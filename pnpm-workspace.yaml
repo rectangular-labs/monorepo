@@ -2,7 +2,10 @@ packages:
   - apps/*
   - packages/*
   - tooling/*
+
 onlyBuiltDependencies:
   - "@biomejs/biome"
-  - better-sqlite3
+  - "@prisma/client"
+  - "@prisma/engines"
   - esbuild
+  - prisma

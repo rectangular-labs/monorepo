@@ -1,0 +1,24 @@
+{
+  "name": "@rectangular-labs/result",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "bun x @biomejs/biome format . --write",
+    "lint": "bun x @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@rectangular-labs/typescript": "workspace:*",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  }
+}
