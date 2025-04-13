@@ -9,3 +9,4 @@ onlyBuiltDependencies:
   - "@prisma/engines"
   - esbuild
   - prisma
+  - core-js-pure
