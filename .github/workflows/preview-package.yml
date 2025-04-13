@@ -1,11 +1,11 @@
 name: Preview Package
 on:
-    pull_request:
-    push:
-      branches-ignore:
-        - main
-      tags:
-        - "!**"
+  pull_request:
+    branches: ["*"]
+  push:
+    branches-ignore:
+      - main
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,4 +26,4 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpm dlx pkg-pr-new publish './packages/result' --comment=update --packageManager=pnpm
+      - run: pnpm dlx pkg-pr-new publish './packages/*' --comment=update --packageManager=pnpm
