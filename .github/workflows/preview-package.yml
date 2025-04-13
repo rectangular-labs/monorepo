@@ -1,7 +1,6 @@
 name: Preview Package
 on:
   pull_request:
-    branches: ["*"]
   push:
     branches-ignore:
       - main
