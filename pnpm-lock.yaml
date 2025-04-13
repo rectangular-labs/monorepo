@@ -38,9 +38,6 @@ importers:
       '@rectangular-labs/env':
         specifier: workspace:*
         version: link:../../packages/env
-      '@rectangular-labs/result':
-        specifier: workspace:*
-        version: link:../../packages/result
       hono:
         specifier: ^4.7.6
         version: 4.7.6
