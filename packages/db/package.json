@@ -1,0 +1,44 @@
+{
+  "name": "@rectangular-labs/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/client.d.ts",
+      "default": "./src/client.ts"
+    },
+    "./schema/*": {
+      "types": "./dist/schema/*.d.ts",
+      "default": "./src/schema/*.ts"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "migrate-generate": "pnpm with-env drizzle-kit generate",
+    "migrate-push": "pnpm with-env drizzle-kit migrate",
+    "push": "pnpm with-env drizzle-kit push",
+    "studio": "pnpm with-env drizzle-kit studio",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "bun x @biomejs/biome format . --write",
+    "lint": "bun x @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "with-env": "dotenvx run -f ../../.env.local  -f ../../.env -- "
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.41.0",
+    "pg": "^8.14.1"
+  },
+  "devDependencies": {
+    "@rectangular-labs/typescript": "workspace:*",
+    "@types/node": "^22.14.1",
+    "@types/pg": "^8.11.12",
+    "drizzle-kit": "^0.30.6",
+    "typescript": "^5.8.3"
+  },
+  "overrides": {
+    "drizzle-orm": "^0.41.0"
+  }
+}

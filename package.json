@@ -1,0 +1,33 @@
+{
+  "name": "rectangular-labs-auth",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*", "tooling/*"],
+  "scripts": {
+    "clean": "git clean -xdf node_modules .turbo .sst",
+    "clean:workspaces": "turbo clean",
+    "db:migrate-generate": "bun run --filter @rectangular-labs/db  migrate-generate",
+    "db:migrate-push": "bun run --filter @rectangular-labs/db  migrate-push",
+    "db:push": "bun run --filter @rectangular-labs/db push --force",
+    "db:studio": "bun run --filter @rectangular-labs/db studio",
+    "ui:add": "cd ./packages/ui && bun run ui-add && cd ../..",
+    "env:set": "bun x dotenvx set",
+    "env:get": "bun x dotenvx get",
+    "dev": "docker compose up -d && turbo run dev",
+    "build": "turbo build",
+    "changeset": "changeset",
+    "changeset:release": "bun run build && changeset publish",
+    "format": "turbo run format --continue",
+    "lint": "turbo run lint --continue",
+    "typecheck": "turbo run typecheck --continue",
+    "postinstall": "bun x sherif@latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@changesets/cli": "^2.28.1",
+    "@dotenvx/dotenvx": "^1.39.1",
+    "@rectangular-labs/typescript": "workspace:*",
+    "turbo": "2.5.0",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.8.0"
+}
