@@ -1,6 +1,6 @@
-# Basic Monorepo Template
+# Rectangular Labs
 
-This repo sets up a basic typescript monorepo.
+Rectangular Labs is a digital playground rethinking everyday digital interactions by me (Winston). I am to build tools and experiences that challenge focuses on simplicity, usability, and thoughtful design.
 
 ## Structure
 
