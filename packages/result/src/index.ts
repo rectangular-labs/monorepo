@@ -1,14 +1,14 @@
 export type Result<T, E = Error> =
-  | { success: true; data: T }
-  | { success: false; error: E };
+  | { ok: true; value: T }
+  | { ok: false; error: E };
 
 /**
  * Creates a successful Result
  * @param data The success data
  * @returns A successful Result containing the data
  */
-export function ok<T>(data: T): Result<T, never> {
-  return { success: true, data };
+export function ok<T>(value: T): Result<T, never> {
+  return { ok: true, value };
 }
 
 /**
@@ -17,7 +17,7 @@ export function ok<T>(data: T): Result<T, never> {
  * @returns A failure Result containing the error
  */
 export function err<E = Error>(error: E): Result<never, E> {
-  return { success: false, error };
+  return { ok: false, error };
 }
 
 /**
@@ -224,10 +224,10 @@ export function pipeSync(
   let currentResult: Result<unknown, unknown> = ok(value);
 
   for (const operation of operations) {
-    if (!currentResult.success) {
+    if (!currentResult.ok) {
       return currentResult;
     }
-    currentResult = operation(currentResult.data);
+    currentResult = operation(currentResult.value);
   }
 
   return currentResult;
@@ -329,11 +329,11 @@ export async function pipe(
   let currentResult: Result<unknown, unknown> = ok(value);
 
   for (const operation of operations) {
-    if (!currentResult.success) {
+    if (!currentResult.ok) {
       return currentResult;
     }
     // Await potentially async operation
-    currentResult = await operation(currentResult.data);
+    currentResult = await operation(currentResult.value);
   }
 
   return currentResult;

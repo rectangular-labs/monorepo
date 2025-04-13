@@ -2,12 +2,29 @@
   "name": "@rectangular-labs/result",
   "version": "0.0.1",
   "type": "module",
+  "description": "Provides a Result type for explicit error handling in TypeScript.",
+  "keywords": [
+    "result",
+    "typescript",
+    "error handling",
+    "functional programming",
+    "utility",
+    "rectangular-labs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElasticBottle/rectangular-labs.git",
+    "directory": "packages/result"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/ElasticBottle/rectangular-labs/tree/main/packages/result#readme",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js"
     }
   },
+  "files": ["dist", "!dist/**/*.map", "README.md"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
