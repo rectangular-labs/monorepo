@@ -134,6 +134,18 @@ importers:
         specifier: ^4.2.4
         version: 4.2.4
 
+  packages/auth-core:
+    devDependencies:
+      '@rectangular-labs/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      tsup:
+        specifier: ^8.4.0
+        version: 8.4.0(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.3)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
   packages/db:
     dependencies:
       drizzle-orm:
