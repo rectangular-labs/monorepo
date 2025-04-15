@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: postgres-db
+    container_name: postgres-database
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres

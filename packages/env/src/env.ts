@@ -17,6 +17,9 @@ export type ClientEnv = typeof ClientEnv.infer;
 
 const ServerEnv = type({
   "...": clientSchema,
+  // delete all non-symbolic keys other than "onlyPreservedStringKey"
+  "+": "delete",
+  "[symbol]": "unknown",
   DATABASE_URL: "string>1",
 });
 export const parseServerEnv = (env: unknown) => {
