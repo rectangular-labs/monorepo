@@ -86,6 +86,7 @@ function ChatInterface() {
       console.log("toolCall", toolCall);
     },
   });
+  console.log("messages", messages);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;

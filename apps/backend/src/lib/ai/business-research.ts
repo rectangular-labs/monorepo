@@ -49,11 +49,20 @@ export const backgroundResearch = tool({
     if (googleMeta?.groundingMetadata) {
       console.log(
         "Grounding Metadata:",
-        googleMeta.groundingMetadata.groundingChunks,
+        (
+          googleMeta.groundingMetadata as unknown as {
+            groundingChunks: string[];
+            groundingSupports: string[];
+          }
+        ).groundingChunks,
       );
       console.log(
         "Grounding Metadata:",
-        googleMeta.groundingMetadata.groundingSupports,
+        (
+          googleMeta.groundingMetadata as unknown as {
+            groundingSupports: string[];
+          }
+        ).groundingSupports,
       );
     }
 

@@ -1,10 +1,10 @@
-import { backgroundResearch } from "@/lib/ai/business-research";
-import { mainAgentModel } from "@/lib/ai/models";
-import { niceClassification } from "@/lib/ai/nice-classification";
-import { relevantGoodsServices } from "@/lib/ai/relevant-goods-services";
 import { streamText } from "ai";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
+import { backgroundResearch } from "../../lib/ai/business-research";
+import { mainAgentModel } from "../../lib/ai/models";
+import { niceClassification } from "../../lib/ai/nice-classification";
+import { relevantGoodsServices } from "../../lib/ai/relevant-goods-services";
 
 // Define the system prompt
 const systemPrompt = `You are an expert Singapore trademark law assistant working for a prestigious law firm.
@@ -30,6 +30,7 @@ Use markdown for formatting the email draft.`;
 export const chatRouter = new Hono().post("/", async (c) => {
   // const { messages } = c.req.valid("json");
   const messages = await c.req.json();
+
   console.log("messages", messages);
 
   // Define and import actual tools
@@ -56,6 +57,7 @@ export const chatRouter = new Hono().post("/", async (c) => {
     });
 
     const dataStream = result.toDataStream();
+    c.header("Content-Type", "text/plain; charset=utf-8");
     return stream(c, async (stream) => {
       stream.onAbort(() => {
         console.log("Stream aborted!");

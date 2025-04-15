@@ -1,5 +1,5 @@
-import type { HonoEnv } from "@/lib/hono";
 import { Hono } from "hono";
+import type { HonoEnv } from "../../lib/hono";
 import { chatRouter } from "./chat";
 
 export const apiRouter = new Hono<HonoEnv>()
