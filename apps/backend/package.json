@@ -19,9 +19,12 @@
     "with-env-prod": "dotenvx run -f ../../.env -- "
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.1",
+    "@ai-sdk/google": "^1.2.11",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/env": "workspace:*",
+    "@rectangular-labs/result": "workspace:*",
+    "ai": "^4.3.6",
+    "arktype": "^2.1.19",
     "hono": "^4.7.6"
   },
   "devDependencies": {

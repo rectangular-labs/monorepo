@@ -21,6 +21,7 @@ const ServerEnv = type({
   "+": "delete",
   "[symbol]": "unknown",
   DATABASE_URL: "string>1",
+  GOOGLE_GENERATIVE_AI_API_KEY: "string>1",
 });
 export const parseServerEnv = (env: unknown) => {
   const result = ServerEnv(env);
