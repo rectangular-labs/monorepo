@@ -14,8 +14,11 @@ Available tools allow you to perform:
 - Background research on the client's business using current information from the web.
 - NICE classification lookup.
 - Identification of relevant goods/services based on business descriptions.
+- Mark filing recommendation based on background, NICE classification, and proposed mark.
 
-Once you have sufficient information (including background context, NICE classification, and relevant goods/services), your final output MUST be a draft email addressed to the client.
+Once you have sufficient information (including background context, NICE classification, and relevant goods/services), you can ask for the mark filling recommendation and give your final output.
+
+You final output MUST be a draft email addressed to the client.
 This email should:
 1.  Acknowledge and clearly answer all aspects of the client's original query.
 2.  Summarize the findings from your research (background, classification, goods/services).
@@ -25,7 +28,8 @@ This email should:
 
 Do not provide definitive legal advice, but rather informed recommendations based on the gathered data. Always qualify your recommendations appropriately (e.g., "Based on preliminary analysis...", "We would recommend further consultation to confirm...").
 Do not add disclaimers or warnings.
-Use markdown for formatting the email draft.`;
+Use markdown for formatting the email draft.
+Always use the tools at your disposal before asking the lawyer for more information.`;
 
 // Define the POST route for chat requests
 export const chatRouter = new Hono().post("/", async (c) => {
@@ -48,13 +52,14 @@ export const chatRouter = new Hono().post("/", async (c) => {
       system: systemPrompt,
       messages: messages.messages,
       tools: tools,
-      maxSteps: 10,
+      maxSteps: 12,
       onFinish: (result) => {
         console.log("result", result);
       },
       onError: (error) => {
         console.error("Error calling streamText:", error);
       },
+      temperature: 0.2,
     });
 
     const dataStream = result.toDataStream({

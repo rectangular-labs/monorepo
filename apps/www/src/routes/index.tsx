@@ -119,7 +119,7 @@ function ChatInterface() {
                       case "text":
                         return (
                           <ChatMessageContent
-                            key={`${message.id}-${part.type}`}
+                            key={JSON.stringify(part)}
                             id={message.id}
                             messageContent={part.text}
                           />
@@ -127,7 +127,7 @@ function ChatInterface() {
                       case "file":
                         return (
                           <ChatMessageContent
-                            key={`${message.id}-${part.type}`}
+                            key={JSON.stringify(part)}
                             id={message.id}
                             messageContent={[part]}
                           />
@@ -135,7 +135,7 @@ function ChatInterface() {
                       case "reasoning":
                         return (
                           <ChatMessageContent
-                            key={`${message.id}-${part.type}`}
+                            key={JSON.stringify(part)}
                             id={message.id}
                             messageContent={part.reasoning}
                           />
@@ -143,7 +143,7 @@ function ChatInterface() {
                       case "source":
                         return (
                           <ChatMessageContent
-                            key={`${message.id}-${part.type}`}
+                            key={JSON.stringify(part)}
                             id={message.id}
                             messageContent={part.source.url}
                           />

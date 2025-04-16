@@ -5,19 +5,15 @@ import { mainAgentModel } from "./models";
 // --- Tool Definition ---
 
 export const markFilingRecommendation = tool({
-  description: `Analyzes a proposed trademark (text and/or image) based on our previously researched business background information to suggest the following: 
+  description: `Synthesizes the business background information, the recommended NICE classes, and the proposed trademark (text and/or image) to suggest the following: 
 
 - Optimal mark type (Word, Logo, Composite).
 - Potential objections under the Singapore Trade Marks Act 1998 and IPOS guidelines (distinctiveness, descriptiveness, similarity, etc.).
 
-Requires either a text description of the mark or information that an image mark was provided along with the business background information and recommended NICE classes.`,
+Requires the nice classification tool and the background research tool to be called first. Requires either a text description of the mark or image mark.`,
   parameters: jsonSchema<{
     backgroundInfo: string;
     markText?: string;
-    markImageInfo?: {
-      mimeType: string;
-      data: string;
-    };
     niceClasses: {
       classNumber: number;
       reasoning: string;
@@ -27,14 +23,6 @@ Requires either a text description of the mark or information that an image mark
     properties: {
       backgroundInfo: { type: "string" },
       markText: { type: "string" },
-      markImageInfo: {
-        type: "object",
-        properties: {
-          mimeType: { type: "string" },
-          data: { type: "string" },
-        },
-        required: ["mimeType", "data"],
-      },
       niceClasses: {
         type: "array",
         items: {
@@ -49,29 +37,31 @@ Requires either a text description of the mark or information that an image mark
     },
     required: ["backgroundInfo", "niceClasses"],
   }),
-  execute: async (
-    { backgroundInfo, markText, markImageInfo, niceClasses },
-    { messages },
-  ) => {
+  execute: async ({ backgroundInfo, markText, niceClasses }, { messages }) => {
     console.log("Executing markFilingRecommendation tool...");
     console.log("Received params:", {
       backgroundInfo,
-      markText,
-      markImageInfo,
       niceClasses,
+      markText,
     });
 
     const latestMessage = messages[messages.length - 1];
     console.log("latestMessage", latestMessage);
+    const imagePart = (() => {
+      if (Array.isArray(latestMessage?.content)) {
+        return latestMessage.content.find((part) => part.type === "image");
+      }
+      return null;
+    })();
 
     // Construct the part of the prompt describing the mark provided
     let markDescription = "";
-    if (markText && markImageInfo) {
-      markDescription = `The user provided both a text mark ("${markText}") and a logo mark (image type: ${markImageInfo.mimeType}, see attached image). Analyze them together as potentially a composite mark, but also evaluate the word mark on its own.`;
+    if (markText && imagePart) {
+      markDescription = `The user provided both a text mark ("${markText}") and a logo mark (image type: ${imagePart.mimeType}, see attached image). Analyze them together as potentially a composite mark, but also evaluate the word mark on its own.`;
     } else if (markText) {
       markDescription = `The user provided the following text mark: "${markText}"`;
-    } else if (markImageInfo) {
-      markDescription = `The user provided a logo mark (image type: ${markImageInfo.mimeType}, see attached image). Please analyze the visual elements conveyed in the image.`;
+    } else if (imagePart) {
+      markDescription = `The user provided a logo mark (image type: ${imagePart.mimeType}, see attached image). Please analyze the visual elements conveyed in the image.`;
     } else {
       // This case should be prevented by the .assert in paramsSchema, but handle defensively
       console.error("Tool called without markText or markImageInfo.");
@@ -191,7 +181,7 @@ Evaluation Rules (MUST follow these in EVERY assessment)
 
     const result = await safe(() =>
       generateObject({
-        model: mainAgentModel, // Use a powerful model for legal reasoning
+        model: mainAgentModel,
         schema: jsonSchema<{
           recommendedMarkType: string;
           potentialObjections: {
@@ -232,7 +222,15 @@ Evaluation Rules (MUST follow these in EVERY assessment)
             "assessmentSummary",
           ],
         }),
-        prompt: newPrompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: newPrompt },
+              ...(imagePart ? [imagePart] : []),
+            ],
+          },
+        ],
       }),
     );
     if (!result.ok) {

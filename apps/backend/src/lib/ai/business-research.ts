@@ -22,7 +22,7 @@ export const backgroundResearch = tool({
     console.log(`Conducting background research for: ${businessName}`);
     const result = await safe(() =>
       generateText({
-        model: google("gemini-2.5-pro-exp-03-25", {
+        model: google("gemini-2.5-pro-preview-03-25", {
           // Enable search grounding
           useSearchGrounding: true,
         }),
