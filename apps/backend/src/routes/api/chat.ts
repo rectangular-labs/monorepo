@@ -2,6 +2,7 @@ import { streamText } from "ai";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { backgroundResearch } from "../../lib/ai/business-research";
+import { markFilingRecommendation } from "../../lib/ai/mark-filing-recommendation";
 import { mainAgentModel } from "../../lib/ai/models";
 import { niceClassification } from "../../lib/ai/nice-classification";
 import { relevantGoodsServices } from "../../lib/ai/relevant-goods-services";
@@ -38,7 +39,7 @@ export const chatRouter = new Hono().post("/", async (c) => {
     backgroundResearch: backgroundResearch,
     niceClassification: niceClassification,
     relevantGoodsServices: relevantGoodsServices,
-    // markFilingRecommendation: markFilingRecommendation,
+    markFilingRecommendation: markFilingRecommendation,
   };
 
   try {
@@ -56,7 +57,11 @@ export const chatRouter = new Hono().post("/", async (c) => {
       },
     });
 
-    const dataStream = result.toDataStream();
+    const dataStream = result.toDataStream({
+      sendUsage: true,
+      sendReasoning: true,
+      sendSources: true,
+    });
     c.header("Content-Type", "text/plain; charset=utf-8");
     return stream(c, async (stream) => {
       stream.onAbort(() => {

@@ -35,7 +35,7 @@ export default $config({
       environment: serverEnv,
       url: true,
       streaming: !$dev,
-      timeout: "2 minutes",
+      timeout: "120 seconds",
     });
 
     const basicAuth = $resolve([
@@ -71,7 +71,9 @@ export default $config({
         },
       },
     });
-    router.route("/api", api.url);
+    router.route("/api", api.url, {
+      readTimeout: "60 seconds",
+    });
 
     new sst.aws.StaticSite("WWW", {
       path: "apps/www",

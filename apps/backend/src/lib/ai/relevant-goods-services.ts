@@ -46,7 +46,7 @@ const mockPreapprovedGoodsServices = {
 
 export const relevantGoodsServices = tool({
   description:
-    "Suggests relevant goods and services from the Singapore preapproved list based on provided NICE classifications and business background.",
+    "Suggests relevant goods and services from the Singapore pre-approved list based on provided NICE classifications and business background.",
   parameters: jsonSchema<{
     classifications: {
       class: number;

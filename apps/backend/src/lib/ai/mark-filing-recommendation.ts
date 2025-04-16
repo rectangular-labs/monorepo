@@ -1,98 +1,77 @@
-import { tool, generateObject, jsonSchema } from "ai";
-import { type } from "arktype";
+import { safe } from "@rectangular-labs/result";
+import { generateObject, jsonSchema, tool } from "ai";
 import { mainAgentModel } from "./models";
-
-// --- Input Schema ---
-
-// Optional info about an image mark provided by the user
-const markImageInfoSchema = type({
-  mimeType: "string", // e.g., "image/jpeg", "image/png"
-});
-
-// Parameters expected by the tool's execute function
-const paramsSchema = type({
-  backgroundInfo: "string", // Business/product background provided by the user or context
-  markText: "string?", // The text mark provided by the user (if any)
-  markImageInfo: `${markImageInfoSchema.expression}?`, // Info about the image mark (if any)
-  // Optional: User-provided context on services/classes, if available
-  userProvidedServices: "string[]?",
-  userProvidedClasses: "number[]?",
-}).assert(
-  // Ensure that either a text mark or an image mark is available for analysis
-  (data) => data.markText !== undefined || data.markImageInfo !== undefined,
-  "Tool requires either markText or markImageInfo.",
-);
-
-// --- Output Schema ---
-
-// Structure for recommended NICE classification
-const niceClassSchema = type({
-  classNumber: "number", // The NICE class number (e.g., 9, 42)
-  reasoning: "string", // Justification for why this class is relevant
-  examples: "string[]", // Example goods/services under this class relevant to the user
-});
-
-// Structure for potential objections identified
-const potentialObjectionSchema = type({
-  reason: "string", // High-level reason (e.g., "Descriptive Mark", "Similarity to Existing Mark")
-  details: "string", // Specific explanation related to the user's mark
-  relevantActSection: "string?", // Corresponding section of the Trade Marks Act (e.g., "7(1)(c)")
-});
-
-// The final structured output of the tool's analysis
-const outputSchema = type({
-  // If critical information is missing (mark, services), provide a question for the user
-  requiresUserInput: "string?",
-  // Recommendation on how to file the mark
-  recommendedMarkType:
-    "'Word Mark' | 'Logo Mark' | 'Composite Mark' | 'Undetermined'?",
-  // Overall summary of the mark's registrability and key points
-  assessmentSummary: "string",
-  // List of suggested NICE classes
-  recommendedNiceClasses: [niceClassSchema, "[]"],
-  // List of potential grounds for refusal by IPOS
-  potentialObjections: [potentialObjectionSchema, "[]"],
-  // Suggested next actions for the user
-  nextSteps: ["string", "[]"],
-});
 
 // --- Tool Definition ---
 
 export const markFilingRecommendation = tool({
-  description: `Analyzes a proposed trademark (text or image) based on user-provided background information.
-Provides an initial assessment for Singapore trademark registration, considering:
+  description: `Analyzes a proposed trademark (text and/or image) based on our previously researched business background information to suggest the following: 
+
 - Optimal mark type (Word, Logo, Composite).
 - Potential objections under the Singapore Trade Marks Act 1998 and IPOS guidelines (distinctiveness, descriptiveness, similarity, etc.).
-- Recommended NICE classification classes.
-- Actionable next steps.
-Requires either a text description of the mark or information that an image mark was provided.`,
-  parameters: jsonSchema<typeof paramsSchema.infer>(
-    paramsSchema.toJsonSchema(),
-  ),
-  execute: async ({
-    backgroundInfo,
-    markText,
-    markImageInfo,
-    userProvidedServices,
-    userProvidedClasses,
-  }) => {
+
+Requires either a text description of the mark or information that an image mark was provided along with the business background information and recommended NICE classes.`,
+  parameters: jsonSchema<{
+    backgroundInfo: string;
+    markText?: string;
+    markImageInfo?: {
+      mimeType: string;
+      data: string;
+    };
+    niceClasses: {
+      classNumber: number;
+      reasoning: string;
+    }[];
+  }>({
+    type: "object",
+    properties: {
+      backgroundInfo: { type: "string" },
+      markText: { type: "string" },
+      markImageInfo: {
+        type: "object",
+        properties: {
+          mimeType: { type: "string" },
+          data: { type: "string" },
+        },
+        required: ["mimeType", "data"],
+      },
+      niceClasses: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            classNumber: { type: "number" },
+            reasoning: { type: "string" },
+          },
+          required: ["classNumber", "reasoning"],
+        },
+      },
+    },
+    required: ["backgroundInfo", "niceClasses"],
+  }),
+  execute: async (
+    { backgroundInfo, markText, markImageInfo, niceClasses },
+    { messages },
+  ) => {
     console.log("Executing markFilingRecommendation tool...");
     console.log("Received params:", {
       backgroundInfo,
       markText,
       markImageInfo,
-      userProvidedServices,
-      userProvidedClasses,
+      niceClasses,
     });
+
+    const latestMessage = messages[messages.length - 1];
+    console.log("latestMessage", latestMessage);
 
     // Construct the part of the prompt describing the mark provided
     let markDescription = "";
     if (markText && markImageInfo) {
-      markDescription = `The user provided both a text mark ("${markText}") and a logo mark (image type: ${markImageInfo.mimeType}). Analyze them together as potentially a composite mark, but also evaluate the word mark on its own.`;
+      markDescription = `The user provided both a text mark ("${markText}") and a logo mark (image type: ${markImageInfo.mimeType}, see attached image). Analyze them together as potentially a composite mark, but also evaluate the word mark on its own.`;
     } else if (markText) {
       markDescription = `The user provided the following text mark: "${markText}"`;
     } else if (markImageInfo) {
-      markDescription = `The user provided a logo mark (image type: ${markImageInfo.mimeType}). Please analyze the visual elements conveyed in the image.`;
+      markDescription = `The user provided a logo mark (image type: ${markImageInfo.mimeType}, see attached image). Please analyze the visual elements conveyed in the image.`;
     } else {
       // This case should be prevented by the .assert in paramsSchema, but handle defensively
       console.error("Tool called without markText or markImageInfo.");
@@ -108,17 +87,13 @@ Requires either a text description of the mark or information that an image mark
 
     // Include user-provided services/classes in the prompt if available
     let serviceClassContext = "";
-    if (userProvidedServices && userProvidedServices.length > 0) {
-      serviceClassContext += `The user mentioned the following goods/services: ${userProvidedServices.join(", ")}.\n`;
+    if (niceClasses && niceClasses.length > 0) {
+      serviceClassContext += `Based on our research, the client is likely to be filing under the following NICE classes: ${niceClasses
+        .map((c) => {
+          return JSON.stringify(c);
+        })
+        .join("\n")}.\n\n`;
     }
-    if (userProvidedClasses && userProvidedClasses.length > 0) {
-      serviceClassContext += `The user mentioned the following NICE classes: ${userProvidedClasses.join(", ")}.\n`;
-    }
-    if (!serviceClassContext) {
-      serviceClassContext =
-        "The user did not explicitly state their goods/services or NICE classes. If the background info is insufficient, please research the business based on the background to propose relevant classes. If research is not possible, state that goods/services information is required.\n";
-    }
-
     // --- Start New Prompt ---
     const newPrompt = `
 Role Definition
@@ -214,37 +189,62 @@ Evaluation Rules (MUST follow these in EVERY assessment)
 - MANDATORY: Output MUST follow the JSON schema strictly. Do not add commentary outside the JSON structure.
 `;
 
-    try {
-      const { object } = await generateObject({
+    const result = await safe(() =>
+      generateObject({
         model: mainAgentModel, // Use a powerful model for legal reasoning
-        schema: jsonSchema<typeof outputSchema.infer>(
-          outputSchema.toJsonSchema(),
-        ),
+        schema: jsonSchema<{
+          recommendedMarkType: string;
+          potentialObjections: {
+            reason: string;
+            details: string;
+            relevantActSection: string;
+          }[];
+          assessmentSummary: string;
+        }>({
+          type: "object",
+          properties: {
+            recommendedMarkType: {
+              type: "string",
+              enum: [
+                "Word Mark",
+                "Logo Mark",
+                "Composite Mark",
+                "Undetermined",
+              ],
+            },
+            potentialObjections: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  reason: { type: "string" },
+                  details: { type: "string" },
+                  relevantActSection: { type: "string" },
+                },
+                required: ["reason", "details", "relevantActSection"],
+              },
+            },
+            assessmentSummary: { type: "string" },
+          },
+          required: [
+            "recommendedMarkType",
+            "potentialObjections",
+            "assessmentSummary",
+          ],
+        }),
         prompt: newPrompt,
-        mode: "json",
-      });
-      console.log("markFilingRecommendation tool result:", object);
-      // Validate or sanitize the object if necessary before returning
-      // For now, assume the model respects the schema
-      return object;
-    } catch (error) {
-      console.error(
-        "Error executing markFilingRecommendation tool with generateObject:",
-        error,
-      );
-      // Return a structured error within the expected schema
+      }),
+    );
+    if (!result.ok) {
       return {
         assessmentSummary:
-          "An error occurred while analyzing the trademark information.",
-        potentialObjections: [
-          {
-            reason: "Tool Execution Error",
-            details: error instanceof Error ? error.message : String(error),
-          },
-        ],
-        recommendedNiceClasses: [],
-        nextSteps: ["Please try again or report this issue."],
+          "Error: Tool failed to generate a valid response. Please try again.",
+        recommendedMarkType: "Undetermined",
+        potentialObjections: [],
       };
     }
+    const object = result.value;
+    console.log("markFilingRecommendation tool result:", object);
+    return object;
   },
 });

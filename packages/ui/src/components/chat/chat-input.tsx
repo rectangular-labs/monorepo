@@ -172,7 +172,9 @@ function ChatInputSubmit({
   }
 
   const isDisabled =
-    typeof context.value !== "string" || context.value.trim().length === 0;
+    typeof context.value !== "string" ||
+    context.value.trim().length === 0 ||
+    props.disabled;
 
   return (
     <Button
