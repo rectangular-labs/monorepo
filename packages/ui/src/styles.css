@@ -151,7 +151,8 @@ code {
   }
 
   @keyframes typing-dot-bounce {
-    0%, 40% {
+    0%,
+    40% {
       transform: translateY(0);
     }
     20% {
