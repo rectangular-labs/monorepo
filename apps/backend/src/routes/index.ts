@@ -14,6 +14,8 @@ showRoutes(app, {
   verbose: true,
 });
 
-export const handler = process.env.SST_LIVE ? handle(app) : streamHandle(app);
+export const handler: unknown = process.env.SST_LIVE
+  ? handle(app)
+  : streamHandle(app);
 
 export type AppType = typeof app;
