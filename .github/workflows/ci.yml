@@ -41,4 +41,6 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Typecheck
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
         run: bun typecheck
