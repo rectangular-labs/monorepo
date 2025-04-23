@@ -24,5 +24,6 @@ jobs:
           # This expects you to have a script called release which does a build for your packages and calls changeset publish
           publish: bun run changeset:release
         env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

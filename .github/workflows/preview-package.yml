@@ -23,6 +23,8 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Build
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
         run: pnpm build
 
       - run: pnpm dlx pkg-pr-new publish './packages/*' --comment=update --packageManager=pnpm
