@@ -127,8 +127,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
               }
             }
           }
-          console.log("pkg", pkg);
-
           return JSON.stringify(pkg, null, 2);
         },
       },

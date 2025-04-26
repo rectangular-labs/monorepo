@@ -6,7 +6,6 @@ import { resolve } from "node:path";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import mkcert from "vite-plugin-mkcert";
 
-console.log("process.env.VITE_APP_URL", process.env.VITE_APP_URL);
 export default defineConfig({
   plugins: [
     TanStackRouterVite({ autoCodeSplitting: true }),

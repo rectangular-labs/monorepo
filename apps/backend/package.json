@@ -9,19 +9,19 @@
     }
   },
   "scripts": {
-    "build": "pnpm with-env-prod tsc --declaration --declarationMap --outDir dist --noEmit false",
-    "serve": "pnpm with-env-prod node ./dist/routes/index.js",
+    "build": "pnpm tsc --declaration --declarationMap --outDir dist --noEmit false",
     "test": "vitest run",
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "bun x @biomejs/biome format . --write",
     "lint": "bun x @biomejs/biome lint . --write",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "with-env-prod": "dotenvx run -f ../../.env -- "
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
+    "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/env": "workspace:*",
+    "@rectangular-labs/result": "workspace:*",
     "hono": "^4.7.6"
   },
   "devDependencies": {

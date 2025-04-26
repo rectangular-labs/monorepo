@@ -1,4 +1,4 @@
-import { backend } from "@/lib/backend";
+import { authorizeUrl, getSession } from "@/lib/auth";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
@@ -10,13 +10,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: App,
-  loader: async () => {
-    const response = await backend.api.$get();
-    return response.json();
+  beforeLoad: async () => {
+    const session = await getSession();
+    if (!session.user) {
+      throw redirect({
+        href: authorizeUrl,
+      });
+    }
+    return session;
   },
 });
 
@@ -27,7 +32,7 @@ function App() {
       <ThemeToggle className="absolute top-4 right-4" />
 
       <div className="container mx-auto flex flex-col items-center justify-center px-4 py-16">
-        <h1 className="font-bold text-4xl tracking-tight">{data.message}</h1>
+        <h1 className="font-bold text-4xl tracking-tight">{data}</h1>
 
         <p className="mt-4 text-lg ">
           A modern, full-stack development template
