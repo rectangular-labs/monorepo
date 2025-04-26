@@ -8,7 +8,7 @@ import { handle } from "hono/aws-lambda";
 import { env } from "./env";
 import { subjects } from "./subject";
 
-async function getUser(email: string) {
+async function getUser(_email: string) {
   await Promise.resolve();
   // Get user from database and return user ID
   return "123";
@@ -52,6 +52,14 @@ const authApp = issuer({
       pkce: true,
       type: "code",
     }),
+  },
+  theme: {
+    title: "Rectangular Labs",
+    primary: {
+      dark: "#000000",
+      light: "#FFFFFF",
+    },
+    radius: "sm",
   },
   success: async (ctx, value) => {
     if (value.provider === "code") {

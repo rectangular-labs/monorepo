@@ -2,6 +2,7 @@ import { type } from "arktype";
 
 const clientSchema = {
   VITE_APP_URL: "string>1",
+  VITE_BACKEND_URL: "string>1",
   VITE_AUTH_URL: "string>1",
 } as const;
 
