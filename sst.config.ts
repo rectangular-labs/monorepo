@@ -117,8 +117,8 @@ export default $config({
         }),
       },
       url: {
-        router: {
-          instance: authRouter,
+        route: {
+          router: authRouter,
         },
         cors: false,
       },
