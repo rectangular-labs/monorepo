@@ -1,4 +1,4 @@
-import { backend } from "@/lib/backend";
+import { authorizeUrl, getSession } from "@/lib/auth";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
@@ -10,13 +10,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: App,
-  beforeLoad: async ({ context }) => {
-    const response = await backend.api.auth.$get();
-    return response.json();
+  beforeLoad: async () => {
+    const session = await getSession();
+    if (!session.user) {
+      throw redirect({
+        href: authorizeUrl,
+      });
+    }
+    return session;
   },
 });
 

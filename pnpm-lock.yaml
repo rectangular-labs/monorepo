@@ -78,6 +78,9 @@ importers:
       '@rectangular-labs/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@rectangular-labs/result':
+        specifier: workspace:*
+        version: link:../../packages/result
       '@rectangular-labs/ui':
         specifier: workspace:*
         version: link:../../packages/ui

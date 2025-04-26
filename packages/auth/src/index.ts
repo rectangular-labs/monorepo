@@ -38,17 +38,17 @@ const authApp = issuer({
         },
       }),
     ),
-    discord: DiscordProvider({
-      clientID: env().DISCORD_CLIENT_ID,
-      clientSecret: env().DISCORD_CLIENT_SECRET,
-      scopes: ["identify", "email"],
-      pkce: true,
-      type: "code",
-    }),
     github: GithubProvider({
       clientID: env().GITHUB_CLIENT_ID,
       clientSecret: env().GITHUB_CLIENT_SECRET,
       scopes: ["user:email", "read:user"],
+      pkce: true,
+      type: "code",
+    }),
+    discord: DiscordProvider({
+      clientID: env().DISCORD_CLIENT_ID,
+      clientSecret: env().DISCORD_CLIENT_SECRET,
+      scopes: ["identify", "email"],
       pkce: true,
       type: "code",
     }),
@@ -64,7 +64,14 @@ const authApp = issuer({
         image: value.claims.picture ?? "",
       });
     }
-    throw new Error("Invalid provider");
+    console.log("ctx.", value.tokenset.refresh);
+    // throw new Error("Invalid provider");
+    return ctx.subject("user", {
+      id: await getUser(""),
+      name: "",
+      email: "",
+      image: "",
+    });
   },
 });
 
