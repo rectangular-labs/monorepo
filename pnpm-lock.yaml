@@ -15,7 +15,7 @@ importers:
         specifier: ^2.29.2
         version: 2.29.2
       '@dotenvx/dotenvx':
-        specifier: ^1.40.0
+        specifier: ^1.41.0
         version: 1.41.0
       '@rectangular-labs/env':
         specifier: workspace:*
