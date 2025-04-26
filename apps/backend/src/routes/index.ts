@@ -1,29 +1,19 @@
-import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { handle } from "hono/aws-lambda";
 import { contextStorage } from "hono/context-storage";
 import { showRoutes } from "hono/dev";
-import { frontendRouter } from "../lib/frontend";
 import { dbContext } from "../lib/hono";
 import { apiRouter } from "./api";
 
 const app = new Hono()
   .use(contextStorage())
   .use(dbContext)
-  .route("/api", apiRouter)
-  .route("*", frontendRouter);
+  .route("/api", apiRouter);
 
 showRoutes(app, {
   verbose: true,
 });
 
-serve(
-  {
-    fetch: app.fetch,
-    port: 3922,
-  },
-  (info) => {
-    console.log(`Listening on http://localhost:${info.port}`);
-  },
-);
+export const handler = handle(app);
 
 export type AppType = typeof app;

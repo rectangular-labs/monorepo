@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import mkcert from "vite-plugin-mkcert";
 
+console.log("process.env.VITE_APP_URL", process.env.VITE_APP_URL);
 export default defineConfig({
   plugins: [
     TanStackRouterVite({ autoCodeSplitting: true }),
@@ -25,7 +26,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:3922",
+        target: process.env.VITE_APP_URL,
         changeOrigin: true,
       },
     },
