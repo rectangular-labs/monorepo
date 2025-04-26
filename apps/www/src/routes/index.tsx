@@ -14,8 +14,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: App,
-  loader: async () => {
-    const response = await backend.api.$get();
+  beforeLoad: async ({ context }) => {
+    const response = await backend.api.auth.$get();
     return response.json();
   },
 });
@@ -27,7 +27,7 @@ function App() {
       <ThemeToggle className="absolute top-4 right-4" />
 
       <div className="container mx-auto flex flex-col items-center justify-center px-4 py-16">
-        <h1 className="font-bold text-4xl tracking-tight">{data.message}</h1>
+        <h1 className="font-bold text-4xl tracking-tight">{data}</h1>
 
         <p className="mt-4 text-lg ">
           A modern, full-stack development template

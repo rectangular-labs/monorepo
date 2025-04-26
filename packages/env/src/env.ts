@@ -1,7 +1,8 @@
 import { type } from "arktype";
 
 const clientSchema = {
-  VITE_APP_URL: "string",
+  VITE_APP_URL: "string>1",
+  VITE_AUTH_URL: "string>1",
 } as const;
 
 const ClientEnv = type(clientSchema);

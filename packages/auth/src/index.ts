@@ -3,8 +3,8 @@ import { CodeProvider } from "@openauthjs/openauth/provider/code";
 import { DiscordProvider } from "@openauthjs/openauth/provider/discord";
 import { GithubProvider } from "@openauthjs/openauth/provider/github";
 import { CodeUI } from "@openauthjs/openauth/ui/code";
+import { Select } from "@openauthjs/openauth/ui/select";
 import { handle } from "hono/aws-lambda";
-import { contextStorage } from "hono/context-storage";
 import { env } from "./env";
 import { subjects } from "./subject";
 
@@ -16,6 +16,19 @@ async function getUser(email: string) {
 
 const authApp = issuer({
   subjects,
+  select: Select({
+    providers: {
+      code: {
+        display: "Code",
+      },
+      discord: {
+        display: "Discord",
+      },
+      github: {
+        display: "GitHub",
+      },
+    },
+  }),
   providers: {
     code: CodeProvider(
       CodeUI({
@@ -54,8 +67,5 @@ const authApp = issuer({
     throw new Error("Invalid provider");
   },
 });
-authApp.use("*", contextStorage());
 
 export const handler = handle(authApp);
-
-export { createClient } from "@openauthjs/openauth/client";

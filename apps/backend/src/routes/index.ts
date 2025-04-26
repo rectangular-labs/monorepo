@@ -3,7 +3,7 @@ import { handle } from "hono/aws-lambda";
 import { contextStorage } from "hono/context-storage";
 import { showRoutes } from "hono/dev";
 import { dbContext } from "../lib/hono";
-import { apiRouter } from "./api";
+import { apiRouter } from "./api/route";
 
 const app = new Hono()
   .use(contextStorage())

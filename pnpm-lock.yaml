@@ -50,6 +50,9 @@ importers:
       '@rectangular-labs/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@rectangular-labs/result':
+        specifier: workspace:*
+        version: link:../../packages/result
       hono:
         specifier: ^4.7.6
         version: 4.7.6
@@ -148,6 +151,9 @@ importers:
       '@openauthjs/openauth':
         specifier: ^0.4.3
         version: 0.4.3(arctic@2.3.4)(hono@4.7.6)
+      '@rectangular-labs/env':
+        specifier: workspace:*
+        version: link:../env
       arktype:
         specifier: ^2.1.19
         version: 2.1.19
@@ -161,18 +167,6 @@ importers:
       '@types/node':
         specifier: ^22.14.1
         version: 22.14.1
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
-
-  packages/auth-core:
-    devDependencies:
-      '@rectangular-labs/typescript':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      tsup:
-        specifier: ^8.4.0
-        version: 8.4.0(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.3)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

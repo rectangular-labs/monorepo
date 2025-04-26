@@ -6,6 +6,9 @@
   "exports": {
     ".": {
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "default": "./src/client.ts"
     }
   },
   "scripts": {

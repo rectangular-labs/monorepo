@@ -12,9 +12,10 @@
     "db:migrate-push": "bun run --filter @rectangular-labs/db  migrate-push",
     "db:push": "bun run --filter @rectangular-labs/db push --force",
     "db:studio": "bun run --filter @rectangular-labs/db studio",
-    "dev": "pnpm with-env pnpx sst dev",
+    "dev": "pnpm with-env-local pnpx sst dev",
     "dev:packages": "docker compose up -d && turbo run dev --filter=\"./packages/*\"",
-    "deploy": "pnpm with-env sst deploy",
+    "deploy:local": "pnpm with-env-local sst deploy",
+    "deploy:preview": "pnpm with-env-preview sst deploy --stage preview",
     "deploy:prod": "pnpm with-env-prod sst deploy --stage production",
     "env:get": "bun x dotenvx get",
     "env:set": "bun x dotenvx set",
@@ -25,8 +26,9 @@
     "typecheck": "turbo run typecheck --continue",
     "ui:add": "cd ./packages/ui && bun run ui-add && cd ../..",
     "sso": "aws sso login --sso-session=rectangular-labs",
-    "with-env": "dotenvx run -f .env.local  -f .env -- ",
-    "with-env-prod": "dotenvx run -f .env -- "
+    "with-env-local": "dotenvx run -f .env.local  -f .env -- ",
+    "with-env-preview": "dotenvx run  -f .env -- ",
+    "with-env-prod": "dotenvx run -f .env.production -- "
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
