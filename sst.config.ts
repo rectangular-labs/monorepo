@@ -18,9 +18,7 @@ export default $config({
     };
   },
   async run() {
-    const { parseServerEnv, parseClientEnv } = await import(
-      "@rectangular-labs/env"
-    );
+    const { parseServerEnv } = await import("@rectangular-labs/env");
     const { Buffer } = await import("node:buffer");
 
     if (!process.env.CLOUDFLARE_ZONE_ID) {
