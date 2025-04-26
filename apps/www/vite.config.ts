@@ -25,7 +25,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: process.env.VITE_APP_URL,
+        target: `${process.env.VITE_BACKEND_URL?.split("://")[0]}://${process.env.VITE_BASIC_AUTH_USERNAME}:${process.env.VITE_BASIC_AUTH_PASSWORD}@${process.env.VITE_BACKEND_URL?.split("://")[1]}`,
         changeOrigin: true,
       },
     },

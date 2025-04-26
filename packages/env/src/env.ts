@@ -2,6 +2,7 @@ import { type } from "arktype";
 
 const clientSchema = {
   VITE_APP_URL: "string>1",
+  VITE_BACKEND_URL: "string>1",
   VITE_AUTH_URL: "string>1",
 } as const;
 
@@ -22,6 +23,7 @@ const ServerEnv = type({
   "+": "delete",
   "[symbol]": "unknown",
   DATABASE_URL: "string>1",
+  GOOGLE_GENERATIVE_AI_API_KEY: "string>1",
   DISCORD_CLIENT_ID: "string>1",
   DISCORD_CLIENT_SECRET: "string>1",
   GITHUB_CLIENT_ID: "string>1",

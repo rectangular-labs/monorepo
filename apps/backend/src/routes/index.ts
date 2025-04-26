@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { handle } from "hono/aws-lambda";
+import { handle, streamHandle } from "hono/aws-lambda";
 import { contextStorage } from "hono/context-storage";
 import { showRoutes } from "hono/dev";
 import { dbContext } from "../lib/hono";
@@ -14,6 +14,8 @@ showRoutes(app, {
   verbose: true,
 });
 
-export const handler = handle(app);
+export const handler: unknown = process.env.SST_LIVE
+  ? handle(app)
+  : streamHandle(app);
 
 export type AppType = typeof app;

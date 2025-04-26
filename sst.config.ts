@@ -18,9 +18,8 @@ export default $config({
     };
   },
   async run() {
-    const { parseServerEnv, parseClientEnv } = await import(
-      "@rectangular-labs/env"
-    );
+    const { parseServerEnv } = await import("@rectangular-labs/env");
+    const { Buffer } = await import("node:buffer");
 
     if (!process.env.CLOUDFLARE_ZONE_ID) {
       throw new Error("CLOUDFLARE_ZONE_ID is not set");
@@ -28,10 +27,25 @@ export default $config({
 
     const serverEnv = parseServerEnv(process.env);
     // const clientEnv = parseClientEnv(process.env);
+
     const dns = sst.cloudflare.dns({
       zone: process.env.CLOUDFLARE_ZONE_ID,
     });
 
+    const api = new sst.aws.Function("Hono", {
+      handler: "apps/backend/src/routes/index.handler",
+      environment: serverEnv,
+      url: true,
+      streaming: !$dev,
+      timeout: "120 seconds",
+    });
+
+    const basicAuth = $resolve([
+      process.env.BASIC_AUTH_USERNAME,
+      process.env.BASIC_AUTH_PASSWORD,
+    ]).apply(([username, password]) =>
+      Buffer.from(`${username}:${password}`).toString("base64"),
+    );
     const router = new sst.aws.Router("AppRouter", {
       domain: {
         name:
@@ -40,17 +54,26 @@ export default $config({
             : `${$app.stage}.dev.scalenelab.com`,
         dns,
       },
-    });
-
-    new sst.aws.Function("Hono", {
-      handler: "apps/backend/src/routes/index.handler",
-      environment: serverEnv,
-      url: {
-        router: {
-          instance: router,
-          path: "/api",
+      edge: {
+        viewerRequest: {
+          injection: $interpolate`
+            if (
+                !event.request.headers.authorization
+                  || event.request.headers.authorization.value !== "Basic ${basicAuth}"
+               ) {
+              return {
+                statusCode: 401,
+                headers: {
+                  "www-authenticate": { value: "Basic" }
+                }
+              };
+            }`,
         },
       },
+    });
+    router.route("/api", api.url, {
+      readTimeout: "60 seconds",
+      keepAliveTimeout: "60 seconds",
     });
 
     new sst.aws.StaticSite("WWW", {
@@ -94,8 +117,8 @@ export default $config({
         }),
       },
       url: {
-        router: {
-          instance: authRouter,
+        route: {
+          router: authRouter,
         },
         cors: false,
       },

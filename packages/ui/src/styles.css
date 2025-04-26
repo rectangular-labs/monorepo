@@ -130,6 +130,7 @@ code {
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-typing-dot-bounce: typing-dot-bounce 1.25s ease-out infinite;
 
   @keyframes accordion-down {
     from {
@@ -146,6 +147,16 @@ code {
     }
     to {
       height: 0;
+    }
+  }
+
+  @keyframes typing-dot-bounce {
+    0%,
+    40% {
+      transform: translateY(0);
+    }
+    20% {
+      transform: translateY(-0.25rem);
     }
   }
 }
