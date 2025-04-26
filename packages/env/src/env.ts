@@ -21,6 +21,10 @@ const ServerEnv = type({
   "+": "delete",
   "[symbol]": "unknown",
   DATABASE_URL: "string>1",
+  DISCORD_CLIENT_ID: "string>1",
+  DISCORD_CLIENT_SECRET: "string>1",
+  GITHUB_CLIENT_ID: "string>1",
+  GITHUB_CLIENT_SECRET: "string>1",
 });
 export const parseServerEnv = (env: unknown) => {
   const result = ServerEnv(env);

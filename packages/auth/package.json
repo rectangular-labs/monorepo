@@ -1,0 +1,28 @@
+{
+  "name": "@rectangular-labs/auth",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "bun x @biomejs/biome format . --write",
+    "lint": "bun x @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@rectangular-labs/typescript": "workspace:*",
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@openauthjs/openauth": "^0.4.3",
+    "@rectangular-labs/env": "workspace:*",
+    "arktype": "^2.1.19",
+    "hono": "^4.7.6"
+  }
+}
