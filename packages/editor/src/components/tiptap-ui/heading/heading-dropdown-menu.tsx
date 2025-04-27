@@ -11,43 +11,44 @@ import {
 } from "@rectangular-labs/ui/components/ui/dropdown-menu";
 import * as React from "react";
 import { useTiptapEditor } from "../../../hooks/use-tiptap-editor";
-import { ChevronDownIcon, ListIcon } from "../../icons";
-import ListButton, { ListOptions, type ListType } from "./list-button";
+import { ChevronDownIcon, HeadingIcon } from "../../icons";
+import HeadingButton, { HeadingOptions, type Level } from "./heading-button";
 
-interface ListDropdownMenuProps extends Omit<ButtonProps, "type"> {
+interface HeadingDropdownMenuProps extends Omit<ButtonProps, "type"> {
   /**
-   * The list types to display in the dropdown.
+   * The levels to display in the dropdown.
+   * @default [1, 2, 3, 4, 5, 6]
    */
-  types?: ListType[];
+  levels?: Level[];
 }
 
-export function ListDropdownMenu({
-  types = ["bulletList", "orderedList", "taskList"],
+export function HeadingDropdownMenu({
+  levels = [1, 2, 3, 4, 5, 6],
   ...props
-}: ListDropdownMenuProps) {
-  const editor = useTiptapEditor();
+}: HeadingDropdownMenuProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const editor = useTiptapEditor();
 
   const currentDisplayOption = React.useMemo(() => {
-    for (const listType of types) {
-      if (editor?.isActive(listType)) {
-        return { ...ListOptions[listType], isActive: true };
+    for (const level of levels) {
+      if (editor?.isActive("heading", { level })) {
+        return { ...HeadingOptions[level], isActive: true };
       }
     }
     return {
-      icon: ListIcon,
-      label: "List",
+      icon: HeadingIcon,
+      label: "Heading",
       isActive: false,
     };
-  }, [editor, types]);
+  }, [editor, levels]);
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant={"ghost"}
           tabIndex={-1}
-          aria-label="List options"
+          aria-label="Format text as heading"
           data-active-state={currentDisplayOption.isActive ? "on" : "off"}
           {...props}
         >
@@ -59,9 +60,9 @@ export function ListDropdownMenu({
 
       <DropdownMenuContent>
         <DropdownMenuGroup>
-          {types.map((listType) => (
-            <DropdownMenuItem key={listType} asChild>
-              <ListButton type={listType} showText />
+          {levels.map((level) => (
+            <DropdownMenuItem key={`heading-${level}`} asChild>
+              <HeadingButton level={level} showText />
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>

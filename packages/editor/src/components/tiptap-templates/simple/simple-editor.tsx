@@ -34,7 +34,7 @@ import {
   ToolbarGroup,
   ToolbarSeparator,
 } from "../../tiptap-ui-primitive/toolbar";
-import { HeadingDropdownMenu } from "../../tiptap-ui/heading-dropdown-menu";
+import { HeadingDropdownMenu } from "../../tiptap-ui/heading/heading-dropdown-menu";
 import {
   HighlightContent,
   HighlightPopover,
@@ -64,7 +64,6 @@ import { MAX_FILE_SIZE, handleImageUpload } from "../../../tiptap-utils";
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss";
-
 import content from "./data/content.json";
 
 const MainToolbarContent = ({
@@ -102,12 +101,12 @@ const MainToolbarContent = ({
         <MarkButton type="strike" />
         <MarkButton type="code" />
         <MarkButton type="underline" />
-        {!isMobile ? (
-          <HighlightPopover />
-        ) : (
+        {isMobile ? (
           <HighlighterButton onClick={onHighlighterClick} />
+        ) : (
+          <HighlightPopover />
         )}
-        {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
+        {isMobile ? <LinkButton onClick={onLinkClick} /> : <LinkPopover />}
       </ToolbarGroup>
 
       <ToolbarSeparator />

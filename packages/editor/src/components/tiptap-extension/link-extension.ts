@@ -1,7 +1,7 @@
 import TiptapLink from "@tiptap/extension-link";
+import { Plugin, TextSelection } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import { getMarkRange } from "@tiptap/react";
-import { Plugin, TextSelection } from "@tiptap/pm/state";
 
 export const Link = TiptapLink.extend({
   inclusive: false,

@@ -1,32 +1,24 @@
 import { type Editor, isNodeSelection } from "@tiptap/react";
 import * as React from "react";
 
-// --- Hooks ---
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
-
-// --- Icons ---
-import { CornerDownLeftIcon } from "@/components/tiptap-icons/corner-down-left-icon";
-import { ExternalLinkIcon } from "@/components/tiptap-icons/external-link-icon";
-import { LinkIcon } from "@/components/tiptap-icons/link-icon";
-import { TrashIcon } from "@/components/tiptap-icons/trash-icon";
-
-// --- Lib ---
-import { isMarkInSchema } from "@/lib/tiptap-utils";
-
-// --- UI Primitives ---
+import "@/components/tiptap-ui/link-popover/link-popover.scss";
 import {
   Button,
   type ButtonProps,
-} from "@/components/tiptap-ui-primitive/button";
+} from "@rectangular-labs/ui/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/tiptap-ui-primitive/popover";
-import { Separator } from "@/components/tiptap-ui-primitive/separator";
-
-// --- Styles ---
-import "@/components/tiptap-ui/link-popover/link-popover.scss";
+} from "@rectangular-labs/ui/components/ui/popover";
+import { Separator } from "@rectangular-labs/ui/components/ui/separator";
+import {
+  CornerDownLeftIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+  TrashIcon,
+} from "lucide-react";
+import { useTiptapEditor } from "../../../hooks/use-tiptap-editor";
 
 export interface LinkHandlerProps {
   editor: Editor | null;
@@ -136,17 +128,15 @@ export const LinkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 
-export const LinkContent: React.FC<{
-  editor?: Editor | null;
-}> = ({ editor: providedEditor }) => {
-  const editor = useTiptapEditor(providedEditor);
+export function LinkContent() {
+  const editor = useTiptapEditor();
 
   const linkHandler = useLinkHandler({
     editor: editor,
   });
 
   return <LinkMain {...linkHandler} />;
-};
+}
 
 const LinkMain: React.FC<LinkMainProps> = ({
   url,
