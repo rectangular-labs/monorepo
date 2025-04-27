@@ -1,8 +1,10 @@
-import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
-import type * as React from "react";
+import * as React from "react";
 
 import { cn } from "../../utils/cn";
+import { Spinner } from "../icon";
+import { ShortcutDisplay, type ShortcutKeys } from "./shortcut";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -35,25 +37,64 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot : "button";
-
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
+interface ButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants> {
+  tooltip?: {
+    content: string;
+    shortcutKeys?: ShortcutKeys[];
+  };
+  isLoading?: boolean;
 }
 
-export { Button, buttonVariants };
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { className, variant, size, tooltip, children, isLoading, ...props },
+    ref,
+  ) => {
+    const isDisabled = isLoading || props.disabled;
+    const body = isLoading ? (
+      <>
+        <Spinner className="animate-spin" />
+        {children}
+      </>
+    ) : (
+      children
+    );
+
+    if (tooltip) {
+      return (
+        <Tooltip>
+          <TooltipTrigger
+            className={`tiptap-button ${className}`.trim()}
+            ref={ref}
+            {...props}
+            disabled={isDisabled}
+          >
+            {body}
+          </TooltipTrigger>
+          <TooltipContent>
+            <span>{tooltip.content}</span>
+            {tooltip.shortcutKeys && (
+              <ShortcutDisplay shortcutCombos={tooltip.shortcutKeys} />
+            )}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return (
+      <button
+        data-slot="button"
+        ref={ref}
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+        disabled={isDisabled}
+      >
+        {body}
+      </button>
+    );
+  },
+);
+
+export { Button, buttonVariants, type ButtonProps };

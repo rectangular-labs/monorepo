@@ -20,6 +20,7 @@
   "dependencies": {
     "@ai-sdk/react": "^1.2.9",
     "@rectangular-labs/backend": "workspace:*",
+    "@rectangular-labs/editor": "workspace:*",
     "@rectangular-labs/env": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
@@ -41,6 +42,7 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.0",
     "jsdom": "^26.1.0",
+    "sass-embedded": "^1.87.0",
     "typescript": "^5.8.3",
     "vite": "^6.2.6",
     "vite-plugin-mkcert": "^1.17.8",

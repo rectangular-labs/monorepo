@@ -1,0 +1,69 @@
+import {
+  Button,
+  type ButtonProps,
+} from "@rectangular-labs/ui/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@rectangular-labs/ui/components/ui/dropdown-menu";
+import { ChevronDownIcon } from "lucide-react";
+import * as React from "react";
+import { useTiptapEditor } from "../../../hooks/use-tiptap-editor";
+import ListButton, { ListOptions, type ListType } from "./list-button";
+
+interface ListDropdownMenuProps extends Omit<ButtonProps, "type"> {
+  /**
+   * The list types to display in the dropdown.
+   */
+  types?: ListType[];
+}
+
+export function ListDropdownMenu({
+  types = ["bulletList", "orderedList", "taskList"],
+  ...props
+}: ListDropdownMenuProps) {
+  const editor = useTiptapEditor();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const currentDisplayOption = React.useMemo(() => {
+    for (const listType of types) {
+      if (editor?.isActive(listType)) {
+        return { ...ListOptions[listType], isActive: true };
+      }
+    }
+    return { ...ListOptions.bulletList, isActive: false };
+  }, [editor, types]);
+
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          tabIndex={-1}
+          aria-label="List options"
+          data-active-state={currentDisplayOption.isActive ? "on" : "off"}
+          {...props}
+        >
+          <currentDisplayOption.icon />
+          <span>{currentDisplayOption.label}</span>
+          <ChevronDownIcon className="tiptap-button-dropdown-small" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent>
+        <DropdownMenuGroup>
+          {types.map((listType) => (
+            <DropdownMenuItem key={listType} asChild>
+              <ListButton type={listType} showText />
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export default ListDropdownMenu;

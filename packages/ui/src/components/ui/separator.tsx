@@ -1,28 +1,33 @@
-"use client";
-
-import * as SeparatorPrimitive from "@radix-ui/react-separator";
-import type * as React from "react";
-
+import React from "react";
 import { cn } from "../../utils/cn";
 
-function Separator({
-  className,
-  orientation = "horizontal",
-  decorative = true,
-  ...props
-}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {
-  return (
-    <SeparatorPrimitive.Root
-      data-slot="separator-root"
-      decorative={decorative}
-      orientation={orientation}
-      className={cn(
-        "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px",
-        className,
-      )}
-      {...props}
-    />
-  );
+export interface SeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
+  orientation?: "horizontal" | "vertical";
+  decorative?: boolean;
 }
 
-export { Separator };
+export const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
+  ({ decorative, orientation = "vertical", className, ...divProps }, ref) => {
+    const ariaOrientation =
+      orientation === "vertical" ? orientation : undefined;
+    const semanticProps = decorative
+      ? { role: "none" }
+      : { "aria-orientation": ariaOrientation, role: "separator" };
+
+    return (
+      <div
+        className={cn(
+          "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px",
+          className,
+        )}
+        data-slot="separator-root"
+        data-orientation={orientation}
+        {...semanticProps}
+        {...divProps}
+        ref={ref}
+      />
+    );
+  },
+);
+
+Separator.displayName = "Separator";

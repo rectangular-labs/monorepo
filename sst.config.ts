@@ -24,13 +24,11 @@ export default $config({
     if (!process.env.CLOUDFLARE_ZONE_ID) {
       throw new Error("CLOUDFLARE_ZONE_ID is not set");
     }
-
-    const serverEnv = parseServerEnv(process.env);
-    // const clientEnv = parseClientEnv(process.env);
-
     const dns = sst.cloudflare.dns({
       zone: process.env.CLOUDFLARE_ZONE_ID,
     });
+
+    const serverEnv = parseServerEnv(process.env);
 
     const api = new sst.aws.Function("Hono", {
       handler: "apps/backend/src/routes/index.handler",
@@ -72,8 +70,8 @@ export default $config({
       },
     });
     router.route("/api", api.url, {
-      readTimeout: "60 seconds",
-      keepAliveTimeout: "60 seconds",
+      readTimeout: "30 seconds",
+      keepAliveTimeout: "30 seconds",
     });
 
     new sst.aws.StaticSite("WWW", {
@@ -88,7 +86,6 @@ export default $config({
       dev: {
         command: "pnpm dev",
       },
-      // environment: clientEnv,
       route: { router, path: "/" },
     });
 
