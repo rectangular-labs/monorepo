@@ -39,8 +39,8 @@ importers:
   apps/backend:
     dependencies:
       '@ai-sdk/google':
-        specifier: ^1.2.11
-        version: 1.2.11(zod@3.24.2)
+        specifier: ^1.2.13
+        version: 1.2.13(zod@3.24.2)
       '@rectangular-labs/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -414,8 +414,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/google@1.2.11':
-    resolution: {integrity: sha512-gjGcxKcRri/Jbkujs9nVwP4qOW5GI4rYQ6vQ17uLAvGMo3qnwr26Q2KUqUWuVHQYtboXVSrxC/Kb6sm3hE5WUQ==}
+  '@ai-sdk/google@1.2.13':
+    resolution: {integrity: sha512-nnHDzbX1Zst28AjP3718xSWsEqx++qmFuqmnDc2Htelc02HyO6WkWOXMH+YVK3W8zdIyZEKpHL9KKlql7pa10A==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -5782,7 +5782,7 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/google@1.2.11(zod@3.24.2)':
+  '@ai-sdk/google@1.2.13(zod@3.24.2)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
       '@ai-sdk/provider-utils': 2.2.7(zod@3.24.2)
