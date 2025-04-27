@@ -2,7 +2,7 @@ import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
 import * as React from "react";
 import { CloseIcon } from "../../icons";
-import "@/components/tiptap-node/image-upload-node/image-upload-node.scss";
+import "./image-upload-node.scss";
 
 export interface FileItem {
   id: string;

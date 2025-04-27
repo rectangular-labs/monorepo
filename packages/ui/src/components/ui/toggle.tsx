@@ -1,13 +1,13 @@
 "use client";
-
 import * as TogglePrimitive from "@radix-ui/react-toggle";
 import { type VariantProps, cva } from "class-variance-authority";
-import type * as React from "react";
-
+import * as React from "react";
 import { cn } from "../../utils/cn";
+import { ShortcutDisplay, type ShortcutKeys } from "./shortcut";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 const toggleVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-[color,box-shadow] hover:bg-muted hover:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 rounded-md font-medium text-sm transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -28,20 +28,57 @@ const toggleVariants = cva(
   },
 );
 
-function Toggle({
-  className,
-  variant,
-  size,
-  ...props
-}: React.ComponentProps<typeof TogglePrimitive.Root> &
-  VariantProps<typeof toggleVariants>) {
+interface ToggleProps
+  extends React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root>,
+    VariantProps<typeof toggleVariants> {
+  /**
+   * The tooltip to display when the toggle is hovered on.
+   */
+  tooltip?: {
+    content: string;
+    shortcutKeys?: ShortcutKeys[];
+  };
+}
+const Toggle = React.forwardRef<
+  React.ComponentRef<typeof TogglePrimitive.Root>,
+  ToggleProps
+>(
+  (
+    { size, variant, pressed, onPressedChange, tooltip, className, ...props },
+    ref,
+  ) => {
+    if (tooltip) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ToolTipBase {...props} ref={ref} />
+          </TooltipTrigger>
+          <TooltipContent>
+            <span>{tooltip.content}</span>
+            {tooltip.shortcutKeys && (
+              <ShortcutDisplay shortcutCombos={tooltip.shortcutKeys} />
+            )}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return <ToolTipBase {...props} ref={ref} />;
+  },
+);
+
+const ToolTipBase = React.forwardRef<
+  React.ComponentRef<typeof TogglePrimitive.Root>,
+  ToggleProps
+>(({ tooltip, variant, size, className, ...props }, ref) => {
   return (
     <TogglePrimitive.Root
+      ref={ref}
       data-slot="toggle"
       className={cn(toggleVariants({ variant, size, className }))}
       {...props}
     />
   );
-}
+});
 
-export { Toggle, toggleVariants };
+export { Toggle, type ToggleProps, toggleVariants };

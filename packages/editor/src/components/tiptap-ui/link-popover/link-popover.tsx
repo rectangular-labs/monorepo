@@ -1,7 +1,7 @@
 import { type Editor, isNodeSelection } from "@tiptap/react";
 import * as React from "react";
 
-import "@/components/tiptap-ui/link-popover/link-popover.scss";
+import "./link-popover.scss";
 import {
   Button,
   type ButtonProps,
@@ -19,22 +19,13 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { useTiptapEditor } from "../../../hooks/use-tiptap-editor";
+import { isMarkInSchema } from "../../../tiptap-utils";
 
-export interface LinkHandlerProps {
+const useLinkHandler = (props: {
   editor: Editor | null;
   onSetLink?: () => void;
   onLinkActive?: () => void;
-}
-
-export interface LinkMainProps {
-  url: string;
-  setUrl: React.Dispatch<React.SetStateAction<string>>;
-  setLink: () => void;
-  removeLink: () => void;
-  isActive: boolean;
-}
-
-export const useLinkHandler = (props: LinkHandlerProps) => {
+}) => {
   const { editor, onSetLink, onLinkActive } = props;
   const [url, setUrl] = React.useState<string>("");
 
@@ -112,17 +103,14 @@ export const LinkButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => {
     return (
       <Button
-        type="button"
-        className={className}
-        data-style="ghost"
-        role="button"
+        ref={ref}
         tabIndex={-1}
         aria-label="Link"
-        tooltip="Link"
-        ref={ref}
+        variant="ghost"
+        size="icon"
         {...props}
       >
-        {children || <LinkIcon className="tiptap-button-icon" />}
+        {children ?? <LinkIcon />}
       </Button>
     );
   },
@@ -136,6 +124,14 @@ export function LinkContent() {
   });
 
   return <LinkMain {...linkHandler} />;
+}
+
+interface LinkMainProps {
+  url: string;
+  setUrl: React.Dispatch<React.SetStateAction<string>>;
+  setLink: () => void;
+  removeLink: () => void;
+  isActive: boolean;
 }
 
 const LinkMain: React.FC<LinkMainProps> = ({

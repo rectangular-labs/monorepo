@@ -1,8 +1,5 @@
-import * as React from "react";
-
-// --- UI ---
-import type { ButtonProps } from "@rectangular-labs/ui/components/ui/button";
 import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
+import * as React from "react";
 import {
   HeadingFiveIcon,
   HeadingFourIcon,
@@ -15,11 +12,12 @@ import {
 // --- Hooks ---
 import { useTiptapEditor } from "../../../hooks/use-tiptap-editor"; // Adjusted path
 
+import {
+  Toggle,
+  type ToggleProps,
+} from "@rectangular-labs/ui/components/ui/toggle";
 // --- Lib ---
 import { isNodeInSchema } from "../../../tiptap-utils"; // Corrected path
-
-// --- Components ---
-import { BaseActionButton } from "../base-action-button"; // Added import
 
 export type Level = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -119,7 +117,8 @@ export function useHeading(level: Level, manuallyDisabled = false) {
 }
 
 // --- Component Props ---
-export interface HeadingButtonProps extends Omit<ButtonProps, "type"> {
+export interface HeadingButtonProps
+  extends Omit<ToggleProps, "type" | "pressed" | "onPressedChange"> {
   /**
    * The heading level.
    */
@@ -141,20 +140,22 @@ export const HeadingButton = React.forwardRef<
   );
 
   return (
-    <BaseActionButton
+    <Toggle
       ref={ref}
-      disabled={isDisabled}
-      aria-pressed={isActive}
+      tabIndex={-1}
       tooltip={{
         content: displayOptions.label,
         shortcutKeys: [displayOptions.shortcutKey],
       }}
-      defaultClickAction={handleToggle}
-      icon={<displayOptions.icon />}
-      text={displayOptions.label}
-      showText={showText}
       {...buttonProps}
-    />
+      aria-label={displayOptions.label}
+      disabled={isDisabled}
+      onPressedChange={handleToggle}
+      pressed={isActive}
+    >
+      <displayOptions.icon />
+      {showText && <span>{displayOptions.label}</span>}
+    </Toggle>
   );
 });
 

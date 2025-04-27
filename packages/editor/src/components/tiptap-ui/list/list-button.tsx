@@ -1,12 +1,13 @@
 "use client";
-
-import type { ButtonProps } from "@rectangular-labs/ui/components/ui/button";
 import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
+import {
+  Toggle,
+  type ToggleProps,
+} from "@rectangular-labs/ui/components/ui/toggle";
 import * as React from "react";
 import { useTiptapEditor } from "../../../hooks/use-tiptap-editor";
 import { isNodeInSchema } from "../../../tiptap-utils";
 import { ListIcon, ListOrderedIcon, ListTodoIcon } from "../../icons";
-import { BaseActionButton } from "../base-action-button";
 
 export type ListType = "bulletList" | "orderedList" | "taskList";
 
@@ -101,14 +102,15 @@ function useListState(type: ListType, manuallyDisabled = false) {
   };
 }
 
-interface ListButtonProps extends Omit<ButtonProps, "type"> {
+interface ListToggleProps
+  extends Omit<ToggleProps, "type" | "pressed" | "onPressedChange"> {
   /**
    * The type of list to toggle.
    */
   type: ListType;
   showText?: boolean;
 }
-export const ListButton = React.forwardRef<HTMLButtonElement, ListButtonProps>(
+export const ListToggle = React.forwardRef<HTMLButtonElement, ListToggleProps>(
   ({ type, showText, ...buttonProps }, ref) => {
     const { toggleList, isActive, displayOptions } = useListState(
       type,
@@ -116,23 +118,25 @@ export const ListButton = React.forwardRef<HTMLButtonElement, ListButtonProps>(
     );
 
     return (
-      <BaseActionButton
+      <Toggle
         ref={ref}
-        aria-pressed={isActive}
+        tabIndex={-1}
         tooltip={{
           content: displayOptions.label,
           shortcutKeys: [displayOptions.shortcutKey],
         }}
-        defaultClickAction={toggleList}
-        icon={<displayOptions.icon />}
-        text={displayOptions.label}
-        showText={showText}
         {...buttonProps}
-      />
+        aria-label={displayOptions.label}
+        onPressedChange={toggleList}
+        pressed={isActive}
+      >
+        <displayOptions.icon />
+        {showText && <span>{displayOptions.label}</span>}
+      </Toggle>
     );
   },
 );
 
-ListButton.displayName = "ListButton";
+ListToggle.displayName = "ListButton";
 
-export default ListButton;
+export default ListToggle;

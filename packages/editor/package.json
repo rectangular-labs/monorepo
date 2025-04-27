@@ -4,11 +4,13 @@
   "type": "module",
   "private": true,
   "sideEffects": false,
+  "files": ["style.css"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./style.css": "./src/style.css"
   },
   "scripts": {
     "clean": "git clean -xdf .turbo node_modules dist .cache",
@@ -46,6 +48,7 @@
     "@types/react-dom": "^19.1.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3"
   }
 }

@@ -1,4 +1,4 @@
-import "@/components/tiptap-ui-primitive/toolbar/toolbar.scss";
+import "./toolbar.scss";
 import { Separator } from "@rectangular-labs/ui/components/ui/separator";
 import * as React from "react";
 

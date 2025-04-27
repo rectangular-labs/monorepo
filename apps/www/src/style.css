@@ -1,2 +1,3 @@
-@import "@rectangular-labs/ui/styles.css";
+@import "@rectangular-labs/ui/style.css";
+@import "@rectangular-labs/editor/style.css";
 @source "./**/*.{ts,tsx}";

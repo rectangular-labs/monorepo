@@ -66,7 +66,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       return (
         <Tooltip>
           <TooltipTrigger
-            className={`tiptap-button ${className}`.trim()}
+            className={cn(buttonVariants({ variant, size, className }))}
             ref={ref}
             {...props}
             disabled={isDisabled}

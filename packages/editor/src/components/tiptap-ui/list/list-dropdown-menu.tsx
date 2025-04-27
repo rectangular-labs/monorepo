@@ -12,7 +12,7 @@ import {
 import * as React from "react";
 import { useTiptapEditor } from "../../../hooks/use-tiptap-editor";
 import { ChevronDownIcon, ListIcon } from "../../icons";
-import ListButton, { ListOptions, type ListType } from "./list-button";
+import ListToggle, { ListOptions, type ListType } from "./list-button";
 
 interface ListDropdownMenuProps extends Omit<ButtonProps, "type"> {
   /**
@@ -61,7 +61,7 @@ export function ListDropdownMenu({
         <DropdownMenuGroup>
           {types.map((listType) => (
             <DropdownMenuItem key={listType} asChild>
-              <ListButton type={listType} showText />
+              <ListToggle type={listType} showText />
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>

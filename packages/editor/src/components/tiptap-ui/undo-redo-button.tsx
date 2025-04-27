@@ -1,9 +1,12 @@
-import type { ButtonProps } from "@rectangular-labs/ui/components/ui/button";
+import {
+  Button,
+  type ButtonProps,
+} from "@rectangular-labs/ui/components/ui/button";
 import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
+import type { Editor } from "@tiptap/react";
 import * as React from "react";
 import { useTiptapEditor } from "../../hooks/use-tiptap-editor";
 import { RedoIcon, UndoIcon } from "../icons";
-import { BaseActionButton } from "./base-action-button";
 
 type HistoryAction = "undo" | "redo";
 
@@ -20,6 +23,18 @@ const historyActionLabels = {
   redo: "Redo",
 };
 
+function isUndoRedoDisabled(
+  editor: Editor | null,
+  action: HistoryAction,
+  manuallyDisabled = false,
+) {
+  if (!editor || manuallyDisabled) return true;
+  if (action === "undo") {
+    return !editor.can().undo();
+  }
+  return !editor.can().redo();
+}
+
 /**
  * Hook that provides all the necessary state and handlers for a history action.
  *
@@ -29,16 +44,10 @@ const historyActionLabels = {
  */
 function useHistoryAction(action: HistoryAction, manuallyDisabled = false) {
   const editor = useTiptapEditor();
-  const isDisabled = React.useMemo(() => {
-    if (!editor || manuallyDisabled) return true;
-    if (action === "undo") {
-      return !editor.can().undo();
-    }
-    return !editor.can().redo();
-  }, [editor, action, manuallyDisabled]);
+  const isDisabled = isUndoRedoDisabled(editor, action, manuallyDisabled);
 
   const handleAction = React.useCallback(() => {
-    if (!editor || !isDisabled) return;
+    if (!editor || isDisabled) return;
     const chain = editor.chain().focus();
 
     if (action === "undo") {
@@ -76,20 +85,35 @@ export const UndoRedoButton = React.forwardRef<
   const { isDisabled, handleAction, Icon, actionLabel, shortcutKey } =
     useHistoryAction(action, props.disabled);
 
+  const onClickHandler = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      onClick?.(e);
+      if (!e.defaultPrevented && !isDisabled) {
+        handleAction();
+      }
+    },
+    [onClick, handleAction, isDisabled],
+  );
+
   return (
-    <BaseActionButton
+    <Button
       ref={ref}
-      disabled={isDisabled}
+      type="button"
+      tabIndex={-1}
+      variant="ghost"
+      size="icon"
       tooltip={{
         content: actionLabel,
         shortcutKeys: [shortcutKey],
       }}
-      defaultClickAction={handleAction}
-      icon={<Icon />}
-      text={actionLabel}
-      showText={showText}
       {...props}
-    />
+      aria-label={actionLabel}
+      onClick={onClickHandler}
+      disabled={isDisabled}
+    >
+      <Icon />
+      {showText && <span>{actionLabel}</span>}
+    </Button>
   );
 });
 

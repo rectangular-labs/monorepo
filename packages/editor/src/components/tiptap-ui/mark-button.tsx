@@ -1,9 +1,12 @@
-import type { ButtonProps } from "@rectangular-labs/ui/components/ui/button";
 import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
 
+import {
+  Toggle,
+  type ToggleProps,
+} from "@rectangular-labs/ui/components/ui/toggle";
 import * as React from "react";
-import { useMemo } from "react";
 import { useTiptapEditor } from "../../hooks/use-tiptap-editor";
+import { isMarkInSchema } from "../../tiptap-utils";
 import {
   BoldIcon,
   Code2Icon,
@@ -13,7 +16,6 @@ import {
   SuperscriptIcon,
   UnderlineIcon,
 } from "../icons";
-import { BaseActionButton } from "./base-action-button";
 
 type Mark =
   | "bold"
@@ -72,8 +74,8 @@ const markOptions: Record<
 export function useMark(type: Mark, manuallyDisabled = false) {
   const editor = useTiptapEditor();
 
-  const isDisabled = useMemo(() => {
-    const markInSchema = editor?.schema.spec.marks.get(type) !== undefined;
+  const isDisabled = (() => {
+    const markInSchema = isMarkInSchema(type, editor);
 
     if (!markInSchema) {
       console.warn(
@@ -94,12 +96,12 @@ export function useMark(type: Mark, manuallyDisabled = false) {
       console.error("Error checking mark toggle", error);
       return true;
     }
-  }, [editor, type, manuallyDisabled]);
+  })();
 
-  const isActive = useMemo(() => {
+  const isActive = (() => {
     if (!editor) return false;
     return editor.isActive(type);
-  }, [editor, type]);
+  })();
 
   const handleToggleMark = React.useCallback(() => {
     if (isDisabled || !editor) return false;
@@ -116,7 +118,8 @@ export function useMark(type: Mark, manuallyDisabled = false) {
   };
 }
 
-interface MarkButtonProps extends Omit<ButtonProps, "type"> {
+interface MarkButtonProps
+  extends Omit<ToggleProps, "type" | "pressed" | "onPressedChange"> {
   /**
    * The type of mark to toggle
    */
@@ -131,21 +134,25 @@ export const MarkButton = React.forwardRef<HTMLButtonElement, MarkButtonProps>(
       disabled,
     );
 
+    console.log("isActive", isActive, type);
     return (
-      <BaseActionButton
+      <Toggle
         ref={ref}
-        disabled={isDisabled}
-        aria-pressed={isActive}
+        size="sm"
+        tabIndex={-1}
         tooltip={{
           content: displayOptions.label,
           shortcutKeys: [displayOptions.shortcutKey],
         }}
-        defaultClickAction={handleToggleMark}
-        icon={<displayOptions.icon />}
-        text={displayOptions.label}
-        showText={showText}
         {...buttonProps}
-      />
+        aria-label={displayOptions.label}
+        disabled={isDisabled}
+        // pressed={true}
+        onClick={handleToggleMark}
+      >
+        <displayOptions.icon />
+        {showText && <span>{displayOptions.label}</span>}
+      </Toggle>
     );
   },
 );

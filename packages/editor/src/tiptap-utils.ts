@@ -26,18 +26,9 @@ export const handleImageUpload = async (
 };
 
 /**
- * Checks if a node exists in the editor schema
- *
- * @param nodeName - The name of the node to check
- * @param editor - The editor instance
- */
-export const isNodeInSchema = (nodeName: string, editor: Editor | null) =>
-  editor?.schema.spec.nodes.get(nodeName) !== undefined;
-
-/**
  * Converts a File to base64 string
  */
-export const convertFileToBase64 = (
+const _convertFileToBase64 = (
   file: File,
   abortSignal?: AbortSignal,
 ): Promise<string> => {
@@ -69,3 +60,15 @@ export const convertFileToBase64 = (
     reader.readAsDataURL(file);
   });
 };
+
+/**
+ * Checks if a node exists in the editor schema
+ *
+ * @param nodeName - The name of the node to check
+ * @param editor - The editor instance
+ */
+export const isNodeInSchema = (nodeName: string, editor: Editor | null) =>
+  editor?.schema.spec.nodes.get(nodeName) !== undefined;
+
+export const isMarkInSchema = (markName: string, editor: Editor | null) =>
+  editor?.schema.spec.marks.get(markName) !== undefined;

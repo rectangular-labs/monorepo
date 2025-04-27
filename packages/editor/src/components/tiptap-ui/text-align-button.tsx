@@ -1,8 +1,10 @@
+import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
 import * as React from "react";
 
-import type { ButtonProps } from "@rectangular-labs/ui/components/ui/button";
-import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
-
+import {
+  Toggle,
+  type ToggleProps,
+} from "@rectangular-labs/ui/components/ui/toggle";
 import type { Editor } from "@tiptap/react";
 import { useTiptapEditor } from "../../hooks/use-tiptap-editor";
 import {
@@ -11,7 +13,6 @@ import {
   AlignLeftIcon,
   AlignRightIcon,
 } from "../icons";
-import { BaseActionButton } from "./base-action-button";
 
 type TextAlign = "left" | "center" | "right" | "justify";
 
@@ -51,31 +52,38 @@ function isTextAlignExtensionAvailable(editor: Editor | null) {
   );
 }
 
+function isTextAlignDisabled(
+  editor: Editor | null,
+  align: TextAlign,
+  manuallyDisabled = false,
+) {
+  const hasExtension = isTextAlignExtensionAvailable(editor);
+
+  if (!hasExtension) {
+    console.warn(
+      `TextAlign extension for ${align} is not available. Make sure it is included in your editor configuration.`,
+    );
+  }
+  if (!editor || !hasExtension || manuallyDisabled) return true;
+
+  try {
+    return !editor?.can().setTextAlign(align);
+  } catch (error) {
+    console.error("Error checking if text align is disabled", error);
+    return true;
+  }
+}
+
+function isTextAlignActive(editor: Editor | null, align: TextAlign) {
+  return editor?.isActive({ textAlign: align }) ?? false;
+}
+
 export function useTextAlign(align: TextAlign, manuallyDisabled = false) {
   const editor = useTiptapEditor();
 
-  const isDisabled = React.useMemo(() => {
-    const hasExtension = isTextAlignExtensionAvailable(editor);
+  const isDisabled = isTextAlignDisabled(editor, align, manuallyDisabled);
 
-    if (!hasExtension) {
-      console.warn(
-        `TextAlign extension for ${align} is not available. Make sure it is included in your editor configuration.`,
-      );
-    }
-    if (!editor || !hasExtension || manuallyDisabled) return true;
-
-    try {
-      return !editor?.can().setTextAlign(align);
-    } catch (error) {
-      console.error("Error checking if text align is disabled", error);
-      return true;
-    }
-  }, [editor, manuallyDisabled, align]);
-
-  const isActive = React.useMemo(() => {
-    if (!editor) return false;
-    return editor.isActive({ textAlign: align });
-  }, [editor, align]);
+  const isActive = isTextAlignActive(editor, align);
 
   const handleAlignment = React.useCallback(() => {
     if (!editor || isDisabled) return false;
@@ -93,7 +101,8 @@ export function useTextAlign(align: TextAlign, manuallyDisabled = false) {
   };
 }
 
-interface TextAlignButtonProps extends ButtonProps {
+interface TextAlignButtonProps
+  extends Omit<ToggleProps, "pressed" | "onPressedChange"> {
   /**
    * The text alignment to apply.
    */
@@ -112,20 +121,23 @@ export const TextAlignButton = React.forwardRef<
       useTextAlign(align, disabled);
 
     return (
-      <BaseActionButton
+      <Toggle
         ref={ref}
-        disabled={isDisabled}
-        aria-pressed={isActive}
+        size="sm"
+        tabIndex={-1}
         tooltip={{
           content: displayOptions.label,
           shortcutKeys: [displayOptions.shortcutKey],
         }}
-        defaultClickAction={handleAlignment}
-        icon={<displayOptions.icon />}
-        text={displayOptions.label}
-        showText={showText}
         {...buttonProps}
-      />
+        aria-label={displayOptions.label}
+        disabled={isDisabled}
+        pressed={isActive}
+        onClick={handleAlignment}
+      >
+        <displayOptions.icon />
+        {showText && <span>{displayOptions.label}</span>}
+      </Toggle>
     );
   },
 );

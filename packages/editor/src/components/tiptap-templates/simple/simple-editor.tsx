@@ -17,13 +17,10 @@ import { StarterKit } from "@tiptap/starter-kit";
 import { Link } from "../../tiptap-extension/link-extension";
 import { Selection } from "../../tiptap-extension/selection-extension";
 import { TrailingNode } from "../../tiptap-extension/trailing-node-extension";
-
-// --- Tiptap Node ---
-import { ImageUploadNode } from "../../tiptap-node/image-upload-node";
-import "@/components/tiptap-node/code-block-node/code-block-node.scss";
-import "@/components/tiptap-node/list-node/list-node.scss";
-import "@/components/tiptap-node/image-node/image-node.scss";
-import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
+import "../../tiptap-node/code-block-node/code-block-node.scss";
+import "../../tiptap-node/list-node/list-node.scss";
+import "../../tiptap-node/image-node/image-node.scss";
+import "../../tiptap-node/paragraph-node/paragraph-node.scss";
 
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 // --- Tiptap UI ---
@@ -35,12 +32,6 @@ import {
   ToolbarSeparator,
 } from "../../tiptap-ui-primitive/toolbar";
 import { HeadingDropdownMenu } from "../../tiptap-ui/heading/heading-dropdown-menu";
-import {
-  HighlightContent,
-  HighlightPopover,
-  HighlighterButton,
-} from "../../tiptap-ui/highlight-popover";
-import { ImageUploadButton } from "../../tiptap-ui/image-upload-button";
 import {
   LinkButton,
   LinkContent,
@@ -59,11 +50,8 @@ import { ArrowLeftIcon, HighlighterIcon, LinkIcon } from "../../icons";
 import { useIsMobile } from "@rectangular-labs/ui/hooks/use-is-mobile";
 import { useWindowSize } from "@rectangular-labs/ui/hooks/use-window-size";
 
-// --- Lib ---
-import { MAX_FILE_SIZE, handleImageUpload } from "../../../tiptap-utils";
-
 // --- Styles ---
-import "@/components/tiptap-templates/simple/simple-editor.scss";
+import "./simple-editor.scss";
 import content from "./data/content.json";
 
 const MainToolbarContent = ({
@@ -101,11 +89,11 @@ const MainToolbarContent = ({
         <MarkButton type="strike" />
         <MarkButton type="code" />
         <MarkButton type="underline" />
-        {isMobile ? (
+        {/* {isMobile ? (
           <HighlighterButton onClick={onHighlighterClick} />
         ) : (
           <HighlightPopover />
-        )}
+        )} */}
         {isMobile ? <LinkButton onClick={onLinkClick} /> : <LinkPopover />}
       </ToolbarGroup>
 
@@ -127,9 +115,9 @@ const MainToolbarContent = ({
 
       <ToolbarSeparator />
 
-      <ToolbarGroup>
+      {/* <ToolbarGroup>
         <ImageUploadButton text="Add" />
-      </ToolbarGroup>
+      </ToolbarGroup> */}
 
       <Spacer />
 
@@ -163,7 +151,8 @@ const MobileToolbarContent = ({
 
     <ToolbarSeparator />
 
-    {type === "highlighter" ? <HighlightContent /> : <LinkContent />}
+    <LinkContent />
+    {/* {type === "highlighter" ? <HighlightContent /> : <LinkContent />} */}
   </>
 );
 
@@ -224,13 +213,13 @@ export function SimpleEditor() {
       Subscript,
 
       Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
-      }),
+      // ImageUploadNode.configure({
+      //   accept: "image/*",
+      //   maxSize: MAX_FILE_SIZE,
+      //   limit: 3,
+      //   upload: handleImageUpload,
+      //   onError: (error) => console.error("Upload failed:", error),
+      // }),
       TrailingNode,
       Link.configure({ openOnClick: false }),
     ],

@@ -1,10 +1,12 @@
-import type { ButtonProps } from "@rectangular-labs/ui/components/ui/button";
 import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
+import {
+  Toggle,
+  type ToggleProps,
+} from "@rectangular-labs/ui/components/ui/toggle";
 import * as React from "react";
 import { useTiptapEditor } from "../../hooks/use-tiptap-editor";
 import { isNodeInSchema } from "../../tiptap-utils";
 import { BlockQuoteIcon, CodeBlockIcon } from "../icons";
-import { BaseActionButton } from "./base-action-button";
 
 type NodeType = "codeBlock" | "blockquote";
 
@@ -74,7 +76,8 @@ function useNode(type: NodeType, manuallyDisabled = false) {
   };
 }
 
-interface NodeButtonProps extends Omit<ButtonProps, "type"> {
+interface NodeButtonProps
+  extends Omit<ToggleProps, "type" | "pressed" | "onPressedChange"> {
   /**
    * The type of node to toggle.
    */
@@ -89,20 +92,23 @@ export const NodeButton = React.forwardRef<HTMLButtonElement, NodeButtonProps>(
     );
 
     return (
-      <BaseActionButton
+      <Toggle
         ref={ref}
-        disabled={isDisabled}
-        aria-pressed={isActive}
+        size="sm"
+        tabIndex={-1}
         tooltip={{
           content: displayOptions.label,
           shortcutKeys: [displayOptions.shortcutKey],
         }}
-        defaultClickAction={handleToggle}
-        icon={<displayOptions.icon />}
-        text={displayOptions.label}
-        showText={showText}
         {...buttonProps}
-      />
+        aria-label={displayOptions.label}
+        disabled={isDisabled}
+        pressed={isActive}
+        onClick={handleToggle}
+      >
+        <displayOptions.icon />
+        {showText && <span>{displayOptions.label}</span>}
+      </Toggle>
     );
   },
 );
