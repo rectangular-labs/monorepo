@@ -52,7 +52,7 @@ import { useWindowSize } from "@rectangular-labs/ui/hooks/use-window-size";
 
 // --- Styles ---
 import "./simple-editor.scss";
-import content from "./data/content.json";
+import { LoroCRDT } from "../../tiptap-extension/loro-extension";
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -222,8 +222,9 @@ export function SimpleEditor() {
       // }),
       TrailingNode,
       Link.configure({ openOnClick: false }),
+      LoroCRDT,
     ],
-    content: content,
+    // content: content,
   });
 
   React.useEffect(() => {

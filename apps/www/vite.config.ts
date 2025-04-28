@@ -5,6 +5,8 @@ import { defineConfig } from "vitest/config";
 import { resolve } from "node:path";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import mkcert from "vite-plugin-mkcert";
+import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
   plugins: [
@@ -12,6 +14,8 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
     mkcert(),
+    wasm(),
+    topLevelAwait(),
   ],
   test: {
     globals: true,
