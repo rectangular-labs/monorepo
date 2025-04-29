@@ -26,11 +26,7 @@ import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 // --- Tiptap UI ---
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Spacer } from "@rectangular-labs/ui/components/ui/spacer";
-import {
-  Toolbar,
-  ToolbarGroup,
-  ToolbarSeparator,
-} from "../../tiptap-ui-primitive/toolbar";
+import { Toolbar } from "../../tiptap-ui-primitive/toolbar";
 import { HeadingDropdownMenu } from "../../tiptap-ui/heading/heading-dropdown-menu";
 import {
   LinkButton,
@@ -52,6 +48,7 @@ import { useWindowSize } from "@rectangular-labs/ui/hooks/use-window-size";
 
 // --- Styles ---
 import "./simple-editor.scss";
+import { Separator } from "@rectangular-labs/ui/components/ui/separator";
 import { LoroCRDT } from "../../tiptap-extension/loro-extension";
 
 const MainToolbarContent = ({
@@ -67,23 +64,23 @@ const MainToolbarContent = ({
     <>
       <Spacer />
 
-      <ToolbarGroup>
+      <div className="flex h-full items-center gap-0.5">
         <UndoRedoButton action="undo" />
         <UndoRedoButton action="redo" />
-      </ToolbarGroup>
+      </div>
 
-      <ToolbarSeparator />
+      <Separator orientation="vertical" className="h-10" />
 
-      <ToolbarGroup>
+      <div className="flex h-full items-center gap-0.5">
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
         <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} />
         <NodeButton type="codeBlock" />
         <NodeButton type="blockquote" />
-      </ToolbarGroup>
+      </div>
 
-      <ToolbarSeparator />
+      <Separator orientation="vertical" className="h-10" />
 
-      <ToolbarGroup>
+      <div className="flex h-full items-center gap-0.5">
         <MarkButton type="bold" />
         <MarkButton type="italic" />
         <MarkButton type="strike" />
@@ -95,25 +92,25 @@ const MainToolbarContent = ({
           <HighlightPopover />
         )} */}
         {isMobile ? <LinkButton onClick={onLinkClick} /> : <LinkPopover />}
-      </ToolbarGroup>
+      </div>
 
-      <ToolbarSeparator />
+      <Separator orientation="vertical" className="h-10" />
 
-      <ToolbarGroup>
+      <div className="flex h-full items-center gap-0.5">
         <MarkButton type="superscript" />
         <MarkButton type="subscript" />
-      </ToolbarGroup>
+      </div>
 
-      <ToolbarSeparator />
+      <Separator orientation="vertical" className="h-10" />
 
-      <ToolbarGroup>
+      <div className="flex h-full items-center gap-0.5">
         <TextAlignButton align="left" />
         <TextAlignButton align="center" />
         <TextAlignButton align="right" />
         <TextAlignButton align="justify" />
-      </ToolbarGroup>
+      </div>
 
-      <ToolbarSeparator />
+      <Separator orientation="vertical" className="h-10" />
 
       {/* <ToolbarGroup>
         <ImageUploadButton text="Add" />
@@ -121,11 +118,11 @@ const MainToolbarContent = ({
 
       <Spacer />
 
-      {isMobile && <ToolbarSeparator />}
+      {isMobile && <Separator orientation="vertical" className="h-10" />}
 
-      <ToolbarGroup>
-        <ThemeToggle />
-      </ToolbarGroup>
+      <div className="flex h-full items-center gap-0.5">
+        <ThemeToggle variant="ghost" />
+      </div>
     </>
   );
 };
@@ -138,7 +135,7 @@ const MobileToolbarContent = ({
   onBack: () => void;
 }) => (
   <>
-    <ToolbarGroup>
+    <div className="flex h-full items-center gap-0.5">
       <Button data-style="ghost" onClick={onBack}>
         <ArrowLeftIcon className="tiptap-button-icon" />
         {type === "highlighter" ? (
@@ -147,9 +144,9 @@ const MobileToolbarContent = ({
           <LinkIcon className="tiptap-button-icon" />
         )}
       </Button>
-    </ToolbarGroup>
+    </div>
 
-    <ToolbarSeparator />
+    <Separator orientation="vertical" className="h-10" />
 
     <LinkContent />
     {/* {type === "highlighter" ? <HighlightContent /> : <LinkContent />} */}
@@ -268,36 +265,29 @@ export function SimpleEditor() {
 
   return (
     <EditorContext.Provider value={{ editor }}>
-      <Toolbar
-        ref={toolbarRef}
-        style={
-          isMobile
-            ? {
-                bottom: `calc(100% - ${windowSize.height - rect.y}px)`,
-              }
-            : {}
-        }
-      >
-        {mobileView === "main" ? (
-          <MainToolbarContent
-            onHighlighterClick={() => setMobileView("highlighter")}
-            onLinkClick={() => setMobileView("link")}
-            isMobile={isMobile}
-          />
-        ) : (
-          <MobileToolbarContent
-            type={mobileView === "highlighter" ? "highlighter" : "link"}
-            onBack={() => setMobileView("main")}
-          />
-        )}
-      </Toolbar>
+      <div className="relative flex min-h-screen flex-col lg:pt-5">
+        <Toolbar ref={toolbarRef} className="order-last md:order-first">
+          {mobileView === "main" ? (
+            <MainToolbarContent
+              onHighlighterClick={() => setMobileView("highlighter")}
+              onLinkClick={() => setMobileView("link")}
+              isMobile={isMobile}
+            />
+          ) : (
+            <MobileToolbarContent
+              type={mobileView}
+              onBack={() => setMobileView("main")}
+            />
+          )}
+        </Toolbar>
 
-      <div className="content-wrapper">
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
+        <div className="flex-1 overflow-y-auto content-wrapper">
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className="mx-auto w-full max-w-2xl px-4 py-6 sm:p-12"
+          />
+        </div>
       </div>
     </EditorContext.Provider>
   );

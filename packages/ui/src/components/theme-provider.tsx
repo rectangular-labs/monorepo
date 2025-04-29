@@ -2,7 +2,7 @@ import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import type * as React from "react";
 import * as Icons from "../components/icon";
 import { cn } from "../utils/cn";
-import { Button } from "./ui/button";
+import { Button, type ButtonProps } from "./ui/button";
 
 export function ThemeProvider({
   children,
@@ -11,11 +11,7 @@ export function ThemeProvider({
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
 
-export function ThemeToggle({
-  className,
-}: {
-  className?: string;
-}) {
+export function ThemeToggle({ className, ...props }: ButtonProps) {
   const { setTheme, theme } = useTheme();
 
   return (
@@ -24,6 +20,7 @@ export function ThemeToggle({
       size="icon"
       onClick={() => (theme === "dark" ? setTheme("light") : setTheme("dark"))}
       className={cn("relative", className)}
+      {...props}
     >
       <Icons.Sun className="dark:-rotate-90 h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:scale-0" />
       <Icons.Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

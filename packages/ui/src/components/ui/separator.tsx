@@ -1,33 +1,34 @@
-import React from "react";
+import type React from "react";
 import { cn } from "../../utils/cn";
 
-export interface SeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SeparatorProps extends React.ComponentProps<"div"> {
   orientation?: "horizontal" | "vertical";
   decorative?: boolean;
 }
 
-export const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
-  ({ decorative, orientation = "vertical", className, ...divProps }, ref) => {
-    const ariaOrientation =
-      orientation === "vertical" ? orientation : undefined;
-    const semanticProps = decorative
-      ? { role: "none" }
-      : { "aria-orientation": ariaOrientation, role: "separator" };
+export const Separator = ({
+  decorative,
+  orientation = "vertical",
+  className,
+  ...divProps
+}: SeparatorProps) => {
+  const ariaOrientation = orientation === "vertical" ? orientation : undefined;
+  const semanticProps = decorative
+    ? { role: "none" }
+    : { "aria-orientation": ariaOrientation, role: "separator" };
 
-    return (
-      <div
-        className={cn(
-          "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px",
-          className,
-        )}
-        data-slot="separator-root"
-        data-orientation={orientation}
-        {...semanticProps}
-        {...divProps}
-        ref={ref}
-      />
-    );
-  },
-);
+  return (
+    <div
+      className={cn(
+        "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px",
+        className,
+      )}
+      data-slot="separator-root"
+      data-orientation={orientation}
+      {...semanticProps}
+      {...divProps}
+    />
+  );
+};
 
 Separator.displayName = "Separator";

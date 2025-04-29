@@ -62,7 +62,11 @@ export function HeadingDropdownMenu({
         <DropdownMenuGroup>
           {levels.map((level) => (
             <DropdownMenuItem key={`heading-${level}`} asChild>
-              <HeadingButton level={level} showText />
+              <HeadingButton
+                level={level}
+                showText
+                className="w-full justify-start"
+              />
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>

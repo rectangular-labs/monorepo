@@ -1,5 +1,4 @@
-import "./toolbar.scss";
-import { Separator } from "@rectangular-labs/ui/components/ui/separator";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import * as React from "react";
 
 type BaseProps = React.HTMLAttributes<HTMLDivElement>;
@@ -20,39 +19,6 @@ const mergeRefs = <T,>(
       }
     }
   };
-};
-
-const useObserveVisibility = (
-  ref: React.RefObject<HTMLElement | null>,
-  callback: () => void,
-): void => {
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    let isMounted = true;
-
-    if (isMounted) {
-      requestAnimationFrame(callback);
-    }
-
-    const observer = new MutationObserver(() => {
-      if (isMounted) {
-        requestAnimationFrame(callback);
-      }
-    });
-
-    observer.observe(element, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-    });
-
-    return () => {
-      isMounted = false;
-      observer.disconnect();
-    };
-  }, [ref, callback]);
 };
 
 const useToolbarKeyboardNav = (
@@ -119,129 +85,28 @@ const useToolbarKeyboardNav = (
   }, [toolbarRef]);
 };
 
-const useToolbarVisibility = (
-  ref: React.RefObject<HTMLDivElement | null>,
-): boolean => {
-  const [isVisible, setIsVisible] = React.useState(true);
-  const isMountedRef = React.useRef(false);
-
-  React.useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const checkVisibility = React.useCallback(() => {
-    if (!isMountedRef.current) return;
-
-    const toolbar = ref.current;
-    if (!toolbar) return;
-
-    // Check if any group has visible children
-    const hasVisibleChildren = Array.from(toolbar.children).some((child) => {
-      if (!(child instanceof HTMLElement)) return false;
-      if (child.getAttribute("role") === "group") {
-        return child.children.length > 0;
-      }
-      return false;
-    });
-
-    setIsVisible(hasVisibleChildren);
-  }, [ref]);
-
-  useObserveVisibility(ref, checkVisibility);
-  return isVisible;
-};
-
-const useGroupVisibility = (
-  ref: React.RefObject<HTMLDivElement | null>,
-): boolean => {
-  const [isVisible, setIsVisible] = React.useState(true);
-  const isMountedRef = React.useRef(false);
-
-  React.useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const checkVisibility = React.useCallback(() => {
-    if (!isMountedRef.current) return;
-
-    const group = ref.current;
-    if (!group) return;
-
-    const hasVisibleChildren = Array.from(group.children).some((child) => {
-      if (!(child instanceof HTMLElement)) return false;
-      return true;
-    });
-
-    setIsVisible(hasVisibleChildren);
-  }, [ref]);
-
-  useObserveVisibility(ref, checkVisibility);
-  return isVisible;
-};
-
-const useSeparatorVisibility = (
-  ref: React.RefObject<HTMLDivElement | null>,
-): boolean => {
-  const [isVisible, setIsVisible] = React.useState(true);
-  const isMountedRef = React.useRef(false);
-
-  React.useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const checkVisibility = React.useCallback(() => {
-    if (!isMountedRef.current) return;
-
-    const separator = ref.current;
-    if (!separator) return;
-
-    const prevSibling = separator.previousElementSibling as HTMLElement;
-    const nextSibling = separator.nextElementSibling as HTMLElement;
-
-    if (!prevSibling || !nextSibling) {
-      setIsVisible(false);
-      return;
-    }
-
-    const areBothGroups =
-      prevSibling.getAttribute("role") === "group" &&
-      nextSibling.getAttribute("role") === "group";
-
-    const haveBothChildren =
-      prevSibling.children.length > 0 && nextSibling.children.length > 0;
-
-    setIsVisible(areBothGroups && haveBothChildren);
-  }, [ref]);
-
-  useObserveVisibility(ref, checkVisibility);
-  return isVisible;
-};
-
 export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
-  ({ children, className, variant = "fixed", ...props }, ref) => {
+  ({ children, className, variant = "floating", ...props }, ref) => {
     const toolbarRef = React.useRef<HTMLDivElement>(null);
-    const isVisible = useToolbarVisibility(toolbarRef);
 
     useToolbarKeyboardNav(toolbarRef);
-
-    if (!isVisible) return null;
 
     return (
       <div
         ref={mergeRefs([toolbarRef, ref])}
         role="toolbar"
         aria-label="toolbar"
-        data-variant={variant}
-        className={`tiptap-toolbar ${className || ""}`}
+        style={{
+          scrollbarWidth: "none",
+        }}
+        className={cn(
+          "mx-auto flex h-11 w-full items-center gap-1 rounded-none border-t",
+          "md:border-t-0 md:border-b",
+          "[&::-webkit-scrollbar]:none",
+          "overflow-x-auto overscroll-x-contain",
+          "lg:max-w-4xl lg:rounded-md lg:border lg:shadow-md",
+          className,
+        )}
         {...props}
       >
         {children}
@@ -251,45 +116,3 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
 );
 
 Toolbar.displayName = "Toolbar";
-
-export const ToolbarGroup = React.forwardRef<HTMLDivElement, BaseProps>(
-  ({ children, className, ...props }, ref) => {
-    const groupRef = React.useRef<HTMLDivElement>(null);
-    const isVisible = useGroupVisibility(groupRef);
-
-    if (!isVisible) return null;
-
-    return (
-      <div
-        ref={mergeRefs([groupRef, ref])}
-        role="group"
-        className={`tiptap-toolbar-group ${className || ""}`}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  },
-);
-
-ToolbarGroup.displayName = "ToolbarGroup";
-
-export const ToolbarSeparator = React.forwardRef<HTMLDivElement, BaseProps>(
-  ({ ...props }, ref) => {
-    const separatorRef = React.useRef<HTMLDivElement>(null);
-    const isVisible = useSeparatorVisibility(separatorRef);
-
-    if (!isVisible) return null;
-
-    return (
-      <Separator
-        ref={mergeRefs([separatorRef, ref])}
-        orientation="vertical"
-        decorative
-        {...props}
-      />
-    );
-  },
-);
-
-ToolbarSeparator.displayName = "ToolbarSeparator";

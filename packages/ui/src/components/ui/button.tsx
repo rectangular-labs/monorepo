@@ -1,5 +1,5 @@
 import { type VariantProps, cva } from "class-variance-authority";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "../../utils/cn";
 import { Spinner } from "../icon";
@@ -47,54 +47,57 @@ interface ButtonProps
   isLoading?: boolean;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { className, variant, size, tooltip, children, isLoading, ...props },
-    ref,
-  ) => {
-    const isDisabled = isLoading || props.disabled;
-    const body = isLoading ? (
-      <>
-        <Spinner className="animate-spin" />
-        {children}
-      </>
-    ) : (
-      children
-    );
+function Button({
+  className,
+  variant,
+  size,
+  tooltip,
+  children,
+  isLoading,
+  ...props
+}: ButtonProps) {
+  const isDisabled = isLoading || props.disabled;
+  const body = isLoading ? (
+    <>
+      <Spinner className="animate-spin" />
+      {children}
+    </>
+  ) : (
+    children
+  );
 
-    if (tooltip) {
-      return (
-        <Tooltip>
-          <TooltipTrigger
-            className={cn(buttonVariants({ variant, size, className }))}
-            ref={ref}
-            {...props}
-            disabled={isDisabled}
-          >
-            {body}
-          </TooltipTrigger>
-          <TooltipContent>
-            <span>{tooltip.content}</span>
-            {tooltip.shortcutKeys && (
-              <ShortcutDisplay shortcutCombos={tooltip.shortcutKeys} />
-            )}
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
+  if (tooltip) {
     return (
-      <button
-        data-slot="button"
-        ref={ref}
-        className={cn(buttonVariants({ variant, size, className }))}
-        {...props}
-        disabled={isDisabled}
-      >
-        {body}
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          className={cn(buttonVariants({ variant, size, className }))}
+          {...props}
+          disabled={isDisabled}
+        >
+          {body}
+        </TooltipTrigger>
+        <TooltipContent>
+          <span>{tooltip.content}</span>
+          {tooltip.shortcutKeys && (
+            <ShortcutDisplay shortcutCombos={tooltip.shortcutKeys} />
+          )}
+        </TooltipContent>
+      </Tooltip>
     );
-  },
-);
+  }
+
+  return (
+    <button
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+      disabled={isDisabled}
+    >
+      {body}
+    </button>
+  );
+}
+
+Button.displayName = "Button";
 
 export { Button, buttonVariants, type ButtonProps };

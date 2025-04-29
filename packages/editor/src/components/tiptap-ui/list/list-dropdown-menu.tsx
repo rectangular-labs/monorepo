@@ -61,7 +61,11 @@ export function ListDropdownMenu({
         <DropdownMenuGroup>
           {types.map((listType) => (
             <DropdownMenuItem key={listType} asChild>
-              <ListToggle type={listType} showText />
+              <ListToggle
+                type={listType}
+                showText
+                className="w-full justify-start"
+              />
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>

@@ -1,9 +1,17 @@
-import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
+import {
+  ShortcutDisplay,
+  type ShortcutKeys,
+} from "@rectangular-labs/ui/components/ui/shortcut";
 
 import {
   Toggle,
   type ToggleProps,
 } from "@rectangular-labs/ui/components/ui/toggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@rectangular-labs/ui/components/ui/tooltip";
 import * as React from "react";
 import { useTiptapEditor } from "../../hooks/use-tiptap-editor";
 import { isMarkInSchema } from "../../tiptap-utils";
@@ -75,6 +83,7 @@ export function useMark(type: Mark, manuallyDisabled = false) {
   const editor = useTiptapEditor();
 
   const isDisabled = (() => {
+    if (!editor) return true;
     const markInSchema = isMarkInSchema(type, editor);
 
     if (!markInSchema) {
@@ -82,12 +91,7 @@ export function useMark(type: Mark, manuallyDisabled = false) {
         `Mark type ${type} is not available. Make sure it is included in your editor configuration.`,
       );
     }
-    if (
-      !editor ||
-      manuallyDisabled ||
-      !markInSchema ||
-      editor.isActive("codeBlock")
-    )
+    if (manuallyDisabled || !markInSchema || editor.isActive("codeBlock"))
       return true;
 
     try {
@@ -134,25 +138,30 @@ export const MarkButton = React.forwardRef<HTMLButtonElement, MarkButtonProps>(
       disabled,
     );
 
-    console.log("isActive", isActive, type);
     return (
-      <Toggle
-        ref={ref}
-        size="sm"
-        tabIndex={-1}
-        tooltip={{
-          content: displayOptions.label,
-          shortcutKeys: [displayOptions.shortcutKey],
-        }}
-        {...buttonProps}
-        aria-label={displayOptions.label}
-        disabled={isDisabled}
-        // pressed={true}
-        onClick={handleToggleMark}
-      >
-        <displayOptions.icon />
-        {showText && <span>{displayOptions.label}</span>}
-      </Toggle>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <Toggle
+              ref={ref}
+              size="sm"
+              tabIndex={-1}
+              {...buttonProps}
+              aria-label={displayOptions.label}
+              disabled={isDisabled}
+              pressed={isActive}
+              onClick={handleToggleMark}
+            >
+              <displayOptions.icon />
+              {showText && <span>{displayOptions.label}</span>}
+            </Toggle>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <span>{displayOptions.label}</span>
+          <ShortcutDisplay shortcutCombos={[displayOptions.shortcutKey]} />
+        </TooltipContent>
+      </Tooltip>
     );
   },
 );

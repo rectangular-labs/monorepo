@@ -1,8 +1,16 @@
-import type { ShortcutKeys } from "@rectangular-labs/ui/components/ui/shortcut";
+import {
+  ShortcutDisplay,
+  type ShortcutKeys,
+} from "@rectangular-labs/ui/components/ui/shortcut";
 import {
   Toggle,
   type ToggleProps,
 } from "@rectangular-labs/ui/components/ui/toggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@rectangular-labs/ui/components/ui/tooltip";
 import * as React from "react";
 import { useTiptapEditor } from "../../hooks/use-tiptap-editor";
 import { isNodeInSchema } from "../../tiptap-utils";
@@ -92,23 +100,27 @@ export const NodeButton = React.forwardRef<HTMLButtonElement, NodeButtonProps>(
     );
 
     return (
-      <Toggle
-        ref={ref}
-        size="sm"
-        tabIndex={-1}
-        tooltip={{
-          content: displayOptions.label,
-          shortcutKeys: [displayOptions.shortcutKey],
-        }}
-        {...buttonProps}
-        aria-label={displayOptions.label}
-        disabled={isDisabled}
-        pressed={isActive}
-        onClick={handleToggle}
-      >
-        <displayOptions.icon />
-        {showText && <span>{displayOptions.label}</span>}
-      </Toggle>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Toggle
+            ref={ref}
+            size="sm"
+            tabIndex={-1}
+            {...buttonProps}
+            aria-label={displayOptions.label}
+            disabled={isDisabled}
+            pressed={isActive}
+            onClick={handleToggle}
+          >
+            <displayOptions.icon />
+            {showText && <span>{displayOptions.label}</span>}
+          </Toggle>
+        </TooltipTrigger>
+        <TooltipContent>
+          <span>{displayOptions.label}</span>
+          <ShortcutDisplay shortcutCombos={[displayOptions.shortcutKey]} />
+        </TooltipContent>
+      </Tooltip>
     );
   },
 );
