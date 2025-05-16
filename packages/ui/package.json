@@ -74,7 +74,7 @@
     "react-resizable-panels": "^3.0.2",
     "recharts": "^2.15.3",
     "remark-gfm": "^4.0.1",
-    "shiki": "^3.4.1",
+    "shiki": "^3.4.2",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
