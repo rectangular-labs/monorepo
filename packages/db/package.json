@@ -29,12 +29,12 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.44.2",
-    "pg": "^8.16.0"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
     "@types/node": "^22.15.32",
-    "@types/pg": "^8.15.4",
+    "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.1",
     "typescript": "^5.8.3"
   },
