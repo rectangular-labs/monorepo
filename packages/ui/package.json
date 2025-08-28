@@ -5,12 +5,13 @@
   "sideEffects": false,
   "files": [
     "tailwind.config.web.ts",
-    "globals.css"
+    "style.css"
   ],
   "exports": {
     "./*": "./src/*.tsx",
-    "./styles.css": "./src/styles.css",
-    "./utils/*": "./src/utils/*.ts"
+    "./style.css": "./src/style.css",
+    "./utils/*": "./src/utils/*.ts",
+    "./hooks/*": "./src/hooks/*.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .turbo node_modules",
@@ -33,6 +34,7 @@
     "react-dom": "^19.1.0"
   },
   "dependencies": {
+    "@ark-ui/react": "^5.22.0",
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

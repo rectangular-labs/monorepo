@@ -4,6 +4,8 @@
   "editor.quickSuggestions": {
     "strings": "on"
   },
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -50,6 +52,7 @@
     "arktype",
     "Creds",
     "dotenvx",
+    "Loro",
     "millis",
     "oklch",
     "orpc",

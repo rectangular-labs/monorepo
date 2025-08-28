@@ -12,6 +12,7 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as EditorRouteImport } from './routes/editor'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedOrpcRouteImport } from './routes/_authed/orpc'
@@ -23,6 +24,11 @@ const rootServerRouteImport = createServerRootRoute()
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorRoute = EditorRouteImport.update({
+  id: '/editor',
+  path: '/editor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedRouteRoute = AuthedRouteRouteImport.update({
@@ -52,11 +58,13 @@ const ApiRpcSplatServerRoute = ApiRpcSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/editor': typeof EditorRoute
   '/login': typeof LoginRoute
   '/orpc': typeof AuthedOrpcRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/editor': typeof EditorRoute
   '/login': typeof LoginRoute
   '/orpc': typeof AuthedOrpcRoute
 }
@@ -64,20 +72,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteRouteWithChildren
+  '/editor': typeof EditorRoute
   '/login': typeof LoginRoute
   '/_authed/orpc': typeof AuthedOrpcRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/orpc'
+  fullPaths: '/' | '/editor' | '/login' | '/orpc'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/orpc'
-  id: '__root__' | '/' | '/_authed' | '/login' | '/_authed/orpc'
+  to: '/' | '/editor' | '/login' | '/orpc'
+  id: '__root__' | '/' | '/_authed' | '/editor' | '/login' | '/_authed/orpc'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
+  EditorRoute: typeof EditorRoute
   LoginRoute: typeof LoginRoute
 }
 export interface FileServerRoutesByFullPath {
@@ -113,6 +123,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editor': {
+      id: '/editor'
+      path: '/editor'
+      fullPath: '/editor'
+      preLoaderRoute: typeof EditorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed': {
@@ -172,6 +189,7 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
+  EditorRoute: EditorRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport

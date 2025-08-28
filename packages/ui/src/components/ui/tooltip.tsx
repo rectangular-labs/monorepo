@@ -1,61 +1,55 @@
 "use client";
 
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { Tooltip as ArkTooltip } from "@ark-ui/react/tooltip";
 import type * as React from "react";
 
 import { cn } from "../../utils/cn";
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+function Tooltip({ ...props }: React.ComponentProps<typeof ArkTooltip.Root>) {
   return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
+    <ArkTooltip.Root
+      closeDelay={0}
+      data-slot="tooltip"
+      interactive={true}
+      openDelay={0}
+      positioning={{
+        placement: "bottom",
+        gutter: 0,
+      }}
       {...props}
     />
   );
 }
-
-function Tooltip({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  );
-}
-
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
-}
-
+const TooltipTrigger = ArkTooltip.Trigger;
 function TooltipContent({
   className,
-  sideOffset = 0,
   children,
   ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+}: React.ComponentProps<typeof ArkTooltip.Content>) {
   return (
-    <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
+    <ArkTooltip.Positioner>
+      <ArkTooltip.Content
         className={cn(
-          "fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit animate-in text-balance rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-xs data-[state=closed]:animate-out",
+          "fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[placement=bottom]:slide-in-from-top-2 data-[placement=left]:slide-in-from-right-2 data-[placement=right]:slide-in-from-left-2 data-[placement=top]:slide-in-from-bottom-2 z-50 w-fit animate-in text-balance rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-xs data-[state=closed]:animate-out",
           className,
         )}
         data-slot="tooltip-content"
-        sideOffset={sideOffset}
         {...props}
       >
+        <ArkTooltip.Arrow
+          style={
+            {
+              "--arrow-size": "calc(var(--spacing) * 1.2)",
+              "--arrow-background": "var(--primary)",
+            } as React.CSSProperties
+          }
+        >
+          <ArkTooltip.ArrowTip />
+        </ArkTooltip.Arrow>
         {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-primary fill-primary" />
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
+      </ArkTooltip.Content>
+    </ArkTooltip.Positioner>
   );
 }
 
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
+export { Tooltip, TooltipContent, TooltipTrigger };

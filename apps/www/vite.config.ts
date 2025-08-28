@@ -3,6 +3,8 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { createJiti } from "jiti";
 import mkcert from "vite-plugin-mkcert";
+import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 import type { serverEnv } from "~/lib/env";
@@ -19,6 +21,8 @@ const config = defineConfig({
     }),
     tailwindcss(),
     mkcert(),
+    wasm(),
+    topLevelAwait(),
     tanstackStart({
       customViteReactPlugin: true,
     }),

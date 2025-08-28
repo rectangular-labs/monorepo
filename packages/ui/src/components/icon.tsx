@@ -7,8 +7,10 @@ import {
   FileIcon,
   Loader2,
   MoonIcon,
+  PaperclipIcon,
   SunIcon,
 } from "lucide-react";
+
 import type { SVGProps } from "react";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
@@ -18,12 +20,13 @@ export const Sun = SunIcon;
 export const EyeOn = EyeIcon;
 export const EyeOff = EyeOffIcon;
 export const Spinner = Loader2;
+export const Paperclip = PaperclipIcon;
+export const Dot = DotIcon;
+export const File = FileIcon;
 export const ArrowUp = ArrowUpIcon;
 export const ArrowDown = ArrowDownIcon;
-export const File = FileIcon;
-export const Dot = DotIcon;
 
-export const Logo = (props: IconProps) => (
+export const Logo = (props: SVGProps<SVGSVGElement>) => (
   <svg
     viewBox="107.599 192.599 284.802 284.802"
     xmlns="http://www.w3.org/2000/svg"
