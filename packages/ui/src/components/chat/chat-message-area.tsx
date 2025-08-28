@@ -26,14 +26,14 @@ export function ScrollButton({
 
   return (
     <Button
-      variant="secondary"
-      size="icon"
       className={cn(
         "absolute bottom-4 rounded-full shadow-lg hover:bg-secondary",
         alignmentClasses[alignment],
         className,
       )}
       onClick={onClick}
+      size="icon"
+      variant="secondary"
     >
       <ChevronDown className="h-4 w-4" />
     </Button>
@@ -61,9 +61,9 @@ export function ChatMessageArea({
       </div>
       {showScrollButton && (
         <ScrollButton
-          onClick={scrollToBottom}
           alignment={scrollButtonAlignment}
           className="absolute bottom-4 rounded-full shadow-lg hover:bg-secondary"
+          onClick={scrollToBottom}
         />
       )}
     </ScrollArea>

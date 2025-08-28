@@ -5,6 +5,15 @@
     {
       "enabled": false,
       "matchPackageNames": ["/^@rectangular-labs//"]
+    },
+    {
+      "description": "Schedule all non-major dependencies updates on Sunday nights at 10pm",
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "schedule": ["* 12-17 * * 2"],
+      "timezone": "America/New_York"
     }
   ],
   "updateInternalDeps": true,

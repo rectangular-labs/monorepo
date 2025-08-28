@@ -1,4 +1,4 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { SparklesIcon, UserIcon } from "lucide-react";
 import React, { type ReactNode } from "react";
 import { cn } from "../../utils/cn";
@@ -71,8 +71,8 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
     return (
       <ChatMessageContext.Provider value={{ variant, type, id }}>
         <div
-          ref={ref}
           className={cn(chatMessageVariants({ variant, type, className }))}
+          ref={ref}
           {...props}
         >
           {children}
@@ -115,15 +115,15 @@ const ChatMessageAvatar = React.forwardRef<
     iconProps ?? (type === "incoming" ? <SparklesIcon /> : <UserIcon />);
   return (
     <div
-      ref={ref}
       className={cn(chatMessageAvatarVariants({ type, className }))}
+      ref={ref}
       {...props}
     >
       {imageSrc ? (
         <img
-          src={imageSrc}
           alt="Avatar"
           className="h-full w-full object-cover"
+          src={imageSrc}
         />
       ) : (
         <div className="translate-y-px [&_svg]:size-4 [&_svg]:shrink-0">
@@ -197,7 +197,7 @@ const ChatMessageContent = React.forwardRef<
   const renderContent = () => {
     if (typeof messageContent === "string") {
       return messageContent.length > 0 ? (
-        <MarkdownContent id={id} content={messageContent} />
+        <MarkdownContent content={messageContent} id={id} />
       ) : null;
     }
 
@@ -207,22 +207,22 @@ const ChatMessageContent = React.forwardRef<
         switch (part.type) {
           case "text":
             return (
-              <MarkdownContent key={partId} id={partId} content={part.text} />
+              <MarkdownContent content={part.text} id={partId} key={partId} />
             );
           case "image":
             return (
               <img
-                key={partId}
-                src={`data:${part.mimeType};base64,${part.data}`}
                 alt="User uploaded content"
                 className="mt-2 max-w-xs rounded-md border md:max-w-md"
+                key={partId}
+                src={`data:${part.mimeType};base64,${part.data}`}
               />
             );
           case "file":
             return (
               <div
-                key={partId}
                 className="mt-2 flex items-center gap-2 rounded-md border bg-muted p-2 text-sm"
+                key={partId}
               >
                 <File className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <span className="truncate text-muted-foreground">
@@ -241,8 +241,8 @@ const ChatMessageContent = React.forwardRef<
 
   return (
     <div
-      ref={ref}
       className={cn(chatMessageContentVariants({ variant, type, className }))}
+      ref={ref}
       {...props}
     >
       {renderContent()}

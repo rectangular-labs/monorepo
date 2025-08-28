@@ -1,6 +1,6 @@
 import { marked } from "marked";
 import type * as React from "react";
-import { Suspense, isValidElement, memo, useMemo } from "react";
+import { isValidElement, memo, Suspense, useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "../../utils/cn";
@@ -176,8 +176,8 @@ const components: Partial<Components> = {
   }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a
       className="font-medium underline underline-offset-4"
-      target="_blank"
       rel="noreferrer"
+      target="_blank"
       {...props}
     >
       {children}
@@ -241,8 +241,7 @@ const components: Partial<Components> = {
     </td>
   ),
   img: ({ alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    // biome-ignore lint/a11y/useAltText: alt is not required
-    <img className="rounded-md" alt={alt} {...props} />
+    <img alt={alt} className="rounded-md" {...props} />
   ),
   code: ({ children, node, className, ...props }) => {
     const match = /language-(\w+)/.exec(className || "");
@@ -252,7 +251,7 @@ const components: Partial<Components> = {
         throw new Error("Language not found");
       }
       return (
-        <CodeBlock language={language} className={className} {...props}>
+        <CodeBlock className={className} language={language} {...props}>
           {children}
         </CodeBlock>
       );
@@ -281,13 +280,9 @@ function parseMarkdownIntoBlocks(markdown: string): string[] {
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({
-    content,
-  }: {
-    content: string;
-  }) => {
+  ({ content }: { content: string }) => {
     return (
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
         {content}
       </ReactMarkdown>
     );
@@ -303,13 +298,7 @@ const MemoizedMarkdownBlock = memo(
 MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
 
 export const MarkdownContent = memo(
-  ({
-    content,
-    id,
-  }: {
-    content: string;
-    id: string;
-  }) => {
+  ({ content, id }: { content: string; id: string }) => {
     const blocks = useMemo(
       () => parseMarkdownIntoBlocks(content || ""),
       [content],

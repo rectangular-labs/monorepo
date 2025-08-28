@@ -1,33 +1,37 @@
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import { defineConfig } from "vitest/config";
-
-import { resolve } from "node:path";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import { createJiti } from "jiti";
 import mkcert from "vite-plugin-mkcert";
+import viteTsConfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vitest/config";
+import type { serverEnv } from "~/lib/env";
 
-export default defineConfig({
+const jiti = createJiti(import.meta.url);
+const env = await jiti.import("./src/lib/env");
+// parses all the required env vars (server env is a super set of client env)
+(env as { serverEnv: () => ReturnType<typeof serverEnv> }).serverEnv();
+
+const config = defineConfig({
   plugins: [
-    TanStackRouterVite({ autoCodeSplitting: true }),
-    viteReact(),
+    viteTsConfigPaths({
+      projects: ["./tsconfig.json"],
+    }),
     tailwindcss(),
     mkcert(),
+    tanstackStart({
+      customViteReactPlugin: true,
+    }),
+    viteReact(),
   ],
   test: {
     globals: true,
     environment: "jsdom",
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
   server: {
-    proxy: {
-      "/api": {
-        target: `${process.env.VITE_BACKEND_URL?.split("://")[0]}://${process.env.VITE_BASIC_AUTH_USERNAME}:${process.env.VITE_BASIC_AUTH_PASSWORD}@${process.env.VITE_BACKEND_URL?.split("://")[1]}`,
-        changeOrigin: true,
-      },
-    },
+    proxy: {},
+    port: 6969,
   },
 });
+
+export default config;
