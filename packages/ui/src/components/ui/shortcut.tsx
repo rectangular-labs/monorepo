@@ -76,11 +76,7 @@ const parseShortcutKeys = (shortcutKeys: ShortcutKeys, isMac: boolean) => {
     .map((key) => formatShortcutKey(key, isMac));
 };
 
-function ShortcutCombo({
-  shortcutKeys,
-}: {
-  shortcutKeys: string[];
-}) {
+function ShortcutCombo({ shortcutKeys }: { shortcutKeys: string[] }) {
   return shortcutKeys.map((shortcut, index) => {
     return (
       // biome-ignore lint/suspicious/noArrayIndexKey: We need to use the index as a key to avoid re-rendering the component

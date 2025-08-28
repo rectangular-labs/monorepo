@@ -1,17 +1,8 @@
 import { type Editor, isNodeSelection } from "@tiptap/react";
 import * as React from "react";
-
-// --- Hooks ---
-import { useMenuNavigation } from "@/hooks/use-menu-navigation";
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
-
 // --- Icons ---
 import { BanIcon } from "@/components/tiptap-icons/ban-icon";
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon";
-
-// --- Lib ---
-import { isMarkInSchema } from "@/lib/tiptap-utils";
-
 // --- UI Primitives ---
 import {
   Button,
@@ -23,6 +14,11 @@ import {
   PopoverTrigger,
 } from "@/components/tiptap-ui-primitive/popover";
 import { Separator } from "@/components/tiptap-ui-primitive/separator";
+// --- Hooks ---
+import { useMenuNavigation } from "@/hooks/use-menu-navigation";
+import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
+// --- Lib ---
+import { isMarkInSchema } from "@/lib/tiptap-utils";
 
 // --- Styles ---
 import "@/components/tiptap-ui/highlight-popover/highlight-popover.scss";
@@ -102,15 +98,15 @@ export const HighlighterButton = React.forwardRef<
 >(({ className, children, ...props }, ref) => {
   return (
     <Button
-      type="button"
+      aria-label="Highlight text"
       className={className}
-      data-style="ghost"
       data-appearance="default"
+      data-style="ghost"
+      ref={ref}
       role="button"
       tabIndex={-1}
-      aria-label="Highlight text"
       tooltip="Highlight"
-      ref={ref}
+      type="button"
       {...props}
     >
       {children || <HighlighterIcon className="tiptap-button-icon" />}
@@ -152,19 +148,19 @@ export function HighlightContent({
   });
 
   return (
-    <div ref={containerRef} className="tiptap-highlight-content" tabIndex={0}>
+    <div className="tiptap-highlight-content" ref={containerRef}>
       <div className="tiptap-button-group" data-orientation="horizontal">
         {colors.map((color, index) => (
           <Button
-            key={color.value}
-            type="button"
-            role="menuitem"
-            data-active-state={activeColor === color.value ? "on" : "off"}
             aria-label={`${color.label} highlight color`}
-            tabIndex={index === selectedIndex ? 0 : -1}
-            data-style="ghost"
-            onClick={() => toggleHighlight(color.value)}
+            data-active-state={activeColor === color.value ? "on" : "off"}
             data-highlighted={selectedIndex === index}
+            data-style="ghost"
+            key={color.value}
+            onClick={() => toggleHighlight(color.value)}
+            role="menuitem"
+            tabIndex={index === selectedIndex ? 0 : -1}
+            type="button"
           >
             <span
               className="tiptap-button-highlight"
@@ -180,13 +176,13 @@ export function HighlightContent({
 
       <div className="tiptap-button-group">
         <Button
-          onClick={() => toggleHighlight("none")}
           aria-label="Remove highlight"
+          data-highlighted={selectedIndex === colors.length}
+          data-style="ghost"
+          onClick={() => toggleHighlight("none")}
+          role="menuitem"
           tabIndex={selectedIndex === colors.length ? 0 : -1}
           type="button"
-          role="menuitem"
-          data-style="ghost"
-          data-highlighted={selectedIndex === colors.length}
         >
           <BanIcon className="tiptap-button-icon" />
         </Button>
@@ -260,21 +256,21 @@ export function HighlightPopover({
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover onOpenChange={setIsOpen} open={isOpen}>
       <PopoverTrigger asChild>
         <HighlighterButton
-          disabled={isDisabled}
+          aria-pressed={isActive}
           data-active-state={isActive ? "on" : "off"}
           data-disabled={isDisabled}
-          aria-pressed={isActive}
+          disabled={isDisabled}
           {...props}
         />
       </PopoverTrigger>
 
       <PopoverContent aria-label="Highlight colors">
         <HighlightContent
-          editor={editor}
           colors={colors}
+          editor={editor}
           onClose={() => setIsOpen(false)}
         />
       </PopoverContent>

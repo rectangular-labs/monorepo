@@ -1,17 +1,14 @@
 import type { Editor } from "@tiptap/react";
 import * as React from "react";
-
-// --- Hooks ---
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
-
 // --- Icons ---
 import { ImagePlusIcon } from "@/components/tiptap-icons/image-plus-icon";
-
 // --- UI Primitives ---
 import {
   Button,
   type ButtonProps,
 } from "@/components/tiptap-ui-primitive/button";
+// --- Hooks ---
+import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 
 export interface ImageUploadButtonProps extends ButtonProps {
   editor?: Editor | null;
@@ -100,17 +97,16 @@ export const ImageUploadButton = React.forwardRef<
 
     return (
       <Button
-        ref={ref}
-        type="button"
-        className={className.trim()}
-        data-style="ghost"
-        data-active-state={isActive ? "on" : "off"}
-        role="button"
-        tabIndex={-1}
         aria-label="Add image"
         aria-pressed={isActive}
-        tooltip="Add image"
+        className={className.trim()}
+        data-active-state={isActive ? "on" : "off"}
+        data-style="ghost"
         onClick={handleClick}
+        ref={ref}
+        tabIndex={-1}
+        tooltip="Add image"
+        type="button"
         {...buttonProps}
       >
         {children || (
