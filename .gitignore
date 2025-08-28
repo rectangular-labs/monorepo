@@ -19,6 +19,12 @@ out/
 next-env.d.ts
 .open-next
 
+# Tanstack Start
+.tanstack/
+.output/
+.nitro
+.vinxi
+
 # expo
 .expo/
 

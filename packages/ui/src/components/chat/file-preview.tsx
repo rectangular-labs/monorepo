@@ -32,12 +32,12 @@ const ImageFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
   ({ file, onRemove }, ref) => {
     return (
       <motion.div
-        ref={ref}
-        className="relative flex max-w-[200px] rounded-md border p-1.5 pr-2 text-xs"
-        layout
-        initial={{ opacity: 0, y: "100%" }}
         animate={{ opacity: 1, y: 0 }}
+        className="relative flex max-w-[200px] rounded-md border p-1.5 pr-2 text-xs"
         exit={{ opacity: 0, y: "100%" }}
+        initial={{ opacity: 0, y: "100%" }}
+        layout
+        ref={ref}
       >
         <div className="flex w-full items-center space-x-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -53,10 +53,10 @@ const ImageFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
 
         {onRemove ? (
           <button
-            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
-            type="button"
-            onClick={onRemove}
             aria-label="Remove attachment"
+            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
+            onClick={onRemove}
+            type="button"
           >
             <X className="h-2.5 w-2.5" />
           </button>
@@ -82,12 +82,12 @@ const TextFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
 
     return (
       <motion.div
-        ref={ref}
-        className="relative flex max-w-[200px] rounded-md border p-1.5 pr-2 text-xs"
-        layout
-        initial={{ opacity: 0, y: "100%" }}
         animate={{ opacity: 1, y: 0 }}
+        className="relative flex max-w-[200px] rounded-md border p-1.5 pr-2 text-xs"
         exit={{ opacity: 0, y: "100%" }}
+        initial={{ opacity: 0, y: "100%" }}
+        layout
+        ref={ref}
       >
         <div className="flex w-full items-center space-x-2">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-sm border bg-muted p-0.5">
@@ -102,10 +102,10 @@ const TextFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
 
         {onRemove ? (
           <button
-            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
-            type="button"
-            onClick={onRemove}
             aria-label="Remove attachment"
+            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
+            onClick={onRemove}
+            type="button"
           >
             <X className="h-2.5 w-2.5" />
           </button>
@@ -120,12 +120,12 @@ const GenericFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
   ({ file, onRemove }, ref) => {
     return (
       <motion.div
-        ref={ref}
-        className="relative flex max-w-[200px] rounded-md border p-1.5 pr-2 text-xs"
-        layout
-        initial={{ opacity: 0, y: "100%" }}
         animate={{ opacity: 1, y: 0 }}
+        className="relative flex max-w-[200px] rounded-md border p-1.5 pr-2 text-xs"
         exit={{ opacity: 0, y: "100%" }}
+        initial={{ opacity: 0, y: "100%" }}
+        layout
+        ref={ref}
       >
         <div className="flex w-full items-center space-x-2">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-sm border bg-muted">
@@ -138,10 +138,10 @@ const GenericFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
 
         {onRemove ? (
           <button
-            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
-            type="button"
-            onClick={onRemove}
             aria-label="Remove attachment"
+            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
+            onClick={onRemove}
+            type="button"
           >
             <X className="h-2.5 w-2.5" />
           </button>

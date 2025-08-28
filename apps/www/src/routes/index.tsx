@@ -1,253 +1,136 @@
-"use client";
-
-import { backend } from "@/lib/backend";
-import { useChat } from "@ai-sdk/react";
-import {
-  ChatInput,
-  ChatInputSubmit,
-  ChatInputTextArea,
-} from "@rectangular-labs/ui/components/chat/chat-input";
-import {
-  ChatMessage,
-  ChatMessageAvatar,
-  ChatMessageContent,
-} from "@rectangular-labs/ui/components/chat/chat-message";
-import { ChatMessageArea } from "@rectangular-labs/ui/components/chat/chat-message-area";
-import { FilePreview } from "@rectangular-labs/ui/components/chat/file-preview";
-import { TypingIndicator } from "@rectangular-labs/ui/components/chat/typing-indicator";
-import { Paperclip } from "@rectangular-labs/ui/components/icon";
+import * as Icons from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@rectangular-labs/ui/components/ui/card";
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
-  component: ChatInterface,
-  loader: async () => {
-    try {
-      const response = await backend.api.$get();
-      return response.json();
-    } catch (error) {
-      console.error("Failed to fetch initial data:", error);
-      return { message: "Welcome!" }; // Default data if fetch fails
-    }
-  },
+  component: App,
 });
 
-function ChatInterface() {
-  const [attachedFiles, setAttachedFiles] = useState<FileList | undefined>(
-    undefined,
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop } =
-    useChat({
-      api: backend.api.chat.$url().href,
-      onToolCall({ toolCall }) {
-        console.log("toolCall", toolCall);
-      },
-    });
-  console.log("messages", messages);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) {
-      return;
-    }
-    const currentFileCount = attachedFiles?.length ?? 0;
-    if (currentFileCount + files.length > 5) {
-      alert("You can attach a maximum of 5 files.");
-      return;
-    }
-    setAttachedFiles((prev) => {
-      if (prev) {
-        const dt = new DataTransfer();
-        for (const file of prev) {
-          dt.items.add(file);
-        }
-        for (const file of files) {
-          dt.items.add(file);
-        }
-        return dt.files;
-      }
-      return files;
-    });
-  };
-
-  const removeFile = (indexToRemove: number) => {
-    if (!attachedFiles) return;
-    const dt = new DataTransfer();
-    let index = 0;
-    for (const file of attachedFiles) {
-      if (index !== indexToRemove) {
-        dt.items.add(file);
-      }
-      index++;
-    }
-
-    const newFileList = dt.files.length > 0 ? dt.files : undefined;
-    setAttachedFiles(newFileList);
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFormSubmit = () => {
-    handleSubmit(undefined, {
-      experimental_attachments: attachedFiles ?? [],
-    });
-    setAttachedFiles(undefined);
-  };
+function App() {
+  const data = Route.useLoaderData();
   return (
-    <div className="flex h-screen flex-col">
-      <ThemeToggle className="absolute top-4 right-4 z-10" />
-      <div className="flex-1 overflow-y-auto">
-        <ChatMessageArea>
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 pt-5 pb-5">
-            {messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                type={message.role === "user" ? "outgoing" : "incoming"}
-                variant="full"
-                id={message.id}
-              >
-                {message.role !== "user" && <ChatMessageAvatar />}
-                <div>
-                  {message.parts.map((part) => {
-                    switch (part.type) {
-                      case "text":
-                        return (
-                          <ChatMessageContent
-                            key={JSON.stringify(part)}
-                            id={message.id}
-                            messageContent={part.text}
-                          />
-                        );
-                      case "file":
-                        return (
-                          <ChatMessageContent
-                            key={JSON.stringify(part)}
-                            id={message.id}
-                            messageContent={[part]}
-                          />
-                        );
-                      case "reasoning":
-                        return (
-                          <ChatMessageContent
-                            key={JSON.stringify(part)}
-                            id={message.id}
-                            messageContent={part.reasoning}
-                          />
-                        );
-                      case "source":
-                        return (
-                          <ChatMessageContent
-                            key={JSON.stringify(part)}
-                            id={message.id}
-                            messageContent={part.source.url}
-                          />
-                        );
-                      default:
-                        return null;
-                    }
-                  })}
-                  {message.experimental_attachments &&
-                    message.experimental_attachments.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {message.experimental_attachments
-                          .filter((att) =>
-                            att.contentType?.startsWith("image/"),
-                          )
-                          .map((attachment, index) => (
-                            <img
-                              key={`${message.id}-att-img-${index}`}
-                              src={attachment.url}
-                              alt={attachment.name ?? "image attachment"}
-                              className="h-20 w-auto max-w-[150px] rounded object-contain"
-                            />
-                          ))}
-                        {message.experimental_attachments
-                          .filter(
-                            (att) => !att.contentType?.startsWith("image/"),
-                          )
-                          .map((attachment, index) => (
-                            <div
-                              key={`${message.id}-att-file-${index}`}
-                              className="rounded border bg-muted/50 p-1 text-xs"
-                            >
-                              📄 {attachment.name ?? "file"}
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                </div>
-                {message.role === "user" && <ChatMessageAvatar />}
-              </ChatMessage>
-            ))}
-            {isLoading && (
-              <ChatMessage type="incoming" id="typing" variant="full">
-                <ChatMessageAvatar />
-                <TypingIndicator />
-              </ChatMessage>
-            )}
-          </div>
-        </ChatMessageArea>
-      </div>
+    <div className="min-h-screen">
+      <ThemeToggle className="absolute top-4 right-4" />
 
-      <div className="flex w-full justify-center p-2">
-        <div className=" w-full max-w-3xl">
-          <input
-            type="file"
-            multiple
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-            accept="image/*,application/pdf,.doc,.docx,.txt,.md"
-          />
+      <div className="container mx-auto flex flex-col items-center justify-center px-4 py-16">
+        <h1 className="font-bold text-4xl tracking-tight">{data}</h1>
 
-          {attachedFiles && attachedFiles.length > 0 && (
-            <div className="flex max-h-20 flex-wrap gap-2 overflow-y-auto pb-2">
-              {Array.from(attachedFiles).map((file, index) => (
-                <FilePreview
-                  key={`${file.name}-${index}`}
-                  file={file}
-                  onRemove={() => removeFile(index)}
-                />
-              ))}
-            </div>
-          )}
+        <p className="mt-4 text-lg">
+          A modern, full-stack development template
+        </p>
 
-          <ChatInput
-            value={input}
-            onChange={handleInputChange}
-            loading={isLoading}
-            onSubmit={handleFormSubmit}
-            onStop={stop}
-            variant="default"
-            rows={1}
-            className="space-y-2"
-          >
-            <ChatInputTextArea placeholder="Ask about Singapore trademark registration..." />
-            <div className="flex w-full justify-between">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={triggerFileInput}
-                disabled={
-                  isLoading || (attachedFiles && attachedFiles.length >= 5)
-                }
-              >
-                <Paperclip className="h-4 w-4" />
+        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle>React + TanStack Start</CardTitle>
+              <CardDescription>Build modern, type-safe UIs</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                A powerful combination for building interactive web applications
+                with type safety and excellent developer experience.
+              </p>
+            </CardContent>
+            <CardFooter className="mt-auto">
+              <Button asChild className="w-full" variant="outline">
+                <a
+                  className="flex items-center justify-center gap-2"
+                  href="https://tanstack.com"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Icons.TanStack className="h-5 w-5" />
+                  <span>Learn TanStack</span>
+                </a>
               </Button>
-              <ChatInputSubmit
-                type="submit"
-                className="rounded-full"
-                onSubmit={handleFormSubmit}
-              />
-            </div>
-          </ChatInput>
+            </CardFooter>
+          </Card>
+
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle>Monorepo Architecture</CardTitle>
+              <CardDescription>Scalable project organization</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Share code between projects, maintain consistency, and scale
+                your development with a modern monorepo setup.
+              </p>
+            </CardContent>
+            <CardFooter className="mt-auto">
+              <Button asChild className="w-full" variant="outline">
+                <a
+                  className="flex items-center justify-center gap-2"
+                  href="https://github.com/pnpm/pnpm"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Icons.Pnpm className="h-5 w-5" />
+                  <span>Learn More</span>
+                </a>
+              </Button>
+            </CardFooter>
+          </Card>
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle>Typesafe APIs with oRPC</CardTitle>
+              <CardDescription>
+                End-to-end typesafe APIs made simple
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                oRPC is a library for building end-to-end typesafe APIs. No code
+                generation, no schemas, just TypeScript.
+              </p>
+            </CardContent>
+            <CardFooter className="mt-auto">
+              <Button asChild className="w-full" variant="outline">
+                <a
+                  className="flex items-center justify-center gap-2"
+                  href="https://orpc.unnoq.com/"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <span>Learn More</span>
+                </a>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        <div className="mt-16 flex flex-col items-center space-y-6">
+          <Button asChild variant="default">
+            <a href="/orpc">
+              <span>Try ORPC Demo</span>
+            </a>
+          </Button>
+
+          <Button asChild className="gap-2" variant="secondary">
+            <a
+              href="https://github.com/ElasticBottle/monorepo-template"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Icons.GitHub className="h-5 w-5" />
+              <span>View on GitHub</span>
+            </a>
+          </Button>
+
+          <p className="mt-8 text-sm">
+            Edit{" "}
+            <code className="rounded px-1 py-0.5">src/routes/index.tsx</code> to
+            customize this page
+          </p>
         </div>
       </div>
     </div>
