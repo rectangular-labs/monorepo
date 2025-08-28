@@ -4,9 +4,10 @@ packages:
   - tooling/*
 
 onlyBuiltDependencies:
-  - "@biomejs/biome"
-  - "@prisma/client"
-  - "@prisma/engines"
+  - '@biomejs/biome'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - aws-sdk
+  - core-js-pure
   - esbuild
   - prisma
-  - core-js-pure

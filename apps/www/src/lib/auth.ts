@@ -1,13 +1,21 @@
-import { safe } from "@rectangular-labs/result";
-import { backend } from "./backend";
+import { initAuthHandler } from "@rectangular-labs/auth";
+import { createAuthClient } from "@rectangular-labs/auth/client";
+import { createIsomorphicFn } from "@tanstack/react-start";
+import { getWebRequest } from "@tanstack/react-start/server";
 
-export const getSession = async () => {
-  const response = await safe(() => backend.api.auth.me.$get());
-  if (!response.ok || !response.value.ok) {
-    return { user: null };
-  }
-  const session = await response.value.json();
-  return { user: session.properties };
-};
+export const getCurrentSession = createIsomorphicFn()
+  .server(async () => {
+    const auth = initAuthHandler();
+    const request = getWebRequest();
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+    return session;
+  })
+  .client(async () => {
+    const auth = createAuthClient();
+    const session = await auth.getSession();
+    return session.data;
+  });
 
-export const authorizeUrl = backend.api.auth.authorize.$url().href;
+export const authClient = createAuthClient();

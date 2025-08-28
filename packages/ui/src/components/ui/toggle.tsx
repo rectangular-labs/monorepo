@@ -1,6 +1,6 @@
 "use client";
 import { Toggle as TogglePrimitive } from "@ark-ui/react";
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 import { cn } from "../../utils/cn";
 
@@ -34,6 +34,7 @@ function Toggle({ size, variant, className, ...props }: ToggleProps) {
   return (
     <TogglePrimitive.Root
       className={cn(toggleVariants({ variant, size, className }))}
+      data-slot="toggle"
       {...props}
     />
   );

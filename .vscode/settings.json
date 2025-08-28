@@ -1,31 +1,66 @@
 {
+  "biome.lsp.bin": "node_modules/@biomejs/biome/bin/biome",
   // allow autocomplete for ArkType expressions like "string | num"
   "editor.quickSuggestions": {
     "strings": "on"
   },
-  // prioritize ArkType's "type" for autoimports
-  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
-    "^(node:)?os$",
-    "^process$",
-    "^hono/adapter$"
-  ],
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.tsdk": "node_modules/typescript/lib",
-
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "files.watcherExclude": {
-    "**/routeTree.gen.ts": true
+    "**/routeTree.gen.ts": true,
+    "**/orpc-contract.json": true,
+    "**/auth-schema.ts": true
+  },
+  "files.readonlyInclude": {
+    "**/routeTree.gen.ts": true,
+    "**/auth-schema.ts": true,
+    "**/orpc-contract.json": true
   },
   "search.exclude": {
-    "**/routeTree.gen.ts": true
+    "**/routeTree.gen.ts": true,
+    "**/orpc-contract.json": true,
+    "**/auth-schema.ts": true
   },
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+    // prioritize ArkType's "type" for autoimports
+    "^(node:)?os$",
+    // prioritize our own env for autoimports
+    "^(node:)?process$"
+  ],
   "cSpell.words": [
+    "arktype",
     "Creds",
     "dotenvx",
     "Loro",
     "millis",
     "oklch",
+    "orpc",
+    "simplewebauthn",
     "Sonner",
     "totp",
-    "turso"
+    "turso",
+    "Unlazied",
+    "webauthn"
   ]
 }

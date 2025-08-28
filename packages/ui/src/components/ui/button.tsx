@@ -1,8 +1,7 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 import type * as React from "react";
-
 import { cn } from "../../utils/cn";
-import { Spinner } from "../icon";
 import { ShortcutDisplay, type ShortcutKeys } from "./shortcut";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
@@ -58,10 +57,10 @@ function Button({
 }: ButtonProps) {
   const isDisabled = isLoading || props.disabled;
   const body = isLoading ? (
-    <>
-      <Spinner className="animate-spin" />
+    <div className="flex w-full items-center justify-center gap-2">
+      <Loader2 className="animate-spin" />
       {children}
-    </>
+    </div>
   ) : (
     children
   );
@@ -88,8 +87,8 @@ function Button({
 
   return (
     <button
-      data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      data-slot="button"
       {...props}
       disabled={isDisabled}
     >

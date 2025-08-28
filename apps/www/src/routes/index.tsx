@@ -1,6 +1,3 @@
-"use client";
-
-import { backend } from "@/lib/backend";
 import { useChat } from "@ai-sdk/react";
 import {
   ChatInput,
@@ -15,7 +12,7 @@ import {
 import { ChatMessageArea } from "@rectangular-labs/ui/components/chat/chat-message-area";
 import { FilePreview } from "@rectangular-labs/ui/components/chat/file-preview";
 import { TypingIndicator } from "@rectangular-labs/ui/components/chat/typing-indicator";
-import { Paperclip } from "@rectangular-labs/ui/components/icon";
+import * as Icons from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
@@ -23,15 +20,6 @@ import { useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: ChatInterface,
-  loader: async () => {
-    try {
-      const response = await backend.api.$get();
-      return response.json();
-    } catch (error) {
-      console.error("Failed to fetch initial data:", error);
-      return { message: "Welcome!" }; // Default data if fetch fails
-    }
-  },
 });
 
 function ChatInterface() {
@@ -42,9 +30,21 @@ function ChatInterface() {
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop } =
     useChat({
-      api: backend.api.chat.$url().href,
-      onToolCall({ toolCall }) {
-        console.log("toolCall", toolCall);
+      transport: {
+        async sendMessages(options) {
+          return eventIteratorToStream(
+            await client.chat(
+              {
+                chatId: options.chatId,
+                messages: options.messages,
+              },
+              { signal: options.abortSignal },
+            ),
+          );
+        },
+        reconnectToStream(options) {
+          throw new Error("Unsupported");
+        },
       },
     });
   console.log("messages", messages);
@@ -107,10 +107,10 @@ function ChatInterface() {
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 pt-5 pb-5">
             {messages.map((message) => (
               <ChatMessage
+                id={message.id}
                 key={message.id}
                 type={message.role === "user" ? "outgoing" : "incoming"}
                 variant="full"
-                id={message.id}
               >
                 {message.role !== "user" && <ChatMessageAvatar />}
                 <div>
@@ -119,32 +119,32 @@ function ChatInterface() {
                       case "text":
                         return (
                           <ChatMessageContent
-                            key={JSON.stringify(part)}
                             id={message.id}
+                            key={JSON.stringify(part)}
                             messageContent={part.text}
                           />
                         );
                       case "file":
                         return (
                           <ChatMessageContent
-                            key={JSON.stringify(part)}
                             id={message.id}
+                            key={JSON.stringify(part)}
                             messageContent={[part]}
                           />
                         );
                       case "reasoning":
                         return (
                           <ChatMessageContent
-                            key={JSON.stringify(part)}
                             id={message.id}
+                            key={JSON.stringify(part)}
                             messageContent={part.reasoning}
                           />
                         );
                       case "source":
                         return (
                           <ChatMessageContent
-                            key={JSON.stringify(part)}
                             id={message.id}
+                            key={JSON.stringify(part)}
                             messageContent={part.source.url}
                           />
                         );
@@ -161,10 +161,10 @@ function ChatInterface() {
                           )
                           .map((attachment, index) => (
                             <img
-                              key={`${message.id}-att-img-${index}`}
-                              src={attachment.url}
                               alt={attachment.name ?? "image attachment"}
                               className="h-20 w-auto max-w-[150px] rounded object-contain"
+                              key={`${message.id}-att-img-${index}`}
+                              src={attachment.url}
                             />
                           ))}
                         {message.experimental_attachments
@@ -173,8 +173,8 @@ function ChatInterface() {
                           )
                           .map((attachment, index) => (
                             <div
-                              key={`${message.id}-att-file-${index}`}
                               className="rounded border bg-muted/50 p-1 text-xs"
+                              key={`${message.id}-att-file-${index}`}
                             >
                               📄 {attachment.name ?? "file"}
                             </div>
@@ -186,7 +186,7 @@ function ChatInterface() {
               </ChatMessage>
             ))}
             {isLoading && (
-              <ChatMessage type="incoming" id="typing" variant="full">
+              <ChatMessage id="typing" type="incoming" variant="full">
                 <ChatMessageAvatar />
                 <TypingIndicator />
               </ChatMessage>
@@ -196,22 +196,22 @@ function ChatInterface() {
       </div>
 
       <div className="flex w-full justify-center p-2">
-        <div className=" w-full max-w-3xl">
+        <div className="w-full max-w-3xl">
           <input
-            type="file"
-            multiple
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
             accept="image/*,application/pdf,.doc,.docx,.txt,.md"
+            className="hidden"
+            multiple
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            type="file"
           />
 
           {attachedFiles && attachedFiles.length > 0 && (
             <div className="flex max-h-20 flex-wrap gap-2 overflow-y-auto pb-2">
               {Array.from(attachedFiles).map((file, index) => (
                 <FilePreview
-                  key={`${file.name}-${index}`}
                   file={file}
+                  key={`${file.name}-${index}`}
                   onRemove={() => removeFile(index)}
                 />
               ))}
@@ -219,32 +219,32 @@ function ChatInterface() {
           )}
 
           <ChatInput
-            value={input}
-            onChange={handleInputChange}
-            loading={isLoading}
-            onSubmit={handleFormSubmit}
-            onStop={stop}
-            variant="default"
-            rows={1}
             className="space-y-2"
+            loading={isLoading}
+            onChange={handleInputChange}
+            onStop={stop}
+            onSubmit={handleFormSubmit}
+            rows={1}
+            value={input}
+            variant="default"
           >
             <ChatInputTextArea placeholder="Ask about Singapore trademark registration..." />
             <div className="flex w-full justify-between">
               <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={triggerFileInput}
                 disabled={
                   isLoading || (attachedFiles && attachedFiles.length >= 5)
                 }
+                onClick={triggerFileInput}
+                size="icon"
+                type="button"
+                variant="ghost"
               >
-                <Paperclip className="h-4 w-4" />
+                <Icons.Paperclip className="h-4 w-4" />
               </Button>
               <ChatInputSubmit
-                type="submit"
                 className="rounded-full"
                 onSubmit={handleFormSubmit}
+                type="submit"
               />
             </div>
           </ChatInput>

@@ -23,8 +23,8 @@ export const Separator = ({
         "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px",
         className,
       )}
-      data-slot="separator-root"
       data-orientation={orientation}
+      data-slot="separator-root"
       {...semanticProps}
       {...divProps}
     />

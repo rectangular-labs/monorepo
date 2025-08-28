@@ -16,10 +16,10 @@ export function ThemeToggle({ className, ...props }: ButtonProps) {
 
   return (
     <Button
-      variant="outline"
-      size="icon"
-      onClick={() => (theme === "dark" ? setTheme("light") : setTheme("dark"))}
       className={cn("relative", className)}
+      onClick={() => (theme === "dark" ? setTheme("light") : setTheme("dark"))}
+      size="icon"
+      variant="outline"
       {...props}
     >
       <Icons.Sun className="dark:-rotate-90 h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:scale-0" />

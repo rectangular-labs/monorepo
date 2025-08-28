@@ -8,104 +8,197 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { createServerRootRoute } from '@tanstack/react-start/server'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as EditorImport } from './routes/editor'
-import { Route as IndexImport } from './routes/index'
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as EditorRouteImport } from './routes/editor'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedOrpcRouteImport } from './routes/_authed/orpc'
+import { ServerRoute as ApiSplatServerRouteImport } from './routes/api/$'
+import { ServerRoute as ApiRpcSplatServerRouteImport } from './routes/api/rpc.$'
 
-// Create/Update Routes
+const rootServerRouteImport = createServerRootRoute()
 
-const EditorRoute = EditorImport.update({
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorRoute = EditorRouteImport.update({
   id: '/editor',
   path: '/editor',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const IndexRoute = IndexImport.update({
+const AuthedRouteRoute = AuthedRouteRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedOrpcRoute = AuthedOrpcRouteImport.update({
+  id: '/orpc',
+  path: '/orpc',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const ApiSplatServerRoute = ApiSplatServerRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const ApiRpcSplatServerRoute = ApiRpcSplatServerRouteImport.update({
+  id: '/api/rpc/$',
+  path: '/api/rpc/$',
+  getParentRoute: () => rootServerRouteImport,
 } as any)
 
-// Populate the FileRoutesByPath interface
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/editor': typeof EditorRoute
+  '/login': typeof LoginRoute
+  '/orpc': typeof AuthedOrpcRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/editor': typeof EditorRoute
+  '/login': typeof LoginRoute
+  '/orpc': typeof AuthedOrpcRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/_authed': typeof AuthedRouteRouteWithChildren
+  '/editor': typeof EditorRoute
+  '/login': typeof LoginRoute
+  '/_authed/orpc': typeof AuthedOrpcRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/editor' | '/login' | '/orpc'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/editor' | '/login' | '/orpc'
+  id: '__root__' | '/' | '/_authed' | '/editor' | '/login' | '/_authed/orpc'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
+  EditorRoute: typeof EditorRoute
+  LoginRoute: typeof LoginRoute
+}
+export interface FileServerRoutesByFullPath {
+  '/api/$': typeof ApiSplatServerRoute
+  '/api/rpc/$': typeof ApiRpcSplatServerRoute
+}
+export interface FileServerRoutesByTo {
+  '/api/$': typeof ApiSplatServerRoute
+  '/api/rpc/$': typeof ApiRpcSplatServerRoute
+}
+export interface FileServerRoutesById {
+  __root__: typeof rootServerRouteImport
+  '/api/$': typeof ApiSplatServerRoute
+  '/api/rpc/$': typeof ApiRpcSplatServerRoute
+}
+export interface FileServerRouteTypes {
+  fileServerRoutesByFullPath: FileServerRoutesByFullPath
+  fullPaths: '/api/$' | '/api/rpc/$'
+  fileServerRoutesByTo: FileServerRoutesByTo
+  to: '/api/$' | '/api/rpc/$'
+  id: '__root__' | '/api/$' | '/api/rpc/$'
+  fileServerRoutesById: FileServerRoutesById
+}
+export interface RootServerRouteChildren {
+  ApiSplatServerRoute: typeof ApiSplatServerRoute
+  ApiRpcSplatServerRoute: typeof ApiRpcSplatServerRoute
+}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/editor': {
       id: '/editor'
       path: '/editor'
       fullPath: '/editor'
-      preLoaderRoute: typeof EditorImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof EditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed/orpc': {
+      id: '/_authed/orpc'
+      path: '/orpc'
+      fullPath: '/orpc'
+      preLoaderRoute: typeof AuthedOrpcRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+  }
+}
+declare module '@tanstack/react-start/server' {
+  interface ServerFileRoutesByPath {
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/rpc/$': {
+      id: '/api/rpc/$'
+      path: '/api/rpc/$'
+      fullPath: '/api/rpc/$'
+      preLoaderRoute: typeof ApiRpcSplatServerRouteImport
+      parentRoute: typeof rootServerRouteImport
     }
   }
 }
 
-// Create and export the route tree
-
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/editor': typeof EditorRoute
+interface AuthedRouteRouteChildren {
+  AuthedOrpcRoute: typeof AuthedOrpcRoute
 }
 
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/editor': typeof EditorRoute
+const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
+  AuthedOrpcRoute: AuthedOrpcRoute,
 }
 
-export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/editor': typeof EditorRoute
-}
-
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/editor'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/editor'
-  id: '__root__' | '/' | '/editor'
-  fileRoutesById: FileRoutesById
-}
-
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  EditorRoute: typeof EditorRoute
-}
+const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
+  AuthedRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthedRouteRoute: AuthedRouteRouteWithChildren,
   EditorRoute: EditorRoute,
+  LoginRoute: LoginRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/editor"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/editor": {
-      "filePath": "editor.tsx"
-    }
-  }
+const rootServerRouteChildren: RootServerRouteChildren = {
+  ApiSplatServerRoute: ApiSplatServerRoute,
+  ApiRpcSplatServerRoute: ApiRpcSplatServerRoute,
 }
-ROUTE_MANIFEST_END */
+export const serverRouteTree = rootServerRouteImport
+  ._addFileChildren(rootServerRouteChildren)
+  ._addFileTypes<FileServerRouteTypes>()
