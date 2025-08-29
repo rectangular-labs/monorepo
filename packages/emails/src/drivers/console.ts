@@ -8,7 +8,10 @@ export function consoleDriver(args?: {
     name: "console",
     send(options: EmailOptions): Promise<EmailResult> {
       const logger = args?.logger ?? console;
-      logger.log("Sent Email:", options);
+      logger.log("[CONSOLE EMAIL]: ", {
+        ...options,
+        html: options.html?.length ? "TRUE" : "FALSE",
+      });
 
       return Promise.resolve({
         success: true,
