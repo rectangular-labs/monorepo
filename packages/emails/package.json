@@ -41,7 +41,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "create": "email create --out=./src/templates",
-    "preview": "email preview ./src/templates --port 42069",
+    "preview": "email preview ./src/templates ",
     "check": "email check ./src/templates",
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "pnpx @biomejs/biome format . --write",
