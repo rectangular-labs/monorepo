@@ -1,5 +1,5 @@
-export type { EmailClientConfig } from "./client.js";
-export { createEmailClient } from "./client.js";
+export type { EmailClientConfig } from "./email.js";
+export { createEmailClient } from "./email.js";
 export type {
   EmailAddress,
   EmailAttachment,
