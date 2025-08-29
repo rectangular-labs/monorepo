@@ -31,7 +31,7 @@ export const WelcomeEmail = ({
       <Preview>Welcome to {companyName}!</Preview>
       <Tailwind production>
         <Body className="font-sans">
-          <Container className="mx-auto max-w-lg px-4 py-8 shadow-md">
+          <Container className="mx-auto max-w-lg px-2 py-8 shadow-md md:px-4 dark:border dark:border-gray-200 dark:border-solid dark:shadow-none">
             {companyLogo && (
               <Container>
                 <Img
