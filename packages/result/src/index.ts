@@ -333,7 +333,7 @@ export async function pipe(
       return currentResult;
     }
     // Await potentially async operation
-    currentResult = await operation(currentResult.value);
+    currentResult = await Promise.resolve(operation(currentResult.value));
   }
 
   return currentResult;
