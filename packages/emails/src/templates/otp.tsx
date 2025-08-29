@@ -29,8 +29,8 @@ export const OtpEmail = ({
       <Head />
       <Preview>Your verification code: {otp}</Preview>
       <Tailwind production>
-        <Body className="bg-white font-sans">
-          <Container className="mx-auto max-w-lg px-4 py-8">
+        <Body className="font-sans">
+          <Container className="mx-auto max-w-lg px-4 py-8 shadow-md">
             {companyLogo && (
               <Container>
                 <Img
@@ -42,27 +42,37 @@ export const OtpEmail = ({
                 />
               </Container>
             )}
-            <Container>
-              <Heading className="my-10 font-bold text-2xl text-gray-900">
-                Your verification code
-              </Heading>
-            </Container>
-            <Text className="my-6 text-gray-700">Hi {username},</Text>
-            <Text className="my-6 text-gray-700">
-              Use the following verification code to complete your sign-in:
-            </Text>
-            <Section className="my-8 bg-gray-50 px-6 py-6">
+            <Section className="p-6">
               <Container>
-                <Text className="font-bold font-mono text-3xl text-gray-900 tracking-widest">
-                  {otp}
-                </Text>
+                <Heading className="font-bold text-2xl text-gray-900 dark:text-gray-100">
+                  Your verification code
+                </Heading>
               </Container>
+              <Section className="my-6">
+                <Text className="text-gray-700 dark:text-gray-200">
+                  Hi {username},
+                </Text>
+                <Text className="text-gray-700 dark:text-gray-200">
+                  Use the following verification code to complete your sign-in:
+                </Text>
+              </Section>
+              <Section className="my-8 bg-gray-50 px-6 py-6">
+                <Container>
+                  <Text className="font-bold font-mono text-3xl text-gray-900 tracking-widest">
+                    {otp}
+                  </Text>
+                </Container>
+              </Section>
+              <Section className="my-6">
+                <Text className="text-gray-700 dark:text-gray-200">
+                  This code will expire in 10 minutes. If you didn't request
+                  this code, you can safely ignore this email.
+                </Text>
+                <Text className="text-gray-500 dark:text-gray-400">
+                  Sent by {companyName}
+                </Text>
+              </Section>
             </Section>
-            <Text className="my-6 text-gray-700">
-              This code will expire in 10 minutes. If you didn't request this
-              code, you can safely ignore this email.
-            </Text>
-            <Text className="my-6 text-gray-500">Sent by {companyName}</Text>
           </Container>
         </Body>
       </Tailwind>

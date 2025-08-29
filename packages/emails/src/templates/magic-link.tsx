@@ -8,6 +8,7 @@ import {
   Img,
   Link,
   Preview,
+  Section,
   Tailwind,
   Text,
 } from "jsx-email";
@@ -30,8 +31,8 @@ export const MagicLinkEmail = ({
       <Head />
       <Preview>Your magic link to sign in</Preview>
       <Tailwind production>
-        <Body className="bg-white font-sans">
-          <Container className="mx-auto max-w-lg px-4 py-8">
+        <Body className="font-sans">
+          <Container className="mx-auto max-w-lg px-4 py-8 shadow-md">
             {companyLogo && (
               <Container>
                 <Img
@@ -43,38 +44,46 @@ export const MagicLinkEmail = ({
                 />
               </Container>
             )}
-            <Container>
-              <Heading className="my-10 font-bold text-2xl text-gray-900">
-                Sign in to {companyName}
-              </Heading>
-            </Container>
-            <Text className="my-6 text-gray-700">Hi {username},</Text>
-            <Text className="my-6 text-gray-700">
-              Click the link below to sign in to your account. This link will
-              expire in 10 minutes.
-            </Text>
-            <Container>
-              <Button
-                align="center"
-                backgroundColor="#000000"
-                fontSize={16}
-                height={48}
-                href={magicLink}
-                textColor="#ffffff"
-                width={220}
-              >
-                Sign in
-              </Button>
-            </Container>
-            <Text className="my-6 text-gray-700">
-              Or copy and paste this URL into your browser:{" "}
-              <Link className="text-black" href={magicLink}>
-                {magicLink}
-              </Link>
-            </Text>
-            <Text className="my-6 text-gray-500">
-              If you didn't request this email, you can safely ignore it.
-            </Text>
+            <Section className="p-6">
+              <Container>
+                <Heading className="font-bold text-2xl text-gray-900 dark:text-gray-100">
+                  Sign in to {companyName}
+                </Heading>
+              </Container>
+              <Section className="my-6">
+                <Text className="text-gray-700 dark:text-gray-200">
+                  Hi {username},
+                </Text>
+                <Text className="text-gray-700 dark:text-gray-200">
+                  Click the link below to sign in to your account. This link
+                  will expire in 10 minutes.
+                </Text>
+              </Section>
+              <Container>
+                <Button
+                  align="center"
+                  backgroundColor="#000000"
+                  fontSize={16}
+                  height={48}
+                  href={magicLink}
+                  textColor="#ffffff"
+                  width={220}
+                >
+                  Sign in
+                </Button>
+              </Container>
+              <Section className="my-6">
+                <Text className="text-gray-700 dark:text-gray-200">
+                  Or copy and paste this URL into your browser:{" "}
+                  <Link className="text-black dark:text-white" href={magicLink}>
+                    {magicLink}
+                  </Link>
+                </Text>
+                <Text className="text-gray-500 dark:text-gray-400">
+                  If you didn't request this email, you can safely ignore it.
+                </Text>
+              </Section>
+            </Section>
           </Container>
         </Body>
       </Tailwind>

@@ -7,6 +7,7 @@ import {
   Html,
   Img,
   Preview,
+  Section,
   Tailwind,
   Text,
 } from "jsx-email";
@@ -33,8 +34,8 @@ export const UserInviteEmail = ({
       <Head />
       <Preview>You've been invited to join {teamName}</Preview>
       <Tailwind production>
-        <Body className="bg-white font-sans">
-          <Container className="mx-auto max-w-lg px-4 py-8">
+        <Body className="font-sans">
+          <Container className="mx-auto max-w-lg px-4 py-8 shadow-md">
             {companyLogo && (
               <Container>
                 <Img
@@ -46,41 +47,50 @@ export const UserInviteEmail = ({
                 />
               </Container>
             )}
-            <Container>
-              <Heading className="my-10 font-bold text-2xl text-gray-900">
-                You've been invited to {teamName}
-              </Heading>
-            </Container>
-            <Text className="my-6 text-gray-700">Hi there,</Text>
-            <Text className="my-6 text-gray-700">
-              <strong>{inviterName}</strong> has invited you to join{" "}
-              <strong>{teamName}</strong> on {companyName}.
-            </Text>
-            <Container>
-              <Button
-                align="center"
-                backgroundColor="#000000"
-                fontSize={16}
-                height={48}
-                href={inviteLink}
-                textColor="#ffffff"
-                width={220}
-              >
-                Accept invitation
-              </Button>
-            </Container>
-            <Text className="my-6 text-gray-700">
-              This invitation was sent to <strong>{inviteeEmail}</strong>. If
-              you were not expecting this invitation, you can ignore this email.
-            </Text>
-            <Text className="my-6 text-gray-700">
-              If you already have an account with {companyName}, clicking the
-              button above will add you to the team. If you don't have an
-              account, you'll be able to create one.
-            </Text>
-            <Text className="my-6 text-gray-500">
-              This invitation will expire in 7 days.
-            </Text>
+            <Section className="p-6">
+              <Container>
+                <Heading className="font-bold text-2xl text-gray-900 dark:text-gray-100">
+                  You've been invited to {teamName}
+                </Heading>
+              </Container>
+              <Section className="my-6">
+                <Text className="text-gray-700 dark:text-gray-200">
+                  Hi there,
+                </Text>
+                <Text className="text-gray-700 dark:text-gray-200">
+                  <strong>{inviterName}</strong> has invited you to join{" "}
+                  <strong>{teamName}</strong> on {companyName}.
+                </Text>
+              </Section>
+              <Container>
+                <Button
+                  align="center"
+                  backgroundColor="#000000"
+                  fontSize={16}
+                  height={48}
+                  href={inviteLink}
+                  textColor="#ffffff"
+                  width={220}
+                >
+                  Accept invitation
+                </Button>
+              </Container>
+              <Section className="my-6">
+                <Text className="text-gray-700 dark:text-gray-200">
+                  This invitation was sent to <strong>{inviteeEmail}</strong>.
+                  If you were not expecting this invitation, you can ignore this
+                  email.
+                </Text>
+                <Text className="text-gray-700 dark:text-gray-200">
+                  If you already have an account with {companyName}, clicking
+                  the button above will add you to the team. If you don't have
+                  an account, you'll be able to create one.
+                </Text>
+                <Text className="text-gray-500 dark:text-gray-400">
+                  This invitation will expire in 7 days.
+                </Text>
+              </Section>
+            </Section>
           </Container>
         </Body>
       </Tailwind>
