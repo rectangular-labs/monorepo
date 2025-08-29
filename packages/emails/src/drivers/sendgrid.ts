@@ -32,7 +32,7 @@ function normalizeEmailAddresses(
   return [normalizeEmailAddress(addrs)];
 }
 
-export function sendgridDriver(config: SendgridConfig): EmailDriver {
+export function sendgridDriver(config: SendgridConfig) {
   return {
     name: "sendgrid",
     async send(
@@ -101,5 +101,5 @@ export function sendgridDriver(config: SendgridConfig): EmailDriver {
         };
       }
     },
-  };
+  } satisfies EmailDriver;
 }

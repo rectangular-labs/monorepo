@@ -22,8 +22,8 @@ function normalizeEmailAddresses(
 }
 
 export function postmarkDriver(
-  config: NonNullable<ConstructorParameters<typeof ServerClient>>[0],
-): EmailDriver {
+  ...config: ConstructorParameters<typeof ServerClient>
+) {
   return {
     name: "postmark",
     async send(
@@ -33,7 +33,7 @@ export function postmarkDriver(
       try {
         const { ServerClient } = await import("postmark");
 
-        const client = new ServerClient(config);
+        const client = new ServerClient(...config);
 
         const toAddresses = normalizeEmailAddresses(options.to);
         const ccAddresses = normalizeEmailAddresses(options.cc);
@@ -82,5 +82,5 @@ export function postmarkDriver(
         };
       }
     },
-  };
+  } satisfies EmailDriver;
 }

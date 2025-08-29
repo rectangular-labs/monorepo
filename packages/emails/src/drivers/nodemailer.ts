@@ -23,8 +23,8 @@ function normalizeEmailAddresses(
 }
 
 export function nodemailerDriver(
-  config: Parameters<typeof createTransport>[0],
-): EmailDriver {
+  ...config: Parameters<typeof createTransport>
+) {
   return {
     name: "nodemailer",
     async send(
@@ -34,7 +34,7 @@ export function nodemailerDriver(
       try {
         const nodemailer = await import("nodemailer");
 
-        const transporter = nodemailer.default.createTransport(config);
+        const transporter = nodemailer.default.createTransport(...config);
 
         const mailOptions: SendMailOptions = {
           from: normalizeEmailAddress(options.from),
@@ -79,5 +79,5 @@ export function nodemailerDriver(
         };
       }
     },
-  };
+  } satisfies EmailDriver;
 }

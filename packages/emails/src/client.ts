@@ -1,28 +1,21 @@
 import type { EmailDriver, EmailOptions, EmailResult } from "./types.js";
 
-export interface EmailClientConfig {
-  driver?: EmailDriver;
+export interface EmailClientConfig<T extends EmailDriver> {
+  driver?: T;
 }
 
-export function createEmailClient(config?: EmailClientConfig) {
+export function createEmailClient<T extends EmailDriver>(
+  config?: EmailClientConfig<T>,
+): {
+  send: T["send"];
+} {
   return {
-    send: async (options: EmailOptions): Promise<EmailResult> => {
-      try {
-        if (!config?.driver) {
+    send: config?.driver?.send
+      ? config.driver.send
+      : async (options: EmailOptions): Promise<EmailResult> => {
           const { consoleDriver } = await import("./drivers/console.js");
           const driver = consoleDriver();
           return await driver.send(options);
-        }
-
-        return await config.driver.send(options);
-      } catch (error) {
-        return {
-          success: false,
-          message:
-            error instanceof Error ? error.message : "Unknown error occurred",
-          error,
-        };
-      }
-    },
+        },
   };
 }

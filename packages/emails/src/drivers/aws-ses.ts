@@ -22,8 +22,8 @@ function normalizeEmailAddresses(
 }
 
 export function awsSesDriver(
-  config: NonNullable<ConstructorParameters<typeof SESv2Client>[0]>,
-): EmailDriver {
+  ...config: NonNullable<ConstructorParameters<typeof SESv2Client>>
+) {
   return {
     name: "aws-ses",
     async send(
@@ -94,5 +94,5 @@ export function awsSesDriver(
         };
       }
     },
-  };
+  } satisfies EmailDriver;
 }

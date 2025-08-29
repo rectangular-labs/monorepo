@@ -22,9 +22,7 @@ function normalizeEmailAddresses(
   return [normalizeEmailAddress(addrs)];
 }
 
-export function resendDriver(
-  config: NonNullable<ConstructorParameters<typeof Resend>>[0],
-): EmailDriver {
+export function resendDriver(...config: ConstructorParameters<typeof Resend>) {
   return {
     name: "resend",
     async send(
@@ -34,7 +32,7 @@ export function resendDriver(
       try {
         const { Resend } = await import("resend");
 
-        const resend = new Resend(config);
+        const resend = new Resend(...config);
 
         const email: CreateEmailOptions = {
           from: normalizeEmailAddress(options.from),
@@ -89,5 +87,5 @@ export function resendDriver(
         };
       }
     },
-  };
+  } satisfies EmailDriver;
 }

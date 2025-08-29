@@ -12,8 +12,8 @@ export type MailersendConfig = {
 };
 
 export function mailersendDriver(
-  config: NonNullable<ConstructorParameters<typeof MailerSend>>[0],
-): EmailDriver {
+  ...config: ConstructorParameters<typeof MailerSend>
+) {
   return {
     name: "mailersend",
     async send(
@@ -45,7 +45,7 @@ export function mailersendDriver(
           return [normalizeRecipient(addresses)];
         }
 
-        const mailerSend = new MailerSend(config);
+        const mailerSend = new MailerSend(...config);
 
         const fromAddr = normalizeSender(options.from);
         const toAddresses = normalizeRecipients(options.to);
@@ -107,5 +107,5 @@ export function mailersendDriver(
         };
       }
     },
-  };
+  } satisfies EmailDriver;
 }
