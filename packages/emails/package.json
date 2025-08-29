@@ -33,6 +33,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    },
     "./drivers/*": {
       "types": "./dist/drivers/*.d.ts",
       "import": "./dist/drivers/*.js"

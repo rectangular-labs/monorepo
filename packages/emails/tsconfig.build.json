@@ -2,9 +2,9 @@
   "extends": "@rectangular-labs/typescript/tsconfig.internal-package.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "rootDir": ".",
+    "rootDir": "src",
     "skipLibCheck": true
   },
-  "include": ["src", "examples"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
