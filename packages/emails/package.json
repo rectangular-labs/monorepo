@@ -9,7 +9,8 @@
     "smtp",
     "sendgrid",
     "resend",
-    "postmark"
+    "postmark",
+    "scaleway"
   ],
   "publishConfig": {
     "access": "public"
