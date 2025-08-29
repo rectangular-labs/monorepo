@@ -7,10 +7,13 @@
     "rectangular-labs",
     "email",
     "smtp",
-    "sendgrid",
-    "resend",
+    "aws-ses",
+    "mailersend",
+    "nodemailer",
     "postmark",
-    "scaleway"
+    "resend",
+    "scaleway",
+    "sendgrid"
   ],
   "publishConfig": {
     "access": "public"
