@@ -1,0 +1,98 @@
+{
+  "name": "@rectangular-labs/emails",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Unified email client with multiple provider drivers",
+  "keywords": [
+    "rectangular-labs",
+    "email",
+    "smtp",
+    "sendgrid",
+    "resend",
+    "postmark"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rectangular-labs/monorepo.git",
+    "directory": "packages/emails"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/rectangular-labs/monorepo/tree/main/packages/emails#readme",
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "package.json",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./drivers/*": {
+      "types": "./dist/drivers/*.d.ts",
+      "import": "./dist/drivers/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "create": "email create --out=./src/templates",
+    "preview": "email preview ./src/templates --port 42069",
+    "check": "email check ./src/templates",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "pnpx @biomejs/biome format . --write",
+    "lint": "pnpx @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-sesv2": "^3.876.0",
+    "@plunk/node": "^3.0.3",
+    "@rectangular-labs/typescript": "workspace:*",
+    "@sendgrid/mail": "^8.1.5",
+    "@types/node": "^22.18.0",
+    "@types/nodemailer": "^7.0.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "jsx-email": "^2.7.3",
+    "mailersend": "^2.6.0",
+    "nodemailer": "^7.0.5",
+    "postmark": "^4.0.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "resend": "^6.0.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-sesv2": "^3.876.0",
+    "@sendgrid/mail": "^8.1.5",
+    "mailersend": "^2.6.0",
+    "nodemailer": "^7.0.5",
+    "postmark": "^4.0.5",
+    "resend": "^6.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-sesv2": {
+      "optional": true
+    },
+    "@sendgrid/mail": {
+      "optional": true
+    },
+    "mailersend": {
+      "optional": true
+    },
+    "nodemailer": {
+      "optional": true
+    },
+    "postmark": {
+      "optional": true
+    },
+    "resend": {
+      "optional": true
+    }
+  }
+}
