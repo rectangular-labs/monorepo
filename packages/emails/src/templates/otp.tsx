@@ -56,9 +56,9 @@ export const OtpEmail = ({
                   Use the following verification code to complete your sign-in:
                 </Text>
               </Section>
-              <Section className="my-8 bg-gray-50 px-6 py-6">
+              <Section className="my-8 rounded-md bg-black px-6 py-6 dark:bg-white">
                 <Container>
-                  <Text className="font-bold font-mono text-3xl text-gray-900 tracking-widest">
+                  <Text className="font-bold font-mono text-3xl text-white tracking-widest dark:text-black">
                     {otp}
                   </Text>
                 </Container>
@@ -67,9 +67,6 @@ export const OtpEmail = ({
                 <Text className="text-gray-700 dark:text-gray-200">
                   This code will expire in 10 minutes. If you didn't request
                   this code, you can safely ignore this email.
-                </Text>
-                <Text className="text-gray-500 dark:text-gray-400">
-                  Sent by {companyName}
                 </Text>
               </Section>
             </Section>

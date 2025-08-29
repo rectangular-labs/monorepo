@@ -16,6 +16,13 @@ import {
 export interface MagicLinkEmailProps {
   username: string;
   magicLink: string;
+  expiresIn:
+    | `${number} minutes`
+    | `${number} minute`
+    | `${number} hour`
+    | `${number} hours`
+    | `${number} day`
+    | `${number} days`;
   companyName?: string;
   companyLogo?: string;
 }
@@ -23,6 +30,7 @@ export interface MagicLinkEmailProps {
 export const MagicLinkEmail = ({
   username = "there",
   magicLink,
+  expiresIn,
   companyName = "Our App",
   companyLogo,
 }: MagicLinkEmailProps) => {
@@ -56,7 +64,7 @@ export const MagicLinkEmail = ({
                 </Text>
                 <Text className="text-gray-700 dark:text-gray-200">
                   Click the link below to sign in to your account. This link
-                  will expire in 10 minutes.
+                  will expire in {expiresIn}.
                 </Text>
               </Section>
               <Container>
@@ -95,6 +103,7 @@ export const templateName = "magic-link";
 export const previewProps: MagicLinkEmailProps = {
   username: "there",
   magicLink: "https://example.com/magic?token=123",
+  expiresIn: "10 minutes",
   companyName: "Our App",
   companyLogo: "https://placehold.co/40x40",
 };
