@@ -15,7 +15,7 @@
     "emails:create": "bun run --filter @rectangular-labs/emails create",
     "emails:preview": "bun run --filter @rectangular-labs/emails preview",
     "emails:check": "bun run --filter @rectangular-labs/emails check",
-    "dev": "pnpm with-env-local pnpx sst dev",
+    "dev": "docker compose up -d && pnpm with-env-local turbo run dev",
     "dev:packages": "docker compose up -d && turbo run dev --filter=\"./packages/*\"",
     "deploy:local": "pnpm with-env-local sst deploy",
     "deploy:preview": "pnpm with-env-preview sst deploy --stage preview",
