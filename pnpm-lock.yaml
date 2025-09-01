@@ -71,6 +71,12 @@ importers:
       arktype:
         specifier: ^2.1.20
         version: 2.1.20
+      fumadocs-core:
+        specifier: ^15.7.6
+        version: 15.7.6(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
+      fumadocs-ui:
+        specifier: ^15.7.6
+        version: 15.7.6(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.12)
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -206,6 +212,9 @@ importers:
 
   packages/content:
     dependencies:
+      '@rectangular-labs/ui':
+        specifier: workspace:*
+        version: link:../ui
       arktype:
         specifier: ^2.1.20
         version: 2.1.20
