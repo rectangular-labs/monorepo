@@ -1,0 +1,23 @@
+---
+title: Result
+description: Explicit error handling with Ok/Err, safe helpers, and pipelining.
+icon: SquareEqual
+---
+
+## Quickstart
+
+```bash
+pnpm add @rectangular-labs/result
+```
+
+```ts
+import { ok, err, Result } from "@rectangular-labs/result";
+
+function double(n: number): Result<number, string> {
+  return ok(n * 2);
+}
+```
+
+## API Reference
+
+<Card title="API Reference" href="./api" />

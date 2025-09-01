@@ -1,0 +1,7 @@
+{
+  "title": "hi",
+  "description": "The description of root folder (optional)",
+  "root": true,
+  "icon": "MyIcon",
+  "defaultOpen": true
+}
