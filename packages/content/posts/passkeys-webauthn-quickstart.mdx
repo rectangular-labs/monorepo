@@ -1,0 +1,41 @@
+---
+title: "Passkeys and WebAuthn: A 10-Minute Quickstart"
+description: "Use platform authenticators to sign in without passwords using WebAuthn."
+icon: "Key"
+cover: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1600&auto=format&fit=crop"
+---
+
+<Callout type="info">
+Passkeys remove passwords from your auth flow using public-key cryptography powered by WebAuthn.
+</Callout>
+
+Passkeys are discoverable credentials stored by the OS and synced across devices. They bind authentication to the device and user presence (biometrics or PIN), improving both security and UX.
+
+## What you need to know
+
+- Registration creates a key pair. The private key never leaves the device.
+- Authentication proves possession of the private key with a signed challenge.
+- Relying parties (your app) validate the signature with the public key.
+
+## Implementation steps
+
+1. Feature-detect WebAuthn and platform authenticator availability.
+2. On signup, call `navigator.credentials.create` with a `publicKey` challenge from your server.
+3. Persist the credential ID and public key on your server.
+4. On login, call `navigator.credentials.get` with a server-issued challenge and verify the assertion.
+
+## Resources
+
+<Cards>
+  <Card title="MDN: Web Authentication API" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API">
+    Overview of WebAuthn APIs in the browser.
+  </Card>
+  <Card title="Passkeys.dev" href="https://passkeys.dev">
+    Deep-dive into passkeys with patterns and UX guidance.
+  </Card>
+  <Card title="W3C WebAuthn Spec" href="https://w3c.github.io/webauthn/">
+    Canonical specification for registration and authentication ceremonies.
+  </Card>
+</Cards>
+
+

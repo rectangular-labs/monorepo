@@ -17,6 +17,10 @@
       "types": "./dist/src/lib/rss.d.ts",
       "default": "./src/lib/rss.ts"
     },
+    "./posts": {
+      "types": "./dist/src/lib/posts.d.ts",
+      "default": "./src/lib/posts.ts"
+    },
     "./collections": "./.content-collections/generated/index.ts",
     "./ui/*": {
       "types": "./dist/src/components/*.d.tsx",

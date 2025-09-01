@@ -14,11 +14,11 @@ export function getBlogRSS(baseUrl: string) {
     feed.addItem({
       id: page.url,
       title: page.data.title,
-      description: page.data.description,
+      description: page.data.description ?? "",
       link: `${baseUrl}${page.url}`,
       date: new Date(
         // try to pick up date from frontmatter if present later
-        page.data.date ?? Date.now(),
+        Date.now(),
       ),
       author: [{ name: "Winston Yeo" }],
     });

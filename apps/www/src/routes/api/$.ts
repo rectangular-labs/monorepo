@@ -1,7 +1,10 @@
 import { createApiContext } from "@rectangular-labs/api/context";
 import { openAPIHandler } from "@rectangular-labs/api/server";
 import { initAuthHandler } from "@rectangular-labs/auth";
-import { createSearchServer } from "@rectangular-labs/content/search";
+import {
+  createBlogSearchServer,
+  createDocsSearchServer,
+} from "@rectangular-labs/content/search";
 import { createServerFileRoute } from "@tanstack/react-start/server";
 import { serverEnv } from "~/lib/env";
 
@@ -15,7 +18,14 @@ async function handle({ request }: { request: Request }) {
     if (request.method !== "GET") {
       return new Response("Method not allowed", { status: 405 });
     }
-    const search = createSearchServer();
+    const search = createDocsSearchServer();
+    return await search.GET(request);
+  }
+  if (new URL(request.url).pathname.startsWith("/api/blog/search")) {
+    if (request.method !== "GET") {
+      return new Response("Method not allowed", { status: 405 });
+    }
+    const search = createBlogSearchServer();
     return await search.GET(request);
   }
 

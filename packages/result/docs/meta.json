@@ -2,5 +2,6 @@
   "title": "Result",
   "description": "Explicit error handling with Ok/Err, safe helpers, and pipes.",
   "root": true,
-  "icon": "SquareEqual"
+  "icon": "SquareEqual",
+  "defaultOpen": true
 }

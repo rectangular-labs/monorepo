@@ -44,7 +44,7 @@ const metas = defineCollection({
 const posts = defineCollection({
   name: "posts",
   directory: "posts",
-  include: "  **/*.mdx",
+  include: "**/*.mdx",
   schema: type({
     "...": DocSchema,
     // blog-specific

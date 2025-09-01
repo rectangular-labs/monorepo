@@ -1,10 +1,7 @@
-import { MDXContent } from "@content-collections/mdx/react";
 import type { PageTree } from "fumadocs-core/server";
 import type { LoaderOutput } from "fumadocs-core/source";
-import { TypeTable } from "fumadocs-ui/components/type-table";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/links";
-import defaultMdxComponents from "fumadocs-ui/mdx";
 import {
   DocsBody,
   DocsDescription,
@@ -15,21 +12,8 @@ import type { MDXComponents } from "mdx/types";
 import { useMemo } from "react";
 import { baseOptions } from "../lib/layout";
 import { transformPageTree } from "../lib/transform-page-tree";
-import type { source } from "../source";
-
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
-  return {
-    ...defaultMdxComponents,
-    TypeTable: ({ ref, ...props }) => <TypeTable ref={ref} {...props} />,
-    // HTML `ref` attribute conflicts with `forwardRef`
-    // pre: ({ ref: _ref, ...props }) => (
-    //   <CodeBlock {...props}>
-    //     <Pre>{props.children}</Pre>
-    //   </CodeBlock>
-    // ),
-    ...components,
-  };
-}
+import type { docSource } from "../source";
+import { MDXRenderer } from "./mdx-renderer";
 
 export function DocPage({
   data,
@@ -39,7 +23,7 @@ export function DocPage({
 }: {
   // biome-ignore lint/suspicious/noExplicitAny: generic to support any page type
   tree: LoaderOutput<any>["pageTree"] | object;
-  data: NonNullable<ReturnType<typeof source.getPage>>["data"];
+  data: NonNullable<ReturnType<typeof docSource.getPage>>["data"];
   layoutOptions?: BaseLayoutProps;
   components?: MDXComponents;
 }) {
@@ -70,9 +54,9 @@ export function DocPage({
           <DocsDescription>{data.description}</DocsDescription>
         ) : null}
         <DocsBody>
-          <MDXContent
+          <MDXRenderer
             code={data.body}
-            components={getMDXComponents(components)}
+            {...(components ? { components } : {})}
           />
         </DocsBody>
       </DocsPage>

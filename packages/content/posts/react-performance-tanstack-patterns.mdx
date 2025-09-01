@@ -1,0 +1,40 @@
+---
+title: "React Performance with TanStack Patterns"
+description: "Practical strategies to ship fast UIs using Query, Router, and Virtual." 
+icon: "Zap"
+cover: "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop"
+---
+
+<Callout type="tip">
+Focus on the highest-impact bottlenecks: network waterfalls, re-render churn, and long lists.
+</Callout>
+
+## Key tactics
+
+- Cache aggressively with `@tanstack/react-query` and avoid duplicate requests.
+- Co-locate route-driven data with `@tanstack/react-router` loaders.
+- Virtualize large lists with `@tanstack/react-virtual`.
+- Memoize stable props and avoid recreating functions on every render.
+
+## Example workflow
+
+1. Profile with the React DevTools Profiler and the Performance panel.
+2. Annotate slow components; add `memo` and `useMemo` where it matters.
+3. Move data fetching into Query with smart keys and `staleTime`.
+4. Virtualize any list over ~200 items.
+
+## Learn more
+
+<Cards>
+  <Card title="React Query Docs" href="https://tanstack.com/query/latest">
+    Patterns for caching, mutations, and background refetching.
+  </Card>
+  <Card title="TanStack Router" href="https://tanstack.com/router/latest">
+    File-based routing with loaders and deferred data.
+  </Card>
+  <Card title="React Virtual" href="https://tanstack.com/virtual/latest">
+    High-performance windowing for large lists and tables.
+  </Card>
+</Cards>
+
+
