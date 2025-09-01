@@ -2,5 +2,5 @@
   "title": "Emails",
   "description": "Unified email client with pluggable providers and consistent API.",
   "root": true,
-  "icon": "Envelope"
+  "icon": "Mail"
 }

@@ -21,6 +21,9 @@ export function transformPageTree(tree: PageTree.Folder): PageTree.Folder {
 
   return {
     ...tree,
+    ...(tree.icon
+      ? { icon: page({ icon: tree.icon } as PageTree.Item).icon }
+      : {}),
     ...(tree.index ? { index: page(tree.index) } : {}),
     children: tree.children.map((item) => {
       if (item.type === "page") return page(item);

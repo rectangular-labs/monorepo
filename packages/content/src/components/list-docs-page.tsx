@@ -29,8 +29,6 @@ export function ListDocsPage({
 
   transformed.children = topLevelFolders;
 
-  console.log("tree", tree);
-
   function getFolderHref(folder: PageTree.Folder): string {
     const indexUrl = folder.index?.url;
     if (typeof indexUrl === "string") return indexUrl;
@@ -78,11 +76,9 @@ export function ListDocsPage({
                   <Card className="hover:-translate-y-0.5 h-full overflow-hidden border-border/60 bg-card/80 shadow-sm ring-1 ring-border/40 transition-all duration-200 hover:border-border hover:shadow-md">
                     <CardHeader className="flex items-start gap-3">
                       {icon ? (
-                        <div
-                          className="rounded-md border bg-muted/40 p-2 text-muted-foreground shadow-sm transition-colors group-hover:bg-muted"
-                          // biome-ignore lint/security/noDangerouslySetInnerHtml: from fumadocs
-                          dangerouslySetInnerHTML={{ __html: icon }}
-                        />
+                        <div className="rounded-md border bg-muted/40 p-2 text-muted-foreground shadow-sm transition-colors group-hover:bg-muted">
+                          {icon}
+                        </div>
                       ) : null}
                       <div className="space-y-1">
                         <CardTitle className="font-semibold text-base">
