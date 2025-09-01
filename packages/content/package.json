@@ -10,8 +10,12 @@
       "default": "./src/source.tsx"
     },
     "./search": {
-      "types": "./dist/src/search.d.ts",
-      "default": "./src/search.ts"
+      "types": "./dist/src/lib/search.d.ts",
+      "default": "./src/lib/search.ts"
+    },
+    "./rss": {
+      "types": "./dist/src/lib/rss.d.ts",
+      "default": "./src/lib/rss.ts"
     },
     "./collections": "./.content-collections/generated/index.ts",
     "./ui/*": {
@@ -51,6 +55,7 @@
   "dependencies": {
     "@rectangular-labs/ui": "workspace:*",
     "arktype": "^2.1.20",
+    "feed": "^5.1.0",
     "fumadocs-core": "^15.7.6",
     "fumadocs-mdx": "^11.8.2",
     "fumadocs-ui": "^15.7.6",

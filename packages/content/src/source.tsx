@@ -1,9 +1,14 @@
 import { createMDXSource } from "@fumadocs/content-collections";
 import { loader } from "fumadocs-core/source";
 import * as icons from "lucide-static";
-import { allDocs, allMetas } from "../.content-collections/generated";
+import {
+  allDocs,
+  allMetas,
+  allPostMetas,
+  allPosts,
+} from "../.content-collections/generated";
 
-export const source = loader({
+export const docSource = loader({
   source: createMDXSource(allDocs, allMetas),
   baseUrl: "/docs",
   icon(icon) {
@@ -31,3 +36,16 @@ export const source = loader({
   //   return info.path.split("/");
   // },
 });
+
+export const blogSource = loader({
+  source: createMDXSource(allPosts, allPostMetas),
+  baseUrl: "/blog",
+  icon(icon) {
+    if (!icon) return;
+    // biome-ignore lint/performance/noDynamicNamespaceImportAccess: We need to access the icons dynamically
+    if (icon in icons) return icons[icon as keyof typeof icons];
+    return;
+  },
+});
+
+export const source = docSource;

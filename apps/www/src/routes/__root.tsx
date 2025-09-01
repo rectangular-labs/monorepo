@@ -30,6 +30,12 @@ export const Route = createRootRouteWithContext<{
       }),
     ],
     links: [
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        href: "/blog/rss.xml",
+        title: "Blog RSS",
+      },
       { rel: "stylesheet", href: appCss },
       {
         rel: "apple-touch-icon",
