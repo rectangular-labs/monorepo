@@ -1,5 +1,5 @@
 import { source } from "@rectangular-labs/content";
-import { DocPage } from "@rectangular-labs/content/ui/content-page";
+import { DocPage } from "@rectangular-labs/content/ui/doc-page";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 

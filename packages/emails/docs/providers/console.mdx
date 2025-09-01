@@ -1,0 +1,25 @@
+---
+title: Console
+description: Console driver for development. Logs emails instead of sending.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { consoleDriver } from "@rectangular-labs/emails/drivers/console";
+
+const email = createEmailClient({
+  driver: consoleDriver(),
+}); // or createEmailClient()
+```
+
+```ts
+await email.send({
+  from: "local@dev",
+  to: "user@example.com",
+  subject: "Logged email",
+  text: "Check your console",
+});
+```
+
+

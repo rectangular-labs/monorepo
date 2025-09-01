@@ -2,6 +2,7 @@
 import { defineCollection, defineConfig } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
 import { type } from "arktype";
+import { createGenerator, remarkAutoTypeTable } from "fumadocs-typescript";
 
 const docSchema = type({
   title: "string",
@@ -12,12 +13,16 @@ const docSchema = type({
   // "_openapi?": "Record<string, any>",
 });
 
+const generator = createGenerator();
 const docs = defineCollection({
   name: "docs",
   directory: "../",
   include: "**/*.mdx",
   schema: docSchema,
-  transform: transformMDX,
+  transform: (document, context) =>
+    transformMDX(document, context, {
+      remarkPlugins: [[remarkAutoTypeTable, { generator }]],
+    }),
 });
 
 const metaSchema = type({

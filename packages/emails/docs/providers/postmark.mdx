@@ -1,0 +1,25 @@
+---
+title: Postmark
+description: Postmark driver for @rectangular-labs/emails.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { postmarkDriver } from "@rectangular-labs/emails/drivers/postmark";
+
+const email = createEmailClient({
+  driver: postmarkDriver("your-postmark-server-token"),
+});
+```
+
+```ts
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Hello from Postmark",
+  html: "<p>Hi!</p>",
+});
+```
+
+

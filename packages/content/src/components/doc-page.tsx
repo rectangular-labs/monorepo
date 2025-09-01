@@ -1,6 +1,7 @@
 import { MDXContent } from "@content-collections/mdx/react";
 import type { PageTree } from "fumadocs-core/server";
 import type { LoaderOutput } from "fumadocs-core/source";
+import { TypeTable } from "fumadocs-ui/components/type-table";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/links";
 import defaultMdxComponents from "fumadocs-ui/mdx";
@@ -10,18 +11,38 @@ import {
   DocsPage,
   DocsTitle,
 } from "fumadocs-ui/page";
+import type { MDXComponents } from "mdx/types";
 import { useMemo } from "react";
 import { baseOptions } from "../lib/layout";
 import { transformPageTree } from "../lib/transform-page-tree";
 import type { source } from "../source";
 
-export function DocPage(props: {
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultMdxComponents,
+    TypeTable: ({ ref, ...props }) => <TypeTable ref={ref} {...props} />,
+    // HTML `ref` attribute conflicts with `forwardRef`
+    // pre: ({ ref: _ref, ...props }) => (
+    //   <CodeBlock {...props}>
+    //     <Pre>{props.children}</Pre>
+    //   </CodeBlock>
+    // ),
+    ...components,
+  };
+}
+
+export function DocPage({
+  data,
+  tree: dataTree,
+  layoutOptions,
+  components,
+}: {
   // biome-ignore lint/suspicious/noExplicitAny: generic to support any page type
   tree: LoaderOutput<any>["pageTree"] | object;
   data: NonNullable<ReturnType<typeof source.getPage>>["data"];
   layoutOptions?: BaseLayoutProps;
+  components?: MDXComponents;
 }) {
-  const { data, tree: dataTree, layoutOptions } = props;
   const tree = useMemo(
     // cast from fumadocs https://fumadocs.dev/docs/ui/manual-installation/tanstack-start
     () => transformPageTree(dataTree as PageTree.Folder),
@@ -51,9 +72,7 @@ export function DocPage(props: {
         <DocsBody>
           <MDXContent
             code={data.body}
-            components={{
-              ...defaultMdxComponents,
-            }}
+            components={getMDXComponents(components)}
           />
         </DocsBody>
       </DocsPage>

@@ -1,4 +1,34 @@
 ---
+title: AWS SES
+description: AWS Simple Email Service driver for @rectangular-labs/emails.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { awsSesDriver } from "@rectangular-labs/emails/drivers/aws-ses";
+
+const email = createEmailClient({
+  driver: awsSesDriver({
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: "your-access-key",
+      secretAccessKey: "your-secret-key",
+    },
+  }),
+});
+```
+
+```ts
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Hello from SES",
+  text: "Hi!",
+});
+```
+
+---
 title: SES
 description: AWS SES driver for @rectangular-labs/emails.
 icon: Rocket

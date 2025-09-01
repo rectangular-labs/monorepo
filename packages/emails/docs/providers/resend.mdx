@@ -1,0 +1,25 @@
+---
+title: Resend
+description: Resend driver for @rectangular-labs/emails.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { resendDriver } from "@rectangular-labs/emails/drivers/resend";
+
+const email = createEmailClient({
+  driver: resendDriver("your-resend-api-key"),
+});
+```
+
+```ts
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Hello from Resend",
+  text: "Hi!",
+});
+```
+
+
