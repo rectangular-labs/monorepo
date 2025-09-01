@@ -1,6 +1,7 @@
 import { createApiContext } from "@rectangular-labs/api/context";
 import { openAPIHandler } from "@rectangular-labs/api/server";
 import { initAuthHandler } from "@rectangular-labs/auth";
+import { createSearchServer } from "@rectangular-labs/content/search";
 import { createServerFileRoute } from "@tanstack/react-start/server";
 import { serverEnv } from "~/lib/env";
 
@@ -8,6 +9,14 @@ async function handle({ request }: { request: Request }) {
   if (new URL(request.url).pathname.startsWith("/api/auth/")) {
     const auth = initAuthHandler();
     return await auth.handler(request);
+  }
+
+  if (new URL(request.url).pathname.startsWith("/api/search")) {
+    if (request.method !== "GET") {
+      return new Response("Method not allowed", { status: 405 });
+    }
+    const search = createSearchServer();
+    return await search.GET(request);
   }
 
   const env = serverEnv();

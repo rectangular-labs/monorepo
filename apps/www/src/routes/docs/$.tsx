@@ -3,7 +3,6 @@ import { DocPage } from "@rectangular-labs/content/ui/doc-page";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
-// a wrapper because we don't want `loader` to be called on client-side
 const getDocData = createServerFn({
   method: "GET",
 })
@@ -22,7 +21,8 @@ const getDocData = createServerFn({
 export const Route = createFileRoute("/docs/$")({
   component: Page,
   loader: async ({ params }) => {
-    const data = await getDocData({ data: params._splat?.split("/") ?? [] });
+    const _params = params as unknown as { _splat?: string };
+    const data = await getDocData({ data: _params._splat?.split("/") ?? [] });
     return data;
   },
 });
