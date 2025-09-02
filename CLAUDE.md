@@ -95,15 +95,15 @@ Preferred for AI/non-interactive: use `--args` to bypass prompts.
 
 - Examples:
   - Public with no docs, no env, no ui, no styles:
-    - `pnpm new:package --args "my-lib" "public" "false" "false" "false" "false"`
+    - `pnpm new:package --args "my-lib" "public" false false false false`
   - Public with docs, no env, no ui, no styles:
-    - `pnpm new:package --args "my-lib" "public" "true" "false" "false" "false"`
+    - `pnpm new:package --args "my-lib" "public" true false false false`
   - Private with docs, env, React UI, and styles:
-    - `pnpm new:package --args "my-private-lib" "private" "true" "true" "true" "true"`
+    - `pnpm new:package --args "my-private-lib" "private" true true true true`
   - Private with env only (no UI, no styles, no docs):
-    - `pnpm new:package --args "my-svc" "private" "false" "true" "false" "false"`
+    - `pnpm new:package --args "my-svc" "private" false true false false`
   - Private with env and UI (no docs, no styles):
-    - `pnpm new:package --args "my-svc" "private" "false" "true" "true" "false"`
+    - `pnpm new:package --args "my-svc" "private" false true true false`
 
 Interactive (for humans): `pnpm new:package` and answer prompts. The scope `@rectangular-labs/` in the name is optional and normalized.
 
