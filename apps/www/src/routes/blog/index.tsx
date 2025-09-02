@@ -7,7 +7,6 @@ import {
 } from "@rectangular-labs/ui/components/ui/toggle-group";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import type { PageTree } from "fumadocs-core/server";
 import { useMemo, useState } from "react";
 
 const getBlogTree = createServerFn({ method: "GET" }).handler(
@@ -24,11 +23,10 @@ export const Route = createFileRoute("/blog/")({
 
 function Page() {
   const { tree } = Route.useLoaderData();
-  const parsedTree = tree as PageTree.Folder;
 
   const [view, setView] = useState<"grid" | "list">("grid");
 
-  const posts = useMemo(() => extractPostsFromTree(parsedTree), [parsedTree]);
+  const posts = useMemo(() => extractPostsFromTree(tree), [tree]);
 
   return (
     <div className="container mx-auto space-y-6 py-10">
