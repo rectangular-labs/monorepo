@@ -7,7 +7,7 @@ export type ExtractedPost = {
   cover: string | null;
 };
 
-export function extractPostsFromTree(tree: PageTree.Folder): ExtractedPost[] {
+export function extractPostsFromTree(tree: object): ExtractedPost[] {
   const items: ExtractedPost[] = [];
 
   function walk(folder: PageTree.Folder) {
@@ -31,6 +31,6 @@ export function extractPostsFromTree(tree: PageTree.Folder): ExtractedPost[] {
     }
   }
 
-  walk(tree);
+  walk(tree as PageTree.Folder);
   return items;
 }
