@@ -14044,7 +14044,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 24.3.0
+      '@types/node': 22.18.0
 
   '@types/hast@2.3.10':
     dependencies:
@@ -14115,7 +14115,7 @@ snapshots:
 
   '@types/through@0.0.33':
     dependencies:
-      '@types/node': 24.3.0
+      '@types/node': 22.18.0
 
   '@types/tinycolor2@1.4.6': {}
 
@@ -14129,7 +14129,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 24.3.0
+      '@types/node': 22.18.0
     optional: true
 
   '@typescript-eslint/project-service@8.41.0(typescript@5.9.2)':

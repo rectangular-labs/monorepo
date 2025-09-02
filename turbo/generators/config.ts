@@ -1,11 +1,20 @@
 import { execSync } from "node:child_process";
 import type { PlopTypes } from "@turbo/gen";
 
+interface TSConfig {
+  compilerOptions: {
+    lib?: string[];
+    jsx?: string;
+  };
+}
+
 interface PackageJson {
   name: string;
   scripts: Record<string, string>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  exports?: Record<string, {types?: string, default?: string, imports?: string}|string>;
 }
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
@@ -29,6 +38,33 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         name: "type",
         message: "What type of package should be created?",
         choices: ["public", "private"],
+      },
+      {
+        type: "confirm",
+        name: "needsDocs",
+        message: "Do you want documentation for this package?",
+        default: false,
+      },
+      {
+        type: "confirm",
+        name: "hasEnv",
+        message: "Do you want to have env variables exported?",
+        default: false,
+        when: (answers) => answers.type === "private",
+      },
+      {
+        type: "confirm",
+        name: "needsUI",
+        message: "Do you need React configured?",
+        default: false,
+        when: (answers) => answers.type === "private",
+      },
+      {
+        type: "confirm",
+        name: "needsStyles",
+        message: "Do you need to have extra CSS styles?",
+        default: false,
+        when: (answers) => !!answers.needsUI,
       },
     ],
     actions: [
@@ -84,9 +120,41 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         template: "export const name = '{{ name }}';",
       },
       {
+        type: "add",
+        path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/src/env.ts",
+        templateFile: "templates/env.ts.hbs",
+        skip: (answers: object) => {
+          return ("hasEnv" in answers && !answers.hasEnv)
+        },
+      },
+      {
+        type: "add",
+        path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/src/styles.css",
+        templateFile: "templates/styles.css.hbs",
+        skip: (answers :object) => {    
+          return ("needsStyles" in answers && !answers.needsStyles)
+        }
+      },
+      {
+        type: "add",
+        path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/docs/index.mdx",
+        templateFile: "templates/docs/index.mdx.hbs",
+        skip: (answers: object) => {
+          return ("needsDocs" in answers && !answers.needsDocs)
+        },
+      },
+      {
+        type: "add",
+        path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/docs/meta.json",
+        templateFile: "templates/docs/meta.json.hbs",
+        skip: (answers: object) => {
+          return ("needsDocs" in answers && !answers.needsDocs)
+        },
+      },
+      {
         type: "modify",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/package.json",
-        async transform(content) {
+        async transform(content, data) {
           const grabPackageVersion = async (packageName: string) => {
             const version = await fetch(
               `https://registry.npmjs.org/-/package/${packageName}/dist-tags`,
@@ -105,34 +173,84 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
             return version;
           };
 
-          // Automatically update the package.json with the latest version of the dependencies
           const pkg = JSON.parse(content) as PackageJson;
-          if (pkg.devDependencies) {
-            for (const devDep of Object.keys(pkg.devDependencies)) {
-              const version = await grabPackageVersion(devDep);
-              if (version.startsWith("workspace:")) {
-                pkg.devDependencies[devDep] = version;
-              } else {
-                pkg.devDependencies[devDep] = `^${version}`;
-              }
-            }
+   
+          // Ensure objects exist
+          pkg.dependencies ||= {};
+          pkg.devDependencies ||= {};
+          pkg.peerDependencies ||= {};
+          pkg.exports ||= {};
+
+          // ENV support
+          if (data.hasEnv) {
+            pkg.dependencies["@t3-oss/env-core"] ||= "";
+            pkg.dependencies["arktype"] ||= "";
+            pkg.devDependencies["@types/node"] ||= "";
+
+            // Add exports for env
+            const exportsField = pkg.exports 
+            exportsField["./env"] = {
+              types: "./dist/src/env.d.ts",
+              default: "./src/env.ts",
+            };
           }
-          if (pkg.dependencies) {
-            for (const dep of Object.keys(pkg.dependencies)) {
-              const version = await grabPackageVersion(dep);
-              if (version.startsWith("workspace:")) {
-                pkg.dependencies[dep] = version;
-              } else {
-                pkg.dependencies[dep] = `^${version}`;
-              }
-            }
+
+          // UI support
+          if (data.needsUI) {
+            pkg.devDependencies["@rectangular-labs/ui"] ||= "";
+            pkg.peerDependencies["@rectangular-labs/ui"] ||= "";
+            pkg.devDependencies["react"] ||= "";
+            pkg.devDependencies["react-dom"] ||= "";
+            pkg.devDependencies["@types/react"] ||= "";
+            pkg.devDependencies["@types/react-dom"] ||= "";
+            pkg.peerDependencies["react"] ||= "";
+            pkg.peerDependencies["react-dom"] ||= "";
           }
+
+          // Styles export when requested
+          if (data.needsStyles) {
+            const exportsField = pkg.exports;
+            exportsField["./styles.css"] = "./src/styles.css";
+          }
+
+          // Normalize dependency versions (dev, deps, and peers)
+          // Automatically update the package.json with the latest version of the dependencies
+          const updateVersions = async (
+            deps: Record<string, string> | undefined,
+          ) => {
+            if (!deps) return;
+            for (const depName of Object.keys(deps)) {
+              const version = await grabPackageVersion(depName);
+              deps[depName] = version.startsWith("workspace:")
+                ? version
+                : `^${version}`;
+            }
+          };
+          await updateVersions(pkg.devDependencies);
+          await updateVersions(pkg.dependencies);
+          await updateVersions(pkg.peerDependencies);
+
           return JSON.stringify(pkg, null, 2);
+        },
+      },
+      {
+        type: "modify",
+        path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/tsconfig.json",
+        async transform(content, data) {
+          if (!data.needsUI) {
+            return content
+          }
+          const tsConfig = JSON.parse(content) as TSConfig
+          tsConfig.compilerOptions.jsx = "preserve";
+          tsConfig.compilerOptions.lib = ["ES2024", "DOM", "DOM.Iterable"];
+          
+          return JSON.stringify(tsConfig, null, 2);
         },
       },
       (answers) => {
         // Install deps and format everything
         if ("name" in answers && typeof answers.name === "string") {
+          execSync("pnpx sherif@latest -f", { stdio: "inherit" });
           execSync("pnpm i", { stdio: "inherit" });
           execSync("pnpm run format", { stdio: "inherit" });
           execSync("pnpm run lint", { stdio: "inherit" });
