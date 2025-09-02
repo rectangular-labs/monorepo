@@ -1,0 +1,6 @@
+{
+  "title": "Email Providers",
+  "description": "Supported email providers for @rectangular-labs/emails.",
+  "icon": "Envelope",
+  "defaultOpen": true
+}

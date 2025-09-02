@@ -1,0 +1,28 @@
+---
+title: Quick Start
+description: Unified email client with multiple providers and a consistent API.
+---
+
+```bash
+pnpm add @rectangular-labs/emails
+```
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+
+// Default uses the console driver (great for development)
+const email = createEmailClient();
+
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Welcome!",
+  html: "<h1>Welcome to our service!</h1>",
+  text: "Welcome to our service!",
+});
+```
+
+<Cards>
+  <Card title="Providers" href="./providers" />
+  <Card title="API Reference" href="./api" />
+</Cards>

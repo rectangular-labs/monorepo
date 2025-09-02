@@ -1,0 +1,27 @@
+---
+title: Scaleway
+description: Scaleway Transactional Email driver for @rectangular-labs/emails.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { scalewayDriver } from "@rectangular-labs/emails/drivers/scaleway";
+
+const email = createEmailClient({
+  driver: scalewayDriver({
+    region: "fr-par",
+    projectId: "your-project-id",
+    authToken: "your-auth-token",
+  }),
+});
+```
+
+```ts
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Hello from Scaleway",
+  text: "Hi!",
+});
+```

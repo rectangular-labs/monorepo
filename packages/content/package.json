@@ -1,0 +1,75 @@
+{
+  "name": "@rectangular-labs/content",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./styles.css": "./src/styles.css",
+    ".": {
+      "types": "./dist/src/source.d.tsx",
+      "default": "./src/source.tsx"
+    },
+    "./search": {
+      "types": "./dist/src/lib/search.d.ts",
+      "default": "./src/lib/search.ts"
+    },
+    "./rss": {
+      "types": "./dist/src/lib/rss.d.ts",
+      "default": "./src/lib/rss.ts"
+    },
+    "./posts": {
+      "types": "./dist/src/lib/posts.d.ts",
+      "default": "./src/lib/posts.ts"
+    },
+    "./collections": "./.content-collections/generated/index.ts",
+    "./ui/*": {
+      "types": "./dist/src/components/*.d.tsx",
+      "default": "./src/components/*.tsx"
+    }
+  },
+  "scripts": {
+    "build": "content-collections build && tsc",
+    "dev": "concurrently \"content-collections watch\" \"tsc --watch\"",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "bun x @biomejs/biome format . --write",
+    "lint": "bun x @biomejs/biome lint . --write",
+    "typecheck": "pnpm run build && tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@content-collections/cli": "^0.1.7",
+    "@content-collections/core": "^0.11.1",
+    "@content-collections/mdx": "^0.2.2",
+    "@fumadocs/content-collections": "^1.2.1",
+    "@rectangular-labs/typescript": "workspace:*",
+    "@types/mdast": "^4.0.4",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "concurrently": "^9.2.1",
+    "estree-util-value-to-estree": "^3.4.0",
+    "fumadocs-typescript": "^4.0.6",
+    "mdast-util-mdxjs-esm": "1.3.1",
+    "mdast-util-to-string": "^4.0.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "reading-time": "^1.5.0",
+    "rehype-external-links": "^3.0.0",
+    "typescript": "^5.9.2",
+    "unified": "^11.0.5",
+    "vite": "^7.1.3"
+  },
+  "peerDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "dependencies": {
+    "@rectangular-labs/ui": "workspace:*",
+    "arktype": "^2.1.20",
+    "feed": "^5.1.0",
+    "fumadocs-core": "^15.7.6",
+    "fumadocs-mdx": "^11.8.2",
+    "fumadocs-ui": "^15.7.6",
+    "lucide-static": "^0.542.0"
+  }
+}

@@ -1,0 +1,25 @@
+---
+title: MailerSend
+description: MailerSend driver for @rectangular-labs/emails.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { mailersendDriver } from "@rectangular-labs/emails/drivers/mailersend";
+
+const email = createEmailClient({
+  driver: mailersendDriver("your-mailersend-api-key"),
+});
+```
+
+```ts
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Hello from MailerSend",
+  html: "<p>Hi!</p>",
+});
+```
+
+

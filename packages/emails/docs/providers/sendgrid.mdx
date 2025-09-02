@@ -1,0 +1,25 @@
+---
+title: SendGrid
+description: SendGrid driver for @rectangular-labs/emails.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { sendgridDriver } from "@rectangular-labs/emails/drivers/sendgrid";
+
+const email = createEmailClient({
+  driver: sendgridDriver("your-sendgrid-api-key"),
+});
+```
+
+```ts
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Hello from SendGrid",
+  html: "<p>Hi!</p>",
+});
+```
+
+

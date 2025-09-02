@@ -12,9 +12,16 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DocsRouteRouteImport } from './routes/docs/route'
+import { Route as BlogRouteRouteImport } from './routes/blog/route'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as DocsSplatRouteImport } from './routes/docs/$'
+import { Route as BlogSplatRouteImport } from './routes/blog/$'
 import { Route as AuthedOrpcRouteImport } from './routes/_authed/orpc'
+import { ServerRoute as BlogRssDotxmlServerRouteImport } from './routes/blog/rss[.]xml'
 import { ServerRoute as ApiSplatServerRouteImport } from './routes/api/$'
 import { ServerRoute as ApiRpcSplatServerRouteImport } from './routes/api/rpc.$'
 
@@ -23,6 +30,16 @@ const rootServerRouteImport = createServerRootRoute()
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRouteRoute = DocsRouteRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRouteRoute = BlogRouteRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedRouteRoute = AuthedRouteRouteImport.update({
@@ -34,10 +51,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRouteRoute,
+} as any)
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const BlogSplatRoute = BlogSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => BlogRouteRoute,
+} as any)
 const AuthedOrpcRoute = AuthedOrpcRouteImport.update({
   id: '/orpc',
   path: '/orpc',
   getParentRoute: () => AuthedRouteRoute,
+} as any)
+const BlogRssDotxmlServerRoute = BlogRssDotxmlServerRouteImport.update({
+  id: '/blog/rss.xml',
+  path: '/blog/rss.xml',
+  getParentRoute: () => rootServerRouteImport,
 } as any)
 const ApiSplatServerRoute = ApiSplatServerRouteImport.update({
   id: '/api/$',
@@ -52,57 +94,99 @@ const ApiRpcSplatServerRoute = ApiRpcSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blog': typeof BlogRouteRouteWithChildren
+  '/docs': typeof DocsRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/orpc': typeof AuthedOrpcRoute
+  '/blog/$': typeof BlogSplatRoute
+  '/docs/$': typeof DocsSplatRoute
+  '/blog/': typeof BlogIndexRoute
+  '/docs/': typeof DocsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/orpc': typeof AuthedOrpcRoute
+  '/blog/$': typeof BlogSplatRoute
+  '/docs/$': typeof DocsSplatRoute
+  '/blog': typeof BlogIndexRoute
+  '/docs': typeof DocsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteRouteWithChildren
+  '/blog': typeof BlogRouteRouteWithChildren
+  '/docs': typeof DocsRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_authed/orpc': typeof AuthedOrpcRoute
+  '/blog/$': typeof BlogSplatRoute
+  '/docs/$': typeof DocsSplatRoute
+  '/blog/': typeof BlogIndexRoute
+  '/docs/': typeof DocsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/orpc'
+  fullPaths:
+    | '/'
+    | '/blog'
+    | '/docs'
+    | '/login'
+    | '/orpc'
+    | '/blog/$'
+    | '/docs/$'
+    | '/blog/'
+    | '/docs/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/orpc'
-  id: '__root__' | '/' | '/_authed' | '/login' | '/_authed/orpc'
+  to: '/' | '/login' | '/orpc' | '/blog/$' | '/docs/$' | '/blog' | '/docs'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/blog'
+    | '/docs'
+    | '/login'
+    | '/_authed/orpc'
+    | '/blog/$'
+    | '/docs/$'
+    | '/blog/'
+    | '/docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
+  BlogRouteRoute: typeof BlogRouteRouteWithChildren
+  DocsRouteRoute: typeof DocsRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
 }
 export interface FileServerRoutesByFullPath {
   '/api/$': typeof ApiSplatServerRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlServerRoute
   '/api/rpc/$': typeof ApiRpcSplatServerRoute
 }
 export interface FileServerRoutesByTo {
   '/api/$': typeof ApiSplatServerRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlServerRoute
   '/api/rpc/$': typeof ApiRpcSplatServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
   '/api/$': typeof ApiSplatServerRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlServerRoute
   '/api/rpc/$': typeof ApiRpcSplatServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/$' | '/api/rpc/$'
+  fullPaths: '/api/$' | '/blog/rss.xml' | '/api/rpc/$'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/$' | '/api/rpc/$'
-  id: '__root__' | '/api/$' | '/api/rpc/$'
+  to: '/api/$' | '/blog/rss.xml' | '/api/rpc/$'
+  id: '__root__' | '/api/$' | '/blog/rss.xml' | '/api/rpc/$'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
   ApiSplatServerRoute: typeof ApiSplatServerRoute
+  BlogRssDotxmlServerRoute: typeof BlogRssDotxmlServerRoute
   ApiRpcSplatServerRoute: typeof ApiRpcSplatServerRoute
 }
 
@@ -113,6 +197,20 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed': {
@@ -129,6 +227,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRouteRoute
+    }
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/blog/$': {
+      id: '/blog/$'
+      path: '/$'
+      fullPath: '/blog/$'
+      preLoaderRoute: typeof BlogSplatRouteImport
+      parentRoute: typeof BlogRouteRoute
+    }
     '/_authed/orpc': {
       id: '/_authed/orpc'
       path: '/orpc'
@@ -140,6 +266,13 @@ declare module '@tanstack/react-router' {
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
+    '/blog/rss.xml': {
+      id: '/blog/rss.xml'
+      path: '/blog/rss.xml'
+      fullPath: '/blog/rss.xml'
+      preLoaderRoute: typeof BlogRssDotxmlServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/$': {
       id: '/api/$'
       path: '/api/$'
@@ -169,9 +302,39 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
   AuthedRouteRouteChildren,
 )
 
+interface BlogRouteRouteChildren {
+  BlogSplatRoute: typeof BlogSplatRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+}
+
+const BlogRouteRouteChildren: BlogRouteRouteChildren = {
+  BlogSplatRoute: BlogSplatRoute,
+  BlogIndexRoute: BlogIndexRoute,
+}
+
+const BlogRouteRouteWithChildren = BlogRouteRoute._addFileChildren(
+  BlogRouteRouteChildren,
+)
+
+interface DocsRouteRouteChildren {
+  DocsSplatRoute: typeof DocsSplatRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+}
+
+const DocsRouteRouteChildren: DocsRouteRouteChildren = {
+  DocsSplatRoute: DocsSplatRoute,
+  DocsIndexRoute: DocsIndexRoute,
+}
+
+const DocsRouteRouteWithChildren = DocsRouteRoute._addFileChildren(
+  DocsRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
+  BlogRouteRoute: BlogRouteRouteWithChildren,
+  DocsRouteRoute: DocsRouteRouteWithChildren,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
@@ -179,6 +342,7 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
   ApiSplatServerRoute: ApiSplatServerRoute,
+  BlogRssDotxmlServerRoute: BlogRssDotxmlServerRoute,
   ApiRpcSplatServerRoute: ApiRpcSplatServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport

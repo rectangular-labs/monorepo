@@ -1,0 +1,33 @@
+---
+title: Nodemailer (SMTP)
+description: Nodemailer SMTP driver for @rectangular-labs/emails.
+icon: Envelope
+---
+
+```ts
+import { createEmailClient } from "@rectangular-labs/emails";
+import { nodemailerDriver } from "@rectangular-labs/emails/drivers/nodemailer";
+
+const email = createEmailClient({
+  driver: nodemailerDriver({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "your-email@gmail.com",
+      pass: "your-app-password",
+    },
+  }),
+});
+```
+
+```ts
+await email.send({
+  from: "noreply@yourdomain.com",
+  to: "user@example.com",
+  subject: "Hello via SMTP",
+  text: "Hi!",
+});
+```
+
+

@@ -1,0 +1,36 @@
+---
+title: "Drizzle ORM + PostgreSQL in a Turborepo"
+description: "Type-safe queries, fast DX, and shared types across packages."
+icon: "Database"
+cover: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop"
+---
+
+<Callout type="note">
+Monorepos shine when database types are shared between API and UI packages.
+</Callout>
+
+## Setup outline
+
+- Define schema in a `packages/db` workspace using Drizzle.
+- Generate types and export a `createDb` factory.
+- Consume from `packages/api` and keep Zod/ArkType schemas in sync.
+
+## Migrations
+
+Use Drizzle Kit to generate and apply migrations, and wire scripts via your root workspace.
+
+## References
+
+<Cards>
+  <Card title="Drizzle ORM" href="https://orm.drizzle.team">
+    Lightweight TypeScript ORM with first-class SQL.
+  </Card>
+  <Card title="PostgreSQL Docs" href="https://www.postgresql.org/docs/">
+    Official PostgreSQL documentation and guides.
+  </Card>
+  <Card title="Turborepo Handbook" href="https://turbo.build/repo/docs">
+    Patterns for multi-package, cached builds.
+  </Card>
+</Cards>
+
+
