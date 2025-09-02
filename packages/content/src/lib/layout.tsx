@@ -3,7 +3,9 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
-      title: "Tanstack Start",
+      title: "Rectangular Labs",
+      transparentMode: "top",
+      url: "/blog",
     },
   };
 }

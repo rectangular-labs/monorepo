@@ -1,7 +1,6 @@
 import { blogSource } from "@rectangular-labs/content";
 import { extractPostsFromTree } from "@rectangular-labs/content/posts";
 import { PostCard } from "@rectangular-labs/content/ui/post-card";
-import { Input } from "@rectangular-labs/ui/components/ui/input";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -27,25 +26,12 @@ function Page() {
   const { tree } = Route.useLoaderData();
   const parsedTree = tree as PageTree.Folder;
 
-  const [query, setQuery] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
 
-  const postsAll = useMemo(
-    () => extractPostsFromTree(parsedTree),
-    [parsedTree],
-  );
-  const posts = useMemo(() => {
-    if (!query) return postsAll;
-    const q = query.toLowerCase();
-    return postsAll.filter(
-      (p) =>
-        (p.title ?? "").toLowerCase().includes(q) ||
-        (p.description ?? "").toLowerCase().includes(q),
-    );
-  }, [postsAll, query]);
+  const posts = useMemo(() => extractPostsFromTree(parsedTree), [parsedTree]);
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto space-y-6 py-10">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div className="space-y-1">
           <h1 className="font-semibold text-2xl tracking-tight">Blog</h1>
@@ -63,17 +49,6 @@ function Page() {
             <ToggleGroupItem value="list">List</ToggleGroupItem>
           </ToggleGroup>
         </div>
-      </div>
-
-      <div className="relative">
-        <Input
-          className="w-full"
-          onChange={(e) =>
-            setQuery("value" in e.target ? (e.target.value as string) : "")
-          }
-          placeholder="Search posts"
-          value={query}
-        />
       </div>
 
       {posts.length === 0 ? (

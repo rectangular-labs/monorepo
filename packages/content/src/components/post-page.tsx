@@ -10,7 +10,7 @@ import {
   DocsTitle,
 } from "fumadocs-ui/page";
 import type { MDXComponents } from "mdx/types";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { baseOptions } from "../lib/layout";
 import { extractPostsFromTree } from "../lib/posts";
 import { transformPageTree } from "../lib/transform-page-tree";
@@ -39,7 +39,12 @@ export function PostPage({
     [dataTree],
   );
 
-  const currentUrl = window.location.href;
+  const [currentUrl, setCurrentUrl] = useState<undefined | string>(undefined);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentUrl(window.location.href);
+    }
+  }, []);
   const currentIndex = useMemo(
     () => (currentUrl ? posts.findIndex((p) => p.url === currentUrl) : -1),
     [posts, currentUrl],
@@ -55,7 +60,6 @@ export function PostPage({
   );
 
   const shareHref = currentUrl ?? "";
-
   return (
     <DocsLayout
       {...(layoutOptions ?? baseOptions())}
@@ -64,15 +68,13 @@ export function PostPage({
     >
       <DocsPage
         breadcrumb={{
-          enabled: true,
-          includePage: false,
-          includeRoot: false,
-          includeSeparator: false,
+          enabled: false,
         }}
         footer={{ enabled: false }}
         tableOfContent={{
           enabled: true,
           style: "clerk",
+          header: <div className="py-6" />,
           footer: (
             <div className="flex items-center gap-3 text-muted-foreground">
               <a
@@ -110,6 +112,9 @@ export function PostPage({
               </button>
             </div>
           ),
+        }}
+        tableOfContentPopover={{
+          enabled: false,
         }}
         toc={data.toc}
       >

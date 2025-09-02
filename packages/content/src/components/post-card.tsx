@@ -5,7 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
+import { HomeLayout } from "fumadocs-ui/layouts/home";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { baseOptions } from "../lib/layout";
 
 type PostCardBaseProps = {
   href: string;
@@ -78,4 +80,8 @@ export function PostCard({
       </Card>
     </a>
   );
+}
+
+export function PostsLayout({ children }: { children: ReactNode }) {
+  return <HomeLayout {...baseOptions()}>{children}</HomeLayout>;
 }

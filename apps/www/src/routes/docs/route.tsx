@@ -1,17 +1,14 @@
 import { ContentProvider } from "@rectangular-labs/content/ui/content-provider";
-import { PostsLayout } from "@rectangular-labs/content/ui/post-card";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/blog")({
+export const Route = createFileRoute("/docs")({
   component: Layout,
 });
 
 function Layout() {
   return (
-    <ContentProvider api="/api/blog/search">
-      <PostsLayout>
-        <Outlet />
-      </PostsLayout>
+    <ContentProvider api="/api/docs/search">
+      <Outlet />
     </ContentProvider>
   );
 }

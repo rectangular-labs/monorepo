@@ -12,6 +12,7 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DocsRouteRouteImport } from './routes/docs/route'
 import { Route as BlogRouteRouteImport } from './routes/blog/route'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -31,6 +32,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsRouteRoute = DocsRouteRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogRouteRoute = BlogRouteRouteImport.update({
   id: '/blog',
   path: '/blog',
@@ -46,9 +52,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
-  id: '/docs/',
-  path: '/docs/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRouteRoute,
 } as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/',
@@ -56,9 +62,9 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   getParentRoute: () => BlogRouteRoute,
 } as any)
 const DocsSplatRoute = DocsSplatRouteImport.update({
-  id: '/docs/$',
-  path: '/docs/$',
-  getParentRoute: () => rootRouteImport,
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => DocsRouteRoute,
 } as any)
 const BlogSplatRoute = BlogSplatRouteImport.update({
   id: '/$',
@@ -89,12 +95,13 @@ const ApiRpcSplatServerRoute = ApiRpcSplatServerRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteRouteWithChildren
+  '/docs': typeof DocsRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/orpc': typeof AuthedOrpcRoute
   '/blog/$': typeof BlogSplatRoute
   '/docs/$': typeof DocsSplatRoute
   '/blog/': typeof BlogIndexRoute
-  '/docs': typeof DocsIndexRoute
+  '/docs/': typeof DocsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteRouteWithChildren
   '/blog': typeof BlogRouteRouteWithChildren
+  '/docs': typeof DocsRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_authed/orpc': typeof AuthedOrpcRoute
   '/blog/$': typeof BlogSplatRoute
@@ -122,12 +130,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
+    | '/docs'
     | '/login'
     | '/orpc'
     | '/blog/$'
     | '/docs/$'
     | '/blog/'
-    | '/docs'
+    | '/docs/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/login' | '/orpc' | '/blog/$' | '/docs/$' | '/blog' | '/docs'
   id:
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/blog'
+    | '/docs'
     | '/login'
     | '/_authed/orpc'
     | '/blog/$'
@@ -147,9 +157,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
   BlogRouteRoute: typeof BlogRouteRouteWithChildren
+  DocsRouteRoute: typeof DocsRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
-  DocsSplatRoute: typeof DocsSplatRoute
-  DocsIndexRoute: typeof DocsIndexRoute
 }
 export interface FileServerRoutesByFullPath {
   '/api/$': typeof ApiSplatServerRoute
@@ -190,6 +199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog': {
       id: '/blog'
       path: '/blog'
@@ -213,10 +229,10 @@ declare module '@tanstack/react-router' {
     }
     '/docs/': {
       id: '/docs/'
-      path: '/docs'
-      fullPath: '/docs'
+      path: '/'
+      fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DocsRouteRoute
     }
     '/blog/': {
       id: '/blog/'
@@ -227,10 +243,10 @@ declare module '@tanstack/react-router' {
     }
     '/docs/$': {
       id: '/docs/$'
-      path: '/docs/$'
+      path: '/$'
       fullPath: '/docs/$'
       preLoaderRoute: typeof DocsSplatRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DocsRouteRoute
     }
     '/blog/$': {
       id: '/blog/$'
@@ -300,13 +316,26 @@ const BlogRouteRouteWithChildren = BlogRouteRoute._addFileChildren(
   BlogRouteRouteChildren,
 )
 
+interface DocsRouteRouteChildren {
+  DocsSplatRoute: typeof DocsSplatRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+}
+
+const DocsRouteRouteChildren: DocsRouteRouteChildren = {
+  DocsSplatRoute: DocsSplatRoute,
+  DocsIndexRoute: DocsIndexRoute,
+}
+
+const DocsRouteRouteWithChildren = DocsRouteRoute._addFileChildren(
+  DocsRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
   BlogRouteRoute: BlogRouteRouteWithChildren,
+  DocsRouteRoute: DocsRouteRouteWithChildren,
   LoginRoute: LoginRoute,
-  DocsSplatRoute: DocsSplatRoute,
-  DocsIndexRoute: DocsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

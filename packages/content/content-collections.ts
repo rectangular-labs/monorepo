@@ -3,6 +3,9 @@ import { defineCollection, defineConfig } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
 import { type } from "arktype";
 import { createGenerator, remarkAutoTypeTable } from "fumadocs-typescript";
+import rehypeExternalLinks from "rehype-external-links";
+import remarkModifiedTime from "./src/lib/remark-modified-time";
+import remarkReadingTime from "./src/lib/remark-reading-time";
 
 const DocSchema = type({
   title: "string",
@@ -11,6 +14,8 @@ const DocSchema = type({
   "full?": "boolean",
   // TODO: add openapi thingy
   // "_openapi?": "Record<string, any>",
+  "readingTime?": "string",
+  "lastModified?": "string",
 });
 
 const generator = createGenerator();
@@ -21,7 +26,21 @@ const docs = defineCollection({
   schema: DocSchema,
   transform: (document, context) =>
     transformMDX(document, context, {
-      remarkPlugins: [[remarkAutoTypeTable, { generator }]],
+      remarkPlugins: [
+        [remarkAutoTypeTable, { generator }],
+        remarkModifiedTime,
+        remarkReadingTime,
+      ],
+      rehypePlugins: [
+        [
+          rehypeExternalLinks,
+          {
+            target: "_blank",
+            rel: ["noopener", "noreferrer"],
+            content: { type: "text", value: " 🔗" },
+          },
+        ],
+      ],
     }),
 });
 
@@ -52,7 +71,21 @@ const posts = defineCollection({
   }),
   transform: (document, context) =>
     transformMDX(document, context, {
-      remarkPlugins: [[remarkAutoTypeTable, { generator }]],
+      remarkPlugins: [
+        [remarkAutoTypeTable, { generator }],
+        remarkModifiedTime,
+        remarkReadingTime,
+      ],
+      rehypePlugins: [
+        [
+          rehypeExternalLinks,
+          {
+            target: "_blank",
+            rel: ["noopener", "noreferrer"],
+            content: { type: "text", value: " 🔗" },
+          },
+        ],
+      ],
     }),
 });
 

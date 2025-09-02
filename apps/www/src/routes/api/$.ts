@@ -14,7 +14,7 @@ async function handle({ request }: { request: Request }) {
     return await auth.handler(request);
   }
 
-  if (new URL(request.url).pathname.startsWith("/api/search")) {
+  if (new URL(request.url).pathname.startsWith("/api/docs/search")) {
     if (request.method !== "GET") {
       return new Response("Method not allowed", { status: 405 });
     }
