@@ -43,6 +43,7 @@ export function DocPage({
           includeRoot: true,
         }}
         footer={{ enabled: true }}
+        lastUpdate={data.lastModified}
         tableOfContent={{
           enabled: true,
           style: "clerk",
