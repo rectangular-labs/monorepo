@@ -50,21 +50,18 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         name: "hasEnv",
         message: "Do you want to have env variables exported?",
         default: false,
-        when: (answers) => answers.type === "private",
       },
       {
         type: "confirm",
         name: "needsUI",
         message: "Do you need React configured?",
         default: false,
-        when: (answers) => answers.type === "private",
       },
       {
         type: "confirm",
         name: "needsStyles",
         message: "Do you need to have extra CSS styles?",
         default: false,
-        when: (answers) => !!answers.needsUI,
       },
     ],
     actions: [

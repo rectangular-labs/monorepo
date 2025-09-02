@@ -1,6 +1,6 @@
 ---
 alwaysApply: true
-globs:
+globs: 
 description: General development
 ---
 
@@ -92,8 +92,30 @@ This is a TypeScript monorepo using Turborepo with the following structure:
 
 ## Package Generation
 
-Create new packages with: `pnpm new:package --args "PACKAGE_NAME" "public"|"private"`
-This scaffolds a new package under `packages/` with proper configuration.
+Preferred for AI/non-interactive: use `--args` to bypass prompts.
+
+- Argument order:
+  - `name`, `type`, `needsDocs`, `hasEnv` (private only), `needsUI` (private only), `needsStyles` (only if UI is enabled)
+
+- Examples:
+  - Public with no docs, no env, no ui, no styles:
+    - `pnpm new:package --args "my-lib" "public" "false" "false" "false" "false"`
+  - Public with docs, no env, no ui, no styles:
+    - `pnpm new:package --args "my-lib" "public" "true" "false" "false" "false"`
+  - Private with docs, env, React UI, and styles:
+    - `pnpm new:package --args "my-private-lib" "private" "true" "true" "true" "true"`
+  - Private with env only (no UI, no styles, no docs):
+    - `pnpm new:package --args "my-svc" "private" "false" "true" "false" "false"`
+  - Private with env and UI (no docs, no styles):
+    - `pnpm new:package --args "my-svc" "private" "false" "true" "true" "false"`
+
+Interactive (for humans): `pnpm new:package` and answer prompts. The scope `@rectangular-labs/` in the name is optional and normalized.
+
+Behavioral notes:
+
+- Public packages get `tsup.config.ts`; private do not.
+- Dependencies are auto-normalized to latest (workspace deps remain `workspace:*`).
+- After scaffolding, install, format, and lint run automatically.
 
 ## Code Conventions
 

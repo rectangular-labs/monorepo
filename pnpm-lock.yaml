@@ -395,6 +395,15 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
 
+  packages/testing:
+    devDependencies:
+      '@rectangular-labs/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   packages/ui:
     dependencies:
       '@hookform/resolvers':
