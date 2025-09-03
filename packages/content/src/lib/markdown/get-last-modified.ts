@@ -22,12 +22,17 @@ const resolveFilepath = (candidate?: string | null): string | null => {
 
 export function getLastModified({ filepath }: { filepath: string }) {
   const resolvedFilePath = resolveFilepath(filepath);
-  const out = execSync(
-    `git log -1 --pretty="format:%cI" "${resolvedFilePath}"`,
-    {
-      stdio: ["ignore", "pipe", "ignore"],
-    },
-  );
-  const iso = out.toString().trim();
-  return iso;
+  if (!resolvedFilePath) return null;
+  try {
+    const out = execSync(
+      `git log -1 --pretty="format:%cI" "${resolvedFilePath}"`,
+      {
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    );
+    const iso = out.toString().trim();
+    return iso;
+  } catch {
+    return null;
+  }
 }
