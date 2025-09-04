@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.3.1",
     "typescript": "^5.9.2"
   },
   "dependencies": {
@@ -52,6 +52,6 @@
     "arktype": "^2.1.21"
   },
   "overrides": {
-    "@tanstack/react-query": "5.85.9"
+    "@tanstack/react-query": "5.86.0"
   }
 }
