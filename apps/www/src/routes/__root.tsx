@@ -23,12 +23,23 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       ...seo({
-        title: "Elastic Bottle Monorepo template",
+        title:
+          "Rectangular Labs — Bootstrapped, customer‑obsessed software ventures",
         description:
-          "Simple typescript monorepo template for end to end application development",
+          "We build and launch high‑craft products: Result, Emails, and a production‑ready monorepo starter.",
       }),
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap",
+      },
       {
         rel: "alternate",
         type: "application/rss+xml",
