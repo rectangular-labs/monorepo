@@ -221,6 +221,9 @@ importers:
 
   packages/content:
     dependencies:
+      '@rectangular-labs/result':
+        specifier: workspace:*
+        version: link:../result
       '@rectangular-labs/ui':
         specifier: workspace:*
         version: link:../ui
