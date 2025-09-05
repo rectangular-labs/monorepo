@@ -1,7 +1,11 @@
 {
   "name": "rectangular-labs",
   "private": true,
-  "workspaces": ["apps/*", "packages/*", "tooling/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tooling/*"
+  ],
   "scripts": {
     "build": "turbo build",
     "changeset": "changeset",

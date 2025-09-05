@@ -17,9 +17,9 @@
       "types": "./dist/src/lib/rss.d.ts",
       "default": "./src/lib/rss.ts"
     },
-    "./posts": {
-      "types": "./dist/src/lib/posts.d.ts",
-      "default": "./src/lib/posts.ts"
+    "./get-posts-overview": {
+      "types": "./dist/src/lib/get-posts-overview.d.ts",
+      "default": "./src/lib/get-posts-overview.ts"
     },
     "./collections": "./.content-collections/generated/index.ts",
     "./ui/*": {
@@ -59,6 +59,7 @@
     "react-dom": "^19.1.1"
   },
   "dependencies": {
+    "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "arktype": "^2.1.22",
     "feed": "^5.1.0",

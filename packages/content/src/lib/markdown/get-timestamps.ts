@@ -20,18 +20,25 @@ const resolveFilepath = (candidate?: string | null): string | null => {
   }
 };
 
-export function getLastModified({ filepath }: { filepath: string }) {
+export function getTimestamps({ filepath }: { filepath: string }) {
   const resolvedFilePath = resolveFilepath(filepath);
   if (!resolvedFilePath) return null;
   try {
-    const out = execSync(
+    const lastModified = execSync(
       `git log -1 --pretty="format:%cI" "${resolvedFilePath}"`,
       {
         stdio: ["ignore", "pipe", "ignore"],
       },
     );
-    const iso = out.toString().trim();
-    return iso;
+    const createdAt = execSync(
+      `git log --follow --pretty="format:%aI" --reverse "${resolvedFilePath}" | head -1`,
+      {
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    );
+    const lastModifiedIso = lastModified.toString().trim();
+    const createdAtIso = createdAt.toString().trim();
+    return { lastModified: lastModifiedIso, createdAt: createdAtIso };
   } catch {
     return null;
   }

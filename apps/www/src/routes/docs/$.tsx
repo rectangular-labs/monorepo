@@ -1,4 +1,5 @@
 import { docSource } from "@rectangular-labs/content";
+import { getPostsOverview } from "@rectangular-labs/content/get-posts-overview";
 import { DocPage } from "@rectangular-labs/content/ui/doc-page";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
@@ -7,27 +8,29 @@ const getDocData = createServerFn({
   method: "GET",
 })
   .validator((slugs: string[]) => slugs)
-  .handler(({ data: slugs }) => {
+  .handler(async ({ data: slugs }) => {
     const page = docSource.getPage(slugs);
     if (!page) throw notFound();
 
+    const postsOverview = await getPostsOverview();
+
     return {
-      tree: docSource.pageTree as object,
       path: page.path,
       data: page.data,
+      postsOverview,
+      tree: docSource.pageTree as object,
     };
   });
 
 export const Route = createFileRoute("/docs/$")({
   component: Page,
   loader: async ({ params }) => {
-    const _params = params as unknown as { _splat?: string };
-    const data = await getDocData({ data: _params._splat?.split("/") ?? [] });
+    const data = await getDocData({ data: params._splat?.split("/") ?? [] });
     return data;
   },
 });
 
 function Page() {
-  const { data, tree: dataTree } = Route.useLoaderData();
-  return <DocPage data={data} tree={dataTree} />;
+  const { data, tree } = Route.useLoaderData();
+  return <DocPage data={data} tree={tree} />;
 }
