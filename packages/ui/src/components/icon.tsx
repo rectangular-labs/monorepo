@@ -9,7 +9,9 @@ import {
   XIcon as LucideXIcon,
   MenuIcon,
   MoonIcon,
+  SearchIcon,
   SunIcon,
+  UserIcon,
 } from "lucide-react";
 import type { SVGProps } from "react";
 
@@ -26,6 +28,8 @@ export const File = FileIcon;
 export const Dot = DotIcon;
 export const Menu = MenuIcon;
 export const X = LucideXIcon;
+export const User = UserIcon;
+export const Search = SearchIcon;
 
 export const Logo = (props: IconProps) => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>
