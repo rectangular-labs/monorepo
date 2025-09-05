@@ -8,6 +8,8 @@ function handle() {
   return new Response(xml);
 }
 
-export const ServerRoute = createServerFileRoute("/_marketing/blog/rss.xml").methods({
+export const ServerRoute = createServerFileRoute(
+  "/_marketing/blog/rss.xml",
+).methods({
   GET: handle,
 });

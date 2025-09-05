@@ -1,6 +1,6 @@
+import { readFileSync } from "node:fs";
 import { safeSync } from "@rectangular-labs/result";
 import { type } from "arktype";
-import { readFileSync } from "fs";
 import { AuthorSchema } from "../schema";
 export function getAuthor(authorId?: string): typeof AuthorSchema.infer | null {
   if (!authorId) return null;

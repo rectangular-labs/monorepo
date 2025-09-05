@@ -1,5 +1,4 @@
 import { MailIcon } from "lucide-react";
-import { cn } from "../../utils/cn";
 import { Button } from "../ui/button";
 import { type AuthViewPath, useAuth } from "./auth-provider";
 
@@ -18,7 +17,7 @@ export function SignInEmailCodeButton({
 
   return (
     <Button
-      className={cn("w-full")}
+      className={"w-full"}
       disabled={isSubmitting}
       onClick={() => setView(toggledView)}
       type="button"
