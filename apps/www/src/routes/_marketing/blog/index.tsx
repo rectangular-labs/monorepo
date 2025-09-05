@@ -18,7 +18,6 @@ export const Route = createFileRoute("/_marketing/blog/")({
 
 function Page() {
   const { postOverview } = Route.useLoaderData();
-  console.log("postOverview", postOverview);
 
   if (postOverview.length === 0) {
     return (
