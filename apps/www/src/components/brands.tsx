@@ -1,39 +1,20 @@
+import {
+  AppleIcon,
+  GoogleIcon,
+  SolanaIcon,
+} from "@rectangular-labs/ui/components/icon";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
+
 export function Brands() {
   return (
-    <section className="section">
-      <div className="container-narrow">
-        <h2 className="text-center font-medium text-lg">
-          Trusted building blocks
-        </h2>
-        <div className="mx-auto mt-10 flex max-w-4xl flex-wrap items-center justify-center gap-x-12 gap-y-8 opacity-80">
-          <img
-            alt="GitHub"
-            className="h-5 w-auto dark:invert"
-            src="/logos/github.svg"
-          />
-          <img
-            alt="Vercel"
-            className="h-5 w-auto dark:invert"
-            src="/logos/vercel.svg"
-          />
-          <img
-            alt="OpenAI"
-            className="h-5 w-auto dark:invert"
-            src="/logos/openai.svg"
-          />
-          <img
-            alt="Tailwind"
-            className="h-5 w-auto dark:invert"
-            src="/logos/tailwindcss.svg"
-          />
-          <img
-            alt="pnpm"
-            className="h-5 w-auto dark:invert"
-            src="/logos/pnpm.svg"
-          />
-        </div>
+    <Section>
+      <h2 className="text-center font-medium text-lg">By Ex Engineers from</h2>
+      <div className="mx-auto mt-10 flex max-w-4xl flex-wrap items-center justify-center gap-x-12 gap-y-8 opacity-80">
+        <SolanaIcon className="size-14" />
+        <GoogleIcon className="size-10" />
+        <AppleIcon className="size-10" />
       </div>
-    </section>
+    </Section>
   );
 }
 

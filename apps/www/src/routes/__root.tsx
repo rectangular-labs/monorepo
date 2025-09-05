@@ -24,9 +24,9 @@ export const Route = createRootRouteWithContext<{
       },
       ...seo({
         title:
-          "Rectangular Labs — Bootstrapped, customer‑obsessed software ventures",
+          "Rectangular Labs — Bootstrapped, customer-obsessed technology studio",
         description:
-          "We build and launch high‑craft products: Result, Emails, and a production‑ready monorepo starter.",
+          "We build and launch high-craft products: Result, Emails, and a production-ready monorepo starter.",
       }),
     ],
     links: [
