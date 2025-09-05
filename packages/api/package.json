@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.3.1",
     "typescript": "^5.9.2"
   },
   "dependencies": {
@@ -49,9 +49,9 @@
     "@rectangular-labs/db": "workspace:*",
     "@simplewebauthn/server": "^13.1.2",
     "@t3-oss/env-core": "^0.13.8",
-    "arktype": "^2.1.21"
+    "arktype": "^2.1.22"
   },
   "overrides": {
-    "@tanstack/react-query": "5.85.9"
+    "@tanstack/react-query": "5.86.0"
   }
 }
