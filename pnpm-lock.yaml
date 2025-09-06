@@ -216,14 +216,14 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
       fumadocs-core:
-        specifier: ^15.7.9
-        version: 15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
+        specifier: ^15.7.10
+        version: 15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
       fumadocs-mdx:
-        specifier: ^11.8.3
-        version: 11.8.3(fumadocs-core@15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(react@19.1.1)(vite@7.1.4(@types/node@24.3.1)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.3)(yaml@2.8.1))
+        specifier: ^11.9.0
+        version: 11.9.0(fumadocs-core@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(react@19.1.1)(vite@7.1.4(@types/node@24.3.1)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.3)(yaml@2.8.1))
       fumadocs-ui:
-        specifier: ^15.7.9
-        version: 15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13)
+        specifier: ^15.7.10
+        version: 15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13)
       lucide-static:
         specifier: ^0.542.0
         version: 0.542.0
@@ -239,7 +239,7 @@ importers:
         version: 0.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@fumadocs/content-collections':
         specifier: ^1.2.2
-        version: 1.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))
+        version: 1.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))
       '@rectangular-labs/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
@@ -259,8 +259,8 @@ importers:
         specifier: ^9.2.1
         version: 9.2.1
       fumadocs-typescript:
-        specifier: ^4.0.7
-        version: 4.0.7(@types/react@19.1.12)(typescript@5.9.2)
+        specifier: ^4.0.8
+        version: 4.0.8(@types/react@19.1.12)(fumadocs-core@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(fumadocs-ui@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13))(typescript@5.9.2)
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -2223,8 +2223,8 @@ packages:
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
 
-  '@orama/orama@3.1.12':
-    resolution: {integrity: sha512-U7PY8FwXHuJ6bNBpbsqe0KLzb91IcJuORDggqHHkFy1waokY5SpWLN9tzB3AOW776awp6s1bjwts9I9Davy3lw==}
+  '@orama/orama@3.1.13':
+    resolution: {integrity: sha512-O0hdKt4K31i8fpq8Bw5RfdPVAqm0EdduBUcluPo2MRcfCOwUEf5JlnvRhf/J0ezOYOD8jQ/LumYZxOVi/XK/BA==}
     engines: {node: '>= 20.0.0'}
 
   '@orpc/arktype@1.8.6':
@@ -3678,17 +3678,11 @@ packages:
   '@shikijs/core@1.29.2':
     resolution: {integrity: sha512-vju0lY9r27jJfOY4Z7+Rt/nIOjzJpZ3y+nYpqtUZInVoXQ/TJZcfGnNOGnKjFdVZb8qexiCuSlZRKcGfhhTTZQ==}
 
-  '@shikijs/core@3.12.0':
-    resolution: {integrity: sha512-rPfCBd6gHIKBPpf2hKKWn2ISPSrmRKAFi+bYDjvZHpzs3zlksWvEwaF3Z4jnvW+xHxSRef7qDooIJkY0RpA9EA==}
-
   '@shikijs/core@3.12.2':
     resolution: {integrity: sha512-L1Safnhra3tX/oJK5kYHaWmLEBJi1irASwewzY3taX5ibyXyMkkSDZlq01qigjryOBwrXSdFgTiZ3ryzSNeu7Q==}
 
   '@shikijs/engine-javascript@1.29.2':
     resolution: {integrity: sha512-iNEZv4IrLYPv64Q6k7EPpOCE/nuvGiKl7zxdq0WFuRPF5PAE9PRo2JGq/d8crLusM59BRemJ4eOqrFrC4wiQ+A==}
-
-  '@shikijs/engine-javascript@3.12.0':
-    resolution: {integrity: sha512-Ni3nm4lnKxyKaDoXQQJYEayX052BL7D0ikU5laHp+ynxPpIF1WIwyhzrMU6WDN7AoAfggVR4Xqx3WN+JTS+BvA==}
 
   '@shikijs/engine-javascript@3.12.2':
     resolution: {integrity: sha512-Nm3/azSsaVS7hk6EwtHEnTythjQfwvrO5tKqMlaH9TwG1P+PNaR8M0EAKZ+GaH2DFwvcr4iSfTveyxMIvXEHMw==}
@@ -3696,41 +3690,29 @@ packages:
   '@shikijs/engine-oniguruma@1.29.2':
     resolution: {integrity: sha512-7iiOx3SG8+g1MnlzZVDYiaeHe7Ez2Kf2HrJzdmGwkRisT7r4rak0e655AcM/tF9JG/kg5fMNYlLLKglbN7gBqA==}
 
-  '@shikijs/engine-oniguruma@3.12.0':
-    resolution: {integrity: sha512-IfDl3oXPbJ/Jr2K8mLeQVpnF+FxjAc7ZPDkgr38uEw/Bg3u638neSrpwqOTnTHXt1aU0Fk1/J+/RBdst1kVqLg==}
-
   '@shikijs/engine-oniguruma@3.12.2':
     resolution: {integrity: sha512-hozwnFHsLvujK4/CPVHNo3Bcg2EsnG8krI/ZQ2FlBlCRpPZW4XAEQmEwqegJsypsTAN9ehu2tEYe30lYKSZW/w==}
 
   '@shikijs/langs@1.29.2':
     resolution: {integrity: sha512-FIBA7N3LZ+223U7cJDUYd5shmciFQlYkFXlkKVaHsCPgfVLiO+e12FmQE6Tf9vuyEsFe3dIl8qGWKXgEHL9wmQ==}
 
-  '@shikijs/langs@3.12.0':
-    resolution: {integrity: sha512-HIca0daEySJ8zuy9bdrtcBPhcYBo8wR1dyHk1vKrOuwDsITtZuQeGhEkcEfWc6IDyTcom7LRFCH6P7ljGSCEiQ==}
-
   '@shikijs/langs@3.12.2':
     resolution: {integrity: sha512-bVx5PfuZHDSHoBal+KzJZGheFuyH4qwwcwG/n+MsWno5cTlKmaNtTsGzJpHYQ8YPbB5BdEdKU1rga5/6JGY8ww==}
 
-  '@shikijs/rehype@3.12.0':
-    resolution: {integrity: sha512-qxZwugfCQUMECTmUOCGiG5cNHHTxxGk3esirD7mwwdSxl344KlN/6M9/anev+3uBFVs9UDNShjsMAla8egkCuw==}
+  '@shikijs/rehype@3.12.2':
+    resolution: {integrity: sha512-9wg+FKv0ByaQScTonpZdrDhADOoJP/yCWLAuiYYG6GehwNV5rGwnLvWKj33UmtLedKMSHzWUdB+Un6rfDFo/FA==}
 
   '@shikijs/themes@1.29.2':
     resolution: {integrity: sha512-i9TNZlsq4uoyqSbluIcZkmPL9Bfi3djVxRnofUHwvx/h6SRW3cwgBC5SML7vsDcWyukY0eCzVN980rqP6qNl9g==}
 
-  '@shikijs/themes@3.12.0':
-    resolution: {integrity: sha512-/lxvQxSI5s4qZLV/AuFaA4Wt61t/0Oka/P9Lmpr1UV+HydNCczO3DMHOC/CsXCCpbv4Zq8sMD0cDa7mvaVoj0Q==}
-
   '@shikijs/themes@3.12.2':
     resolution: {integrity: sha512-fTR3QAgnwYpfGczpIbzPjlRnxyONJOerguQv1iwpyQZ9QXX4qy/XFQqXlf17XTsorxnHoJGbH/LXBvwtqDsF5A==}
 
-  '@shikijs/transformers@3.12.0':
-    resolution: {integrity: sha512-HcJwlvMAyZzOY+ayEAGE891BdJ7Vtio+qdWUTF9ki4d0LIkDb6DBz8ynOWGAEglHv6eQs/WcAWf/h6ina6IgCw==}
+  '@shikijs/transformers@3.12.2':
+    resolution: {integrity: sha512-+z1aMq4N5RoNGY8i7qnTYmG2MBYzFmwkm/yOd6cjEI7OVzcldVvzQCfxU1YbIVgsyB0xHVc2jFe1JhgoXyUoSQ==}
 
   '@shikijs/types@1.29.2':
     resolution: {integrity: sha512-VJjK0eIijTZf0QSTODEXCqinjBn0joAHQ+aPSBzrv4O2d/QSbsMw+ZeSRx03kV34Hy7NzUvV/7NqfYGRLrASmw==}
-
-  '@shikijs/types@3.12.0':
-    resolution: {integrity: sha512-jsFzm8hCeTINC3OCmTZdhR9DOl/foJWplH2Px0bTi4m8z59fnsueLsweX82oGcjRQ7mfQAluQYKGoH2VzsWY4A==}
 
   '@shikijs/types@3.12.2':
     resolution: {integrity: sha512-K5UIBzxCyv0YoxN3LMrKB9zuhp1bV+LgewxuVwHdl4Gz5oePoUFrr9EfgJlGlDeXCU1b/yhdnXeuRvAnz8HN8Q==}
@@ -6069,8 +6051,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  fumadocs-core@15.7.9:
-    resolution: {integrity: sha512-GaD8UXcpJgp0CTXVd+sKL1Qt+tCN5cQsBxOXneGpEzoida4MRS83IphodLsvMqz33uVHJY+J22g8ijTnpgWj4A==}
+  fumadocs-core@15.7.10:
+    resolution: {integrity: sha512-QQVj57Y6GWI+fpfD/YZ3uhay5i13OBVY1+S6dKn4c4M25v2WL7mjTpWM8VwdZOSu4PETQM7/qrTzDILQFMGV3w==}
     peerDependencies:
       '@mixedbread/sdk': ^0.19.0
       '@oramacloud/client': 1.x.x || 2.x.x
@@ -6104,8 +6086,8 @@ packages:
       waku:
         optional: true
 
-  fumadocs-mdx@11.8.3:
-    resolution: {integrity: sha512-ZHdWaeSHUq/5ZpfMOjClFc4ZVViMlA4RwfvauHH7Byz/wZIQhhRDXTuEcQumakOliytXXArua/BQFYmbNUhooA==}
+  fumadocs-mdx@11.9.0:
+    resolution: {integrity: sha512-RBgoj++hVSWEjVCPjSqwfcMcuCKvMLjAgXF3ZL+D5dNVbaDvGpTrvdsO6WFse6MJpHL6OPBiER2nq0NsqBBUHg==}
     hasBin: true
     peerDependencies:
       '@fumadocs/mdx-remote': ^1.4.0
@@ -6123,17 +6105,21 @@ packages:
       vite:
         optional: true
 
-  fumadocs-typescript@4.0.7:
-    resolution: {integrity: sha512-EAbQmNkXEIcotxf33cswdy25q6d/TX4X0dVgpWJCAjFdQWRhjNMMFN+DoRh65b9TMV7lZhz5XwtIqZ7TwQqaUg==}
+  fumadocs-typescript@4.0.8:
+    resolution: {integrity: sha512-S+Ix6BMKppr3YlINHsX3vU6uyB7bAkD62SkRWl8zxmnOt0P6Sgs+iV4D2vpHbrqHb9Zq/Afa4PMD8J19ymkRgw==}
     peerDependencies:
       '@types/react': '*'
+      fumadocs-core: ^15.7.0
+      fumadocs-ui: ^15.7.0
       typescript: '*'
     peerDependenciesMeta:
       '@types/react':
         optional: true
+      fumadocs-ui:
+        optional: true
 
-  fumadocs-ui@15.7.9:
-    resolution: {integrity: sha512-6ZOniTWBRB9DSBV6ae2hX+wYNhkzosqN4N2kT2RUGsp2MuPr+pLyKazbUsOj+pSat1BuDZpkBtBa2ht1ky7L2g==}
+  fumadocs-ui@15.7.10:
+    resolution: {integrity: sha512-yGSCuRwFSiHFbVperUzSM+8aP7LbOzI3HoiX1ORDPI1DsuUE1nCyxHjnKsczZImhjEwOqJPf/gywZHAbiPTJkA==}
     peerDependencies:
       '@types/react': '*'
       next: 14.x.x || 15.x.x
@@ -7019,8 +7005,8 @@ packages:
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
-  lru-cache@11.1.0:
-    resolution: {integrity: sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==}
+  lru-cache@11.2.1:
+    resolution: {integrity: sha512-r8LA6i4LP4EeWOhqBaZZjDWwehd1xUJPCJd9Sv300H0ZmcUER4+JPh7bqqZeqs1o5pgtgvXm+d9UGrB5zZGDiQ==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -8611,9 +8597,6 @@ packages:
 
   shiki@1.29.2:
     resolution: {integrity: sha512-njXuliz/cP+67jU2hukkxCNuH1yUi4QfdZZY+sMr5PPrIyXSu5iTb/qYC4BiWWB0vZ+7TbdvYUCeL23zpwCfbg==}
-
-  shiki@3.12.0:
-    resolution: {integrity: sha512-E+ke51tciraTHpaXYXfqnPZFSViKHhSQ3fiugThlfs/om/EonlQ0hSldcqgzOWWqX6PcjkKKzFgrjIaiPAXoaA==}
 
   shiki@3.12.2:
     resolution: {integrity: sha512-uIrKI+f9IPz1zDT+GMz+0RjzKJiijVr6WDWm9Pe3NNY6QigKCfifCEv9v9R2mDASKKjzjQ2QpFLcxaR3iHSnMA==}
@@ -11193,11 +11176,11 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@fumadocs/content-collections@1.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))':
+  '@fumadocs/content-collections@1.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))':
     dependencies:
       '@content-collections/core': 0.11.1(typescript@5.9.2)
       '@content-collections/mdx': 0.2.2(@content-collections/core@0.11.1(typescript@5.9.2))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
-      fumadocs-core: 15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
+      fumadocs-core: 15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
 
   '@hexagon/base64@1.1.28': {}
 
@@ -11530,7 +11513,7 @@ snapshots:
   '@opentelemetry/api@1.9.0':
     optional: true
 
-  '@orama/orama@3.1.12': {}
+  '@orama/orama@3.1.13': {}
 
   '@orpc/arktype@1.8.6(@ark/schema@0.49.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.8.6(@opentelemetry/api@1.9.0))(arktype@2.1.22)(crossws@0.3.5)(ws@8.18.1)':
     dependencies:
@@ -12988,13 +12971,6 @@ snapshots:
       '@types/hast': 3.0.4
       hast-util-to-html: 9.0.5
 
-  '@shikijs/core@3.12.0':
-    dependencies:
-      '@shikijs/types': 3.12.0
-      '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
-      hast-util-to-html: 9.0.5
-
   '@shikijs/core@3.12.2':
     dependencies:
       '@shikijs/types': 3.12.2
@@ -13008,12 +12984,6 @@ snapshots:
       '@shikijs/vscode-textmate': 10.0.2
       oniguruma-to-es: 2.3.0
 
-  '@shikijs/engine-javascript@3.12.0':
-    dependencies:
-      '@shikijs/types': 3.12.0
-      '@shikijs/vscode-textmate': 10.0.2
-      oniguruma-to-es: 4.3.3
-
   '@shikijs/engine-javascript@3.12.2':
     dependencies:
       '@shikijs/types': 3.12.2
@@ -13025,11 +12995,6 @@ snapshots:
       '@shikijs/types': 1.29.2
       '@shikijs/vscode-textmate': 10.0.2
 
-  '@shikijs/engine-oniguruma@3.12.0':
-    dependencies:
-      '@shikijs/types': 3.12.0
-      '@shikijs/vscode-textmate': 10.0.2
-
   '@shikijs/engine-oniguruma@3.12.2':
     dependencies:
       '@shikijs/types': 3.12.2
@@ -13039,20 +13004,16 @@ snapshots:
     dependencies:
       '@shikijs/types': 1.29.2
 
-  '@shikijs/langs@3.12.0':
-    dependencies:
-      '@shikijs/types': 3.12.0
-
   '@shikijs/langs@3.12.2':
     dependencies:
       '@shikijs/types': 3.12.2
 
-  '@shikijs/rehype@3.12.0':
+  '@shikijs/rehype@3.12.2':
     dependencies:
-      '@shikijs/types': 3.12.0
+      '@shikijs/types': 3.12.2
       '@types/hast': 3.0.4
       hast-util-to-string: 3.0.1
-      shiki: 3.12.0
+      shiki: 3.12.2
       unified: 11.0.5
       unist-util-visit: 5.0.0
 
@@ -13060,25 +13021,16 @@ snapshots:
     dependencies:
       '@shikijs/types': 1.29.2
 
-  '@shikijs/themes@3.12.0':
-    dependencies:
-      '@shikijs/types': 3.12.0
-
   '@shikijs/themes@3.12.2':
     dependencies:
       '@shikijs/types': 3.12.2
 
-  '@shikijs/transformers@3.12.0':
+  '@shikijs/transformers@3.12.2':
     dependencies:
-      '@shikijs/core': 3.12.0
-      '@shikijs/types': 3.12.0
+      '@shikijs/core': 3.12.2
+      '@shikijs/types': 3.12.2
 
   '@shikijs/types@1.29.2':
-    dependencies:
-      '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
-
-  '@shikijs/types@3.12.0':
     dependencies:
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
@@ -15893,12 +15845,12 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  fumadocs-core@15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1):
+  fumadocs-core@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1):
     dependencies:
       '@formatjs/intl-localematcher': 0.6.1
-      '@orama/orama': 3.1.12
-      '@shikijs/rehype': 3.12.0
-      '@shikijs/transformers': 3.12.0
+      '@orama/orama': 3.1.13
+      '@shikijs/rehype': 3.12.2
+      '@shikijs/transformers': 3.12.2
       github-slugger: 2.0.0
       hast-util-to-estree: 3.1.3
       hast-util-to-jsx-runtime: 2.3.6
@@ -15921,16 +15873,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-mdx@11.8.3(fumadocs-core@15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(react@19.1.1)(vite@7.1.4(@types/node@24.3.1)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.3)(yaml@2.8.1)):
+  fumadocs-mdx@11.9.0(fumadocs-core@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(react@19.1.1)(vite@7.1.4(@types/node@24.3.1)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.3)(yaml@2.8.1)):
     dependencies:
       '@mdx-js/mdx': 3.1.1
       '@standard-schema/spec': 1.0.0
       chokidar: 4.0.3
       esbuild: 0.25.9
       estree-util-value-to-estree: 3.4.0
-      fumadocs-core: 15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
+      fumadocs-core: 15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
       js-yaml: 4.1.0
-      lru-cache: 11.1.0
+      lru-cache: 11.2.1
       picocolors: 1.1.1
       remark-mdx: 3.1.1
       remark-parse: 11.0.0
@@ -15945,24 +15897,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-typescript@4.0.7(@types/react@19.1.12)(typescript@5.9.2):
+  fumadocs-typescript@4.0.8(@types/react@19.1.12)(fumadocs-core@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(fumadocs-ui@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13))(typescript@5.9.2):
     dependencies:
       estree-util-value-to-estree: 3.4.0
+      fumadocs-core: 15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
       hast-util-to-estree: 3.1.3
       hast-util-to-jsx-runtime: 2.3.6
       remark: 15.0.1
       remark-rehype: 11.1.2
-      shiki: 3.12.2
       tinyglobby: 0.2.14
       ts-morph: 26.0.0
       typescript: 5.9.2
       unist-util-visit: 5.0.0
     optionalDependencies:
       '@types/react': 19.1.12
+      fumadocs-ui: 15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13)
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-ui@15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13):
+  fumadocs-ui@15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13):
     dependencies:
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@radix-ui/react-collapsible': 1.1.12(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -15975,7 +15928,7 @@ snapshots:
       '@radix-ui/react-slot': 1.2.3(@types/react@19.1.12)(react@19.1.1)
       '@radix-ui/react-tabs': 1.1.13(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       class-variance-authority: 0.7.1
-      fumadocs-core: 15.7.9(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
+      fumadocs-core: 15.7.10(@tanstack/react-router@1.131.35(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react-router@7.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
       lodash.merge: 4.6.2
       next-themes: 0.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       postcss-selector-parser: 7.1.0
@@ -17051,7 +17004,7 @@ snapshots:
 
   lru-cache@10.4.3: {}
 
-  lru-cache@11.1.0: {}
+  lru-cache@11.2.1: {}
 
   lru-cache@5.1.1:
     dependencies:
@@ -19193,17 +19146,6 @@ snapshots:
       '@shikijs/langs': 1.29.2
       '@shikijs/themes': 1.29.2
       '@shikijs/types': 1.29.2
-      '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
-
-  shiki@3.12.0:
-    dependencies:
-      '@shikijs/core': 3.12.0
-      '@shikijs/engine-javascript': 3.12.0
-      '@shikijs/engine-oniguruma': 3.12.0
-      '@shikijs/langs': 3.12.0
-      '@shikijs/themes': 3.12.0
-      '@shikijs/types': 3.12.0
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
 
