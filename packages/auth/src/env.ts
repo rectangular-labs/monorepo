@@ -6,7 +6,6 @@ export const authEnv = () =>
   createEnv({
     extends: [dbEnv()],
     server: {
-      AUTH_PRODUCTION_URL: type("string.url"),
       AUTH_ENCRYPTION_KEY: type("string >= 32"),
       AUTH_DISCORD_ID: type("string|undefined"),
       AUTH_DISCORD_SECRET: type("string|undefined"),

@@ -3,19 +3,12 @@ import { createDb } from "@rectangular-labs/db";
 import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import {
-  emailOTP,
-  magicLink,
-  oAuthProxy,
-  twoFactor,
-} from "better-auth/plugins";
+import { emailOTP, magicLink, twoFactor } from "better-auth/plugins";
 import { authEnv } from "./env";
 
 export function initAuthHandler() {
   const env = authEnv();
-
   const baseUrl = env.VITE_APP_URL;
-  const productionUrl = env.AUTH_PRODUCTION_URL;
 
   const useDiscord = !!env.AUTH_DISCORD_ID && !!env.AUTH_DISCORD_SECRET;
   const useGithub = !!env.AUTH_GITHUB_ID && !!env.AUTH_GITHUB_SECRET;
@@ -56,13 +49,6 @@ export function initAuthHandler() {
       },
     },
     plugins: [
-      oAuthProxy({
-        /**
-         * Auto-inference blocked by https://github.com/better-auth/better-auth/pull/2891
-         */
-        currentURL: baseUrl,
-        productionURL: productionUrl,
-      }),
       emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
           await Promise.resolve();
@@ -83,14 +69,14 @@ export function initAuthHandler() {
         discord: {
           clientId: env.AUTH_DISCORD_ID,
           clientSecret: env.AUTH_DISCORD_SECRET,
-          redirectURI: `${productionUrl}/api/auth/callback/discord`,
+          redirectURI: `${baseUrl}/api/auth/callback/discord`,
         },
       }),
       ...(useGithub && {
         github: {
           clientId: env.AUTH_GITHUB_ID,
           clientSecret: env.AUTH_GITHUB_SECRET,
-          redirectURI: `${productionUrl}/api/auth/callback/github`,
+          redirectURI: `${baseUrl}/api/auth/callback/github`,
         },
       }),
     },

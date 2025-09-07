@@ -19,11 +19,7 @@
     "emails:create": "bun run --filter @rectangular-labs/emails create",
     "emails:preview": "bun run --filter @rectangular-labs/emails preview",
     "emails:check": "bun run --filter @rectangular-labs/emails check",
-    "dev": "docker compose up -d && pnpm with-env-local turbo run dev",
-    "dev:packages": "docker compose up -d && turbo run dev --filter=\"./packages/*\"",
-    "deploy:local": "pnpm with-env-local sst deploy",
-    "deploy:preview": "pnpm with-env-preview sst deploy --stage preview",
-    "deploy:prod": "pnpm with-env-prod sst deploy --stage production",
+    "dev": "docker compose up -d && pnpm with-env turbo run dev",
     "env:get": "bun x dotenvx get",
     "env:set": "bun x dotenvx set",
     "format": "turbo run format --continue",
@@ -33,9 +29,7 @@
     "typecheck": "turbo run typecheck --continue",
     "ui:add": "cd ./packages/ui && bun run ui-add && cd ../..",
     "sso": "aws sso login --sso-session=rectangular-labs",
-    "with-env-local": "dotenvx run -f .env.local  -f .env -- ",
-    "with-env-preview": "dotenvx run  -f .env -- ",
-    "with-env-prod": "dotenvx run -f .env.production -- "
+    "with-env": "dotenvx run  -f .env -- "
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.3",
