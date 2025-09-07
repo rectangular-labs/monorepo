@@ -8,7 +8,6 @@ import { transformMDX } from "@fumadocs/content-collections/configuration";
 import { remarkNpm } from "fumadocs-core/mdx-plugins";
 import { createGenerator, remarkAutoTypeTable } from "fumadocs-typescript";
 import rehypeExternalLinks from "rehype-external-links";
-import { getAuthor } from "./src/lib/markdown/get-author";
 import { getContentReadingTime } from "./src/lib/markdown/get-reading-time";
 import { getTimestamps } from "./src/lib/markdown/get-timestamps";
 import {
@@ -49,18 +48,27 @@ const mdxTransformer = async <
       ],
     ],
   });
-  // biome-ignore lint/suspicious/noExplicitAny: We need to access the author dynamically
-  const author = getAuthor((mdx as any).author);
+  let authorDetail = null;
+  if ("author" in mdx && typeof mdx.author === "string") {
+    const author = context.documents(authors).find((author) => {
+      if (author._meta.path === mdx.author) {
+        authorDetail = author;
+        return true;
+      }
+      return false;
+    });
+    if (author) {
+      authorDetail = { name: author.name, image: author.image };
+    } else {
+      authorDetail = { name: mdx.author };
+    }
+  }
 
   return {
     ...mdx,
     readingTime: readingTime.text,
     ...timestamps,
-    authorDetail:
-      author ??
-      ("author" in mdx && typeof mdx.author === "string"
-        ? { name: mdx.author as string }
-        : null),
+    authorDetail,
   };
 };
 
