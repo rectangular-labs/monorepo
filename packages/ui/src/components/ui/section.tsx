@@ -6,7 +6,7 @@ export function Section({
   as,
 }: {
   children: React.ReactNode;
-  as?: React.ElementType;
+  as?: React.ElementType<{ className: string }>;
   className?: string;
 }) {
   const Comp = as ?? "section";
