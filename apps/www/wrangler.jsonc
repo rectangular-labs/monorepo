@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "@rectangular-labs/www",
+  "name": "rectangular-labs-www",
   "main": ".output/server/index.mjs",
   "compatibility_date": "2025-09-07",
   "compatibility_flags": ["nodejs_compat"],
@@ -12,5 +12,12 @@
   },
   "placement": {
     "mode": "smart"
-  }
+  },
+  "preview_urls": true,
+  "routes": [
+    {
+      "pattern": "rectangularlabs.com",
+      "custom_domain": true
+    }
+  ]
 }
