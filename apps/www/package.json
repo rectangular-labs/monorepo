@@ -9,6 +9,8 @@
     "build:production": "pnpm with-env-prod vite build && tsc",
     "serve:preview": "pnpm with-env-preview vite preview",
     "serve:production": "pnpm with-env-prod vite preview",
+    "deploy": "pnpm run build:production && wrangler deploy",
+    "cf-typegen": "wrangler types --env-interface Env",
     "test": "vitest run",
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "pnpx @biomejs/biome format . --write",
@@ -55,6 +57,7 @@
     "vite-plugin-mkcert": "^1.17.8",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.1.0",
+    "wrangler": "^4.34.0"
   }
 }

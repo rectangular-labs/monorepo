@@ -21,6 +21,7 @@ const config = defineConfig({
     mkcert(),
     tanstackStart({
       customViteReactPlugin: true,
+      target: "cloudflare-module",
     }),
     viteReact(),
   ],
