@@ -11,57 +11,55 @@ import {
 } from "fumadocs-ui/page";
 import type { MDXComponents } from "mdx/types";
 import { useEffect, useMemo, useState } from "react";
+import type { ExtractedPost } from "../lib/get-posts-overview";
 import { baseOptions } from "../lib/layout";
-import { extractPostsFromTree } from "../lib/posts";
 import { transformPageTree } from "../lib/transform-page-tree";
 import type { blogSource } from "../source";
 import { MDXRenderer } from "./mdx-renderer";
-import { PostCard } from "./post-card";
 
-export function PostPage({
+export function BlogPost({
   data,
   tree: dataTree,
+  postsOverview,
   layoutOptions,
   components,
 }: {
   // biome-ignore lint/suspicious/noExplicitAny: generic to support any page type
   tree: LoaderOutput<any>["pageTree"] | object;
   data: NonNullable<ReturnType<typeof blogSource.getPage>>["data"];
+  postsOverview: ExtractedPost[];
   layoutOptions?: BaseLayoutProps;
   components?: MDXComponents;
 }) {
-  const tree = useMemo(
-    () => transformPageTree(dataTree as PageTree.Folder),
-    [dataTree],
-  );
-  const posts = useMemo(
-    () => extractPostsFromTree(dataTree as PageTree.Folder),
-    [dataTree],
-  );
-
   const [currentUrl, setCurrentUrl] = useState<undefined | string>(undefined);
   useEffect(() => {
     if (typeof window !== "undefined") {
       setCurrentUrl(window.location.href);
     }
   }, []);
-  const currentIndex = useMemo(
-    () => (currentUrl ? posts.findIndex((p) => p.url === currentUrl) : -1),
-    [posts, currentUrl],
+  const tree = useMemo(
+    // cast from fumadocs https://fumadocs.dev/docs/ui/manual-installation/tanstack-start
+    () => transformPageTree(dataTree as PageTree.Folder),
+    [dataTree],
   );
-  const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : undefined;
-  const nextPost =
-    currentIndex >= 0 && currentIndex < posts.length - 1
-      ? posts[currentIndex + 1]
-      : undefined;
-  const relatedPosts = useMemo(
-    () => posts.filter((p) => p.url !== currentUrl).slice(0, 3),
-    [posts, currentUrl],
-  );
-
   const shareHref = currentUrl ?? "";
+  const currentIndex = useMemo(
+    () =>
+      currentUrl ? postsOverview.findIndex((p) => p.url === currentUrl) : -1,
+    [postsOverview, currentUrl],
+  );
+  const prevPost =
+    currentIndex > 0 ? postsOverview[currentIndex - 1] : undefined;
+  const nextPost =
+    currentIndex >= 0 && currentIndex < postsOverview.length - 1
+      ? postsOverview[currentIndex + 1]
+      : undefined;
+
   return (
     <DocsLayout
+      containerProps={{
+        className: "max-w-5xl mx-auto",
+      }}
       {...(layoutOptions ?? baseOptions())}
       sidebar={{ enabled: false }}
       tree={tree}
@@ -70,7 +68,17 @@ export function PostPage({
         breadcrumb={{
           enabled: false,
         }}
-        footer={{ enabled: false }}
+        editOnGithub={{
+          owner: "rectangular-labs",
+          repo: "monorepo",
+          sha: "main",
+          path: `packages/content/posts/${data._meta.fileName}`,
+        }}
+        footer={{
+          enabled: true,
+        }}
+        full
+        {...(data.lastModified ? { lastUpdate: data.lastModified } : {})}
         tableOfContent={{
           enabled: true,
           style: "clerk",
@@ -156,22 +164,6 @@ export function PostPage({
             ) : null}
           </div>
         </div>
-        {relatedPosts.length > 0 ? (
-          <div className="mt-10">
-            <h3 className="mb-4 font-semibold text-base">Related posts</h3>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {relatedPosts.map((p) => (
-                <PostCard
-                  cover={p.cover}
-                  description={p.description}
-                  href={p.url}
-                  key={p.url}
-                  title={p.title ?? "Untitled"}
-                />
-              ))}
-            </div>
-          </div>
-        ) : null}
       </DocsPage>
     </DocsLayout>
   );

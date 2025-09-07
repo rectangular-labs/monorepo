@@ -4,8 +4,8 @@ import type {
   BaseAuthClient,
   CompleteAuthClient,
 } from "@rectangular-labs/auth/client";
-import { LockIcon, MailIcon, PhoneIcon } from "lucide-react";
-import type { PropsWithChildren } from "react";
+import { LockIcon, type LucideProps, MailIcon, PhoneIcon } from "lucide-react";
+import type { PropsWithChildren, RefAttributes } from "react";
 import { createContext, useCallback, useContext, useMemo, useRef } from "react";
 import type { SocialProvider } from "./social-providers";
 
@@ -104,7 +104,9 @@ type AuthContextValue = {
   defaultFormView: {
     view: AuthViewPath;
     text: string;
-    icon: React.ElementType;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+    >;
   };
   credentials: CredentialsOptions | undefined;
   socialProviders: SocialProvider[];

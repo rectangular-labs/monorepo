@@ -5,21 +5,17 @@ import {
   type Meta,
 } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
-import { type } from "arktype";
 import { remarkNpm } from "fumadocs-core/mdx-plugins";
 import { createGenerator, remarkAutoTypeTable } from "fumadocs-typescript";
 import rehypeExternalLinks from "rehype-external-links";
-import { getLastModified } from "./src/lib/markdown/get-last-modified";
 import { getContentReadingTime } from "./src/lib/markdown/get-reading-time";
-
-const DocSchema = type({
-  title: "string",
-  "description?": "string",
-  "icon?": "string",
-  "full?": "boolean",
-  // TODO: add openapi thingy
-  // "_openapi?": "Record<string, any>",
-});
+import { getTimestamps } from "./src/lib/markdown/get-timestamps";
+import {
+  AuthorSchema,
+  DocSchema,
+  MetaSchema,
+  PostSchema,
+} from "./src/lib/schema";
 
 const generator = createGenerator();
 const mdxTransformer = async <
@@ -35,7 +31,7 @@ const mdxTransformer = async <
   const readingTime = getContentReadingTime({
     content: document.content,
   });
-  const lastModified = getLastModified({ filepath: document._meta.filePath });
+  const timestamps = getTimestamps({ filepath: document._meta.filePath });
   const mdx = await transformMDX(document, context, {
     remarkPlugins: [
       [remarkAutoTypeTable, { generator }],
@@ -52,10 +48,27 @@ const mdxTransformer = async <
       ],
     ],
   });
+  let authorDetail = null;
+  if ("author" in mdx && typeof mdx.author === "string") {
+    const author = context.documents(authors).find((author) => {
+      if (author._meta.path === mdx.author) {
+        authorDetail = author;
+        return true;
+      }
+      return false;
+    });
+    if (author) {
+      authorDetail = { name: author.name, image: author.image };
+    } else {
+      authorDetail = { name: mdx.author };
+    }
+  }
+
   return {
     ...mdx,
     readingTime: readingTime.text,
-    lastModified,
+    ...timestamps,
+    authorDetail,
   };
 };
 
@@ -70,22 +83,10 @@ const posts = defineCollection({
   name: "posts",
   directory: "posts",
   include: "**/*.mdx",
-  schema: type({
-    "...": DocSchema,
-    // blog-specific
-    "cover?": "string",
-  }),
+  schema: PostSchema,
   transform: (document, context) => mdxTransformer(document, context),
 });
 
-const MetaSchema = type({
-  "title?": "string",
-  "description?": "string",
-  "icon?": "string",
-  "pages?": "string[]",
-  "root?": "boolean",
-  "defaultOpen?": "boolean",
-});
 const metas = defineCollection({
   name: "meta",
   directory: "../",
@@ -102,6 +103,14 @@ const postMetas = defineCollection({
   schema: MetaSchema,
 });
 
+const authors = defineCollection({
+  name: "authors",
+  directory: "authors",
+  include: "*.json",
+  parser: "json",
+  schema: AuthorSchema,
+});
+
 export default defineConfig({
-  collections: [docs, metas, posts, postMetas],
+  collections: [docs, metas, posts, postMetas, authors],
 });

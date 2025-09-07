@@ -29,7 +29,7 @@ export function SearchDialogComponent(props: SharedProps & { api: string }) {
       {...props}
     >
       <SearchDialogOverlay />
-      <SearchDialogContent>
+      <SearchDialogContent className="rounded-lg">
         <SearchDialogHeader>
           <SearchDialogIcon />
           <SearchDialogInput />

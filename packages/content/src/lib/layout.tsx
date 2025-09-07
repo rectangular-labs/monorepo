@@ -5,7 +5,7 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: "Rectangular Labs",
       transparentMode: "top",
-      url: "/blog",
+      url: "/",
     },
   };
 }
