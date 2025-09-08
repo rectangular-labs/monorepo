@@ -32,6 +32,9 @@ jobs:
     name: Deploy
     permissions:  
       pull-requests: write
+    env:
+      DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
+      DOTENV_PRIVATE_KEY_PRODUCTION: ${{ secrets.DOTENV_PRIVATE_KEY_PRODUCTION }}
     steps:
       - uses: actions/checkout@v4
 
@@ -96,8 +99,6 @@ jobs:
         uses: ./tooling/github/prepare-secrets
         with:
           env_path: ${{ steps.resolve.outputs.env_path }}
-        env:
-          DOTENV_PRIVATE_KEY: ${{ secrets[steps.resolve.outputs.dotenv_key_name] }}
       
       - name: Update Wrangler Environment for Preview
         if: ${{ steps.resolve.outputs.stage == 'preview' }}

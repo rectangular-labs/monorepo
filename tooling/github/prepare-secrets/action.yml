@@ -44,7 +44,7 @@ runs:
         ENV_FILE="${{ inputs.env_path }}"
         TMP_FILE=$(mktemp)
         # Try to decrypt with dotenvx; if it fails (or not encrypted), fallback to the file as-is
-        if npx --yes dotenvx decrypt --stdout -f "$ENV_FILE" > "$TMP_FILE" 2>/dev/null; then
+        if pnpm dotenvx decrypt --stdout -f "$ENV_FILE" > "$TMP_FILE" 2>/dev/null; then
           echo "Using decrypted content from dotenvx."
         else
           echo "::notice::dotenvx decrypt failed or not needed; using file as-is."
