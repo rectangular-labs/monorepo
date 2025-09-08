@@ -51,6 +51,28 @@ runs:
           cp "$ENV_FILE" "$TMP_FILE"
         fi
 
-        # Remove comments/blank lines and filter out dotenvx key material before exporting
-        grep -v '^#' "$TMP_FILE" | sed '/^\s*$/d' | grep -v '^DOTENV_PUBLIC_KEY' | grep -v '^DOTENV_PRIVATE_KEY' >> "$GITHUB_ENV"
+        # Remove comments/blank lines and filter out dotenvx key material, then strip surrounding quotes
+        while IFS= read -r line; do
+          # Skip comments and empty lines
+          if [[ -z "$line" || "$line" =~ ^# ]]; then
+            continue
+          fi
+
+          # Skip dotenvx key material
+          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY || "$line" =~ ^DOTENV_PRIVATE_KEY ]]; then
+            continue
+          fi
+
+          key="${line%%=*}"
+          value="${line#*=}"
+          # Trim potential CR from Windows line endings
+          value="${value%$'\r'}"
+
+          # Strip matching surrounding single or double quotes
+          if [[ ( "${value:0:1}" == '"' && "${value: -1}" == '"' ) || ( "${value:0:1}" == "'" && "${value: -1}" == "'" ) ]]; then
+            value="${value:1:-1}"
+          fi
+
+          echo "${key}=${value}" >> "$GITHUB_ENV"
+        done < "$TMP_FILE"
         echo "Exported environment variables to GITHUB_ENV."
