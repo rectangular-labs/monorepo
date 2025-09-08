@@ -130,7 +130,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
-            Cloudflare Preview URL :balloon: : ${{ steps.deploy.outputs.deployment-url }}
+            Cloudflare Preview URL :balloon: : https://${{ steps.deploy.outputs.deployment-url }}
           comment-tag: execution
 
   cleanup:
