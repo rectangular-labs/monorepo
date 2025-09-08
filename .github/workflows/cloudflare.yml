@@ -46,7 +46,7 @@ jobs:
           STAGE="preview"
           ENV_PATH=".env"
           DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY"
-          DEPLOY_CMD="deploy"
+          DEPLOY_CMD="deploy --env 'pr-${{ github.event.number}}'"
           if [[ "$EVENT" == "push" && "$REF" == "refs/heads/main" ]]; then
             STAGE="production"
             ENV_PATH=".env.production"
@@ -88,7 +88,7 @@ jobs:
           DOTENV_PRIVATE_KEY: ${{ secrets[steps.resolve.outputs.dotenv_key_name] }}
 
       - name: Build
-        run: pnpm run build && pnpm run build:${{ steps.resolve.outputs.stage }}
+        run: pnpm run build
         
       - name: Deploy WWW
         uses: cloudflare/wrangler-action@v3

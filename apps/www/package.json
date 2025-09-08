@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm with-env-local vite",
+    "build": "vite build",
     "build:local": "pnpm with-env-local vite build",
     "build:production": "pnpm with-env-prod vite build",
     "build:preview": "pnpm with-env vite build ",
