@@ -58,16 +58,17 @@ jobs:
             DEPLOY_CMD="deploy --env production"
           elif [[ "$EVENT" == "pull_request" ]]; then
             ENVIRONMENT="pr-${{ github.event.number }}"
+            DEPLOY_CMD="deploy --env $ENVIRONMENT"
           elif [[ "$EVENT" == "workflow_dispatch" ]]; then
             case "$INPUT_ENV" in
               preview)
                 ;; # default to preview env and stage
               production)
-                STAGE="production"
                 ENV_PATH=".env.production"
                 DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY_PRODUCTION"
-                DEPLOY_CMD="deploy --env production"
+                STAGE="production"
                 ENVIRONMENT="production"
+                DEPLOY_CMD="deploy --env $ENVIRONMENT"
                 ;;
               *)
                 echo "Unknown manual environment: $INPUT_ENV" >&2
