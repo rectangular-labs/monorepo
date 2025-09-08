@@ -108,6 +108,8 @@ jobs:
           # Replace placeholder with computed slug
           sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
           sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
+          echo "VITE_APP_URL after replacement:"
+          grep -E '^VITE_APP_URL=' "$ENV_PATH" || echo "VITE_APP_URL not set"
         
       - name: Build
         run: pnpm run build:${{ steps.resolve.outputs.stage }}
