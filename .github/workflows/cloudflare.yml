@@ -87,8 +87,9 @@ jobs:
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets[steps.resolve.outputs.dotenv_key_name] }}
     
-      - name: Build 
-        run: pnpm dotenvx run -f ./${{ steps.resolve.outputs.env_path }} -- pnpm run build
+      - name: Build WWW
+        working-directory: ./apps/www
+        run: pnpm dotenvx run -f ../../${{ steps.resolve.outputs.env_path }} -- pnpm run build
 
       - name: Deploy WWW
         uses: cloudflare/wrangler-action@v3
