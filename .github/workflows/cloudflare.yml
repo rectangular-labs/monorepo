@@ -30,6 +30,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy
+    permissions:  
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
