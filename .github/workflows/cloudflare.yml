@@ -112,6 +112,10 @@ jobs:
       - name: Build
         run: pnpm run build:${{ steps.resolve.outputs.stage }}
         
+
+      - name: Migrate Database
+        run: pnpm run db:mp:${{ steps.resolve.outputs.stage }}
+        
       - name: Deploy WWW
         id: deploy
         uses: cloudflare/wrangler-action@v3
