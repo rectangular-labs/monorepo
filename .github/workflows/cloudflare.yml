@@ -79,6 +79,10 @@ jobs:
           echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
           echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
 
+      - name: Build WWW
+        working-directory: ./apps/www
+        run: pnpm dotenvx run -f ../../${{ steps.resolve.outputs.env_path }} -- pnpm run build
+        
       - name: Prepare secrets
         id: prepare_secrets
         uses: ./tooling/github/prepare-secrets
@@ -87,9 +91,6 @@ jobs:
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets[steps.resolve.outputs.dotenv_key_name] }}
     
-      - name: Build WWW
-        working-directory: ./apps/www
-        run: pnpm dotenvx run -f ../../${{ steps.resolve.outputs.env_path }} -- pnpm run build
 
       - name: Deploy WWW
         uses: cloudflare/wrangler-action@v3
