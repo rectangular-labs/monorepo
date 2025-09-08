@@ -1,4 +1,4 @@
-name: Cloudflare Deploy
+name: Cloudflare
 
 on:
   push:
@@ -91,7 +91,7 @@ jobs:
           echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
           echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
          
-      - name: Update Wrangler Environment for Preview
+      - name: Update Environment Variables for Preview
         if: ${{ steps.resolve.outputs.stage == 'preview' }}
         shell: bash
         env:
@@ -102,8 +102,6 @@ jobs:
           # Replace placeholder with computed slug
           sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
           sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
-          echo "VITE_APP_URL after replacement:"
-          grep -E '^VITE_APP_URL=' "$ENV_PATH" || echo "VITE_APP_URL not set"
         
       - name: Prepare secrets
         id: prepare_secrets
@@ -118,12 +116,12 @@ jobs:
         id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
+          packageManager: pnpm
+          workingDirectory: apps/www
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/www
           command: ${{ steps.resolve.outputs.deploy_command }}
           environment: ${{ steps.resolve.outputs.environment }}
-          packageManager: pnpm
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
       - name: Comment for deployment details
@@ -140,11 +138,11 @@ jobs:
       STAGE: pr-${{ github.event.number }}
     steps:
       - uses: actions/checkout@v4
-      - name: Destroy Preview Environment (Wrangler)
+      - name: Destroy Preview Environment
         uses: cloudflare/wrangler-action@v3
         with:
+          packageManager: pnpm
+          workingDirectory: apps/www
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/www
           command: delete --env ${{ env.STAGE }}
-          packageManager: pnpm
