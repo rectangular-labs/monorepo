@@ -22,6 +22,7 @@
     "dev": "docker compose up -d && pnpm with-env turbo run dev",
     "env:get": "bun x dotenvx get",
     "env:set": "bun x dotenvx set",
+    "env:encrypt": "bun x dotenvx encrypt",
     "format": "turbo run format --continue",
     "lint": "turbo run lint --continue",
     "new:package": "turbo gen package",

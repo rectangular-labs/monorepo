@@ -1,0 +1,56 @@
+name: "Prepare Cloudflare Secrets"
+description: "Decrypts an env file (if needed), exports variables to GITHUB_ENV, and outputs secret names for wrangler-action."
+
+inputs:
+  env_path:
+    description: "Path to the .env file to use (e.g., apps/www/.env or apps/www/.env.production)"
+    required: true
+
+outputs:
+  secret_names:
+    description: "Newline-separated list of secret variable names for wrangler-action"
+    value: ${{ steps.compute.outputs.secret_names }}
+
+runs:
+  using: composite
+  steps:
+    - name: Validate env file exists
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.env_path }}" ]; then
+          echo "::error::Environment file not found: ${{ inputs.env_path }}"
+          exit 1
+        fi
+
+    - name: Compute secret names
+      id: compute
+      shell: bash
+      run: |
+        ENV_FILE="${{ inputs.env_path }}"
+        # Extract key names (ignore comments and dotenvx key material)
+        SECRET_NAMES=$(awk -F= '!/^#/ && !/^\s*$/ && !/^DOTENV_PUBLIC_KEY/ && !/^DOTENV_PRIVATE_KEY/ {print $1}' "$ENV_FILE")
+        if [ -z "$SECRET_NAMES" ]; then
+          echo "::warning::No secret names found in $ENV_FILE after filtering."
+          echo "secret_names=" >> "$GITHUB_OUTPUT"
+        else
+          echo "secret_names<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$SECRET_NAMES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Export decrypted variables to GITHUB_ENV
+      shell: bash
+      run: |
+        ENV_FILE="${{ inputs.env_path }}"
+        TMP_FILE=$(mktemp)
+        # Try to decrypt with dotenvx; if it fails (or not encrypted), fallback to the file as-is
+        if npx --yes dotenvx decrypt --stdout -f "$ENV_FILE" > "$TMP_FILE" 2>/dev/null; then
+          echo "Using decrypted content from dotenvx."
+        else
+          echo "::notice::dotenvx decrypt failed or not needed; using file as-is."
+          cp "$ENV_FILE" "$TMP_FILE"
+        fi
+
+        # Remove comments/blank lines and filter out dotenvx key material before exporting
+        grep -v '^#' "$TMP_FILE" | sed '/^\s*$/d' | grep -v '^DOTENV_PUBLIC_KEY' | grep -v '^DOTENV_PRIVATE_KEY' >> "$GITHUB_ENV"
+        echo "Exported environment variables to GITHUB_ENV."

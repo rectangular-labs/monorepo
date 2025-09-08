@@ -1,0 +1,101 @@
+name: Cloudflare Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Choose environment: preview (default), or prod"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - production
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Dependencies
+        uses: ./tooling/github/setup
+      
+      - name: Resolve deployment context
+        id: resolve
+        shell: bash
+        run: |
+          EVENT="${{ github.event_name }}"
+          REF="${{ github.ref }}"
+          INPUT_ENV="${{ github.event.inputs.environment || '' }}"
+          STAGE="preview"
+          ENV_PATH=".env"
+          DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY"
+          DEPLOY_CMD="deploy"
+          if [[ "$EVENT" == "push" && "$REF" == "refs/heads/main" ]]; then
+            STAGE="production"
+            ENV_PATH=".env.production"
+            DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY_PRODUCTION"
+            DEPLOY_CMD="deploy --env production"
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            ;; # default to preview
+          elif [[ "$EVENT" == "workflow_dispatch" ]]; then
+            case "$INPUT_ENV" in
+              preview)
+                ;; # default to preview
+              production)
+                STAGE="production"
+                ENV_PATH=".env.production"
+                DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY_PRODUCTION"
+                DEPLOY_CMD="deploy --env production"
+                ;;
+              *)
+                echo "Unknown manual environment: $INPUT_ENV" >&2
+                exit 1
+                ;;
+            esac
+          else
+            echo "Unsupported trigger: $EVENT" >&2
+            exit 1
+          fi
+
+          echo "stage=$STAGE" >> "$GITHUB_OUTPUT"
+          echo "env_path=$ENV_PATH" >> "$GITHUB_OUTPUT"
+          echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
+          echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare secrets
+        id: prepare_secrets
+        uses: ./tooling/github/prepare-secrets
+        with:
+          env_path: ${{ steps.resolve.outputs.env_path }}
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets[steps.resolve.outputs.dotenv_key_name] }}
+    
+      - name: Build 
+        run: pnpm build
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/www
+          command: ${{ steps.resolve.outputs.deploy_command }}
+          packageManager: pnpm
+          secrets: ${{ steps.prepare_secrets.outputs.secret_names }}

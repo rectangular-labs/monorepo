@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rectangular-labs-www",
   "main": ".output/server/index.mjs",
+  "preview_urls": true,
   "compatibility_date": "2025-09-07",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
@@ -13,11 +14,17 @@
   "placement": {
     "mode": "smart"
   },
-  "preview_urls": true,
-  "routes": [
-    {
-      "pattern": "rectangularlabs.com",
-      "custom_domain": true
+  "env": {
+    "production": {
+      "vars": {
+        "VITE_APP_URL": "https://rectangularlabs.com"
+      },
+      "routes": [
+        {
+          "pattern": "rectangularlabs.com",
+          "custom_domain": true
+        }
+      ]
     }
-  ]
+  }
 }
