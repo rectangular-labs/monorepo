@@ -21,7 +21,7 @@
     "emails:create": "bun run --filter @rectangular-labs/emails create",
     "emails:preview": "bun run --filter @rectangular-labs/emails preview",
     "emails:check": "bun run --filter @rectangular-labs/emails check",
-    "dev": "docker compose up -d && pnpm with-env turbo run dev",
+    "dev": "docker compose up -d && pnpm turbo run dev",
     "env:get": "bun x dotenvx get",
     "env:set": "bun x dotenvx set",
     "env:encrypt": "bun x dotenvx encrypt",
@@ -31,8 +31,7 @@
     "postinstall": "bun x sherif@latest",
     "typecheck": "turbo run typecheck --continue",
     "ui:add": "cd ./packages/ui && bun run ui-add && cd ../..",
-    "sso": "aws sso login --sso-session=rectangular-labs",
-    "with-env": "dotenvx run  -f .env -- "
+    "sso": "aws sso login --sso-session=rectangular-labs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.3",
