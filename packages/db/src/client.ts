@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import * as authSchema from "./schema/auth-schema";
 import { dbEnv } from "./env";
+import * as authSchema from "./schema/auth-schema";
 
 export * from "drizzle-orm";
 

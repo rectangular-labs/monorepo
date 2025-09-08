@@ -31,7 +31,6 @@ async function handle({ request }: { request: Request }) {
 
   const env = serverEnv();
   const context = createApiContext({
-    dbUrl: env.DATABASE_URL,
     url: new URL(request.url),
   });
 
