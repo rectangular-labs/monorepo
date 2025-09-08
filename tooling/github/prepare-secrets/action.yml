@@ -58,8 +58,8 @@ runs:
             continue
           fi
 
-          # Skip dotenvx key material
-          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY || "$line" =~ ^DOTENV_PRIVATE_KEY ]]; then
+          # Skip dotenvx key and public env var material
+          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY || "$line" =~ ^VITE_ || "$line" =~ ^NEXT_PUBLIC ]]; then
             continue
           fi
 
