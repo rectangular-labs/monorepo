@@ -46,7 +46,14 @@ jobs:
           STAGE="preview"
           ENV_PATH=".env"
           DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY"
-          DEPLOY_CMD="deploy --env 'pr-${{ github.event.number}}'"
+          PR="$PR_NUMBER"
+          if [[ -z "$PR" ]]; then
+          PR_SLUG="pr-preview"
+          else
+          PR_SLUG="pr-$PR"
+          fi
+          DEPLOY_CMD="deploy --env '$PR_SLUG'"
+
           if [[ "$EVENT" == "push" && "$REF" == "refs/heads/main" ]]; then
             STAGE="production"
             ENV_PATH=".env.production"
@@ -75,6 +82,7 @@ jobs:
           fi
 
           echo "stage=$STAGE" >> "$GITHUB_OUTPUT"
+          echo "pr_slug=$PR_SLUG" >> "$GITHUB_OUTPUT"
           echo "env_path=$ENV_PATH" >> "$GITHUB_OUTPUT"
           echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
           echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
@@ -94,15 +102,10 @@ jobs:
         if: ${{ steps.resolve.outputs.stage == 'preview' }}
         shell: bash
         env:
-          PR_NUMBER: ${{ github.event.number }}
+          PR_SLUG: ${{ steps.resolve.outputs.pr_slug }}
         run: |
           FILE="apps/www/wrangler.jsonc"
-          PR="$PR_NUMBER"
-          if [[ -z "$PR" ]]; then
-            PR_SLUG="pr-preview"
-          else
-            PR_SLUG="pr-$PR"
-          fi
+          echo "PR_SLUG=$PR_SLUG"
           # Replace placeholder with computed slug
           sed -i "s|\${env.PULL_REQUEST}|$PR_SLUG|g" "$FILE"
         
@@ -114,7 +117,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/www
           command: ${{ steps.resolve.outputs.deploy_command }}
-          environment: ${{ steps.resolve.outputs.stage }}
+          environment: ${{ steps.resolve.outputs.pr_slug }}
           packageManager: pnpm
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
