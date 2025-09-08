@@ -13,7 +13,7 @@ export function initAuthHandler(baseURL: string) {
   const useGithub = !!env.AUTH_GITHUB_ID && !!env.AUTH_GITHUB_SECRET;
 
   const config = {
-    database: drizzleAdapter(createDb(env.DATABASE_URL), {
+    database: drizzleAdapter(createDb(), {
       provider: "pg",
     }),
     telemetry: {
