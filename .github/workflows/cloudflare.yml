@@ -100,8 +100,8 @@ jobs:
         run: |
           FILE="apps/www/wrangler.jsonc"
           # Replace placeholder with computed slug
-          sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
-          sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
         
       - name: Prepare secrets
         id: prepare_secrets
