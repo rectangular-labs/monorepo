@@ -80,7 +80,7 @@ jobs:
           echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
           
       - name: Build
-        run: pnpm run build && pnpm run build:${{ steps.resolve.outputs.stage }}
+        run: pnpm run build:${{ steps.resolve.outputs.stage }}
         
       - name: Prepare secrets
         id: prepare_secrets

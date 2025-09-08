@@ -11,16 +11,16 @@
       "outputs": [".cache/tsbuildinfo.json", "dist/**"]
     },
     "build:preview": {
-      "dependsOn": ["^build:preview"],
-      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**", ".output"]
     },
     "build:production": {
-      "dependsOn": ["^build:production"],
-      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**", ".output"]
     },
     "build:local": {
-      "dependsOn": ["^build:local"],
-      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**", ".output"]
     },
     "clean": {
       "cache": false
