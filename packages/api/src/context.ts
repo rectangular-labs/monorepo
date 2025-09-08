@@ -11,7 +11,7 @@ export const createApiContext = (
 ) => {
   return {
     db: createDb(args.dbUrl),
-    auth: initAuthHandler(),
+    auth: initAuthHandler(args.url.origin),
     ...args,
   };
 };

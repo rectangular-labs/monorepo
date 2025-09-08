@@ -12,10 +12,6 @@ export const authEnv = () =>
       AUTH_GITHUB_ID: type("string|undefined"),
       AUTH_GITHUB_SECRET: type("string|undefined"),
     },
-    clientPrefix: "VITE_",
-    client: {
-      VITE_APP_URL: type("string.url"),
-    },
     runtimeEnv:
       typeof window !== "undefined"
         ? (import.meta as unknown as { env: Record<string, string> }).env

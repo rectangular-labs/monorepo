@@ -90,9 +90,6 @@ jobs:
           echo "env_path=$ENV_PATH" >> "$GITHUB_OUTPUT"
           echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
           echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
-          
-      - name: Build
-        run: pnpm run build:${{ steps.resolve.outputs.stage }}
         
       - name: Prepare secrets
         id: prepare_secrets
@@ -105,11 +102,15 @@ jobs:
         shell: bash
         env:
           ENVIRONMENT: ${{ steps.resolve.outputs.environment }}
+          ENV_PATH: ${{ steps.resolve.outputs.env_path }}
         run: |
           FILE="apps/www/wrangler.jsonc"
-          echo "ENVIRONMENT=$ENVIRONMENT"
           # Replace placeholder with computed slug
           sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
+          sed -i "s|\${env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
+        
+      - name: Build
+        run: pnpm run build:${{ steps.resolve.outputs.stage }}
         
       - name: Deploy WWW
         id: deploy

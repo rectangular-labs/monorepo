@@ -28,7 +28,7 @@ runs:
       run: |
         ENV_FILE="${{ inputs.env_path }}"
         # Extract key names (ignore comments and dotenvx key material)
-        SECRET_NAMES=$(awk -F= '!/^#/ && !/^\s*$/ && !/^DOTENV_PUBLIC_KEY/ && !/^DOTENV_PRIVATE_KEY/ && !/^VITE_ && !/^NEXT_PUBLIC {print $1}' "$ENV_FILE")
+        SECRET_NAMES=$(awk -F= '!/^#/ && !/^\s*$/ && !/^DOTENV_PUBLIC_KEY/ && !/^DOTENV_PRIVATE_KEY/ {print $1}' "$ENV_FILE")
         if [ -z "$SECRET_NAMES" ]; then
           echo "::warning::No secret names found in $ENV_FILE after filtering."
           echo "secret_names=" >> "$GITHUB_OUTPUT"
@@ -59,7 +59,7 @@ runs:
           fi
 
           # Skip dotenvx key and public env var material
-          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY || "$line" =~ ^VITE_ || "$line" =~ ^NEXT_PUBLIC ]]; then
+          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY ]]; then
             continue
           fi
 

@@ -6,9 +6,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP, magicLink, twoFactor } from "better-auth/plugins";
 import { authEnv } from "./env";
 
-export function initAuthHandler() {
+export function initAuthHandler(baseURL: string) {
   const env = authEnv();
-  const baseUrl = env.VITE_APP_URL;
 
   const useDiscord = !!env.AUTH_DISCORD_ID && !!env.AUTH_DISCORD_SECRET;
   const useGithub = !!env.AUTH_GITHUB_ID && !!env.AUTH_GITHUB_SECRET;
@@ -23,7 +22,7 @@ export function initAuthHandler() {
     onAPIError: {
       errorURL: "/login",
     },
-    baseURL: baseUrl,
+    baseURL,
     secret: env.AUTH_ENCRYPTION_KEY,
     logger: {
       disabled: true,
@@ -69,14 +68,14 @@ export function initAuthHandler() {
         discord: {
           clientId: env.AUTH_DISCORD_ID,
           clientSecret: env.AUTH_DISCORD_SECRET,
-          redirectURI: `${baseUrl}/api/auth/callback/discord`,
+          redirectURI: `${baseURL}/api/auth/callback/discord`,
         },
       }),
       ...(useGithub && {
         github: {
           clientId: env.AUTH_GITHUB_ID,
           clientSecret: env.AUTH_GITHUB_SECRET,
-          redirectURI: `${baseUrl}/api/auth/callback/github`,
+          redirectURI: `${baseURL}/api/auth/callback/github`,
         },
       }),
     },

@@ -16,9 +16,6 @@
   },
   "env": {
     "production": {
-      "vars": {
-        "VITE_APP_URL": "https://rectangularlabs.com"
-      },
       "routes": [
         {
           "pattern": "rectangularlabs.com",
@@ -27,9 +24,6 @@
       ]
     },
     "${env.PULL_REQUEST}": {
-      "vars": {
-        "VITE_APP_URL": "https://${env.PULL_REQUEST}.rectangularlabs.com"
-      },
       "routes": [
         {
           "pattern": "${env.PULL_REQUEST}.rectangularlabs.com",
