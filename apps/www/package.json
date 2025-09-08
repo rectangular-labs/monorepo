@@ -5,14 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm with-env-local vite",
-    "build": "vite build",
     "build:local": "pnpm with-env-local vite build",
+    "build:production": "pnpm with-env-prod vite build",
+    "build:preview": "pnpm with-env vite build ",
     "serve:local": "pnpm with-env-local vite preview",
     "test": "vitest run",
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "pnpx @biomejs/biome format . --write",
     "lint": "pnpx @biomejs/biome lint . --write",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "with-env": "dotenvx run  -f ../../.env -- ",
+    "with-env-prod": "dotenvx run  -f ../../.env.production -- ",
     "with-env-local": "dotenvx run  -f ../../.env.local -f ../../.env -- ",
     "wrangler": "wrangler",
     "cf-typegen": "wrangler types --env-interface Env"

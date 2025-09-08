@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "build": "turbo build",
+    "build:preview": "turbo build:preview",
+    "build:production": "turbo build:production",
     "changeset": "changeset",
     "changeset:release": "bun run build && changeset publish",
     "clean": "git clean -xdf node_modules .turbo .sst",

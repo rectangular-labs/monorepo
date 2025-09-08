@@ -10,6 +10,18 @@
       "dependsOn": ["^build"],
       "outputs": [".cache/tsbuildinfo.json", "dist/**"]
     },
+    "build:preview": {
+      "dependsOn": ["^build:preview"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
+    },
+    "build:production": {
+      "dependsOn": ["^build:production"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
+    },
+    "build:local": {
+      "dependsOn": ["^build:local"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
+    },
     "clean": {
       "cache": false
     },
