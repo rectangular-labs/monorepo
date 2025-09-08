@@ -53,7 +53,7 @@ jobs:
             DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY_PRODUCTION"
             DEPLOY_CMD="deploy --env production"
           elif [[ "$EVENT" == "pull_request" ]]; then
-            ;; # default to preview
+            : # default to preview
           elif [[ "$EVENT" == "workflow_dispatch" ]]; then
             case "$INPUT_ENV" in
               preview)

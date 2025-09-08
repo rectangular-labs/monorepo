@@ -21,4 +21,8 @@ export const getApiClient = createIsomorphicFn()
     return client;
   });
 
-export const rqHelper = rqApiClient(clientEnv().VITE_APP_URL);
+export const rqHelper = rqApiClient(
+  typeof window !== "undefined"
+    ? window.location.origin
+    : clientEnv().VITE_APP_URL,
+);
