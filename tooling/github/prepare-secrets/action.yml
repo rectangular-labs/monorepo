@@ -59,7 +59,7 @@ runs:
           fi
 
           # Skip dotenvx key and public env var material
-          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY || "$line" =~ ^VITE_ || "$line" =~ ^NEXT_PUBLIC_ ]]; then
+          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY || "$line" =~ ^DOTENV_PRIVATE_KEY || "$line" =~ ^VITE_ || "$line" =~ ^NEXT_PUBLIC_ ]]; then
             continue
           fi
 
@@ -71,6 +71,11 @@ runs:
           # Strip matching surrounding single or double quotes
           if [[ ( "${value:0:1}" == '"' && "${value: -1}" == '"' ) || ( "${value:0:1}" == "'" && "${value: -1}" == "'" ) ]]; then
             value="${value:1:-1}"
+          fi
+
+          # Mask the value in GitHub logs to prevent accidental leak if echoed later
+          if [[ -n "$value" ]]; then
+            echo "::add-mask::$value"
           fi
 
           echo "${key}=${value}" >> "$GITHUB_ENV"
