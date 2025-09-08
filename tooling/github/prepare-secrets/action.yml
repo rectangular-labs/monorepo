@@ -38,41 +38,41 @@ runs:
           echo "EOF" >> "$GITHUB_OUTPUT"
         fi
 
-    # - name: Export decrypted variables to GITHUB_ENV
-    #   shell: bash
-    #   run: |
-    #     ENV_FILE="${{ inputs.env_path }}"
-    #     TMP_FILE=$(mktemp)
-    #     # Try to decrypt with dotenvx; if it fails (or not encrypted), fallback to the file as-is
-    #     if pnpm dotenvx decrypt --stdout -f "$ENV_FILE" > "$TMP_FILE" 2>/dev/null; then
-    #       echo "Using decrypted content from dotenvx."
-    #     else
-    #       echo "::notice::dotenvx decrypt failed or not needed; using file as-is."
-    #       cp "$ENV_FILE" "$TMP_FILE"
-    #     fi
+    - name: Export decrypted variables to GITHUB_ENV
+      shell: bash
+      run: |
+        ENV_FILE="${{ inputs.env_path }}"
+        TMP_FILE=$(mktemp)
+        # Try to decrypt with dotenvx; if it fails (or not encrypted), fallback to the file as-is
+        if pnpm dotenvx decrypt --stdout -f "$ENV_FILE" > "$TMP_FILE" 2>/dev/null; then
+          echo "Using decrypted content from dotenvx."
+        else
+          echo "::notice::dotenvx decrypt failed or not needed; using file as-is."
+          cp "$ENV_FILE" "$TMP_FILE"
+        fi
 
-    #     # Remove comments/blank lines and filter out dotenvx key material, then strip surrounding quotes
-    #     while IFS= read -r line; do
-    #       # Skip comments and empty lines
-    #       if [[ -z "$line" || "$line" =~ ^# ]]; then
-    #         continue
-    #       fi
+        # Remove comments/blank lines and filter out dotenvx key material, then strip surrounding quotes
+        while IFS= read -r line; do
+          # Skip comments and empty lines
+          if [[ -z "$line" || "$line" =~ ^# ]]; then
+            continue
+          fi
 
-    #       # Skip dotenvx key and public env var material
-    #       if [[ "$line" =~ ^DOTENV_PUBLIC_KEY ]]; then
-    #         continue
-    #       fi
+          # Skip dotenvx key and public env var material
+          if [[ "$line" =~ ^DOTENV_PUBLIC_KEY ]]; then
+            continue
+          fi
 
-    #       key="${line%%=*}"
-    #       value="${line#*=}"
-    #       # Trim potential CR from Windows line endings
-    #       value="${value%$'\r'}"
+          key="${line%%=*}"
+          value="${line#*=}"
+          # Trim potential CR from Windows line endings
+          value="${value%$'\r'}"
 
-    #       # Strip matching surrounding single or double quotes
-    #       if [[ ( "${value:0:1}" == '"' && "${value: -1}" == '"' ) || ( "${value:0:1}" == "'" && "${value: -1}" == "'" ) ]]; then
-    #         value="${value:1:-1}"
-    #       fi
+          # Strip matching surrounding single or double quotes
+          if [[ ( "${value:0:1}" == '"' && "${value: -1}" == '"' ) || ( "${value:0:1}" == "'" && "${value: -1}" == "'" ) ]]; then
+            value="${value:1:-1}"
+          fi
 
-    #       echo "${key}=${value}" >> "$GITHUB_ENV"
-    #     done < "$TMP_FILE"
-    #     echo "Exported environment variables to GITHUB_ENV."
+          echo "${key}=${value}" >> "$GITHUB_ENV"
+        done < "$TMP_FILE"
+        echo "Exported environment variables to GITHUB_ENV."

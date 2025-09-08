@@ -90,13 +90,7 @@ jobs:
           echo "env_path=$ENV_PATH" >> "$GITHUB_OUTPUT"
           echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
           echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
-        
-      - name: Prepare secrets
-        id: prepare_secrets
-        uses: ./tooling/github/prepare-secrets
-        with:
-          env_path: ${{ steps.resolve.outputs.env_path }}
-      
+         
       - name: Update Wrangler Environment for Preview
         if: ${{ steps.resolve.outputs.stage == 'preview' }}
         shell: bash
@@ -111,6 +105,12 @@ jobs:
           echo "VITE_APP_URL after replacement:"
           grep -E '^VITE_APP_URL=' "$ENV_PATH" || echo "VITE_APP_URL not set"
         
+      - name: Prepare secrets
+        id: prepare_secrets
+        uses: ./tooling/github/prepare-secrets
+        with:
+          env_path: ${{ steps.resolve.outputs.env_path }}
+     
       - name: Build
         run: pnpm run build:${{ steps.resolve.outputs.stage }}
         
