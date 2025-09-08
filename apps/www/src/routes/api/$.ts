@@ -9,12 +9,6 @@ import { createServerFileRoute } from "@tanstack/react-start/server";
 import { serverEnv } from "~/lib/env";
 
 async function handle({ request }: { request: Request }) {
-  if (new URL(request.url).pathname.startsWith("/api/test")) {
-    return new Response(`Hello, world! ${serverEnv().VITE_APP_URL}`, {
-      status: 200,
-    });
-  }
-
   if (new URL(request.url).pathname.startsWith("/api/auth/")) {
     const auth = initAuthHandler(serverEnv().VITE_APP_URL);
     return await auth.handler(request);
