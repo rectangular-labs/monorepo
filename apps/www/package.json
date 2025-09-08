@@ -13,7 +13,7 @@
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "pnpx @biomejs/biome format . --write",
     "lint": "pnpx @biomejs/biome lint . --write",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "typecheck": "pnpm cf-typegen && pnpm tsc --noEmit --emitDeclarationOnly false",
     "with-env": "dotenvx run  -f ../../.env -- ",
     "with-env-prod": "dotenvx run  -f ../../.env.production -- ",
     "with-env-local": "dotenvx run  -f ../../.env.local -f ../../.env -- ",
