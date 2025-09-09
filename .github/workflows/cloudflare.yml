@@ -129,6 +129,7 @@ jobs:
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
       - name: Comment for deployment details
+        if: ${{ github.event_name == 'pull_request' }}
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
@@ -137,7 +138,7 @@ jobs:
 
   cleanup:
     runs-on: ubuntu-latest
-    if: ${{ github.event.action == 'closed' && github.ref != 'refs/heads/main' }}
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
     env:
       STAGE: pr-${{ github.event.number }}
     steps:
