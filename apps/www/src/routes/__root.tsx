@@ -6,7 +6,6 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
-  ScriptOnce,
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -42,6 +41,12 @@ export const Route = createRootRouteWithContext<{
           "We build and launch high-craft products: Result, Emails, and a production-ready monorepo starter.",
       }),
     ],
+    scripts: [
+      {
+        data: "!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();",
+        dataCfasync: "false",
+      },
+    ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
@@ -52,6 +57,11 @@ export const Route = createRootRouteWithContext<{
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.cdnfonts.com",
+        crossOrigin: "anonymous",
       },
       {
         rel: "alternate",
@@ -95,18 +105,6 @@ function RootLayout() {
         <HeadContent />
       </head>
       <body>
-        <ScriptOnce>
-          {`${(
-            () => {
-              document.documentElement.classList.toggle(
-                "dark",
-                localStorage.theme === "dark" ||
-                  (!("theme" in localStorage) &&
-                    window.matchMedia("(prefers-color-scheme: dark)").matches),
-              );
-            }
-          ).toString()}()`}
-        </ScriptOnce>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
