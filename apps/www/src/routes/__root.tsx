@@ -97,28 +97,8 @@ function RootLayout() {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* <script data-cfasync="false">
-          {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
-        </script> */}
         <script async={false} data-cfasync="false">
-          {`!(${(
-            function () {
-              try {
-                const theme = localStorage.theme;
-                const prefersDark = window.matchMedia(
-                  "(prefers-color-scheme: dark)",
-                ).matches;
-                const isDark = theme === "dark" || (!theme && prefersDark);
-                if (isDark) {
-                  document.documentElement.classList.add("dark");
-                } else {
-                  document.documentElement.classList.remove("dark");
-                }
-              } catch {
-                // noop
-              }
-            }
-          ).toString()})();`}
+          {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
         </script>
         <HeadContent />
       </head>
