@@ -76,6 +76,7 @@ const docs = defineCollection({
   name: "docs",
   directory: "../",
   include: "**/docs/**/*.mdx",
+  exclude: "**/node_modules/**",
   schema: DocSchema,
   transform: async (document, context) => mdxTransformer(document, context),
 });
@@ -91,6 +92,7 @@ const metas = defineCollection({
   name: "meta",
   directory: "../",
   include: "**/docs/**/meta.json",
+  exclude: "**/node_modles/**",
   parser: "json",
   schema: MetaSchema,
 });
