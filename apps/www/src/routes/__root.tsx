@@ -97,7 +97,7 @@ function RootLayout() {
     <html lang="en">
       <head>
         {/* hacky js script to prevent next theme flash of light mode on first load. For some reason, an equivalent function typescript compiled doesn't work. */}
-        <script async={false} data-cfasync="false">
+        <script async={false}>
           {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
         </script>
         <HeadContent />
