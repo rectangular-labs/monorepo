@@ -111,9 +111,13 @@ function RootLayout() {
                 "(prefers-color-scheme: dark)",
               ).matches;
               const isDark = theme === "dark" || (!theme && prefersDark);
-              document.documentElement.classList.toggle("dark", isDark);
+              if (isDark) {
+                document.documentElement.classList.add("dark");
+              } else {
+                document.documentElement.classList.remove("dark");
+              }
             }
-          ).toString()}()`}
+          ).toString()}();`}
         </script>
         <HeadContent />
       </head>
