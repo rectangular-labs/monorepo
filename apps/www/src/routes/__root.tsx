@@ -95,27 +95,38 @@ export const Route = createRootRouteWithContext<{
 function RootLayout() {
   return (
     <html lang="en">
-      <head>
-        <script data-cfasync="false">
-          {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
-        </script>
-        <HeadContent />
-      </head>
-      <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          // cloudflare magic see https://github.com/pacocoursey/next-themes?tab=readme-ov-file#using-with-cloudflare-rocket-loader
-          // scriptProps={{ "data-cfasync": "false" }}
-        >
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        // cloudflare magic see https://github.com/pacocoursey/next-themes?tab=readme-ov-file#using-with-cloudflare-rocket-loader
+        scriptProps={{ "data-cfasync": "false" }}
+      >
+        <head>
+          {/* <script data-cfasync="false">
+            {`${(
+              () => {
+                const theme = localStorage.theme;
+                document.documentElement.classList.toggle(
+                  "dark",
+                  localStorage.theme === "dark" ||
+                    (!("theme" in localStorage) &&
+                      window.matchMedia("(prefers-color-scheme: dark)")
+                        .matches),
+                );
+              }
+            ).toString()}()`}
+          </script> */}
+          <HeadContent />
+        </head>
+        <body>
           <Outlet />
           <Toaster />
-        </ThemeProvider>
-        <TanStackRouterDevtools position="bottom-left" />
-        <ReactQueryDevtools buttonPosition="bottom-right" />
-        <Scripts />
-      </body>
+          <TanStackRouterDevtools position="bottom-left" />
+          <ReactQueryDevtools buttonPosition="bottom-right" />
+          <Scripts />
+        </body>
+      </ThemeProvider>
     </html>
   );
 }
