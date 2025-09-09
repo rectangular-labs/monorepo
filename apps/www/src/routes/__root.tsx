@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/useArrowFunction: something */
 import { ThemeProvider } from "@rectangular-labs/ui/components/theme-provider";
 import { Toaster } from "@rectangular-labs/ui/components/ui/sonner";
 import type { QueryClient } from "@tanstack/react-query";
@@ -96,9 +97,28 @@ function RootLayout() {
   return (
     <html lang="en">
       <head>
-        {/* hacky js script to prevent next theme flash of light mode on first load. For some reason, an equivalent function typescript compiled doesn't work. */}
-        <script async={false}>
+        {/* <script data-cfasync="false">
           {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
+        </script> */}
+        <script async={false} data-cfasync="false">
+          {`(${(
+            function () {
+              try {
+                const theme = localStorage.theme;
+                const prefersDark = window.matchMedia(
+                  "(prefers-color-scheme: dark)",
+                ).matches;
+                const isDark = theme === "dark" || (!theme && prefersDark);
+                if (isDark) {
+                  document.documentElement.classList.add("dark");
+                } else {
+                  document.documentElement.classList.remove("dark");
+                }
+              } catch {
+                // noop
+              }
+            }
+          ).toString()})();`}
         </script>
         <HeadContent />
       </head>
