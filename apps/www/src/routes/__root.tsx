@@ -100,7 +100,7 @@ function RootLayout() {
         defaultTheme="system"
         enableSystem
         // cloudflare magic see https://github.com/pacocoursey/next-themes?tab=readme-ov-file#using-with-cloudflare-rocket-loader
-        scriptProps={{ "data-cfasync": "false" }}
+        scriptProps={{ "data-cfasync": "false", async: false }}
       >
         <head>
           {/* <script data-cfasync="false">
