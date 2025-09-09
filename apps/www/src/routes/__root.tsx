@@ -99,13 +99,19 @@ function RootLayout() {
         <script async={false} data-cfasync="false">
           {`${(
             () => {
-              const theme = localStorage.theme ?? "dark";
-              document.documentElement.classList.toggle(
-                theme,
-                localStorage.theme === theme ||
-                  (!("theme" in localStorage) &&
-                    window.matchMedia("(prefers-color-scheme: dark)").matches),
-              );
+              const theme = (() => {
+                try {
+                  // Access can throw in some browser modes
+                  return localStorage.theme;
+                } catch {
+                  return undefined;
+                }
+              })();
+              const prefersDark = window.matchMedia(
+                "(prefers-color-scheme: dark)",
+              ).matches;
+              const isDark = theme === "dark" || (!theme && prefersDark);
+              document.documentElement.classList.toggle("dark", isDark);
             }
           ).toString()}()`}
         </script>
