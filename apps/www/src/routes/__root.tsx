@@ -41,12 +41,6 @@ export const Route = createRootRouteWithContext<{
           "We build and launch high-craft products: Result, Emails, and a production-ready monorepo starter.",
       }),
     ],
-    scripts: [
-      {
-        data: "!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();",
-        dataCfasync: "false",
-      },
-    ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
@@ -102,6 +96,9 @@ function RootLayout() {
   return (
     <html lang="en">
       <head>
+        <script async={false} data-cfasync="false">
+          {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
+        </script>
         <HeadContent />
       </head>
       <body>
