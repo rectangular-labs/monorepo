@@ -95,38 +95,38 @@ export const Route = createRootRouteWithContext<{
 function RootLayout() {
   return (
     <html lang="en">
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        // cloudflare magic see https://github.com/pacocoursey/next-themes?tab=readme-ov-file#using-with-cloudflare-rocket-loader
-        scriptProps={{ "data-cfasync": "false", async: false }}
-      >
-        <head>
-          {/* <script data-cfasync="false">
-            {`${(
-              () => {
-                const theme = localStorage.theme;
-                document.documentElement.classList.toggle(
-                  "dark",
-                  localStorage.theme === "dark" ||
-                    (!("theme" in localStorage) &&
-                      window.matchMedia("(prefers-color-scheme: dark)")
-                        .matches),
-                );
-              }
-            ).toString()}()`}
-          </script> */}
-          <HeadContent />
-        </head>
-        <body>
+      <head>
+        <script async={false} data-cfasync="false">
+          {`${(
+            () => {
+              const theme = localStorage.theme ?? "dark";
+              document.documentElement.classList.toggle(
+                theme,
+                localStorage.theme === theme ||
+                  (!("theme" in localStorage) &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches),
+              );
+            }
+          ).toString()}()`}
+        </script>
+        <HeadContent />
+      </head>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          // Enable when scripts here are working as intended.
+          // cloudflare magic see https://github.com/pacocoursey/next-themes?tab=readme-ov-file#using-with-cloudflare-rocket-loader
+          // scriptProps={{ "data-cfasync": "false", async: false }}
+        >
           <Outlet />
           <Toaster />
-          <TanStackRouterDevtools position="bottom-left" />
-          <ReactQueryDevtools buttonPosition="bottom-right" />
-          <Scripts />
-        </body>
-      </ThemeProvider>
+        </ThemeProvider>
+        <TanStackRouterDevtools position="bottom-left" />
+        <ReactQueryDevtools buttonPosition="bottom-right" />
+        <Scripts />
+      </body>
     </html>
   );
 }
