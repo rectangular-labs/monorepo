@@ -54,6 +54,11 @@ export const Route = createRootRouteWithContext<{
         href: "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap",
       },
       {
+        rel: "preconnect",
+        href: "https://fonts.cdnfonts.com",
+        crossOrigin: "anonymous",
+      },
+      {
         rel: "alternate",
         type: "application/rss+xml",
         href: "/blog/rss.xml",
@@ -92,9 +97,11 @@ function RootLayout() {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script async={false} data-cfasync="false">
+        {/* hacky js script to prevent next theme flash of light mode on first load. For some reason, an equivalent function typescript compiled doesn't work. */}
+        <script data-cfasync="false">
           {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
         </script>
+
         <HeadContent />
       </head>
       <body>
