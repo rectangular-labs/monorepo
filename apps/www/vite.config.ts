@@ -21,7 +21,7 @@ const config = defineConfig({
     mkcert(),
     tanstackStart({
       customViteReactPlugin: true,
-      target: "vercel",
+      target: "cloudflare-module",
     }),
     viteReact(),
   ],
