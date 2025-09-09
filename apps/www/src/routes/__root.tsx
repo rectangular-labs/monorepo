@@ -54,11 +54,6 @@ export const Route = createRootRouteWithContext<{
         href: "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap",
       },
       {
-        rel: "preconnect",
-        href: "https://fonts.cdnfonts.com",
-        crossOrigin: "anonymous",
-      },
-      {
         rel: "alternate",
         type: "application/rss+xml",
         href: "/blog/rss.xml",
