@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/complexity/useArrowFunction: something */
 import { ThemeProvider } from "@rectangular-labs/ui/components/theme-provider";
 import { Toaster } from "@rectangular-labs/ui/components/ui/sonner";
 import type { QueryClient } from "@tanstack/react-query";
