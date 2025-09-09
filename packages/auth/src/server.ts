@@ -3,7 +3,12 @@ import { createDb } from "@rectangular-labs/db";
 import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { emailOTP, magicLink, twoFactor } from "better-auth/plugins";
+import {
+  emailOTP,
+  magicLink,
+  oAuthProxy,
+  twoFactor,
+} from "better-auth/plugins";
 import { authEnv } from "./env";
 
 export function initAuthHandler(baseURL: string) {
@@ -48,6 +53,13 @@ export function initAuthHandler(baseURL: string) {
       },
     },
     plugins: [
+      oAuthProxy({
+        /**
+         * Auto-inference blocked by https://github.com/better-auth/better-auth/pull/2891
+         */
+        currentURL: baseURL,
+        productionURL: baseURL,
+      }),
       emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
           await Promise.resolve();
