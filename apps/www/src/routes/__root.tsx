@@ -6,6 +6,7 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
+  ScriptOnce,
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -94,6 +95,18 @@ function RootLayout() {
         <HeadContent />
       </head>
       <body>
+        <ScriptOnce>
+          {`${(
+            () => {
+              document.documentElement.classList.toggle(
+                "dark",
+                localStorage.theme === "dark" ||
+                  (!("theme" in localStorage) &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches),
+              );
+            }
+          ).toString()}()`}
+        </ScriptOnce>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
