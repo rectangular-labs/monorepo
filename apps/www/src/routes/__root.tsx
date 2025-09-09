@@ -96,27 +96,9 @@ function RootLayout() {
   return (
     <html lang="en">
       <head>
-        {/* <script async={false} data-cfasync="false">
-          {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
-        </script> */}
+        {/* hacky js script to prevent next theme flash of light mode on first load. For some reason, an equivalent function typescript compiled doesn't work. */}
         <script async={false} data-cfasync="false">
-          {`(${(
-            () => {
-              try {
-                const theme = localStorage.theme;
-                const isDark =
-                  theme === "dark" ||
-                  (!theme &&
-                    window.matchMedia("(prefers-color-scheme: dark)").matches);
-                const documentElement = document.documentElement;
-                isDark
-                  ? documentElement.classList.add("dark")
-                  : documentElement.classList.remove("dark");
-              } catch {
-                // noop
-              }
-            }
-          ).toString()})();`}
+          {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
         </script>
         <HeadContent />
       </head>
