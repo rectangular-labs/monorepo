@@ -104,15 +104,14 @@ function RootLayout() {
             () => {
               try {
                 const theme = localStorage.theme;
-                const prefersDark = window.matchMedia(
-                  "(prefers-color-scheme: dark)",
-                ).matches;
-                const isDark = theme === "dark" || (!theme && prefersDark);
-                if (isDark) {
-                  document.documentElement.classList.add("dark");
-                } else {
-                  document.documentElement.classList.remove("dark");
-                }
+                const isDark =
+                  theme === "dark" ||
+                  (!theme &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches);
+                const documentElement = document.documentElement;
+                isDark
+                  ? documentElement.classList.add("dark")
+                  : documentElement.classList.remove("dark");
               } catch {
                 // noop
               }
