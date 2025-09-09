@@ -101,7 +101,7 @@ function RootLayout() {
           {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
         </script> */}
         <script async={false} data-cfasync="false">
-          {`(${(
+          {`!(${(
             function () {
               try {
                 const theme = localStorage.theme;
@@ -125,7 +125,6 @@ function RootLayout() {
       <body>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
           enableSystem
           // Enable when scripts here are working as intended.
           // cloudflare magic see https://github.com/pacocoursey/next-themes?tab=readme-ov-file#using-with-cloudflare-rocket-loader
