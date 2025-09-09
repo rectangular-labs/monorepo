@@ -18,10 +18,11 @@ const menuItems = [
 ];
 export function Header() {
   const isMobile = useIsMobile();
-  const [menuState, setMenuState] = useState<undefined | boolean>(undefined);
+  const [menuState, setMenuState] = useState<boolean>(false);
   useEffect(() => {
     setMenuState(!isMobile);
   }, [isMobile]);
+
   return (
     <header>
       <nav
@@ -51,7 +52,7 @@ export function Header() {
             </div>
 
             <AnimatePresence>
-              {typeof menuState === "boolean" && menuState && (
+              {menuState && (
                 <motion.div
                   animate={{ opacity: 1, scaleY: 1 }}
                   className="mb-6 block w-full flex-wrap items-center justify-end space-y-8 rounded-lg border bg-background p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent"

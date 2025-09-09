@@ -10,6 +10,18 @@
       "dependsOn": ["^build"],
       "outputs": [".cache/tsbuildinfo.json", "dist/**"]
     },
+    "build:preview": {
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**", ".output"]
+    },
+    "build:production": {
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**", ".output"]
+    },
+    "build:local": {
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**", ".output"]
+    },
     "clean": {
       "cache": false
     },
@@ -38,6 +50,8 @@
     "VERCEL",
     "VERCEL_ENV",
     "VERCEL_URL",
-    "npm_lifecycle_event"
+    "npm_lifecycle_event",
+    "DOTENVX_PRIVATE_KEY",
+    "DOTENVX_PRIVATE_KEY_PRODUCTION"
   ]
 }

@@ -88,6 +88,8 @@
     "includes": [
       "apps/**",
       "packages/**",
+      "!**/migrations",
+      "!**/worker-configuration.d.ts",
       "!**/.content-collections",
       "!**/auth-schema.ts",
       "!**/.conductor",

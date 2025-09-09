@@ -10,7 +10,7 @@ import { serverEnv } from "~/lib/env";
 
 async function handle({ request }: { request: Request }) {
   if (new URL(request.url).pathname.startsWith("/api/auth/")) {
-    const auth = initAuthHandler();
+    const auth = initAuthHandler(serverEnv().VITE_APP_URL);
     return await auth.handler(request);
   }
 
@@ -31,7 +31,6 @@ async function handle({ request }: { request: Request }) {
 
   const env = serverEnv();
   const context = createApiContext({
-    dbUrl: env.DATABASE_URL,
     url: new URL(request.url),
   });
 

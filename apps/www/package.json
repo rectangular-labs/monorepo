@@ -4,19 +4,21 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "pnpm with-env-local vite",
-    "build:preview": "pnpm with-env-preview vite build && tsc",
-    "build:production": "pnpm with-env-prod vite build && tsc",
-    "serve:preview": "pnpm with-env-preview vite preview",
-    "serve:production": "pnpm with-env-prod vite preview",
+    "dev": "pnpm cf-typegen && pnpm with-env-local vite",
+    "build:local": "pnpm with-env-local vite build",
+    "build:preview": "pnpm with-env-preview vite build ",
+    "build:production": "pnpm with-env-production vite build",
+    "serve:local": "pnpm with-env-local vite preview",
     "test": "vitest run",
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "pnpx @biomejs/biome format . --write",
     "lint": "pnpx @biomejs/biome lint . --write",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "with-env-local": "dotenvx run -f ../../.env.local  -f ../../.env -- ",
+    "typecheck": "pnpm cf-typegen && pnpm tsc --noEmit --emitDeclarationOnly false",
+    "with-env-local": "dotenvx run  -f ../../.env.local -f ../../.env -- ",
     "with-env-preview": "dotenvx run  -f ../../.env -- ",
-    "with-env-prod": "dotenvx run -f ../../.env.production -- "
+    "with-env-production": "dotenvx run  -f ../../.env.production -- ",
+    "wrangler": "wrangler",
+    "cf-typegen": "wrangler types --env-interface Env"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.4",
@@ -44,6 +46,7 @@
     "@tailwindcss/vite": "^4.1.13",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
+    "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@types/three": "^0.180.0",
@@ -55,6 +58,7 @@
     "vite-plugin-mkcert": "^1.17.8",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.1.0",
+    "wrangler": "^4.34.0"
   }
 }
