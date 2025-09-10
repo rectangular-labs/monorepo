@@ -156,3 +156,7 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+@utility content-vis-auto {
+  content-visibility: auto;
+}

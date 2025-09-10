@@ -29,12 +29,6 @@ export function initAuthHandler(baseURL: string) {
     },
     baseURL,
     secret: env.AUTH_ENCRYPTION_KEY,
-    logger: {
-      disabled: true,
-      log(level, message, ...args) {
-        console.log(level, message, ...args);
-      },
-    },
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,
