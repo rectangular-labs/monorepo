@@ -169,7 +169,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           pkg.exports ||= {};
 
           // ENV support
-          if (data.features.includes("env")) {
+          if (data.features?.includes("env")) {
             pkg.dependencies["@t3-oss/env-core"] ||= "";
             pkg.dependencies["arktype"] ||= "";
             pkg.devDependencies["@types/node"] ||= "";
