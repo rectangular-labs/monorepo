@@ -1,7 +1,7 @@
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { FingerprintIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { toast } from "../ui/sonner";
 import { useAuth } from "./auth-provider";
 
 interface PasskeyButtonProps {

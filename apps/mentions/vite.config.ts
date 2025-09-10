@@ -31,7 +31,7 @@ const config = defineConfig({
   },
   server: {
     proxy: {},
-    port: 6060,
+    port: 7070,
   },
 });
 

@@ -1,6 +1,6 @@
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import { PhoneIcon } from "lucide-react";
-import { cn } from "../../utils/cn";
-import { Button } from "../ui/button";
 import { type AuthViewPath, useAuth } from "./auth-provider";
 
 export function SignInPhoneCodeButton({

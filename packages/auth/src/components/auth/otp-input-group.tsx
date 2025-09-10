@@ -2,7 +2,7 @@ import {
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
-} from "../ui/input-otp";
+} from "@rectangular-labs/ui/components/ui/input-otp";
 
 export function OTPInputGroup({
   otpSeparators = 0,

@@ -1,10 +1,10 @@
 "use client";
 
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { type ComponentProps, useState } from "react";
-import { cn } from "../../utils/cn";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 
 export function PasswordInput({
   className,

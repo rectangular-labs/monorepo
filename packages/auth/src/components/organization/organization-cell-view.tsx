@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "../../../utils/cn";
-import { Skeleton } from "../../ui/skeleton";
+import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import {
   OrganizationLogo,
   type OrganizationLogoProps,

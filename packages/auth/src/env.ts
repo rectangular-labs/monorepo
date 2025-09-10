@@ -9,6 +9,8 @@ export const authEnv = () =>
       AUTH_DISCORD_SECRET: type("string|undefined"),
       AUTH_GITHUB_ID: type("string|undefined"),
       AUTH_GITHUB_SECRET: type("string|undefined"),
+      AUTH_REDDIT_ID: type("string|undefined"),
+      AUTH_REDDIT_SECRET: type("string|undefined"),
     },
     runtimeEnv:
       typeof window !== "undefined"

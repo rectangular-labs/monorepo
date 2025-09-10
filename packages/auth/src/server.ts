@@ -6,6 +6,7 @@ import {
   emailOTP,
   magicLink,
   oAuthProxy,
+  organization,
   twoFactor,
 } from "better-auth/plugins";
 import { authEnv } from "./env";
@@ -14,11 +15,15 @@ interface DB {
   // biome-ignore lint/suspicious/noExplicitAny: better-auth types
   [key: string]: any;
 }
-export function initAuthHandler(baseURL: string, db: DB) {
+export function initAuthHandler(
+  baseURL: string,
+  db: DB,
+): ReturnType<typeof betterAuth<BetterAuthOptions>> {
   const env = authEnv();
 
   const useDiscord = !!env.AUTH_DISCORD_ID && !!env.AUTH_DISCORD_SECRET;
   const useGithub = !!env.AUTH_GITHUB_ID && !!env.AUTH_GITHUB_SECRET;
+  const useReddit = !!env.AUTH_REDDIT_ID && !!env.AUTH_REDDIT_SECRET;
 
   const config = {
     database: drizzleAdapter(db, {
@@ -70,6 +75,12 @@ export function initAuthHandler(baseURL: string, db: DB) {
         },
       }),
       twoFactor(),
+      organization({
+        sendInvitationEmail: async ({ email, id }) => {
+          await Promise.resolve();
+          console.log(`[auth] Invitation email for ${email}: ${id}`);
+        },
+      }),
       expo(),
     ],
     socialProviders: {
@@ -85,6 +96,13 @@ export function initAuthHandler(baseURL: string, db: DB) {
           clientId: env.AUTH_GITHUB_ID,
           clientSecret: env.AUTH_GITHUB_SECRET,
           redirectURI: `${baseURL}/api/auth/callback/github`,
+        },
+      }),
+      ...(useReddit && {
+        reddit: {
+          clientId: env.AUTH_REDDIT_ID,
+          clientSecret: env.AUTH_REDDIT_SECRET,
+          redirectURI: `${baseURL}/api/auth/callback/reddit`,
         },
       }),
     },

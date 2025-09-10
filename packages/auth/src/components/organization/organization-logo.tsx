@@ -1,10 +1,14 @@
 "use client";
 
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@rectangular-labs/ui/components/ui/avatar";
+import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
 import { BuildingIcon } from "lucide-react";
-import { cn } from "../../../utils/cn";
-import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
-import { Skeleton } from "../../ui/skeleton";
 
 const organizationLogoSize = cva("", {
   variants: {

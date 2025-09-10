@@ -1,14 +1,12 @@
-import { initAuthHandler } from "@rectangular-labs/auth";
 import { createAuthClient } from "@rectangular-labs/auth/client";
-import { createDb } from "@rectangular-labs/db";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
-import { clientEnv, serverEnv } from "./env";
+import { clientEnv } from "./env";
 
-export const authServerHandler = initAuthHandler(
-  serverEnv().VITE_APP_URL,
-  createDb(),
-);
+// export const authServerHandler = initAuthHandler(
+//   serverEnv().VITE_APP_URL,
+//   createDb(),
+// );
 export const authClient = createAuthClient(clientEnv().VITE_APP_URL);
 
 export const getCurrentSession = createIsomorphicFn()

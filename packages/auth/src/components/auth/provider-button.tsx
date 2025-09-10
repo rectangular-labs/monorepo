@@ -1,8 +1,8 @@
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "../../utils/cn";
-import { Button } from "../ui/button";
-import { toast } from "../ui/sonner";
 import { useAuth } from "./auth-provider";
 import type { SocialProvider } from "./social-providers";
 

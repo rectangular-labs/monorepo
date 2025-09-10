@@ -1,5 +1,5 @@
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { MailIcon } from "lucide-react";
-import { Button } from "../ui/button";
 import { type AuthViewPath, useAuth } from "./auth-provider";
 
 export function SignInEmailCodeButton({

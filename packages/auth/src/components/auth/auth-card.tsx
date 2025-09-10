@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeftIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { cn } from "../../utils/cn";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { Button } from "../ui/button";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,8 +13,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Separator } from "../ui/separator";
+} from "@rectangular-labs/ui/components/ui/card";
+import { Separator } from "@rectangular-labs/ui/components/ui/separator";
+import { cn } from "@rectangular-labs/ui/utils/cn";
+import { ArrowLeftIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { AuthForm } from "./auth-form";
 import { type AuthViewPath, useAuth } from "./auth-provider";
 import type {

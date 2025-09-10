@@ -1,11 +1,8 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { type } from "arktype";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "../../ui/button";
+import { Spinner } from "@rectangular-labs/ui/components/icon";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,8 +10,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../ui/form";
-import { toast } from "../../ui/sonner";
+} from "@rectangular-labs/ui/components/ui/form";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import { type } from "arktype";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useAuth } from "../auth-provider";
 import { PasswordInput } from "../password-input";
 import { PasswordSchema } from "../schema/password";
@@ -185,7 +185,7 @@ export function ChangePasswordForm(props: ChangePasswordProps) {
         )}
 
         <Button className={"w-full"} disabled={isSubmitting} type="submit">
-          {isSubmitting && <Loader2 className="animate-spin" />}
+          {isSubmitting && <Spinner className="animate-spin" />}
           {props.mode === "update" ? "Update password" : "Reset password"}
         </Button>
       </form>

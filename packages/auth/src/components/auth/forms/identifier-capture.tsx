@@ -1,12 +1,7 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { type } from "arktype";
-import { Loader2 } from "lucide-react";
-import type * as React from "react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "../../ui/button";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,9 +9,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../ui/form";
-import { Input } from "../../ui/input";
-import { PhoneInput } from "../../ui/phone-input";
+} from "@rectangular-labs/ui/components/ui/form";
+import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { PhoneInput } from "@rectangular-labs/ui/components/ui/phone-input";
+import { type } from "arktype";
+import { Loader2 } from "lucide-react";
+import type * as React from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import type { AuthViewPath } from "../auth-provider";
 import { useAuth } from "../auth-provider";
 import type { VerificationInfo } from "./verification-form";

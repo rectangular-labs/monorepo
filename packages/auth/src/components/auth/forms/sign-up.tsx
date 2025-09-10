@@ -1,13 +1,8 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { type } from "arktype";
-import { Loader2 } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { cn } from "../../../utils/cn";
-import { Button } from "../../ui/button";
-import { Checkbox } from "../../ui/checkbox";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -15,10 +10,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../ui/form";
-import { Input } from "../../ui/input";
-import { toast } from "../../ui/sonner";
-import { Textarea } from "../../ui/textarea";
+} from "@rectangular-labs/ui/components/ui/form";
+import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
+import { cn } from "@rectangular-labs/ui/utils/cn";
+import { type } from "arktype";
+import { Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { type AuthViewPath, useAuth } from "../auth-provider";
 import { PasswordInput } from "../password-input";
 import { PasswordSchema } from "../schema/password";
