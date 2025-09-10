@@ -2,10 +2,10 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 
 export function Footer() {
   const links = [
-    { title: "Docs", href: "/docs" },
-    { title: "Blog", href: "/blog" },
+    { title: "How it works", href: "#how-it-works" },
+    { title: "Pricing", href: "#pricing" },
+    { title: "FAQ", href: "#faq" },
     { title: "Open Source", href: "https://github.com/rectangular-labs/" },
-    { title: "About", href: "/docs" },
   ];
   return (
     <div className="border-t">
@@ -22,7 +22,8 @@ export function Footer() {
           ))}
         </div>
         <p className="mt-6 text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} Rectangular Labs. All rights reserved.
+          © {new Date().getFullYear()} Rectangular Labs — Keyword mention
+          tracking & AI reply assistant.
         </p>
       </Section>
     </div>

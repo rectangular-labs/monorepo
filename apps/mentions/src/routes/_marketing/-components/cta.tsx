@@ -1,4 +1,3 @@
-import { InteractiveGridPattern } from "@rectangular-labs/ui/components/background/interactive-grid-pattern";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { Link } from "@tanstack/react-router";
@@ -6,28 +5,22 @@ import { Link } from "@tanstack/react-router";
 export function CTA() {
   return (
     <Section className="content-vis-auto">
-      <div className="relative overflow-hidden rounded-lg border p-8 text-center md:p-12">
+      <div className="relative overflow-hidden rounded-lg border bg-muted p-8 text-center md:p-12">
         <h2 className="font-semibold text-3xl tracking-tight md:text-4xl">
-          Build in the future
+          Get your first leads this week
         </h2>
         <p className="mt-2 text-muted-foreground">
-          We are actively building new products. Stay tuned.
+          Don&apos;t waste hours monitoring social feeds. Let our AI find the
+          best conversations and draft replies for you.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
-            <Link to="/docs">Read the Docs</Link>
+            <a href="#pricing">Start free trial</a>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/blog">Read Lab Notes</Link>
+            <Link to="/blog">See how it works</Link>
           </Button>
         </div>
-        <InteractiveGridPattern
-          className="-z-10"
-          height={24}
-          interactive
-          squares={[60, 20]}
-          width={24}
-        />
       </div>
     </Section>
   );

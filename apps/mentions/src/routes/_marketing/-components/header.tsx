@@ -12,9 +12,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 const menuItems = [
-  { name: "Docs", href: "/docs" },
-  { name: "Blog", href: "/blog" },
-  { name: "About", href: "/about" },
+  { name: "How it works", href: "#how-it-works" },
+  { name: "Pricing", href: "#pricing" },
+  { name: "FAQ", href: "#faq" },
+  { name: "Login", href: "/login" },
 ];
 export function Header() {
   const isMobile = useIsMobile();
@@ -64,23 +65,32 @@ export function Header() {
                     <ul className="space-y-6 text-base lg:flex lg:gap-8 lg:space-y-0 lg:text-sm">
                       {menuItems.map((item) => (
                         <li key={item.name}>
-                          <Link
-                            className="block text-muted-foreground duration-150 hover:text-accent-foreground"
-                            to={item.href}
-                          >
-                            <span>{item.name}</span>
-                          </Link>
+                          {item.href.startsWith("#") ? (
+                            <a
+                              className="block text-muted-foreground duration-150 hover:text-accent-foreground"
+                              href={item.href}
+                            >
+                              <span>{item.name}</span>
+                            </a>
+                          ) : (
+                            <Link
+                              className="block text-muted-foreground duration-150 hover:text-accent-foreground"
+                              to={item.href}
+                            >
+                              <span>{item.name}</span>
+                            </Link>
+                          )}
                         </li>
                       ))}
                     </ul>
                   </div>
 
                   <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit lg:border-l lg:pl-6">
-                    {/* <Button asChild size="sm" variant="outline">
-                      <Link to="/login">
-                        <span>Login</span>
-                      </Link>
-                    </Button> */}
+                    <Button asChild size="sm">
+                      <a href="#pricing">
+                        <span>Start free trial</span>
+                      </a>
+                    </Button>
                     <Button asChild size="icon" variant="outline">
                       <a
                         href="https://github.com/rectangular-labs/"

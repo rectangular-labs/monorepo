@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
 import {
   Tabs,
   TabsList,
@@ -85,7 +86,7 @@ const plans = [
   },
 ];
 
-export default function SimplePricing() {
+export default function Pricing() {
   const [frequency, setFrequency] = useState<string>("monthly");
   const currencyFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -94,13 +95,10 @@ export default function SimplePricing() {
   });
 
   return (
-    <div className="not-prose relative flex w-full flex-col gap-16 overflow-hidden px-4 py-24 text-center sm:px-8">
-      <div className="-z-10 absolute inset-0 overflow-hidden">
-        <div className="-top-[10%] -translate-x-1/2 absolute left-[50%] h-[40%] w-[60%] rounded-full bg-primary/10 blur-3xl" />
-        <div className="-right-[10%] -bottom-[10%] absolute h-[40%] w-[40%] rounded-full bg-primary/5 blur-3xl" />
-        <div className="-bottom-[10%] -left-[10%] absolute h-[40%] w-[40%] rounded-full bg-primary/5 blur-3xl" />
-      </div>
-
+    <Section
+      className="relative flex w-full flex-col gap-16 overflow-hidden px-4 py-24 text-center sm:px-8"
+      id="pricing"
+    >
       <div className="flex flex-col items-center justify-center gap-8">
         <div className="flex flex-col items-center space-y-2">
           <Badge
@@ -108,7 +106,7 @@ export default function SimplePricing() {
             variant="outline"
           >
             <Sparkles className="mr-1 h-3.5 w-3.5 animate-pulse text-primary" />
-            Pricing Plans
+            Simple, transparent pricing
           </Badge>
           <motion.h1
             animate={{ opacity: 1, y: 0 }}
@@ -124,20 +122,19 @@ export default function SimplePricing() {
             initial={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Simple, transparent pricing that scales with your business. No
-            hidden fees, no surprises.
+            Pricing that scales with your business. No hidden fees, no
+            surprises.
           </motion.p>
         </div>
 
-        <motion.div
-          animate={{ opacity: 1, scale: 1 }}
-          initial={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
+        <div>
           <Tabs
             className="inline-block rounded-full bg-muted/30 p-1 shadow-sm"
             defaultValue={frequency}
-            onValueChange={setFrequency}
+            onValueChange={(value) => {
+              console.log("value", value);
+              setFrequency(value);
+            }}
           >
             <TabsList className="bg-transparent">
               <TabsTrigger
@@ -160,7 +157,7 @@ export default function SimplePricing() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-        </motion.div>
+        </div>
 
         <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
           {plans.map((plan, index) => (
@@ -307,6 +304,6 @@ export default function SimplePricing() {
           ))}
         </div>
       </div>
-    </div>
+    </Section>
   );
 }

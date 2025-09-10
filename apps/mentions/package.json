@@ -21,8 +21,6 @@
     "cf-typegen": "wrangler types --env-interface Env"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.4",
-    "@react-three/fiber": "^9.3.0",
     "@rectangular-labs/api": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/content": "workspace:*",
@@ -39,8 +37,7 @@
     "arktype": "^2.1.22",
     "motion": "^12.23.12",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "three": "^0.180.0"
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
@@ -50,7 +47,6 @@
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
-    "@types/three": "^0.180.0",
     "@vitejs/plugin-react": "^5.0.2",
     "jiti": "^2.5.1",
     "jsdom": "^26.1.0",

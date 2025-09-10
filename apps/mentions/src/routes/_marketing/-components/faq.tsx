@@ -7,6 +7,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/accordion";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
 
 const faqs = [
   { id: "free-trial", q: "Is there a free trial?", a: "Yes, try it free." },
@@ -39,8 +40,8 @@ const faqs = [
   { id: "billing", q: "Do you bill yearly?", a: "Yes, with discounts." },
 ];
 
-export const FAQ1 = () => (
-  <div className="w-full py-20 lg:py-40">
+export const FAQ = () => (
+  <Section id="faq">
     <div className="container mx-auto">
       <div className="grid gap-10 lg:grid-cols-2">
         <div className="flex flex-col gap-10">
@@ -50,13 +51,11 @@ export const FAQ1 = () => (
             </div>
             <div className="flex flex-col gap-2">
               <h4 className="max-w-xl text-left font-regular text-3xl tracking-tighter md:text-5xl">
-                This is the start of something new
+                Questions about keyword tracking & replying
               </h4>
               <p className="max-w-xl text-left text-lg text-muted-foreground leading-relaxed tracking-tight lg:max-w-lg">
-                Managing a small business today is already tough. Avoid further
-                complications by ditching outdated, tedious trade methods. Our
-                goal is to streamline SMB trade, making it easier and faster
-                than ever.
+                We help you discover high-intent conversations across socials
+                and forums where your product can add value—without spamming.
               </p>
             </div>
             <div className="">
@@ -76,5 +75,5 @@ export const FAQ1 = () => (
         </Accordion>
       </div>
     </div>
-  </div>
+  </Section>
 );

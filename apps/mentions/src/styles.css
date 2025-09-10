@@ -2,9 +2,8 @@
 @import "@rectangular-labs/content/styles.css";
 @source "./**/*.{ts,tsx}";
 
-/* Playful theme tweaks inspired by ReplyGuy (https://replyguy.com/) */
 :root {
-  --radius: 14px;
+  --radius: 0.8rem;
   --fun-pink: 336 100% 67%; /* hot pink */
   --fun-yellow: 45 100% 51%; /* sunny yellow */
   --fun-blue: 210 100% 56%; /* bright blue */
@@ -12,29 +11,9 @@
 
 .marketing-fun-bg {
   background:
-    radial-gradient(1200px 400px at 10% -10%, hsl(var(--fun-pink)/0.10), transparent 60%),
-    radial-gradient(900px 300px at 110% 10%, hsl(var(--fun-blue)/0.10), transparent 60%),
+    radial-gradient(1200px 400px at 10% -10%, hsl(var(--fun-pink)/0.12), transparent 60%),
+    radial-gradient(900px 300px at 110% 10%, hsl(var(--fun-blue)/0.12), transparent 60%),
     radial-gradient(800px 300px at -10% 90%, hsl(var(--fun-yellow)/0.12), transparent 60%);
-}
-
-/* Buttons pop a bit more */
-.btn,
-button,
-.shadcn-button {
-  border-radius: var(--radius);
-}
-
-/* Badges a tad rounder and brighter */
-[data-radix-collection-item][role="tab"],
-.badge,
-.shadcn-badge {
-  border-radius: calc(var(--radius) + 6px);
-}
-
-/* Card subtle hover float */
-.card:hover {
-  transform: translateY(-2px);
-  transition: transform 200ms ease;
 }
 
 /* Fun accent gradient on headings */
@@ -43,4 +22,10 @@ button,
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Card subtle hover float */
+.card:hover {
+  transform: translateY(-2px);
+  transition: transform 200ms ease;
 }
