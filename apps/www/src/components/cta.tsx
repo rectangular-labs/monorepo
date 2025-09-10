@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 
 export function CTA() {
   return (
-    <Section>
+    <Section className="content-vis-auto">
       <div className="relative overflow-hidden rounded-lg border p-8 text-center md:p-12">
         <h2 className="font-semibold text-3xl tracking-tight md:text-4xl">
           Build in the future

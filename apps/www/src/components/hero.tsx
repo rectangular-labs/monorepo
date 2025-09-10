@@ -2,7 +2,9 @@ import { InteractiveGridPattern } from "@rectangular-labs/ui/components/backgrou
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { Link } from "@tanstack/react-router";
-import { InteractiveRectangle } from "./interactive-rectangle";
+import { lazy, Suspense } from "react";
+
+const InteractiveRectangle = lazy(() => import("./interactive-rectangle"));
 
 export function Hero() {
   return (
@@ -34,7 +36,9 @@ export function Hero() {
           squares={[60, 20]}
           width={24}
         />
-        <InteractiveRectangle />
+        <Suspense fallback={null}>
+          <InteractiveRectangle />
+        </Suspense>
       </div>
     </Section>
   );

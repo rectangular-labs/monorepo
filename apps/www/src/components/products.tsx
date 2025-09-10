@@ -11,7 +11,7 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 
 export function Products() {
   return (
-    <Section>
+    <Section className="content-vis-auto">
       <h2 className="font-semibold text-2xl tracking-tight md:text-3xl">
         Try our products
       </h2>
