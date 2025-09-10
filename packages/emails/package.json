@@ -57,7 +57,7 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
-    "@aws-sdk/client-sesv2": "^3.883.0",
+    "@aws-sdk/client-sesv2": "^3.886.0",
     "@plunk/node": "^3.0.3",
     "@rectangular-labs/typescript": "workspace:*",
     "@sendgrid/mail": "^8.1.5",
@@ -71,17 +71,17 @@
     "postmark": "^4.0.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "resend": "^6.0.2",
+    "resend": "^6.0.3",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
   "peerDependencies": {
-    "@aws-sdk/client-sesv2": "^3.883.0",
+    "@aws-sdk/client-sesv2": "^3.886.0",
     "@sendgrid/mail": "^8.1.5",
     "mailersend": "^2.6.0",
     "nodemailer": "^7.0.6",
     "postmark": "^4.0.5",
-    "resend": "^6.0.2"
+    "resend": "^6.0.3"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-sesv2": {
