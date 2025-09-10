@@ -19,7 +19,7 @@ interface PackageJson {
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setGenerator("package", {
-    description: "Generate a new package for the Acme Monorepo",
+    description: "Generate a new package for the Monorepo",
     prompts: [
       {
         type: "input",
@@ -40,28 +40,18 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         choices: ["public", "private"],
       },
       {
-        type: "confirm",
-        name: "needsDocs",
-        message: "Do you want documentation for this package?",
-        default: false,
-      },
-      {
-        type: "confirm",
-        name: "hasEnv",
-        message: "Do you want to have env variables exported?",
-        default: false,
-      },
-      {
-        type: "confirm",
-        name: "needsUI",
-        message: "Do you need React configured?",
-        default: false,
-      },
-      {
-        type: "confirm",
-        name: "needsStyles",
-        message: "Do you need to have extra CSS styles?",
-        default: false,
+        type: "checkbox",
+        name: "features",
+        message: "Select features to include",
+        choices: [
+          { name: "Documentation", value: "docs" },
+          { name: "Env variables", value: "env" },
+          { name: "React UI", value: "react" },
+          { name: "Extra CSS styles", value: "styles" },
+          // Empty value and name so that we can skip the feature via "" from the command line
+          { name: "", value:""}
+        ],
+        default: [],
       },
     ],
     actions: [
@@ -120,32 +110,32 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/src/env.ts",
         templateFile: "templates/env.ts.hbs",
-        skip: (answers: object) => {
-          return ("hasEnv" in answers && !answers.hasEnv)
+        skip: (answers: {features?: string[]}) => {
+         return answers.features?.includes("env") ? undefined : "Skipping env.ts"
         },
       },
       {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/src/styles.css",
         templateFile: "templates/styles.css.hbs",
-        skip: (answers :object) => {    
-          return ("needsStyles" in answers && !answers.needsStyles)
+        skip: (answers :{features?: string[]}) => {    
+          return answers.features?.includes("styles") ? undefined : "Skipping styles.css"
         }
       },
       {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/docs/index.mdx",
         templateFile: "templates/docs/index.mdx.hbs",
-        skip: (answers: object) => {
-          return ("needsDocs" in answers && !answers.needsDocs)
+        skip: (answers: {features?: string[]}) => {
+          return answers.features?.includes("docs") ? undefined : "Skipping docs/index.mdx"
         },
       },
       {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/docs/meta.json",
         templateFile: "templates/docs/meta.json.hbs",
-        skip: (answers: object) => {
-          return ("needsDocs" in answers && !answers.needsDocs)
+        skip: (answers: {features?: string[]}) => {
+          return answers.features?.includes("docs") ? undefined : "Skipping docs/meta.json"
         },
       },
       {
@@ -179,7 +169,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           pkg.exports ||= {};
 
           // ENV support
-          if (data.hasEnv) {
+          if (data.features.includes("env")) {
             pkg.dependencies["@t3-oss/env-core"] ||= "";
             pkg.dependencies["arktype"] ||= "";
             pkg.devDependencies["@types/node"] ||= "";
@@ -193,7 +183,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           }
 
           // UI support
-          if (data.needsUI) {
+          if (data.features?.includes("react")) {
             pkg.devDependencies["@rectangular-labs/ui"] ||= "";
             pkg.peerDependencies["@rectangular-labs/ui"] ||= "";
             pkg.devDependencies["react"] ||= "";
@@ -205,7 +195,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           }
 
           // Styles export when requested
-          if (data.needsStyles) {
+          if (data.features?.includes("styles")) {
             const exportsField = pkg.exports;
             exportsField["./styles.css"] = "./src/styles.css";
           }
@@ -234,7 +224,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         type: "modify",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/tsconfig.json",
         async transform(content, data) {
-          if (!data.needsUI) {
+          if (!data.features?.includes("react")) {
             return content
           }
           const tsConfig = JSON.parse(content) as TSConfig

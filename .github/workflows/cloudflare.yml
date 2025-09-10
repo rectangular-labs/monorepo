@@ -143,6 +143,9 @@ jobs:
       STAGE: pr-${{ github.event.number }}
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Setup Dependencies
+        uses: ./tooling/github/setup
       - name: Destroy Preview Environment
         uses: cloudflare/wrangler-action@v3
         with:
