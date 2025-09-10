@@ -40,28 +40,16 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         choices: ["public", "private"],
       },
       {
-        type: "confirm",
-        name: "needsDocs",
-        message: "Do you want documentation for this package?",
-        default: false,
-      },
-      {
-        type: "confirm",
-        name: "hasEnv",
-        message: "Do you want to have env variables exported?",
-        default: false,
-      },
-      {
-        type: "confirm",
-        name: "needsUI",
-        message: "Do you need React configured?",
-        default: false,
-      },
-      {
-        type: "confirm",
-        name: "needsStyles",
-        message: "Do you need to have extra CSS styles?",
-        default: false,
+        type: "checkbox",
+        name: "features",
+        message: "Select features to include",
+        choices: [
+          { name: "Documentation", value: "docs" },
+          { name: "Env variables", value: "env" },
+          { name: "React UI", value: "ui" },
+          { name: "Extra CSS styles", value: "styles" },
+        ],
+        default: [],
       },
     ],
     actions: [
@@ -70,6 +58,19 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           if (answers.name.startsWith("@rectangular-labs/")) {
             answers.name = answers.name.replace("@rectangular-labs/", "");
           }
+        }
+        if ("features" in answers && Array.isArray(answers.features)) {
+          const selected = answers.features;
+          const mapped = answers as unknown as {
+            needsDocs?: boolean;
+            hasEnv?: boolean;
+            needsUI?: boolean;
+            needsStyles?: boolean;
+          };
+          mapped.needsDocs = selected.includes("docs");
+          mapped.hasEnv = selected.includes("env");
+          mapped.needsUI = selected.includes("ui");
+          mapped.needsStyles = selected.includes("styles");
         }
         return "Config sanitized";
       },
