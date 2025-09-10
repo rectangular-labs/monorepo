@@ -48,6 +48,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           { name: "Env variables", value: "env" },
           { name: "React UI", value: "react" },
           { name: "Extra CSS styles", value: "styles" },
+          // Empty value and name so that we can skip the feature via "" from the command line
           { name: "", value:""}
         ],
         default: [],
@@ -182,7 +183,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           }
 
           // UI support
-          if (data.features.includes("react")) {
+          if (data.features?.includes("react")) {
             pkg.devDependencies["@rectangular-labs/ui"] ||= "";
             pkg.peerDependencies["@rectangular-labs/ui"] ||= "";
             pkg.devDependencies["react"] ||= "";
@@ -194,7 +195,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           }
 
           // Styles export when requested
-          if (data.features.includes("styles")) {
+          if (data.features?.includes("styles")) {
             const exportsField = pkg.exports;
             exportsField["./styles.css"] = "./src/styles.css";
           }
@@ -223,7 +224,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         type: "modify",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/tsconfig.json",
         async transform(content, data) {
-          if (!data.features.includes("react")) {
+          if (!data.features?.includes("react")) {
             return content
           }
           const tsConfig = JSON.parse(content) as TSConfig
