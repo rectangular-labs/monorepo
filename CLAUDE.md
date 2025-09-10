@@ -91,19 +91,23 @@ This is a TypeScript monorepo using Turborepo with the following structure:
 Preferred for AI/non-interactive: use `--args` to bypass prompts.
 
 - Argument order:
-  - `name`, `type`, `needsDocs`, `hasEnv` (private only), `needsUI` (private only), `needsStyles` (only if UI is enabled)
+  - `name`, `type`, `features`
+
+- Features:
+  - Comma-separated list from: `docs`, `env`, `react`, `styles` (order doesn't matter)
+  - Use an empty string `""` for no features
 
 - Examples:
-  - Public with no docs, no env, no ui, no styles:
-    - `pnpm new:package --args "my-lib" "public" false false false false`
-  - Public with docs, no env, no ui, no styles:
-    - `pnpm new:package --args "my-lib" "public" true false false false`
+  - Public with no features:
+    - `pnpm new:package --args "my-lib" "public" ""`
+  - Public with docs only:
+    - `pnpm new:package --args "my-lib" "public" "docs"`
   - Private with docs, env, React UI, and styles:
-    - `pnpm new:package --args "my-private-lib" "private" true true true true`
-  - Private with env only (no UI, no styles, no docs):
-    - `pnpm new:package --args "my-svc" "private" false true false false`
-  - Private with env and UI (no docs, no styles):
-    - `pnpm new:package --args "my-svc" "private" false true true false`
+    - `pnpm new:package --args "my-private-lib" "private" "docs,env,react,styles"`
+  - Private with env only:
+    - `pnpm new:package --args "my-svc" "private" "env"`
+  - Private with env and React UI (no docs, no styles):
+    - `pnpm new:package --args "my-svc" "private" "env,react"`
 
 Interactive (for humans): `pnpm new:package` and answer prompts. The scope `@rectangular-labs/` in the name is optional and normalized.
 
