@@ -62,9 +62,9 @@
     "@rectangular-labs/ui": "workspace:*",
     "arktype": "^2.1.22",
     "feed": "^5.1.0",
-    "fumadocs-core": "^15.7.10",
-    "fumadocs-mdx": "^11.9.0",
-    "fumadocs-ui": "^15.7.10",
-    "lucide-static": "^0.542.0"
+    "fumadocs-core": "^15.7.11",
+    "fumadocs-mdx": "^11.9.1",
+    "fumadocs-ui": "^15.7.11",
+    "lucide-static": "^0.543.0"
   }
 }
