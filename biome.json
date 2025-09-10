@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
   "assist": {
     "actions": {
       "source": { "organizeImports": "on", "useSortedAttributes": "on" }
@@ -70,9 +70,12 @@
       "enabled": false
     },
     "parser": {
-      "cssModules": true
+      "cssModules": false
     },
     "formatter": {
+      "enabled": false
+    },
+    "assist": {
       "enabled": false
     }
   },
