@@ -21,7 +21,7 @@ import {
   VKIcon,
   XIcon,
   ZoomIcon,
-} from "../icon";
+} from "@rectangular-labs/ui/components/icon";
 
 export const socialProviders: SocialProvider[] = [
   {
