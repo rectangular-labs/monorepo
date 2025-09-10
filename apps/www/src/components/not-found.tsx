@@ -1,26 +1,34 @@
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { Link } from "@tanstack/react-router";
 
 export function NotFound({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="space-y-2 p-2">
-      <div className="text-gray-600 dark:text-gray-400">
-        {children || <p>The page you are looking for does not exist.</p>}
+    <Section className="flex min-h-screen items-center justify-center text-center">
+      <div className="mx-auto max-w-xl">
+        <p className="font-mono text-muted-foreground text-xs tracking-widest">
+          404
+        </p>
+        <h1 className="mt-2 font-bold text-3xl tracking-tight [text-wrap:balance] md:text-5xl">
+          Page not found
+        </h1>
+        <p className="mx-auto mt-4 max-w-prose text-muted-foreground [text-wrap:balance]">
+          {children ||
+            "The page you are looking for does not exist or has been moved."}
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Button
+            onClick={() => window.history.back()}
+            type="button"
+            variant="outline"
+          >
+            Go back
+          </Button>
+          <Button asChild>
+            <Link to="/">Go to home</Link>
+          </Button>
+        </div>
       </div>
-      <p className="flex flex-wrap items-center gap-2">
-        <button
-          className="rounded bg-emerald-500 px-2 py-1 font-black text-sm text-white uppercase"
-          onClick={() => window.history.back()}
-          type="button"
-        >
-          Go back
-        </button>
-        <Link
-          className="rounded bg-cyan-600 px-2 py-1 font-black text-sm text-white uppercase"
-          to="/"
-        >
-          Start Over
-        </Link>
-      </p>
-    </div>
+    </Section>
   );
 }
