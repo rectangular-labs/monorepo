@@ -131,10 +131,7 @@ export default function Pricing() {
           <Tabs
             className="inline-block rounded-full bg-muted/30 p-1 shadow-sm"
             defaultValue={frequency}
-            onValueChange={(value) => {
-              console.log("value", value);
-              setFrequency(value);
-            }}
+            onValueChange={setFrequency}
           >
             <TabsList className="bg-transparent">
               <TabsTrigger
