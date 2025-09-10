@@ -71,7 +71,7 @@
     "postmark": "^4.0.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "resend": "^6.0.2",
+    "resend": "^6.0.3",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
@@ -81,7 +81,7 @@
     "mailersend": "^2.6.0",
     "nodemailer": "^7.0.6",
     "postmark": "^4.0.5",
-    "resend": "^6.0.2"
+    "resend": "^6.0.3"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-sesv2": {
