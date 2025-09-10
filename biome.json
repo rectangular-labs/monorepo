@@ -73,7 +73,7 @@
       "cssModules": true
     },
     "formatter": {
-      "enabled": true
+      "enabled": false
     }
   },
   "javascript": { "globals": [] },

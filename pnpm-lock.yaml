@@ -406,6 +406,12 @@ importers:
 
   packages/ui:
     dependencies:
+      '@fontsource-variable/atkinson-hyperlegible-mono':
+        specifier: ^5.2.4
+        version: 5.2.4
+      '@fontsource-variable/atkinson-hyperlegible-next':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.1))
@@ -2225,6 +2231,12 @@ packages:
 
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
+
+  '@fontsource-variable/atkinson-hyperlegible-mono@5.2.4':
+    resolution: {integrity: sha512-eoRaqYu7rP5yqediGkwT+MHp2Op/rUgNRkPdtzo14FfLS1a2mOqgZG3kzyMG3Y68DEtHTBkisjljRpnK/7f1/w==}
+
+  '@fontsource-variable/atkinson-hyperlegible-next@5.2.5':
+    resolution: {integrity: sha512-RmVQzcI2ZIHiDRi4djHOcHN1CpHmEc5soCHXad4EMalakFEK4K6DoNJu0KCP5rZCzlHsQOQUjizjbmx9DiB+hQ==}
 
   '@formatjs/intl-localematcher@0.6.1':
     resolution: {integrity: sha512-ePEgLgVCqi2BBFnTMWPfIghu6FkbZnnBVhO2sSxvLfrdFw7wCHAHiDoM2h4NRgjbaY7+B7HgOLZGkK187pZTZg==}
@@ -11932,6 +11944,10 @@ snapshots:
       react-dom: 19.1.1(react@19.1.1)
 
   '@floating-ui/utils@0.2.9': {}
+
+  '@fontsource-variable/atkinson-hyperlegible-mono@5.2.4': {}
+
+  '@fontsource-variable/atkinson-hyperlegible-next@5.2.5': {}
 
   '@formatjs/intl-localematcher@0.6.1':
     dependencies:
