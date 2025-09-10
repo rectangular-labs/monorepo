@@ -1,10 +1,8 @@
-import { dbEnv } from "@rectangular-labs/db/env";
 import { createEnv } from "@t3-oss/env-core";
 import { type } from "arktype";
 
 export const authEnv = () =>
   createEnv({
-    extends: [dbEnv()],
     server: {
       AUTH_ENCRYPTION_KEY: type("string >= 32"),
       AUTH_DISCORD_ID: type("string|undefined"),

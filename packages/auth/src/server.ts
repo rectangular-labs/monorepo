@@ -1,5 +1,4 @@
 import { expo } from "@better-auth/expo";
-import { createDb } from "@rectangular-labs/db";
 import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -11,14 +10,18 @@ import {
 } from "better-auth/plugins";
 import { authEnv } from "./env";
 
-export function initAuthHandler(baseURL: string) {
+interface DB {
+  // biome-ignore lint/suspicious/noExplicitAny: better-auth types
+  [key: string]: any;
+}
+export function initAuthHandler(baseURL: string, db: DB) {
   const env = authEnv();
 
   const useDiscord = !!env.AUTH_DISCORD_ID && !!env.AUTH_DISCORD_SECRET;
   const useGithub = !!env.AUTH_GITHUB_ID && !!env.AUTH_GITHUB_SECRET;
 
   const config = {
-    database: drizzleAdapter(createDb(), {
+    database: drizzleAdapter(db, {
       provider: "pg",
     }),
     telemetry: {
