@@ -9,7 +9,6 @@ const CTA = lazy(() => import("~/routes/_marketing/-components/cta"));
 export const Route = createFileRoute("/_marketing/")({ component: App });
 
 function App() {
-  throw new Error("Not implemented");
   return (
     <>
       <Hero />
