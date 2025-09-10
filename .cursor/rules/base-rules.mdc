@@ -58,7 +58,8 @@ This is a TypeScript monorepo using Turborepo with the following structure:
 - **`packages/db`** - Database layer using Drizzle ORM
   - PostgreSQL with snake_case column naming
   - User and credential schemas for authentication
-  - Factory function `createDb(connectionString)`
+  - Factory function `createDb()`
+  - Provides `_helpers.ts` to manage timestamps
 
 - **`packages/ui`** - Shared UI components
   - Shadcn/ui components
