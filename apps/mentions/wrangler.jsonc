@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rectangular-labs-www",
+  "main": ".output/server/index.mjs",
+  "preview_urls": false,
+  "compatibility_date": "2025-09-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".output/public"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "placement": {
+    "mode": "smart"
+  },
+  "env": {
+    "production": {
+      "routes": [
+        {
+          "pattern": "rectangularlabs.com",
+          "custom_domain": true
+        }
+      ]
+    },
+    "{env.PULL_REQUEST}": {
+      "routes": [
+        {
+          "pattern": "{env.PULL_REQUEST}.rectangularlabs.com",
+          "custom_domain": true
+        }
+      ]
+    }
+  }
+}
