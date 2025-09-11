@@ -2,11 +2,13 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { dbEnv } from "./env";
 import * as authSchema from "./schema/auth-schema";
+import * as mentionScheme from "./schema/mention";
 
 export * from "drizzle-orm";
 
-const schema = {
+const mentionSchema = {
   ...authSchema,
+  ...mentionScheme,
 };
 
 export const createDb = () => {
@@ -15,7 +17,7 @@ export const createDb = () => {
     prepare: false,
   });
   return drizzle(client, {
-    schema,
+    schema: mentionSchema,
     casing: "snake_case",
   });
 };
