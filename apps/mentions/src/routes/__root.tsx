@@ -28,17 +28,16 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: "apple-mobile-web-app-title",
-        content: "Rectangular Labs",
+        content: "Mentions",
       },
       {
         name: "application-name",
-        content: "Rectangular Labs",
+        content: "Mentions",
       },
       ...seo({
-        title:
-          "Rectangular Labs — Bootstrapped, customer-obsessed technology studio",
+        title: "Mentions — Monitor keywords, generate replies, publish fast",
         description:
-          "We build and launch high-craft products: Result, Emails, and a production-ready monorepo starter.",
+          "Track brand and product mentions, curate an inbox, generate helpful replies with AI, and publish to Reddit in one flow.",
       }),
     ],
     links: [
