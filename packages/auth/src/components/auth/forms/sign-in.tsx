@@ -1,21 +1,21 @@
 "use client";
 
-import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
+  arktypeResolver,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { type } from "arktype";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { type AuthViewPath, useAuth } from "../auth-provider";
 import { PasswordInput } from "../password-input";
 import type { VerificationInfo } from "./verification-form";

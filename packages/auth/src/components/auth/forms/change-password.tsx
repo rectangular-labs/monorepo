@@ -1,20 +1,20 @@
 "use client";
 
-import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Spinner } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
+  arktypeResolver,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { type } from "arktype";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { useAuth } from "../auth-provider";
 import { PasswordInput } from "../password-input";
 import { PasswordSchema } from "../schema/password";

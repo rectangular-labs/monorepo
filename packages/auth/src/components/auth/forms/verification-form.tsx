@@ -1,21 +1,21 @@
 "use client";
 
-import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
+  arktypeResolver,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { InputOTP } from "@rectangular-labs/ui/components/ui/input-otp";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { type } from "arktype";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { type AuthViewPath, useAuth } from "../auth-provider";
 import { OTPInputGroup } from "../otp-input-group";
 import { CodeSchema } from "../schema/code";

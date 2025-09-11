@@ -5,6 +5,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
   emailOTP,
   magicLink,
+  type OrganizationOptions,
   oAuthProxy,
   organization,
   twoFactor,
@@ -16,6 +17,7 @@ interface DB {
   // biome-ignore lint/suspicious/noExplicitAny: better-auth types
   [key: string]: any;
 }
+
 export function initAuthHandler(
   baseURL: string,
   db: DB,
@@ -84,7 +86,7 @@ export function initAuthHandler(
         },
       }),
       expo(),
-    ],
+    ] as const,
     socialProviders: {
       ...(useDiscord && {
         discord: {
@@ -115,10 +117,34 @@ export function initAuthHandler(
         enabled: true,
       },
     },
+    databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            await Promise.resolve();
+            // const organization = await getActiveOrganization(session.userId);
+            return {
+              data: {
+                ...session,
+                activeOrganizationId: null,
+              },
+            };
+          },
+        },
+      },
+    },
   } satisfies BetterAuthOptions;
 
   return betterAuth(config);
 }
 
 export type Auth = ReturnType<typeof initAuthHandler>;
-export type Session = Auth["$Infer"]["Session"];
+export type Session = Auth["$Infer"]["Session"] & {
+  session: { activeOrganizationId?: string | null | undefined };
+};
+export type Organization = ReturnType<
+  typeof organization<OrganizationOptions>
+>["$Infer"]["Organization"];
+export type Member = ReturnType<
+  typeof organization<OrganizationOptions>
+>["$Infer"]["Member"];

@@ -1,20 +1,20 @@
 "use client";
 
-import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
+  arktypeResolver,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { type } from "arktype";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { useAuth } from "../auth-provider";
 
 export function RecoverAccountForm() {
