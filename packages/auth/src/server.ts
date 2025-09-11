@@ -9,6 +9,7 @@ import {
   organization,
   twoFactor,
 } from "better-auth/plugins";
+import { passkey } from "better-auth/plugins/passkey";
 import { authEnv } from "./env";
 
 interface DB {
@@ -74,6 +75,7 @@ export function initAuthHandler(
           console.log(`[auth] Magic link for ${email}: ${token} ${url}`);
         },
       }),
+      passkey(),
       twoFactor(),
       organization({
         sendInvitationEmail: async ({ email, id }) => {
@@ -107,6 +109,12 @@ export function initAuthHandler(
       }),
     },
     trustedOrigins: ["expo://"],
+    account: {
+      encryptOAuthTokens: true,
+      accountLinking: {
+        enabled: true,
+      },
+    },
   } satisfies BetterAuthOptions;
 
   return betterAuth(config);

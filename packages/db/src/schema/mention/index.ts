@@ -1,3 +1,4 @@
+export * from "./auth-schema";
 export * from "./keyword-schema";
 export * from "./mention-schema";
 export * from "./project-schema";
