@@ -1,3 +1,8 @@
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import {
   index,
@@ -67,3 +72,6 @@ export const smMentionTableRelations = relations(
     replies: many(smReply),
   }),
 );
+export const mentionInsertSchema = createInsertSchema(smMention);
+export const mentionSelectSchema = createSelectSchema(smMention);
+export const mentionUpdateSchema = createUpdateSchema(smMention);

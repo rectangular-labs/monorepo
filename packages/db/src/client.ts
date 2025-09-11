@@ -5,7 +5,7 @@ import * as mentionScheme from "./schema/mention";
 
 export * from "drizzle-orm";
 
-const mentionSchema = {
+export const schema = {
   ...mentionScheme,
 };
 
@@ -15,7 +15,7 @@ export const createDb = () => {
     prepare: false,
   });
   return drizzle(client, {
-    schema: mentionSchema,
+    schema,
     casing: "snake_case",
   });
 };

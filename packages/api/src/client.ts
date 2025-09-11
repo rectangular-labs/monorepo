@@ -15,7 +15,7 @@ export const rqApiClient = (baseUrl: string) =>
   createTanstackQueryUtils(rpcClient(baseUrl));
 
 const openApiLink = (baseUrl: string) =>
-  new OpenAPILink(contract as Router, {
+  new OpenAPILink(contract as unknown as Router, {
     url: `${baseUrl}/api`,
     headers: () => ({}),
     fetch: (request, init) => {

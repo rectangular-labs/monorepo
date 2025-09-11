@@ -1,3 +1,8 @@
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { boolean, index, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
@@ -73,3 +78,6 @@ export const smReplyRelations = relations(smReply, ({ one }) => ({
     references: [smMention.id],
   }),
 }));
+export const replyInsertSchema = createInsertSchema(smReply);
+export const replySelectSchema = createSelectSchema(smReply);
+export const replyUpdateSchema = createUpdateSchema(smReply);

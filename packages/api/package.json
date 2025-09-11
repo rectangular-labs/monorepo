@@ -37,6 +37,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.13",
     "@orpc/arktype": "^1.8.7",
     "@orpc/client": "^1.8.7",
     "@orpc/contract": "^1.8.7",
@@ -47,8 +48,10 @@
     "@orpc/tanstack-query": "^1.8.7",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
+    "@rectangular-labs/result": "workspace:*",
     "@simplewebauthn/server": "^13.1.2",
     "@t3-oss/env-core": "^0.13.8",
+    "ai": "^5.0.39",
     "arktype": "^2.1.22"
   },
   "overrides": {

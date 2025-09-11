@@ -30,5 +30,10 @@ export const protectedBase = base.use(({ context, next }) => {
   if (!session) {
     throw new ORPCError("UNAUTHORIZED");
   }
-  return next();
+  return next({
+    context: {
+      ...context,
+      session,
+    },
+  });
 });

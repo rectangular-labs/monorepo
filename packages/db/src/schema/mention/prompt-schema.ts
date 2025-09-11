@@ -1,3 +1,8 @@
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
@@ -19,3 +24,6 @@ export const smPromptRelations = relations(smPrompt, ({ many }) => ({
   projects: many(smProject),
   keywords: many(smKeyword),
 }));
+export const promptInsertSchema = createInsertSchema(smPrompt);
+export const promptSelectSchema = createSelectSchema(smPrompt);
+export const promptUpdateSchema = createUpdateSchema(smPrompt);
