@@ -145,6 +145,9 @@ export type Session = Auth["$Infer"]["Session"] & {
 export type Organization = ReturnType<
   typeof organization<OrganizationOptions>
 >["$Infer"]["Organization"];
-export type Member = ReturnType<
-  typeof organization<OrganizationOptions>
->["$Infer"]["Member"];
+export type Member = Omit<
+  NonNullable<
+    ReturnType<typeof organization<OrganizationOptions>>["$Infer"]["Member"]
+  >,
+  "role"
+> & { role: string };

@@ -26,8 +26,26 @@ import {
   TableRow as DataTableRow,
   Table,
 } from "@rectangular-labs/ui/components/ui/table";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import type { Member } from "../../server";
 import { useAuth } from "../auth/auth-provider";
+
+type Role = "owner" | "admin" | "member";
+
+// The query infers the response shape from authClient; no manual narrowing needed
+
+// Note: no longer needed after switching to page.data.members access
+
+function isRole(value: unknown): value is Role {
+  return value === "owner" || value === "admin" || value === "member";
+}
+
+function formatCreatedAt(createdAt: string | Date | null | undefined): string {
+  if (!createdAt) return "—";
+  const date = new Date(createdAt);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
+}
 
 type Props = {
   organization: { id: string };
@@ -35,26 +53,48 @@ type Props = {
 
 export function OrganizationMembersTable({ organization }: Props) {
   const { authClient } = useAuth();
-  const [page, setPage] = useState(0);
   const limit = 10;
 
-  const { data: membersResp, refetch } = (authClient.organization as any)
-    .useListMembers
-    ? authClient.organization.useListMembers({
-        organizationId: organization.id,
-        limit,
-        offset: page * limit,
-        sortBy: "createdAt",
-        sortDirection: "desc",
-      })
-    : ({
-        data: { members: [] as OrgMember[], total: 0 },
-        refetch: () => {},
-      } as const);
-  const members = membersResp?.members ?? [];
-  const total = membersResp?.total ?? members.length;
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    fetchPreviousPage,
+  } = useInfiniteQuery({
+    queryKey: ["organization-members", organization.id, limit],
+    queryFn: async ({ pageParam = 0 }) => {
+      return await authClient.organization.listMembers({
+        query: {
+          organizationId: organization.id,
+          limit,
+          offset: typeof pageParam === "number" ? pageParam : 0,
+          sortBy: "createdAt",
+          sortDirection: "desc",
+        },
+      });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const count = lastPage.data?.members.length ?? 0;
+      if (count < limit) return undefined;
+      return allPages.length * limit;
+    },
+    getPreviousPageParam: (_firstPage, _allPages, firstPageParam) => {
+      const current = typeof firstPageParam === "number" ? firstPageParam : 0;
+      const prev = current - limit;
+      return prev >= 0 ? prev : undefined;
+    },
+  });
 
-  const canManageMembers = true; // Hook up to roles/permissions later if needed
+  const pages = data?.pages ?? [];
+  const members = pages.flatMap((page) => page.data?.members ?? []);
+
+  const lastPage = pages[pages.length - 1];
+  const total = lastPage?.data?.total ?? members.length;
+
+  const canManageMembers = true;
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
@@ -84,34 +124,43 @@ export function OrganizationMembersTable({ organization }: Props) {
             </DataTableRow>
           </DataTableHeader>
           <DataTableBody>
-            {members.map((m: OrgMember) => (
-              <MemberRow
-                canManage={canManageMembers}
-                key={m.id}
-                member={m}
-                onChanged={() => void refetch()}
-              />
-            ))}
+            {isLoading && (
+              <DataTableRow>
+                <DataTableCell colSpan={5}>Loading…</DataTableCell>
+              </DataTableRow>
+            )}
+            {isError && (
+              <DataTableRow>
+                <DataTableCell colSpan={5}>
+                  Failed to load members
+                </DataTableCell>
+              </DataTableRow>
+            )}
+            {!isLoading &&
+              !isError &&
+              members?.map((m) => (
+                <MemberRow
+                  canManage={canManageMembers}
+                  key={m.id}
+                  member={m as Member}
+                  onChanged={() => void refetch()}
+                />
+              ))}
           </DataTableBody>
         </Table>
 
         <div className="flex items-center justify-between p-4">
           <span className="text-muted-foreground text-sm">
-            Page {page + 1} of {totalPages}
+            Page {Math.max(1, Math.ceil(members.length / limit))} of{" "}
+            {totalPages}
           </span>
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                />
+                <PaginationPrevious onClick={() => void fetchPreviousPage()} />
               </PaginationItem>
               <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages - 1, p + 1))
-                  }
-                />
+                <PaginationNext onClick={() => void fetchNextPage()} />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
@@ -121,30 +170,21 @@ export function OrganizationMembersTable({ organization }: Props) {
   );
 }
 
-type OrgMember = {
-  id: string;
-  role: string;
-  organizationId: string;
-  createdAt: string | number | Date;
-  email?: string | null;
-  user?: { name?: string | null; email?: string | null } | null;
-};
-
 function MemberRow({
   member,
   canManage,
   onChanged,
 }: {
-  member: OrgMember;
+  member: Member;
   canManage: boolean;
   onChanged: () => void;
 }) {
   const { authClient } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const roles = useMemo(() => ["owner", "admin", "member"], []);
+  const roles = useMemo<Role[]>(() => ["owner", "admin", "member"], []);
 
-  async function changeRole(role: string) {
+  async function changeRole(role: Role) {
     setIsUpdating(true);
     const response = await authClient.organization.updateMemberRole({
       memberId: member.id,
@@ -175,13 +215,20 @@ function MemberRow({
     onChanged();
   }
 
+  const createdAtText = formatCreatedAt(member.createdAt);
+
   return (
     <DataTableRow>
-      <DataTableCell>{member.user?.name ?? member.email ?? "—"}</DataTableCell>
-      <DataTableCell>{member.user?.email ?? member.email ?? "—"}</DataTableCell>
+      <DataTableCell>{member.user?.name ?? "—"}</DataTableCell>
+      <DataTableCell>{member.user?.email ?? "—"}</DataTableCell>
       <DataTableCell>
         {canManage ? (
-          <Select onValueChange={(v) => void changeRole(v)} value={member.role}>
+          <Select
+            onValueChange={(v) => {
+              if (isRole(v)) void changeRole(v);
+            }}
+            value={member.role}
+          >
             <SelectTrigger className="w-36">
               <SelectValue />
             </SelectTrigger>
@@ -197,9 +244,7 @@ function MemberRow({
           member.role
         )}
       </DataTableCell>
-      <DataTableCell>
-        {new Date(member.createdAt).toLocaleDateString()}
-      </DataTableCell>
+      <DataTableCell>{createdAtText}</DataTableCell>
       {canManage && (
         <DataTableCell className="text-right">
           <Button
@@ -254,7 +299,9 @@ function AddMemberForm({
         value={email}
       />
       <Select
-        onValueChange={(v) => setRole(v as "owner" | "admin" | "member")}
+        onValueChange={(v) => {
+          if (isRole(v)) setRole(v);
+        }}
         value={role}
       >
         <SelectTrigger className="w-32">

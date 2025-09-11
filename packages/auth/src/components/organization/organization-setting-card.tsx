@@ -10,18 +10,20 @@ import {
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
 import {
+  arktypeResolver,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
+import { type } from "arktype";
 import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
 import { useAuth } from "../auth/auth-provider";
 
 function safeParseJson(input: string): Record<string, unknown> | undefined {
@@ -29,16 +31,11 @@ function safeParseJson(input: string): Record<string, unknown> | undefined {
     const parsed = JSON.parse(input);
     if (parsed && typeof parsed === "object")
       return parsed as Record<string, unknown>;
-  } catch {}
+  } catch {
+    // do nothing
+  }
   return undefined;
 }
-
-type FormValues = {
-  name: string;
-  slug: string;
-  logo?: string;
-  metadata?: string;
-};
 
 export type OrganizationSettingCardProps = {
   organization?: {
@@ -51,6 +48,13 @@ export type OrganizationSettingCardProps = {
   onSaved?: () => void;
 };
 
+const schema = type({
+  name: "string > 0",
+  slug: "string > 0",
+  logo: "string",
+  metadata: "string",
+});
+
 export function OrganizationSettingCard({
   organization,
   onSaved,
@@ -58,7 +62,8 @@ export function OrganizationSettingCard({
   const isEdit = Boolean(organization?.id);
   const { authClient } = useAuth();
 
-  const form = useForm<FormValues>({
+  const form = useForm({
+    resolver: arktypeResolver(schema),
     defaultValues: {
       name: organization?.name ?? "",
       slug: organization?.slug ?? "",
@@ -87,7 +92,7 @@ export function OrganizationSettingCard({
   );
   const submitText = isEdit ? "Save changes" : "Create";
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: typeof schema.infer) {
     // basic guardrails
     if (!values.name || !values.slug) {
       toast.error("Name and slug are required");
