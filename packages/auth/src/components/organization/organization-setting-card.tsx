@@ -106,26 +106,16 @@ export function OrganizationSettingCard({
       ? safeParseJson(values.metadata)
       : undefined;
     if (isEdit && organization) {
-      const response = (await (authClient.organization as any)
-        .updateOrganization)
-        ? (authClient.organization as any).updateOrganization({
-            organizationId: organization.id,
-            data: {
-              name: values.name,
-              slug: values.slug,
-              logo: values.logo || undefined,
-              metadata: parsedMetadata,
-            },
-          })
-        : (authClient.organization as any).update({
-            organizationId: organization.id,
-            data: {
-              name: values.name,
-              slug: values.slug,
-              logo: values.logo || undefined,
-              metadata: parsedMetadata,
-            },
-          });
+      const response = await authClient.organization.update({
+        organizationId: organization.id,
+        data: {
+          name: values.name,
+          slug: values.slug,
+          logo: values.logo || undefined,
+          metadata: parsedMetadata,
+        },
+      });
+
       if (response?.error) {
         toast.error(response.error.message ?? "Failed to update organization");
         return;
@@ -135,19 +125,12 @@ export function OrganizationSettingCard({
       return;
     }
 
-    const response = (await (authClient.organization as any).createOrganization)
-      ? (authClient.organization as any).createOrganization({
-          name: values.name,
-          slug: values.slug,
-          logo: values.logo || undefined,
-          metadata: parsedMetadata,
-        })
-      : (authClient.organization as any).create({
-          name: values.name,
-          slug: values.slug,
-          logo: values.logo || undefined,
-          metadata: parsedMetadata,
-        });
+    const response = await authClient.organization.create({
+      name: values.name,
+      slug: values.slug,
+      logo: values.logo || undefined,
+      metadata: parsedMetadata,
+    });
     if (response?.error) {
       toast.error(response.error.message ?? "Failed to create organization");
       return;
