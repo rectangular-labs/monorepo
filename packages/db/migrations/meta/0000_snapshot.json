@@ -1,5 +1,5 @@
 {
-  "id": "0f42cbce-2322-4117-aaa7-401dbe04f4ea",
+  "id": "ec48f5c9-d01b-493e-b57a-cf7bedaade7b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -683,48 +683,17 @@
       "name": "sm_keyword",
       "schema": "",
       "columns": {
-        "sm_keyword_id": {
-          "name": "sm_keyword_id",
+        "id": {
+          "name": "id",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reply_prompt_override_id": {
-          "name": "reply_prompt_override_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
         },
         "phrase": {
           "name": "phrase",
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "next_run_at": {
-          "name": "next_run_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_run_at": {
-          "name": "last_run_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_paused": {
-          "name": "is_paused",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -741,41 +710,11 @@
         }
       },
       "indexes": {
-        "sm_keyword_project_idx": {
-          "name": "sm_keyword_project_idx",
-          "columns": [
-            {
-              "expression": "project_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "sm_keyword_phrase_idx": {
           "name": "sm_keyword_phrase_idx",
           "columns": [
             {
               "expression": "phrase",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_keyword_next_run_at_idx": {
-          "name": "sm_keyword_next_run_at_idx",
-          "columns": [
-            {
-              "expression": "next_run_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -802,31 +741,154 @@
           "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sm_keyword_source_cursor": {
+      "name": "sm_keyword_source_cursor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "keyword_id": {
+          "name": "keyword_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "current_cursor": {
+          "name": "current_cursor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latest_item_at": {
+          "name": "latest_item_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "empty_streak": {
+          "name": "empty_streak",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "next_earliest_run_at": {
+          "name": "next_earliest_run_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "sm_keyword_source_cursor_source_keyword_unique": {
+          "name": "sm_keyword_source_cursor_source_keyword_unique",
+          "columns": [
+            {
+              "expression": "source",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "keyword_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_keyword_source_cursor_src_idx": {
+          "name": "sm_keyword_source_cursor_src_idx",
+          "columns": [
+            {
+              "expression": "source",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_keyword_source_cursor_kw_idx": {
+          "name": "sm_keyword_source_cursor_kw_idx",
+          "columns": [
+            {
+              "expression": "keyword_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_keyword_source_cursor_created_at_idx": {
+          "name": "sm_keyword_source_cursor_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "sm_keyword_project_id_sm_project_sm_project_id_fk": {
-          "name": "sm_keyword_project_id_sm_project_sm_project_id_fk",
-          "tableFrom": "sm_keyword",
-          "tableTo": "sm_project",
+        "sm_keyword_source_cursor_keyword_id_sm_keyword_id_fk": {
+          "name": "sm_keyword_source_cursor_keyword_id_sm_keyword_id_fk",
+          "tableFrom": "sm_keyword_source_cursor",
+          "tableTo": "sm_keyword",
           "columnsFrom": [
-            "project_id"
+            "keyword_id"
           ],
           "columnsTo": [
-            "sm_project_id"
+            "id"
           ],
           "onDelete": "cascade",
-          "onUpdate": "cascade"
-        },
-        "sm_keyword_reply_prompt_override_id_sm_prompt_sm_prompt_id_fk": {
-          "name": "sm_keyword_reply_prompt_override_id_sm_prompt_sm_prompt_id_fk",
-          "tableFrom": "sm_keyword",
-          "tableTo": "sm_prompt",
-          "columnsFrom": [
-            "reply_prompt_override_id"
-          ],
-          "columnsTo": [
-            "sm_prompt_id"
-          ],
-          "onDelete": "set null",
           "onUpdate": "cascade"
         }
       },
@@ -840,22 +902,10 @@
       "name": "sm_mention",
       "schema": "",
       "columns": {
-        "sm_mention_id": {
-          "name": "sm_mention_id",
+        "id": {
+          "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "keyword_id": {
-          "name": "keyword_id",
-          "type": "uuid",
-          "primaryKey": false,
           "notNull": true
         },
         "provider": {
@@ -865,20 +915,20 @@
           "notNull": true,
           "default": "'reddit'"
         },
-        "provider_mention_id": {
-          "name": "provider_mention_id",
+        "provider_id": {
+          "name": "provider_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "provider_mention_url": {
-          "name": "provider_mention_url",
+        "provider_url": {
+          "name": "provider_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "provider_mention_created_at": {
-          "name": "provider_mention_created_at",
+        "provider_created_at": {
+          "name": "provider_created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -922,36 +972,6 @@
         }
       },
       "indexes": {
-        "sm_mention_project_idx": {
-          "name": "sm_mention_project_idx",
-          "columns": [
-            {
-              "expression": "project_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_mention_keyword_idx": {
-          "name": "sm_mention_keyword_idx",
-          "columns": [
-            {
-              "expression": "keyword_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "sm_mention_provider_unique": {
           "name": "sm_mention_provider_unique",
           "columns": [
@@ -962,7 +982,7 @@
               "nulls": "last"
             },
             {
-              "expression": "provider_mention_id",
+              "expression": "provider_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -977,7 +997,7 @@
           "name": "sm_mention_provider_created_at_idx",
           "columns": [
             {
-              "expression": "provider_mention_created_at",
+              "expression": "provider_created_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1004,10 +1024,158 @@
           "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sm_project_keyword_mention": {
+      "name": "sm_project_keyword_mention",
+      "schema": "",
+      "columns": {
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "keyword_id": {
+          "name": "keyword_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mention_id": {
+          "name": "mention_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "matched_at": {
+          "name": "matched_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "sm_pkm_project_idx": {
+          "name": "sm_pkm_project_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pkm_keyword_idx": {
+          "name": "sm_pkm_keyword_idx",
+          "columns": [
+            {
+              "expression": "keyword_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pkm_mention_idx": {
+          "name": "sm_pkm_mention_idx",
+          "columns": [
+            {
+              "expression": "mention_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pkm_status_idx": {
+          "name": "sm_pkm_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pkm_matched_at_idx": {
+          "name": "sm_pkm_matched_at_idx",
+          "columns": [
+            {
+              "expression": "matched_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pkm_created_at_idx": {
+          "name": "sm_pkm_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "sm_mention_project_id_sm_project_sm_project_id_fk": {
-          "name": "sm_mention_project_id_sm_project_sm_project_id_fk",
-          "tableFrom": "sm_mention",
+        "sm_project_keyword_mention_project_id_sm_project_sm_project_id_fk": {
+          "name": "sm_project_keyword_mention_project_id_sm_project_sm_project_id_fk",
+          "tableFrom": "sm_project_keyword_mention",
           "tableTo": "sm_project",
           "columnsFrom": [
             "project_id"
@@ -1018,18 +1186,472 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "sm_mention_keyword_id_sm_keyword_sm_keyword_id_fk": {
-          "name": "sm_mention_keyword_id_sm_keyword_sm_keyword_id_fk",
-          "tableFrom": "sm_mention",
+        "sm_project_keyword_mention_keyword_id_sm_keyword_id_fk": {
+          "name": "sm_project_keyword_mention_keyword_id_sm_keyword_id_fk",
+          "tableFrom": "sm_project_keyword_mention",
           "tableTo": "sm_keyword",
           "columnsFrom": [
             "keyword_id"
           ],
           "columnsTo": [
-            "sm_keyword_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "cascade"
+        },
+        "sm_project_keyword_mention_mention_id_sm_mention_id_fk": {
+          "name": "sm_project_keyword_mention_mention_id_sm_mention_id_fk",
+          "tableFrom": "sm_project_keyword_mention",
+          "tableTo": "sm_mention",
+          "columnsFrom": [
+            "mention_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "sm_pkm_project_keyword_fk": {
+          "name": "sm_pkm_project_keyword_fk",
+          "tableFrom": "sm_project_keyword_mention",
+          "tableTo": "sm_project_keyword",
+          "columnsFrom": [
+            "project_id",
+            "keyword_id"
+          ],
+          "columnsTo": [
+            "project_id",
+            "keyword_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "sm_project_keyword_mention_project_id_keyword_id_mention_id_pk": {
+          "name": "sm_project_keyword_mention_project_id_keyword_id_mention_id_pk",
+          "columns": [
+            "project_id",
+            "keyword_id",
+            "mention_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sm_project_keyword": {
+      "name": "sm_project_keyword",
+      "schema": "",
+      "columns": {
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "keyword_id": {
+          "name": "keyword_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "polling_interval_sec": {
+          "name": "polling_interval_sec",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_run_at": {
+          "name": "next_run_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_run_at": {
+          "name": "last_run_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_paused": {
+          "name": "is_paused",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "sm_project_keyword_project_idx": {
+          "name": "sm_project_keyword_project_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_project_keyword_keyword_idx": {
+          "name": "sm_project_keyword_keyword_idx",
+          "columns": [
+            {
+              "expression": "keyword_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_project_keyword_next_run_at_idx": {
+          "name": "sm_project_keyword_next_run_at_idx",
+          "columns": [
+            {
+              "expression": "next_run_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_project_keyword_created_at_idx": {
+          "name": "sm_project_keyword_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sm_project_keyword_project_id_sm_project_sm_project_id_fk": {
+          "name": "sm_project_keyword_project_id_sm_project_sm_project_id_fk",
+          "tableFrom": "sm_project_keyword",
+          "tableTo": "sm_project",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "sm_project_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "sm_project_keyword_keyword_id_sm_keyword_id_fk": {
+          "name": "sm_project_keyword_keyword_id_sm_keyword_id_fk",
+          "tableFrom": "sm_project_keyword",
+          "tableTo": "sm_keyword",
+          "columnsFrom": [
+            "keyword_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "sm_project_keyword_project_id_keyword_id_pk": {
+          "name": "sm_project_keyword_project_id_keyword_id_pk",
+          "columns": [
+            "project_id",
+            "keyword_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sm_project_mention_reply": {
+      "name": "sm_project_mention_reply",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mention_id": {
+          "name": "mention_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attributed_keyword_id": {
+          "name": "attributed_keyword_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prompt_override_id": {
+          "name": "prompt_override_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reply_text": {
+          "name": "reply_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_auto_generated": {
+          "name": "is_auto_generated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "error": {
+          "name": "error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_published_id": {
+          "name": "provider_published_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_published_url": {
+          "name": "provider_published_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "sm_pmr_unique": {
+          "name": "sm_pmr_unique",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "mention_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pmr_project_idx": {
+          "name": "sm_pmr_project_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pmr_mention_idx": {
+          "name": "sm_pmr_mention_idx",
+          "columns": [
+            {
+              "expression": "mention_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pmr_status_idx": {
+          "name": "sm_pmr_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sm_pmr_created_at_idx": {
+          "name": "sm_pmr_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sm_project_mention_reply_project_id_sm_project_sm_project_id_fk": {
+          "name": "sm_project_mention_reply_project_id_sm_project_sm_project_id_fk",
+          "tableFrom": "sm_project_mention_reply",
+          "tableTo": "sm_project",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "sm_project_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "sm_project_mention_reply_mention_id_sm_mention_id_fk": {
+          "name": "sm_project_mention_reply_mention_id_sm_mention_id_fk",
+          "tableFrom": "sm_project_mention_reply",
+          "tableTo": "sm_mention",
+          "columnsFrom": [
+            "mention_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "sm_project_mention_reply_attributed_keyword_id_sm_keyword_id_fk": {
+          "name": "sm_project_mention_reply_attributed_keyword_id_sm_keyword_id_fk",
+          "tableFrom": "sm_project_mention_reply",
+          "tableTo": "sm_keyword",
+          "columnsFrom": [
+            "attributed_keyword_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "sm_project_mention_reply_prompt_override_id_sm_prompt_sm_prompt_id_fk": {
+          "name": "sm_project_mention_reply_prompt_override_id_sm_prompt_sm_prompt_id_fk",
+          "tableFrom": "sm_project_mention_reply",
+          "tableTo": "sm_prompt",
+          "columnsFrom": [
+            "prompt_override_id"
+          ],
+          "columnsTo": [
+            "sm_prompt_id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        },
+        "sm_pmr_project_keyword_mention_fk": {
+          "name": "sm_pmr_project_keyword_mention_fk",
+          "tableFrom": "sm_project_mention_reply",
+          "tableTo": "sm_project_keyword_mention",
+          "columnsFrom": [
+            "project_id",
+            "mention_id",
+            "attributed_keyword_id"
+          ],
+          "columnsTo": [
+            "project_id",
+            "mention_id",
+            "keyword_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1209,207 +1831,6 @@
         }
       },
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.sm_reply": {
-      "name": "sm_reply",
-      "schema": "",
-      "columns": {
-        "sm_reply_id": {
-          "name": "sm_reply_id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "mention_id": {
-          "name": "mention_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "model": {
-          "name": "model",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "prompt_override_id": {
-          "name": "prompt_override_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reply_text": {
-          "name": "reply_text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_auto_generated": {
-          "name": "is_auto_generated",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'draft'"
-        },
-        "error": {
-          "name": "error",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "provider_published_id": {
-          "name": "provider_published_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "provider_url": {
-          "name": "provider_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "published_at": {
-          "name": "published_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "sm_reply_project_idx": {
-          "name": "sm_reply_project_idx",
-          "columns": [
-            {
-              "expression": "project_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_reply_mention_idx": {
-          "name": "sm_reply_mention_idx",
-          "columns": [
-            {
-              "expression": "mention_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_reply_status_idx": {
-          "name": "sm_reply_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_reply_created_at_idx": {
-          "name": "sm_reply_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "sm_reply_project_id_sm_project_sm_project_id_fk": {
-          "name": "sm_reply_project_id_sm_project_sm_project_id_fk",
-          "tableFrom": "sm_reply",
-          "tableTo": "sm_project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "sm_project_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        },
-        "sm_reply_mention_id_sm_mention_sm_mention_id_fk": {
-          "name": "sm_reply_mention_id_sm_mention_sm_mention_id_fk",
-          "tableFrom": "sm_reply",
-          "tableTo": "sm_mention",
-          "columnsFrom": [
-            "mention_id"
-          ],
-          "columnsTo": [
-            "sm_mention_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        },
-        "sm_reply_prompt_override_id_sm_prompt_sm_prompt_id_fk": {
-          "name": "sm_reply_prompt_override_id_sm_prompt_sm_prompt_id_fk",
-          "tableFrom": "sm_reply",
-          "tableTo": "sm_prompt",
-          "columnsFrom": [
-            "prompt_override_id"
-          ],
-          "columnsTo": [
-            "sm_prompt_id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "cascade"
-        }
-      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

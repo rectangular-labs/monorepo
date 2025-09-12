@@ -9,6 +9,7 @@ import { timestamps, uuidv7 } from "../_helper";
 import { pgMentionTable } from "../_table";
 import { organization } from "./auth-schema";
 import { smKeyword } from "./keyword-schema";
+import { smProjectKeyword } from "./project-keyword-schema";
 import { smPrompt } from "./prompt-schema";
 
 export const smProject = pgMentionTable(
@@ -40,6 +41,7 @@ export const smProjectRelations = relations(smProject, ({ many, one }) => ({
     references: [organization.id],
   }),
   keywords: many(smKeyword),
+  projectKeywords: many(smProjectKeyword),
   replyPrompts: one(smPrompt, {
     fields: [smProject.currentReplyPromptId],
     references: [smPrompt.id],
