@@ -9,11 +9,11 @@ export default {
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
-  schema: "./src/schema/*",
+  schema: "./src/schema/**/*",
   out: "./migrations",
   breakpoints: true,
   verbose: true,
   strict: true,
   casing: "snake_case",
-  tablesFilter: "ra_*",
+  tablesFilter: ["ra_*", "sm_*"],
 } satisfies Config;

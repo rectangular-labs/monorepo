@@ -7,9 +7,10 @@ import { loggerMiddleware } from "./lib/logger";
 import type { InitialContext } from "./types";
 
 export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
+  const db = createDb();
   return {
-    db: createDb(),
-    auth: initAuthHandler(args.url.origin),
+    auth: initAuthHandler(args.url.origin, db),
+    db,
     ...args,
   };
 };
@@ -29,5 +30,10 @@ export const protectedBase = base.use(({ context, next }) => {
   if (!session) {
     throw new ORPCError("UNAUTHORIZED");
   }
-  return next();
+  return next({
+    context: {
+      ...context,
+      session,
+    },
+  });
 });

@@ -10,7 +10,6 @@ import {
 } from "@orpc/server/plugins";
 import { createApiContext } from "./context";
 import { router } from "./routes";
-import { todoSchema } from "./routes/todo";
 
 export const serverClient = (context: Parameters<typeof createApiContext>[0]) =>
   createRouterClient(router, {
@@ -48,9 +47,6 @@ export const openAPIHandler = (apiUrl: string) =>
           },
           servers: [{ url: apiUrl }],
           commonSchemas: {
-            Todo: {
-              schema: todoSchema,
-            },
             UndefinedError: { error: "UndefinedError" },
           },
         },

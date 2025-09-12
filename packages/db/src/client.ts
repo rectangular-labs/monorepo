@@ -1,12 +1,12 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { dbEnv } from "./env";
-import * as authSchema from "./schema/auth-schema";
+import * as mentionScheme from "./schema/mention";
 
 export * from "drizzle-orm";
 
-const schema = {
-  ...authSchema,
+export const schema = {
+  ...mentionScheme,
 };
 
 export const createDb = () => {
