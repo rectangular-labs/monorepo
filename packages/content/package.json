@@ -65,6 +65,6 @@
     "fumadocs-core": "^15.7.11",
     "fumadocs-mdx": "^11.9.1",
     "fumadocs-ui": "^15.7.11",
-    "lucide-static": "^0.543.0"
+    "lucide-static": "^0.544.0"
   }
 }
