@@ -28,10 +28,30 @@ const AuthViewPaths = {
 export type AuthViewPath = (typeof AuthViewPaths)[keyof typeof AuthViewPaths];
 
 export interface Redirects {
+  /**
+   * A function to be called when the user successfully signs in
+   * @default undefined
+   */
   onSuccess?: (() => void | Promise<void>) | undefined;
+  /**
+   * The URL to redirect to when the user successfully signs in
+   * @default /
+   */
   successCallbackURL?: string | undefined;
+  /**
+   * The URL to redirect to when the user encounters an error
+   * @default /login?type=error
+   */
   errorCallbackURL?: string | undefined;
+  /**
+   * The URL to redirect to when the user creates a new account
+   * @default /
+   */
   newUserCallbackURL?: string | undefined;
+  /**
+   * The URL to redirect to when the user resets their password
+   * @default /login?type=reset-password
+   */
   resetPasswordCallbackURL?: string | undefined;
 }
 
@@ -121,7 +141,6 @@ type AuthContextValue = {
   errorCallbackURL: string;
   newUserCallbackURL: string;
   resetPasswordCallbackURL: string;
-  onSuccess: Redirects["onSuccess"];
 };
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -195,12 +214,13 @@ export function AuthProvider({
   }, [credentials, hasMagicLink, hasEmailOTP, hasPhoneOTP]);
 
   const onSuccessRef = useRef(redirects?.onSuccess);
+  const normalizedSuccessCallbackURL = redirects?.successCallbackURL ?? "/";
   const successHandler = useCallback(async () => {
     if (onSuccessRef.current) {
       return await Promise.resolve(onSuccessRef.current());
     }
-    window.location.href = redirects?.successCallbackURL ?? "/";
-  }, [redirects?.successCallbackURL]);
+    window.location.href = normalizedSuccessCallbackURL;
+  }, [normalizedSuccessCallbackURL]);
 
   return (
     <AuthContext.Provider
@@ -213,8 +233,7 @@ export function AuthProvider({
           : undefined,
         socialProviders: socialProviders ?? [],
         successHandler,
-        onSuccess: redirects?.onSuccess,
-        successCallbackURL: redirects?.successCallbackURL ?? "/",
+        successCallbackURL: normalizedSuccessCallbackURL,
         errorCallbackURL: redirects?.errorCallbackURL ?? "/login?type=error",
         newUserCallbackURL: redirects?.newUserCallbackURL ?? "/",
         resetPasswordCallbackURL:
