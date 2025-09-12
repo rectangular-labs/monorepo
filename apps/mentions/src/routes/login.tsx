@@ -1,5 +1,5 @@
-import { AuthCard } from "@rectangular-labs/ui/components/auth/auth-card";
-import { AuthProvider } from "@rectangular-labs/ui/components/auth/auth-provider";
+import { AuthCard } from "@rectangular-labs/auth/components/auth/auth-card";
+import { AuthProvider } from "@rectangular-labs/auth/components/auth/auth-provider";
 import {
   DiscordIcon,
   GitHubIcon,
@@ -8,7 +8,7 @@ import {
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { type } from "arktype";
-import { authClient, getCurrentSession } from "~/lib/auth";
+import { authClient, getCurrentSession } from "~/lib/auth/client";
 
 export const Route = createFileRoute("/login")({
   validateSearch: type({
@@ -32,6 +32,8 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const normalizedSuccessCallbackURL = search.next ?? "/dashboard";
+  const newUserCallbackURL = `/onboarding?next=${normalizedSuccessCallbackURL}`;
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -46,10 +48,11 @@ function Login() {
         }}
         plugins={["oneTap"]}
         redirects={{
-          successCallbackURL: search.next,
+          successCallbackURL: normalizedSuccessCallbackURL,
           onSuccess: () => {
-            void navigate({ to: search.next ?? "/orpc" });
+            void navigate({ to: normalizedSuccessCallbackURL });
           },
+          newUserCallbackURL,
         }}
         socialProviders={[
           {

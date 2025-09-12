@@ -1,7 +1,7 @@
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { authClient } from "~/lib/auth";
+import { authClient } from "~/lib/auth/client";
 
 export function LogoutButton({ className }: { className?: string }) {
   const router = useRouter();

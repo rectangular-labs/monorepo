@@ -5,8 +5,7 @@ import {
   createDocsSearchServer,
 } from "@rectangular-labs/content/search";
 import { createServerFileRoute } from "@tanstack/react-start/server";
-import { URL } from "url";
-import { authServerHandler } from "~/lib/auth";
+import { authServerHandler } from "~/lib/auth/server";
 import { serverEnv } from "~/lib/env";
 
 async function handle({ request }: { request: Request }) {
@@ -34,13 +33,12 @@ async function handle({ request }: { request: Request }) {
     url: new URL(request.url),
   });
 
-  const { response } = await openAPIHandler(`${env.VITE_APP_URL}/api`).handle(
-    request,
-    {
-      prefix: "/api",
-      context,
-    },
-  );
+  const { response } = await openAPIHandler(
+    `${env.VITE_MENTIONS_URL}/api`,
+  ).handle(request, {
+    prefix: "/api",
+    context,
+  });
 
   return response ?? new Response("Not Found", { status: 404 });
 }

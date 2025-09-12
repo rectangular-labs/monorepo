@@ -3,7 +3,7 @@ import { createServerFileRoute } from "@tanstack/react-start/server";
 import { serverEnv } from "~/lib/env";
 
 function handle() {
-  const baseUrl = serverEnv().VITE_APP_URL;
+  const baseUrl = serverEnv().VITE_MENTIONS_URL;
   const xml = getBlogRSS(baseUrl);
   return new Response(xml);
 }
