@@ -1,5 +1,5 @@
 import { ORPCError } from "@orpc/client";
-import { and, desc, eq, gt, schema } from "@rectangular-labs/db";
+import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
 import { protectedBase } from "../context";
 
@@ -8,10 +8,15 @@ const list = protectedBase
   .input(
     type({
       limit: "1<=number<=100 = 20",
-      cursor: "string|undefined",
+      "cursor?": "string.uuid|undefined",
     }),
   )
-  .output(schema.projectSelectSchema.array())
+  .output(
+    type({
+      data: schema.projectSelectSchema.array(),
+      nextPageCursor: "string.uuid|undefined",
+    }),
+  )
   .handler(async ({ context, input }) => {
     const { session } = context.session;
     if (!session.activeOrganizationId) {
@@ -20,12 +25,15 @@ const list = protectedBase
     const rows = await context.db.query.smProject.findMany({
       where: and(
         eq(schema.smProject.organizationId, session.activeOrganizationId),
-        input.cursor ? gt(schema.smProject.id, input.cursor) : undefined,
+        input.cursor ? lt(schema.smProject.id, input.cursor) : undefined,
       ),
       orderBy: desc(schema.smProject.id),
-      limit: input.limit,
+      limit: input.limit + 1,
     });
-    return rows;
+    const data = rows.slice(0, input.limit);
+    const nextPageCursor =
+      rows.length > input.limit ? data.at(-1)?.id : undefined;
+    return { data, nextPageCursor };
   });
 
 const create = protectedBase
@@ -126,5 +134,5 @@ const remove = protectedBase
   });
 
 export default protectedBase
-  .prefix("/projects")
+  .prefix("/project")
   .router({ list, create, update, remove });

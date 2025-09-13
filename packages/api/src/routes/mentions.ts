@@ -1,8 +1,9 @@
 import { ORPCError } from "@orpc/client";
-import { and, desc, eq, schema } from "@rectangular-labs/db";
+import { desc, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
 import { protectedBase } from "../context";
-import { getProjectById } from "../lib/project";
+import { getKeywordIds } from "../lib/database/keywords";
+import { getProjectById } from "../lib/database/project";
 
 const list = protectedBase
   .route({ method: "GET", path: "/" })
@@ -10,10 +11,18 @@ const list = protectedBase
     type({
       projectId: "string",
       keywordId: "string|undefined",
-      limit: "1<=number<=100|undefined",
+      limit: "1<=number<=100 = 20",
+      "cursor?": "string|undefined",
     }),
   )
-  .output(schema.mentionSelectSchema.array())
+  .output(
+    type({
+      data: schema.projectKeywordMentionSelectSchema
+        .merge(type({ mention: schema.mentionSelectSchema }))
+        .array(),
+      nextPageCursor: "string|undefined",
+    }),
+  )
   .handler(async ({ context, input }) => {
     const { session } = context.session;
     if (!session.activeOrganizationId) {
@@ -24,20 +33,32 @@ const list = protectedBase
       input.projectId,
       session.activeOrganizationId,
     );
-    if (!project.ok)
+    if (!project.ok) {
       throw new ORPCError("BAD_REQUEST", { message: project.error.message });
+    }
 
-    const rows = await context.db.query.smMention.findMany({
-      where: input.keywordId
-        ? and(
-            eq(schema.smMention.projectId, input.projectId),
-            eq(schema.smMention.keywordId, input.keywordId),
-          )
-        : eq(schema.smMention.projectId, input.projectId),
+    const keywordIds = input.keywordId
+      ? []
+      : await getKeywordIds(input.projectId);
+
+    const rows = await context.db.query.smProjectKeywordMention.findMany({
+      where: (table, { eq, and, inArray }) => {
+        return and(
+          eq(table.projectId, input.projectId),
+          input.keywordId
+            ? eq(table.keywordId, input.keywordId)
+            : inArray(table.keywordId, keywordIds),
+        );
+      },
       orderBy: desc(schema.smMention.createdAt),
-      limit: input.limit ?? 50,
+      limit: input.limit,
+      with: {
+        mention: true,
+      },
     });
-    return rows;
+    return { data: rows, nextPageCursor: undefined };
   });
 
-export default protectedBase.prefix("/mentions").router({ list });
+export default protectedBase
+  .prefix("/project/{projectId}/mention")
+  .router({ list });

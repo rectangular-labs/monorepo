@@ -147,10 +147,10 @@ const create = protectedBase
   });
 
 const update = protectedBase
-  .route({ method: "PATCH", path: "/{id}" })
+  .route({ method: "PATCH", path: "/{keywordId}" })
   .input(
     type({
-      id: "string",
+      keywordId: "string",
       projectId: "string",
       data: schema.keywordUpdateSchema,
     }),
@@ -186,7 +186,7 @@ const update = protectedBase
         .where(
           and(
             eq(schema.smProjectKeyword.projectId, input.projectId),
-            eq(schema.smProjectKeyword.keywordId, input.id),
+            eq(schema.smProjectKeyword.keywordId, input.keywordId),
           ),
         )
         .returning();
@@ -239,5 +239,5 @@ const remove = protectedBase
   });
 
 export default protectedBase
-  .prefix("/keywords")
+  .prefix("/project/{projectId}/keyword")
   .router({ list, create, update, remove });

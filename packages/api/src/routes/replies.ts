@@ -3,7 +3,7 @@ import { and, desc, eq, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
 import { protectedBase } from "../context";
 import { generateReply } from "../lib/ai";
-import { getProjectById } from "../lib/project";
+import { getProjectById } from "../lib/database/project";
 import { postRedditComment } from "../lib/reddit";
 
 const statusUnion = type(
