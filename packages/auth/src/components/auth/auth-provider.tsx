@@ -235,7 +235,8 @@ export function AuthProvider({
         successHandler,
         successCallbackURL: normalizedSuccessCallbackURL,
         errorCallbackURL: redirects?.errorCallbackURL ?? "/login?type=error",
-        newUserCallbackURL: redirects?.newUserCallbackURL ?? "/",
+        newUserCallbackURL:
+          redirects?.newUserCallbackURL ?? normalizedSuccessCallbackURL,
         resetPasswordCallbackURL:
           redirects?.resetPasswordCallbackURL ?? "/login?type=reset-password",
         hasMagicLink,
