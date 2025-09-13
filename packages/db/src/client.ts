@@ -21,3 +21,4 @@ export const createDb = () => {
 };
 
 export type DB = ReturnType<typeof createDb>;
+export type DBTransaction = Parameters<Parameters<DB["transaction"]>[0]>[0];
