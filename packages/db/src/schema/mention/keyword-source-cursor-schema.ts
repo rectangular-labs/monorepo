@@ -40,7 +40,6 @@ export const smKeywordSourceCursor = pgMentionTable(
     ),
     index("sm_keyword_source_cursor_src_idx").on(table.source),
     index("sm_keyword_source_cursor_kw_idx").on(table.keywordId),
-    index("sm_keyword_source_cursor_created_at_idx").on(table.createdAt),
   ],
 );
 

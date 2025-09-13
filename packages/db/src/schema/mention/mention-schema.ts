@@ -34,7 +34,6 @@ export const smMention = pgMentionTable(
       table.providerId,
     ),
     index("sm_mention_provider_created_at_idx").on(table.providerCreatedAt),
-    index("sm_mention_created_at_idx").on(table.createdAt),
   ],
 );
 

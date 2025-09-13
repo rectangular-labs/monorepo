@@ -60,7 +60,6 @@ export const smProjectKeywordMention = pgMentionTable(
     index("sm_pkm_mention_idx").on(table.mentionId),
     index("sm_pkm_status_idx").on(table.status),
     index("sm_pkm_matched_at_idx").on(table.matchedAt),
-    index("sm_pkm_created_at_idx").on(table.createdAt),
   ],
 );
 

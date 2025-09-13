@@ -43,7 +43,11 @@ export const smProjectKeyword = pgMentionTable(
     index("sm_project_keyword_project_idx").on(table.projectId),
     index("sm_project_keyword_keyword_idx").on(table.keywordId),
     index("sm_project_keyword_next_run_at_idx").on(table.nextRunAt),
-    index("sm_project_keyword_created_at_idx").on(table.createdAt),
+    index("sm_project_keyword_proj_created_id_idx").on(
+      table.projectId,
+      table.createdAt,
+      table.keywordId,
+    ),
   ],
 );
 

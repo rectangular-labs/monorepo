@@ -79,6 +79,11 @@ export const smProjectMentionReply = pgMentionTable(
   (table) => [
     // A project should only have one reply per mention
     uniqueIndex("sm_pmr_unique").on(table.projectId, table.mentionId),
+    index("sm_pmr_project_keyword_mention_idx").on(
+      table.projectId,
+      table.mentionId,
+      table.attributedKeywordId,
+    ),
     foreignKey({
       name: "sm_pmr_project_keyword_mention_fk",
       columns: [table.projectId, table.mentionId, table.attributedKeywordId],
@@ -91,7 +96,6 @@ export const smProjectMentionReply = pgMentionTable(
     index("sm_pmr_project_idx").on(table.projectId),
     index("sm_pmr_mention_idx").on(table.mentionId),
     index("sm_pmr_status_idx").on(table.status),
-    index("sm_pmr_created_at_idx").on(table.createdAt),
   ],
 );
 
