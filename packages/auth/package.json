@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.3.3",
+    "@types/node": "^24.4.0",
     "typescript": "^5.9.2"
   },
   "dependencies": {
