@@ -1,5 +1,5 @@
 {
-  "id": "ec48f5c9-d01b-493e-b57a-cf7bedaade7b",
+  "id": "94de5e4e-9b2b-4d0a-8601-d38aa952af96",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -610,6 +610,18 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "goal": {
+          "name": "goal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -679,6 +691,79 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.sm_company_background": {
+      "name": "sm_company_background",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "website_url": {
+          "name": "website_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'queued'"
+        },
+        "last_indexed_at": {
+          "name": "last_indexed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "sm_company_background_website_url_unique": {
+          "name": "sm_company_background_website_url_unique",
+          "columns": [
+            {
+              "expression": "website_url",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.sm_keyword": {
       "name": "sm_keyword",
       "schema": "",
@@ -710,8 +795,8 @@
         }
       },
       "indexes": {
-        "sm_keyword_phrase_idx": {
-          "name": "sm_keyword_phrase_idx",
+        "sm_keyword_phrase_unique": {
+          "name": "sm_keyword_phrase_unique",
           "columns": [
             {
               "expression": "phrase",
@@ -720,22 +805,7 @@
               "nulls": "last"
             }
           ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_keyword_created_at_idx": {
-          "name": "sm_keyword_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
+          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -851,21 +921,6 @@
           "columns": [
             {
               "expression": "keyword_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_keyword_source_cursor_created_at_idx": {
-          "name": "sm_keyword_source_cursor_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1007,21 +1062,6 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "sm_mention_created_at_idx": {
-          "name": "sm_mention_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {},
@@ -1146,21 +1186,6 @@
           "columns": [
             {
               "expression": "matched_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_pkm_created_at_idx": {
-          "name": "sm_pkm_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1344,11 +1369,23 @@
           "method": "btree",
           "with": {}
         },
-        "sm_project_keyword_created_at_idx": {
-          "name": "sm_project_keyword_created_at_idx",
+        "sm_project_keyword_proj_created_id_idx": {
+          "name": "sm_project_keyword_proj_created_id_idx",
           "columns": [
             {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
               "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "keyword_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1522,6 +1559,33 @@
           "method": "btree",
           "with": {}
         },
+        "sm_pmr_project_keyword_mention_idx": {
+          "name": "sm_pmr_project_keyword_mention_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "mention_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "attributed_keyword_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "sm_pmr_project_idx": {
           "name": "sm_pmr_project_idx",
           "columns": [
@@ -1557,21 +1621,6 @@
           "columns": [
             {
               "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "sm_pmr_created_at_idx": {
-          "name": "sm_pmr_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

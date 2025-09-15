@@ -13,6 +13,8 @@ export const user = pgTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  source: text("source"),
+  goal: text("goal"),
 });
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),

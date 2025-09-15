@@ -8,7 +8,6 @@ import { boolean, index, integer, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgMentionTable } from "../_table";
 import { organization } from "./auth-schema";
-import { smKeyword } from "./keyword-schema";
 import { smProjectKeyword } from "./project-keyword-schema";
 import { smPrompt } from "./prompt-schema";
 
@@ -40,7 +39,6 @@ export const smProjectRelations = relations(smProject, ({ many, one }) => ({
     fields: [smProject.organizationId],
     references: [organization.id],
   }),
-  keywords: many(smKeyword),
   projectKeywords: many(smProjectKeyword),
   replyPrompts: one(smPrompt, {
     fields: [smProject.currentReplyPromptId],

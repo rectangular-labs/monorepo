@@ -85,6 +85,8 @@ CREATE TABLE "user" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"two_factor_enabled" boolean DEFAULT false,
+	"source" text,
+	"goal" text,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -95,6 +97,16 @@ CREATE TABLE "verification" (
 	"expires_at" timestamp NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "sm_company_background" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"website_url" text NOT NULL,
+	"status" text DEFAULT 'queued' NOT NULL,
+	"last_indexed_at" timestamp with time zone,
+	"data" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "sm_keyword" (
@@ -211,30 +223,27 @@ ALTER TABLE "sm_project_mention_reply" ADD CONSTRAINT "sm_project_mention_reply_
 ALTER TABLE "sm_project_mention_reply" ADD CONSTRAINT "sm_pmr_project_keyword_mention_fk" FOREIGN KEY ("project_id","mention_id","attributed_keyword_id") REFERENCES "public"."sm_project_keyword_mention"("project_id","mention_id","keyword_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sm_project" ADD CONSTRAINT "sm_project_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "sm_project" ADD CONSTRAINT "sm_project_current_reply_prompt_id_sm_prompt_sm_prompt_id_fk" FOREIGN KEY ("current_reply_prompt_id") REFERENCES "public"."sm_prompt"("sm_prompt_id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
-CREATE INDEX "sm_keyword_phrase_idx" ON "sm_keyword" USING btree ("phrase");--> statement-breakpoint
-CREATE INDEX "sm_keyword_created_at_idx" ON "sm_keyword" USING btree ("created_at");--> statement-breakpoint
+CREATE UNIQUE INDEX "sm_company_background_website_url_unique" ON "sm_company_background" USING btree ("website_url");--> statement-breakpoint
+CREATE UNIQUE INDEX "sm_keyword_phrase_unique" ON "sm_keyword" USING btree ("phrase");--> statement-breakpoint
 CREATE UNIQUE INDEX "sm_keyword_source_cursor_source_keyword_unique" ON "sm_keyword_source_cursor" USING btree ("source","keyword_id");--> statement-breakpoint
 CREATE INDEX "sm_keyword_source_cursor_src_idx" ON "sm_keyword_source_cursor" USING btree ("source");--> statement-breakpoint
 CREATE INDEX "sm_keyword_source_cursor_kw_idx" ON "sm_keyword_source_cursor" USING btree ("keyword_id");--> statement-breakpoint
-CREATE INDEX "sm_keyword_source_cursor_created_at_idx" ON "sm_keyword_source_cursor" USING btree ("created_at");--> statement-breakpoint
 CREATE UNIQUE INDEX "sm_mention_provider_unique" ON "sm_mention" USING btree ("provider","provider_id");--> statement-breakpoint
 CREATE INDEX "sm_mention_provider_created_at_idx" ON "sm_mention" USING btree ("provider_created_at");--> statement-breakpoint
-CREATE INDEX "sm_mention_created_at_idx" ON "sm_mention" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "sm_pkm_project_idx" ON "sm_project_keyword_mention" USING btree ("project_id");--> statement-breakpoint
 CREATE INDEX "sm_pkm_keyword_idx" ON "sm_project_keyword_mention" USING btree ("keyword_id");--> statement-breakpoint
 CREATE INDEX "sm_pkm_mention_idx" ON "sm_project_keyword_mention" USING btree ("mention_id");--> statement-breakpoint
 CREATE INDEX "sm_pkm_status_idx" ON "sm_project_keyword_mention" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "sm_pkm_matched_at_idx" ON "sm_project_keyword_mention" USING btree ("matched_at");--> statement-breakpoint
-CREATE INDEX "sm_pkm_created_at_idx" ON "sm_project_keyword_mention" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "sm_project_keyword_project_idx" ON "sm_project_keyword" USING btree ("project_id");--> statement-breakpoint
 CREATE INDEX "sm_project_keyword_keyword_idx" ON "sm_project_keyword" USING btree ("keyword_id");--> statement-breakpoint
 CREATE INDEX "sm_project_keyword_next_run_at_idx" ON "sm_project_keyword" USING btree ("next_run_at");--> statement-breakpoint
-CREATE INDEX "sm_project_keyword_created_at_idx" ON "sm_project_keyword" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "sm_project_keyword_proj_created_id_idx" ON "sm_project_keyword" USING btree ("project_id","created_at","keyword_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "sm_pmr_unique" ON "sm_project_mention_reply" USING btree ("project_id","mention_id");--> statement-breakpoint
+CREATE INDEX "sm_pmr_project_keyword_mention_idx" ON "sm_project_mention_reply" USING btree ("project_id","mention_id","attributed_keyword_id");--> statement-breakpoint
 CREATE INDEX "sm_pmr_project_idx" ON "sm_project_mention_reply" USING btree ("project_id");--> statement-breakpoint
 CREATE INDEX "sm_pmr_mention_idx" ON "sm_project_mention_reply" USING btree ("mention_id");--> statement-breakpoint
 CREATE INDEX "sm_pmr_status_idx" ON "sm_project_mention_reply" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "sm_pmr_created_at_idx" ON "sm_project_mention_reply" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "sm_project_org_idx" ON "sm_project" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX "sm_project_current_reply_prompt_idx" ON "sm_project" USING btree ("current_reply_prompt_id");--> statement-breakpoint
 CREATE INDEX "sm_prompt_created_at_idx" ON "sm_prompt" USING btree ("created_at");

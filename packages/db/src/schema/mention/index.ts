@@ -1,4 +1,5 @@
 export * from "./auth-schema";
+export * from "./company-background-schema";
 export * from "./keyword-schema";
 export * from "./keyword-source-cursor-schema";
 export * from "./mention-schema";
