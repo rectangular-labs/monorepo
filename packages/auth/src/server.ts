@@ -5,7 +5,6 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
   emailOTP,
   magicLink,
-  type OrganizationOptions,
   oAuthProxy,
   organization,
   twoFactor,
@@ -18,10 +17,7 @@ interface DB {
   [key: string]: any;
 }
 
-export function initAuthHandler(
-  baseURL: string,
-  db: DB,
-): ReturnType<typeof betterAuth<BetterAuthOptions>> {
+export function initAuthHandler(baseURL: string, db: DB) {
   const env = authEnv();
 
   const useDiscord = !!env.AUTH_DISCORD_ID && !!env.AUTH_DISCORD_SECRET;
@@ -29,6 +25,26 @@ export function initAuthHandler(
   const useReddit = !!env.AUTH_REDDIT_ID && !!env.AUTH_REDDIT_SECRET;
 
   const config = {
+    baseURL,
+    secret: env.AUTH_ENCRYPTION_KEY,
+    account: {
+      encryptOAuthTokens: true,
+      accountLinking: {
+        enabled: true,
+      },
+    },
+    user: {
+      additionalFields: {
+        source: {
+          type: "string",
+          required: false,
+        },
+        goal: {
+          type: "string",
+          required: false,
+        },
+      },
+    },
     database: drizzleAdapter(db, {
       provider: "pg",
     }),
@@ -38,8 +54,6 @@ export function initAuthHandler(
     onAPIError: {
       errorURL: "/login",
     },
-    baseURL,
-    secret: env.AUTH_ENCRYPTION_KEY,
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,
@@ -86,7 +100,7 @@ export function initAuthHandler(
         },
       }),
       expo(),
-    ] as const,
+    ],
     socialProviders: {
       ...(useDiscord && {
         discord: {
@@ -111,12 +125,6 @@ export function initAuthHandler(
       }),
     },
     trustedOrigins: ["expo://"],
-    account: {
-      encryptOAuthTokens: true,
-      accountLinking: {
-        enabled: true,
-      },
-    },
     databaseHooks: {
       session: {
         create: {
@@ -135,19 +143,10 @@ export function initAuthHandler(
     },
   } satisfies BetterAuthOptions;
 
-  return betterAuth(config);
+  return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;
 }
 
 export type Auth = ReturnType<typeof initAuthHandler>;
-export type Session = Auth["$Infer"]["Session"] & {
-  session: { activeOrganizationId?: string | null | undefined };
-};
-export type Organization = ReturnType<
-  typeof organization<OrganizationOptions>
->["$Infer"]["Organization"];
-export type Member = Omit<
-  NonNullable<
-    ReturnType<typeof organization<OrganizationOptions>>["$Infer"]["Member"]
-  >,
-  "role"
-> & { role: string };
+export type Session = Auth["$Infer"]["Session"];
+export type Organization = Auth["$Infer"]["Organization"];
+export type Member = Auth["$Infer"]["Member"];

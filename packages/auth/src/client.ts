@@ -3,6 +3,7 @@ import {
   apiKeyClient,
   emailOTPClient,
   genericOAuthClient,
+  inferAdditionalFields,
   magicLinkClient,
   multiSessionClient,
   oidcClient,
@@ -16,6 +17,7 @@ import {
   usernameClient,
 } from "better-auth/client/plugins";
 import { createAuthClient as createAuthClientBase } from "better-auth/react";
+import type { Auth } from "./server";
 
 export type BaseAuthClient = ReturnType<typeof createAuthClientBase>;
 // used to generate the types for the complete auth client
@@ -50,6 +52,6 @@ export type CompleteAuthClient = typeof _authClient;
 export const createAuthClient = (baseURL: string) => {
   return createAuthClientBase({
     baseURL,
-    plugins: [],
+    plugins: [inferAdditionalFields<Auth>(), organizationClient()],
   });
 };
