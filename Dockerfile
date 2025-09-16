@@ -86,6 +86,6 @@ USER myuser
 COPY --from=builder --chown=myuser /app/packages/crawler/dist ./dist
 
 # Default command: start XVFB (for headful Chrome) and run the actor entry
-CMD pnpm run start:prod --silent
+CMD pnpm run --filter @rectangular-labs/crawler start:prod --silent
 
 
