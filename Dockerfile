@@ -17,9 +17,12 @@ RUN wget -qO- https://get.pnpm.io/install.sh | SHELL="$(which bash)" bash -
 RUN pnpm i -g turbo@2.5.6
 
 WORKDIR /app
+USER root
+RUN chown -R myuser:myuser /app
+USER myuser
 
 COPY --chown=myuser . .
-RUN --chown=myuser pnpm turbo prune @rectangular-labs/crawler --docker
+RUN pnpm turbo prune @rectangular-labs/crawler --docker
 
 ###############################
 # Installer - installs the dependencies for the crawler package
@@ -78,6 +81,6 @@ COPY --from=builder --chown=myuser /app/packages/crawler/dist ./dist
 COPY --from=builder --chown=myuser /app/packages/crawler/package.json ./package.json
 
 # Default command: start XVFB (for headful Chrome) and run the actor entry
-CMD pnpm run start:prod --silent
+CMDpnpm run start:prod --silent
 
 
