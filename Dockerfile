@@ -81,6 +81,6 @@ COPY --from=builder --chown=myuser /app/packages/crawler/dist ./dist
 COPY --from=builder --chown=myuser /app/packages/crawler/package.json ./package.json
 
 # Default command: start XVFB (for headful Chrome) and run the actor entry
-CMDpnpm run start:prod --silent
+CMD pnpm run start:prod --silent
 
 
