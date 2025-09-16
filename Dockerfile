@@ -41,6 +41,9 @@ RUN npm ls crawlee apify puppeteer playwright
 RUN node check-playwright-version.mjs
 
 WORKDIR /app
+USER root
+RUN chown -R myuser:myuser /app
+USER myuser
 # Avoid re-downloading Playwright browsers on install (already in base image)
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
@@ -68,6 +71,9 @@ ENV PATH=$PNPM_HOME:$PATH
 RUN wget -qO- https://get.pnpm.io/install.sh | SHELL="$(which bash)" bash -
     
 WORKDIR /app
+USER root
+RUN chown -R myuser:myuser /app
+USER myuser
 # Avoid Playwright browser re-downloads; suppress outdated warnings
 # ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 # ENV APIFY_DISABLE_OUTDATED_WARNING=1
@@ -78,7 +84,6 @@ WORKDIR /app
 
 # Copy built JS artifacts
 COPY --from=builder --chown=myuser /app/packages/crawler/dist ./dist
-COPY --from=builder --chown=myuser /app/packages/crawler/package.json ./package.json
 
 # Default command: start XVFB (for headful Chrome) and run the actor entry
 CMD pnpm run start:prod --silent
