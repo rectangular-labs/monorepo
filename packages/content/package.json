@@ -42,7 +42,7 @@
     "@fumadocs/content-collections": "^1.2.2",
     "@rectangular-labs/typescript": "workspace:*",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.4.0",
+    "@types/node": "^24.5.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "concurrently": "^9.2.1",
@@ -63,9 +63,9 @@
     "@rectangular-labs/ui": "workspace:*",
     "arktype": "^2.1.22",
     "feed": "^5.1.0",
-    "fumadocs-core": "^15.7.11",
-    "fumadocs-mdx": "^11.9.1",
-    "fumadocs-ui": "^15.7.11",
+    "fumadocs-core": "^15.7.12",
+    "fumadocs-mdx": "^11.10.0",
+    "fumadocs-ui": "^15.7.12",
     "lucide-static": "^0.544.0"
   }
 }
