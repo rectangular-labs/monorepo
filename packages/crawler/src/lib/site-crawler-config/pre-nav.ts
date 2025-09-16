@@ -1,5 +1,5 @@
 import type { PlaywrightHook } from "crawlee";
-import type { Cookie } from "../../schema/site-crawl";
+import type { Cookie } from "../../schema/site-crawl.js";
 
 export const createCrawlSitePreNavHook = ({
   cookie,

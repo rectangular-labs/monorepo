@@ -1,5 +1,5 @@
 import { log, RobotsTxtFile } from "crawlee";
-import { extractUrlLocale } from "../extract-url-locale";
+import { extractUrlLocale } from "../extract-url-locale.js";
 
 export async function parseStartingUrl({
   url,

@@ -8,11 +8,11 @@ import { readFile, writeFile } from "fs/promises";
 import { glob } from "glob";
 import { isWithinTokenLimit } from "gpt-tokenizer";
 import type { Page } from "playwright";
-import { createPlaywrightCrawler } from "./lib/playwright-crawler";
-import { parseStartingUrl } from "./lib/site-crawler-config/parse-starting-url";
-import { createCrawlSitePreNavHook } from "./lib/site-crawler-config/pre-nav";
-import { createCrawlSiteRouter } from "./lib/site-crawler-config/router";
-import { SiteCrawlInputSchema } from "./schema/site-crawl";
+import { createPlaywrightCrawler } from "./lib/playwright-crawler.js";
+import { parseStartingUrl } from "./lib/site-crawler-config/parse-starting-url.js";
+import { createCrawlSitePreNavHook } from "./lib/site-crawler-config/pre-nav.js";
+import { createCrawlSiteRouter } from "./lib/site-crawler-config/router.js";
+import { SiteCrawlInputSchema } from "./schema/site-crawl.js";
 
 type Config = {
   maxPagesToCrawl: number;

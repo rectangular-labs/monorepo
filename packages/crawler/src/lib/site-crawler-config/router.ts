@@ -1,6 +1,6 @@
 import { createPlaywrightRouter } from "crawlee";
 import type { Page } from "playwright";
-import { extractUrlLocale, type Locales } from "../extract-url-locale";
+import { extractUrlLocale, type Locales } from "../extract-url-locale.js";
 
 function getPageHtml(page: Page, selector: string) {
   return page.evaluate((selector) => {

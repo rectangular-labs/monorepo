@@ -6,6 +6,8 @@
     "paths": {
       "@rectangular-labs/crawler/*": ["./src/*"]
     },
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "emitDeclarationOnly": false,
     "sourceMap": true,
     "experimentalDecorators": true,
