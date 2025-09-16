@@ -5,7 +5,11 @@
     "baseUrl": ".",
     "paths": {
       "@rectangular-labs/crawler/*": ["./src/*"]
-    }
+    },
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]

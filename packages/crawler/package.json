@@ -5,8 +5,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/site-crawl.d.ts",
+      "default": "./src/site-crawl.ts"
     },
     "./env": {
       "types": "./dist/src/env.d.ts",
@@ -15,8 +15,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
-    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "start": "pnpm run start:dev",
+    "start:dev": "tsx src/site-crawl.ts",
+    "start:prod": "tsc && node dist/site-crawl.js",
+    "start:apify": "APIFY_CLI_DISABLE_TELEMETRY=1 apify run",
+    "push": "APIFY_CLI_DISABLE_TELEMETRY=1 apify push",
+    "clean": "git clean -xdf .turbo node_modules dist .cache storage",
     "format": "bun x @biomejs/biome format . --write",
     "lint": "bun x @biomejs/biome lint . --write",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
@@ -24,12 +28,16 @@
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
     "@types/node": "^24.3.1",
+    "apify-cli": "^1.1.1",
     "typescript": "^5.9.2"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.8",
+    "apify": "^3.4.5",
     "arktype": "^2.1.22",
     "crawlee": "^3.14.1",
-    "playwright": "^1.55.0"
+    "glob": "^11.0.3",
+    "gpt-tokenizer": "^3.0.1",
+    "playwright": "1.55.0"
   }
 }
