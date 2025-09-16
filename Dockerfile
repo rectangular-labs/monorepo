@@ -85,7 +85,6 @@ USER myuser
 # Copy built JS artifacts
 COPY --from=builder --chown=myuser /app/packages/crawler/dist ./dist
 
-# Default command: start XVFB (for headful Chrome) and run the actor entry
-CMD pnpm run --filter @rectangular-labs/crawler start:prod --silent
+CMD node dist/site-crawl.js --silent
 
 
