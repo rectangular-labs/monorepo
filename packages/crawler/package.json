@@ -17,7 +17,7 @@
     "build": "tsc",
     "start": "pnpm run start:dev",
     "start:dev": "tsx src/site-crawl.ts",
-    "start:prod": "tsc && node dist/site-crawl.js",
+    "start:prod": "node dist/site-crawl.js",
     "start:apify": "APIFY_CLI_DISABLE_TELEMETRY=1 apify run",
     "push": "APIFY_CLI_DISABLE_TELEMETRY=1 apify push",
     "clean": "git clean -xdf .turbo node_modules dist .cache storage",

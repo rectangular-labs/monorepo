@@ -60,31 +60,6 @@ COPY --chown=myuser --from=pruner /app/out/full/ .
 # Build just the crawler package
 RUN pnpm run build
 
-###############################
-# Runtime
-###############################
-FROM base AS runtime
-
-# Install pnpm without using npm -g
-ENV PNPM_HOME=/home/myuser/.local/share/pnpm
-ENV PATH=$PNPM_HOME:$PATH
-RUN wget -qO- https://get.pnpm.io/install.sh | SHELL="$(which bash)" bash -
-    
-WORKDIR /app
-USER root
-RUN chown -R myuser:myuser /app
-USER myuser
-# Avoid Playwright browser re-downloads; suppress outdated warnings
-# ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-# ENV APIFY_DISABLE_OUTDATED_WARNING=1
-
-# Install only production dependencies for the crawler at runtime
-# COPY --from=builder --chown=myuser /app/out/json/pnpm-lock.yaml ./
-# COPY --from=builder --chown=myuser /app/packages/crawler/package.json ./
-
-# Copy built JS artifacts
-COPY --from=builder --chown=myuser /app/packages/crawler/dist ./dist
-
-CMD node dist/site-crawl.js --silent
+CMD cd packages/crawler && pnpm run start:prod
 
 
