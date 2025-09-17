@@ -103,5 +103,3 @@ export function Products() {
     </Section>
   );
 }
-
-export default Products;

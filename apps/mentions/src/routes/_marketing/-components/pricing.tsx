@@ -86,7 +86,7 @@ const plans = [
   },
 ];
 
-export default function Pricing() {
+export function Pricing() {
   const [frequency, setFrequency] = useState<string>("monthly");
   const currencyFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
