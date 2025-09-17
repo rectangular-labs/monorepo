@@ -58,12 +58,10 @@
     "react-dom": "^19.1.1"
   },
   "dependencies": {
-    "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "arktype": "^2.1.22",
     "feed": "^5.1.0",
     "fumadocs-core": "^15.7.12",
-    "fumadocs-mdx": "^11.10.0",
     "fumadocs-ui": "^15.7.12",
     "lucide-static": "^0.544.0"
   }

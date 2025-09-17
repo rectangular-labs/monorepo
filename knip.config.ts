@@ -2,9 +2,12 @@ import type { KnipConfig } from "knip";
 
 export default {
   ignore: ["**/.sst/**", "**/routeTree.gen.ts"],
+  biome: {
+    config: ["biome.jsonc"],
+  },
   workspaces: {
     ".": {
-      entry: "turbo/generators/config.ts",
+      entry: ["turbo/generators/config.ts"],
       project: "turbo/generators/**/*.ts",
     },
     "packages/*": {

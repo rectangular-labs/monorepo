@@ -32,6 +32,7 @@
     "format": "turbo run format --continue",
     "lint": "turbo run lint --continue",
     "typecheck": "turbo run typecheck --continue",
+    "knip": "pnpm dotenvx run -- knip",
     "postinstall": "pnpx sherif@latest",
     "sso": "aws sso login --sso-session=rectangular-labs"
   },
@@ -41,8 +42,8 @@
     "@dotenvx/dotenvx": "^1.49.1",
     "@rectangular-labs/typescript": "workspace:*",
     "@turbo/gen": "^2.5.6",
-    "apify-cli": "^1.1.1",
     "knip": "^5.63.1",
+    "tsx": "^4.20.5",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2"
   },
