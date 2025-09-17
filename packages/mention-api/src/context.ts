@@ -1,5 +1,5 @@
 import { ORPCError, os } from "@orpc/server";
-import { initAuthHandler } from "@rectangular-labs/auth";
+import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
 import { createDb } from "@rectangular-labs/db";
 import { authMiddleware } from "./lib/auth";
 import { asyncStorageMiddleware } from "./lib/context-storage";
@@ -9,7 +9,7 @@ import type { InitialContext } from "./types";
 export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
   const db = createDb();
   return {
-    auth: initAuthHandler(args.url.origin, db),
+    auth: initAuthHandler(args.url.origin, db) as Auth,
     db,
     ...args,
   };

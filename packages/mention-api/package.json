@@ -1,5 +1,5 @@
 {
-  "name": "@rectangular-labs/api",
+  "name": "@rectangular-labs/mention-api",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -33,11 +33,11 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.3.1",
+    "@types/node": "^24.5.1",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.13",
+    "@ai-sdk/google": "^2.0.14",
     "@orpc/arktype": "^1.8.8",
     "@orpc/client": "^1.8.8",
     "@orpc/contract": "^1.8.8",
@@ -51,7 +51,7 @@
     "@rectangular-labs/result": "workspace:*",
     "@simplewebauthn/server": "^13.1.2",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.39",
+    "ai": "^5.0.44",
     "arktype": "^2.1.22"
   },
   "overrides": {

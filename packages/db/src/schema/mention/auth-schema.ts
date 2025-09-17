@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -7,7 +13,9 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  createdAt: timestamp({ mode: "date", withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp({ mode: "date", withTimezone: true })
+    .defaultNow()
+    .notNull(),
   updatedAt: timestamp({ mode: "date", withTimezone: true })
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
@@ -29,7 +37,9 @@ export const session = pgTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
   token: text("token").notNull().unique(),
-  createdAt: timestamp({ mode: "date", withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp({ mode: "date", withTimezone: true })
+    .defaultNow()
+    .notNull(),
   updatedAt: timestamp({ mode: "date", withTimezone: true })
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
@@ -61,7 +71,9 @@ export const account = pgTable("account", {
   refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
   scope: text("scope"),
   password: text("password"),
-  createdAt: timestamp({ mode: "date", withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp({ mode: "date", withTimezone: true })
+    .defaultNow()
+    .notNull(),
   updatedAt: timestamp({ mode: "date", withTimezone: true })
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
@@ -78,13 +90,14 @@ export const verification = pgTable("verification", {
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp({ mode: "date", withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp({ mode: "date", withTimezone: true })
+    .defaultNow()
+    .notNull(),
   updatedAt: timestamp({ mode: "date", withTimezone: true })
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
-
 
 export const passkey = pgTable("passkey", {
   id: text("id").primaryKey(),

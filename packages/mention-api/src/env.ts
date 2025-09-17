@@ -8,7 +8,6 @@ export const apiEnv = () =>
     extends: [dbEnv(), authEnv()],
     server: {
       GOOGLE_GENERATIVE_AI_API_KEY: type("string|undefined"),
-      AI_MODEL: type("string|undefined"),
       REDDIT_USER_AGENT: type("string|undefined"),
     },
     runtimeEnv: process.env,

@@ -6,4 +6,5 @@ export const router = base.router({
   keywords: lazy(() => import("./keywords")),
   mentions: lazy(() => import("./mentions")),
   replies: lazy(() => import("./replies")),
+  companyBackground: lazy(() => import("./company-background")),
 });
