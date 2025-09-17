@@ -31,7 +31,7 @@ importers:
 
   apps/mentions:
     dependencies:
-      "@rectangular-labs/mention-api":
+      "@rectangular-labs/mentions-api":
         specifier: workspace:*
         version: link:../../packages/api
       "@rectangular-labs/auth":

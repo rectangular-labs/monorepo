@@ -1,5 +1,5 @@
-import { rpcClient, rqApiClient } from "@rectangular-labs/mention-api/client";
-import { serverClient } from "@rectangular-labs/mention-api/server";
+import { rpcClient, rqApiClient } from "@rectangular-labs/mentions-api/client";
+import { serverClient } from "@rectangular-labs/mentions-api/server";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
 import { clientEnv } from "./env";
