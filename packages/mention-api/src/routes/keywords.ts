@@ -229,7 +229,8 @@ const remove = protectedBase
           eq(schema.smProjectKeyword.keywordId, input.keywordId),
           eq(schema.smProjectKeyword.projectId, input.projectId),
         ),
-      );
+      )
+      .returning();
     if (!deletedProjectKeyword) {
       throw new ORPCError("BAD_REQUEST", {
         message: "No project keyword found to delete.",

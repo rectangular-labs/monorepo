@@ -224,6 +224,7 @@ function MemberRow({
       <DataTableCell>
         {canManage ? (
           <Select
+            // TODO: add confirmation dialog when downgrading self
             onValueChange={(v) => {
               if (isRole(v)) void changeRole(v);
             }}
