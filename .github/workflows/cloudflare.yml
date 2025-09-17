@@ -147,8 +147,8 @@ jobs:
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
-            Cloudflare Preview URL for WWW:balloon: : https://${{ steps.deploy_www.outputs.deployment-url }}
-            Cloudflare Preview URL for Mentions:balloon: : https://${{ steps.deploy_mentions.outputs.deployment-url }}
+            Cloudflare Preview URL for WWW :balloon: : https://${{ steps.deploy_www.outputs.deployment-url }}
+            Cloudflare Preview URL for Mentions :balloon: : https://${{ steps.deploy_mentions.outputs.deployment-url }}
           comment-tag: execution
 
   cleanup:
