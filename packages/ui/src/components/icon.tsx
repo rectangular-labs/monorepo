@@ -3,6 +3,8 @@ import {
   ArrowRightIcon,
   ArrowUpIcon,
   CheckIcon,
+  ChevronDownIcon,
+  ChevronsUpDownIcon,
   DotIcon,
   EyeIcon,
   EyeOffIcon,
@@ -14,8 +16,10 @@ import {
   MoveDownLeftIcon,
   MoveRightIcon,
   MoveUpRightIcon,
+  PartyPopperIcon,
   PhoneCallIcon,
   SearchIcon,
+  SettingsIcon,
   ShieldIcon,
   SparklesIcon,
   StarIcon,
@@ -52,6 +56,10 @@ export const Zap = ZapIcon;
 export const MoveDownLeft = MoveDownLeftIcon;
 export const MoveUpRight = MoveUpRightIcon;
 export const Check = CheckIcon;
+export const ChevronDown = ChevronDownIcon;
+export const ChevronsUpDown = ChevronsUpDownIcon;
+export const Settings = SettingsIcon;
+export const PartyPopper = PartyPopperIcon;
 
 export const Logo = (props: IconProps) => (
   <svg viewBox="0 0 100 100" xmlns="https://www.w3.org/2000/svg" {...props}>

@@ -10,12 +10,12 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@rectangular-labs/ui/components",
-    "ui": "@rectangular-labs/ui/components/ui",
     "utils": "@rectangular-labs/ui/utils/cn",
+    "ui": "@rectangular-labs/ui/components/ui",
     "lib": "@rectangular-labs/ui/utils",
     "hooks": "@rectangular-labs/ui/hooks"
-  },
-  "iconLibrary": "lucide"
+  }
 }
