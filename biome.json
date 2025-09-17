@@ -94,7 +94,6 @@
       "!**/migrations",
       "!**/worker-configuration.d.ts",
       "!**/.content-collections",
-      "!**/auth-schema.ts",
       "!**/.conductor",
       "!**/orpc-contract.json",
       "!**/node_modules",
