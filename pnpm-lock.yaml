@@ -44,9 +44,9 @@ importers:
       '@rectangular-labs/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@rectangular-labs/mention-api':
+      '@rectangular-labs/mentions-api':
         specifier: workspace:*
-        version: link:../../packages/mention-api
+        version: link:../../packages/mentions-api
       '@rectangular-labs/result':
         specifier: workspace:*
         version: link:../../packages/result
@@ -507,7 +507,7 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
 
-  packages/mention-api:
+  packages/mentions-api:
     dependencies:
       '@ai-sdk/google':
         specifier: ^2.0.14

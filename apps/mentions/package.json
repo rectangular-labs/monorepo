@@ -24,7 +24,7 @@
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/content": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
-    "@rectangular-labs/mention-api": "workspace:*",
+    "@rectangular-labs/mentions-api": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "@stepperize/react": "^5.1.7",
