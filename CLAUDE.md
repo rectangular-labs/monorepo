@@ -120,7 +120,7 @@ Behavioral notes:
 ## Code Conventions
 
 - React hooks must be at component top level
-- Use react query and the `getRqHelper` to fetch and mutate data on the server.
 - Avoid enums, prefer union types
 - After generating code, you MUST make sure that the linter and formatter is happy by running the linter and formatter.
-- NEVER use `as any` or casting generally unless specifically asked to. If you need type either use `satisfies` or type the object directly as needed - e.g. `const test:number = 3`.
+- NEVER use `as any` or casting generally unless specifically asked to. If you need type either use `satisfies` or type the object directly as needed - e.g. `const test:number = 3`. ASK FOR HELP, when you're lost and tempted to start using type casts.
+- When using the database object ALWAYS prefer using the `.query` function over the `.select().from()` syntax
