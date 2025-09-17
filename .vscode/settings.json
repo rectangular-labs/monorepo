@@ -45,7 +45,9 @@
     "^(node:)?process$"
   ],
   "cSpell.words": [
+    "apify",
     "arktype",
+    "crawlee",
     "Creds",
     "dotenvx",
     "fumadocs",
@@ -54,6 +56,7 @@
     "oklch",
     "orpc",
     "rectangularlabs",
+    "Satoshi's",
     "Scaleway",
     "simplewebauthn",
     "Solana",
