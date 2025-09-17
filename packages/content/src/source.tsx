@@ -47,5 +47,3 @@ export const blogSource = loader({
     return;
   },
 });
-
-export const source = docSource;
