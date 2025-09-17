@@ -89,8 +89,14 @@
   "overrides": [],
   "files": {
     "includes": [
+      "*",
       "apps/**",
       "packages/**",
+      "turbo/**",
+      "tooling/**",
+      ".vscode/**",
+      ".github/**",
+      ".cursor/**",
       "!**/migrations",
       "!**/worker-configuration.d.ts",
       "!**/.content-collections",

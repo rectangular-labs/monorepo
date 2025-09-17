@@ -14,7 +14,10 @@ interface PackageJson {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
-  exports?: Record<string, {types?: string, default?: string, imports?: string}|string>;
+  exports?: Record<
+    string,
+    { types?: string; default?: string; imports?: string } | string
+  >;
 }
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
@@ -49,7 +52,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           { name: "React UI", value: "react" },
           { name: "Extra CSS styles", value: "styles" },
           // Empty value and name so that we can skip the feature via "" from the command line
-          { name: "", value:""}
+          { name: "", value: "" },
         ],
         default: [],
       },
@@ -110,32 +113,40 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/src/env.ts",
         templateFile: "templates/env.ts.hbs",
-        skip: (answers: {features?: string[]}) => {
-         return answers.features?.includes("env") ? undefined : "Skipping env.ts"
+        skip: (answers: { features?: string[] }) => {
+          return answers.features?.includes("env")
+            ? undefined
+            : "Skipping env.ts";
         },
       },
       {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/src/styles.css",
         templateFile: "templates/styles.css.hbs",
-        skip: (answers :{features?: string[]}) => {    
-          return answers.features?.includes("styles") ? undefined : "Skipping styles.css"
-        }
+        skip: (answers: { features?: string[] }) => {
+          return answers.features?.includes("styles")
+            ? undefined
+            : "Skipping styles.css";
+        },
       },
       {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/docs/index.mdx",
         templateFile: "templates/docs/index.mdx.hbs",
-        skip: (answers: {features?: string[]}) => {
-          return answers.features?.includes("docs") ? undefined : "Skipping docs/index.mdx"
+        skip: (answers: { features?: string[] }) => {
+          return answers.features?.includes("docs")
+            ? undefined
+            : "Skipping docs/index.mdx";
         },
       },
       {
         type: "add",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/docs/meta.json",
         templateFile: "templates/docs/meta.json.hbs",
-        skip: (answers: {features?: string[]}) => {
-          return answers.features?.includes("docs") ? undefined : "Skipping docs/meta.json"
+        skip: (answers: { features?: string[] }) => {
+          return answers.features?.includes("docs")
+            ? undefined
+            : "Skipping docs/meta.json";
         },
       },
       {
@@ -161,7 +172,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           };
 
           const pkg = JSON.parse(content) as PackageJson;
-   
+
           // Ensure objects exist
           pkg.dependencies ||= {};
           pkg.devDependencies ||= {};
@@ -170,12 +181,12 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 
           // ENV support
           if (data.features?.includes("env")) {
+            pkg.dependencies.arktype ||= "";
             pkg.dependencies["@t3-oss/env-core"] ||= "";
-            pkg.dependencies["arktype"] ||= "";
             pkg.devDependencies["@types/node"] ||= "";
 
             // Add exports for env
-            const exportsField = pkg.exports 
+            const exportsField = pkg.exports;
             exportsField["./env"] = {
               types: "./dist/src/env.d.ts",
               default: "./src/env.ts",
@@ -184,13 +195,13 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 
           // UI support
           if (data.features?.includes("react")) {
+            pkg.devDependencies.react ||= "";
             pkg.devDependencies["@rectangular-labs/ui"] ||= "";
-            pkg.peerDependencies["@rectangular-labs/ui"] ||= "";
-            pkg.devDependencies["react"] ||= "";
             pkg.devDependencies["react-dom"] ||= "";
             pkg.devDependencies["@types/react"] ||= "";
             pkg.devDependencies["@types/react-dom"] ||= "";
-            pkg.peerDependencies["react"] ||= "";
+            pkg.peerDependencies.react ||= "";
+            pkg.peerDependencies["@rectangular-labs/ui"] ||= "";
             pkg.peerDependencies["react-dom"] ||= "";
           }
 
@@ -223,14 +234,14 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       {
         type: "modify",
         path: "{{ turbo.paths.root }}/packages/{{ dashCase name }}/tsconfig.json",
-        async transform(content, data) {
+        transform(content, data) {
           if (!data.features?.includes("react")) {
-            return content
+            return content;
           }
-          const tsConfig = JSON.parse(content) as TSConfig
+          const tsConfig = JSON.parse(content) as TSConfig;
           tsConfig.compilerOptions.jsx = "preserve";
           tsConfig.compilerOptions.lib = ["ES2024", "DOM", "DOM.Iterable"];
-          
+
           return JSON.stringify(tsConfig, null, 2);
         },
       },
