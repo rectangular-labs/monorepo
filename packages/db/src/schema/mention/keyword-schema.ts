@@ -1,3 +1,4 @@
+import { type } from "arktype";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -9,7 +10,6 @@ import { timestamps, uuidv7 } from "../_helper";
 import { pgMentionTable } from "../_table";
 import { smKeywordSourceCursor } from "./keyword-source-cursor-schema";
 import { smProjectKeyword } from "./project-keyword-schema";
-import { type } from "arktype";
 
 export const smKeyword = pgMentionTable(
   "keyword",
