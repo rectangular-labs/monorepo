@@ -28,18 +28,15 @@
   },
   "files.watcherExclude": {
     "**/routeTree.gen.ts": true,
-    "**/orpc-contract.json": true,
-    "**/auth-schema.ts": true
+    "**/orpc-contract.json": true
   },
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true,
-    "**/auth-schema.ts": true,
     "**/orpc-contract.json": true
   },
   "search.exclude": {
     "**/routeTree.gen.ts": true,
-    "**/orpc-contract.json": true,
-    "**/auth-schema.ts": true
+    "**/orpc-contract.json": true
   },
   "typescript.preferences.autoImportSpecifierExcludeRegexes": [
     // prioritize ArkType's "type" for autoimports
@@ -48,7 +45,9 @@
     "^(node:)?process$"
   ],
   "cSpell.words": [
+    "apify",
     "arktype",
+    "crawlee",
     "Creds",
     "dotenvx",
     "fumadocs",
@@ -57,6 +56,7 @@
     "oklch",
     "orpc",
     "rectangularlabs",
+    "Satoshi's",
     "Scaleway",
     "simplewebauthn",
     "Solana",

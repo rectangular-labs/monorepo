@@ -99,9 +99,11 @@ jobs:
           ENVIRONMENT: ${{ steps.resolve.outputs.environment }}
           ENV_PATH: ${{ steps.resolve.outputs.env_path }}
         run: |
-          FILE="apps/www/wrangler.jsonc"
+          FILE_WWW="apps/www/wrangler.jsonc"
+          FILE_MENTIONS="apps/mentions/wrangler.jsonc"
           # Replace placeholder with computed slug
-          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_WWW"
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_MENTIONS"
           sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
         
       - name: Prepare secrets
@@ -118,11 +120,22 @@ jobs:
         run: pnpm run db:mp:${{ steps.resolve.outputs.stage }}
         
       - name: Deploy WWW
-        id: deploy
+        id: deploy_www
         uses: cloudflare/wrangler-action@v3
         with:
           packageManager: pnpm
           workingDirectory: apps/www
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: ${{ steps.resolve.outputs.deploy_command }}
+          environment: ${{ steps.resolve.outputs.environment }}
+          secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
+      - name: Deploy Mentions
+        id: deploy_mentions
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: pnpm
+          workingDirectory: apps/mentions
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: ${{ steps.resolve.outputs.deploy_command }}
@@ -134,7 +147,8 @@ jobs:
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
-            Cloudflare Preview URL :balloon: : https://${{ steps.deploy.outputs.deployment-url }}
+            Cloudflare Preview URL for WWW :balloon: : https://${{ steps.deploy_www.outputs.deployment-url }}
+            Cloudflare Preview URL for Mentions :balloon: : https://${{ steps.deploy_mentions.outputs.deployment-url }}
           comment-tag: execution
 
   cleanup:
@@ -150,18 +164,27 @@ jobs:
 
       - name: Update Environment in wrangler.jsonc for teardown
         shell: bash
-        env:
-          ENVIRONMENT: pr-${{ github.event.number }}
         run: |
-          FILE="apps/www/wrangler.jsonc"
+          FILE_WWW="apps/www/wrangler.jsonc"
+          FILE_MENTIONS="apps/mentions/wrangler.jsonc"
           # Replace placeholder with computed slug
-          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
+          sed -i "s|{env.PULL_REQUEST}|$STAGE|g" "$FILE_WWW"
+          sed -i "s|{env.PULL_REQUEST}|$STAGE|g" "$FILE_MENTIONS"
 
-      - name: Destroy Preview Environment
+      - name: Destroy Preview Environment for WWW
         uses: cloudflare/wrangler-action@v3
         with:
           packageManager: pnpm
           workingDirectory: apps/www
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: delete --env ${{ env.STAGE }}
+
+      - name: Destroy Preview Environment for Mentions
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: pnpm
+          workingDirectory: apps/mentions
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: delete --env ${{ env.STAGE }}

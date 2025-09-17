@@ -1,4 +1,4 @@
-import { initAuthHandler } from "./server";
+import { type Auth, initAuthHandler } from "./server";
 
 // Used simply to generate the schema for the auth database
-export const auth = initAuthHandler("");
+export const auth: Auth = initAuthHandler("", {});

@@ -1,0 +1,27 @@
+# configurations
+.idea
+.vscode
+.zed
+
+# unused files
+apps
+
+# crawlee and apify storage folders
+apify_storage
+crawlee_storage
+storage
+
+# installed files
+node_modules
+out
+.cache
+.claude
+.changeset
+.conductor
+.cursor
+.github
+.turbo
+.vscode
+
+# git folder
+.git

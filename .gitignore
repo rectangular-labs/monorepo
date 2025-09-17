@@ -52,6 +52,7 @@ dist/
 *.sln
 *.sw?
 dump
+storage
 
 # debug
 logs/

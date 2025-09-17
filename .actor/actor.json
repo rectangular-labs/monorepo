@@ -1,0 +1,84 @@
+{
+  "actorSpecification": 1,
+  "name": "site-crawler",
+  "title": "Site Crawler",
+  "description": "Crawls a site and extracts content.",
+  "version": "0.1",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile",
+  "dockerContextDir": "../",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "views": {
+        "list": {
+          "title": "List",
+          "description": "Lightweight listing of pages.",
+          "transformation": {
+            "fields": ["id", "url", "title", "ogDescription", "lang"],
+            "order": ["id", "url", "title", "ogDescription", "lang"]
+          },
+          "display": {
+            "component": "table",
+            "properties": {
+              "id": { "label": "ID", "format": "text", "width": 160 },
+              "url": { "label": "URL", "format": "link" },
+              "title": { "label": "Title", "format": "text" },
+              "ogDescription": { "label": "OG Description", "format": "text" },
+              "lang": { "label": "Lang", "format": "text", "width": 80 }
+            }
+          }
+        },
+        "content": {
+          "title": "Content",
+          "description": "Full page content per item.",
+          "transformation": {
+            "fields": [
+              "id",
+              "url",
+              "title",
+              "text",
+              "metaDescription",
+              "ogLocale",
+              "canonical",
+              "wordCount"
+            ],
+            "order": [
+              "id",
+              "url",
+              "title",
+              "text",
+              "metaDescription",
+              "ogLocale",
+              "canonical",
+              "wordCount"
+            ]
+          },
+          "display": {
+            "component": "table",
+            "properties": {
+              "url": { "label": "URL", "format": "link", "width": 320 },
+              "title": { "label": "Title", "format": "text", "width": 320 },
+              "text": { "label": "Text Content", "format": "text" },
+              "metaDescription": {
+                "label": "Meta Description",
+                "format": "text"
+              },
+              "ogLocale": {
+                "label": "OG Locale",
+                "format": "text",
+                "width": 120
+              },
+              "canonical": {
+                "label": "Canonical",
+                "format": "link",
+                "width": 320
+              },
+              "wordCount": { "label": "Words", "format": "number", "width": 80 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

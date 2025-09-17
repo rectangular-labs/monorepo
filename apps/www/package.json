@@ -25,7 +25,6 @@
     "@react-three/fiber": "^9.3.0",
     "@rectangular-labs/content": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
-    "@simplewebauthn/browser": "^13.2.0",
     "@t3-oss/env-core": "^0.13.8",
     "@tanstack/react-query": "^5.89.0",
     "@tanstack/react-query-devtools": "^5.89.0",

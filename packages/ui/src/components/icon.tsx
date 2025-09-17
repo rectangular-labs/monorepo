@@ -1,6 +1,10 @@
 import {
   ArrowDownIcon,
+  ArrowRightIcon,
   ArrowUpIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronsUpDownIcon,
   DotIcon,
   EyeIcon,
   EyeOffIcon,
@@ -9,10 +13,20 @@ import {
   XIcon as LucideXIcon,
   MenuIcon,
   MoonIcon,
+  MoveDownLeftIcon,
+  MoveRightIcon,
+  MoveUpRightIcon,
+  PartyPopperIcon,
+  PhoneCallIcon,
   SearchIcon,
+  SettingsIcon,
+  ShieldIcon,
+  SparklesIcon,
+  StarIcon,
   SunIcon,
   TerminalIcon,
   UserIcon,
+  ZapIcon,
 } from "lucide-react";
 import type { SVGProps } from "react";
 
@@ -25,6 +39,7 @@ export const EyeOff = EyeOffIcon;
 export const Spinner = Loader2;
 export const ArrowUp = ArrowUpIcon;
 export const ArrowDown = ArrowDownIcon;
+export const ArrowRight = ArrowRightIcon;
 export const File = FileIcon;
 export const Dot = DotIcon;
 export const Menu = MenuIcon;
@@ -32,6 +47,19 @@ export const X = LucideXIcon;
 export const Search = SearchIcon;
 export const Terminal = TerminalIcon;
 export const User = UserIcon;
+export const MoveRight = MoveRightIcon;
+export const PhoneCall = PhoneCallIcon;
+export const Sparkles = SparklesIcon;
+export const Shield = ShieldIcon;
+export const Star = StarIcon;
+export const Zap = ZapIcon;
+export const MoveDownLeft = MoveDownLeftIcon;
+export const MoveUpRight = MoveUpRightIcon;
+export const Check = CheckIcon;
+export const ChevronDown = ChevronDownIcon;
+export const ChevronsUpDown = ChevronsUpDownIcon;
+export const Settings = SettingsIcon;
+export const PartyPopper = PartyPopperIcon;
 
 export const Logo = (props: IconProps) => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>
