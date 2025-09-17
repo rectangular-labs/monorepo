@@ -162,7 +162,7 @@ function ChatInputSubmit({
           strokeWidth="2"
           viewBox="0 0 24 24"
           width="24"
-          xmlns="https://www.w3.org/2000/svg"
+          xmlns="http://www.w3.org/2000/svg"
         >
           <title>Stop</title>
           <rect height="12" width="12" x="6" y="6" />
