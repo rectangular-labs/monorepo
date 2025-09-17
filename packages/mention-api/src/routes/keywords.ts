@@ -152,7 +152,7 @@ const update = protectedBase
     type({
       keywordId: "string",
       projectId: "string",
-      data: schema.keywordUpdateSchema.merge(type({ phrase: "string >= 1" })),
+      data: schema.keywordUpdateSchema,
     }),
   )
   .output(ProjectKeywordSelectSchema)
