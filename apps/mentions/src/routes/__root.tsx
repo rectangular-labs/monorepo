@@ -80,21 +80,10 @@ function RootLayout() {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* hacky js script to prevent next theme flash of light mode on first load. For some reason, an equivalent function typescript compiled doesn't work. */}
-        <script data-cfasync="false">
-          {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
-        </script>
-
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider
-          attribute="class"
-          enableSystem
-          // Enable when scripts here are working as intended.
-          // cloudflare magic see https://github.com/pacocoursey/next-themes?tab=readme-ov-file#using-with-cloudflare-rocket-loader
-          // scriptProps={{ "data-cfasync": "false", async: false }}
-        >
+        <ThemeProvider attribute="class" enableSystem>
           <Outlet />
           <Toaster />
         </ThemeProvider>

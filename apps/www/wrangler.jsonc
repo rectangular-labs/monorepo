@@ -14,6 +14,7 @@
   "placement": {
     "mode": "smart"
   },
+  "keep_names": false,
   "env": {
     "production": {
       "routes": [
