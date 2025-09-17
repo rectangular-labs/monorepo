@@ -181,6 +181,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 
           // ENV support
           if (data.features?.includes("env")) {
+            // We'll fill in the deps with the latest version below
             pkg.dependencies.arktype ||= "";
             pkg.dependencies["@t3-oss/env-core"] ||= "";
             pkg.devDependencies["@types/node"] ||= "";
@@ -195,6 +196,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 
           // UI support
           if (data.features?.includes("react")) {
+            // We'll fill in the deps with the latest version below
             pkg.devDependencies.react ||= "";
             pkg.devDependencies["@rectangular-labs/ui"] ||= "";
             pkg.devDependencies["react-dom"] ||= "";

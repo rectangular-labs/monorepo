@@ -16,7 +16,7 @@ export function OnboardingAllSet({
   description: string;
   title: string;
 }) {
-  const navigate = useNavigate({ from: "/onboarding" });
+  const navigate = useNavigate();
   return (
     <Card className="w-full">
       <CardHeader>

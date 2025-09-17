@@ -83,7 +83,7 @@ const generate = protectedBase
     const content = formatMention(keywordMention.mention);
     if (!content) {
       throw new ORPCError("BAD_REQUEST", {
-        message: "Mention content is empty. Nothing to reply too.",
+        message: "Mention content is empty. Nothing to reply to.",
       });
     }
     const generationResult = await generateReply({

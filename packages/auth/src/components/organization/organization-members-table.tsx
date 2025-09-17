@@ -31,12 +31,7 @@ import { useMemo, useState } from "react";
 import type { Member } from "../../server";
 import { useAuth } from "../auth/auth-provider";
 
-type Role = "owner" | "admin" | "member";
-
-// The query infers the response shape from authClient; no manual narrowing needed
-
-// Note: no longer needed after switching to page.data.members access
-
+type Role = Member["role"];
 function isRole(value: unknown): value is Role {
   return value === "owner" || value === "admin" || value === "member";
 }

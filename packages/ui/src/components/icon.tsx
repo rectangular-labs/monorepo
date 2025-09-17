@@ -316,7 +316,7 @@ export const TwitchIcon = (props: IconProps) => (
     viewBox="0 0 2400 2800"
     x="0px"
     xmlns="http://www.w3.org/2000/svg"
-    xmlnsXlink="https://www.w3.org/1999/xlink"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
     xmlSpace="preserve"
     y="0px"
     {...props}
@@ -393,7 +393,7 @@ export const TanStackIcon = (props: SVGProps<SVGSVGElement>) => (
     viewBox="0 0 633 633"
     width="1em"
     xmlns="http://www.w3.org/2000/svg"
-    xmlnsXlink="https://www.w3.org/1999/xlink"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
     {...props}
   >
     <title>TanStack Icon</title>
@@ -742,7 +742,7 @@ export const PnpmIcon = (props: SVGProps<SVGSVGElement>) => (
     viewBox="76.58987244897958 44 164.00775510204068 164"
     width="1em"
     xmlns="http://www.w3.org/2000/svg"
-    xmlnsXlink="https://www.w3.org/1999/xlink"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
     {...props}
   >
     <title>PNPM Icon</title>

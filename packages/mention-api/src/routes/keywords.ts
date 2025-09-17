@@ -152,7 +152,7 @@ const update = protectedBase
     type({
       keywordId: "string",
       projectId: "string",
-      data: schema.keywordUpdateSchema,
+      data: schema.keywordUpdateSchema.merge(type({ phrase: "string >= 1" })),
     }),
   )
   .output(ProjectKeywordSelectSchema)
@@ -170,7 +170,7 @@ const update = protectedBase
     }
 
     const projectKeyword = await context.db.transaction(async (tx) => {
-      const keywordResult = await upsertKeyword(input.data.phrase ?? "", tx);
+      const keywordResult = await upsertKeyword(input.data.phrase, tx);
       if (!keywordResult.ok) {
         throw new ORPCError("BAD_REQUEST", {
           message: keywordResult.error.message,
