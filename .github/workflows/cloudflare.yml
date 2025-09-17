@@ -146,6 +146,16 @@ jobs:
       
       - name: Setup Dependencies
         uses: ./tooling/github/setup
+
+      - name: Update Environment in wrangler.jsonc for teardown
+        shell: bash
+        env:
+          ENVIRONMENT: pr-${{ github.event.number }}
+        run: |
+          FILE="apps/www/wrangler.jsonc"
+          # Replace placeholder with computed slug
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE"
+
       - name: Destroy Preview Environment
         uses: cloudflare/wrangler-action@v3
         with:
