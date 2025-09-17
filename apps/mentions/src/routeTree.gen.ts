@@ -15,10 +15,15 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketingRouteRouteImport } from './routes/_marketing/route'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
-import { Route as AuthedOrpcRouteImport } from './routes/_authed/orpc'
+import { Route as AuthedProjectsRouteImport } from './routes/_authed/projects'
+import { Route as AuthedOrganizationsRouteImport } from './routes/_authed/organizations'
+import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as MarketingBlogRouteRouteImport } from './routes/_marketing/blog/route'
 import { Route as MarketingBlogIndexRouteImport } from './routes/_marketing/blog/index'
+import { Route as AuthedOnboardingIndexRouteImport } from './routes/_authed/onboarding/index'
 import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog/$'
+import { Route as AuthedProjectIdKeywordsRouteImport } from './routes/_authed/$projectId/keywords'
+import { Route as AuthedProjectIdInboxRouteImport } from './routes/_authed/$projectId/inbox'
 import { ServerRoute as ApiSplatServerRouteImport } from './routes/api/$'
 import { ServerRoute as ApiRpcSplatServerRouteImport } from './routes/api/rpc.$'
 import { ServerRoute as MarketingBlogRssDotxmlServerRouteImport } from './routes/_marketing/blog/rss[.]xml'
@@ -43,9 +48,19 @@ const MarketingIndexRoute = MarketingIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MarketingRouteRoute,
 } as any)
-const AuthedOrpcRoute = AuthedOrpcRouteImport.update({
-  id: '/orpc',
-  path: '/orpc',
+const AuthedProjectsRoute = AuthedProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedOrganizationsRoute = AuthedOrganizationsRouteImport.update({
+  id: '/organizations',
+  path: '/organizations',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
 const MarketingBlogRouteRoute = MarketingBlogRouteRouteImport.update({
@@ -58,10 +73,25 @@ const MarketingBlogIndexRoute = MarketingBlogIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MarketingBlogRouteRoute,
 } as any)
+const AuthedOnboardingIndexRoute = AuthedOnboardingIndexRouteImport.update({
+  id: '/onboarding/',
+  path: '/onboarding/',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
 const MarketingBlogSplatRoute = MarketingBlogSplatRouteImport.update({
   id: '/$',
   path: '/$',
   getParentRoute: () => MarketingBlogRouteRoute,
+} as any)
+const AuthedProjectIdKeywordsRoute = AuthedProjectIdKeywordsRouteImport.update({
+  id: '/$projectId/keywords',
+  path: '/$projectId/keywords',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedProjectIdInboxRoute = AuthedProjectIdInboxRouteImport.update({
+  id: '/$projectId/inbox',
+  path: '/$projectId/inbox',
+  getParentRoute: () => AuthedRouteRoute,
 } as any)
 const ApiSplatServerRoute = ApiSplatServerRouteImport.update({
   id: '/api/$',
@@ -83,16 +113,26 @@ const MarketingBlogRssDotxmlServerRoute =
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/blog': typeof MarketingBlogRouteRouteWithChildren
-  '/orpc': typeof AuthedOrpcRoute
+  '/dashboard': typeof AuthedDashboardRoute
+  '/organizations': typeof AuthedOrganizationsRoute
+  '/projects': typeof AuthedProjectsRoute
   '/': typeof MarketingIndexRoute
+  '/$projectId/inbox': typeof AuthedProjectIdInboxRoute
+  '/$projectId/keywords': typeof AuthedProjectIdKeywordsRoute
   '/blog/$': typeof MarketingBlogSplatRoute
+  '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog/': typeof MarketingBlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/orpc': typeof AuthedOrpcRoute
+  '/dashboard': typeof AuthedDashboardRoute
+  '/organizations': typeof AuthedOrganizationsRoute
+  '/projects': typeof AuthedProjectsRoute
   '/': typeof MarketingIndexRoute
+  '/$projectId/inbox': typeof AuthedProjectIdInboxRoute
+  '/$projectId/keywords': typeof AuthedProjectIdKeywordsRoute
   '/blog/$': typeof MarketingBlogSplatRoute
+  '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog': typeof MarketingBlogIndexRoute
 }
 export interface FileRoutesById {
@@ -101,25 +141,56 @@ export interface FileRoutesById {
   '/_marketing': typeof MarketingRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_marketing/blog': typeof MarketingBlogRouteRouteWithChildren
-  '/_authed/orpc': typeof AuthedOrpcRoute
+  '/_authed/dashboard': typeof AuthedDashboardRoute
+  '/_authed/organizations': typeof AuthedOrganizationsRoute
+  '/_authed/projects': typeof AuthedProjectsRoute
   '/_marketing/': typeof MarketingIndexRoute
+  '/_authed/$projectId/inbox': typeof AuthedProjectIdInboxRoute
+  '/_authed/$projectId/keywords': typeof AuthedProjectIdKeywordsRoute
   '/_marketing/blog/$': typeof MarketingBlogSplatRoute
+  '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
   '/_marketing/blog/': typeof MarketingBlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/blog' | '/orpc' | '/' | '/blog/$' | '/blog/'
+  fullPaths:
+    | '/login'
+    | '/blog'
+    | '/dashboard'
+    | '/organizations'
+    | '/projects'
+    | '/'
+    | '/$projectId/inbox'
+    | '/$projectId/keywords'
+    | '/blog/$'
+    | '/onboarding'
+    | '/blog/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/orpc' | '/' | '/blog/$' | '/blog'
+  to:
+    | '/login'
+    | '/dashboard'
+    | '/organizations'
+    | '/projects'
+    | '/'
+    | '/$projectId/inbox'
+    | '/$projectId/keywords'
+    | '/blog/$'
+    | '/onboarding'
+    | '/blog'
   id:
     | '__root__'
     | '/_authed'
     | '/_marketing'
     | '/login'
     | '/_marketing/blog'
-    | '/_authed/orpc'
+    | '/_authed/dashboard'
+    | '/_authed/organizations'
+    | '/_authed/projects'
     | '/_marketing/'
+    | '/_authed/$projectId/inbox'
+    | '/_authed/$projectId/keywords'
     | '/_marketing/blog/$'
+    | '/_authed/onboarding/'
     | '/_marketing/blog/'
   fileRoutesById: FileRoutesById
 }
@@ -188,11 +259,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingIndexRouteImport
       parentRoute: typeof MarketingRouteRoute
     }
-    '/_authed/orpc': {
-      id: '/_authed/orpc'
-      path: '/orpc'
-      fullPath: '/orpc'
-      preLoaderRoute: typeof AuthedOrpcRouteImport
+    '/_authed/projects': {
+      id: '/_authed/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AuthedProjectsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/organizations': {
+      id: '/_authed/organizations'
+      path: '/organizations'
+      fullPath: '/organizations'
+      preLoaderRoute: typeof AuthedOrganizationsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/dashboard': {
+      id: '/_authed/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedDashboardRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
     '/_marketing/blog': {
@@ -209,12 +294,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingBlogIndexRouteImport
       parentRoute: typeof MarketingBlogRouteRoute
     }
+    '/_authed/onboarding/': {
+      id: '/_authed/onboarding/'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthedOnboardingIndexRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/_marketing/blog/$': {
       id: '/_marketing/blog/$'
       path: '/$'
       fullPath: '/blog/$'
       preLoaderRoute: typeof MarketingBlogSplatRouteImport
       parentRoute: typeof MarketingBlogRouteRoute
+    }
+    '/_authed/$projectId/keywords': {
+      id: '/_authed/$projectId/keywords'
+      path: '/$projectId/keywords'
+      fullPath: '/$projectId/keywords'
+      preLoaderRoute: typeof AuthedProjectIdKeywordsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/$projectId/inbox': {
+      id: '/_authed/$projectId/inbox'
+      path: '/$projectId/inbox'
+      fullPath: '/$projectId/inbox'
+      preLoaderRoute: typeof AuthedProjectIdInboxRouteImport
+      parentRoute: typeof AuthedRouteRoute
     }
   }
 }
@@ -245,11 +351,21 @@ declare module '@tanstack/react-start/server' {
 }
 
 interface AuthedRouteRouteChildren {
-  AuthedOrpcRoute: typeof AuthedOrpcRoute
+  AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedOrganizationsRoute: typeof AuthedOrganizationsRoute
+  AuthedProjectsRoute: typeof AuthedProjectsRoute
+  AuthedProjectIdInboxRoute: typeof AuthedProjectIdInboxRoute
+  AuthedProjectIdKeywordsRoute: typeof AuthedProjectIdKeywordsRoute
+  AuthedOnboardingIndexRoute: typeof AuthedOnboardingIndexRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
-  AuthedOrpcRoute: AuthedOrpcRoute,
+  AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedOrganizationsRoute: AuthedOrganizationsRoute,
+  AuthedProjectsRoute: AuthedProjectsRoute,
+  AuthedProjectIdInboxRoute: AuthedProjectIdInboxRoute,
+  AuthedProjectIdKeywordsRoute: AuthedProjectIdKeywordsRoute,
+  AuthedOnboardingIndexRoute: AuthedOnboardingIndexRoute,
 }
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(

@@ -1,9 +1,9 @@
-import { createApiContext } from "@rectangular-labs/api/context";
-import { openAPIHandler } from "@rectangular-labs/api/server";
 import {
   createBlogSearchServer,
   createDocsSearchServer,
 } from "@rectangular-labs/content/search";
+import { createApiContext } from "@rectangular-labs/mention-api/context";
+import { openAPIHandler } from "@rectangular-labs/mention-api/server";
 import { createServerFileRoute } from "@tanstack/react-start/server";
 import { authServerHandler } from "~/lib/auth/server";
 import { serverEnv } from "~/lib/env";

@@ -1,4 +1,4 @@
-import { apiEnv } from "@rectangular-labs/api/env";
+import { apiEnv } from "@rectangular-labs/mention-api/env";
 import { createEnv } from "@t3-oss/env-core";
 import { type } from "arktype";
 

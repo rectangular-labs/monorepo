@@ -1,5 +1,5 @@
-import { rpcClient, rqApiClient } from "@rectangular-labs/api/client";
-import { serverClient } from "@rectangular-labs/api/server";
+import { rpcClient, rqApiClient } from "@rectangular-labs/mention-api/client";
+import { serverClient } from "@rectangular-labs/mention-api/server";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
 import { clientEnv } from "./env";
@@ -20,7 +20,7 @@ export const getApiClient = createIsomorphicFn()
     return client;
   });
 
-export const rqHelper = rqApiClient(
+export const apiClientRq = rqApiClient(
   typeof window !== "undefined"
     ? window.location.origin
     : clientEnv().VITE_MENTIONS_URL,

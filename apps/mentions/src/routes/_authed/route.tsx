@@ -1,5 +1,5 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { getCurrentSession } from "~/lib/auth";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { getCurrentSession } from "~/lib/auth/client";
 
 export const Route = createFileRoute("/_authed")({
   beforeLoad: async ({ location }) => {
@@ -13,4 +13,9 @@ export const Route = createFileRoute("/_authed")({
       });
     }
   },
+  component: AuthedLayout,
 });
+
+function AuthedLayout() {
+  return <Outlet />;
+}

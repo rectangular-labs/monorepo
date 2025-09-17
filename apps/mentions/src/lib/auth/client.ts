@@ -15,8 +15,25 @@ export const getCurrentSession = createIsomorphicFn()
     return session;
   })
   .client(async () => {
-    const baseUrl = clientEnv().VITE_MENTIONS_URL;
-    const auth = createAuthClient(baseUrl);
-    const session = await auth.getSession();
+    const session = await authClient.getSession();
     return session.data;
+  });
+
+export const getUserOrganizations = createIsomorphicFn()
+  .server(async () => {
+    const request = getWebRequest();
+    const organizations = await authServerHandler.api.listOrganizations({
+      headers: request.headers,
+    });
+    return organizations;
+  })
+  .client(async () => {
+    const organizations = await authClient.organization.list();
+    if (organizations.error) {
+      throw new Error(
+        organizations.error.message ??
+          "Something went wrong loading organizations. Please try again",
+      );
+    }
+    return organizations.data;
   });

@@ -1,5 +1,5 @@
-import { createApiContext } from "@rectangular-labs/api/context";
-import { RpcHandler } from "@rectangular-labs/api/server";
+import { createApiContext } from "@rectangular-labs/mention-api/context";
+import { RpcHandler } from "@rectangular-labs/mention-api/server";
 import { createServerFileRoute } from "@tanstack/react-start/server";
 
 async function handle({ request }: { request: Request }) {
