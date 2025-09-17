@@ -48,6 +48,7 @@
     "@orpc/tanstack-query": "^1.8.9",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
+    "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.45",
     "arktype": "^2.1.22"

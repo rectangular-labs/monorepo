@@ -17,5 +17,3 @@ export function Brands() {
     </Section>
   );
 }
-
-export default Brands;

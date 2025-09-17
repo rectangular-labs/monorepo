@@ -416,5 +416,3 @@ export function InteractiveRectangle() {
     </div>
   );
 }
-
-export default InteractiveRectangle;

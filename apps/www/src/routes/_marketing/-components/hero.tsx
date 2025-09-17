@@ -4,7 +4,11 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { Link } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 
-const InteractiveRectangle = lazy(() => import("./interactive-rectangle"));
+const InteractiveRectangle = lazy(() =>
+  import("./interactive-rectangle").then((mod) => ({
+    default: mod.InteractiveRectangle,
+  })),
+);
 
 export function Hero() {
   return (
@@ -43,5 +47,3 @@ export function Hero() {
     </Section>
   );
 }
-
-export default Hero;

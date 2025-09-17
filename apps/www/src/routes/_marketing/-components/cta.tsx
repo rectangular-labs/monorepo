@@ -32,5 +32,3 @@ export function CTA() {
     </Section>
   );
 }
-
-export default CTA;
