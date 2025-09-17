@@ -30,6 +30,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy
+    if: ${{ github.event.action != 'closed' }}
     permissions:  
       pull-requests: write
     env:
@@ -160,6 +161,18 @@ jobs:
       
       - name: Setup Dependencies
         uses: ./tooling/github/setup
+
+      - name: Update Environment in wrangler.jsonc for teardown
+        shell: bash
+        env:
+          ENVIRONMENT: pr-${{ github.event.number }}
+        run: |
+          FILE_WWW="apps/www/wrangler.jsonc"
+          FILE_MENTIONS="apps/mentions/wrangler.jsonc"
+          # Replace placeholder with computed slug
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_WWW"
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_MENTIONS"
+
       - name: Destroy Preview Environment for WWW
         uses: cloudflare/wrangler-action@v3
         with:
