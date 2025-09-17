@@ -82,9 +82,9 @@ function RootLayout() {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* hacky js script to prevent next theme flash of light mode on first load. For some reason, an equivalent function typescript compiled doesn't work. */}
-        <script data-cfasync="false">
+        {/* <script data-cfasync="false">
           {`!function(){try{var e=localStorage.theme;var n=e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme: dark)').matches);var t=document.documentElement;n?t.classList.add('dark'):t.classList.remove('dark')}catch(o){}}();`}
-        </script>
+        </script> */}
 
         <HeadContent />
       </head>
