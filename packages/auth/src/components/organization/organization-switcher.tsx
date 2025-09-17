@@ -35,8 +35,10 @@ export function OrganizationSwitcher({
   const hooks = authClient.organization as unknown as {
     useListOrganizations?: () => { data: OrgSummary[] | null };
     useActiveOrganization?: () => { data: OrgSummary | null };
-    setActiveOrganization?: (args: { organizationId: string }) => Promise<any>;
-    setActive?: (args: { organizationId: string }) => Promise<any>;
+    setActiveOrganization?: (args: {
+      organizationId: string;
+    }) => Promise<OrgSummary>;
+    setActive?: (args: { organizationId: string }) => Promise<OrgSummary>;
   };
   type OrgSummary = {
     id: string;

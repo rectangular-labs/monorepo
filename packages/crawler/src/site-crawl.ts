@@ -1,10 +1,10 @@
 // For more information, see https://crawlee.dev/
 import { Buffer } from "node:buffer";
+import type { PathLike } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
 import { Actor } from "apify";
 import { type } from "arktype";
 import { log } from "crawlee";
-import type { PathLike } from "fs";
-import { readFile, writeFile } from "fs/promises";
 import { glob } from "glob";
 import { isWithinTokenLimit } from "gpt-tokenizer";
 import type { Page } from "playwright";

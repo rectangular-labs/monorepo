@@ -30,7 +30,7 @@ export function RecoverAccountForm() {
 
   async function recovery({ code }: { code: string }) {
     setIsSubmitting(true);
-    const response = await (authClient as any).recovery?.({ code });
+    const response = await authClient.twoFactor.verifyBackupCode({ code });
     setIsSubmitting(false);
 
     if (response?.error) {
