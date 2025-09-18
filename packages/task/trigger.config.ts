@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   build: {
-    external: ["crawlee", "jsdom", "defuddle"],
+    external: ["crawlee", "jsdom"],
     extensions: [playwright()],
   },
   dirs: ["src/trigger"],

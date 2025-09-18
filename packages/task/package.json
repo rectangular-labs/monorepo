@@ -19,8 +19,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev:trigger": "pnpm dotenvx run -f ../../.env.local -f ../../.env -- pnpx trigger.dev@latest dev",
-    "clean": "git clean -xdf .turbo node_modules dist .cache storage",
+    "dev:trigger": "pnpm dotenvx run -f ../../.env.local -f ../../.env -- pnpx trigger.dev@4.0.2 dev",
+    "clean": "git clean -xdf .turbo node_modules dist .cache .trigger storage",
     "format": "bun x @biomejs/biome format . --write",
     "lint": "bun x @biomejs/biome lint . --write",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
@@ -41,6 +41,7 @@
     "defuddle": "^0.6.6",
     "glob": "^11.0.3",
     "gpt-tokenizer": "^3.0.1",
+    "jsdom": "^26.1.0",
     "playwright": "1.55.0",
     "unstorage": "^1.17.1"
   }
