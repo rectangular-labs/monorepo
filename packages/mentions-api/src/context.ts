@@ -24,8 +24,8 @@ export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
  */
 export const base = os
   .$context<InitialContext>()
-  .use(asyncStorageMiddleware<InitialContext>())
   .use(loggerMiddleware)
+  .use(asyncStorageMiddleware<InitialContext>())
   .use(authMiddleware);
 
 export const protectedBase = base.use(({ context, next }) => {
