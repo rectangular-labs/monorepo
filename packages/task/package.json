@@ -4,17 +4,17 @@
   "version": "0.0.1",
   "type": "module",
   "exports": {
-    "./site-crawl": {
-      "default": "./src/site-crawl.ts",
-      "types": "./dist/site-crawl.d.ts"
-    },
     "./env": {
       "default": "./src/env.ts",
       "types": "./dist/src/env.d.ts"
     },
-    "./schema": {
-      "default": "./src/schema/site-crawl.ts",
-      "types": "./dist/schema/site-crawl.d.ts"
+    "./client": {
+      "default": "./src/client.ts",
+      "types": "./dist/client.d.ts"
+    },
+    "./schema/*": {
+      "default": "./src/schema/*.ts",
+      "types": "./dist/schema/*.d.ts"
     }
   },
   "scripts": {
@@ -36,11 +36,8 @@
     "@t3-oss/env-core": "^0.13.8",
     "@trigger.dev/sdk": "4.0.2",
     "arktype": "^2.1.22",
-    "aws4fetch": "^1.0.20",
     "crawlee": "^3.14.1",
     "defuddle": "^0.6.6",
-    "glob": "^11.0.3",
-    "gpt-tokenizer": "^3.0.1",
     "jsdom": "^26.1.0",
     "playwright": "1.55.0",
     "unstorage": "^1.17.1"

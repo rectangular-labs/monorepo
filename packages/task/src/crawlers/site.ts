@@ -55,7 +55,7 @@ export async function crawlSite(input: typeof SiteCrawlInputSchema.infer) {
   });
 
   const proxyConfiguration = new ProxyConfiguration({
-    proxyUrls: [],
+    tieredProxyUrls: [[null]],
   });
   const crawler = new PlaywrightCrawler({
     proxyConfiguration,
@@ -81,9 +81,10 @@ export async function crawlSite(input: typeof SiteCrawlInputSchema.infer) {
     },
   });
 
+  const sitemapProxyUrl = await proxyConfiguration.newUrl();
   const startUrls = await parseStartingUrl({
     url: startUrl,
-    proxyUrl: await proxyConfiguration.newUrl(),
+    proxyUrl: sitemapProxyUrl,
   });
   await crawler.run(startUrls);
   console.timeEnd("Crawl");
