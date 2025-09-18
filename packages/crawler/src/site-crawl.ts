@@ -2,9 +2,8 @@
 import { Buffer } from "node:buffer";
 import type { PathLike } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
-import { Actor } from "apify";
 import { type } from "arktype";
-import { log } from "crawlee";
+import { KeyValueStore, log, ProxyConfiguration } from "crawlee";
 import { glob } from "glob";
 import { isWithinTokenLimit } from "gpt-tokenizer";
 import type { Page } from "playwright";
@@ -114,8 +113,7 @@ export async function write(config: Config) {
   return nextFileNameString;
 }
 
-await Actor.init();
-const rawInput = await Actor.getInput();
+const rawInput = await KeyValueStore.getInput();
 const userInput = SiteCrawlInputSchema.or(type.null)(rawInput);
 
 if (userInput instanceof type.errors) {
@@ -149,7 +147,9 @@ const router = createCrawlSiteRouter({
   match,
   exclude,
 });
-const proxyConfiguration = await Actor.createProxyConfiguration();
+const proxyConfiguration = new ProxyConfiguration({
+  tieredProxyUrls: [[null]],
+});
 const crawler = createPlaywrightCrawler(
   maxRequestsPerCrawl,
   router,
@@ -162,5 +162,3 @@ const startUrls = await parseStartingUrl({
 });
 await crawler.run(startUrls);
 console.timeEnd("Crawl");
-
-await Actor.exit();
