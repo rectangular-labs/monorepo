@@ -38,10 +38,13 @@ export default {
         (match) => match[2]?.trim(),
       )
         .filter((value) => {
-          if (value?.startsWith("@")) return true;
+          if (value?.startsWith("../node_modules/")) return true;
           return false;
         })
-        .map((specifier) => `import "${specifier}"`);
+        .map(
+          (specifier) =>
+            `import "${specifier?.replace("../node_modules/", "")}"`,
+        );
 
       return [...atRuleImports, ...urlImports].join("\n");
     },
