@@ -1,6 +1,6 @@
 import { type DBTransaction, schema } from "@rectangular-labs/db";
 import { err, ok } from "@rectangular-labs/result";
-import { getContext } from "../context-storage";
+import { getContext } from "../../context";
 
 export async function upsertKeyword(keyword: string, tx?: DBTransaction) {
   const context = await getContext();

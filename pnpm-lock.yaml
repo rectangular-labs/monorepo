@@ -251,6 +251,40 @@ importers:
         specifier: ^4.37.1
         version: 4.37.1(@cloudflare/workers-types@4.20250414.0)
 
+  packages/api-core:
+    dependencies:
+      '@orpc/arktype':
+        specifier: ^1.8.9
+        version: 1.8.9(@ark/schema@0.49.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.8.9(@opentelemetry/api@1.9.0))(arktype@2.1.22)(crossws@0.3.5)(ws@8.18.3)
+      '@orpc/client':
+        specifier: ^1.8.9
+        version: 1.8.9(@opentelemetry/api@1.9.0)
+      '@orpc/contract':
+        specifier: ^1.8.9
+        version: 1.8.9(@opentelemetry/api@1.9.0)
+      '@orpc/json-schema':
+        specifier: ^1.8.9
+        version: 1.8.9(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+      '@orpc/openapi':
+        specifier: ^1.8.9
+        version: 1.8.9(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+      '@orpc/openapi-client':
+        specifier: ^1.8.9
+        version: 1.8.9(@opentelemetry/api@1.9.0)
+      '@orpc/server':
+        specifier: ^1.8.9
+        version: 1.8.9(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+    devDependencies:
+      '@rectangular-labs/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@types/node':
+        specifier: ^24.5.1
+        version: 24.5.1
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   packages/auth:
     dependencies:
       '@better-auth/expo':
@@ -533,6 +567,9 @@ importers:
       '@orpc/tanstack-query':
         specifier: ^1.8.9
         version: 1.8.9(@opentelemetry/api@1.9.0)(@orpc/client@1.8.9(@opentelemetry/api@1.9.0))(@tanstack/query-core@5.89.0)
+      '@rectangular-labs/api-core':
+        specifier: workspace:*
+        version: link:../api-core
       '@rectangular-labs/auth':
         specifier: workspace:*
         version: link:../auth

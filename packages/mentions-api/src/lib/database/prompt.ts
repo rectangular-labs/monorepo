@@ -1,5 +1,5 @@
 import { safe } from "@rectangular-labs/result";
-import { getContext } from "../context-storage";
+import { getContext } from "../../context";
 
 export async function getPromptById(id: string) {
   const context = await getContext();
