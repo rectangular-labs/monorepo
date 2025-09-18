@@ -1,5 +1,4 @@
 import { experimental_ArkTypeToJsonSchemaConverter as ArkTypeToJsonSchemaConverter } from "@orpc/arktype";
-import { onError } from "@orpc/client";
 import { experimental_SmartCoercionPlugin as SmartCoercionPlugin } from "@orpc/json-schema";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import {
@@ -7,6 +6,7 @@ import {
   type OpenAPIReferencePluginOptions,
 } from "@orpc/openapi/plugins";
 import type { Context, Router } from "@orpc/server";
+import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import {
   RequestHeadersPlugin,

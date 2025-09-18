@@ -1,6 +1,9 @@
 import { createORPCClient } from "@orpc/client";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
-import { createOpenApiLink, createRpcLink } from "@rectangular-labs/api-core";
+import {
+  createOpenApiLink,
+  createRpcLink,
+} from "@rectangular-labs/api-core/lib/links";
 import contract from "./_open-api/orpc-contract.json";
 import type { Router, RouterClient } from "./types";
 

@@ -2,7 +2,7 @@ import { createRouterClient } from "@orpc/server";
 import {
   createOpenAPIHandler,
   createRpcHandler,
-} from "@rectangular-labs/api-core";
+} from "@rectangular-labs/api-core/lib/handlers";
 import { createApiContext } from "./context";
 import { router } from "./routes";
 

@@ -4,7 +4,7 @@ import type {
   RouterClient as ORPCRouterClient,
   UnlaziedRouter,
 } from "@orpc/server";
-import type { BaseContext } from "@rectangular-labs/api-core";
+import type { BaseContext } from "@rectangular-labs/api-core/lib/types";
 import type { Auth } from "@rectangular-labs/auth";
 import type { DB } from "@rectangular-labs/db";
 import type { router } from "./routes";

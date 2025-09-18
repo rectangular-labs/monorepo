@@ -2,8 +2,8 @@ import { ORPCError, os } from "@orpc/server";
 import {
   asyncStorageMiddleware,
   getContext as getBaseContext,
-  loggerMiddleware,
-} from "@rectangular-labs/api-core";
+} from "@rectangular-labs/api-core/lib/context-storage";
+import { loggerMiddleware } from "@rectangular-labs/api-core/lib/logger";
 import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
 import { createDb } from "@rectangular-labs/db";
 import { authMiddleware } from "./lib/auth";
