@@ -1,5 +1,5 @@
 import { err, ok } from "@rectangular-labs/result";
-import { getContext } from "../context-storage";
+import { getContext } from "../../context";
 
 export async function getProjectById(projectId: string, orgId: string) {
   const context = await getContext();

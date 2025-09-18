@@ -14,6 +14,7 @@
   "placement": {
     "mode": "smart"
   },
+  // mostly a workaround to avoid issues with the build and next themes
   "keep_names": false,
   "env": {
     "production": {

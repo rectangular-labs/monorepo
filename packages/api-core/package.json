@@ -1,0 +1,34 @@
+{
+  "name": "@rectangular-labs/api-core",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./lib/*": {
+      "types": "./dist/lib/*.d.ts",
+      "default": "./src/lib/*.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "bun x @biomejs/biome format . --write",
+    "lint": "bun x @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@rectangular-labs/typescript": "workspace:*",
+    "@types/node": "^24.5.1",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@orpc/arktype": "^1.8.9",
+    "@orpc/client": "^1.8.9",
+    "@orpc/contract": "^1.8.9",
+    "@orpc/json-schema": "^1.8.9",
+    "@orpc/openapi": "^1.8.9",
+    "@orpc/openapi-client": "^1.8.9",
+    "@orpc/server": "^1.8.9"
+  }
+}

@@ -4,10 +4,7 @@ import type {
   RouterClient as ORPCRouterClient,
   UnlaziedRouter,
 } from "@orpc/server";
-import type {
-  RequestHeadersPluginContext,
-  ResponseHeadersPluginContext,
-} from "@orpc/server/plugins";
+import type { BaseContext } from "@rectangular-labs/api-core/lib/types";
 import type { Auth } from "@rectangular-labs/auth";
 import type { DB } from "@rectangular-labs/db";
 import type { router } from "./routes";
@@ -21,9 +18,7 @@ export type RouterOutputs = InferRouterOutputs<Router>;
  * Initial context type definition for oRPC procedures
  * This defines the required dependencies that must be passed when calling procedures
  */
-export interface InitialContext
-  extends RequestHeadersPluginContext,
-    ResponseHeadersPluginContext {
+export interface InitialContext extends BaseContext {
   db: DB;
   auth: Auth;
   url: URL;

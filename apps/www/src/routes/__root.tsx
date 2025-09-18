@@ -23,10 +23,6 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       {
-        name: "apple-mobile-web-app-capable",
-        content: "yes",
-      },
-      {
         name: "apple-mobile-web-app-title",
         content: "Rectangular Labs",
       },
