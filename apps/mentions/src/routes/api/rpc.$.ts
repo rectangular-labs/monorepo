@@ -5,6 +5,7 @@ import { createServerFileRoute } from "@tanstack/react-start/server";
 async function handle({ request }: { request: Request }) {
   const context = createApiContext({
     url: new URL(request.url),
+    reqHeaders: request.headers,
   });
 
   const { response } = await RpcHandler.handle(request, {

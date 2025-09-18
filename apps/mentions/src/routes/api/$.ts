@@ -8,6 +8,9 @@ import { createServerFileRoute } from "@tanstack/react-start/server";
 import { authServerHandler } from "~/lib/auth/server";
 import { serverEnv } from "~/lib/env";
 
+const docsSearch = createDocsSearchServer();
+const blogSearch = createBlogSearchServer();
+
 async function handle({ request }: { request: Request }) {
   if (new URL(request.url).pathname.startsWith("/api/auth/")) {
     return await authServerHandler.handler(request);
@@ -17,20 +20,19 @@ async function handle({ request }: { request: Request }) {
     if (request.method !== "GET") {
       return new Response("Method not allowed", { status: 405 });
     }
-    const search = createDocsSearchServer();
-    return await search.GET(request);
+    return await docsSearch.GET(request);
   }
   if (new URL(request.url).pathname.startsWith("/api/blog/search")) {
     if (request.method !== "GET") {
       return new Response("Method not allowed", { status: 405 });
     }
-    const search = createBlogSearchServer();
-    return await search.GET(request);
+    return await blogSearch.GET(request);
   }
 
   const env = serverEnv();
   const context = createApiContext({
     url: new URL(request.url),
+    reqHeaders: request.headers,
   });
 
   const { response } = await openAPIHandler(
