@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "rectangular-labs-mentions",
+  "name": "rectangular-labs-seo",
   "main": ".output/server/index.mjs",
   "preview_urls": false,
   "compatibility_date": "2025-09-07",
@@ -20,7 +20,7 @@
     "production": {
       "routes": [
         {
-          "pattern": "mentions.rectangularlabs.com",
+          "pattern": "seo.rectangularlabs.com",
           "custom_domain": true
         }
       ]
@@ -28,7 +28,7 @@
     "{env.PULL_REQUEST}": {
       "routes": [
         {
-          "pattern": "{env.PULL_REQUEST}.mentions.rectangularlabs.com",
+          "pattern": "{env.PULL_REQUEST}.seo.rectangularlabs.com",
           "custom_domain": true
         }
       ]
