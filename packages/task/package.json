@@ -11,10 +11,6 @@
     "./client": {
       "default": "./src/client.ts",
       "types": "./dist/client.d.ts"
-    },
-    "./schema/*": {
-      "default": "./src/schema/*.ts",
-      "types": "./dist/schema/*.d.ts"
     }
   },
   "scripts": {
@@ -33,6 +29,7 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.14",
+    "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "@trigger.dev/sdk": "4.0.2",
     "arktype": "^2.1.22",

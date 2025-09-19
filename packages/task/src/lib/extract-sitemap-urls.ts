@@ -1,7 +1,16 @@
 import { log, RobotsTxtFile } from "crawlee";
-import { extractUrlLocale } from "../extract-url-locale.js";
+import { extractUrlLocale, type Locales } from "./extract-url-locale.js";
 
-export async function parseStartingUrl({
+/**
+ *
+ * @param {object} param - The parameters for the function
+ * @param {string} param.url - The url of the site from which we will try to find sitemap urls from
+ * @param {string} param.proxyUrl - The proxy url to use
+ * @param {string} param.defaultLocale - The default locale to use
+ * @param {boolean} param.onlyParseDefaultLocale - Whether to only parse default locale
+ * @returns
+ */
+export async function extractSitemapUrls({
   url,
   proxyUrl,
   defaultLocale = "en",
@@ -9,7 +18,7 @@ export async function parseStartingUrl({
 }: {
   url: string;
   proxyUrl?: string | undefined;
-  defaultLocale?: string | undefined;
+  defaultLocale?: Locales | undefined;
   onlyParseDefaultLocale?: boolean | undefined;
 }) {
   const robots = await RobotsTxtFile.find(url, proxyUrl);
@@ -29,9 +38,5 @@ export async function parseStartingUrl({
     : urls;
   log.info(`${filteredUrls.length} urls after filtering.`);
 
-  // TODO: This is a temporary solution to avoid crawling too many urls. We'll likely inject high ranking urls as needed too.
-  // If there's too much urls, we'll just crawl the start url and discover the most relevant urls from the perspective of the user.
-  return filteredUrls.length > 0 && filteredUrls.length < 1000
-    ? filteredUrls
-    : [url];
+  return filteredUrls;
 }

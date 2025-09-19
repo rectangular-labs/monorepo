@@ -9,6 +9,7 @@ export type Cookie = typeof cookieSchema.infer;
 export const SiteCrawlInputSchema = type({
   startUrl: "string",
   maxRequestsPerCrawl: "number",
+  crawlSitemap: "boolean=false",
   "selector?": "string",
   "waitForSelectorTimeoutMs?": "number",
   "match?": "string[]",
@@ -16,7 +17,14 @@ export const SiteCrawlInputSchema = type({
   "cookie?": [cookieSchema, "[]"],
   "resourceFileTypeExclusions?": "string[]",
 });
-export type SiteCrawlInput = typeof SiteCrawlInputSchema.infer;
+export type SiteCrawlInput = typeof SiteCrawlInputSchema.infer & {
+  onProgress?: (args: {
+    currentUrl?: string;
+    inFlight: number;
+    succeeded: number;
+    failed: number;
+  }) => void | Promise<void>;
+};
 
 export const SiteCrawlOutputSchema = type({
   title: "string",

@@ -1,7 +1,8 @@
 import { createPlaywrightRouter } from "crawlee";
 import { Defuddle as parseWithDefuddle } from "defuddle/node";
 import type { Page } from "playwright";
-import { extractUrlLocale, type Locales } from "../extract-url-locale.js";
+import { extractUrlLocale, type Locales } from "../lib/extract-url-locale.js";
+import type { SiteCrawlInput } from "./site.schema.js";
 
 function getPageContent(page: Page, selector: string) {
   return page.evaluate((selector) => {
@@ -58,6 +59,7 @@ export const createCrawlSiteRouter = ({
   exclude,
   onlyEnqueueDefaultLocale = true,
   defaultLocale = "en",
+  onProgress,
 }: {
   selector: string;
   waitForSelectorTimeoutMs?: number | undefined;
@@ -65,14 +67,27 @@ export const createCrawlSiteRouter = ({
   exclude: string[];
   onlyEnqueueDefaultLocale?: boolean | undefined;
   defaultLocale?: Locales | (string & {}) | undefined;
+  onProgress: SiteCrawlInput["onProgress"];
 }) => {
   const siteCrawlRouter = createPlaywrightRouter();
 
   siteCrawlRouter.addDefaultHandler(
-    async ({ enqueueLinks, pushData, request, page }) => {
+    async ({ enqueueLinks, pushData, request, page, crawler }) => {
       const title = await page.title();
 
       console.info(`Crawling: ${request.loadedUrl}...`);
+
+      const inFlight = crawler.autoscaledPool?.currentConcurrency ?? 0;
+      const succeeded = crawler.stats.state.requestsFinished;
+      const failed = crawler.stats.state.requestsFailed;
+      const currentUrl = request.loadedUrl;
+
+      await onProgress?.({
+        currentUrl,
+        inFlight,
+        succeeded,
+        failed,
+      });
 
       // Use custom handling for XPath selector
       const timeout = waitForSelectorTimeoutMs ?? 10_000;
@@ -92,15 +107,16 @@ export const createCrawlSiteRouter = ({
       let defuddleDescription: string | undefined;
       try {
         const html = await page.content();
-        const parsed = await parseWithDefuddle(html, request.loadedUrl, {
+        const parsed = await parseWithDefuddle(html, currentUrl, {
           separateMarkdown: true,
         });
+
         defuddleContentHtml = parsed.content;
         defuddleContentMarkdown = parsed.contentMarkdown;
         defuddleDescription = parsed.description;
       } catch (_error) {
         // Ignore extraction errors and fall back to selector text
-        console.info(`Defuddle extraction failed for ${request.loadedUrl}`);
+        console.info(`Defuddle extraction failed for ${currentUrl}`);
       }
 
       const text = await getPageContent(page, selector);
@@ -108,7 +124,7 @@ export const createCrawlSiteRouter = ({
       // Save results as JSON to ./storage/datasets/default
       await pushData({
         title,
-        url: request.loadedUrl,
+        url: currentUrl,
         text,
         description: defuddleDescription,
         contentHtml: defuddleContentHtml,

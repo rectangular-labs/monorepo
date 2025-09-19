@@ -4,14 +4,16 @@ import {
   type PlaywrightHook,
   ProxyConfiguration,
 } from "crawlee";
-import { parseStartingUrl } from "../lib/site-crawler-config/parse-starting-url.js";
-import { createCrawlSiteRouter } from "../lib/site-crawler-config/router.js";
-import type { SiteCrawlInputSchema } from "../schema/site.js";
+import { extractSitemapUrls } from "../lib/extract-sitemap-urls.js";
+import { createCrawlSiteRouter } from "./site.router.js";
+import type { SiteCrawlInput } from "./site.schema.js";
 
-export async function crawlSite(input: typeof SiteCrawlInputSchema.infer) {
+export async function crawlSite(input: SiteCrawlInput) {
   const {
+    onProgress,
     startUrl,
     maxRequestsPerCrawl,
+    crawlSitemap,
     match = [],
     exclude = [],
     selector = "body",
@@ -52,6 +54,7 @@ export async function crawlSite(input: typeof SiteCrawlInputSchema.infer) {
     waitForSelectorTimeoutMs,
     match,
     exclude,
+    onProgress,
   });
 
   const proxyConfiguration = new ProxyConfiguration({
@@ -82,10 +85,12 @@ export async function crawlSite(input: typeof SiteCrawlInputSchema.infer) {
   });
 
   const sitemapProxyUrl = await proxyConfiguration.newUrl();
-  const startUrls = await parseStartingUrl({
-    url: startUrl,
-    proxyUrl: sitemapProxyUrl,
-  });
+  const startUrls = crawlSitemap
+    ? await extractSitemapUrls({
+        url: startUrl,
+        proxyUrl: sitemapProxyUrl,
+      })
+    : [startUrl];
   await crawler.run(startUrls);
   console.timeEnd("Crawl");
   return crawler;
