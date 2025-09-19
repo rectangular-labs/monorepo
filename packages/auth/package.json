@@ -22,7 +22,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
+    "dev": "tsc",
     "generate": "pnpm with-env pnpx @better-auth/cli generate --config ./src/generate.ts --output ../db/src/schema/auth-schema.ts",
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "pnpx @biomejs/biome format . --write",
