@@ -7,7 +7,7 @@ import { relations } from "drizzle-orm";
 import { boolean, index, integer, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgMentionTable } from "../_table";
-import { organization } from "./auth-schema";
+import { organization } from "../auth-schema";
 import { smProjectKeyword } from "./project-keyword-schema";
 import { smPrompt } from "./prompt-schema";
 
