@@ -23,6 +23,10 @@ jobs:
 
       - name: Setup Dependencies
         uses: ./tooling/github/setup
+      - name: Build and deploy
+        run: |
+          pnpm run build
+
       - name: Echo profile
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
