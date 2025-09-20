@@ -1,6 +1,7 @@
 import { syncEnvVars } from "@trigger.dev/build/extensions/core";
 import { playwright } from "@trigger.dev/build/extensions/playwright";
 import { defineConfig } from "@trigger.dev/sdk";
+import packageJson from "./package.json";
 import { taskEnv } from "./src/env";
 
 const env = taskEnv();
@@ -22,9 +23,12 @@ export default defineConfig({
   build: {
     external: ["crawlee", "jsdom"],
     extensions: [
-      playwright(),
+      playwright({
+        browsers: ["chromium"],
+        headless: true,
+        version: packageJson.dependencies.playwright,
+      }),
       syncEnvVars(() => {
-        console.log("env", env);
         return Object.entries(env).map(([key, value]) => ({
           name: key,
           value,
