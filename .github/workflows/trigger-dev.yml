@@ -1,4 +1,4 @@
-name: Trigger.dev
+name: Trigger
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: task-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Staging
     if: ${{ github.event_name == 'pull_request' }}
+
     env:
       DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
     steps:
