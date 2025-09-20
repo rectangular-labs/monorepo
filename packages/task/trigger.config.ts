@@ -5,7 +5,7 @@ import { taskEnv } from "./src/env";
 
 const env = taskEnv();
 export default defineConfig({
-  project: "proj_ybfrijjvtusiailrndnt",
+  project: env.TRIGGER_PROJECT_ID,
   runtime: "node-22",
   logLevel: "log",
   maxDuration: 1800,
