@@ -35,16 +35,77 @@ const list = withOrganizationIdBase
     return { data, nextPageCursor };
   });
 
+const checkName = withOrganizationIdBase
+  .route({ method: "GET", path: "/check-name/{name}" })
+  .input(type({ name: "string" }))
+  .output(type({ exists: "boolean" }))
+  .handler(async ({ context, input }) => {
+    const row = await context.db.query.seoProject.findFirst({
+      where: and(
+        eq(
+          schema.seoProject.organizationId,
+          context.session.activeOrganizationId,
+        ),
+        eq(schema.seoProject.name, input.name),
+      ),
+    });
+    // we want name to be unique within an organization
+    return { exists: !!row };
+  });
+
+const get = withOrganizationIdBase
+  .route({ method: "GET", path: "/{identifier}" })
+  .input(type({ identifier: "string.url|string.uuid" }))
+  .output(
+    type({
+      "...": schema.seoProjectSelectSchema,
+      tasks: schema.seoTaskRunSelectSchema.array(),
+    }).or(type("undefined")),
+  )
+  .handler(async ({ context, input }) => {
+    if (input.identifier.startsWith("http")) {
+      const row = await context.db.query.seoProject.findFirst({
+        where: and(
+          eq(schema.seoProject.websiteUrl, input.identifier),
+          eq(
+            schema.seoProject.organizationId,
+            context.session.activeOrganizationId,
+          ),
+        ),
+        with: {
+          tasks: {
+            orderBy(fields, { desc }) {
+              return [desc(fields.createdAt)];
+            },
+            limit: 1,
+          },
+        },
+      });
+      return row;
+    }
+    const row = await context.db.query.seoProject.findFirst({
+      where: and(
+        eq(schema.seoProject.id, input.identifier),
+        eq(
+          schema.seoProject.organizationId,
+          context.session.activeOrganizationId,
+        ),
+      ),
+      with: {
+        tasks: {
+          orderBy(fields, { desc }) {
+            return [desc(fields.createdAt)];
+          },
+          limit: 1,
+        },
+      },
+    });
+    return row;
+  });
+
 const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
-  .input(
-    schema.seoProjectInsertSchema.omit(
-      "id",
-      "createdAt",
-      "updatedAt",
-      "organizationId",
-    ),
-  )
+  .input(schema.seoProjectInsertSchema)
   .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
     const [row] = await context.db
@@ -63,22 +124,12 @@ const create = withOrganizationIdBase
   });
 const update = withOrganizationIdBase
   .route({ method: "PATCH", path: "/{id}" })
-  .input(
-    type({
-      id: "string",
-      data: schema.seoProjectUpdateSchema.omit(
-        "id",
-        "createdAt",
-        "updatedAt",
-        "organizationId",
-      ),
-    }),
-  )
+  .input(schema.seoProjectUpdateSchema)
   .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
     const [row] = await context.db
       .update(schema.seoProject)
-      .set(input.data)
+      .set(input)
       .where(
         and(
           eq(schema.seoProject.id, input.id),
@@ -124,4 +175,4 @@ const remove = withOrganizationIdBase
 
 export default protectedBase
   .prefix("/project")
-  .router({ list, create, update, remove });
+  .router({ list, create, update, remove, checkName, get });

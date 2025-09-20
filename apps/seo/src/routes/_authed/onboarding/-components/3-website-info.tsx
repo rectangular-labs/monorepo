@@ -27,7 +27,7 @@ const backgroundSchema = type({
   url: type("string.url").configure({ message: () => "Must be a valid URL" }),
 });
 
-export function OnboardingCompanyBackground({
+export function OnboardingWebsiteInfo({
   description,
   title,
 }: {
@@ -35,17 +35,17 @@ export function OnboardingCompanyBackground({
   title: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
   });
 
-  const { mutate: startUnderstanding, isPending } = useMutation(
+  const { mutateAsync: startUnderstanding, isPending } = useMutation(
     apiClientRq.companyBackground.understandSite.mutationOptions({
       onSuccess: (data, { websiteUrl }) => {
         matcher.setMetadata("website-info", {
           websiteUrl,
-          crawlId: data.id,
+          taskId: data.taskId,
+          projectId: data.projectId,
         });
         matcher.next();
       },
@@ -65,7 +65,7 @@ export function OnboardingCompanyBackground({
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card>
+      <Card className="rounded-none sm:rounded-lg">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>

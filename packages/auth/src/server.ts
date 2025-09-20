@@ -98,6 +98,20 @@ export function initAuthHandler(baseURL: string, db: DB) {
           await Promise.resolve();
           console.log(`[auth] Invitation email for ${email}: ${id}`);
         },
+        organizationHooks: {
+          beforeCreateOrganization: ({ organization }) => {
+            if (organization.slug === "organization") {
+              throw new Error("Organization slug is already taken");
+            }
+            return Promise.resolve();
+          },
+          beforeUpdateOrganization: ({ organization }) => {
+            if (organization.slug === "organization") {
+              throw new Error("Organization slug is already taken");
+            }
+            return Promise.resolve();
+          },
+        },
       }),
       expo(),
     ],

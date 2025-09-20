@@ -9,6 +9,7 @@ import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { type } from "arktype";
 import { authClient, getCurrentSession } from "~/lib/auth/client";
+import { clientEnv } from "~/lib/env";
 
 export const Route = createFileRoute("/login")({
   validateSearch: type({
@@ -32,8 +33,10 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const search = Route.useSearch();
   const navigate = useNavigate();
-  const normalizedSuccessCallbackURL = search.next ?? "/organization";
-  const newUserCallbackURL = `/onboarding?next=${normalizedSuccessCallbackURL}`;
+  const normalizedSuccessCallbackURL = search.next
+    ? `${clientEnv().VITE_SEO_URL}${search.next}`
+    : `${clientEnv().VITE_SEO_URL}/organization`;
+  const newUserCallbackURL = `${clientEnv().VITE_SEO_URL}/onboarding?next=${normalizedSuccessCallbackURL}`;
 
   return (
     <div className="flex min-h-screen items-center justify-center">

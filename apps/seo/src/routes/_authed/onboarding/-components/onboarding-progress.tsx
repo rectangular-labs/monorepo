@@ -27,7 +27,7 @@ export function OnboardingProgress() {
   );
 
   return (
-    <div className="w-full max-w-lg space-y-2">
+    <div className="w-full max-w-lg space-y-2 px-6">
       <p className="text-muted-foreground text-sm">
         Step {currentRelevantStepIndex + 1} of {totalRelevantSteps}
       </p>

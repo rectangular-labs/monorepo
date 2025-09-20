@@ -7,27 +7,29 @@ import {
 } from "@rectangular-labs/task/client";
 import { type } from "arktype";
 import { protectedBase, withOrganizationIdBase } from "../context";
+import { upsertProject } from "../lib/database/project";
 
 const understandSite = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
   .input(schema.seoProjectInsertSchema.pick("websiteUrl"))
   .output(
     type({
-      id: "string",
+      projectId: "string",
+      taskId: "string",
     }),
   )
   .handler(async ({ context, input }) => {
     const { id: taskId } = await triggerUnderstandSiteTask(input.websiteUrl);
 
     const taskRun = await context.db.transaction(async (tx) => {
-      const [project] = await tx
-        .insert(schema.seoProject)
-        .values({
+      const upsertProjectResult = await upsertProject(
+        {
           organizationId: context.session.activeOrganizationId,
           websiteUrl: input.websiteUrl,
-        })
-        .returning();
-      if (!project) {
+        },
+        tx,
+      );
+      if (!upsertProjectResult.ok) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Error creating project",
         });
@@ -35,7 +37,7 @@ const understandSite = withOrganizationIdBase
       const [taskRun] = await tx
         .insert(schema.seoTaskRun)
         .values({
-          projectId: project.id,
+          projectId: upsertProjectResult.value.id,
           requestedBy: context.user.id,
           taskId,
           provider: "trigger.dev",
@@ -50,7 +52,7 @@ const understandSite = withOrganizationIdBase
           message: "Error creating task run",
         });
       }
-      return { id: taskRun.id };
+      return { projectId: upsertProjectResult.value.id, taskId: taskRun.id };
     });
     return taskRun;
   });
@@ -60,7 +62,9 @@ const outputSchema = type({
   status:
     "'pending' | 'queued' | 'running' | 'completed' | 'cancelled' | 'failed'",
   statusMessage: "string",
-  websiteInfo: schema.seoWebsiteInfoSchema.or(type("undefined")),
+  websiteInfo: schema.seoWebsiteInfoSchema
+    .merge(type({ name: "string" }))
+    .or(type("undefined")),
 });
 
 const getUnderstandSiteStatus = protectedBase

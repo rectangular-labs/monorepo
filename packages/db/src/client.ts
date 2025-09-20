@@ -3,14 +3,14 @@ import postgres from "postgres";
 import { dbEnv } from "./env";
 import * as authSchema from "./schema/auth-schema";
 import * as mentionScheme from "./schema/mention";
-import * as taskScheme from "./schema/seo";
+import * as seoScheme from "./schema/seo";
 
 export * from "drizzle-orm";
 
 export const schema = {
   ...authSchema,
   ...mentionScheme,
-  ...taskScheme,
+  ...seoScheme,
 };
 
 export const createDb = () => {

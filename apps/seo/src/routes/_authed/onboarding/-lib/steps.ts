@@ -27,7 +27,7 @@ export const OnboardingSteps = defineStepper(
     id: "understanding-site",
     title: "Understanding your site",
     description:
-      "Hang tight while we synthesize everything! This typically takes1 to 3 minutes.",
+      "Hang tight while we synthesize everything! This typically takes 1 to 3 minutes.",
   },
   {
     id: "review-project",

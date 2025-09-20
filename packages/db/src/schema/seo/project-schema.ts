@@ -5,7 +5,7 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import { index, jsonb, text, uuid } from "drizzle-orm/pg-core";
+import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
@@ -23,6 +23,8 @@ export const seoProject = pgSeoTable(
   "project",
   {
     id: uuid().primaryKey().$defaultFn(uuidv7),
+    slug: text(),
+    name: text(),
     organizationId: text()
       .notNull()
       .references(() => organization.id, {
@@ -34,6 +36,11 @@ export const seoProject = pgSeoTable(
     ...timestamps,
   },
   (table) => [
+    unique("seo_project_org_slug_idx").on(table.organizationId, table.slug),
+    unique("seo_project_org_website_url_idx").on(
+      table.organizationId,
+      table.websiteUrl,
+    ),
     index("seo_project_org_idx").on(table.organizationId),
     index("seo_project_website_url_idx").on(table.websiteUrl),
   ],
@@ -46,6 +53,14 @@ export const seoProjectRelations = relations(seoProject, ({ one, many }) => ({
   }),
   tasks: many(seoTaskRun),
 }));
-export const seoProjectInsertSchema = createInsertSchema(seoProject);
+
+export const seoProjectInsertSchema = createInsertSchema(seoProject).omit(
+  "id",
+  "createdAt",
+  "updatedAt",
+  "organizationId",
+);
 export const seoProjectSelectSchema = createSelectSchema(seoProject);
-export const seoProjectUpdateSchema = createUpdateSchema(seoProject);
+export const seoProjectUpdateSchema = createUpdateSchema(seoProject)
+  .omit("createdAt", "updatedAt")
+  .merge(type({ id: "string.uuid" }));

@@ -3,8 +3,8 @@ import { OnboardingSteps } from "../-lib/steps";
 import { OnboardingWelcome } from "./0-welcome";
 import { OnboardingUserBackground } from "./1-user-background";
 import { OnboardingCreateOrganization } from "./2-create-organization";
-import { OnboardingCompanyBackground } from "./3-company-background";
-import { OnboardingUnderstandingCompany } from "./4-understanding-company";
+import { OnboardingWebsiteInfo } from "./3-website-info";
+import { OnboardingUnderstandingSite } from "./4-understanding-site";
 import { OnboardingReviewProject } from "./5-review-project";
 import { OnboardingAllSet } from "./6-all-set";
 import { OnboardingProgress } from "./onboarding-progress";
@@ -13,7 +13,7 @@ export function OnboardingContent() {
   const matcher = OnboardingSteps.useStepper();
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-6">
+    <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-6 py-6">
       <OnboardingProgress />
       <AutoHeight
         className="w-full"
@@ -38,13 +38,13 @@ export function OnboardingContent() {
           ),
           "create-organization": () => <OnboardingCreateOrganization />,
           "website-info": (step) => (
-            <OnboardingCompanyBackground
+            <OnboardingWebsiteInfo
               description={step.description}
               title={step.title}
             />
           ),
           "understanding-site": (step) => (
-            <OnboardingUnderstandingCompany
+            <OnboardingUnderstandingSite
               description={step.description}
               title={step.title}
             />

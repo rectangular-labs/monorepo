@@ -119,7 +119,7 @@ export function OnboardingUserBackground({
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card>
+      <Card className="rounded-none sm:rounded-lg">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>

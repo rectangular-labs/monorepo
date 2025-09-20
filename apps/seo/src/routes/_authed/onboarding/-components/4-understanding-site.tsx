@@ -14,7 +14,7 @@ import { useState } from "react";
 import { apiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
 
-export function OnboardingUnderstandingCompany({
+export function OnboardingUnderstandingSite({
   description,
   title,
 }: {
@@ -22,23 +22,25 @@ export function OnboardingUnderstandingCompany({
   description: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-  const { crawlId, websiteUrl } = matcher.getMetadata<{
-    crawlId: string;
+  const { taskId, projectId, websiteUrl } = matcher.getMetadata<{
+    taskId: string;
+    projectId: string;
     websiteUrl: string;
   }>("website-info");
-  const [currentCrawlId, setCurrentCrawlId] = useState(crawlId);
+  const [currentTaskId, setCurrentTaskId] = useState(taskId);
+  const autoWentNext = matcher.getMetadata("understanding-site");
   const { data: status, error: getStatusError } = useQuery(
     apiClientRq.companyBackground.getUnderstandSiteStatus.queryOptions({
       refetchInterval: 5_000,
       input: {
-        id: currentCrawlId,
+        id: currentTaskId,
       },
     }),
   );
   const { mutate: retry, isPending } = useMutation(
     apiClientRq.companyBackground.understandSite.mutationOptions({
       onSuccess: (data) => {
-        setCurrentCrawlId(data.id);
+        setCurrentTaskId(data.taskId);
         toast.success("Retrying understanding site");
       },
       onError: () => {
@@ -46,31 +48,36 @@ export function OnboardingUnderstandingCompany({
       },
     }),
   );
+
   const goNext = () => {
     if (!status?.websiteInfo) {
       toast.error("No website info found");
       return;
     }
-    matcher.setMetadata("website-info", {
+    matcher.setMetadata("understanding-site", {
       websiteUrl,
+      projectId,
       ...status?.websiteInfo,
     });
     matcher.next();
   };
 
-  if (getStatusError) {
-    return (
-      <div>Something went wrong getting status. Trying again in 5 seconds.</div>
-    );
-  }
-
   const isCompleted = status?.status === "completed";
   const needsRetry =
     status?.status === "failed" || status?.status === "cancelled";
 
+  if (isCompleted && !autoWentNext) {
+    matcher.setMetadata("understanding-site", {
+      websiteUrl,
+      projectId,
+      ...status?.websiteInfo,
+    });
+    matcher.next();
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card>
+      <Card className="rounded-none sm:rounded-lg">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
@@ -78,7 +85,9 @@ export function OnboardingUnderstandingCompany({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="text-muted-foreground text-sm">
-              {status?.statusMessage ?? "We are setting things up..."}
+              {status?.statusMessage ??
+                getStatusError?.message ??
+                "We are setting things up..."}
             </div>
             <Progress value={status?.progress ?? 0} />
           </div>

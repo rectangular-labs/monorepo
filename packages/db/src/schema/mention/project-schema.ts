@@ -12,7 +12,7 @@ import { smProjectKeyword } from "./project-keyword-schema";
 import { smPrompt } from "./prompt-schema";
 
 export const smProject = pgMentionTable(
-  "project",
+  "workspace",
   {
     id: uuid("sm_project_id").primaryKey().$defaultFn(uuidv7),
     organizationId: text().references(() => organization.id, {

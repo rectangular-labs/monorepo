@@ -22,22 +22,12 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { type } from "arktype";
 import { authClient } from "~/lib/auth/client";
 import { OnboardingSteps } from "../-lib/steps";
+import { toSlug } from "../-lib/to-slug";
 
 const backgroundSchema = type({
   name: type("string").atLeastLength(1),
 });
 
-function toSlug(input: string) {
-  return (
-    input
-      .toLowerCase()
-      .trim()
-      // replace all non-alphanumeric characters with a hyphen
-      .replace(/[^a-z0-9]+/g, "-")
-      // replace any names starting with a hyphen or ending with a hyphen
-      .replace(/^-+|-+$/g, "")
-  );
-}
 export function OnboardingCreateOrganization() {
   const matcher = OnboardingSteps.useStepper();
   const form = useForm({
@@ -57,7 +47,7 @@ export function OnboardingCreateOrganization() {
       });
       return;
     }
-    if (!valid.data?.status) {
+    if (!valid.data?.status || slug === "organization") {
       form.setError("name", {
         message: "Organization name already taken, please choose another one.",
       });
@@ -81,7 +71,7 @@ export function OnboardingCreateOrganization() {
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card>
+      <Card className="rounded-none sm:rounded-lg">
         <CardHeader>
           <CardTitle>Set Up Organization</CardTitle>
           <CardDescription>

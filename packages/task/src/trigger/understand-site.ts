@@ -18,7 +18,7 @@ const inputSchema = type({
 
 const outputSchema = type({
   message: "string",
-  websiteInfo: schema.seoWebsiteInfoSchema,
+  websiteInfo: schema.seoWebsiteInfoSchema.merge(type({ name: "string" })),
 });
 
 export const understandSiteTask: ReturnType<
@@ -90,6 +90,7 @@ export const understandSiteTask: ReturnType<
 
     // Define structured output schema to match seoWebsiteInfoSchema
     const StructuredSeoSchema = type({
+      name: type.string.describe("The name of the site."),
       businessOverview: type.string.describe(
         "Start with org type + primary offering(s); state ALL the business Unique Value Proposition comprehensively; no fluff.",
       ),
@@ -119,6 +120,7 @@ export const understandSiteTask: ReturnType<
         "## Output rules:",
         "Final answer must be STRICT JSON matching the schema below exactly (no prose).",
         `{
+    "name": "string", // The name of the site.
     "businessOverview": "string", // Start with org type + primary offering(s); state ALL the business Unique Value Proposition comprehensively; no fluff
     "idealCustomer": "string", // B2B: Roles/Titles; Industries; Company size; Geo. B2C: Personas; Demographics/Age; Needs/Use cases; Geo. If both, separate with ' | '. Examples — B2B: 'Ops leaders; SaaS; 50-500 FTE; US/UK'; B2C: 'Parents of toddlers; 25-40; Childcare savings; US'
     "serviceRegion": "string", // Global OR 'US; UK' OR regions like 'EU', 'Asia', 'Africa', OR local 'City, ST; City, ST'
@@ -149,7 +151,7 @@ export const understandSiteTask: ReturnType<
 
     setUnderstandSiteMetadata({
       progress: 100,
-      statusMessage: "All done, loading the results...",
+      statusMessage: "All done, ready to continue!",
     });
 
     return {

@@ -19,38 +19,58 @@ import {
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
+import { useMutation } from "@tanstack/react-query";
 import { type } from "arktype";
+import { apiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
+import { toSlug } from "../-lib/to-slug";
 
 const formSchema = type({
-  websiteUrl: type("string.url").configure({
-    message: () => "Must be a valid URL",
-  }),
-}).merge(
-  type({
-    businessOverview: type("string").configure({
+  projectId: type("string.uuid"),
+  name: type("string")
+    .atLeastLength(1)
+    .configure({
+      message: () => "Name is required",
+    }),
+  websiteUrl: type("string.url")
+    .atLeastLength(1)
+    .configure({
+      message: () => "Must be a valid URL",
+    }),
+  businessOverview: type("string")
+    .atLeastLength(1)
+    .configure({
       message: () => "Business Overview is required",
     }),
-    idealCustomer: type("string").configure({
+  idealCustomer: type("string")
+    .atLeastLength(1)
+    .configure({
       message: () => "Ideal Customer is required",
     }),
-    serviceRegion: type("string").configure({
+  serviceRegion: type("string")
+    .atLeastLength(1)
+    .configure({
       message: () => "Service Region is required",
     }),
-    industry: type("string").configure({
+  industry: type("string")
+    .atLeastLength(1)
+    .configure({
       message: () => "Industry is required",
     }),
-  }),
-);
+});
+
 export function OnboardingReviewProject() {
   const matcher = OnboardingSteps.useStepper();
 
   const defaultValues =
-    matcher.getMetadata<Partial<typeof formSchema.infer>>("understanding-site");
-
+    matcher.getMetadata<
+      Partial<typeof formSchema.infer & { projectId: string }>
+    >("understanding-site");
   const form = useForm({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
+      projectId: defaultValues?.projectId || "",
+      name: defaultValues?.name || "",
       websiteUrl: defaultValues?.websiteUrl || "",
       businessOverview: defaultValues?.businessOverview || "",
       idealCustomer: defaultValues?.idealCustomer || "",
@@ -59,14 +79,43 @@ export function OnboardingReviewProject() {
     },
   });
 
-  const handleSubmit = (_values: typeof formSchema.infer) => {
-    // TODO: Persist to API once endpoint exists. For now, proceed.
-    matcher.next();
+  const { mutate: updateProject, isPending } = useMutation(
+    apiClientRq.projects.update.mutationOptions({
+      onSuccess: (data) => {
+        matcher.setMetadata("review-project", {
+          slug: data.slug,
+          name: data.name,
+        });
+        matcher.next();
+      },
+      onError: () => {
+        form.setError("root", {
+          message: "Failed to update project. Please try again later.",
+        });
+      },
+    }),
+  );
+
+  const handleSubmit = (values: typeof formSchema.infer) => {
+    const slug = toSlug(values.name);
+    updateProject({
+      id: values.projectId,
+      websiteUrl: values.websiteUrl,
+      name: values.name,
+      slug,
+      websiteInfo: {
+        version: "v1",
+        businessOverview: values.businessOverview,
+        idealCustomer: values.idealCustomer,
+        serviceRegion: values.serviceRegion,
+        industry: values.industry,
+      },
+    });
   };
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card>
+      <Card className="rounded-none sm:rounded-lg">
         <CardHeader>
           <CardTitle>{matcher.current.title}</CardTitle>
           <CardDescription>{matcher.current.description}</CardDescription>
@@ -76,7 +125,21 @@ export function OnboardingReviewProject() {
             className="grid gap-6"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
-            <CardContent className="grid gap-6">
+            <CardContent className="grid max-h-[60vh] gap-6 overflow-y-auto">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="My First Project" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="websiteUrl"
@@ -135,7 +198,7 @@ export function OnboardingReviewProject() {
                       <Textarea
                         {...field}
                         placeholder="What does your business do? The more detail, the better."
-                        rows={3}
+                        rows={5}
                       />
                     </FormControl>
                     <FormMessage />
@@ -153,7 +216,7 @@ export function OnboardingReviewProject() {
                       <Textarea
                         {...field}
                         placeholder="Who are you serving? Like business overview, the more detail here, the better!"
-                        rows={3}
+                        rows={5}
                       />
                     </FormControl>
                     <FormMessage />
@@ -174,7 +237,7 @@ export function OnboardingReviewProject() {
                 >
                   Back
                 </Button>
-                <Button className={"w-fit"} type="submit">
+                <Button className={"w-fit"} isLoading={isPending} type="submit">
                   Continue
                 </Button>
               </div>

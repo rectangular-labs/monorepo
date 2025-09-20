@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
 import { Link } from "@tanstack/react-router";
+import { OnboardingSteps } from "../-lib/steps";
 
 export function OnboardingAllSet({
   description,
@@ -16,8 +17,13 @@ export function OnboardingAllSet({
   description: string;
   title: string;
 }) {
+  const matcher = OnboardingSteps.useStepper();
+  const { slug, name } = matcher.getMetadata<{
+    name: string;
+    slug: string;
+  }>("review-project");
   return (
-    <Card className="w-full">
+    <Card className="w-full rounded-none sm:rounded-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <PartyPopper className="size-5" />
@@ -27,7 +33,15 @@ export function OnboardingAllSet({
       </CardHeader>
       <CardFooter>
         <Button asChild className="w-full" type="button">
-          <Link to="/organization">Go to Dashboard</Link>
+          <Link
+            params={{
+              organizationSlug: "organization",
+              projectSlug: slug,
+            }}
+            to="/$organizationSlug/$projectSlug"
+          >
+            Go to {name}
+          </Link>
         </Button>
       </CardFooter>
     </Card>
