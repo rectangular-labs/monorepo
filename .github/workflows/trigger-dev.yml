@@ -24,10 +24,12 @@ jobs:
       - name: Setup Dependencies
         uses: ./tooling/github/setup
       - name: Echo profile
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
         run: |
           echo "TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}"
           pnpm dotenvx run -f .env -- pnpx trigger.dev@4.0.4 whoami --profile default
-          
+
       - name: Deploy to Trigger.dev Staging
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
