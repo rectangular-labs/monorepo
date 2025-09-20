@@ -29,6 +29,7 @@
     "env:encrypt": "bun x dotenvx encrypt",
     "ui:add": "cd ./packages/ui && bun run ui-add && cd ../..",
     "new:package": "turbo gen package",
+    "copy:package": "turbo gen workspace --copy",
     "format": "turbo run format --continue",
     "lint": "turbo run lint --continue",
     "typecheck": "turbo run typecheck --continue",

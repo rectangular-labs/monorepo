@@ -47,7 +47,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
+    "dev": "tsup",
     "create": "email create --out=./src/templates",
     "preview": "email preview ./src/templates ",
     "check": "email check ./src/templates",

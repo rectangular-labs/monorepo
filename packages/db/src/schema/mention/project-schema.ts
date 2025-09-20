@@ -7,12 +7,12 @@ import { relations } from "drizzle-orm";
 import { boolean, index, integer, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgMentionTable } from "../_table";
-import { organization } from "./auth-schema";
+import { organization } from "../auth-schema";
 import { smProjectKeyword } from "./project-keyword-schema";
 import { smPrompt } from "./prompt-schema";
 
 export const smProject = pgMentionTable(
-  "project",
+  "workspace",
   {
     id: uuid("sm_project_id").primaryKey().$defaultFn(uuidv7),
     organizationId: text().references(() => organization.id, {
@@ -45,6 +45,6 @@ export const smProjectRelations = relations(smProject, ({ many, one }) => ({
     references: [smPrompt.id],
   }),
 }));
-export const projectInsertSchema = createInsertSchema(smProject);
-export const projectSelectSchema = createSelectSchema(smProject);
-export const projectUpdateSchema = createUpdateSchema(smProject);
+export const smProjectInsertSchema = createInsertSchema(smProject);
+export const smProjectSelectSchema = createSelectSchema(smProject);
+export const smProjectUpdateSchema = createUpdateSchema(smProject);

@@ -36,13 +36,12 @@ export const smCompanyBackgroundRelations = relations(
   smCompanyBackground,
   () => ({}),
 );
-export const companyInsertSchema = createInsertSchema(smCompanyBackground).omit(
-  "createdAt",
-  "updatedAt",
-  "id",
-);
-export const companyUpdateSchema = createUpdateSchema(
+export const smCompanyBackgroundInsertSchema = createInsertSchema(
+  smCompanyBackground,
+).omit("createdAt", "updatedAt", "id");
+export const smCompanyBackgroundUpdateSchema = createUpdateSchema(
   smCompanyBackground,
   {},
 ).omit("createdAt", "updatedAt", "id");
-export const companySelectSchema = createSelectSchema(smCompanyBackground);
+export const smCompanyBackgroundSelectSchema =
+  createSelectSchema(smCompanyBackground);
