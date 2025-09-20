@@ -32,7 +32,7 @@ export function OnboardingUnderstandingCompany({
   const matcher = OnboardingSteps.useStepper();
   const { crawlId } = matcher.getMetadata<{
     crawlId: string;
-  }>("user-company");
+  }>("website-info");
 
   const { data: companyBackground, error: getStatusError } = useQuery(
     apiClientRq.companyBackground.getCrawlStatus.queryOptions({

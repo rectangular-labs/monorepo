@@ -36,7 +36,7 @@ export function OnboardingContent() {
               title={step.title}
             />
           ),
-          "user-company": (step) => (
+          "website-info": (step) => (
             <OnboardingCompanyBackground
               description={step.description}
               title={step.title}

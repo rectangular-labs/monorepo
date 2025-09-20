@@ -13,13 +13,13 @@ export const OnboardingSteps = defineStepper(
       "Help us better understand your background to personalize your onboarding experience.",
   },
   {
-    id: "user-company",
+    id: "website-info",
     title: "Company",
     description:
       "We will visit your company's website to match your goals with what your company does.",
   },
   {
-    id: "understanding",
+    id: "understanding-site",
     title: "Formulating Plan",
     description:
       "Hang tight while we synthesize everything! Note that this may take a few minutes.",

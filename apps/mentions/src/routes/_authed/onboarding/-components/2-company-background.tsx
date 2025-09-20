@@ -43,7 +43,7 @@ export function OnboardingCompanyBackground({
   const { mutate: crawlInfo, isPending } = useMutation(
     apiClientRq.companyBackground.crawlInfo.mutationOptions({
       onSuccess: (data, { websiteUrl }) => {
-        matcher.setMetadata("user-company", {
+        matcher.setMetadata("website-info", {
           websiteUrl,
           crawlId: data.id,
         });
