@@ -16,8 +16,17 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
   });
 
   console.error(error);
-  const message =
-    error instanceof Error ? error.message : "An unexpected error occurred.";
+  const message = (() => {
+    if (error instanceof Error) {
+      try {
+        const parsed = JSON.parse(error.message);
+        return parsed[0].problem;
+      } catch {
+        return error.message;
+      }
+    }
+    return "An unexpected error occurred.";
+  })();
 
   return (
     <div className="mx-auto flex max-w-lg flex-col items-center justify-center gap-4 p-6">
