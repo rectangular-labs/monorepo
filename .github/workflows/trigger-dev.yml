@@ -1,0 +1,47 @@
+name: Trigger.dev
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    name: Deploy Staging
+    if: ${{ github.event_name == 'pull_request' }}
+    env:
+      DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Dependencies
+        uses: ./tooling/github/setup
+    
+      - name: Deploy to Trigger.dev Staging
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN_STAGING }}
+        run: |
+          pnpm dotenvx run -f .env -- pnpm run task:deploy
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: Deploy Production
+    if: ${{ github.event_name != 'pull_request' }}
+    env:
+      DOTENV_PRIVATE_KEY_PRODUCTION: ${{ secrets.DOTENV_PRIVATE_KEY_PRODUCTION }}
+
+    steps:
+     - uses: actions/checkout@v4
+     - name: Setup Dependencies
+       uses: ./tooling/github/setup
+    
+     - name: Deploy to Trigger.dev Production
+       env:
+        TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+       run: |
+        pnpm dotenvx run -f .env.production -- pnpm run task:deploy

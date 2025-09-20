@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "deploy": "pnpm dotenvx run -f ../../.env.production -- pnpx trigger.dev@4.0.4 deploy",
+    "deploy": "pnpx trigger.dev@4.0.4 deploy",
     "dev:trigger": "pnpm dotenvx run -f ../../.env.local -f ../../.env -- pnpx trigger.dev@4.0.4 dev",
     "clean": "git clean -xdf .turbo node_modules dist .cache .trigger storage",
     "format": "bun x @biomejs/biome format . --write",
