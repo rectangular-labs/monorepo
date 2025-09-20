@@ -4,9 +4,8 @@ import { defineConfig } from "@trigger.dev/sdk";
 import packageJson from "./package.json";
 import { taskEnv } from "./src/env";
 
-const env = taskEnv();
 export default defineConfig({
-  project: env.TRIGGER_PROJECT_ID,
+  project: process.env.TRIGGER_PROJECT_ID ?? "",
   runtime: "node-22",
   logLevel: "log",
   maxDuration: 1800,
@@ -29,10 +28,16 @@ export default defineConfig({
         version: packageJson.dependencies.playwright,
       }),
       syncEnvVars(() => {
-        return Object.entries(env).map(([key, value]) => ({
-          name: key,
-          value,
-        }));
+        try {
+          const env = taskEnv();
+
+          return Object.entries(env).map(([key, value]) => ({
+            name: key,
+            value,
+          }));
+        } catch {
+          process.exit(1);
+        }
       }),
     ],
   },
