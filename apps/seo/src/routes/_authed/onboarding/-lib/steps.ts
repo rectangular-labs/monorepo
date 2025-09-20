@@ -9,35 +9,35 @@ export const OnboardingSteps = defineStepper(
   {
     id: "user-background",
     title: "Background",
-    description:
-      "Help us better understand your background to personalize your onboarding experience.",
+    description: "Help us better personalize your onboarding experience.",
   },
   {
-    id: "user-company",
-    title: "Company",
-    description:
-      "We will visit your company's website to match your goals with what your company does.",
-  },
-  {
-    id: "understanding",
-    title: "Formulating Plan",
-    description:
-      "Hang tight while we synthesize everything! Note that this may take a few minutes.",
-  },
-  {
-    id: "review-organization",
-    title: "Review Organization",
+    id: "create-organization",
+    title: "Create Organization",
     description:
       "Your organization will let you manage team members and projects.",
   },
   {
+    id: "website-info",
+    title: "Website Info",
+    description:
+      "We'll use your website's homepage to understand what your business does.",
+  },
+  {
+    id: "understanding-site",
+    title: "Understanding your site",
+    description:
+      "Hang tight while we synthesize everything! This typically takes1 to 3 minutes.",
+  },
+  {
     id: "review-project",
     title: "Review Project",
-    description: "Configure your first project.",
+    description: "Let's make sure everything looks good.",
   },
   {
     id: "all-set",
     title: "You're all set!",
-    description: "Let's get you to your dashboard.",
+    description:
+      "Let's start running campaigns for your site on the dashboard.",
   },
 );

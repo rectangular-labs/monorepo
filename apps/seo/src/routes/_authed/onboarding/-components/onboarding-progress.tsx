@@ -1,14 +1,26 @@
+import { useSearch } from "@tanstack/react-router";
 import { OnboardingSteps } from "../-lib/steps";
 
 export function OnboardingProgress() {
   const matcher = OnboardingSteps.useStepper();
+  const { type } = useSearch({
+    from: "/_authed/onboarding/",
+  });
 
   if (matcher.current.id === "welcome" || matcher.current.id === "all-set") {
     return null;
   }
-  const relevantSteps = matcher.all.filter(
-    (step) => step.id !== "welcome" && step.id !== "all-set",
-  );
+  const relevantSteps = matcher.all.filter((step) => {
+    if (type === "new-user") {
+      return step.id !== "welcome" && step.id !== "all-set";
+    }
+    return (
+      step.id !== "welcome" &&
+      step.id !== "all-set" &&
+      step.id !== "user-background" &&
+      step.id !== "create-organization"
+    );
+  });
   const totalRelevantSteps = relevantSteps.length;
   const currentRelevantStepIndex = relevantSteps.findIndex(
     (step) => step.id === matcher.current.id,
