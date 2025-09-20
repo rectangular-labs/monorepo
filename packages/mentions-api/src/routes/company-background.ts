@@ -6,7 +6,7 @@ import { protectedBase } from "../context";
 
 const crawlInfo = protectedBase
   .route({ method: "POST", path: "/company-background" })
-  .input(schema.companyInsertSchema.pick("websiteUrl"))
+  .input(schema.smCompanyBackgroundInsertSchema.pick("websiteUrl"))
   .output(
     type({
       id: "string.uuid",
@@ -33,7 +33,7 @@ const getCrawlStatus = protectedBase
     path: "/company-background/{id}",
   })
   .input(type({ id: "string" }))
-  .output(schema.companySelectSchema.or(type("undefined")))
+  .output(schema.smCompanyBackgroundSelectSchema.or(type("undefined")))
   .handler(async ({ context, input }) => {
     const crawlData = await context.db.query.smCompanyBackground.findFirst({
       where: (table, { eq }) => eq(table.id, input.id),
