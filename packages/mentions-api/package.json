@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.5.1",
+    "@types/node": "^24.5.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
@@ -47,7 +47,7 @@
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.45",
+    "ai": "^5.0.47",
     "arktype": "^2.1.22"
   },
   "overrides": {
