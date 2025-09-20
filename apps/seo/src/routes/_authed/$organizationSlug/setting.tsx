@@ -9,11 +9,11 @@ import {
 import { Separator } from "@rectangular-labs/ui/components/ui/separator";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_authed/organizations")({
-  component: OrganizationsPage,
+export const Route = createFileRoute("/_authed/$organizationSlug/setting")({
+  component: OrganizationSettingPage,
 });
 
-function OrganizationsPage() {
+function OrganizationSettingPage() {
   return (
     <div className="grid gap-6">
       <div className="flex items-center justify-between">

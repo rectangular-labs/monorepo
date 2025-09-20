@@ -32,7 +32,7 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const search = Route.useSearch();
   const navigate = useNavigate();
-  const normalizedSuccessCallbackURL = search.next ?? "/dashboard";
+  const normalizedSuccessCallbackURL = search.next ?? "/organization";
   const newUserCallbackURL = `/onboarding?next=${normalizedSuccessCallbackURL}`;
 
   return (
