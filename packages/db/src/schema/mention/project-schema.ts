@@ -45,6 +45,6 @@ export const smProjectRelations = relations(smProject, ({ many, one }) => ({
     references: [smPrompt.id],
   }),
 }));
-export const projectInsertSchema = createInsertSchema(smProject);
-export const projectSelectSchema = createSelectSchema(smProject);
-export const projectUpdateSchema = createUpdateSchema(smProject);
+export const smProjectInsertSchema = createInsertSchema(smProject);
+export const smProjectSelectSchema = createSelectSchema(smProject);
+export const smProjectUpdateSchema = createUpdateSchema(smProject);

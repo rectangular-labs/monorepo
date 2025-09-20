@@ -125,22 +125,6 @@ export function initAuthHandler(baseURL: string, db: DB) {
       }),
     },
     trustedOrigins: ["expo://"],
-    databaseHooks: {
-      session: {
-        create: {
-          before: async (session) => {
-            await Promise.resolve();
-            // const organization = await getActiveOrganization(session.userId);
-            return {
-              data: {
-                ...session,
-                activeOrganizationId: null,
-              },
-            };
-          },
-        },
-      },
-    },
   } satisfies BetterAuthOptions;
 
   return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;
