@@ -23,22 +23,31 @@ import { type } from "arktype";
 import { authClient } from "~/lib/auth/client";
 import { OnboardingSteps } from "../-lib/steps";
 
-const schema = type({
-  name: "string.alphanumeric",
-  description: "string",
-  targetAudience: "string",
-  suggestedKeywords: "string[]",
-  responseTone: "string",
+const backgroundSchema = type({
+  name: type("string").atLeastLength(1),
 });
-export function OnboardingReviewProject() {
+
+function toSlug(input: string) {
+  return (
+    input
+      .toLowerCase()
+      .trim()
+      // replace all non-alphanumeric characters with a hyphen
+      .replace(/[^a-z0-9]+/g, "-")
+      // replace any names starting with a hyphen or ending with a hyphen
+      .replace(/^-+|-+$/g, "")
+  );
+}
+export function OnboardingCreateOrganization() {
   const matcher = OnboardingSteps.useStepper();
   const form = useForm({
-    resolver: arktypeResolver(schema),
+    resolver: arktypeResolver(backgroundSchema),
   });
 
-  const handleSubmit = async (values: typeof schema.infer) => {
+  const handleSubmit = async (values: typeof backgroundSchema.infer) => {
+    const slug = toSlug(values.name);
     const valid = await authClient.organization.checkSlug({
-      slug: values.name,
+      slug,
     });
     if (valid.error) {
       form.setError("root", {
@@ -50,15 +59,14 @@ export function OnboardingReviewProject() {
     }
     if (!valid.data?.status) {
       form.setError("name", {
-        message: "Organization name already taken, please choose another one!",
+        message: "Organization name already taken, please choose another one.",
       });
       return;
     }
 
     const organizationResult = await authClient.organization.create({
       name: values.name,
-      slug: values.name,
-      metadata: { description: values.description },
+      slug,
     });
     if (organizationResult.error) {
       form.setError("root", {
@@ -75,12 +83,17 @@ export function OnboardingReviewProject() {
     <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{matcher.current.title}</CardTitle>
-          <CardDescription>{matcher.current.description}</CardDescription>
+          <CardTitle>Set Up Organization</CardTitle>
+          <CardDescription>
+            Your organization will let you manage team members and projects.
+          </CardDescription>
         </CardHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)}>
-            <CardContent className="grid gap-6">
+          <form
+            className="grid gap-6"
+            onSubmit={form.handleSubmit(handleSubmit)}
+          >
+            <CardContent>
               <FormField
                 control={form.control}
                 name="name"
@@ -95,27 +108,6 @@ export function OnboardingReviewProject() {
                         You will be able to change this at anytime later on
                       </FormDescription>
                     </FormMessage>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Organization Description{" "}
-                      <span className="text-muted-foreground">(optional)</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="We invented the mice"
-                        type="text"
-                      />
-                    </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />

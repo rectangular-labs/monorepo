@@ -40,10 +40,10 @@ export function OnboardingCompanyBackground({
     resolver: arktypeResolver(backgroundSchema),
   });
 
-  const { mutate: crawlInfo, isPending } = useMutation(
-    apiClientRq.companyBackground.crawlInfo.mutationOptions({
+  const { mutate: startUnderstanding, isPending } = useMutation(
+    apiClientRq.companyBackground.understandSite.mutationOptions({
       onSuccess: (data, { websiteUrl }) => {
-        matcher.setMetadata("user-company", {
+        matcher.setMetadata("website-info", {
           websiteUrl,
           crawlId: data.id,
         });
@@ -58,7 +58,7 @@ export function OnboardingCompanyBackground({
   );
 
   const handleSubmit = (values: typeof backgroundSchema.infer) => {
-    crawlInfo({
+    startUnderstanding({
       websiteUrl: values.url,
     });
   };

@@ -11,7 +11,6 @@ import {
   arktypeResolver,
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,55 +18,49 @@ import {
   useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { type } from "arktype";
-import { authClient } from "~/lib/auth/client";
 import { OnboardingSteps } from "../-lib/steps";
 
-const schema = type({
-  name: "string.alphanumeric",
-  description: "string",
-  targetAudience: "string",
-  suggestedKeywords: "string[]",
-  responseTone: "string",
-});
+const formSchema = type({
+  websiteUrl: type("string.url").configure({
+    message: () => "Must be a valid URL",
+  }),
+}).merge(
+  type({
+    businessOverview: type("string").configure({
+      message: () => "Business Overview is required",
+    }),
+    idealCustomer: type("string").configure({
+      message: () => "Ideal Customer is required",
+    }),
+    serviceRegion: type("string").configure({
+      message: () => "Service Region is required",
+    }),
+    industry: type("string").configure({
+      message: () => "Industry is required",
+    }),
+  }),
+);
 export function OnboardingReviewProject() {
   const matcher = OnboardingSteps.useStepper();
+
+  const defaultValues =
+    matcher.getMetadata<Partial<typeof formSchema.infer>>("understanding-site");
+
   const form = useForm({
-    resolver: arktypeResolver(schema),
+    resolver: arktypeResolver(formSchema),
+    defaultValues: {
+      websiteUrl: defaultValues?.websiteUrl || "",
+      businessOverview: defaultValues?.businessOverview || "",
+      idealCustomer: defaultValues?.idealCustomer || "",
+      serviceRegion: defaultValues?.serviceRegion || "",
+      industry: defaultValues?.industry || "",
+    },
   });
 
-  const handleSubmit = async (values: typeof schema.infer) => {
-    const valid = await authClient.organization.checkSlug({
-      slug: values.name,
-    });
-    if (valid.error) {
-      form.setError("root", {
-        message:
-          valid.error.message ??
-          "Something went wrong creating the organization. Please try again later",
-      });
-      return;
-    }
-    if (!valid.data?.status) {
-      form.setError("name", {
-        message: "Organization name already taken, please choose another one!",
-      });
-      return;
-    }
-
-    const organizationResult = await authClient.organization.create({
-      name: values.name,
-      slug: values.name,
-      metadata: { description: values.description },
-    });
-    if (organizationResult.error) {
-      form.setError("root", {
-        message:
-          organizationResult.error.message ||
-          organizationResult.error.statusText,
-      });
-      return;
-    }
+  const handleSubmit = (_values: typeof formSchema.infer) => {
+    // TODO: Persist to API once endpoint exists. For now, proceed.
     matcher.next();
   };
 
@@ -79,40 +72,88 @@ export function OnboardingReviewProject() {
           <CardDescription>{matcher.current.description}</CardDescription>
         </CardHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <form
+            className="grid gap-6"
+            onSubmit={form.handleSubmit(handleSubmit)}
+          >
             <CardContent className="grid gap-6">
               <FormField
                 control={form.control}
-                name="name"
+                name="websiteUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Organization Name</FormLabel>
+                    <FormLabel>Website URL</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Xerox" />
+                      <Input {...field} placeholder="https://42.com" />
                     </FormControl>
-                    <FormMessage>
-                      <FormDescription>
-                        You will be able to change this at anytime later on
-                      </FormDescription>
-                    </FormMessage>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
               <FormField
                 control={form.control}
-                name="description"
+                name="serviceRegion"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Organization Description{" "}
-                      <span className="text-muted-foreground">(optional)</span>
-                    </FormLabel>
+                    <FormLabel>Service Region</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="We invented the mice"
-                        type="text"
+                        placeholder="e.g., Global, US-only, EU"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="industry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Industry</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="e.g., SaaS, Healthcare, Retail"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="businessOverview"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Business Overview</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="What does your business do? The more detail, the better."
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="idealCustomer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ideal Customer</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Who are you serving? Like business overview, the more detail here, the better!"
+                        rows={3}
                       />
                     </FormControl>
                     <FormMessage />

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 export function OnboardingAllSet({
   description,
@@ -16,7 +16,6 @@ export function OnboardingAllSet({
   description: string;
   title: string;
 }) {
-  const navigate = useNavigate();
   return (
     <Card className="w-full">
       <CardHeader>
@@ -27,12 +26,8 @@ export function OnboardingAllSet({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardFooter>
-        <Button
-          className="w-full"
-          onClick={() => navigate({ to: "/dashboard" })}
-          type="button"
-        >
-          Go to Dashboard
+        <Button asChild className="w-full" type="button">
+          <Link to="/organization">Go to Dashboard</Link>
         </Button>
       </CardFooter>
     </Card>

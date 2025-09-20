@@ -65,6 +65,7 @@
     "totp",
     "turso",
     "Unlazied",
+    "uuidv",
     "webauthn"
   ]
 }

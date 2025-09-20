@@ -2,9 +2,9 @@ import { AutoHeight } from "@rectangular-labs/ui/animation/auto-height";
 import { OnboardingSteps } from "../-lib/steps";
 import { OnboardingWelcome } from "./0-welcome";
 import { OnboardingUserBackground } from "./1-user-background";
-import { OnboardingCompanyBackground } from "./2-company-background";
-import { OnboardingUnderstandingCompany } from "./3-understanding-company";
-import { OnboardingReviewOrganization } from "./4-review-organization";
+import { OnboardingCreateOrganization } from "./2-create-organization";
+import { OnboardingCompanyBackground } from "./3-company-background";
+import { OnboardingUnderstandingCompany } from "./4-understanding-company";
 import { OnboardingReviewProject } from "./5-review-project";
 import { OnboardingAllSet } from "./6-all-set";
 import { OnboardingProgress } from "./onboarding-progress";
@@ -36,19 +36,19 @@ export function OnboardingContent() {
               title={step.title}
             />
           ),
-          "user-company": (step) => (
+          "create-organization": () => <OnboardingCreateOrganization />,
+          "website-info": (step) => (
             <OnboardingCompanyBackground
               description={step.description}
               title={step.title}
             />
           ),
-          understanding: (step) => (
+          "understanding-site": (step) => (
             <OnboardingUnderstandingCompany
               description={step.description}
               title={step.title}
             />
           ),
-          "review-organization": () => <OnboardingReviewOrganization />,
           "review-project": () => <OnboardingReviewProject />,
           "all-set": (step) => (
             <OnboardingAllSet
