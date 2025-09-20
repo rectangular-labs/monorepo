@@ -7,7 +7,7 @@ export const clientEnv = () =>
     extends: [],
     clientPrefix: "VITE_",
     client: {
-      VITE_MENTIONS_URL: type("string"),
+      VITE_SEO_URL: type("string"),
     },
     runtimeEnv: import.meta.env,
     emptyStringAsUndefined: true,

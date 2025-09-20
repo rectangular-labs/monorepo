@@ -23,5 +23,5 @@ export const getApiClient = createIsomorphicFn()
 export const apiClientRq = rqApiClient(
   typeof window !== "undefined"
     ? window.location.origin
-    : clientEnv().VITE_MENTIONS_URL,
+    : clientEnv().VITE_SEO_URL,
 );
