@@ -60,5 +60,5 @@ COPY --chown=myuser --from=pruner /app/out/full/ .
 # Build just the crawler package
 RUN pnpm run build
 
-# If your "start:prod" script exists in the package.json (recommended)
-CMD ["cd", "packages/crawler", "&&", "pnpm", "run", "start:prod"]
+# Currently not running through docker. If we want, we'll have to expose some main script to run the task.
+# CMD ["cd", "packages/crawler", "&&", "pnpm", "run", "start:prod"]
