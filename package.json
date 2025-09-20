@@ -24,6 +24,7 @@
     "emails:create": "bun run --filter @rectangular-labs/emails create",
     "emails:preview": "bun run --filter @rectangular-labs/emails preview",
     "emails:check": "bun run --filter @rectangular-labs/emails check",
+    "task:deploy": "bun run --filter @rectangular-labs/task deploy:trigger",
     "env:get": "bun x dotenvx get",
     "env:set": "bun x dotenvx set",
     "env:encrypt": "bun x dotenvx encrypt",
