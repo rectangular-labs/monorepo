@@ -8,7 +8,7 @@ import { extractUrlLocale, type Locales } from "./extract-url-locale.js";
  * @param {string} param.proxyUrl - The proxy url to use
  * @param {string} param.defaultLocale - The default locale to use
  * @param {boolean} param.onlyParseDefaultLocale - Whether to only parse default locale
- * @returns
+ * @returns {string[]} The filtered sitemap URLs.
  */
 export async function extractSitemapUrls({
   url,
