@@ -33,11 +33,11 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.5.1",
+    "@types/node": "^24.5.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.14",
+    "@ai-sdk/google": "^2.0.15",
     "@orpc/client": "^1.8.9",
     "@orpc/contract": "^1.8.9",
     "@orpc/server": "^1.8.9",
@@ -47,10 +47,10 @@
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.47",
+    "ai": "^5.0.48",
     "arktype": "^2.1.22"
   },
   "overrides": {
-    "@tanstack/react-query": "5.89.0"
+    "@tanstack/react-query": "5.90.1"
   }
 }
