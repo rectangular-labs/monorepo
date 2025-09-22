@@ -20,11 +20,11 @@ import {
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
+import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { useMutation } from "@tanstack/react-query";
 import { type } from "arktype";
 import { getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
-import { toSlug } from "../-lib/to-slug";
 
 const formSchema = type({
   projectId: type("string.uuid"),

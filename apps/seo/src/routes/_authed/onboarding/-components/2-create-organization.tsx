@@ -1,3 +1,4 @@
+import { toSlug } from "@rectangular-labs/auth/lib/to-slug";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
@@ -22,7 +23,6 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { type } from "arktype";
 import { authClient } from "~/lib/auth/client";
 import { OnboardingSteps } from "../-lib/steps";
-import { toSlug } from "../-lib/to-slug";
 
 const backgroundSchema = type({
   name: type("string").atLeastLength(1),
