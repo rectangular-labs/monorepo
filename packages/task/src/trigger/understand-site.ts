@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { create, insertMultiple } from "@orama/orama";
-import { schema } from "@rectangular-labs/db";
+import { seoWebsiteInfoSchema } from "@rectangular-labs/db/parsers";
 import { schemaTask } from "@trigger.dev/sdk";
 import { generateText, stepCountIs } from "ai";
 import { type } from "arktype";
@@ -18,7 +18,7 @@ const inputSchema = type({
 
 const outputSchema = type({
   message: "string",
-  websiteInfo: schema.seoWebsiteInfoSchema.merge(type({ name: "string" })),
+  websiteInfo: seoWebsiteInfoSchema.merge(type({ name: "string" })),
 });
 
 export const understandSiteTask: ReturnType<

@@ -1,6 +1,7 @@
 "use server";
 import { ORPCError } from "@orpc/client";
 import { schema } from "@rectangular-labs/db";
+import { seoWebsiteInfoSchema } from "@rectangular-labs/db/parsers";
 import {
   getUnderstandSiteTask,
   triggerUnderstandSiteTask,
@@ -62,7 +63,7 @@ const outputSchema = type({
   status:
     "'pending' | 'queued' | 'running' | 'completed' | 'cancelled' | 'failed'",
   statusMessage: "string",
-  websiteInfo: schema.seoWebsiteInfoSchema
+  websiteInfo: seoWebsiteInfoSchema
     .merge(type({ name: "string" }))
     .or(type("undefined")),
 });

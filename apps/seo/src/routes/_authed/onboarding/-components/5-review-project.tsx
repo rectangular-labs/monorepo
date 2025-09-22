@@ -1,3 +1,4 @@
+import { seoWebsiteInfoSchema } from "@rectangular-labs/db/parsers";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
@@ -21,7 +22,7 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation } from "@tanstack/react-query";
 import { type } from "arktype";
-import { apiClientRq } from "~/lib/api";
+import { getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
 import { toSlug } from "../-lib/to-slug";
 
@@ -37,27 +38,7 @@ const formSchema = type({
     .configure({
       message: () => "Must be a valid URL",
     }),
-  businessOverview: type("string")
-    .atLeastLength(1)
-    .configure({
-      message: () => "Business Overview is required",
-    }),
-  idealCustomer: type("string")
-    .atLeastLength(1)
-    .configure({
-      message: () => "Ideal Customer is required",
-    }),
-  serviceRegion: type("string")
-    .atLeastLength(1)
-    .configure({
-      message: () => "Service Region is required",
-    }),
-  industry: type("string")
-    .atLeastLength(1)
-    .configure({
-      message: () => "Industry is required",
-    }),
-});
+}).merge(seoWebsiteInfoSchema);
 
 export function OnboardingReviewProject() {
   const matcher = OnboardingSteps.useStepper();
@@ -80,7 +61,7 @@ export function OnboardingReviewProject() {
   });
 
   const { mutate: updateProject, isPending } = useMutation(
-    apiClientRq.projects.update.mutationOptions({
+    getApiClientRq().projects.update.mutationOptions({
       onSuccess: (data) => {
         matcher.setMetadata("review-project", {
           slug: data.slug,
