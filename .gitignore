@@ -109,3 +109,6 @@ sst-env.d.ts
 
 # content-collections
 .content-collections
+
+# trigger dev
+.trigger

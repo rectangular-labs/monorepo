@@ -13,6 +13,7 @@ storage
 
 # installed files
 node_modules
+dist
 out
 .cache
 .claude

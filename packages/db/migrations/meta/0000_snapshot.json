@@ -1,5 +1,5 @@
 {
-  "id": "94de5e4e-9b2b-4d0a-8601-d38aa952af96",
+  "id": "10f3473b-0b06-4e77-97ee-e8bbbd45e052",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1198,10 +1198,10 @@
         }
       },
       "foreignKeys": {
-        "sm_project_keyword_mention_project_id_sm_project_sm_project_id_fk": {
-          "name": "sm_project_keyword_mention_project_id_sm_project_sm_project_id_fk",
+        "sm_project_keyword_mention_project_id_sm_workspace_sm_project_id_fk": {
+          "name": "sm_project_keyword_mention_project_id_sm_workspace_sm_project_id_fk",
           "tableFrom": "sm_project_keyword_mention",
-          "tableTo": "sm_project",
+          "tableTo": "sm_workspace",
           "columnsFrom": [
             "project_id"
           ],
@@ -1398,10 +1398,10 @@
         }
       },
       "foreignKeys": {
-        "sm_project_keyword_project_id_sm_project_sm_project_id_fk": {
-          "name": "sm_project_keyword_project_id_sm_project_sm_project_id_fk",
+        "sm_project_keyword_project_id_sm_workspace_sm_project_id_fk": {
+          "name": "sm_project_keyword_project_id_sm_workspace_sm_project_id_fk",
           "tableFrom": "sm_project_keyword",
-          "tableTo": "sm_project",
+          "tableTo": "sm_workspace",
           "columnsFrom": [
             "project_id"
           ],
@@ -1633,10 +1633,10 @@
         }
       },
       "foreignKeys": {
-        "sm_project_mention_reply_project_id_sm_project_sm_project_id_fk": {
-          "name": "sm_project_mention_reply_project_id_sm_project_sm_project_id_fk",
+        "sm_project_mention_reply_project_id_sm_workspace_sm_project_id_fk": {
+          "name": "sm_project_mention_reply_project_id_sm_workspace_sm_project_id_fk",
           "tableFrom": "sm_project_mention_reply",
-          "tableTo": "sm_project",
+          "tableTo": "sm_workspace",
           "columnsFrom": [
             "project_id"
           ],
@@ -1709,8 +1709,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sm_project": {
-      "name": "sm_project",
+    "public.sm_workspace": {
+      "name": "sm_workspace",
       "schema": "",
       "columns": {
         "sm_project_id": {
@@ -1799,9 +1799,9 @@
         }
       },
       "foreignKeys": {
-        "sm_project_organization_id_organization_id_fk": {
-          "name": "sm_project_organization_id_organization_id_fk",
-          "tableFrom": "sm_project",
+        "sm_workspace_organization_id_organization_id_fk": {
+          "name": "sm_workspace_organization_id_organization_id_fk",
+          "tableFrom": "sm_workspace",
           "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
@@ -1812,9 +1812,9 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "sm_project_current_reply_prompt_id_sm_prompt_sm_prompt_id_fk": {
-          "name": "sm_project_current_reply_prompt_id_sm_prompt_sm_prompt_id_fk",
-          "tableFrom": "sm_project",
+        "sm_workspace_current_reply_prompt_id_sm_prompt_sm_prompt_id_fk": {
+          "name": "sm_workspace_current_reply_prompt_id_sm_prompt_sm_prompt_id_fk",
+          "tableFrom": "sm_workspace",
           "tableTo": "sm_prompt",
           "columnsFrom": [
             "current_reply_prompt_id"
@@ -1880,6 +1880,295 @@
         }
       },
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.seo_project": {
+      "name": "seo_project",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "website_url": {
+          "name": "website_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "website_info": {
+          "name": "website_info",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "seo_project_org_idx": {
+          "name": "seo_project_org_idx",
+          "columns": [
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "seo_project_website_url_idx": {
+          "name": "seo_project_website_url_idx",
+          "columns": [
+            {
+              "expression": "website_url",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "seo_project_organization_id_organization_id_fk": {
+          "name": "seo_project_organization_id_organization_id_fk",
+          "tableFrom": "seo_project",
+          "tableTo": "organization",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "seo_project_org_slug_idx": {
+          "name": "seo_project_org_slug_idx",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organization_id",
+            "slug"
+          ]
+        },
+        "seo_project_org_website_url_idx": {
+          "name": "seo_project_org_website_url_idx",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organization_id",
+            "website_url"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.seo_task_run": {
+      "name": "seo_task_run",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requested_by": {
+          "name": "requested_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "task_id": {
+          "name": "task_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'trigger.dev'"
+        },
+        "input_data": {
+          "name": "input_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_in_cents": {
+          "name": "cost_in_cents",
+          "type": "numeric(10, 5)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00000'"
+        },
+        "duration_ms": {
+          "name": "duration_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "seo_task_run_project_idx": {
+          "name": "seo_task_run_project_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "seo_task_run_task_id_idx": {
+          "name": "seo_task_run_task_id_idx",
+          "columns": [
+            {
+              "expression": "task_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "seo_task_run_provider_idx": {
+          "name": "seo_task_run_provider_idx",
+          "columns": [
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "seo_task_run_requested_by_idx": {
+          "name": "seo_task_run_requested_by_idx",
+          "columns": [
+            {
+              "expression": "requested_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "seo_task_run_project_id_seo_project_id_fk": {
+          "name": "seo_task_run_project_id_seo_project_id_fk",
+          "tableFrom": "seo_task_run",
+          "tableTo": "seo_project",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "seo_task_run_requested_by_user_id_fk": {
+          "name": "seo_task_run_requested_by_user_id_fk",
+          "tableFrom": "seo_task_run",
+          "tableTo": "user",
+          "columnsFrom": [
+            "requested_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

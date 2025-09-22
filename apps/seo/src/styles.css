@@ -1,0 +1,7 @@
+@import "@rectangular-labs/ui/styles.css";
+@import "@rectangular-labs/content/styles.css";
+@source "./**/*.{ts,tsx}";
+
+:root {
+  --radius: 0.8rem;
+}

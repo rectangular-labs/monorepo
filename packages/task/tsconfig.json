@@ -1,0 +1,12 @@
+{
+  "extends": "@rectangular-labs/typescript/tsconfig.internal-package.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@rectangular-labs/crawler/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "trigger.config.ts"],
+  "exclude": ["node_modules"]
+}

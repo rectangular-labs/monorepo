@@ -4,6 +4,7 @@ import {
   ArrowUpIcon,
   CheckIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
   ChevronsUpDownIcon,
   DotIcon,
   EyeIcon,
@@ -25,6 +26,8 @@ import {
   StarIcon,
   SunIcon,
   TerminalIcon,
+  TimerIcon,
+  TrendingUpIcon,
   UserIcon,
   ZapIcon,
 } from "lucide-react";
@@ -58,8 +61,11 @@ export const MoveUpRight = MoveUpRightIcon;
 export const Check = CheckIcon;
 export const ChevronDown = ChevronDownIcon;
 export const ChevronsUpDown = ChevronsUpDownIcon;
+export const ChevronRight = ChevronRightIcon;
 export const Settings = SettingsIcon;
 export const PartyPopper = PartyPopperIcon;
+export const Timer = TimerIcon;
+export const TrendingUp = TrendingUpIcon;
 
 export const Logo = (props: IconProps) => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>

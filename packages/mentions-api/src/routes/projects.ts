@@ -13,7 +13,7 @@ const list = protectedBase
   )
   .output(
     type({
-      data: schema.projectSelectSchema.array(),
+      data: schema.smProjectSelectSchema.array(),
       nextPageCursor: "string.uuid|undefined",
     }),
   )
@@ -39,7 +39,7 @@ const list = protectedBase
 const create = protectedBase
   .route({ method: "POST", path: "/" })
   .input(
-    schema.projectInsertSchema.omit(
+    schema.smProjectInsertSchema.omit(
       "id",
       "createdAt",
       "updatedAt",
@@ -47,7 +47,7 @@ const create = protectedBase
       "currentReplyPromptId",
     ),
   )
-  .output(schema.projectSelectSchema)
+  .output(schema.smProjectSelectSchema)
   .handler(async ({ context, input }) => {
     const { session } = context.session;
     if (!session.activeOrganizationId) {
@@ -74,7 +74,7 @@ const update = protectedBase
   .input(
     type({
       id: "string",
-      data: schema.projectUpdateSchema.omit(
+      data: schema.smProjectUpdateSchema.omit(
         "id",
         "createdAt",
         "updatedAt",
@@ -83,7 +83,7 @@ const update = protectedBase
       ),
     }),
   )
-  .output(schema.projectSelectSchema)
+  .output(schema.smProjectSelectSchema)
   .handler(async ({ context, input }) => {
     const { session } = context.session;
     if (!session.activeOrganizationId) {

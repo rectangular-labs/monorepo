@@ -98,6 +98,20 @@ export function initAuthHandler(baseURL: string, db: DB) {
           await Promise.resolve();
           console.log(`[auth] Invitation email for ${email}: ${id}`);
         },
+        organizationHooks: {
+          beforeCreateOrganization: ({ organization }) => {
+            if (organization.slug === "organization") {
+              throw new Error("Organization slug is already taken");
+            }
+            return Promise.resolve();
+          },
+          beforeUpdateOrganization: ({ organization }) => {
+            if (organization.slug === "organization") {
+              throw new Error("Organization slug is already taken");
+            }
+            return Promise.resolve();
+          },
+        },
       }),
       expo(),
     ],
@@ -125,22 +139,6 @@ export function initAuthHandler(baseURL: string, db: DB) {
       }),
     },
     trustedOrigins: ["expo://"],
-    databaseHooks: {
-      session: {
-        create: {
-          before: async (session) => {
-            await Promise.resolve();
-            // const organization = await getActiveOrganization(session.userId);
-            return {
-              data: {
-                ...session,
-                activeOrganizationId: null,
-              },
-            };
-          },
-        },
-      },
-    },
   } satisfies BetterAuthOptions;
 
   return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;

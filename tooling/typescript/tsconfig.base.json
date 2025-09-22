@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     /** Base Options */
-    "target": "ES2024",
-    "lib": ["ES2024"],
+    "target": "esnext",
+    "lib": ["ESNext"],
     "moduleDetection": "force",
     "esModuleInterop": true,
     "skipLibCheck": true,

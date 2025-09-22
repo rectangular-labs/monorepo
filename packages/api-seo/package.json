@@ -1,0 +1,58 @@
+{
+  "name": "@rectangular-labs/api-seo",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./client": {
+      "default": "./src/client.ts"
+    },
+    "./server": {
+      "default": "./src/server.ts"
+    },
+    "./context": {
+      "default": "./src/context.ts"
+    },
+    "./env": {
+      "default": "./src/env.ts"
+    },
+    "./types": {
+      "default": "./src/types.ts"
+    },
+    "./schemas/*": {
+      "default": "./src/schemas/*.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch ./src/_open-api/open-api-resolver.ts",
+    "dev:trigger": "pnpx trigger.dev@latest dev",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "pnpx @biomejs/biome format . --write",
+    "lint": "pnpx @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@rectangular-labs/typescript": "workspace:*",
+    "@types/node": "^24.5.1",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^2.0.14",
+    "@orpc/client": "^1.8.9",
+    "@orpc/contract": "^1.8.9",
+    "@orpc/server": "^1.8.9",
+    "@orpc/tanstack-query": "^1.8.9",
+    "@rectangular-labs/api-core": "workspace:*",
+    "@rectangular-labs/auth": "workspace:*",
+    "@rectangular-labs/db": "workspace:*",
+    "@rectangular-labs/result": "workspace:*",
+    "@rectangular-labs/task": "workspace:*",
+    "@t3-oss/env-core": "^0.13.8",
+    "ai": "^5.0.47",
+    "arktype": "^2.1.22"
+  },
+  "overrides": {
+    "@tanstack/react-query": "5.89.0"
+  }
+}
