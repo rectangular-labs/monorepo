@@ -321,8 +321,8 @@ importers:
         specifier: ^0.13.8
         version: 0.13.8(arktype@2.1.22)(typescript@5.9.2)(zod@4.1.9)
       ai:
-        specifier: ^5.0.48
-        version: 5.0.48(zod@4.1.9)
+        specifier: ^5.0.49
+        version: 5.0.49(zod@4.1.9)
       arktype:
         specifier: ^2.1.22
         version: 2.1.22
@@ -580,8 +580,8 @@ importers:
         specifier: ^0.13.8
         version: 0.13.8(arktype@2.1.22)(typescript@5.9.2)(zod@4.1.9)
       ai:
-        specifier: ^5.0.48
-        version: 5.0.48(zod@4.1.9)
+        specifier: ^5.0.49
+        version: 5.0.49(zod@4.1.9)
       arktype:
         specifier: ^2.1.22
         version: 2.1.22
@@ -627,10 +627,10 @@ importers:
         version: 0.13.8(arktype@2.1.22)(typescript@5.9.2)(zod@4.1.9)
       '@trigger.dev/sdk':
         specifier: 4.0.4
-        version: 4.0.4(ai@5.0.48(zod@4.1.9))(zod@4.1.9)
+        version: 4.0.4(ai@5.0.49(zod@4.1.9))(zod@4.1.9)
       ai:
-        specifier: ^5.0.48
-        version: 5.0.48(zod@4.1.9)
+        specifier: ^5.0.49
+        version: 5.0.49(zod@4.1.9)
       arktype:
         specifier: ^2.1.22
         version: 2.1.22
@@ -858,8 +858,8 @@ packages:
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
 
-  '@ai-sdk/gateway@1.0.25':
-    resolution: {integrity: sha512-eI/6LLmn1tWFzuhjxgcPEqUFXwLjyRuGFrwkCoqLaTKe/qMYBEAV3iddnGUM0AV+Hp4NEykzP4ly5tibOLDMXw==}
+  '@ai-sdk/gateway@1.0.26':
+    resolution: {integrity: sha512-AfTkubvvHU+soI5IdIpPvXgdnNy56Kt//vBJxYNQ0eGwlVhSQ/SkCVMdQxcVDvdTvlEO46MHKuPaZnQnT5Zgxw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4
@@ -6431,8 +6431,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@5.0.48:
-    resolution: {integrity: sha512-+oYhbN3NGRXayGfTFI8k1Fu4rhiJcQ0mbgiAOJGFkzvCxunRRQu5cyDl7y6cHNTj1QvHmIBROK5u655Ss2oI0g==}
+  ai@5.0.49:
+    resolution: {integrity: sha512-7XVcmXbnAqG7waJqNcxKrzVW1Ck5fw4KhWxAyltKxnupOgFxH62ra1zEofym/KO3hPYq4aJ3/gTp1ZeLvlwLkQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4
@@ -13307,7 +13307,7 @@ snapshots:
 
   '@adobe/css-tools@4.4.4': {}
 
-  '@ai-sdk/gateway@1.0.25(zod@4.1.9)':
+  '@ai-sdk/gateway@1.0.26(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.9(zod@4.1.9)
@@ -19210,7 +19210,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.0.4(ai@5.0.48(zod@4.1.9))(zod@4.1.9)':
+  '@trigger.dev/sdk@4.0.4(ai@5.0.49(zod@4.1.9))(zod@4.1.9)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -19226,7 +19226,7 @@ snapshots:
       ws: 8.18.3
       zod: 4.1.9
     optionalDependencies:
-      ai: 5.0.48(zod@4.1.9)
+      ai: 5.0.49(zod@4.1.9)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -19909,9 +19909,9 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@5.0.48(zod@4.1.9):
+  ai@5.0.49(zod@4.1.9):
     dependencies:
-      '@ai-sdk/gateway': 1.0.25(zod@4.1.9)
+      '@ai-sdk/gateway': 1.0.26(zod@4.1.9)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.9(zod@4.1.9)
       '@opentelemetry/api': 1.9.0
