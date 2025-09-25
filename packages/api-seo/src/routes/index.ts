@@ -2,7 +2,7 @@ import { lazy } from "@orpc/server";
 import { base } from "../context";
 
 export const router = base.router({
-  projects: lazy(() => import("./projects")),
+  project: lazy(() => import("./project")),
   keywords: lazy(() => import("./keywords")),
   companyBackground: lazy(() => import("./company-background")),
   auth: {

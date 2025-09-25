@@ -22,6 +22,7 @@ import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import { useState } from "react";
 import { ManageOrganizationForm } from "./manage-organization-form";
 import { OrganizationCellView } from "./organization-cell-view";
+import { OrganizationLogo } from "./organization-logo";
 
 export type OrganizationSwitcherProps<
   T extends React.ComponentType<{ to: string }>,
@@ -75,38 +76,50 @@ export function OrganizationSwitcher<
   };
 
   return (
-    <div>
+    <>
       <PopoverDrawer
         onOpenChange={setOpen}
         open={open}
         trigger={
-          <Button className="md:min-w-60" variant="outline">
-            <div className="flex w-full items-center justify-between gap-1">
-              <AnchorComponent
-                // TODO: Fix this hack
-                // hack for tanstack router link to work properly. We fill in the `to` prop
-                href={createHref(activeOrganization?.slug ?? "")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log("clicked");
-                }}
-                to={createHref(activeOrganization?.slug ?? "")}
-              >
-                {activeOrganization?.name}
-              </AnchorComponent>
-              <ChevronsUpDown
-                className="shrink-0 text-muted-foreground"
-                size={16}
+          <div>
+            <Button className="md:hidden" size="icon" variant="ghost">
+              <OrganizationLogo
+                organization={activeOrganization}
+                size="default"
               />
-            </div>
-          </Button>
+            </Button>
+
+            <Button
+              className="hidden md:inline-flex md:min-w-52"
+              variant="outline"
+            >
+              <div className="flex w-full items-center justify-between gap-1">
+                <AnchorComponent
+                  // TODO: Fix this hack
+                  // hack for tanstack router link to work properly. We fill in the `to` prop
+                  href={createHref(activeOrganization?.slug ?? "")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("clicked");
+                  }}
+                  to={createHref(activeOrganization?.slug ?? "")}
+                >
+                  {activeOrganization?.name}
+                </AnchorComponent>
+                <ChevronsUpDown
+                  className="shrink-0 text-muted-foreground"
+                  size={16}
+                />
+              </div>
+            </Button>
+          </div>
         }
       >
         <Command
           className={
             isMobile ? "mt-4 rounded-none border-t bg-transparent" : ""
           }
-          defaultValue={"-"}
+          defaultValue={activeOrganization?.slug || "-"}
         >
           <CommandInput onValueChange={setSearch} value={search} />
           <CommandEmpty
@@ -120,7 +133,7 @@ export function OrganizationSwitcher<
               >
                 <Plus />{" "}
                 <span className="block w-full min-w-0 truncate text-start">
-                  Create new organization: "{search}"
+                  Create Org: "{search}"
                 </span>
               </Button>
             ) : (
@@ -164,7 +177,7 @@ export function OrganizationSwitcher<
                     <div className="flex size-6 items-center justify-center">
                       <Plus className="size-[80%]" />
                     </div>
-                    Create new organization
+                    Create organization
                   </CommandItem>
                 </>
               )}
@@ -175,6 +188,7 @@ export function OrganizationSwitcher<
 
       {createOrgProps.showCreateButton && (
         <DialogDrawer
+          isLoading={createOrgProps.isCreatingOrganization}
           onOpenChange={(isOpen) => {
             if (!isOpen) {
               setSearch("");
@@ -213,6 +227,6 @@ export function OrganizationSwitcher<
           />
         </DialogDrawer>
       )}
-    </div>
+    </>
   );
 }

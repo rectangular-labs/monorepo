@@ -1,16 +1,19 @@
 import { ORPCError } from "@orpc/client";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
-import { protectedBase, withOrganizationIdBase } from "../context";
+import { protectedBase } from "../context";
+import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
-const list = withOrganizationIdBase
+const list = protectedBase
   .route({ method: "GET", path: "/" })
   .input(
     type({
+      organizationIdentifier: "string",
       limit: "1<=number<=100 = 20",
       "cursor?": "string.uuid|undefined",
     }),
   )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
       data: schema.seoProjectSelectSchema.array(),
@@ -20,10 +23,7 @@ const list = withOrganizationIdBase
   .handler(async ({ context, input }) => {
     const rows = await context.db.query.seoProject.findMany({
       where: and(
-        eq(
-          schema.seoProject.organizationId,
-          context.session.activeOrganizationId,
-        ),
+        eq(schema.seoProject.organizationId, context.organization.id),
         input.cursor ? lt(schema.seoProject.id, input.cursor) : undefined,
       ),
       orderBy: desc(schema.seoProject.id),
@@ -35,17 +35,15 @@ const list = withOrganizationIdBase
     return { data, nextPageCursor };
   });
 
-const checkName = withOrganizationIdBase
+const checkName = protectedBase
   .route({ method: "GET", path: "/check-name/{name}" })
-  .input(type({ name: "string" }))
+  .input(type({ name: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(type({ exists: "boolean" }))
   .handler(async ({ context, input }) => {
     const row = await context.db.query.seoProject.findFirst({
       where: and(
-        eq(
-          schema.seoProject.organizationId,
-          context.session.activeOrganizationId,
-        ),
+        eq(schema.seoProject.organizationId, context.organization.id),
         eq(schema.seoProject.name, input.name),
       ),
     });
@@ -53,24 +51,27 @@ const checkName = withOrganizationIdBase
     return { exists: !!row };
   });
 
-const get = withOrganizationIdBase
+const get = protectedBase
   .route({ method: "GET", path: "/{identifier}" })
-  .input(type({ identifier: "string.url|string.uuid" }))
+  .input(
+    type({
+      identifier: "string.url|string",
+      organizationIdentifier: "string",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
       "...": schema.seoProjectSelectSchema,
       tasks: schema.seoTaskRunSelectSchema.array(),
-    }).or(type("undefined")),
+    }).or(type.null),
   )
   .handler(async ({ context, input }) => {
     if (input.identifier.startsWith("http")) {
       const row = await context.db.query.seoProject.findFirst({
         where: and(
           eq(schema.seoProject.websiteUrl, input.identifier),
-          eq(
-            schema.seoProject.organizationId,
-            context.session.activeOrganizationId,
-          ),
+          eq(schema.seoProject.organizationId, context.organization.id),
         ),
         with: {
           tasks: {
@@ -81,15 +82,15 @@ const get = withOrganizationIdBase
           },
         },
       });
-      return row;
+      return row ?? null;
     }
+    const isSlug = type("string.uuid")(input.identifier) instanceof type.errors;
     const row = await context.db.query.seoProject.findFirst({
       where: and(
-        eq(schema.seoProject.id, input.identifier),
-        eq(
-          schema.seoProject.organizationId,
-          context.session.activeOrganizationId,
-        ),
+        isSlug
+          ? eq(schema.seoProject.slug, input.identifier)
+          : eq(schema.seoProject.id, input.identifier),
+        eq(schema.seoProject.organizationId, context.organization.id),
       ),
       with: {
         tasks: {
@@ -100,18 +101,25 @@ const get = withOrganizationIdBase
         },
       },
     });
-    return row;
+    return row ?? null;
   });
 
-const create = withOrganizationIdBase
+const create = protectedBase
   .route({ method: "POST", path: "/" })
-  .input(schema.seoProjectInsertSchema)
+  .input(
+    schema.seoProjectInsertSchema.merge(
+      type({
+        organizationIdentifier: "string",
+      }),
+    ),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
     const [row] = await context.db
       .insert(schema.seoProject)
       .values({
-        organizationId: context.session.activeOrganizationId,
+        organizationId: context.organization.id,
         websiteUrl: input.websiteUrl,
       })
       .returning();
@@ -122,9 +130,14 @@ const create = withOrganizationIdBase
     }
     return row;
   });
-const update = withOrganizationIdBase
+const update = protectedBase
   .route({ method: "PATCH", path: "/{id}" })
-  .input(schema.seoProjectUpdateSchema)
+  .input(
+    schema.seoProjectUpdateSchema.merge(
+      type({ organizationIdentifier: "string" }),
+    ),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
     const [row] = await context.db
@@ -133,10 +146,7 @@ const update = withOrganizationIdBase
       .where(
         and(
           eq(schema.seoProject.id, input.id),
-          eq(
-            schema.seoProject.organizationId,
-            context.session.activeOrganizationId,
-          ),
+          eq(schema.seoProject.organizationId, context.organization.id),
         ),
       )
       .returning();
@@ -148,9 +158,10 @@ const update = withOrganizationIdBase
     return row;
   });
 
-const remove = withOrganizationIdBase
+const remove = protectedBase
   .route({ method: "DELETE", path: "/{id}" })
-  .input(type({ id: "string" }))
+  .input(type({ id: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(type({ success: "true" }))
   .handler(async ({ context, input }) => {
     const [row] = await context.db
@@ -158,10 +169,7 @@ const remove = withOrganizationIdBase
       .where(
         and(
           eq(schema.seoProject.id, input.id),
-          eq(
-            schema.seoProject.organizationId,
-            context.session.activeOrganizationId,
-          ),
+          eq(schema.seoProject.organizationId, context.organization.id),
         ),
       )
       .returning();
@@ -174,5 +182,5 @@ const remove = withOrganizationIdBase
   });
 
 export default protectedBase
-  .prefix("/project")
+  .prefix("/organization/{organizationIdentifier}/project")
   .router({ list, create, update, remove, checkName, get });
