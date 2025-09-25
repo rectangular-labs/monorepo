@@ -1,13 +1,55 @@
 "use client";
 
-import type {
-  BaseAuthClient,
-  CompleteAuthClient,
-} from "@rectangular-labs/auth/client";
+import {
+  adminClient,
+  apiKeyClient,
+  emailOTPClient,
+  genericOAuthClient,
+  magicLinkClient,
+  multiSessionClient,
+  oidcClient,
+  oneTapClient,
+  organizationClient,
+  passkeyClient,
+  phoneNumberClient,
+  siweClient,
+  ssoClient,
+  usernameClient,
+} from "better-auth/client/plugins";
+import { twoFactorClient } from "better-auth/plugins";
+import { createAuthClient } from "better-auth/react";
 import { LockIcon, type LucideProps, MailIcon, PhoneIcon } from "lucide-react";
 import type { PropsWithChildren, RefAttributes } from "react";
 import { createContext, useCallback, useContext, useMemo, useRef } from "react";
 import type { SocialProvider } from "./social-providers";
+
+type BaseAuthClient = ReturnType<typeof createAuthClient>;
+// used to generate the types for the complete auth client
+const _authClient = createAuthClient({
+  plugins: [
+    twoFactorClient(),
+    usernameClient(),
+    phoneNumberClient(),
+    magicLinkClient(),
+    emailOTPClient(),
+    passkeyClient(),
+    genericOAuthClient(),
+    oneTapClient({
+      clientId: "",
+    }),
+    siweClient(),
+    // authorization
+    adminClient(),
+    apiKeyClient(),
+    // enterprise
+    organizationClient(),
+    oidcClient(),
+    ssoClient(),
+    // utility
+    multiSessionClient(),
+  ],
+});
+type CompleteAuthClient = typeof _authClient;
 
 const AuthViewPaths = {
   // identity capture. These all ask for either a phone number or email address.
@@ -144,7 +186,7 @@ type AuthContextValue = {
 };
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function AuthProvider({
+export function AuthProvider<T extends BaseAuthClient>({
   // initialView = "SIGN_IN",
   authClient,
   redirects,
@@ -154,7 +196,7 @@ export function AuthProvider({
   plugins = [],
 }: PropsWithChildren<{
   redirects?: Redirects;
-  authClient: BaseAuthClient;
+  authClient: T;
   credentials?: CredentialsOptions | undefined;
   socialProviders?: SocialProvider[];
   plugins?: (

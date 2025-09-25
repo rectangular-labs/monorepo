@@ -7,6 +7,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/avatar";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import type { Organization } from "better-auth/plugins";
 import { cva, type VariantProps } from "class-variance-authority";
 import { BuildingIcon } from "lucide-react";
 
@@ -25,17 +26,9 @@ const organizationLogoSize = cva("", {
 });
 
 export type OrganizationLogoProps = {
-  className?: string | undefined;
-  isPending?: boolean | undefined;
-  organization?:
-    | Partial<{
-        id?: string | null;
-        name?: string | null;
-        logo?: string | null;
-        slug?: string | null;
-        createdAt?: Date | null;
-      }>
-    | undefined;
+  className?: string;
+  isPending?: boolean;
+  organization?: Organization;
 } & VariantProps<typeof organizationLogoSize>;
 
 /**
