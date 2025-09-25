@@ -55,7 +55,7 @@ ${outputData}`;
     const functionEndTime = Date.now();
     const durationMs = functionEndTime - functionStartTime;
 
-    if (durationMs > 20000) {
+    if (durationMs > 20_000) {
       // 20 seconds = 20000 milliseconds
       console.log(
         `llmParseJson took ${durationMs / 1000}s (longer than 20s). Outputting generated object for schema '${schema.description ?? "unknown_schema"}':`,

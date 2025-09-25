@@ -91,7 +91,7 @@ export const DialogStack = ({
           // do nothing
         },
         isOpen: isOpen ?? false,
-        setIsOpen: (value) => setIsOpen(Boolean(value)),
+        setIsOpen,
         clickable,
       }}
     >

@@ -100,7 +100,6 @@ export function OrganizationSwitcher<
                   href={createHref(activeOrganization?.slug ?? "")}
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log("clicked");
                   }}
                   to={createHref(activeOrganization?.slug ?? "")}
                 >

@@ -2,6 +2,8 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { AppHeader } from "./-components/app-header";
 
+const AUTO_ROUTE_ORG = "organization";
+
 export const Route = createFileRoute("/_authed/$organizationSlug")({
   beforeLoad: async ({ params, context, preload }) => {
     const [organizations, activeOrganization] = await Promise.all([
@@ -30,7 +32,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
     }
     // auto route to current active org if org slug is 'organization'
     if (
-      params.organizationSlug === "organization" &&
+      params.organizationSlug === AUTO_ROUTE_ORG &&
       activeOrganization?.slug
     ) {
       throw redirect({
@@ -53,7 +55,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
     const result = await getApiClient().auth.organization.setActive({
       organizationId: null,
       organizationSlug:
-        params.organizationSlug === "organization"
+        params.organizationSlug === AUTO_ROUTE_ORG
           ? organization.slug
           : params.organizationSlug,
     });
@@ -62,11 +64,11 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
         to: ".",
         params: (params) => ({
           ...params,
-          organizationSlug: activeOrganization?.slug || "organization",
+          organizationSlug: activeOrganization?.slug || AUTO_ROUTE_ORG,
         }),
       });
     }
-    if (params.organizationSlug === "organization") {
+    if (params.organizationSlug === AUTO_ROUTE_ORG) {
       throw redirect({
         to: ".",
         params: (params) => ({

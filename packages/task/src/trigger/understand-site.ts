@@ -43,7 +43,7 @@ export const understandSiteTask: ReturnType<
       onProgress: (args) => {
         const progress = Math.round(
           ((args.succeeded + args.failed + args.inFlight) /
-            (payload.maxRequestsPerCrawl * 2)) *
+            (payload.maxRequestsPerCrawl * 2)) * // we set the crawl to be at most half the progress of the whole understanding process
             100,
         );
         setUnderstandSiteMetadata({
