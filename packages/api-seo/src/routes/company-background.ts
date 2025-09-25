@@ -16,6 +16,7 @@ const understandSite = withOrganizationIdBase
   .output(
     type({
       projectId: "string",
+      organizationId: "string",
       taskId: "string",
     }),
   )
@@ -53,7 +54,11 @@ const understandSite = withOrganizationIdBase
           message: "Error creating task run",
         });
       }
-      return { projectId: upsertProjectResult.value.id, taskId: taskRun.id };
+      return {
+        projectId: upsertProjectResult.value.id,
+        organizationId: context.session.activeOrganizationId,
+        taskId: taskRun.id,
+      };
     });
     return taskRun;
   });
