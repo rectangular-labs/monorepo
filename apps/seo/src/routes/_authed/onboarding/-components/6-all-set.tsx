@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
 import { Link } from "@tanstack/react-router";
+import { AUTO_ROUTE_ORG } from "~/lib/organization";
 import { OnboardingSteps } from "../-lib/steps";
 
 export function OnboardingAllSet({
@@ -35,7 +36,7 @@ export function OnboardingAllSet({
         <Button asChild className="w-full" type="button">
           <Link
             params={{
-              organizationSlug: "organization",
+              organizationSlug: AUTO_ROUTE_ORG,
               projectSlug: slug,
             }}
             to="/$organizationSlug/$projectSlug"

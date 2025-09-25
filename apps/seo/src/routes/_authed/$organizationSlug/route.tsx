@@ -1,8 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
+import { AUTO_ROUTE_ORG } from "~/lib/organization";
 import { AppHeader } from "./-components/app-header";
-
-const AUTO_ROUTE_ORG = "organization";
 
 export const Route = createFileRoute("/_authed/$organizationSlug")({
   beforeLoad: async ({ params, context, preload }) => {
@@ -48,6 +47,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
     if (preload) {
       return {
         organizations,
+        activeOrganization: undefined
       };
     }
 

@@ -146,7 +146,6 @@ export const understandSiteTask: ReturnType<
       console.error("Error in understandSiteTask", error);
       throw error;
     });
-    console.log("text", text);
     const websiteInfo = await llmParseJson(text, StructuredSeoSchema);
 
     setUnderstandSiteMetadata({

@@ -39,10 +39,6 @@ ${outputData}`;
           repairedText = tripleTildeMatch[1];
         } else if (singleTildeMatch?.[1]) {
           repairedText = singleTildeMatch[1];
-        } else {
-          repairedText = repairedText
-            .replaceAll("ny\n```json\n", "")
-            .replaceAll("\n```", "");
         }
 
         repairedText = repairedText.trim();
