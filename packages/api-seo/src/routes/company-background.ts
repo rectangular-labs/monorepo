@@ -68,9 +68,9 @@ const outputSchema = type({
   status:
     "'pending' | 'queued' | 'running' | 'completed' | 'cancelled' | 'failed'",
   statusMessage: "string",
-  websiteInfo: seoWebsiteInfoSchema
+  "websiteInfo?": seoWebsiteInfoSchema
     .merge(type({ name: "string" }))
-    .or(type("undefined")),
+    .or(type.undefined),
 });
 
 const getUnderstandSiteStatus = protectedBase
