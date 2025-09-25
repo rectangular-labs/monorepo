@@ -1,9 +1,13 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { getCurrentSession } from "~/lib/auth/client";
+import { getApiClientRq } from "~/lib/api";
 
 export const Route = createFileRoute("/_authed")({
-  beforeLoad: async ({ location }) => {
-    const session = await getCurrentSession();
+  beforeLoad: async ({ location, context }) => {
+    const session = await context.queryClient.fetchQuery(
+      getApiClientRq().auth.session.current.queryOptions({
+        staleTime: 15 * 1000, // 15 seconds
+      }),
+    );
     if (!session) {
       throw redirect({
         to: "/login",
@@ -12,6 +16,7 @@ export const Route = createFileRoute("/_authed")({
         },
       });
     }
+
     return { ...session };
   },
   component: AuthedLayout,

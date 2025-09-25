@@ -1,8 +1,10 @@
-import { rpcClient, rqApiClient } from "@rectangular-labs/api-seo/client";
+import {
+  createTanstackQueryUtils,
+  rpcClient,
+} from "@rectangular-labs/api-seo/client";
 import { serverClient } from "@rectangular-labs/api-seo/server";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
-import { clientEnv } from "./env";
 
 export const getApiClient = createIsomorphicFn()
   .server(() => {
@@ -19,9 +21,4 @@ export const getApiClient = createIsomorphicFn()
     const client = rpcClient(window.location.origin);
     return client;
   });
-
-export const apiClientRq = rqApiClient(
-  typeof window !== "undefined"
-    ? window.location.origin
-    : clientEnv().VITE_SEO_URL,
-);
+export const getApiClientRq = () => createTanstackQueryUtils(getApiClient());

@@ -12,6 +12,12 @@ export const createRpcLink = ({
 }) =>
   new RPCLink({
     url: `${baseUrl}${path}`,
+    fetch(request, init) {
+      return globalThis.fetch(request, {
+        ...init,
+        credentials: "include", // Include cookies for cross-origin requests
+      });
+    },
   });
 
 export const createOpenApiLink = ({

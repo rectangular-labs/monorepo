@@ -13,7 +13,7 @@ export function OnboardingContent() {
   const matcher = OnboardingSteps.useStepper();
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-6 py-6">
+    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center gap-6 py-6">
       <OnboardingProgress />
       <AutoHeight
         className="w-full"
