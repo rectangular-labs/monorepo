@@ -6,16 +6,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
-import { ManageProjectForm } from "~/routes/_authed/-components/manage-project-form";
-
-type FormValues = {
-  name: string;
-  websiteUrl: string;
-  businessOverview: string;
-  idealCustomer: string;
-  serviceRegion: string;
-  industry: string;
-};
+import {
+  ManageProjectForm,
+  type ManageProjectFormValues,
+} from "~/routes/_authed/-components/manage-project-form";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/settings",
@@ -54,7 +48,7 @@ function PageComponent() {
     }),
   );
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: ManageProjectFormValues) => {
     if (!activeProject?.id || !activeProject?.organizationId) {
       return;
     }

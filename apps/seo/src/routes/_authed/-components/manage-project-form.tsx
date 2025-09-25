@@ -33,7 +33,7 @@ const formSchema = type({
       message: () => "Must be a valid URL",
     }),
 }).merge(seoWebsiteInfoSchema.omit("version"));
-type FormValues = typeof formSchema.infer;
+export type ManageProjectFormValues = typeof formSchema.infer;
 
 export function ManageProjectForm({
   defaultValues,
@@ -41,8 +41,8 @@ export function ManageProjectForm({
   children,
   className,
 }: {
-  defaultValues?: Partial<FormValues>;
-  onSubmit: (values: FormValues) => void | Promise<void>;
+  defaultValues?: Partial<ManageProjectFormValues>;
+  onSubmit: (values: ManageProjectFormValues) => void | Promise<void>;
   className?: string;
   children?: ReactNode;
 }) {
@@ -58,7 +58,7 @@ export function ManageProjectForm({
     },
   });
 
-  const submitForm = async (values: FormValues) => {
+  const submitForm = async (values: ManageProjectFormValues) => {
     const result = await safe(() => Promise.resolve(onSubmit(values)));
     if (!result.ok) {
       form.setError("root", {
