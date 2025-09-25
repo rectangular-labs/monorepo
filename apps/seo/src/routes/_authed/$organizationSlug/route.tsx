@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
     if (preload) {
       return {
         organizations,
-        activeOrganization: undefined
+        activeOrganization: undefined,
       };
     }
 
