@@ -80,7 +80,7 @@ function RootLayout() {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <ThemeProvider attribute="class" enableSystem>
           <Outlet />
           <Toaster />

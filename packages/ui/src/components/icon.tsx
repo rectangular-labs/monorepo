@@ -24,6 +24,7 @@ import {
   PartyPopperIcon,
   PhoneCallIcon,
   PlusIcon,
+  RotateCcwIcon,
   SearchIcon,
   SettingsIcon,
   ShieldIcon,
@@ -76,6 +77,7 @@ export const User = UserIcon;
 export const X = LucideXIcon;
 export const Zap = ZapIcon;
 export const Folder = FolderIcon;
+export const RotateCcw = RotateCcwIcon;
 
 export const Logo = (props: IconProps) => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>

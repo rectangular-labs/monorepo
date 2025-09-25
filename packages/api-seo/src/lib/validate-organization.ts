@@ -1,17 +1,16 @@
 import { ORPCError, os } from "@orpc/server";
 import type { Session } from "@rectangular-labs/auth";
-import { type } from "arktype";
 import { member } from "../../../db/src/schema/auth-schema";
 import type { InitialContext } from "../types";
 
 export const validateOrganizationMiddleware = os
   .$context<InitialContext & Session>()
   .middleware(async ({ next, context }, identifier: string) => {
-    const isSlug = type("string.uuid")(identifier) instanceof type.errors;
     const organization = await context.db.query.organization.findFirst({
-      where: (table, { eq }) =>
-        isSlug ? eq(table.slug, identifier) : eq(table.id, identifier),
+      where: (table, { eq, or }) =>
+        or(eq(table.slug, identifier), eq(table.id, identifier)),
     });
+
     if (!organization) {
       throw new ORPCError("BAD_REQUEST", {
         message: "Invalid Organization Identifier",

@@ -21,8 +21,10 @@ import { Route as MarketingBlogIndexRouteImport } from './routes/_marketing/blog
 import { Route as AuthedOnboardingIndexRouteImport } from './routes/_authed/onboarding/index'
 import { Route as AuthedOrganizationSlugIndexRouteImport } from './routes/_authed/$organizationSlug/index'
 import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog/$'
-import { Route as AuthedOrganizationSlugSettingRouteImport } from './routes/_authed/$organizationSlug/setting'
+import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/route'
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
+import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings'
+import { Route as AuthedOrganizationSlugProjectSlugCampaignsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/campaigns'
 import { ServerRoute as ApiSplatServerRouteImport } from './routes/api/$'
 import { ServerRoute as ApiRpcSplatServerRouteImport } from './routes/api/rpc.$'
 import { ServerRoute as MarketingBlogRssDotxmlServerRouteImport } from './routes/_marketing/blog/rss[.]xml'
@@ -79,17 +81,29 @@ const MarketingBlogSplatRoute = MarketingBlogSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => MarketingBlogRouteRoute,
 } as any)
-const AuthedOrganizationSlugSettingRoute =
-  AuthedOrganizationSlugSettingRouteImport.update({
-    id: '/setting',
-    path: '/setting',
+const AuthedOrganizationSlugProjectSlugRouteRoute =
+  AuthedOrganizationSlugProjectSlugRouteRouteImport.update({
+    id: '/$projectSlug',
+    path: '/$projectSlug',
     getParentRoute: () => AuthedOrganizationSlugRouteRoute,
   } as any)
 const AuthedOrganizationSlugProjectSlugIndexRoute =
   AuthedOrganizationSlugProjectSlugIndexRouteImport.update({
-    id: '/$projectSlug/',
-    path: '/$projectSlug/',
-    getParentRoute: () => AuthedOrganizationSlugRouteRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
+  } as any)
+const AuthedOrganizationSlugProjectSlugSettingsRoute =
+  AuthedOrganizationSlugProjectSlugSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
+  } as any)
+const AuthedOrganizationSlugProjectSlugCampaignsRoute =
+  AuthedOrganizationSlugProjectSlugCampaignsRouteImport.update({
+    id: '/campaigns',
+    path: '/campaigns',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
   } as any)
 const ApiSplatServerRoute = ApiSplatServerRouteImport.update({
   id: '/api/$',
@@ -113,21 +127,24 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
   '/blog': typeof MarketingBlogRouteRouteWithChildren
   '/': typeof MarketingIndexRoute
-  '/$organizationSlug/setting': typeof AuthedOrganizationSlugSettingRoute
+  '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/blog/$': typeof MarketingBlogSplatRoute
   '/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog/': typeof MarketingBlogIndexRoute
-  '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
+  '/$organizationSlug/$projectSlug/campaigns': typeof AuthedOrganizationSlugProjectSlugCampaignsRoute
+  '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
+  '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof MarketingIndexRoute
-  '/$organizationSlug/setting': typeof AuthedOrganizationSlugSettingRoute
   '/blog/$': typeof MarketingBlogSplatRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog': typeof MarketingBlogIndexRoute
+  '/$organizationSlug/$projectSlug/campaigns': typeof AuthedOrganizationSlugProjectSlugCampaignsRoute
+  '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
 }
 export interface FileRoutesById {
@@ -138,11 +155,13 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
   '/_marketing/blog': typeof MarketingBlogRouteRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
-  '/_authed/$organizationSlug/setting': typeof AuthedOrganizationSlugSettingRoute
+  '/_authed/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/_marketing/blog/$': typeof MarketingBlogSplatRoute
   '/_authed/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
   '/_marketing/blog/': typeof MarketingBlogIndexRoute
+  '/_authed/$organizationSlug/$projectSlug/campaigns': typeof AuthedOrganizationSlugProjectSlugCampaignsRoute
+  '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
 }
 export interface FileRouteTypes {
@@ -152,21 +171,24 @@ export interface FileRouteTypes {
     | '/$organizationSlug'
     | '/blog'
     | '/'
-    | '/$organizationSlug/setting'
+    | '/$organizationSlug/$projectSlug'
     | '/blog/$'
     | '/$organizationSlug/'
     | '/onboarding'
     | '/blog/'
-    | '/$organizationSlug/$projectSlug'
+    | '/$organizationSlug/$projectSlug/campaigns'
+    | '/$organizationSlug/$projectSlug/settings'
+    | '/$organizationSlug/$projectSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/'
-    | '/$organizationSlug/setting'
     | '/blog/$'
     | '/$organizationSlug'
     | '/onboarding'
     | '/blog'
+    | '/$organizationSlug/$projectSlug/campaigns'
+    | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug'
   id:
     | '__root__'
@@ -176,11 +198,13 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug'
     | '/_marketing/blog'
     | '/_marketing/'
-    | '/_authed/$organizationSlug/setting'
+    | '/_authed/$organizationSlug/$projectSlug'
     | '/_marketing/blog/$'
     | '/_authed/$organizationSlug/'
     | '/_authed/onboarding/'
     | '/_marketing/blog/'
+    | '/_authed/$organizationSlug/$projectSlug/campaigns'
+    | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/$projectSlug/'
   fileRoutesById: FileRoutesById
 }
@@ -291,19 +315,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingBlogSplatRouteImport
       parentRoute: typeof MarketingBlogRouteRoute
     }
-    '/_authed/$organizationSlug/setting': {
-      id: '/_authed/$organizationSlug/setting'
-      path: '/setting'
-      fullPath: '/$organizationSlug/setting'
-      preLoaderRoute: typeof AuthedOrganizationSlugSettingRouteImport
+    '/_authed/$organizationSlug/$projectSlug': {
+      id: '/_authed/$organizationSlug/$projectSlug'
+      path: '/$projectSlug'
+      fullPath: '/$organizationSlug/$projectSlug'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugRouteRouteImport
       parentRoute: typeof AuthedOrganizationSlugRouteRoute
     }
     '/_authed/$organizationSlug/$projectSlug/': {
       id: '/_authed/$organizationSlug/$projectSlug/'
-      path: '/$projectSlug'
-      fullPath: '/$organizationSlug/$projectSlug'
+      path: '/'
+      fullPath: '/$organizationSlug/$projectSlug/'
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugRouteRoute
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
+    }
+    '/_authed/$organizationSlug/$projectSlug/settings': {
+      id: '/_authed/$organizationSlug/$projectSlug/settings'
+      path: '/settings'
+      fullPath: '/$organizationSlug/$projectSlug/settings'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
+    }
+    '/_authed/$organizationSlug/$projectSlug/campaigns': {
+      id: '/_authed/$organizationSlug/$projectSlug/campaigns'
+      path: '/campaigns'
+      fullPath: '/$organizationSlug/$projectSlug/campaigns'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignsRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
     }
   }
 }
@@ -333,18 +371,37 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
-interface AuthedOrganizationSlugRouteRouteChildren {
-  AuthedOrganizationSlugSettingRoute: typeof AuthedOrganizationSlugSettingRoute
-  AuthedOrganizationSlugIndexRoute: typeof AuthedOrganizationSlugIndexRoute
+interface AuthedOrganizationSlugProjectSlugRouteRouteChildren {
+  AuthedOrganizationSlugProjectSlugCampaignsRoute: typeof AuthedOrganizationSlugProjectSlugCampaignsRoute
+  AuthedOrganizationSlugProjectSlugSettingsRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   AuthedOrganizationSlugProjectSlugIndexRoute: typeof AuthedOrganizationSlugProjectSlugIndexRoute
+}
+
+const AuthedOrganizationSlugProjectSlugRouteRouteChildren: AuthedOrganizationSlugProjectSlugRouteRouteChildren =
+  {
+    AuthedOrganizationSlugProjectSlugCampaignsRoute:
+      AuthedOrganizationSlugProjectSlugCampaignsRoute,
+    AuthedOrganizationSlugProjectSlugSettingsRoute:
+      AuthedOrganizationSlugProjectSlugSettingsRoute,
+    AuthedOrganizationSlugProjectSlugIndexRoute:
+      AuthedOrganizationSlugProjectSlugIndexRoute,
+  }
+
+const AuthedOrganizationSlugProjectSlugRouteRouteWithChildren =
+  AuthedOrganizationSlugProjectSlugRouteRoute._addFileChildren(
+    AuthedOrganizationSlugProjectSlugRouteRouteChildren,
+  )
+
+interface AuthedOrganizationSlugRouteRouteChildren {
+  AuthedOrganizationSlugProjectSlugRouteRoute: typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
+  AuthedOrganizationSlugIndexRoute: typeof AuthedOrganizationSlugIndexRoute
 }
 
 const AuthedOrganizationSlugRouteRouteChildren: AuthedOrganizationSlugRouteRouteChildren =
   {
-    AuthedOrganizationSlugSettingRoute: AuthedOrganizationSlugSettingRoute,
+    AuthedOrganizationSlugProjectSlugRouteRoute:
+      AuthedOrganizationSlugProjectSlugRouteRouteWithChildren,
     AuthedOrganizationSlugIndexRoute: AuthedOrganizationSlugIndexRoute,
-    AuthedOrganizationSlugProjectSlugIndexRoute:
-      AuthedOrganizationSlugProjectSlugIndexRoute,
   }
 
 const AuthedOrganizationSlugRouteRouteWithChildren =

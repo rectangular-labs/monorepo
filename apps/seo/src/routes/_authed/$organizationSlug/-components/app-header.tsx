@@ -15,6 +15,7 @@ export function AppHeader() {
   const matcher = useMatchRoute();
   const projectParams = matcher({
     to: "/$organizationSlug/$projectSlug",
+    fuzzy: true,
   });
 
   const { data: session } = useQuery(

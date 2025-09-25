@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 
 export function NotFound({ children }: { children?: React.ReactNode }) {
   return (
-    <Section className="flex min-h-screen items-center justify-center text-center">
+    <Section className="flex flex-1 items-center justify-center text-center">
       <div className="mx-auto max-w-xl">
         <p className="font-mono text-muted-foreground text-xs tracking-widest">
           404
