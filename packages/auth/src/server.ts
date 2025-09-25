@@ -23,6 +23,8 @@ export function initAuthHandler(baseURL: string, db: DB) {
   const useDiscord = !!env.AUTH_DISCORD_ID && !!env.AUTH_DISCORD_SECRET;
   const useGithub = !!env.AUTH_GITHUB_ID && !!env.AUTH_GITHUB_SECRET;
   const useReddit = !!env.AUTH_REDDIT_ID && !!env.AUTH_REDDIT_SECRET;
+  const useGoogle =
+    !!env.AUTH_GOOGLE_CLIENT_SECRET && !!env.AUTH_GOOGLE_CLIENT_ID;
 
   const config = {
     baseURL,
@@ -77,7 +79,9 @@ export function initAuthHandler(baseURL: string, db: DB) {
          * Auto-inference blocked by https://github.com/better-auth/better-auth/pull/2891
          */
         currentURL: baseURL,
-        productionURL: baseURL,
+        productionURL: baseURL.includes("pr-")
+          ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}`
+          : baseURL,
       }),
       emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
@@ -135,6 +139,15 @@ export function initAuthHandler(baseURL: string, db: DB) {
           clientId: env.AUTH_REDDIT_ID,
           clientSecret: env.AUTH_REDDIT_SECRET,
           redirectURI: `${baseURL}/api/auth/callback/reddit`,
+        },
+      }),
+      ...(useGoogle && {
+        google: {
+          clientId: env.AUTH_GOOGLE_CLIENT_ID,
+          clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
+          redirectURI: `${baseURL}/api/auth/callback/google`,
+          accessType: "offline",
+          prompt: "select_account consent",
         },
       }),
     },
