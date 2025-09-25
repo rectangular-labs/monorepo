@@ -8,11 +8,14 @@
     "types": ["vite/client", "./worker-configuration.d.ts"],
 
     /* Linting */
+    // This causes issues with better auth
+    "exactOptionalPropertyTypes": false,
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "@rectangular-labs/ui/*": ["../../packages/ui/src/*"]
+      "@rectangular-labs/ui/*": ["../../packages/ui/src/*"],
+      "@rectangular-labs/auth/*": ["../../packages/auth/src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],
