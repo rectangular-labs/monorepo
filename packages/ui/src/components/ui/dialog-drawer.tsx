@@ -22,7 +22,7 @@ import {
 } from "./drawer";
 
 export type DrawerDialogProps = {
-  loading?: boolean;
+  isLoading?: boolean;
   open?: boolean;
   className?: string;
   onOpenChange?: (open: boolean) => void;
@@ -31,7 +31,7 @@ export type DrawerDialogProps = {
 };
 
 export default function DialogDrawer({
-  loading = false,
+  isLoading = false,
   open: controlledOpen,
   className,
   onOpenChange: controlledOnOpenChange,
@@ -51,8 +51,8 @@ export default function DialogDrawer({
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
         <DialogContent
           className={className}
-          onEscapeKeyDown={(e) => loading && e.preventDefault()}
-          onInteractOutside={(e) => loading && e.preventDefault()}
+          onEscapeKeyDown={(e) => isLoading && e.preventDefault()}
+          onInteractOutside={(e) => isLoading && e.preventDefault()}
         >
           {children}
         </DialogContent>
@@ -65,8 +65,8 @@ export default function DialogDrawer({
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent
         className={className}
-        onEscapeKeyDown={(e) => loading && e.preventDefault()}
-        onInteractOutside={(e) => loading && e.preventDefault()}
+        onEscapeKeyDown={(e) => isLoading && e.preventDefault()}
+        onInteractOutside={(e) => isLoading && e.preventDefault()}
       >
         {children}
       </DrawerContent>
