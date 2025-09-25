@@ -25,13 +25,12 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy
     if: ${{ github.event.action != 'closed' }}
-    permissions:  
+    permissions:
       pull-requests: write
     env:
       DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
@@ -41,7 +40,7 @@ jobs:
 
       - name: Setup Dependencies
         uses: ./tooling/github/setup
-      
+
       - name: Resolve deployment context
         id: resolve
         shell: bash
@@ -51,7 +50,7 @@ jobs:
           INPUT_ENV="${{ github.event.inputs.environment || '' }}"
 
           STAGE="preview"
-          ENVIRONMENT="pr-preview"
+          ENVIRONMENT="preview"
           ENV_PATH=".env"
           DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY"
           DEPLOY_CMD="deploy --env $ENVIRONMENT"
@@ -91,7 +90,7 @@ jobs:
           echo "env_path=$ENV_PATH" >> "$GITHUB_OUTPUT"
           echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
           echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
-         
+
       - name: Update Environment Variables for Preview
         if: ${{ steps.resolve.outputs.stage == 'preview' }}
         shell: bash
@@ -105,20 +104,19 @@ jobs:
           sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_WWW"
           sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_SEO"
           sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
-        
+
       - name: Prepare secrets
         id: prepare_secrets
         uses: ./tooling/github/prepare-secrets
         with:
           env_path: ${{ steps.resolve.outputs.env_path }}
-     
+
       - name: Build
         run: pnpm run build:${{ steps.resolve.outputs.stage }}
-        
 
       - name: Migrate Database
         run: pnpm run db:mp:${{ steps.resolve.outputs.stage }}
-        
+
       - name: Deploy WWW
         id: deploy_www
         uses: cloudflare/wrangler-action@v3
@@ -130,8 +128,7 @@ jobs:
           command: ${{ steps.resolve.outputs.deploy_command }}
           environment: ${{ steps.resolve.outputs.environment }}
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
-    
-          
+
       - name: Deploy SEO
         id: deploy_seo
         uses: cloudflare/wrangler-action@v3
@@ -160,7 +157,7 @@ jobs:
       STAGE: pr-${{ github.event.number }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Dependencies
         uses: ./tooling/github/setup
 
@@ -189,4 +186,3 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: delete --env ${{ env.STAGE }}
-          
