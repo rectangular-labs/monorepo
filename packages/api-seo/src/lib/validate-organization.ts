@@ -1,6 +1,5 @@
 import { ORPCError, os } from "@orpc/server";
 import type { Session } from "@rectangular-labs/auth";
-import { member } from "../../../db/src/schema/auth-schema";
 import type { InitialContext } from "../types";
 
 export const validateOrganizationMiddleware = os
@@ -16,7 +15,7 @@ export const validateOrganizationMiddleware = os
         message: "Invalid Organization Identifier",
       });
     }
-    context.db.query.member.findFirst({
+    const member = await context.db.query.member.findFirst({
       where: (table, { eq, and }) =>
         and(
           eq(table.organizationId, organization.id),
