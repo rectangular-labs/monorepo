@@ -1,7 +1,7 @@
 import type { Organization } from "@rectangular-labs/auth";
 import { createFileRoute } from "@tanstack/react-router";
 import { type } from "arktype";
-import { getUserOrganizations } from "~/lib/auth/client";
+import { getApiClientRq } from "~/lib/api";
 import { OnboardingContent } from "./-components/content";
 import { OnboardingSteps } from "./-lib/steps";
 
@@ -9,17 +9,17 @@ export const Route = createFileRoute("/_authed/onboarding/")({
   validateSearch: type({
     type: "'new-user' | 'new-project' = 'new-user'",
   }),
-  loader: async () => {
-    const organizations = await getUserOrganizations();
-    if (!organizations.ok) {
-      throw new Error(organizations.error.message);
-    }
-    if (organizations.value.length === 0) {
-      return { organizations: organizations.value };
+  loader: async ({ context }) => {
+    const organizations = await context.queryClient.fetchQuery(
+      getApiClientRq().auth.organization.list.queryOptions(),
+    );
+
+    if (organizations.length === 0) {
+      return { organizations: [] };
     }
 
     return {
-      organizations: organizations.value,
+      organizations: organizations,
     };
   },
   component: OnboardingPage,

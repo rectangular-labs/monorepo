@@ -28,6 +28,7 @@ import { OnboardingSteps } from "../-lib/steps";
 
 const formSchema = type({
   projectId: type("string.uuid"),
+  organizationIdentifier: type("string"),
   name: type("string")
     .atLeastLength(1)
     .configure({
@@ -45,12 +46,15 @@ export function OnboardingReviewProject() {
 
   const defaultValues =
     matcher.getMetadata<
-      Partial<typeof formSchema.infer & { projectId: string }>
+      Partial<
+        typeof formSchema.infer & { projectId: string; organizationId: string }
+      >
     >("understanding-site");
   const form = useForm({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
       projectId: defaultValues?.projectId || "",
+      organizationIdentifier: defaultValues?.organizationId || "",
       name: defaultValues?.name || "",
       websiteUrl: defaultValues?.websiteUrl || "",
       businessOverview: defaultValues?.businessOverview || "",
@@ -81,6 +85,7 @@ export function OnboardingReviewProject() {
     const slug = toSlug(values.name);
     updateProject({
       id: values.projectId,
+      organizationIdentifier: values.organizationIdentifier,
       websiteUrl: values.websiteUrl,
       name: values.name,
       slug,

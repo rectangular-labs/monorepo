@@ -1,4 +1,3 @@
-import { toSlug } from "@rectangular-labs/auth/lib/to-slug";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
@@ -20,6 +19,7 @@ import {
   useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { type } from "arktype";
 import { authClient } from "~/lib/auth/client";
 import { OnboardingSteps } from "../-lib/steps";

@@ -11,7 +11,7 @@ import { Progress } from "@rectangular-labs/ui/components/ui/progress";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { apiClientRq } from "~/lib/api";
+import { getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
 
 export function OnboardingUnderstandingSite({
@@ -22,15 +22,17 @@ export function OnboardingUnderstandingSite({
   description: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-  const { taskId, projectId, websiteUrl } = matcher.getMetadata<{
-    taskId: string;
-    projectId: string;
-    websiteUrl: string;
-  }>("website-info");
+  const { taskId, projectId, websiteUrl, organizationId } =
+    matcher.getMetadata<{
+      taskId: string;
+      projectId: string;
+      websiteUrl: string;
+      organizationId: string;
+    }>("website-info");
   const [currentTaskId, setCurrentTaskId] = useState(taskId);
   const autoWentNext = matcher.getMetadata("understanding-site");
   const { data: status, error: getStatusError } = useQuery(
-    apiClientRq.companyBackground.getUnderstandSiteStatus.queryOptions({
+    getApiClientRq().companyBackground.getUnderstandSiteStatus.queryOptions({
       refetchInterval: 5_000,
       input: {
         id: currentTaskId,
@@ -38,7 +40,7 @@ export function OnboardingUnderstandingSite({
     }),
   );
   const { mutate: retry, isPending } = useMutation(
-    apiClientRq.companyBackground.understandSite.mutationOptions({
+    getApiClientRq().companyBackground.understandSite.mutationOptions({
       onSuccess: (data) => {
         setCurrentTaskId(data.taskId);
         toast.success("Retrying understanding site");
@@ -70,6 +72,7 @@ export function OnboardingUnderstandingSite({
     matcher.setMetadata("understanding-site", {
       websiteUrl,
       projectId,
+      organizationId,
       ...status?.websiteInfo,
     });
     matcher.next();
