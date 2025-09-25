@@ -10,7 +10,11 @@ import {
   EyeIcon,
   EyeOffIcon,
   FileIcon,
+  FolderIcon,
+  GridIcon,
+  ListIcon,
   Loader2,
+  LogOutIcon,
   XIcon as LucideXIcon,
   MenuIcon,
   MoonIcon,
@@ -19,6 +23,8 @@ import {
   MoveUpRightIcon,
   PartyPopperIcon,
   PhoneCallIcon,
+  PlusIcon,
+  RotateCcwIcon,
   SearchIcon,
   SettingsIcon,
   ShieldIcon,
@@ -35,37 +41,43 @@ import type { SVGProps } from "react";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
-export const Moon = MoonIcon;
-export const Sun = SunIcon;
-export const EyeOn = EyeIcon;
-export const EyeOff = EyeOffIcon;
-export const Spinner = Loader2;
-export const ArrowUp = ArrowUpIcon;
 export const ArrowDown = ArrowDownIcon;
 export const ArrowRight = ArrowRightIcon;
-export const File = FileIcon;
-export const Dot = DotIcon;
-export const Menu = MenuIcon;
-export const X = LucideXIcon;
-export const Search = SearchIcon;
-export const Terminal = TerminalIcon;
-export const User = UserIcon;
-export const MoveRight = MoveRightIcon;
-export const PhoneCall = PhoneCallIcon;
-export const Sparkles = SparklesIcon;
-export const Shield = ShieldIcon;
-export const Star = StarIcon;
-export const Zap = ZapIcon;
-export const MoveDownLeft = MoveDownLeftIcon;
-export const MoveUpRight = MoveUpRightIcon;
+export const ArrowUp = ArrowUpIcon;
 export const Check = CheckIcon;
 export const ChevronDown = ChevronDownIcon;
-export const ChevronsUpDown = ChevronsUpDownIcon;
 export const ChevronRight = ChevronRightIcon;
-export const Settings = SettingsIcon;
+export const ChevronsUpDown = ChevronsUpDownIcon;
+export const Dot = DotIcon;
+export const EyeOff = EyeOffIcon;
+export const EyeOn = EyeIcon;
+export const File = FileIcon;
+export const Folder = FolderIcon;
+export const Grid = GridIcon;
+export const List = ListIcon;
+export const LogOut = LogOutIcon;
+export const Menu = MenuIcon;
+export const Moon = MoonIcon;
+export const MoveDownLeft = MoveDownLeftIcon;
+export const MoveRight = MoveRightIcon;
+export const MoveUpRight = MoveUpRightIcon;
 export const PartyPopper = PartyPopperIcon;
+export const PhoneCall = PhoneCallIcon;
+export const Plus = PlusIcon;
+export const RotateCcw = RotateCcwIcon;
+export const Search = SearchIcon;
+export const Settings = SettingsIcon;
+export const Shield = ShieldIcon;
+export const Sparkles = SparklesIcon;
+export const Spinner = Loader2;
+export const Star = StarIcon;
+export const Sun = SunIcon;
+export const Terminal = TerminalIcon;
 export const Timer = TimerIcon;
 export const TrendingUp = TrendingUpIcon;
+export const User = UserIcon;
+export const X = LucideXIcon;
+export const Zap = ZapIcon;
 
 export const Logo = (props: IconProps) => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>

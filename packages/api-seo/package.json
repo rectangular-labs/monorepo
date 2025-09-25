@@ -18,9 +18,6 @@
     },
     "./types": {
       "default": "./src/types.ts"
-    },
-    "./schemas/*": {
-      "default": "./src/schemas/*.ts"
     }
   },
   "scripts": {

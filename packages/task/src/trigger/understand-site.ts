@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { create, insertMultiple } from "@orama/orama";
-import { schema } from "@rectangular-labs/db";
+import { seoWebsiteInfoSchema } from "@rectangular-labs/db/parsers";
 import { schemaTask } from "@trigger.dev/sdk";
 import { generateText, stepCountIs } from "ai";
 import { type } from "arktype";
@@ -18,7 +18,7 @@ const inputSchema = type({
 
 const outputSchema = type({
   message: "string",
-  websiteInfo: schema.seoWebsiteInfoSchema.merge(type({ name: "string" })),
+  websiteInfo: seoWebsiteInfoSchema.merge(type({ name: "string" })),
 });
 
 export const understandSiteTask: ReturnType<
@@ -43,7 +43,7 @@ export const understandSiteTask: ReturnType<
       onProgress: (args) => {
         const progress = Math.round(
           ((args.succeeded + args.failed + args.inFlight) /
-            (payload.maxRequestsPerCrawl * 2)) *
+            (payload.maxRequestsPerCrawl * 2)) * // we set the crawl to be at most half the progress of the whole understanding process
             100,
         );
         setUnderstandSiteMetadata({
@@ -146,7 +146,6 @@ export const understandSiteTask: ReturnType<
       console.error("Error in understandSiteTask", error);
       throw error;
     });
-    console.log("text", text);
     const websiteInfo = await llmParseJson(text, StructuredSeoSchema);
 
     setUnderstandSiteMetadata({

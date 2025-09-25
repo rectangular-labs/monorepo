@@ -1,6 +1,7 @@
 "use server";
 import { ORPCError } from "@orpc/client";
 import { schema } from "@rectangular-labs/db";
+import { seoWebsiteInfoSchema } from "@rectangular-labs/db/parsers";
 import {
   getUnderstandSiteTask,
   triggerUnderstandSiteTask,
@@ -15,6 +16,7 @@ const understandSite = withOrganizationIdBase
   .output(
     type({
       projectId: "string",
+      organizationId: "string",
       taskId: "string",
     }),
   )
@@ -52,7 +54,11 @@ const understandSite = withOrganizationIdBase
           message: "Error creating task run",
         });
       }
-      return { projectId: upsertProjectResult.value.id, taskId: taskRun.id };
+      return {
+        projectId: upsertProjectResult.value.id,
+        organizationId: context.session.activeOrganizationId,
+        taskId: taskRun.id,
+      };
     });
     return taskRun;
   });
@@ -62,9 +68,9 @@ const outputSchema = type({
   status:
     "'pending' | 'queued' | 'running' | 'completed' | 'cancelled' | 'failed'",
   statusMessage: "string",
-  websiteInfo: schema.seoWebsiteInfoSchema
+  "websiteInfo?": seoWebsiteInfoSchema
     .merge(type({ name: "string" }))
-    .or(type("undefined")),
+    .or(type.undefined),
 });
 
 const getUnderstandSiteStatus = protectedBase

@@ -1,3 +1,5 @@
+import { type } from "arktype";
+import { createSelectSchema } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -194,3 +196,18 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+// ArkType select schemas for auth tables
+export const userSelectSchema = createSelectSchema(user);
+export const sessionSelectSchema = createSelectSchema(session);
+export const accountSelectSchema = createSelectSchema(account);
+export const verificationSelectSchema = createSelectSchema(verification);
+export const passkeySelectSchema = createSelectSchema(passkey);
+export const twoFactorSelectSchema = createSelectSchema(twoFactor);
+export const organizationSelectSchema = createSelectSchema(organization).merge(
+  type({
+    slug: "string",
+  }),
+);
+export const memberSelectSchema = createSelectSchema(member);
+export const invitationSelectSchema = createSelectSchema(invitation);

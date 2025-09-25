@@ -19,8 +19,9 @@ import {
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { type } from "arktype";
-import { apiClientRq } from "~/lib/api";
+import { getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
 
 const backgroundSchema = type({
@@ -35,17 +36,21 @@ export function OnboardingWebsiteInfo({
   title: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
+  const { type } = useSearch({
+    from: "/_authed/onboarding/",
+  });
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
   });
 
   const { mutateAsync: startUnderstanding, isPending } = useMutation(
-    apiClientRq.companyBackground.understandSite.mutationOptions({
+    getApiClientRq().companyBackground.understandSite.mutationOptions({
       onSuccess: (data, { websiteUrl }) => {
         matcher.setMetadata("website-info", {
           websiteUrl,
           taskId: data.taskId,
           projectId: data.projectId,
+          organizationId: data.organizationId,
         });
         matcher.next();
       },
@@ -101,15 +106,21 @@ export function OnboardingWebsiteInfo({
             </CardContent>
             <CardFooter>
               <div className="flex w-full justify-between">
+                {type === "new-user" && (
+                  <Button
+                    disabled={isPending}
+                    onClick={() => matcher.prev()}
+                    type="button"
+                    variant="ghost"
+                  >
+                    Back
+                  </Button>
+                )}
                 <Button
-                  disabled={isPending}
-                  onClick={() => matcher.prev()}
-                  type="button"
-                  variant="ghost"
+                  className={"ml-auto w-fit"}
+                  isLoading={isPending}
+                  type="submit"
                 >
-                  Back
-                </Button>
-                <Button className={"w-fit"} isLoading={isPending} type="submit">
                   Next
                 </Button>
               </div>

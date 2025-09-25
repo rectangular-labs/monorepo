@@ -116,7 +116,7 @@ export const createCrawlSiteRouter = ({
         defuddleDescription = parsed.description;
       } catch (_error) {
         // Ignore extraction errors and fall back to selector text
-        console.info(`Defuddle extraction failed for ${currentUrl}`);
+        console.error(`Defuddle extraction failed for ${currentUrl}`);
       }
 
       const text = await getPageContent(page, selector);

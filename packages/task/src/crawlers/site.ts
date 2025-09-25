@@ -43,8 +43,9 @@ export async function crawlSite(input: SiteCrawlInput) {
       if (resourceFileTypeExclusions.length === 0) {
         return;
       }
-      await page.route(`**/*.{${resourceFileTypeExclusions.join()}}`, (route) =>
-        route.abort("aborted"),
+      await page.route(
+        `**/*.{${resourceFileTypeExclusions.join(",")}}`,
+        (route) => route.abort("aborted"),
       );
       log.info(`Aborting requests for as this is a resource excluded route`);
     },

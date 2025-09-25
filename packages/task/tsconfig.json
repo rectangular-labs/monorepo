@@ -4,7 +4,7 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@rectangular-labs/crawler/*": ["./src/*"]
+      "@rectangular-labs/task/*": ["./src/*"]
     }
   },
   "include": ["src", "trigger.config.ts"],

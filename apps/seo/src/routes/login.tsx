@@ -8,7 +8,8 @@ import {
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { type } from "arktype";
-import { authClient, getCurrentSession } from "~/lib/auth/client";
+import { getApiClientRq } from "~/lib/api";
+import { authClient } from "~/lib/auth/client";
 import { clientEnv } from "~/lib/env";
 
 export const Route = createFileRoute("/login")({
@@ -20,10 +21,21 @@ export const Route = createFileRoute("/login")({
       next: search.next,
     };
   },
-  loader: async ({ deps }) => {
-    const session = await getCurrentSession();
-    if (session && deps.next) {
-      return redirect({ to: deps.next });
+  loader: async ({ deps, context }) => {
+    const session = await context.queryClient.fetchQuery(
+      getApiClientRq().auth.session.current.queryOptions(),
+    );
+
+    if (session) {
+      if (deps.next) {
+        return redirect({ to: deps.next });
+      }
+      return redirect({
+        to: "/$organizationSlug",
+        params: {
+          organizationSlug: "organization",
+        },
+      });
     }
     return;
   },
@@ -49,7 +61,6 @@ function Login() {
           enableConfirmPassword: true,
           enableRememberMe: true,
         }}
-        plugins={["oneTap"]}
         redirects={{
           successCallbackURL: normalizedSuccessCallbackURL,
           onSuccess: () => {

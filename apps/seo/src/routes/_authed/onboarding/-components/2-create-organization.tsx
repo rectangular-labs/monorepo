@@ -19,10 +19,10 @@ import {
   useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { type } from "arktype";
 import { authClient } from "~/lib/auth/client";
 import { OnboardingSteps } from "../-lib/steps";
-import { toSlug } from "../-lib/to-slug";
 
 const backgroundSchema = type({
   name: type("string").atLeastLength(1),

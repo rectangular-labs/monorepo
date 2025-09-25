@@ -10,7 +10,13 @@ import { routeTree } from "./routeTree.gen";
 // to show what's possible with the current APIs.
 
 export function createRouter() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 15, // 15 seconds
+      },
+    },
+  });
 
   return routerWithQueryClient(
     createTanStackRouter({

@@ -47,6 +47,7 @@ export function OrganizationCellView({
                 "truncate font-semibold",
                 size === "lg" ? "text-base" : "text-sm",
               )}
+              title={organization?.name}
             >
               {organization?.name}
             </span>
@@ -57,6 +58,7 @@ export function OrganizationCellView({
                   "truncate opacity-70",
                   size === "lg" ? "text-sm" : "text-xs",
                 )}
+                title={organization.slug}
               >
                 {organization.slug}
               </span>

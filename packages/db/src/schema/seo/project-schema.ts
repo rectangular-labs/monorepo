@@ -6,18 +6,11 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
+import type { seoWebsiteInfoSchema } from "../../schema-parsers/seo-website-info-schema";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
 import { seoTaskRun } from "./task-run-schema";
-
-export const seoWebsiteInfoSchema = type({
-  version: "'v1'",
-  businessOverview: "string",
-  idealCustomer: "string",
-  serviceRegion: "string",
-  industry: "string",
-});
 
 export const seoProject = pgSeoTable(
   "project",

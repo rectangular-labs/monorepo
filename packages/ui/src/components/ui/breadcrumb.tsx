@@ -1,5 +1,5 @@
 import { Slot } from "@radix-ui/react-slot";
-import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, SlashIcon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "../../utils/cn";
@@ -77,7 +77,9 @@ function BreadcrumbSeparator({
       role="presentation"
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? (
+        <SlashIcon className="-rotate-[30deg] h-5 w-5 text-muted-foreground" />
+      )}
     </li>
   );
 }

@@ -6,7 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@rectangular-labs/ui/*": ["./src/*"]
-    }
+    },
+    "exactOptionalPropertyTypes": false
   },
   "include": ["src"],
   "exclude": ["node_modules"]
