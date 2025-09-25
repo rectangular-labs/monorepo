@@ -4,12 +4,7 @@ import * as Icons from "@rectangular-labs/ui/components/icon";
 import { BreadcrumbSeparator } from "@rectangular-labs/ui/components/ui/breadcrumb";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
-import {
-  Link,
-  useMatchRoute,
-  useNavigate,
-  useParams,
-} from "@tanstack/react-router";
+import { Link, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
 import { authClient } from "~/lib/auth/client";
 import { ProjectSwitcher } from "./project-switcher";
@@ -17,10 +12,10 @@ import { UserDropdown } from "./user-dropdown";
 
 export function AppHeader() {
   const navigate = useNavigate();
-  const { projectSlug } = useParams({
-    from: "/_authed/$organizationSlug/$projectSlug",
-  });
   const matcher = useMatchRoute();
+  const projectParams = matcher({
+    to: "/$organizationSlug/$projectSlug",
+  });
 
   const { data: session } = useQuery(
     getApiClientRq().auth.session.current.queryOptions(),
@@ -49,9 +44,9 @@ export function AppHeader() {
     getApiClientRq().project.get.queryOptions({
       input: {
         organizationIdentifier: activeOrganization?.slug ?? "",
-        identifier: projectSlug,
+        identifier: projectParams ? projectParams.projectSlug : "",
       },
-      enabled: !!projectSlug,
+      enabled: !!projectParams,
     }),
   );
 
