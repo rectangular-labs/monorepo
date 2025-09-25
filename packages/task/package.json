@@ -25,23 +25,23 @@
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
     "@trigger.dev/build": "4.0.4",
-    "@types/node": "^24.5.1",
-    "jiti": "^2.5.1",
+    "@types/node": "^24.5.2",
+    "jiti": "^2.6.0",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.14",
+    "@ai-sdk/google": "^2.0.15",
     "@orama/orama": "^3.1.14",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "@trigger.dev/sdk": "4.0.4",
-    "ai": "^5.0.47",
+    "ai": "^5.0.49",
     "arktype": "^2.1.22",
-    "crawlee": "^3.14.1",
+    "crawlee": "^3.15.0",
     "defuddle": "^0.6.6",
     "jsdom": "^26.1.0",
-    "playwright": "1.55.0",
+    "playwright": "1.55.1",
     "unstorage": "^1.17.1"
   }
 }

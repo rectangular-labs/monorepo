@@ -16,7 +16,6 @@ export const Route = createFileRoute("/_authed")({
         },
       });
     }
-
     return { ...session };
   },
   component: AuthedLayout,

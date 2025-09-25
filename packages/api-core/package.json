@@ -19,16 +19,16 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.5.1",
+    "@types/node": "^24.5.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@orpc/arktype": "^1.8.9",
-    "@orpc/client": "^1.8.9",
-    "@orpc/contract": "^1.8.9",
-    "@orpc/json-schema": "^1.8.9",
-    "@orpc/openapi": "^1.8.9",
-    "@orpc/openapi-client": "^1.8.9",
-    "@orpc/server": "^1.8.9"
+    "@orpc/arktype": "^1.9.0",
+    "@orpc/client": "^1.9.0",
+    "@orpc/contract": "^1.9.0",
+    "@orpc/json-schema": "^1.9.0",
+    "@orpc/openapi": "^1.9.0",
+    "@orpc/openapi-client": "^1.9.0",
+    "@orpc/server": "^1.9.0"
   }
 }

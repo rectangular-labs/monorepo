@@ -52,6 +52,7 @@ export const Dot = DotIcon;
 export const EyeOff = EyeOffIcon;
 export const EyeOn = EyeIcon;
 export const File = FileIcon;
+export const Folder = FolderIcon;
 export const Grid = GridIcon;
 export const List = ListIcon;
 export const LogOut = LogOutIcon;
@@ -63,6 +64,7 @@ export const MoveUpRight = MoveUpRightIcon;
 export const PartyPopper = PartyPopperIcon;
 export const PhoneCall = PhoneCallIcon;
 export const Plus = PlusIcon;
+export const RotateCcw = RotateCcwIcon;
 export const Search = SearchIcon;
 export const Settings = SettingsIcon;
 export const Shield = ShieldIcon;
@@ -76,8 +78,6 @@ export const TrendingUp = TrendingUpIcon;
 export const User = UserIcon;
 export const X = LucideXIcon;
 export const Zap = ZapIcon;
-export const Folder = FolderIcon;
-export const RotateCcw = RotateCcwIcon;
 
 export const Logo = (props: IconProps) => (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>
