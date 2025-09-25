@@ -13,15 +13,23 @@ export const schema = {
   ...seoScheme,
 };
 
+let db: ReturnType<
+  typeof drizzle<typeof schema, postgres.Sql<Record<string, never>>>
+> | null = null;
+
 export const createDb = () => {
+  if (db) {
+    return db;
+  }
   const env = dbEnv();
   const client = postgres(env.DATABASE_URL, {
     prepare: false,
   });
-  return drizzle(client, {
+  db = drizzle(client, {
     schema,
     casing: "snake_case",
   });
+  return db;
 };
 
 export type DB = ReturnType<typeof createDb>;

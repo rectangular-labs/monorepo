@@ -11,6 +11,10 @@
     "./env": {
       "types": "./dist/env.d.ts",
       "default": "./src/env.ts"
+    },
+    "./parsers": {
+      "types": "./dist/schema-parsers/index.d.ts",
+      "default": "./src/schema-parsers/index.ts"
     }
   },
   "license": "MIT",
@@ -42,7 +46,6 @@
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
     "@types/node": "^24.5.1",
-    "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.4",
     "typescript": "^5.9.2"
   },
