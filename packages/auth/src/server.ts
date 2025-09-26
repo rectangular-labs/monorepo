@@ -79,9 +79,10 @@ export function initAuthHandler(baseURL: string, db: DB) {
          * Auto-inference blocked by https://github.com/better-auth/better-auth/pull/2891
          */
         currentURL: baseURL,
-        productionURL: baseURL.includes("pr-")
-          ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}`
-          : baseURL,
+        productionURL:
+          baseURL.includes("pr-") || baseURL.includes("preview")
+            ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}`
+            : baseURL,
       }),
       emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
