@@ -21,7 +21,7 @@ import {
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { type } from "arktype";
-import { authClient } from "~/lib/auth/client";
+import { authClient } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
 
 const backgroundSchema = type({

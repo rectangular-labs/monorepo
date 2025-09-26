@@ -18,10 +18,7 @@ export const createDb = () => {
   const client = postgres(env.DATABASE_URL, {
     prepare: false,
   });
-  const db = drizzle(client, {
-    schema,
-    casing: "snake_case",
-  });
+  const db = drizzle({ client, schema, casing: "snake_case" });
   return db;
 };
 
