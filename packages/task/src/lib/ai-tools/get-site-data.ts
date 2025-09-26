@@ -8,6 +8,19 @@ const toolInputSchema = type({
     "Document id from search-sites hits[number].id",
   ),
 });
+
+const documentSchema = type({
+  id: "string|number",
+  title: "string",
+  url: "string",
+  description: "string",
+  contentMarkdown: "string",
+});
+const toolOutputSchema = type({
+  found: "boolean",
+  documents: documentSchema.array(),
+});
+
 export function createGetSitesDataTool(db: AnyOrama<SiteSchema>) {
   return tool({
     description:
@@ -15,15 +28,23 @@ export function createGetSitesDataTool(db: AnyOrama<SiteSchema>) {
     inputSchema: jsonSchema<typeof toolInputSchema.infer>(
       toolInputSchema.toJsonSchema() as JSONSchema7,
     ),
+    outputSchema: jsonSchema<typeof toolOutputSchema.infer>(
+      toolOutputSchema.toJsonSchema() as JSONSchema7,
+    ),
     execute: async ({ ids }) => {
-      const documents = [];
+      const documents: (typeof documentSchema.infer)[] = [];
       for (const id of ids) {
         const document = await getByID(db, id);
         if (!document) {
           continue;
         }
-        const { contentHtml: _, text: __, extractor: ___, ...rest } = document;
-        documents.push(rest);
+        documents.push({
+          id: document.id,
+          title: document.title,
+          url: document.url,
+          description: document.description,
+          contentMarkdown: document.contentMarkdown,
+        });
       }
       return { found: documents.length > 0, documents };
     },
