@@ -10,5 +10,4 @@ onlyBuiltDependencies:
   - core-js-pure
   - esbuild
 
-nodeLinker: hoisted
 linkWorkspacePackages: true

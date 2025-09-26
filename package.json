@@ -50,5 +50,10 @@
     "turbo": "^2.5.7",
     "typescript": "^5.9.2"
   },
+  "pnpm": {
+    "overrides": {
+      "@tanstack/react-router": "1.131.50"
+    }
+  },
   "packageManager": "pnpm@10.17.1"
 }

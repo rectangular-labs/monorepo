@@ -48,8 +48,5 @@
     "@types/node": "^24.5.2",
     "drizzle-kit": "^0.31.4",
     "typescript": "^5.9.2"
-  },
-  "overrides": {
-    "drizzle-orm": "^0.44.5"
   }
 }
