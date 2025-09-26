@@ -28,7 +28,7 @@ export function initAuthHandler(baseURL: string, db: DB) {
 
   const productionUrl =
     baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
-      ? `https://preview.seo.rectangularlabs.com}`
+      ? `https://preview.seo.rectangularlabs.com`
       : baseURL;
 
   console.log("productionUrl", productionUrl);
