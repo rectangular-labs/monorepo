@@ -21,6 +21,7 @@ import {
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { type } from "arktype";
+import { useState } from "react";
 import { authClient } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
 
@@ -33,13 +34,16 @@ export function OnboardingCreateOrganization() {
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values: typeof backgroundSchema.infer) => {
     const slug = toSlug(values.name);
+    setIsLoading(true);
     const valid = await authClient.organization.checkSlug({
       slug,
     });
     if (valid.error) {
+      setIsLoading(false);
       form.setError("root", {
         message:
           valid.error.message ??
@@ -48,6 +52,7 @@ export function OnboardingCreateOrganization() {
       return;
     }
     if (!valid.data?.status || slug === "organization") {
+      setIsLoading(false);
       form.setError("name", {
         message: "Organization name already taken, please choose another one.",
       });
@@ -58,12 +63,15 @@ export function OnboardingCreateOrganization() {
       name: values.name,
       slug,
     });
+    setIsLoading(false);
+
     if (organizationResult.error) {
       form.setError("root", {
         message:
           organizationResult.error.message ||
           organizationResult.error.statusText,
       });
+      setIsLoading(false);
       return;
     }
     matcher.next();
@@ -115,7 +123,7 @@ export function OnboardingCreateOrganization() {
                 >
                   Back
                 </Button>
-                <Button className={"w-fit"} type="submit">
+                <Button className={"w-fit"} isLoading={isLoading} type="submit">
                   Continue
                 </Button>
               </div>
