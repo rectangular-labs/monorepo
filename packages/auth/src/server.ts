@@ -27,9 +27,11 @@ export function initAuthHandler(baseURL: string, db: DB) {
     !!env.AUTH_GOOGLE_CLIENT_SECRET && !!env.AUTH_GOOGLE_CLIENT_ID;
 
   const productionUrl =
-    baseURL.startsWith("http://pr-") || baseURL.startsWith("https://preview.")
-      ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}`
+    baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
+      ? `https://preview.seo.rectangularlabs.com}`
       : baseURL;
+
+  console.log("productionUrl", productionUrl);
 
   const config = {
     baseURL,
