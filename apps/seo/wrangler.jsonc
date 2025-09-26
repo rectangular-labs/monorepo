@@ -12,7 +12,7 @@
     "enabled": true
   },
   "placement": {
-    "mode": "smart"
+    "mode": "off"
   },
   // mostly a workaround to avoid issues with the build and next themes
   "keep_names": false,
