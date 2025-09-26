@@ -13,49 +13,22 @@ export const schema = {
   ...seoScheme,
 };
 
-// Thread-safe singleton implementation
 let db: ReturnType<
   typeof drizzle<typeof schema, postgres.Sql<Record<string, never>>>
 > | null = null;
-let isInitializing = false;
 
 export const createDb = () => {
-  // If already initialized, return immediately
   if (db) {
     return db;
   }
-
-  // Prevent multiple concurrent initializations
-  if (isInitializing) {
-    // Busy wait with small delay to avoid tight loop
-    // In Node.js, this is sufficient for typical usage patterns
-    while (isInitializing) {
-      // do nothing
-    }
-    // After waiting, db should be initialized
-    if (db) {
-      return db;
-    }
-  }
-
-  // Mark as initializing
-  isInitializing = true;
-  try {
-    // Double-check pattern: verify db is still null after acquiring the lock
-    if (!db) {
-      const env = dbEnv();
-      const client = postgres(env.DATABASE_URL, {
-        prepare: false,
-      });
-      db = drizzle(client, {
-        schema,
-        casing: "snake_case",
-      });
-    }
-  } finally {
-    // Always reset the initializing flag
-    isInitializing = false;
-  }
+  const env = dbEnv();
+  const client = postgres(env.DATABASE_URL, {
+    prepare: false,
+  });
+  db = drizzle(client, {
+    schema,
+    casing: "snake_case",
+  });
 
   return db;
 };
