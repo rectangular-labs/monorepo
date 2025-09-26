@@ -6,7 +6,7 @@ import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
-import { authClient } from "~/lib/auth/client";
+import { authClient } from "~/lib/auth";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserDropdown } from "./user-dropdown";
 
@@ -97,14 +97,14 @@ export function AppHeader() {
                 isCreatingOrganization={isCreatingOrganization}
                 isLoadingOrganizations={isLoadingOrganizations}
                 onCreateOrganization={onCreateOrganization}
-                onSelect={(orgSlug) => {
+                onSelect={async (orgSlug) => {
                   void navigate({
                     to: "/$organizationSlug",
                     params: {
                       organizationSlug: orgSlug,
                     },
                   });
-                  refetchActiveOrganization();
+                  await refetchActiveOrganization();
                 }}
                 organizations={organizations}
                 showCreateButton

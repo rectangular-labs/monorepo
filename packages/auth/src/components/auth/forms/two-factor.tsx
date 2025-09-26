@@ -127,7 +127,7 @@ export function TwoFactorForm({
     }
 
     toast.success("Two-factor authentication enabled successfully");
-    successHandler();
+    await successHandler();
   }
 
   return (

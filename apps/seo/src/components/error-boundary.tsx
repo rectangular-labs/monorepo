@@ -38,7 +38,7 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Button
           onClick={() => {
-            router.invalidate();
+            void router.invalidate();
           }}
           type="button"
           variant="outline"

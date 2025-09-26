@@ -27,7 +27,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/select";
 import { useMutation } from "@tanstack/react-query";
 import { type } from "arktype";
-import { authClient } from "~/lib/auth/client";
+import { authClient } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
 
 const sourceOptions = [

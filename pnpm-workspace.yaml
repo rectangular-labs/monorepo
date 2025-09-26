@@ -9,3 +9,5 @@ onlyBuiltDependencies:
   - aws-sdk
   - core-js-pure
   - esbuild
+
+linkWorkspacePackages: true

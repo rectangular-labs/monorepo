@@ -65,7 +65,7 @@ export function ProjectSwitcher<T extends React.ComponentType<{ to: string }>>({
   const onOpenChange = (open: boolean) => {
     setOpen(open);
     if (open) {
-      router.preloadRoute({
+      void router.preloadRoute({
         to: "/onboarding",
         search: {
           type: "new-project",

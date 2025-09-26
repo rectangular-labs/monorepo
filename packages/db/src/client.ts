@@ -1,3 +1,5 @@
+import { neon } from "@neondatabase/serverless";
+import { drizzle as neonDrizzle } from "drizzle-orm/neon-http";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { dbEnv } from "./env";
@@ -13,50 +15,17 @@ export const schema = {
   ...seoScheme,
 };
 
-// Thread-safe singleton implementation
-let db: ReturnType<
-  typeof drizzle<typeof schema, postgres.Sql<Record<string, never>>>
-> | null = null;
-let isInitializing = false;
-
 export const createDb = () => {
-  // If already initialized, return immediately
-  if (db) {
+  const env = dbEnv();
+  if (process.env.NODE_ENV === "development") {
+    const client = postgres(env.DATABASE_URL, {
+      prepare: false,
+    });
+    const db = drizzle({ client, schema, casing: "snake_case" });
     return db;
   }
-
-  // Prevent multiple concurrent initializations
-  if (isInitializing) {
-    // Busy wait with small delay to avoid tight loop
-    // In Node.js, this is sufficient for typical usage patterns
-    while (isInitializing) {
-      // do nothing
-    }
-    // After waiting, db should be initialized
-    if (db) {
-      return db;
-    }
-  }
-
-  // Mark as initializing
-  isInitializing = true;
-  try {
-    // Double-check pattern: verify db is still null after acquiring the lock
-    if (!db) {
-      const env = dbEnv();
-      const client = postgres(env.DATABASE_URL, {
-        prepare: false,
-      });
-      db = drizzle(client, {
-        schema,
-        casing: "snake_case",
-      });
-    }
-  } finally {
-    // Always reset the initializing flag
-    isInitializing = false;
-  }
-
+  const sql = neon(env.DATABASE_URL);
+  const db = neonDrizzle({ client: sql, schema, casing: "snake_case" });
   return db;
 };
 

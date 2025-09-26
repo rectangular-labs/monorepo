@@ -1,5 +1,5 @@
 {
-  "extends": "@rectangular-labs/typescript/tsconfig.internal-package.json",
+  "extends": "@rectangular-labs/typescript/tsconfig.compiled-package.json",
   "compilerOptions": {
     "lib": ["ES2024", "DOM"],
     "rootDir": "src"

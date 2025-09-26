@@ -9,7 +9,7 @@ import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClientRq } from "~/lib/api";
-import { authClient } from "~/lib/auth/client";
+import { authClient } from "~/lib/auth";
 import { clientEnv } from "~/lib/env";
 
 export const Route = createFileRoute("/login")({

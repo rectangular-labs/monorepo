@@ -36,12 +36,12 @@ export function OnboardingReviewProject() {
     }),
   );
 
-  const handleSubmit = (values: ManageProjectFormValues) => {
+  const handleSubmit = async (values: ManageProjectFormValues) => {
     if (!defaultValues?.projectId || !defaultValues?.organizationId) {
       return;
     }
     const slug = toSlug(values.name);
-    updateProject({
+    await updateProject({
       id: defaultValues?.projectId,
       organizationIdentifier: defaultValues?.organizationId,
       websiteUrl: values.websiteUrl,

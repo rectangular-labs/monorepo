@@ -43,7 +43,7 @@ export function OnboardingWebsiteInfo({
     resolver: arktypeResolver(backgroundSchema),
   });
 
-  const { mutateAsync: startUnderstanding, isPending } = useMutation(
+  const { mutate: startUnderstanding, isPending } = useMutation(
     getApiClientRq().companyBackground.understandSite.mutationOptions({
       onSuccess: (data, { websiteUrl }) => {
         matcher.setMetadata("website-info", {

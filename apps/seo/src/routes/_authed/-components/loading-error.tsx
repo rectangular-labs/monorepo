@@ -31,9 +31,11 @@ export function LoadingError({
 }: LoadingErrorProps) {
   if (isLoading) {
     return (
-      <div className={cn("py-8", className)}>
-        {loadingComponent || <DefaultLoadingComponent />}
-      </div>
+      loadingComponent ?? (
+        <div className={cn("py-8", className)}>
+          <DefaultLoadingComponent />
+        </div>
+      )
     );
   }
 

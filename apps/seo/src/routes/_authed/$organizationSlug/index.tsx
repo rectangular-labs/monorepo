@@ -107,9 +107,10 @@ function RouteComponent() {
         isLoading={isLoading}
         loadingComponent={<ProjectSkeletons viewMode={viewMode} />}
       />
-      {filteredProjects.length === 0 ? (
+      {!isLoading && filteredProjects.length === 0 && (
         <EmptyState searchQuery={searchQuery} />
-      ) : (
+      )}
+      {!isLoading && filteredProjects.length > 0 && (
         <div
           className={cn(
             viewMode === "grid"

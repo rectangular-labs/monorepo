@@ -26,6 +26,13 @@ export function initAuthHandler(baseURL: string, db: DB) {
   const useGoogle =
     !!env.AUTH_GOOGLE_CLIENT_SECRET && !!env.AUTH_GOOGLE_CLIENT_ID;
 
+  const productionUrl =
+    baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
+      ? `https://preview.seo.rectangularlabs.com`
+      : baseURL;
+
+  console.log("productionUrl", productionUrl);
+
   const config = {
     baseURL,
     secret: env.AUTH_ENCRYPTION_KEY,
@@ -79,11 +86,7 @@ export function initAuthHandler(baseURL: string, db: DB) {
          * Auto-inference blocked by https://github.com/better-auth/better-auth/pull/2891
          */
         currentURL: baseURL,
-        productionURL:
-          baseURL.startsWith("http://pr-") ||
-          baseURL.startsWith("https://preview.")
-            ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}`
-            : baseURL,
+        productionURL: productionUrl,
       }),
       emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
@@ -126,28 +129,28 @@ export function initAuthHandler(baseURL: string, db: DB) {
         discord: {
           clientId: env.AUTH_DISCORD_ID,
           clientSecret: env.AUTH_DISCORD_SECRET,
-          redirectURI: `${baseURL}/api/auth/callback/discord`,
+          redirectURI: `${productionUrl}/api/auth/callback/discord`,
         },
       }),
       ...(useGithub && {
         github: {
           clientId: env.AUTH_GITHUB_ID,
           clientSecret: env.AUTH_GITHUB_SECRET,
-          redirectURI: `${baseURL}/api/auth/callback/github`,
+          redirectURI: `${productionUrl}/api/auth/callback/github`,
         },
       }),
       ...(useReddit && {
         reddit: {
           clientId: env.AUTH_REDDIT_ID,
           clientSecret: env.AUTH_REDDIT_SECRET,
-          redirectURI: `${baseURL}/api/auth/callback/reddit`,
+          redirectURI: `${productionUrl}/api/auth/callback/reddit`,
         },
       }),
       ...(useGoogle && {
         google: {
           clientId: env.AUTH_GOOGLE_CLIENT_ID,
           clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
-          redirectURI: `${baseURL}/api/auth/callback/google`,
+          redirectURI: `${productionUrl}/api/auth/callback/google`,
           accessType: "offline",
           prompt: "select_account consent",
         },

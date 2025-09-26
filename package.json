@@ -7,7 +7,8 @@
     "tooling/*"
   ],
   "scripts": {
-    "dev": "docker compose up -d && pnpm turbo run dev",
+    "dev": "docker compose up -d && pnpm turbo watch dev --continue",
+    "dev:seo": "docker compose up -d && pnpm turbo watch dev --continue --filter=seo...",
     "build": "turbo build",
     "build:preview": "turbo build:preview",
     "build:production": "turbo build:production",
@@ -20,10 +21,10 @@
     "db:mp:preview": "cd ./packages/db && pnpm run migrate-push:preview && cd ../..",
     "db:mp:production": "cd ./packages/db && pnpm run migrate-push:production && cd ../..",
     "db:push": "cd ./packages/db && pnpm run push --force && cd ../..",
-    "db:studio": "bun run --filter @rectangular-labs/db studio",
+    "db:studio": "turbo run --filter @rectangular-labs/db studio",
     "emails:create": "bun run --filter @rectangular-labs/emails create",
-    "emails:preview": "bun run --filter @rectangular-labs/emails preview",
-    "emails:check": "bun run --filter @rectangular-labs/emails check",
+    "emails:preview": "turbo run --filter @rectangular-labs/emails preview",
+    "emails:check": "turbo run --filter @rectangular-labs/emails check",
     "task:deploy": "cd ./packages/task && pnpm run deploy && cd ../..",
     "env:get": "bun x dotenvx get",
     "env:set": "bun x dotenvx set",
@@ -48,6 +49,29 @@
     "tsx": "^4.20.5",
     "turbo": "^2.5.7",
     "typescript": "^5.9.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "@tanstack/react-router": "1.131.50"
+    },
+    "ignoredBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "oxc-resolver",
+      "prisma",
+      "protobufjs"
+    ],
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "@parcel/watcher",
+      "@tailwindcss/oxide",
+      "aws-sdk",
+      "better-sqlite3",
+      "core-js-pure",
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
   },
   "packageManager": "pnpm@10.17.1"
 }
