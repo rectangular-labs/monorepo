@@ -106,35 +106,32 @@ const create = withOrganizationIdBase
       throw new ORPCError("BAD_REQUEST", { message: project.error.message });
     }
 
-    const keyword = await context.db.transaction(async (tx) => {
-      const keywordResult = await upsertKeyword(input.phrase, tx);
-      if (!keywordResult.ok) {
-        throw new ORPCError("BAD_REQUEST", {
-          message: keywordResult.error.message,
-        });
-      }
-      const keyword = keywordResult.value;
+    // TODO(txn): revisit when we can support transactions
+    const keywordResult = await upsertKeyword(input.phrase);
+    if (!keywordResult.ok) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: keywordResult.error.message,
+      });
+    }
+    const keyword = keywordResult.value;
 
-      const [projectKeyword] = await tx
-        .insert(schema.smProjectKeyword)
-        .values({
-          projectId: input.projectId,
-          keywordId: keyword.id,
-          isPaused: false,
-          pollingIntervalSec: 900,
-          nextRunAt: new Date(),
-          lastRunAt: null,
-        })
-        .returning();
-      if (!projectKeyword) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "No project keyword created.",
-        });
-      }
-      return { phrase: keyword.phrase, ...projectKeyword };
-    });
-
-    return keyword;
+    const [projectKeyword] = await context.db
+      .insert(schema.smProjectKeyword)
+      .values({
+        projectId: input.projectId,
+        keywordId: keyword.id,
+        isPaused: false,
+        pollingIntervalSec: 900,
+        nextRunAt: new Date(),
+        lastRunAt: null,
+      })
+      .returning();
+    if (!projectKeyword) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "No project keyword created.",
+      });
+    }
+    return { phrase: keyword.phrase, ...projectKeyword };
   });
 
 const update = withOrganizationIdBase

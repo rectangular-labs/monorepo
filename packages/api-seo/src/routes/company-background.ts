@@ -23,44 +23,39 @@ const understandSite = withOrganizationIdBase
   .handler(async ({ context, input }) => {
     const { id: taskId } = await triggerUnderstandSiteTask(input.websiteUrl);
 
-    const taskRun = await context.db.transaction(async (tx) => {
-      const upsertProjectResult = await upsertProject(
-        {
-          organizationId: context.session.activeOrganizationId,
-          websiteUrl: input.websiteUrl,
-        },
-        tx,
-      );
-      if (!upsertProjectResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Error creating project",
-        });
-      }
-      const [taskRun] = await tx
-        .insert(schema.seoTaskRun)
-        .values({
-          projectId: upsertProjectResult.value.id,
-          requestedBy: context.user.id,
-          taskId,
-          provider: "trigger.dev",
-          inputData: {
-            type: "site-understanding",
-            siteUrl: input.websiteUrl,
-          },
-        })
-        .returning();
-      if (!taskRun) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Error creating task run",
-        });
-      }
-      return {
-        projectId: upsertProjectResult.value.id,
-        organizationId: context.session.activeOrganizationId,
-        taskId: taskRun.id,
-      };
+    // TODO(txn): revisit when we can support transactions
+    const upsertProjectResult = await upsertProject({
+      organizationId: context.session.activeOrganizationId,
+      websiteUrl: input.websiteUrl,
     });
-    return taskRun;
+    if (!upsertProjectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Error creating project",
+      });
+    }
+    const [taskRun] = await context.db
+      .insert(schema.seoTaskRun)
+      .values({
+        projectId: upsertProjectResult.value.id,
+        requestedBy: context.user.id,
+        taskId,
+        provider: "trigger.dev",
+        inputData: {
+          type: "site-understanding",
+          siteUrl: input.websiteUrl,
+        },
+      })
+      .returning();
+    if (!taskRun) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Error creating task run",
+      });
+    }
+    return {
+      projectId: upsertProjectResult.value.id,
+      organizationId: context.session.activeOrganizationId,
+      taskId: taskRun.id,
+    };
   });
 
 const outputSchema = type({
