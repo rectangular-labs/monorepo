@@ -1,3 +1,5 @@
+import { neon } from "@neondatabase/serverless";
+import { drizzle as neonDrizzle } from "drizzle-orm/neon-http";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { dbEnv } from "./env";
@@ -14,11 +16,17 @@ export const schema = {
 };
 
 export const createDb = () => {
+  console.log("pr", process.env.NODE_ENV);
   const env = dbEnv();
-  const client = postgres(env.DATABASE_URL, {
-    prepare: false,
-  });
-  const db = drizzle({ client, schema, casing: "snake_case" });
+  if (process.env.NODE_ENV === "development") {
+    const client = postgres(env.DATABASE_URL, {
+      prepare: false,
+    });
+    const db = drizzle({ client, schema, casing: "snake_case" });
+    return db;
+  }
+  const sql = neon(env.DATABASE_URL);
+  const db = neonDrizzle({ client: sql, schema, casing: "snake_case" });
   return db;
 };
 
