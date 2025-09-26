@@ -77,7 +77,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
         }),
       });
     }
-    context.queryClient.invalidateQueries({
+    await context.queryClient.invalidateQueries({
       queryKey: getApiClientRq().auth.organization.active.queryKey(),
       refetchType: "active",
     });

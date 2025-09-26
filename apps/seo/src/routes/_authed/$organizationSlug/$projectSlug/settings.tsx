@@ -34,9 +34,9 @@ function PageComponent() {
   );
   const { mutateAsync: updateProject, isPending } = useMutation(
     getApiClientRq().project.update.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success("Project updated successfully!");
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: getApiClientRq().project.get.queryKey({
             input: {
               organizationIdentifier: organizationSlug,

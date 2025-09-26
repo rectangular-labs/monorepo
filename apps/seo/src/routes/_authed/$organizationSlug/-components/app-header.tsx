@@ -97,14 +97,14 @@ export function AppHeader() {
                 isCreatingOrganization={isCreatingOrganization}
                 isLoadingOrganizations={isLoadingOrganizations}
                 onCreateOrganization={onCreateOrganization}
-                onSelect={(orgSlug) => {
+                onSelect={async (orgSlug) => {
                   void navigate({
                     to: "/$organizationSlug",
                     params: {
                       organizationSlug: orgSlug,
                     },
                   });
-                  refetchActiveOrganization();
+                  await refetchActiveOrganization();
                 }}
                 organizations={organizations}
                 showCreateButton
