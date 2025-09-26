@@ -5,18 +5,23 @@
   "type": "module",
   "exports": {
     "./client": {
+      "types": "./dist/client.d.ts",
       "default": "./src/client.ts"
     },
     "./server": {
+      "types": "./dist/server.d.ts",
       "default": "./src/server.ts"
     },
     "./context": {
+      "types": "./dist/context.d.ts",
       "default": "./src/context.ts"
     },
     "./env": {
+      "types": "./dist/env.d.ts",
       "default": "./src/env.ts"
     },
     "./types": {
+      "types": "./dist/types.d.ts",
       "default": "./src/types.ts"
     }
   },
