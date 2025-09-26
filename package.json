@@ -53,7 +53,25 @@
   "pnpm": {
     "overrides": {
       "@tanstack/react-router": "1.131.50"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "oxc-resolver",
+      "prisma",
+      "protobufjs"
+    ],
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "@parcel/watcher",
+      "@tailwindcss/oxide",
+      "aws-sdk",
+      "better-sqlite3",
+      "core-js-pure",
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
   },
   "packageManager": "pnpm@10.17.1"
 }
