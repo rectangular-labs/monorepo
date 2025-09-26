@@ -26,7 +26,17 @@ export const base = os
   .$context<InitialContext>()
   .use(loggerMiddleware)
   .use(asyncStorageMiddleware<InitialContext>())
-  .use(authMiddleware);
+  .use(authMiddleware)
+  .use(
+    // this is mostly useful in dev where we have a non pooler docker link
+    os
+      .$context<InitialContext>()
+      .middleware(async ({ next, context }) => {
+        const response = await next();
+        await context.db.$client.end();
+        return response;
+      }),
+  );
 
 export const protectedBase = base.use(({ context, next }) => {
   const session = context.session;
