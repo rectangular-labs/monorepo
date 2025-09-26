@@ -16,7 +16,6 @@ export const schema = {
 };
 
 export const createDb = () => {
-  console.log("pr", process.env.NODE_ENV);
   const env = dbEnv();
   if (process.env.NODE_ENV === "development") {
     const client = postgres(env.DATABASE_URL, {
