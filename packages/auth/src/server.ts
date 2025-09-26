@@ -80,7 +80,8 @@ export function initAuthHandler(baseURL: string, db: DB) {
          */
         currentURL: baseURL,
         productionURL:
-          baseURL.includes("pr-") || baseURL.includes("preview")
+          baseURL.startsWith("http://pr-") ||
+          baseURL.startsWith("https://preview.")
             ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}`
             : baseURL,
       }),
