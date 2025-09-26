@@ -30,6 +30,7 @@
   "scripts": {
     "build": "content-collections build && tsc",
     "dev": "concurrently \"content-collections build\" \"tsc\"",
+    "dev:watch": "concurrently \"content-collections watch\" \"tsc --watch\"",
     "clean": "git clean -xdf .turbo node_modules dist .cache .next .content-collections",
     "format": "bun x @biomejs/biome format . --write",
     "lint": "bun x @biomejs/biome lint . --write",
