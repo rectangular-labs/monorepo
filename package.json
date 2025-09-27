@@ -42,17 +42,17 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@changesets/cli": "^2.29.7",
-    "@dotenvx/dotenvx": "^1.50.1",
+    "@dotenvx/dotenvx": "^1.51.0",
     "@rectangular-labs/typescript": "workspace:*",
-    "@turbo/gen": "^2.5.7",
-    "knip": "^5.64.0",
-    "tsx": "^4.20.5",
-    "turbo": "^2.5.7",
+    "@turbo/gen": "^2.5.8",
+    "knip": "^5.64.1",
+    "tsx": "^4.20.6",
+    "turbo": "^2.5.8",
     "typescript": "^5.9.2"
   },
   "pnpm": {
     "overrides": {
-      "@tanstack/react-router": "1.131.50"
+      "@tanstack/react-router": "1.132.7"
     },
     "ignoredBuiltDependencies": [
       "@prisma/client",
