@@ -103,11 +103,11 @@ function PageComponent() {
         onRetry={refetch}
       />
 
-      {!isLoading && filteredCampaigns.length === 0 && (
+      {!isLoading && !error && filteredCampaigns.length === 0 && (
         <EmptyState searchQuery={searchQuery} />
       )}
 
-      {!isLoading && filteredCampaigns.length > 0 && (
+      {!isLoading && !error && filteredCampaigns.length > 0 && (
         <div
           className={cn(
             viewMode === "grid"
@@ -125,7 +125,7 @@ function PageComponent() {
         </div>
       )}
 
-      {hasNextPage && (
+      {!error && !isLoading && hasNextPage && (
         <div className="flex justify-center pt-6">
           <Button
             disabled={isFetchingNextPage}

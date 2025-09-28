@@ -90,10 +90,10 @@ function RouteComponent() {
         isLoading={isLoading}
         loadingComponent={<ProjectSkeletons viewMode={gridListMode} />}
       />
-      {!isLoading && filteredProjects.length === 0 && (
+      {!isLoading && !error && filteredProjects.length === 0 && (
         <EmptyState searchQuery={searchQuery} />
       )}
-      {!isLoading && filteredProjects.length > 0 && (
+      {!isLoading && !error && filteredProjects.length > 0 && (
         <div
           className={cn(
             gridListMode === "grid"
@@ -113,7 +113,7 @@ function RouteComponent() {
       )}
 
       {/* Load More */}
-      {hasNextPage && (
+      {!error && !isLoading && hasNextPage && (
         <div className="flex justify-center pt-6">
           <Button
             disabled={isFetchingNextPage}
