@@ -2,11 +2,18 @@ import { type DBTransaction, schema } from "@rectangular-labs/db";
 import { err, ok, safe } from "@rectangular-labs/result";
 import { getContext } from "../../context";
 
-export async function getProjectById(projectId: string, orgId: string) {
+export async function getProjectByIdentifier(
+  projectIdentifier: string,
+  orgId: string,
+) {
   const context = await getContext();
+
   const project = await context.db.query.seoProject.findFirst({
-    where: (table, { eq, and }) =>
-      and(eq(table.id, projectId), eq(table.organizationId, orgId)),
+    where: (table, { eq, and, or }) =>
+      or(
+        and(eq(table.id, projectIdentifier), eq(table.organizationId, orgId)),
+        and(eq(table.slug, projectIdentifier), eq(table.organizationId, orgId)),
+      ),
   });
   if (!project) return err(new Error("Project not found"));
   return ok(project);
