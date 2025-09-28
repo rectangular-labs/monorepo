@@ -10,6 +10,7 @@ import type { seoWebsiteInfoSchema } from "../../schema-parsers/seo-website-info
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
+import { seoContentCampaign } from "./content-campaign-schema";
 import { seoTaskRun } from "./task-run-schema";
 
 export const seoProject = pgSeoTable(
@@ -44,6 +45,7 @@ export const seoProjectRelations = relations(seoProject, ({ one, many }) => ({
     fields: [seoProject.organizationId],
     references: [organization.id],
   }),
+  campaigns: many(seoContentCampaign),
   tasks: many(seoTaskRun),
 }));
 

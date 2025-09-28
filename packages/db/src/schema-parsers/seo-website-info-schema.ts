@@ -17,9 +17,17 @@ export const seoWebsiteInfoSchema = type({
     .configure({
       message: () => "Service Region is required",
     }),
+  targetCountryCode: type("string")
+    .atLeastLength(1)
+    .configure({
+      message: () => "Country Code is required",
+    })
+    .default("US"),
+  targetCity: "string = 'San Francisco'",
   industry: type("string")
     .atLeastLength(1)
     .configure({
       message: () => "Industry is required",
     }),
+  languageCode: "string = 'en'",
 });

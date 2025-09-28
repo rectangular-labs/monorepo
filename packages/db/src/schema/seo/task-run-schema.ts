@@ -34,11 +34,19 @@ export const seoTaskRun = pgSeoTable(
         onUpdate: "cascade",
       }),
     taskId: text().notNull(),
-    provider: text().notNull().default("trigger.dev"),
-    inputData: jsonb().notNull().$type<{
-      type: "site-understanding";
-      siteUrl: string;
-    }>(),
+    provider: text({ enum: ["trigger.dev", "cloudflare"] })
+      .notNull()
+      .default("trigger.dev"),
+    inputData: jsonb().notNull().$type<
+      | {
+          type: "site-understanding";
+          siteUrl: string;
+        }
+      | {
+          type: "topic-clusters";
+          keywordCategory: string;
+        }
+    >(),
     costInCents: numeric({
       mode: "string",
       precision: 10,
