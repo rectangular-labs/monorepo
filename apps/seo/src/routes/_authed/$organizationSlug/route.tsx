@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
-import { AUTO_ROUTE_ORG } from "~/lib/organization";
+import { AUTO_ROUTE_ORG } from "~/lib/constants";
 import { AppHeader } from "./-components/app-header";
 
 export const Route = createFileRoute("/_authed/$organizationSlug")({
