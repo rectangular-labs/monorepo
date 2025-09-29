@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/client";
 import { schema } from "@rectangular-labs/db";
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
+import { createTask } from "../lib/task";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -75,7 +76,9 @@ const create = withOrganizationIdBase
       keywordCategory: "string",
     }),
   )
-  .output(schema.seoContentCampaignSelectSchema)
+  .output(
+    schema.seoContentCampaignSelectSchema.merge(type({ taskId: "string" })),
+  )
   .handler(async ({ context, input }) => {
     const [campaign] = await context.db
       .insert(schema.seoContentCampaign)
@@ -90,7 +93,18 @@ const create = withOrganizationIdBase
         message: "Failed to create campaign",
       });
     }
-    return campaign;
+    const createTaskResult = await createTask({
+      projectId: input.projectId,
+      userId: context.user.id,
+      input: {
+        type: "generate-keyword-clusters",
+        keywordCategory: input.keywordCategory,
+      },
+    });
+    if (!createTaskResult.ok) {
+      throw createTaskResult.error;
+    }
+    return { ...campaign, taskId: createTaskResult.value.id };
   });
 
 export default withOrganizationIdBase

@@ -1,6 +1,10 @@
 import { google } from "@ai-sdk/google";
 import { create, insertMultiple } from "@orama/orama";
-import { seoWebsiteInfoSchema } from "@rectangular-labs/db/parsers";
+import {
+  seoWebsiteInfoSchema,
+  understandSiteTaskInputSchema,
+  type understandSiteTaskOutputSchema,
+} from "@rectangular-labs/db/parsers";
 import { schemaTask } from "@trigger.dev/sdk";
 import { generateText, stepCountIs } from "ai";
 import { type } from "arktype";
@@ -9,36 +13,29 @@ import { createGetSitesDataTool } from "../lib/ai-tools/get-site-data.js";
 import { llmParseJson } from "../lib/ai-tools/llm-parse-json.js";
 import { createSearchSitesTool } from "../lib/ai-tools/search-site.js";
 import { siteSchema } from "../lib/orama/site-schema.js";
-import { setUnderstandSiteMetadata } from "./understand-site.metadata.js";
+import { setTaskMetadata } from "../lib/task-metadata.js";
 
-const inputSchema = type({
-  startUrl: "string",
-  maxRequestsPerCrawl: "number=25",
-});
-
-const outputSchema = type({
-  message: "string",
-  websiteInfo: seoWebsiteInfoSchema.merge(type({ name: "string" })),
-});
-
+const inputSchema = understandSiteTaskInputSchema.merge(
+  type({ maxRequestsPerCrawl: "1<=number<=50 = 25" }),
+);
 export const understandSiteTask: ReturnType<
   typeof schemaTask<
     "understand-site",
     typeof inputSchema,
-    typeof outputSchema.infer
+    typeof understandSiteTaskOutputSchema.infer
   >
 > = schemaTask({
   id: "understand-site",
   maxDuration: 300,
-  machine: "small-2x",
+  machine: "micro",
   schema: inputSchema,
   run: async (payload) => {
-    setUnderstandSiteMetadata({
+    setTaskMetadata({
       progress: 0,
-      statusMessage: `Loading up ${payload.startUrl}...`,
+      statusMessage: `Loading up ${payload.websiteUrl}...`,
     });
     const result = await crawlSite({
-      startUrl: payload.startUrl,
+      startUrl: payload.websiteUrl,
       maxRequestsPerCrawl: payload.maxRequestsPerCrawl,
       crawlSitemap: false,
       onProgress: (args) => {
@@ -47,7 +44,7 @@ export const understandSiteTask: ReturnType<
             (payload.maxRequestsPerCrawl * 2)) * // we set the crawl to be at most half the progress of the whole understanding process
             100,
         );
-        setUnderstandSiteMetadata({
+        setTaskMetadata({
           progress,
           statusMessage: args.currentUrl
             ? `Currently understanding ${args.currentUrl}...`
@@ -56,7 +53,7 @@ export const understandSiteTask: ReturnType<
       },
     });
 
-    setUnderstandSiteMetadata({
+    setTaskMetadata({
       progress: 50,
       statusMessage:
         "Finished reading through the site. Extracting relevant information...",
@@ -84,7 +81,7 @@ export const understandSiteTask: ReturnType<
       });
     }
 
-    setUnderstandSiteMetadata({
+    setTaskMetadata({
       progress: 75,
       statusMessage: "Found relevant information, synthesizing the results...",
     });
@@ -92,19 +89,9 @@ export const understandSiteTask: ReturnType<
     // Define structured output schema to match seoWebsiteInfoSchema
     const StructuredSeoSchema = type({
       name: type.string.describe("The name of the site."),
-      businessOverview: type.string.describe(
-        "Start with org type + primary offering(s); state ALL the business Unique Value Proposition comprehensively; no fluff.",
-      ),
-      idealCustomer: type.string.describe(
-        "Format: B2B - Roles/Titles; Industries; Company size; Geo. B2C - Personas; Demographics/Age; Needs/Use cases; Geo. If both, include both separated by ' | '. Examples — B2B: 'Ops leaders; SaaS; 50-500 FTE; US/UK' | 'HR Directors; Healthcare; 200-1000 FTE; US/CA'. B2C: 'Parents of toddlers; Age 25-40; Childcare savings; US' | 'College students; Age 18-24; Budget laptops; UK'.",
-      ),
-      serviceRegion: type.string.describe(
-        "Canonical regions. Prefer 'Global', regions like 'EU', 'Asia', 'Africa', or country list separated by ';'. For local, use 'City, ST' or 'Metro, ST'.",
-      ),
-      industry: type.string.describe(
-        "Broad top-level category, e.g. 'Software', 'Healthcare', 'E-commerce'.",
-      ),
-    }).describe("Normalized business context for downstream SEO planning.");
+    })
+      .merge(seoWebsiteInfoSchema)
+      .describe("Normalized business context for downstream SEO planning.");
 
     // Guide the model to use tools to ground the output
     const { text } = await generateText({
@@ -134,7 +121,7 @@ export const understandSiteTask: ReturnType<
         "search-sites": createSearchSitesTool(db),
         "get-sites-data": createGetSitesDataTool(db),
       },
-      prompt: `I've extracted information from ${payload.startUrl} to inform SEO keyword and content planning. Use the tools to research and return ONLY the normalized JSON.`,
+      prompt: `I've extracted information from ${payload.websiteUrl} to inform SEO keyword and content planning. Use the tools to research and return ONLY the normalized JSON.`,
       onStepFinish: (step) => {
         console.log("Step content", step.text);
         console.log(
@@ -149,13 +136,13 @@ export const understandSiteTask: ReturnType<
     });
     const websiteInfo = await llmParseJson(text, StructuredSeoSchema);
 
-    setUnderstandSiteMetadata({
+    setTaskMetadata({
       progress: 100,
       statusMessage: "All done, ready to continue!",
     });
 
     return {
-      message: "Site crawled successfully",
+      type: "understand-site",
       websiteInfo: {
         ...websiteInfo,
         version: "v1",

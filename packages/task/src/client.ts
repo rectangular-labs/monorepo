@@ -1,16 +1,41 @@
+import type { taskInputSchema } from "@rectangular-labs/db/parsers";
 import { type RetrieveRunResult, runs, tasks } from "@trigger.dev/sdk";
-import type { understandSiteTask } from "./trigger/understand-site";
+import type { type } from "arktype";
+import type { generateKeywordClustersTask } from "./trigger/keyword-clusters";
+import type { understandSiteLlmTask } from "./trigger/understand-site-llm";
 
 export * from "@trigger.dev/sdk";
 
-export const triggerUnderstandSiteTask = (
-  siteUrl: string,
-): Promise<{ id: string }> =>
-  tasks.trigger<typeof understandSiteTask>("understand-site", {
-    startUrl: siteUrl,
-  });
+export const triggerTask = (
+  args: type.infer<typeof taskInputSchema>,
+): Promise<{ id: string }> => {
+  switch (args.type) {
+    case "understand-site":
+      return tasks.trigger<typeof understandSiteLlmTask>(
+        "understand-site-llm",
+        args,
+      );
+    case "generate-keyword-clusters":
+      return tasks.trigger<typeof generateKeywordClustersTask>(
+        "generate-keyword-clusters",
+        args,
+      );
+    default: {
+      const never: never = args;
+      throw new Error(`Unknown task type: ${never}`);
+    }
+  }
+};
 
-export const getUnderstandSiteTask = (
+export const getTask = async (
   taskId: string,
-): Promise<RetrieveRunResult<typeof understandSiteTask>> =>
-  runs.retrieve<typeof understandSiteTask>(taskId);
+): Promise<
+  RetrieveRunResult<
+    typeof understandSiteLlmTask | typeof generateKeywordClustersTask
+  >
+> => {
+  const run = await runs.retrieve<
+    typeof understandSiteLlmTask | typeof generateKeywordClustersTask
+  >(taskId);
+  return run;
+};

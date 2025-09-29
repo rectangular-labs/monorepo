@@ -12,6 +12,7 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core";
+import type { taskInputSchema } from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { user } from "../auth-schema";
@@ -34,19 +35,10 @@ export const seoTaskRun = pgSeoTable(
         onUpdate: "cascade",
       }),
     taskId: text().notNull(),
-    provider: text({ enum: ["trigger.dev", "cloudflare"] })
+    provider: text({ enum: ["trigger.dev"] })
       .notNull()
       .default("trigger.dev"),
-    inputData: jsonb().notNull().$type<
-      | {
-          type: "site-understanding";
-          siteUrl: string;
-        }
-      | {
-          type: "topic-clusters";
-          keywordCategory: string;
-        }
-    >(),
+    inputData: jsonb().notNull().$type<typeof taskInputSchema.infer>(),
     costInCents: numeric({
       mode: "string",
       precision: 10,

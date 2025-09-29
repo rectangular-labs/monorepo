@@ -5,9 +5,8 @@ export const router = base.router({
   project: lazy(() => import("./project")),
   campaign: {
     ...lazy(() => import("./campaign")),
-    campaignKeywords: lazy(() => import("./campaign-keywords")),
   },
-  companyBackground: lazy(() => import("./company-background")),
+  task: lazy(() => import("./task")),
   auth: {
     session: lazy(() => import("./auth/session")),
     organization: lazy(() => import("./auth/organization")),

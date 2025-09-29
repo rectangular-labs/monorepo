@@ -1,18 +1,17 @@
 "use server";
 import { ORPCError } from "@orpc/client";
-import { schema } from "@rectangular-labs/db";
-import { seoWebsiteInfoSchema } from "@rectangular-labs/db/parsers";
 import {
-  getUnderstandSiteTask,
-  triggerUnderstandSiteTask,
-} from "@rectangular-labs/task/client";
+  taskInputSchema,
+  taskOutputSchema,
+} from "@rectangular-labs/db/parsers";
+import { getTask } from "@rectangular-labs/task/client";
 import { type } from "arktype";
 import { protectedBase, withOrganizationIdBase } from "../context";
-import { upsertProject } from "../lib/database/project";
+import { createTask } from "../lib/task";
 
-const understandSite = withOrganizationIdBase
+const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
-  .input(schema.seoProjectInsertSchema.pick("websiteUrl"))
+  .input(taskInputSchema.merge(type({ projectId: "string" })))
   .output(
     type({
       projectId: "string",
@@ -21,40 +20,19 @@ const understandSite = withOrganizationIdBase
     }),
   )
   .handler(async ({ context, input }) => {
-    const { id: taskId } = await triggerUnderstandSiteTask(input.websiteUrl);
-
-    // TODO(txn): revisit when we can support transactions
-    const upsertProjectResult = await upsertProject({
-      organizationId: context.session.activeOrganizationId,
-      websiteUrl: input.websiteUrl,
+    const { projectId, ...taskInput } = input;
+    const createTaskResult = await createTask({
+      projectId,
+      userId: context.user.id,
+      input: taskInput,
     });
-    if (!upsertProjectResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Error creating project",
-      });
-    }
-    const [taskRun] = await context.db
-      .insert(schema.seoTaskRun)
-      .values({
-        projectId: upsertProjectResult.value.id,
-        requestedBy: context.user.id,
-        taskId,
-        provider: "trigger.dev",
-        inputData: {
-          type: "site-understanding",
-          siteUrl: input.websiteUrl,
-        },
-      })
-      .returning();
-    if (!taskRun) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Error creating task run",
-      });
+    if (!createTaskResult.ok) {
+      throw createTaskResult.error;
     }
     return {
-      projectId: upsertProjectResult.value.id,
+      projectId,
       organizationId: context.session.activeOrganizationId,
-      taskId: taskRun.id,
+      taskId: createTaskResult.value.id,
     };
   });
 
@@ -63,12 +41,10 @@ const outputSchema = type({
   status:
     "'pending' | 'queued' | 'running' | 'completed' | 'cancelled' | 'failed'",
   statusMessage: "string",
-  "websiteInfo?": seoWebsiteInfoSchema
-    .merge(type({ name: "string" }))
-    .or(type.undefined),
+  "output?": taskOutputSchema.or(type.undefined),
 });
 
-const getUnderstandSiteStatus = protectedBase
+const status = protectedBase
   .route({
     method: "GET",
     path: "/{id}",
@@ -79,12 +55,12 @@ const getUnderstandSiteStatus = protectedBase
     const taskRun = await context.db.query.seoTaskRun.findFirst({
       where: (table, { eq }) => eq(table.id, input.id),
     });
-    if (!taskRun || taskRun.inputData.type !== "site-understanding") {
+    if (!taskRun) {
       throw new ORPCError("NOT_FOUND", {
         message: "Task run not found",
       });
     }
-    const task = await getUnderstandSiteTask(taskRun.taskId);
+    const task = await getTask(taskRun.taskId);
     if (!task) {
       throw new ORPCError("NOT_FOUND", {
         message: "Task not found",
@@ -121,10 +97,10 @@ const getUnderstandSiteStatus = protectedBase
       progress,
       status,
       statusMessage,
-      websiteInfo: task.output?.websiteInfo,
+      output: task.output,
     };
   });
 
 export default protectedBase
-  .prefix("/site-understanding")
-  .router({ understandSite, getUnderstandSiteStatus });
+  .prefix("/task")
+  .router({ create, getStatus: status });
