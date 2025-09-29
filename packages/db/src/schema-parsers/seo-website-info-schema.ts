@@ -28,12 +28,14 @@ export const seoWebsiteInfoSchema = type({
     }),
   targetCountryCode: type("string")
     .atLeastLength(1)
-    .describe("2-letter country code. Default 'US' if not specified.")
+    .describe(
+      "2-letter country code that would contain the majority of the target audience. Default 'US' if not specified.",
+    )
     .configure({
       message: () => "Country Code is required",
     }),
   targetCity: type("string").describe(
-    "City name. Default 'San Francisco' if not specified.",
+    "City name that would contain the majority of the target audience . Default 'San Francisco' if not specified.",
   ),
   industry: type("string")
     .atLeastLength(1)
@@ -44,6 +46,6 @@ export const seoWebsiteInfoSchema = type({
       message: () => "Industry is required",
     }),
   languageCode: type("string").describe(
-    "2-letter language code. Default 'en' if not specified.",
+    "2-letter language code that would encompass the language of the majority of the target audience. Default 'en' if not specified.",
   ),
 });

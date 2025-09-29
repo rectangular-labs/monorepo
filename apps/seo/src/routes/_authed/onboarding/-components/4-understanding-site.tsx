@@ -70,7 +70,9 @@ export function OnboardingUnderstandingSite({
 
   const isCompleted = status?.status === "completed";
   const needsRetry =
-    status?.status === "failed" || status?.status === "cancelled";
+    status?.status === "failed" ||
+    status?.status === "cancelled" ||
+    getStatusError;
 
   if (
     isCompleted &&
@@ -96,8 +98,8 @@ export function OnboardingUnderstandingSite({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="text-muted-foreground text-sm">
-              {status?.statusMessage ??
-                getStatusError?.message ??
+              {getStatusError?.message ??
+                status?.statusMessage ??
                 "We are setting things up..."}
             </div>
             <Progress value={status?.progress ?? 0} />
