@@ -471,6 +471,9 @@ importers:
         specifier: ^2.1.22
         version: 2.1.22
     devDependencies:
+      '@rectangular-labs/db':
+        specifier: workspace:*
+        version: link:../db
       '@rectangular-labs/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript

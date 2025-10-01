@@ -31,6 +31,7 @@
     "generate-api": "mv ./src/env.ts ./ && npx @hey-api/openapi-ts -i https://raw.githubusercontent.com/dataforseo/OpenApiDocumentation/refs/heads/master/openapi_specification.yaml  -o ./src && mv ./env.ts ./src/ && rm ./src/index.ts"
   },
   "devDependencies": {
+    "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/typescript": "workspace:*",
     "@types/node": "^24.6.1",
     "typescript": "^5.9.3"
