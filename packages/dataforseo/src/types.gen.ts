@@ -29945,9 +29945,7 @@ export type DataforseoLabsGoogleRankedKeywordsLiveRequestInfo = {
      * ["ranked_serp_element.serp_item.relative_url", "=", "/apis/rank-tracker-api"]
      * for more information about filters, please refer to Dataforseo Labs – Filters or this help center guide
      */
-    filters?: Array<{
-        [key: string]: unknown;
-    } | null> | null;
+    filters?: Array<string | string[] | null> | null;
     /**
      * results sorting rules
      * optional field

@@ -461,6 +461,9 @@ importers:
 
   packages/dataforseo:
     dependencies:
+      '@rectangular-labs/result':
+        specifier: workspace:*
+        version: link:../result
       '@t3-oss/env-core':
         specifier: ^0.13.8
         version: 0.13.8(arktype@2.1.22)(typescript@5.9.3)(zod@4.1.9)

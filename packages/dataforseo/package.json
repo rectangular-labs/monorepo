@@ -5,8 +5,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/sdk.gen.d.ts",
-      "default": "./src/sdk.gen.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
     },
     "./client": {
       "types": "./dist/client.gen.d.ts",
@@ -36,6 +36,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.22"
   }
