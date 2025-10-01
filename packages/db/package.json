@@ -15,6 +15,10 @@
     "./parsers": {
       "types": "./dist/schema-parsers/index.d.ts",
       "default": "./src/schema-parsers/index.ts"
+    },
+    "./operations": {
+      "types": "./dist/operations/index.d.ts",
+      "default": "./src/operations/index.ts"
     }
   },
   "license": "MIT",
