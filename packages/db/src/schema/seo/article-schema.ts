@@ -7,15 +7,15 @@ import { relations } from "drizzle-orm";
 import { index, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
-import { seoContentCampaignCluster } from "./content-campaign-cluster-schema";
+import { seoContentCampaign } from "./content-campaign-schema";
 
 export const seoArticle = pgSeoTable(
   "article",
   {
     id: uuid().primaryKey().$defaultFn(uuidv7),
-    campaignClusterId: uuid()
+    contentCampaignId: uuid()
       .notNull()
-      .references(() => seoContentCampaignCluster.id, {
+      .references(() => seoContentCampaign.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
@@ -28,15 +28,15 @@ export const seoArticle = pgSeoTable(
     ...timestamps,
   },
   (table) => [
-    index("seo_article_campaign_cluster_idx").on(table.campaignClusterId),
+    index("seo_article_content_campaign_idx").on(table.contentCampaignId),
     index("seo_article_status_idx").on(table.status),
   ],
 );
 
 export const seoArticleRelations = relations(seoArticle, ({ one }) => ({
-  campaignCluster: one(seoContentCampaignCluster, {
-    fields: [seoArticle.campaignClusterId],
-    references: [seoContentCampaignCluster.id],
+  contentCampaign: one(seoContentCampaign, {
+    fields: [seoArticle.contentCampaignId],
+    references: [seoContentCampaign.id],
   }),
 }));
 

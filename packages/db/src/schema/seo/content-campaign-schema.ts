@@ -5,11 +5,24 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import { index, text, uuid } from "drizzle-orm/pg-core";
+import {
+  index,
+  integer,
+  jsonb,
+  numeric,
+  text,
+  uuid,
+} from "drizzle-orm/pg-core";
+import type {
+  campaignTypeSchema,
+  contentCategorySchema,
+  contentTypeSchema,
+  statusSchema,
+} from "../../schema-parsers/content-campaign";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
-import { seoContentCampaignCluster } from "./content-campaign-cluster-schema";
+import { seoContentCampaignSearchKeyword } from "./content-campaign-search-keywords-schema";
 import { seoProject } from "./project-schema";
 
 export const seoContentCampaign = pgSeoTable(
@@ -28,7 +41,65 @@ export const seoContentCampaign = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    keywordCategory: text().notNull(),
+
+    // Campaign metadata
+    campaignType: text({
+      enum: [
+        "improvement",
+        "new-content",
+      ] satisfies (typeof campaignTypeSchema.infer)[] as [string, ...string[]],
+    }).notNull(),
+    status: text({
+      enum: [
+        "analyzing",
+        "new",
+        "ready",
+        "generating-content",
+        "content-ready",
+      ] satisfies (typeof statusSchema.infer)[] as [string, ...string[]],
+    })
+      .notNull()
+      .default("analyzing"),
+    targetArticleCount: integer(),
+    impactScore: numeric({ precision: 10, scale: 2 }),
+
+    serpSnapshot: jsonb().$type<{
+      fetchedAt: string;
+      provider: "dataforseo";
+      topResults: {
+        type: "paid" | "organic";
+        position: number;
+        url: string;
+        title: string;
+        description?: string;
+        contentType?: typeof contentTypeSchema.infer;
+      }[];
+    }>(),
+
+    // Content strategy
+    proposedFormat: text({
+      enum: [
+        "blog",
+        "listicle",
+        "guide",
+        "comparison",
+        "how-to",
+        "checklist",
+        "case-study",
+        "other",
+      ] satisfies (typeof contentTypeSchema.infer)[] as [string, ...string[]],
+    }),
+    contentCategory: text({
+      enum: [
+        "money-page",
+        "authority-builder",
+        "quick-win",
+      ] satisfies (typeof contentCategorySchema.infer)[] as [
+        string,
+        ...string[],
+      ],
+    }),
+
     ...timestamps,
   },
   (table) => [
@@ -48,7 +119,7 @@ export const seoContentCampaignRelations = relations(
       fields: [seoContentCampaign.organizationId],
       references: [organization.id],
     }),
-    clusters: many(seoContentCampaignCluster),
+    searchKeywordsMap: many(seoContentCampaignSearchKeyword),
   }),
 );
 
