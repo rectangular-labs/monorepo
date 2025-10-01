@@ -46,8 +46,8 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.5.2",
+    "@types/node": "^24.6.1",
     "drizzle-kit": "^0.31.5",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }

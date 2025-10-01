@@ -39,8 +39,8 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.5.2",
-    "typescript": "^5.9.2"
+    "@types/node": "^24.6.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.15",

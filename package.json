@@ -48,7 +48,7 @@
     "knip": "^5.64.0",
     "tsx": "^4.20.5",
     "turbo": "^2.5.7",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "pnpm": {
     "overrides": {
