@@ -5,6 +5,7 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, integer, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import type { intentSchema } from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { seoContentCampaignSearchKeyword } from "./content-campaign-search-keywords-schema";
@@ -16,9 +17,14 @@ export const seoSearchKeyword = pgSeoTable(
     normalizedPhrase: text().notNull().unique(),
     searchVolume: integer().notNull(),
     keywordDifficulty: integer().notNull(),
-    cpc: integer().notNull(),
+    cpc: integer().notNull().default(0),
     intent: text({
-      enum: ["transactional", "informational", "navigational", "commercial"],
+      enum: [
+        "transactional",
+        "informational",
+        "navigational",
+        "commercial",
+      ] as (typeof intentSchema.infer)[] as [string, ...string[]],
     }).notNull(),
     ...timestamps,
   },

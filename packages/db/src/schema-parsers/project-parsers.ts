@@ -1,5 +1,32 @@
 import { type } from "arktype";
 
+export const COUNTRY_CODE_MAP: Record<string, string> = {
+  US: "United States",
+  CA: "Canada",
+  MX: "Mexico",
+  GB: "United Kingdom",
+  DE: "Germany",
+  FR: "France",
+  JP: "Japan",
+  CN: "China",
+  IN: "India",
+  BR: "Brazil",
+  AU: "Australia",
+  RU: "Russia",
+  IT: "Italy",
+  ES: "Spain",
+  KR: "South Korea",
+  NL: "Netherlands",
+  CH: "Switzerland",
+  SE: "Sweden",
+  IE: "Ireland",
+  SG: "Singapore",
+  IL: "Israel",
+  SA: "Saudi Arabia",
+  AE: "United Arab Emirates",
+  ZA: "South Africa",
+};
+
 export const seoWebsiteInfoSchema = type({
   version: "'v1'",
   businessOverview: type("string")
@@ -26,8 +53,11 @@ export const seoWebsiteInfoSchema = type({
     .configure({
       message: () => "Service Region is required",
     }),
-  targetCountryCode: type("string")
-    .atLeastLength(1)
+  targetCountryCode: type(
+    `'${Object.keys(COUNTRY_CODE_MAP)
+      .map((key) => key)
+      .join("'|'")}'`,
+  )
     .describe(
       "2-letter country code that would contain the majority of the target audience. Default 'US' if not specified.",
     )
@@ -51,4 +81,22 @@ export const seoWebsiteInfoSchema = type({
   competitorsWebsites: type({ url: "string.url" })
     .array()
     .describe("List of URLs of direct competitors. Leave blank if none."),
+});
+
+export const seoSerpTrafficSchema = type({
+  position1_10: type("number"),
+  position11_20: type("number"),
+  position21_30: type("number"),
+  estimatedTrafficVolume: type("number"),
+});
+
+export const seoSerpSnapshotSchema = type({
+  nextEarliestFetchAt: type("string.date"),
+  provider: type("'dataforseo'"),
+  current: type({
+    organic: seoSerpTrafficSchema,
+  }),
+  previous: type({
+    organic: seoSerpTrafficSchema,
+  }).or(type.null),
 });

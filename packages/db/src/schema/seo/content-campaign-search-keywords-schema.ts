@@ -9,7 +9,7 @@ import { index, jsonb, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { seoContentCampaign } from "./content-campaign-schema";
-import { seoSearchKeyword } from "./search-keyword";
+import { seoSearchKeyword } from "./search-keyword-schema";
 
 export const seoContentCampaignSearchKeyword = pgSeoTable(
   "content_campaign_search_keyword",

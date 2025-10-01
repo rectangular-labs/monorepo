@@ -10,3 +10,6 @@ export const campaignTypeSchema = type("'improvement'|'new-content'");
 export const statusSchema = type(
   "'analyzing'|'new'|'ready'|'generating-content'|'content-ready'",
 );
+export const intentSchema = type(
+  "'transactional'|'informational'|'navigational'|'commercial'",
+);

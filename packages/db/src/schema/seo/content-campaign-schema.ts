@@ -18,7 +18,7 @@ import type {
   contentCategorySchema,
   contentTypeSchema,
   statusSchema,
-} from "../../schema-parsers/content-campaign";
+} from "../../schema-parsers/content-campaign-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
