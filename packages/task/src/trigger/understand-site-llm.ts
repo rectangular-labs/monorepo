@@ -41,15 +41,15 @@ export const understandSiteLlmTask: ReturnType<
     }, 3000);
 
     const system = [
-      "You are an SEO strategy expert at extracting concise, high-signal, normalized business context.",
-      "Optimize for downstream LLM keyword/content planning: concrete nouns, no fluff, no marketing speak.",
-      "## Research policy:",
-      "- Prioritize authoritative sources like About, Product/Service, Pricing, Contact, Case Studies, Blog, Testimonials.",
-      "- Use `search-sites` tool to find these pages; for top hits, call the `get-sites-data` tool to get the full content for relevant pages to ground your statements.",
-      "- If specifics are missing, make sure you search the site thoroughly. If things are still missing infer conservatively from the various search results; do not hallucinate.",
-      "- Determine whether the site serves businesses (B2B), consumers (B2C), or both; format idealCustomer accordingly.",
+      "You are an SEO research expert at extracting concise, high-signal, normalized business context required.",
+      "Optimize for downstream LLM consumption to do keyword/content planning: concrete nouns, no fluff, no marketing speak.",
+      "## Web search playbook:",
+      "- Use ONLY the web_search tool to find and verify facts.",
+      "- Extract facts from reputable sources. Prefer the site's own pages.",
+      "- Be conservative: if uncertain, default as per schema guidance rather than guessing; do not hallucinate.",
       "## Output rules:",
-      "Final answer must be STRICT JSON matching the schema below exactly (no prose).",
+      "- Final answer must be STRICT JSON matching the fields below exactly (no prose, no trailing comments).",
+      "- Provide non-empty values when reasonably inferable; otherwise use conservative defaults noted below.",
       `{
   "name": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("name").description}
   "businessOverview": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("businessOverview").description}
@@ -59,6 +59,7 @@ export const understandSiteLlmTask: ReturnType<
   "languageCode": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("languageCode").description}
   "targetCountryCode": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("targetCountryCode").description}
   "targetCity": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("targetCity").description}
+  "competitorsWebsites": "string.url[]", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("competitorsWebsites").description}
 }`,
       "",
       "DO NOT ASK FOR MORE INFORMATION. Start planning deeply for 30 minutes right away and use the appropriate tools to get the information. A great response will help a lot of people and could save the business from going under. Good work will be thoroughly rewarded.",

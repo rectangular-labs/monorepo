@@ -48,4 +48,7 @@ export const seoWebsiteInfoSchema = type({
   languageCode: type("string").describe(
     "2-letter language code that would encompass the language of the majority of the target audience. Default 'en' if not specified.",
   ),
+  competitorsWebsites: type({ url: "string.url" })
+    .array()
+    .describe("List of URLs of direct competitors. Leave blank if none."),
 });
