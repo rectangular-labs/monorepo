@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 import { generateObject, type JSONSchema7, jsonSchema } from "ai";
 import { type } from "arktype";
 
@@ -29,11 +29,13 @@ export async function llmParseJson<T extends type>(
   const extractionPrompt = `Convert the following text into a valid JSON in javascript:
 ${outputData}`;
 
+  console.log("raw outputData", outputData);
+
   const generateObjectLabel = `generateObject in llmParseJson for schema ${schema.description ?? "unknown_schema"}`;
   console.time(generateObjectLabel);
   try {
     const { object } = await generateObject({
-      model: google("gemini-2.5-flash-lite"),
+      model: openai("gpt-5-mini"),
       messages: [{ role: "user", content: extractionPrompt }],
       temperature: 0,
       schema: jsonSchema<type.infer<T>>(schema.toJsonSchema() as JSONSchema7),
