@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
+    "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.22",
     "drizzle-arktype": "^0.1.3",

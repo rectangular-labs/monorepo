@@ -95,8 +95,10 @@ export const seoSerpSnapshotSchema = type({
   provider: type("'dataforseo'"),
   current: type({
     organic: seoSerpTrafficSchema,
+    dateFetchedAt: type("string"),
   }),
   previous: type({
     organic: seoSerpTrafficSchema,
+    dateFetchedAt: type("string"),
   }).or(type.null),
 });

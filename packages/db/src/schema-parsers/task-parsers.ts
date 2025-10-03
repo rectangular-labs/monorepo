@@ -21,8 +21,9 @@ export const understandSiteTaskOutputSchema = type({
 });
 export const analyzeKeywordsTaskOutputSchema = type({
   type: "'analyze-keywords'",
-  improvementCampaignIds: "string.uuid[]",
-  newContentCampaignIds: "string.uuid[]",
+  improvementContentIds: "string.uuid[]",
+  doNothingContentIds: "string.uuid[]",
+  newContentContentIds: "string.uuid[]",
 });
 export const taskOutputSchema = type.or(
   understandSiteTaskOutputSchema,
