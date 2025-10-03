@@ -26,7 +26,7 @@ export const seoSearchKeyword = pgSeoTable(
   "search_keyword",
   {
     id: uuid().primaryKey().$defaultFn(uuidv7),
-    normalizedPhrase: text().notNull().unique(),
+    normalizedPhrase: text().notNull(),
     keywordDifficulty: integer(),
     location: text().notNull(),
     cpcUsdCents: integer().notNull().default(0),

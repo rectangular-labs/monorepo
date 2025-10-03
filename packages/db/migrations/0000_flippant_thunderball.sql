@@ -252,8 +252,7 @@ CREATE TABLE "seo_search_keyword" (
 	"serp_features" text[],
 	"serp_results" jsonb DEFAULT '[]'::jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone NOT NULL,
-	CONSTRAINT "seo_search_keyword_normalizedPhrase_unique" UNIQUE("normalized_phrase")
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "seo_task_run" (

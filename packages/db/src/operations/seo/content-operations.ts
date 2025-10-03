@@ -1,5 +1,6 @@
 import { err, ok, safe } from "@rectangular-labs/result";
-import { type DB, eq, schema, sql } from "../../client";
+import { type DB, eq, schema } from "../../client";
+import { buildConflictUpdateColumns } from "../../schema/_helper";
 import type {
   seoContentInsertSchema,
   seoContentSearchKeywordInsertSchema,
@@ -16,18 +17,15 @@ export async function upsertContent(
       .values(values)
       .onConflictDoUpdate({
         target: [schema.seoContent.pathname],
-        set: {
-          campaignType: sql.raw(
-            `excluded.${schema.seoContent.campaignType.name}`,
-          ),
-          status: sql.raw(`excluded.${schema.seoContent.status.name}`),
-          contentCategory: sql.raw(
-            `excluded.${schema.seoContent.contentCategory.name}`,
-          ),
-          markdownVersions: sql.raw(
-            `excluded.${schema.seoContent.markdownVersions.name}`,
-          ),
-        },
+        set: buildConflictUpdateColumns(schema.seoContent, [
+          "campaignType",
+          "contentCategory",
+          "impactScore",
+          "markdownVersions",
+          "pathname",
+          "proposedFormat",
+          "status",
+        ]),
       })
       .returning()
       .then((rows) => rows[0]),

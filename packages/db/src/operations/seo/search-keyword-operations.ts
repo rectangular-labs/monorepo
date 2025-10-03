@@ -1,5 +1,6 @@
 import { err, safe } from "@rectangular-labs/result";
-import { type DB, eq, schema, sql } from "../../client";
+import { type DB, eq, schema } from "../../client";
+import { buildConflictUpdateColumns } from "../../schema/_helper";
 import type {
   seoSearchKeywordInsertSchema,
   seoSearchKeywordUpdateSchema,
@@ -23,30 +24,15 @@ export async function upsertSearchKeyword(
           schema.seoSearchKeyword.normalizedPhrase,
           schema.seoSearchKeyword.location,
         ],
-        set: {
-          keywordDifficulty: sql.raw(
-            `excluded.${schema.seoSearchKeyword.keywordDifficulty.name}`,
-          ),
-          cpcUsdCents: sql.raw(
-            `excluded.${schema.seoSearchKeyword.cpcUsdCents.name}`,
-          ),
-          searchVolume: sql.raw(
-            `excluded.${schema.seoSearchKeyword.searchVolume.name}`,
-          ),
-          intent: sql.raw(`excluded.${schema.seoSearchKeyword.intent.name}`),
-          backlinkInfo: sql.raw(
-            `excluded.${schema.seoSearchKeyword.backlinkInfo.name}`,
-          ),
-          serpFeatures: sql.raw(
-            `excluded.${schema.seoSearchKeyword.serpFeatures.name}`,
-          ),
-          serpResults: sql.raw(
-            `excluded.${schema.seoSearchKeyword.serpResults.name}`,
-          ),
-          updatedAt: sql.raw(
-            `excluded.${schema.seoSearchKeyword.updatedAt.name}`,
-          ),
-        },
+        set: buildConflictUpdateColumns(schema.seoSearchKeyword, [
+          "keywordDifficulty",
+          "cpcUsdCents",
+          "searchVolume",
+          "intent",
+          "backlinkInfo",
+          "serpFeatures",
+          "serpResults",
+        ]),
       })
       .returning(),
   );
