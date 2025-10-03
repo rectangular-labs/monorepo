@@ -1,7 +1,7 @@
 import type { taskInputSchema } from "@rectangular-labs/db/parsers";
 import { type RetrieveRunResult, runs, tasks } from "@trigger.dev/sdk";
 import type { type } from "arktype";
-import type { generateKeywordClustersTask } from "./trigger/keyword-clusters";
+import type { analyzeKeywordsTask } from "./trigger/analyze-keywords";
 import type { understandSiteLlmTask } from "./trigger/understand-site-llm";
 
 export * from "@trigger.dev/sdk";
@@ -15,9 +15,9 @@ export const triggerTask = (
         "understand-site-llm",
         args,
       );
-    case "generate-keyword-clusters":
-      return tasks.trigger<typeof generateKeywordClustersTask>(
-        "generate-keyword-clusters",
+    case "analyze-keywords":
+      return tasks.trigger<typeof analyzeKeywordsTask>(
+        "analyze-keywords",
         args,
       );
     default: {
@@ -30,12 +30,10 @@ export const triggerTask = (
 export const getTask = async (
   taskId: string,
 ): Promise<
-  RetrieveRunResult<
-    typeof understandSiteLlmTask | typeof generateKeywordClustersTask
-  >
+  RetrieveRunResult<typeof understandSiteLlmTask | typeof analyzeKeywordsTask>
 > => {
   const run = await runs.retrieve<
-    typeof understandSiteLlmTask | typeof generateKeywordClustersTask
+    typeof understandSiteLlmTask | typeof analyzeKeywordsTask
   >(taskId);
   return run;
 };
