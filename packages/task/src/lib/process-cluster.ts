@@ -18,6 +18,8 @@ function getContentCategory(
       : "quick-win";
 }
 
+export const MAX_PAGE_RANK = 35;
+
 /**
  * This functionProcess a single cluster (page URL + keywords) and create a campaign
  * * Fetch the page content as markdown using JINA.ai
@@ -181,7 +183,7 @@ export async function processCluster(args: {
   // Current position 10%
   const impactScore =
     (totalSearchVolume / 100) * 0.4 +
-    (1 - avgKeywordDifficulty) * 100 * 0.3 +
+    (100 - avgKeywordDifficulty) * 0.3 +
     (primaryKeywordData?.intent === "transactional"
       ? 100
       : primaryKeywordData?.intent === "commercial"
@@ -189,7 +191,7 @@ export async function processCluster(args: {
         : 60) *
       0.2 +
     (primaryKeywordData.currentPosition
-      ? (30 - primaryKeywordData.currentPosition) * 0.1
+      ? (MAX_PAGE_RANK - primaryKeywordData.currentPosition) * 0.1
       : 0);
 
   // Step 6: Create content

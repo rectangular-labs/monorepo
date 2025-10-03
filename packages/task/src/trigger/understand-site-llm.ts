@@ -60,6 +60,7 @@ export const understandSiteLlmTask: ReturnType<
   "targetCountryCode": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("targetCountryCode").description}
   "targetCity": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("targetCity").description}
   "competitorsWebsites": "{url: string.url}[]", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("competitorsWebsites").description}
+  "writingStyle": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("writingStyle").description}
 }`,
       "",
       "DO NOT ASK FOR MORE INFORMATION. Start planning deeply for 30 minutes right away and use the appropriate tools to get the information. A great response will help a lot of people and could save the business from going under. Good work will be thoroughly rewarded.",

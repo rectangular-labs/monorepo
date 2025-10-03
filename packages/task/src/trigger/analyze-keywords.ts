@@ -13,7 +13,7 @@ import {
 } from "@rectangular-labs/db/parsers";
 import { AbortTaskRunError, schemaTask } from "@trigger.dev/sdk";
 import { taskEnv } from "../env.js";
-import { processCluster } from "../lib/process-cluster.js";
+import { MAX_PAGE_RANK, processCluster } from "../lib/process-cluster.js";
 import { setTaskMetadata } from "../lib/task-metadata.js";
 
 export const analyzeKeywordsTask: ReturnType<
@@ -24,7 +24,7 @@ export const analyzeKeywordsTask: ReturnType<
   >
 > = schemaTask({
   id: "analyze-keywords",
-  maxDuration: 300,
+  maxDuration: 60 * 15, // 15 minutes
   machine: "micro",
   schema: analyzeKeywordsTaskInputSchema,
   run: async (payload) => {
@@ -66,7 +66,7 @@ export const analyzeKeywordsTask: ReturnType<
       const result = await fetchRankedKeywordsForSite({
         hostname: new URL(project.websiteUrl).hostname,
         positionFrom: 1,
-        positionTo: 35,
+        positionTo: MAX_PAGE_RANK,
         locationName,
         languageCode: project.websiteInfo?.languageCode ?? "en",
         limit: 1000,
@@ -143,20 +143,48 @@ export const analyzeKeywordsTask: ReturnType<
         >,
       );
 
-      for (const [url, keywords] of Object.entries(keywordsToImproveByPage)) {
+      // Batch processing with 100 items per batch and minimum 1 minute per batch
+      const entries = Object.entries(keywordsToImproveByPage);
+      const BATCH_SIZE = 100;
+      const MIN_BATCH_DURATION_MS = 60_000; // 1 minute
+
+      for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+        const batch = entries.slice(i, i + BATCH_SIZE);
+        const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
+        const totalBatches = Math.ceil(entries.length / BATCH_SIZE);
+
         console.log(
-          `Processing cluster for ${url} with ${keywords.length} keywords`,
+          `Processing batch ${batchNumber}/${totalBatches} (${batch.length} pages)`,
         );
-        const content = await processCluster({
-          db,
-          project,
-          pageUrl: url,
-          keywords,
-        });
-        if (content && content.campaignType === "improvement") {
-          improvementContentIds.push(content.id);
-        } else if (content && content.campaignType === "do-nothing") {
-          doNothingContentIds.push(content.id);
+        const batchStartTime = Date.now();
+        await Promise.all(
+          batch.map(async ([url, keywords]) => {
+            console.log(
+              `Processing cluster for ${url} with ${keywords.length} keywords`,
+            );
+            const content = await processCluster({
+              db,
+              project,
+              pageUrl: url,
+              keywords,
+            });
+            if (content && content.campaignType === "improvement") {
+              improvementContentIds.push(content.id);
+            } else if (content && content.campaignType === "do-nothing") {
+              doNothingContentIds.push(content.id);
+            }
+          }),
+        );
+        // Ensure minimum batch duration
+        const batchDuration = Date.now() - batchStartTime;
+        const remainingTime = MIN_BATCH_DURATION_MS - batchDuration;
+        if (remainingTime > 0 && i + BATCH_SIZE < entries.length) {
+          console.log(
+            `Batch ${batchNumber} completed in ${batchDuration}ms. Waiting ${remainingTime}ms before next batch...`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, remainingTime));
+        } else {
+          console.log(`Batch ${batchNumber} completed in ${batchDuration}ms`);
         }
       }
     }
