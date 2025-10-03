@@ -45,6 +45,14 @@ export const seoWebsiteInfoSchema = type({
     .configure({
       message: () => "Ideal Customer is required",
     }),
+  writingStyle: type("string")
+    .atLeastLength(1)
+    .describe(
+      "Capture brand voice comprehensively: Tone (e.g., professional, casual, witty, authoritative, empathetic); Style (e.g., concise, storytelling, data-driven, conversational); Persona (e.g., expert advisor, friendly guide, industry leader, innovator); Voice attributes (e.g., formal/informal, technical/accessible, serious/playful). Include linguistic patterns if distinctive (e.g., 'uses contractions', 'avoids jargon', 'data-heavy with examples'). Examples — 'Professional yet approachable; concise data-driven style; expert advisor persona; uses contractions and accessible language; balances technical depth with clarity' | 'Witty and irreverent; storytelling style with pop culture refs; challenger brand persona; playful informal voice; avoids corporate speak'.",
+    )
+    .configure({
+      message: () => "Writing Style is required",
+    }),
   serviceRegion: type("string")
     .atLeastLength(1)
     .describe(
