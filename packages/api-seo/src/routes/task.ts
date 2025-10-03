@@ -19,10 +19,9 @@ const create = withOrganizationIdBase
       taskId: "string",
     }),
   )
-  .handler(async ({ context, input }) => {
-    const { projectId, ...taskInput } = input;
+  .handler(async ({ context, input: taskInput }) => {
     const createTaskResult = await createTask({
-      projectId,
+      projectId: taskInput.projectId,
       userId: context.user.id,
       input: taskInput,
     });
@@ -30,7 +29,7 @@ const create = withOrganizationIdBase
       throw createTaskResult.error;
     }
     return {
-      projectId,
+      projectId: taskInput.projectId,
       organizationId: context.session.activeOrganizationId,
       taskId: createTaskResult.value.id,
     };

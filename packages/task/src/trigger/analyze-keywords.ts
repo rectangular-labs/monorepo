@@ -127,8 +127,9 @@ export const analyzeKeywordsTask: ReturnType<
             ...(acc[pageUrl] || []),
             {
               ...upsertedKeyword,
-              currentPosition: keyword.serpDetails.position,
-              estimatedSearchVolume: keyword.serpDetails.estimatedTrafficVolume,
+              currentPosition: keyword.serpDetails?.position ?? null,
+              estimatedSearchVolume:
+                keyword.serpDetails?.estimatedTrafficVolume ?? null,
             },
           ];
           return acc;

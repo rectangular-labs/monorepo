@@ -15,12 +15,12 @@ const list = withOrganizationIdBase
   )
   .output(
     type({
-      data: schema.seoContentCampaignSelectSchema.array(),
+      data: schema.seoContentSelectSchema.array(),
       nextPageCursor: "string.uuid|undefined",
     }),
   )
   .handler(async ({ context, input }) => {
-    const campaigns = await context.db.query.seoContentCampaign.findMany({
+    const campaigns = await context.db.query.seoContent.findMany({
       where: (table, { eq, and }) =>
         and(
           eq(table.projectId, input.projectId),
@@ -45,13 +45,13 @@ const get = withOrganizationIdBase
   )
   .output(
     type({
-      campaign: schema.seoContentCampaignSelectSchema.merge({
-        clusters: schema.seoContentCampaignClusterSelectSchema.array(),
+      campaign: schema.seoContentSelectSchema.merge({
+        searchKeywordsMap: schema.seoContentSearchKeywordSelectSchema.array(),
       }),
     }),
   )
   .handler(async ({ context, input }) => {
-    const campaign = await context.db.query.seoContentCampaign.findFirst({
+    const campaign = await context.db.query.seoContent.findFirst({
       where: (table, { and, eq }) =>
         and(
           eq(table.id, input.id),
@@ -59,7 +59,7 @@ const get = withOrganizationIdBase
           eq(table.organizationId, context.session.activeOrganizationId),
         ),
       with: {
-        clusters: true,
+        searchKeywordsMap: true,
       },
     });
     if (!campaign) {
@@ -73,18 +73,20 @@ const create = withOrganizationIdBase
   .input(
     type({
       projectId: "string",
-      keywordCategory: "string",
+      pathname: "string",
+      contentCategory: "'money-page'|'authority-builder'|'quick-win'",
+      campaignType: "'do-nothing'|'improvement'|'new-content'",
     }),
   )
-  .output(
-    schema.seoContentCampaignSelectSchema.merge(type({ taskId: "string" })),
-  )
+  .output(schema.seoContentSelectSchema.merge(type({ taskId: "string" })))
   .handler(async ({ context, input }) => {
     const [campaign] = await context.db
-      .insert(schema.seoContentCampaign)
+      .insert(schema.seoContent)
       .values({
         projectId: input.projectId,
-        keywordCategory: input.keywordCategory,
+        pathname: input.pathname,
+        contentCategory: input.contentCategory,
+        campaignType: input.campaignType,
         organizationId: context.session.activeOrganizationId,
       })
       .returning();
@@ -97,8 +99,8 @@ const create = withOrganizationIdBase
       projectId: input.projectId,
       userId: context.user.id,
       input: {
-        type: "generate-keyword-clusters",
-        keywordCategory: input.keywordCategory,
+        type: "analyze-keywords",
+        projectId: input.projectId,
       },
     });
     if (!createTaskResult.ok) {
