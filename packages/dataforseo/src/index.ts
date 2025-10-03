@@ -1,6 +1,9 @@
 import type {
+  backlinkInfoSchema,
   intentSchema,
   seoSerpTrafficSchema,
+  serpPositionSchema,
+  serpResultSchema,
 } from "@rectangular-labs/db/parsers";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import {
@@ -22,6 +25,7 @@ export async function fetchRankedKeywordsForSite(args: {
   Result<
     {
       cost: number;
+      provider: "dataforseo";
       se_provider: "google" | (string & {});
       nextEarliestUpdate: string;
       siteDetails: {
@@ -36,23 +40,11 @@ export async function fetchRankedKeywordsForSite(args: {
         competition: number | null;
         searchVolume: number | null;
         mainIntent: typeof intentSchema.infer | null;
-        backlinkInfo: {
-          avgBacklinks: number | null;
-          avgDoFollow: number | null;
-          avgReferringPages: number | null;
-          avgReferringDomains: number | null;
-          avgReferringMainDomains: number | null;
-          avgRank: number | null;
-          avgMainDomainRank: number | null;
-        };
+        backlinkInfo: typeof backlinkInfoSchema.infer;
         serpFeatures: string[] | null;
-        serpDetails: {
-          url: string | null;
-          title: string | null;
-          description: string | null;
-          position: number | null;
-          estimatedTrafficVolume: number | null;
-        };
+        serpDetails:
+          | (typeof serpPositionSchema.infer & typeof serpResultSchema.infer)
+          | null;
       }[];
     },
     unknown
@@ -87,7 +79,7 @@ export async function fetchRankedKeywordsForSite(args: {
           "and",
           ["keyword_data.keyword_info.search_volume", ">=", "100"],
         ],
-        order_by: ["ranked_serp_element.serp_item.rank_absolute,asc"],
+        order_by: ["keyword_data.clickstream_keyword_info.search_volume,desc"],
         offset: args.offset ?? 0,
         limit: args.limit ?? 1000,
       },
@@ -120,6 +112,7 @@ export async function fetchRankedKeywordsForSite(args: {
 
   return ok({
     cost: json.data.cost ?? 0,
+    provider: "dataforseo",
     se_provider: result.se_type ?? "google",
     nextEarliestUpdate: nextEarliestUpdate.toISOString(),
     siteDetails: {
@@ -186,19 +179,29 @@ export async function fetchRankedKeywordsForSite(args: {
               avgMainDomainRank:
                 keywordData.avg_backlinks_info?.main_domain_rank ?? null,
             },
-            serpDetails: {
-              // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
-              url: (ranked_serp_element.serp_item as any)?.url ?? null,
-              // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
-              title: (ranked_serp_element.serp_item as any)?.title ?? null,
-              description:
-                // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
-                (ranked_serp_element.serp_item as any)?.description ?? null,
-              estimatedTrafficVolume:
-                // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
-                (ranked_serp_element.serp_item as any)?.etv ?? null,
-              position: ranked_serp_element.serp_item?.rank_group ?? null,
-            },
+            serpDetails:
+              ranked_serp_element.serp_item &&
+              (ranked_serp_element.serp_item.rank_group ||
+                ranked_serp_element.serp_item.rank_absolute)
+                ? {
+                    // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
+                    url: (ranked_serp_element.serp_item as any)?.url ?? null,
+                    title:
+                      // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
+                      (ranked_serp_element.serp_item as any)?.title ?? null,
+                    description:
+                      // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
+                      (ranked_serp_element.serp_item as any)?.description ??
+                      null,
+                    estimatedTrafficVolume:
+                      // biome-ignore lint/suspicious/noExplicitAny: dataForSeo api return type missing
+                      (ranked_serp_element.serp_item as any)?.etv ?? null,
+                    position:
+                      ranked_serp_element.serp_item.rank_group ??
+                      ranked_serp_element.serp_item.rank_absolute ??
+                      -1,
+                  }
+                : null,
           };
         })
         .filter((item) => !!item) ?? [],
