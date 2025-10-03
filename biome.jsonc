@@ -97,7 +97,7 @@
       ".vscode/**",
       ".github/**",
       ".cursor/**",
-      "!packages/dataforseo/src/*.gen.ts",
+      "!packages/dataforseo/src/**/*.gen.ts",
       "!**/migrations",
       "!**/worker-configuration.d.ts",
       "!**/.content-collections",
