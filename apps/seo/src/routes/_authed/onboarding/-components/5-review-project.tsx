@@ -56,6 +56,8 @@ export function OnboardingReviewProject() {
         languageCode: values.languageCode,
         targetCountryCode: values.targetCountryCode,
         targetCity: values.targetCity,
+        writingStyle: values.writingStyle,
+        competitorsWebsites: values.competitorsWebsites,
       },
     });
   };
