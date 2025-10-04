@@ -1,0 +1,14 @@
+{
+  "extends": "@rectangular-labs/typescript/tsconfig.compiled-package.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@rectangular-labs/dataforseo/*": ["./src/*"]
+    },
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

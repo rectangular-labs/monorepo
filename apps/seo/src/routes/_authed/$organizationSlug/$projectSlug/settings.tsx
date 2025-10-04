@@ -1,5 +1,4 @@
 import { Button } from "@rectangular-labs/ui/components/ui/button";
-import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,12 +65,17 @@ function PageComponent() {
         idealCustomer: values.idealCustomer,
         serviceRegion: values.serviceRegion,
         industry: values.industry,
+        languageCode: values.languageCode,
+        targetCountryCode: values.targetCountryCode,
+        targetCity: values.targetCity,
+        competitorsWebsites: values.competitorsWebsites,
+        writingStyle: values.writingStyle,
       },
     });
   };
 
   return (
-    <Section className="space-y-6 py-8">
+    <div className="w-full space-y-6 p-6">
       <div className="space-y-2">
         <h1 className="font-semibold text-3xl tracking-tight">
           Project Settings
@@ -95,6 +99,13 @@ function PageComponent() {
             idealCustomer: activeProject.websiteInfo?.idealCustomer || "",
             serviceRegion: activeProject.websiteInfo?.serviceRegion || "",
             industry: activeProject.websiteInfo?.industry || "",
+            languageCode: activeProject.websiteInfo?.languageCode || "",
+            targetCountryCode:
+              activeProject.websiteInfo?.targetCountryCode || "",
+            targetCity: activeProject.websiteInfo?.targetCity || "",
+            competitorsWebsites:
+              activeProject.websiteInfo?.competitorsWebsites || [],
+            writingStyle: activeProject.websiteInfo?.writingStyle || "",
           }}
           onSubmit={handleSubmit}
         >
@@ -105,6 +116,6 @@ function PageComponent() {
           </div>
         </ManageProjectForm>
       )}
-    </Section>
+    </div>
   );
 }

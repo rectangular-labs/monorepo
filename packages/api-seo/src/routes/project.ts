@@ -2,6 +2,8 @@ import { ORPCError } from "@orpc/client";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
 import { protectedBase } from "../context";
+import { upsertProject } from "../lib/database/project";
+import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
 const list = protectedBase
@@ -107,29 +109,37 @@ const get = protectedBase
 const create = protectedBase
   .route({ method: "POST", path: "/" })
   .input(
-    schema.seoProjectInsertSchema.merge(
+    schema.seoProjectInsertSchema.pick("websiteUrl").merge(
       type({
         organizationIdentifier: "string",
       }),
     ),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(schema.seoProjectSelectSchema)
+  .output(schema.seoProjectSelectSchema.merge(type({ taskId: "string" })))
   .handler(async ({ context, input }) => {
-    const [row] = await context.db
-      .insert(schema.seoProject)
-      .values({
-        organizationId: context.organization.id,
-        websiteUrl: input.websiteUrl,
-      })
-      .returning();
-    if (!row) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "No project created.",
-      });
+    // TODO(txn): revisit when we can support transactions
+    const upsertProjectResult = await upsertProject({
+      organizationId: context.organization.id,
+      websiteUrl: input.websiteUrl,
+    });
+    if (!upsertProjectResult.ok) {
+      throw upsertProjectResult.error;
     }
-    return row;
+    const createTaskResult = await createTask({
+      projectId: upsertProjectResult.value.id,
+      userId: context.user.id,
+      input: {
+        type: "understand-site",
+        websiteUrl: input.websiteUrl,
+      },
+    });
+    if (!createTaskResult.ok) {
+      throw createTaskResult.error;
+    }
+    return { ...upsertProjectResult.value, taskId: createTaskResult.value.id };
   });
+
 const update = protectedBase
   .route({ method: "PATCH", path: "/{id}" })
   .input(

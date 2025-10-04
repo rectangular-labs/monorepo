@@ -3,8 +3,8 @@ import { base } from "../context";
 
 export const router = base.router({
   project: lazy(() => import("./project")),
-  keywords: lazy(() => import("./keywords")),
-  companyBackground: lazy(() => import("./company-background")),
+  content: lazy(() => import("./content")),
+  task: lazy(() => import("./task")),
   auth: {
     session: lazy(() => import("./auth/session")),
     organization: lazy(() => import("./auth/organization")),

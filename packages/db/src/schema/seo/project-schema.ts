@@ -6,10 +6,14 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
-import type { seoWebsiteInfoSchema } from "../../schema-parsers/seo-website-info-schema";
+import type {
+  seoSerpSnapshotSchema,
+  seoWebsiteInfoSchema,
+} from "../../schema-parsers/project-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
+import { seoContent } from "./content-schema";
 import { seoTaskRun } from "./task-run-schema";
 
 export const seoProject = pgSeoTable(
@@ -26,6 +30,7 @@ export const seoProject = pgSeoTable(
       }),
     websiteUrl: text().notNull(),
     websiteInfo: jsonb().$type<typeof seoWebsiteInfoSchema.infer>(),
+    serpSnapshot: jsonb().$type<typeof seoSerpSnapshotSchema.infer>(),
     ...timestamps,
   },
   (table) => [
@@ -44,6 +49,7 @@ export const seoProjectRelations = relations(seoProject, ({ one, many }) => ({
     fields: [seoProject.organizationId],
     references: [organization.id],
   }),
+  campaigns: many(seoContent),
   tasks: many(seoTaskRun),
 }));
 

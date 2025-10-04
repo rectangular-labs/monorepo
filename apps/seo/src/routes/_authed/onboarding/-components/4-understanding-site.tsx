@@ -32,7 +32,7 @@ export function OnboardingUnderstandingSite({
   const [currentTaskId, setCurrentTaskId] = useState(taskId);
   const autoWentNext = matcher.getMetadata("understanding-site");
   const { data: status, error: getStatusError } = useQuery(
-    getApiClientRq().companyBackground.getUnderstandSiteStatus.queryOptions({
+    getApiClientRq().task.getStatus.queryOptions({
       refetchInterval: 5_000,
       input: {
         id: currentTaskId,
@@ -40,7 +40,7 @@ export function OnboardingUnderstandingSite({
     }),
   );
   const { mutate: retry, isPending } = useMutation(
-    getApiClientRq().companyBackground.understandSite.mutationOptions({
+    getApiClientRq().task.create.mutationOptions({
       onSuccess: (data) => {
         setCurrentTaskId(data.taskId);
         toast.success("Retrying understanding site");
@@ -52,28 +52,38 @@ export function OnboardingUnderstandingSite({
   );
 
   const goNext = () => {
-    if (!status?.websiteInfo) {
+    if (
+      status?.output?.type !== "understand-site" ||
+      !status?.output?.websiteInfo
+    ) {
       toast.error("No website info found");
       return;
     }
     matcher.setMetadata("understanding-site", {
       websiteUrl,
       projectId,
-      ...status?.websiteInfo,
+      organizationId,
+      ...status.output.websiteInfo,
     });
     matcher.next();
   };
 
   const isCompleted = status?.status === "completed";
   const needsRetry =
-    status?.status === "failed" || status?.status === "cancelled";
+    status?.status === "failed" ||
+    status?.status === "cancelled" ||
+    getStatusError;
 
-  if (isCompleted && !autoWentNext) {
+  if (
+    isCompleted &&
+    !autoWentNext &&
+    status?.output?.type === "understand-site"
+  ) {
     matcher.setMetadata("understanding-site", {
       websiteUrl,
       projectId,
       organizationId,
-      ...status?.websiteInfo,
+      ...status.output.websiteInfo,
     });
     matcher.next();
   }
@@ -88,8 +98,8 @@ export function OnboardingUnderstandingSite({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="text-muted-foreground text-sm">
-              {status?.statusMessage ??
-                getStatusError?.message ??
+              {getStatusError?.message ??
+                status?.statusMessage ??
                 "We are setting things up..."}
             </div>
             <Progress value={status?.progress ?? 0} />
@@ -121,6 +131,8 @@ export function OnboardingUnderstandingSite({
                 onClick={() => {
                   retry({
                     websiteUrl,
+                    type: "understand-site",
+                    projectId,
                   });
                 }}
                 type="button"

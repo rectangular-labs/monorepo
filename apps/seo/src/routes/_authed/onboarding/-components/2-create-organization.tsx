@@ -22,6 +22,7 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { type } from "arktype";
 import { useState } from "react";
+import { getApiClient } from "~/lib/api";
 import { authClient } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
 
@@ -74,6 +75,11 @@ export function OnboardingCreateOrganization() {
       setIsLoading(false);
       return;
     }
+    await getApiClient().auth.organization.setActive({
+      organizationId: organizationResult.data.id,
+      organizationSlug: organizationResult.data.slug,
+    });
+
     matcher.next();
   };
 

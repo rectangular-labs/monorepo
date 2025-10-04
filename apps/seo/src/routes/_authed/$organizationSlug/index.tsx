@@ -9,14 +9,11 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@rectangular-labs/ui/components/ui/toggle-group";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import React from "react";
+import { useState } from "react";
+import { GridListToggle, useGridListMode } from "~/components/grid-list-toggle";
 import { getApiClientRq } from "~/lib/api";
 import { getFaviconUrl } from "~/lib/get-favicon-url";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -27,8 +24,8 @@ export const Route = createFileRoute("/_authed/$organizationSlug/")({
 
 function RouteComponent() {
   const { organizationSlug } = Route.useParams();
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [gridListMode, setGridListMode] = useGridListMode();
+  const [searchQuery, setSearchQuery] = useState("");
   const {
     data,
     isLoading,
@@ -57,7 +54,7 @@ function RouteComponent() {
   );
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -83,37 +80,23 @@ function RouteComponent() {
           </div>
         </div>
 
-        <ToggleGroup
-          onValueChange={(value) =>
-            value && setViewMode(value as "grid" | "list")
-          }
-          type="single"
-          value={viewMode}
-        >
-          <ToggleGroupItem aria-label="Grid view" value="grid">
-            <Icons.Grid className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem aria-label="List view" value="list">
-            <Icons.List className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <GridListToggle onChange={setGridListMode} value={gridListMode} />
       </div>
 
-      {/* Content */}
       <LoadingError
         error={error}
         errorDescription="There was an error loading your projects. Please try again."
         errorTitle="Error loading projects"
         isLoading={isLoading}
-        loadingComponent={<ProjectSkeletons viewMode={viewMode} />}
+        loadingComponent={<ProjectSkeletons viewMode={gridListMode} />}
       />
-      {!isLoading && filteredProjects.length === 0 && (
+      {!isLoading && !error && filteredProjects.length === 0 && (
         <EmptyState searchQuery={searchQuery} />
       )}
-      {!isLoading && filteredProjects.length > 0 && (
+      {!isLoading && !error && filteredProjects.length > 0 && (
         <div
           className={cn(
-            viewMode === "grid"
+            gridListMode === "grid"
               ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
               : "space-y-4",
           )}
@@ -123,14 +106,14 @@ function RouteComponent() {
               key={project.id}
               organizationSlug={organizationSlug}
               project={project}
-              viewMode={viewMode}
+              viewMode={gridListMode}
             />
           ))}
         </div>
       )}
 
       {/* Load More */}
-      {hasNextPage && (
+      {!error && !isLoading && hasNextPage && (
         <div className="flex justify-center pt-6">
           <Button
             disabled={isFetchingNextPage}
@@ -146,17 +129,15 @@ function RouteComponent() {
 }
 
 type Project = RouterOutputs["project"]["list"]["data"][0];
-interface ProjectCardProps {
-  organizationSlug: string;
-  project: Project;
-  viewMode: "grid" | "list";
-}
-
 function ProjectCard({
   organizationSlug,
   project,
   viewMode,
-}: ProjectCardProps) {
+}: {
+  organizationSlug: string;
+  project: Project;
+  viewMode: "grid" | "list";
+}) {
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
       month: "short",

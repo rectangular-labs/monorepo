@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
 import { Link } from "@tanstack/react-router";
-import { AUTO_ROUTE_ORG } from "~/lib/organization";
+import { AUTO_ROUTE_ORG } from "~/lib/constants";
 import { OnboardingSteps } from "../-lib/steps";
 
 export function OnboardingAllSet({

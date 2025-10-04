@@ -21,7 +21,7 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { type } from "arktype";
-import { getApiClientRq } from "~/lib/api";
+import { getApiClient, getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
 
 const backgroundSchema = type({
@@ -43,14 +43,19 @@ export function OnboardingWebsiteInfo({
     resolver: arktypeResolver(backgroundSchema),
   });
 
-  const { mutate: startUnderstanding, isPending } = useMutation(
-    getApiClientRq().companyBackground.understandSite.mutationOptions({
+  const { mutate: createProject, isPending } = useMutation(
+    getApiClientRq().project.create.mutationOptions({
       onSuccess: (data, { websiteUrl }) => {
         matcher.setMetadata("website-info", {
           websiteUrl,
           taskId: data.taskId,
-          projectId: data.projectId,
+          projectId: data.id,
           organizationId: data.organizationId,
+        } satisfies {
+          taskId: string;
+          projectId: string;
+          websiteUrl: string;
+          organizationId: string;
         });
         matcher.next();
       },
@@ -62,9 +67,17 @@ export function OnboardingWebsiteInfo({
     }),
   );
 
-  const handleSubmit = (values: typeof backgroundSchema.infer) => {
-    startUnderstanding({
+  const handleSubmit = async (values: typeof backgroundSchema.infer) => {
+    const organization = await getApiClient().auth.organization.active();
+    if (!organization) {
+      form.setError("root", {
+        message: "No active organization found",
+      });
+      return;
+    }
+    createProject({
       websiteUrl: values.url,
+      organizationIdentifier: organization.id,
     });
   };
 
