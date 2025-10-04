@@ -1,5 +1,6 @@
 import {
   ArrowDownIcon,
+  ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpIcon,
   CheckIcon,
@@ -7,9 +8,11 @@ import {
   ChevronRightIcon,
   ChevronsUpDownIcon,
   DotIcon,
+  ExternalLinkIcon,
   EyeIcon,
   EyeOffIcon,
   FileIcon,
+  FileTextIcon,
   FolderIcon,
   GridIcon,
   ListIcon,
@@ -25,16 +28,19 @@ import {
   PhoneCallIcon,
   PlusIcon,
   RotateCcwIcon,
+  SaveIcon,
   SearchIcon,
   SettingsIcon,
   ShieldIcon,
   SparklesIcon,
   StarIcon,
   SunIcon,
+  TargetIcon,
   TerminalIcon,
   TimerIcon,
   TrendingUpIcon,
   UserIcon,
+  UsersIcon,
   ZapIcon,
 } from "lucide-react";
 import type { SVGProps } from "react";
@@ -42,6 +48,7 @@ import type { SVGProps } from "react";
 type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const ArrowDown = ArrowDownIcon;
+export const ArrowLeft = ArrowLeftIcon;
 export const ArrowRight = ArrowRightIcon;
 export const ArrowUp = ArrowUpIcon;
 export const Check = CheckIcon;
@@ -51,7 +58,9 @@ export const ChevronsUpDown = ChevronsUpDownIcon;
 export const Dot = DotIcon;
 export const EyeOff = EyeOffIcon;
 export const EyeOn = EyeIcon;
+export const ExternalLink = ExternalLinkIcon;
 export const File = FileIcon;
+export const FileText = FileTextIcon;
 export const Folder = FolderIcon;
 export const Grid = GridIcon;
 export const List = ListIcon;
@@ -65,6 +74,7 @@ export const PartyPopper = PartyPopperIcon;
 export const PhoneCall = PhoneCallIcon;
 export const Plus = PlusIcon;
 export const RotateCcw = RotateCcwIcon;
+export const Save = SaveIcon;
 export const Search = SearchIcon;
 export const Settings = SettingsIcon;
 export const Shield = ShieldIcon;
@@ -72,10 +82,12 @@ export const Sparkles = SparklesIcon;
 export const Spinner = Loader2;
 export const Star = StarIcon;
 export const Sun = SunIcon;
+export const Target = TargetIcon;
 export const Terminal = TerminalIcon;
 export const Timer = TimerIcon;
 export const TrendingUp = TrendingUpIcon;
 export const User = UserIcon;
+export const Users = UsersIcon;
 export const X = LucideXIcon;
 export const Zap = ZapIcon;
 
