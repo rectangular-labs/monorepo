@@ -9,7 +9,7 @@ import { getApiClientRq } from "~/lib/api";
 export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
   {
     loader: async ({ context, params }) => {
-      const activeProject = await context.queryClient.fetchQuery(
+      const activeProject = await context.queryClient.ensureQueryData(
         getApiClientRq().project.get.queryOptions({
           input: {
             organizationIdentifier: params.organizationSlug,
@@ -52,9 +52,9 @@ function RouteComponent() {
           activeProps={activeProps}
           className={className}
           params={{ organizationSlug, projectSlug }}
-          to="/$organizationSlug/$projectSlug/campaigns"
+          to="/$organizationSlug/$projectSlug/articles"
         >
-          Campaigns
+          Articles
         </Link>
         <Link
           activeProps={activeProps}
@@ -66,7 +66,7 @@ function RouteComponent() {
         </Link>
       </ul>
 
-      <main className="mx-auto max-w-5xl flex-1">
+      <main className="mx-auto max-w-7xl flex-1">
         <Outlet />
       </main>
     </div>
