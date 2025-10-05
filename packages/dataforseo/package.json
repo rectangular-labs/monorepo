@@ -28,7 +28,7 @@
     "format": "bun x @biomejs/biome format . --write",
     "lint": "bun x @biomejs/biome lint . --write",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "generate-api": "mv ./src/env.ts ./ && npx @hey-api/openapi-ts -i https://raw.githubusercontent.com/dataforseo/OpenApiDocumentation/refs/heads/master/openapi_specification.yaml  -o ./src && mv ./env.ts ./src/ && rm ./src/index.ts"
+    "generate-api": "mv ./src/env.ts ./ && mv ./src/index.ts ./ && pnpm openapi-ts && mv ./env.ts ./src/ && mv ./index.ts ./src/ "
   },
   "devDependencies": {
     "@rectangular-labs/db": "workspace:*",
@@ -37,6 +37,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@hey-api/openapi-ts": "^0.84.4",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.22"
