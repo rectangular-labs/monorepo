@@ -1,0 +1,12 @@
+{
+  "extends": "@rectangular-labs/typescript/tsconfig.compiled-package.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@rectangular-labs/google-apis/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
