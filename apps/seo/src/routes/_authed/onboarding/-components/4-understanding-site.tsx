@@ -13,6 +13,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
+import { useMetadata } from "../-lib/use-metadata";
 
 export function OnboardingUnderstandingSite({
   description,
@@ -22,15 +23,19 @@ export function OnboardingUnderstandingSite({
   description: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-  const { taskId, projectId, websiteUrl, organizationId } =
-    matcher.getMetadata<{
-      taskId: string;
-      projectId: string;
-      websiteUrl: string;
-      organizationId: string;
-    }>("website-info");
+  const { data: websiteInfoMetadata } = useMetadata("website-info");
+  const { data: understandingSiteMetadata, set: setUnderstandingSiteMetadata } =
+    useMetadata("understanding-site");
+  const autoWentNext = understandingSiteMetadata;
+
+  const {
+    taskId = "",
+    projectId = "",
+    websiteUrl = "",
+    organizationId = "",
+  } = websiteInfoMetadata ?? {};
+
   const [currentTaskId, setCurrentTaskId] = useState(taskId);
-  const autoWentNext = matcher.getMetadata("understanding-site");
   const { data: status, error: getStatusError } = useQuery(
     getApiClientRq().task.getStatus.queryOptions({
       refetchInterval: 5_000,
@@ -59,7 +64,7 @@ export function OnboardingUnderstandingSite({
       toast.error("No website info found");
       return;
     }
-    matcher.setMetadata("understanding-site", {
+    setUnderstandingSiteMetadata({
       websiteUrl,
       projectId,
       organizationId,
@@ -79,7 +84,7 @@ export function OnboardingUnderstandingSite({
     !autoWentNext &&
     status?.output?.type === "understand-site"
   ) {
-    matcher.setMetadata("understanding-site", {
+    setUnderstandingSiteMetadata({
       websiteUrl,
       projectId,
       organizationId,

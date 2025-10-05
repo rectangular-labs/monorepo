@@ -13,23 +13,21 @@ import {
   type ManageProjectFormValues,
 } from "../../-components/manage-project-form";
 import { OnboardingSteps } from "../-lib/steps";
+import { useMetadata } from "../-lib/use-metadata";
 
 export function OnboardingReviewProject() {
   const matcher = OnboardingSteps.useStepper();
-
-  const defaultValues =
-    matcher.getMetadata<
-      Partial<
-        ManageProjectFormValues & { projectId: string; organizationId: string }
-      >
-    >("understanding-site");
+  const { data: defaultValues } = useMetadata("understanding-site");
+  const { set: setReviewProjectMetadata } = useMetadata("review-project");
 
   const { mutateAsync: updateProject, isPending } = useMutation(
     getApiClientRq().project.update.mutationOptions({
       onSuccess: (data) => {
-        matcher.setMetadata("review-project", {
-          slug: data.slug,
-          name: data.name,
+        setReviewProjectMetadata({
+          slug: data.slug ?? undefined,
+          name: data.name ?? undefined,
+          projectId: data.id,
+          organizationId: data.organizationId,
         });
         matcher.next();
       },

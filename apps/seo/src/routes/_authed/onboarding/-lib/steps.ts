@@ -1,6 +1,6 @@
 import { defineStepper } from "@stepperize/react";
 
-export const OnboardingSteps = defineStepper(
+const steps = [
   {
     id: "welcome",
     title: "Welcome",
@@ -41,9 +41,17 @@ export const OnboardingSteps = defineStepper(
       "Link your Google Search Console account to enable more accurate data.",
   },
   {
+    id: "connect-gsc-property",
+    title: "Select Property",
+    description:
+      "Choose which Google Search Console property to connect to your project.",
+  },
+  {
     id: "all-set",
     title: "You're all set!",
     description:
       "Let's start running campaigns for your site on the dashboard.",
   },
-);
+] as const;
+export const OnboardingSteps = defineStepper(...steps);
+export type OnboardingStep = (typeof steps)[number]["id"];
