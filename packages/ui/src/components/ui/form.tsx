@@ -146,7 +146,12 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 
   return (
     <p
-      className={cn("text-destructive text-sm", className)}
+      className={cn(
+        "text-sm",
+        error && "text-destructive",
+        !error && "text-muted-foreground",
+        className,
+      )}
       data-slot="form-message"
       id={formMessageId}
       {...props}
@@ -157,7 +162,8 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 }
 
 export { arktypeResolver } from "@hookform/resolvers/arktype";
-export { useForm } from "react-hook-form";
+export type { Control } from "react-hook-form";
+export { useFieldArray, useForm } from "react-hook-form";
 export {
   Form,
   FormControl,

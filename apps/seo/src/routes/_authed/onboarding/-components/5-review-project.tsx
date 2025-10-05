@@ -53,6 +53,11 @@ export function OnboardingReviewProject() {
         idealCustomer: values.idealCustomer,
         serviceRegion: values.serviceRegion,
         industry: values.industry,
+        languageCode: values.languageCode,
+        targetCountryCode: values.targetCountryCode,
+        targetCity: values.targetCity,
+        writingStyle: values.writingStyle,
+        competitorsWebsites: values.competitorsWebsites,
       },
     });
   };

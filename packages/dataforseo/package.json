@@ -1,0 +1,45 @@
+{
+  "name": "@rectangular-labs/dataforseo",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./dist/client.gen.d.ts",
+      "default": "./src/client.gen.ts"
+    },
+    "./env": {
+      "types": "./dist/src/env.d.ts",
+      "default": "./src/env.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./src/types.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "bun x @biomejs/biome format . --write",
+    "lint": "bun x @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "generate-api": "mv ./src/env.ts ./ && mv ./src/index.ts ./ && pnpm openapi-ts && mv ./env.ts ./src/ && mv ./index.ts ./src/ "
+  },
+  "devDependencies": {
+    "@rectangular-labs/db": "workspace:*",
+    "@rectangular-labs/typescript": "workspace:*",
+    "@types/node": "^24.6.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@hey-api/openapi-ts": "^0.84.4",
+    "@rectangular-labs/result": "workspace:*",
+    "@t3-oss/env-core": "^0.13.8",
+    "arktype": "^2.1.22"
+  }
+}

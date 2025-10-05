@@ -201,6 +201,31 @@ CREATE TABLE "sm_prompt" (
 	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "seo_content" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"organization_id" text NOT NULL,
+	"project_id" uuid NOT NULL,
+	"campaign_type" text NOT NULL,
+	"status" text DEFAULT 'analyzing' NOT NULL,
+	"pathname" text NOT NULL,
+	"markdown_versions" jsonb,
+	"impact_score" numeric(10, 2) DEFAULT '0' NOT NULL,
+	"proposed_format" text,
+	"content_category" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "seo_content_search_keyword" (
+	"content_id" uuid NOT NULL,
+	"search_keyword_id" uuid NOT NULL,
+	"type" text NOT NULL,
+	"serp_detail" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL,
+	CONSTRAINT "seo_content_search_keyword_content_id_search_keyword_id_pk" PRIMARY KEY("content_id","search_keyword_id")
+);
+--> statement-breakpoint
 CREATE TABLE "seo_project" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"slug" text,
@@ -208,10 +233,26 @@ CREATE TABLE "seo_project" (
 	"organization_id" text NOT NULL,
 	"website_url" text NOT NULL,
 	"website_info" jsonb,
+	"serp_snapshot" jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone NOT NULL,
 	CONSTRAINT "seo_project_org_slug_idx" UNIQUE("organization_id","slug"),
 	CONSTRAINT "seo_project_org_website_url_idx" UNIQUE("organization_id","website_url")
+);
+--> statement-breakpoint
+CREATE TABLE "seo_search_keyword" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"normalized_phrase" text NOT NULL,
+	"keyword_difficulty" integer,
+	"location" text NOT NULL,
+	"cpc_usd_cents" integer DEFAULT 0 NOT NULL,
+	"search_volume" integer,
+	"intent" text NOT NULL,
+	"backlink_info" jsonb,
+	"serp_features" text[],
+	"serp_results" jsonb DEFAULT '[]'::jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "seo_task_run" (
@@ -249,6 +290,10 @@ ALTER TABLE "sm_project_mention_reply" ADD CONSTRAINT "sm_project_mention_reply_
 ALTER TABLE "sm_project_mention_reply" ADD CONSTRAINT "sm_pmr_project_keyword_mention_fk" FOREIGN KEY ("project_id","mention_id","attributed_keyword_id") REFERENCES "public"."sm_project_keyword_mention"("project_id","mention_id","keyword_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sm_workspace" ADD CONSTRAINT "sm_workspace_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "sm_workspace" ADD CONSTRAINT "sm_workspace_current_reply_prompt_id_sm_prompt_sm_prompt_id_fk" FOREIGN KEY ("current_reply_prompt_id") REFERENCES "public"."sm_prompt"("sm_prompt_id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "seo_content" ADD CONSTRAINT "seo_content_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "seo_content" ADD CONSTRAINT "seo_content_project_id_seo_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."seo_project"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "seo_content_search_keyword" ADD CONSTRAINT "seo_content_search_keyword_content_id_seo_content_id_fk" FOREIGN KEY ("content_id") REFERENCES "public"."seo_content"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "seo_content_search_keyword" ADD CONSTRAINT "seo_content_search_keyword_search_keyword_id_seo_search_keyword_id_fk" FOREIGN KEY ("search_keyword_id") REFERENCES "public"."seo_search_keyword"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "seo_project" ADD CONSTRAINT "seo_project_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "seo_task_run" ADD CONSTRAINT "seo_task_run_project_id_seo_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."seo_project"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "seo_task_run" ADD CONSTRAINT "seo_task_run_requested_by_user_id_fk" FOREIGN KEY ("requested_by") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
@@ -276,8 +321,19 @@ CREATE INDEX "sm_pmr_status_idx" ON "sm_project_mention_reply" USING btree ("sta
 CREATE INDEX "sm_project_org_idx" ON "sm_workspace" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX "sm_project_current_reply_prompt_idx" ON "sm_workspace" USING btree ("current_reply_prompt_id");--> statement-breakpoint
 CREATE INDEX "sm_prompt_created_at_idx" ON "sm_prompt" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "seo_content_organization_idx" ON "seo_content" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "seo_content_project_idx" ON "seo_content" USING btree ("project_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "seo_content_pathname_unique" ON "seo_content" USING btree ("pathname");--> statement-breakpoint
+CREATE INDEX "seo_content_search_keyword_content_idx" ON "seo_content_search_keyword" USING btree ("content_id");--> statement-breakpoint
+CREATE INDEX "seo_content_search_keyword_search_keyword_idx" ON "seo_content_search_keyword" USING btree ("search_keyword_id");--> statement-breakpoint
+CREATE INDEX "seo_content_search_keyword_type_idx" ON "seo_content_search_keyword" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "seo_project_org_idx" ON "seo_project" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX "seo_project_website_url_idx" ON "seo_project" USING btree ("website_url");--> statement-breakpoint
+CREATE UNIQUE INDEX "seo_search_keyword_location_normalized_phrase_unique" ON "seo_search_keyword" USING btree ("location","normalized_phrase");--> statement-breakpoint
+CREATE INDEX "seo_search_keyword_search_volume_idx" ON "seo_search_keyword" USING btree ("search_volume");--> statement-breakpoint
+CREATE INDEX "seo_search_keyword_keyword_difficulty_idx" ON "seo_search_keyword" USING btree ("keyword_difficulty");--> statement-breakpoint
+CREATE INDEX "seo_search_keyword_cpc_idx" ON "seo_search_keyword" USING btree ("cpc_usd_cents");--> statement-breakpoint
+CREATE INDEX "seo_search_keyword_intent_idx" ON "seo_search_keyword" USING btree ("intent");--> statement-breakpoint
 CREATE INDEX "seo_task_run_project_idx" ON "seo_task_run" USING btree ("project_id");--> statement-breakpoint
 CREATE INDEX "seo_task_run_task_id_idx" ON "seo_task_run" USING btree ("task_id");--> statement-breakpoint
 CREATE INDEX "seo_task_run_provider_idx" ON "seo_task_run" USING btree ("provider");--> statement-breakpoint

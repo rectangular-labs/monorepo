@@ -61,7 +61,7 @@
     "@plunk/node": "^3.0.3",
     "@rectangular-labs/typescript": "workspace:*",
     "@sendgrid/mail": "^8.1.6",
-    "@types/node": "^24.5.2",
+    "@types/node": "^24.6.1",
     "@types/nodemailer": "^7.0.1",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
@@ -73,7 +73,7 @@
     "react-dom": "^19.1.1",
     "resend": "^6.1.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@aws-sdk/client-sesv2": "^3.894.0",
