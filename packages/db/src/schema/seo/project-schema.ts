@@ -14,6 +14,7 @@ import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
 import { seoContent } from "./content-schema";
+import { seoGscProperty } from "./gsc-property-schema";
 import { seoTaskRun } from "./task-run-schema";
 
 export const seoProject = pgSeoTable(
@@ -31,6 +32,10 @@ export const seoProject = pgSeoTable(
     websiteUrl: text().notNull(),
     websiteInfo: jsonb().$type<typeof seoWebsiteInfoSchema.infer>(),
     serpSnapshot: jsonb().$type<typeof seoSerpSnapshotSchema.infer>(),
+    gscPropertyId: uuid().references(() => seoGscProperty.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     ...timestamps,
   },
   (table) => [
@@ -48,6 +53,10 @@ export const seoProjectRelations = relations(seoProject, ({ one, many }) => ({
   organization: one(organization, {
     fields: [seoProject.organizationId],
     references: [organization.id],
+  }),
+  gscProperty: one(seoGscProperty, {
+    fields: [seoProject.gscPropertyId],
+    references: [seoGscProperty.id],
   }),
   campaigns: many(seoContent),
   tasks: many(seoTaskRun),

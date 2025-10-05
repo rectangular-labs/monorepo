@@ -25,7 +25,11 @@ export interface GscClientConfig {
 export interface GscProperty {
   url: string;
   type: "URL_PREFIX" | "DOMAIN";
-  permissionLevel: "write" | "read-only" | "needs-verification";
+  permissionLevel:
+    | "siteFull"
+    | "siteRestricted"
+    | "siteOwner"
+    | "siteUnverifiedUser";
 }
 
 export interface GscAnalyticsRow {
@@ -104,15 +108,6 @@ export async function listProperties(
       new Error(`Failed to list properties: ${await response.value.text()}`),
     );
   }
-  const getPermissionLevel = (permissionLevel: string) => {
-    if (permissionLevel === "siteOwner" || permissionLevel === "siteFull") {
-      return "write" as const;
-    }
-    if (permissionLevel === "siteRestricted") {
-      return "read-only" as const;
-    }
-    return "needs-verification" as const;
-  };
 
   const properties: GscProperty[] = (response.value.data.siteEntry || [])
     .filter((entry) => !!entry.siteUrl)
@@ -127,7 +122,9 @@ export async function listProperties(
         type: siteUrl.startsWith("sc-domain:")
           ? ("DOMAIN" as const)
           : ("URL_PREFIX" as const),
-        permissionLevel: getPermissionLevel(entry.permissionLevel ?? ""),
+        permissionLevel:
+          (entry.permissionLevel as GscProperty["permissionLevel"]) ??
+          "siteUnverifiedUser",
       };
     });
 
