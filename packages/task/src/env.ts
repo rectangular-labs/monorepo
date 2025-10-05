@@ -11,6 +11,7 @@ export const taskEnv = () =>
       TRIGGER_SECRET_KEY: type("string"),
       JINA_API_KEY: type("string"),
       GOOGLE_GENERATIVE_AI_API_KEY: type("string"),
+      OPENAI_API_KEY: type("string"),
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
