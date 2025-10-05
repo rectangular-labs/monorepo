@@ -10,10 +10,10 @@ export interface GscClientConfig {
     clientId: string;
     clientSecret: string;
     accessToken: string;
-    refreshToken?: string;
-    scopes?: string[];
-    expiryDate?: Date;
-    idToken?: string;
+    refreshToken?: string | undefined;
+    scopes?: string[] | undefined;
+    expiryDate?: Date | undefined;
+    idToken?: string | undefined;
   };
   onTokenRefresh?: (tokens: {
     accessToken: string;
@@ -23,7 +23,7 @@ export interface GscClientConfig {
 }
 
 export interface GscProperty {
-  url: string;
+  domain: string;
   type: "URL_PREFIX" | "DOMAIN";
   permissionLevel:
     | "siteFull"
@@ -118,7 +118,7 @@ export async function listProperties(
       }
 
       return {
-        url: siteUrl,
+        domain: siteUrl.startsWith("sc-domain:") ? siteUrl.slice(10) : siteUrl,
         type: siteUrl.startsWith("sc-domain:")
           ? ("DOMAIN" as const)
           : ("URL_PREFIX" as const),
