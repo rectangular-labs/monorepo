@@ -40,6 +40,7 @@ export function initAuthHandler(baseURL: string, db: DB) {
       encryptOAuthTokens: true,
       accountLinking: {
         enabled: true,
+        allowDifferentEmails: true,
       },
     },
     user: {

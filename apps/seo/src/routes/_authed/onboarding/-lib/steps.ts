@@ -35,6 +35,12 @@ export const OnboardingSteps = defineStepper(
     description: "Let's make sure everything looks good.",
   },
   {
+    id: "connect-gsc",
+    title: "Connect Search Console",
+    description:
+      "Link your Google Search Console account to enable more accurate data.",
+  },
+  {
     id: "all-set",
     title: "You're all set!",
     description:
