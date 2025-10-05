@@ -8,6 +8,7 @@ import { OnboardingUnderstandingSite } from "./4-understanding-site";
 import { OnboardingReviewProject } from "./5-review-project";
 import { OnboardingAllSet } from "./6-all-set";
 import { OnboardingConnectGsc } from "./connect-gsc";
+import { OnboardingConnectGscProperty } from "./connect-gsc-property";
 import { OnboardingProgress } from "./onboarding-progress";
 
 export function OnboardingContent() {
@@ -46,6 +47,12 @@ export function OnboardingContent() {
           ),
           "connect-gsc": (step) => (
             <OnboardingConnectGsc
+              description={step.description}
+              title={step.title}
+            />
+          ),
+          "connect-gsc-property": (step) => (
+            <OnboardingConnectGscProperty
               description={step.description}
               title={step.title}
             />

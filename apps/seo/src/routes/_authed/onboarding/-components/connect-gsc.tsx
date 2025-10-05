@@ -8,9 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
+import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { authClient } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
+import { useMetadata } from "../-lib/use-metadata";
 
 const GSC_SCOPE = "https://www.googleapis.com/auth/webmasters";
 function linkGoogleAccountForGsc(options?: { callbackURL?: string }) {
@@ -33,12 +35,28 @@ export function OnboardingConnectGsc({
   description: string;
 }) {
   const stepper = OnboardingSteps.useStepper();
+  const searchParams = useSearch({ from: "/_authed/onboarding/" });
+  const { data: reviewProjectMetadata } = useMetadata("review-project");
   const [isLinking, setIsLinking] = useState(false);
 
   const handleConnect = async () => {
     try {
       setIsLinking(true);
-      await linkGoogleAccountForGsc();
+      // Build callback URL with existing search params and projectId
+      const params = new URLSearchParams();
+      if (searchParams.type) {
+        params.set("type", searchParams.type);
+      }
+      if (reviewProjectMetadata?.projectId) {
+        params.set("projectId", reviewProjectMetadata.projectId);
+      }
+      if (reviewProjectMetadata?.organizationId) {
+        params.set("organizationId", reviewProjectMetadata.organizationId);
+      }
+
+      const callbackURL = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+      await linkGoogleAccountForGsc({ callbackURL });
     } finally {
       setIsLinking(false);
     }
