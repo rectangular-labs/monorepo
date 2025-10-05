@@ -84,7 +84,6 @@ const listProperties = protectedBase
         });
       }),
     );
-    console.log("accessTokens", accessTokens);
     const env = apiEnv();
     // 4. Initialize GSC client and fetch properties
     const gscClients = accessTokens.map((accessToken) => {
