@@ -87,7 +87,7 @@ export function OnboardingConnectGsc({
           <div className="flex gap-2">
             <Button
               disabled={isLinking}
-              onClick={() => stepper.next()}
+              onClick={() => stepper.goTo("all-set")}
               variant="ghost"
             >
               Skip for now
