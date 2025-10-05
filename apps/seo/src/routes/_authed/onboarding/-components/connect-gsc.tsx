@@ -15,14 +15,10 @@ import { OnboardingSteps } from "../-lib/steps";
 import { useMetadata } from "../-lib/use-metadata";
 
 const GSC_SCOPE = "https://www.googleapis.com/auth/webmasters";
-function linkGoogleAccountForGsc(options?: { callbackURL?: string }) {
-  const callbackURL =
-    options?.callbackURL ??
-    (typeof window !== "undefined" ? window.location.href : "/");
-
+function linkGoogleAccountForGsc(options: { callbackURL: string }) {
   return authClient.linkSocial({
     provider: "google",
-    callbackURL,
+    callbackURL: options.callbackURL,
     scopes: [GSC_SCOPE],
   });
 }
