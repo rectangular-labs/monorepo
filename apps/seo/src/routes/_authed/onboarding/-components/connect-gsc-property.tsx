@@ -2,7 +2,11 @@ import type {
   seoGscPermissionLevelSchema,
   seoGscPropertyTypeSchema,
 } from "@rectangular-labs/db/parsers";
-import { GoogleIcon } from "@rectangular-labs/ui/components/icon";
+import {
+  GoogleIcon,
+  Info,
+  Spinner,
+} from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
@@ -35,23 +39,22 @@ export function OnboardingConnectGscProperty({
   description: string;
 }) {
   const stepper = OnboardingSteps.useStepper();
+
   const searchParams = useSearch({ from: "/_authed/onboarding/" });
   const { data: reviewProjectMetadata } = useMetadata("review-project");
+  const projectId = searchParams.projectId || reviewProjectMetadata?.projectId;
   const api = getApiClientRq();
+
   const [selectedProperty, setSelectedProperty] = useState<GscProperty | null>(
     null,
   );
 
-  const projectId = searchParams.projectId || reviewProjectMetadata?.projectId;
-
-  // Fetch GSC properties
   const {
     data: propertiesData,
     isLoading,
     error,
   } = useQuery(api.googleSearchConsole.listProperties.queryOptions({}));
 
-  // Connect property to project mutation
   const { mutateAsync: connectProperty, isPending } = useMutation(
     api.googleSearchConsole.connectToProject.mutationOptions({
       onSuccess: (data) => {
@@ -87,65 +90,6 @@ export function OnboardingConnectGscProperty({
     stepper.next();
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GoogleIcon className="size-4" />
-              {title}
-            </CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-8">
-              <div className="flex flex-col items-center gap-2">
-                <div className="size-8 animate-spin rounded-full border-primary border-b-2" />
-                <p className="text-muted-foreground text-sm">
-                  Loading properties...
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GoogleIcon className="size-4" />
-              {title}
-            </CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <p className="text-destructive">Failed to load GSC properties</p>
-              <p className="mt-2 text-muted-foreground text-sm">
-                {error.message}
-              </p>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button onClick={() => stepper.prev()} variant="ghost">
-              Back
-            </Button>
-            <Button onClick={handleSkip} variant="ghost">
-              Skip for now
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show property selection
   return (
     <div className="space-y-6">
       <Card>
@@ -157,28 +101,54 @@ export function OnboardingConnectGscProperty({
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {isLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="flex flex-col items-center gap-2">
+                <Spinner className="size-8 animate-spin" />
+                <p className="text-muted-foreground text-sm">
+                  Loading properties...
+                </p>
+              </div>
+            </div>
+          )}
+          {error && (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <p className="text-destructive">Failed to load GSC properties</p>
+              <p className="mt-2 text-muted-foreground text-sm">
+                {error.message}
+              </p>
+            </div>
+          )}
+
           {propertiesData?.properties &&
           propertiesData.properties.length > 0 ? (
             propertiesData.properties.map((property) => {
               const isSelected = selectedProperty?.domain === property.domain;
+              const isDisabled =
+                property.permissionLevel === "needs-verification";
+
               return (
                 <Card
-                  className={`cursor-pointer p-4 transition-colors hover:bg-accent/50 ${
+                  className={`p-4 transition-colors ${
+                    isDisabled
+                      ? "cursor-not-allowed opacity-60"
+                      : "cursor-pointer hover:bg-accent/50"
+                  } ${
                     isSelected
                       ? "border-primary bg-accent/30 ring-1 ring-primary"
-                      : "hover:border-primary"
+                      : isDisabled
+                        ? ""
+                        : "hover:border-primary"
                   }`}
                   key={property.domain}
-                  onClick={() => setSelectedProperty(property)}
+                  onClick={() => !isDisabled && setSelectedProperty(property)}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 space-y-2">
                       <p className="font-medium">{property.domain}</p>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground text-xs">
-                          {property.type === "DOMAIN"
-                            ? "Domain Property"
-                            : "URL Prefix"}
+                          {property.type === "DOMAIN" ? "Domain" : "URL Prefix"}
                         </span>
                         <span
                           className={`flex items-center gap-1 text-xs ${
@@ -196,13 +166,10 @@ export function OnboardingConnectGscProperty({
                             "Needs Verification"}
                         </span>
                       </div>
-                      {(property.permissionLevel === "read-only" ||
-                        property.permissionLevel === "needs-verification") && (
-                        <p className="mt-1 text-muted-foreground text-xs">
-                          ⚠️{" "}
-                          {property.permissionLevel === "read-only"
-                            ? "Read-only access may limit some features"
-                            : "Property needs verification"}
+                      {property.permissionLevel === "read-only" && (
+                        <p className="flex items-center gap-1 text-muted-foreground text-xs">
+                          <Info className="size-3" /> Read-only access may limit
+                          some features
                         </p>
                       )}
                     </div>
@@ -250,7 +217,8 @@ export function OnboardingConnectGscProperty({
               Skip for now
             </Button>
             <Button
-              disabled={!selectedProperty || isPending}
+              disabled={!selectedProperty}
+              isLoading={isPending}
               onClick={handleConnect}
             >
               Connect
