@@ -77,14 +77,14 @@ const listProperties = protectedBase
       accountsWithScopes.map(async (account) => {
         return await context.auth.api.getAccessToken({
           body: {
-            providerId: account.providerId,
-            accountId: account.accountId,
+            accountId: account.id,
             userId: account.userId,
+            providerId: account.providerId,
           },
         });
       }),
     );
-
+    console.log("accessTokens", accessTokens);
     const env = apiEnv();
     // 4. Initialize GSC client and fetch properties
     const gscClients = accessTokens.map((accessToken) => {
@@ -114,7 +114,7 @@ const listProperties = protectedBase
           return null;
         }
         return result.value.map((property) => ({
-          accountId: account.accountId,
+          accountId: account.id,
           domain: property.domain,
           type: property.type,
           permissionLevel: getPermissionLevel(property.permissionLevel),
@@ -199,7 +199,7 @@ const connectToProject = protectedBase
         and(
           eq(table.userId, context.user.id),
           eq(table.providerId, "google"),
-          eq(table.accountId, input.accountId),
+          eq(table.id, input.accountId),
         ),
     });
     if (!account) {
