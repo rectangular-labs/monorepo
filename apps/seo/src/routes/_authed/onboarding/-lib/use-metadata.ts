@@ -35,19 +35,9 @@ export interface OnboardingMetadata {
     projectId?: string;
     organizationId?: string;
   };
-  "connect-gsc": {
-    hasGoogleAccount?: boolean;
-    hasGscScopes?: boolean;
-    projectId?: string;
-  };
-  "connect-gsc-property": {
-    gscPropertyId?: string;
-    projectId?: string;
-  };
-  "all-set": {
-    projectSlug?: string;
-    projectName?: string;
-  };
+  "connect-gsc": Record<string, never>;
+  "connect-gsc-property": Record<string, never>;
+  "all-set": Record<string, never>;
 }
 
 /**
