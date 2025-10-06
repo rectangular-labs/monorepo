@@ -106,6 +106,7 @@ const listProperties = protectedBase
     )
       .map((result, index) => {
         if (!result.ok) {
+          console.error("Failed to get GSC properties", result.error.message);
           return null;
         }
         const account = accountsWithScopes[index];
