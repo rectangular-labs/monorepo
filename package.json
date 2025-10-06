@@ -71,7 +71,10 @@
       "esbuild",
       "sharp",
       "workerd"
-    ]
+    ],
+    "patchedDependencies": {
+      "better-auth": "patches/better-auth.patch"
+    }
   },
   "packageManager": "pnpm@10.17.1"
 }

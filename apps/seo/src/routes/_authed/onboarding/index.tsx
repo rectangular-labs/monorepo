@@ -32,7 +32,10 @@ export const Route = createFileRoute("/_authed/onboarding/")({
       };
     }
 
-    const [project] = await Promise.all([
+    const [gscProperties, project] = await Promise.all([
+      context.queryClient.fetchQuery(
+        api.googleSearchConsole.listProperties.queryOptions(),
+      ),
       ...(deps.projectId && deps.organizationId
         ? [
             context.queryClient.fetchQuery(
@@ -50,9 +53,9 @@ export const Route = createFileRoute("/_authed/onboarding/")({
     console.log("project", project);
     return {
       organizations,
-      // gscConnectionStatus: {
-      //   hasGscScopes: gscProperties.hasGscScopes,
-      // },
+      gscConnectionStatus: {
+        hasGscScopes: gscProperties.hasGscScopes,
+      },
       project: project ?? null,
     };
   },
@@ -72,6 +75,10 @@ function getInitialStep(
     if (!project.name) {
       return "website-info";
     }
+    if (gscConnectionStatus?.hasGscScopes) {
+      return "connect-gsc-property";
+    }
+    return "connect-gsc";
   }
 
   switch (type) {
@@ -93,13 +100,18 @@ function getInitialStep(
 
 function OnboardingPage() {
   const { type } = Route.useSearch();
-  const { organizations, project } = Route.useLoaderData();
+  const { organizations, gscConnectionStatus, project } = Route.useLoaderData();
   const { data: websiteInfoMetadata, set: setWebsiteInfoMetadata } =
     useMetadata("website-info");
-  // const { data: reviewProjectMetadata, set: setReviewProjectMetadata } =
-  // useMetadata("review-project");
+  const { data: reviewProjectMetadata, set: setReviewProjectMetadata } =
+    useMetadata("review-project");
 
-  const initialStep = getInitialStep(type, organizations, project, null);
+  const initialStep = getInitialStep(
+    type,
+    organizations,
+    project,
+    gscConnectionStatus,
+  );
   if (initialStep === "website-info" && project && !websiteInfoMetadata) {
     // prefill the website info so that users don't have to re-enter the website URL
     setWebsiteInfoMetadata({
@@ -110,15 +122,15 @@ function OnboardingPage() {
     });
   }
 
-  // if (initialStep.startsWith("connect-gsc") && !reviewProjectMetadata) {
-  //   // so that we have the project ID and organization ID to navigate too on completion of the onboarding.
-  //   setReviewProjectMetadata({
-  //     projectId: project?.id,
-  //     organizationId: project?.organizationId,
-  //     name: project?.name ?? undefined,
-  //     slug: project?.slug ?? undefined,
-  //   });
-  // }
+  if (initialStep.startsWith("connect-gsc") && !reviewProjectMetadata) {
+    // so that we have the project ID and organization ID to navigate too on completion of the onboarding.
+    setReviewProjectMetadata({
+      projectId: project?.id,
+      organizationId: project?.organizationId,
+      name: project?.name ?? undefined,
+      slug: project?.slug ?? undefined,
+    });
+  }
 
   return (
     <OnboardingSteps.Scoped initialStep={initialStep}>
