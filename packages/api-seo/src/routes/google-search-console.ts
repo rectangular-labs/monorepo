@@ -8,14 +8,12 @@ import {
   seoGscPropertyTypeSchema,
 } from "@rectangular-labs/db/parsers";
 import {
-  createGscClient,
   type GscProperty,
   listProperties as listGscProperties,
 } from "@rectangular-labs/google-apis/google-search-console";
 import { safe } from "@rectangular-labs/result";
 import { type } from "arktype";
 import { protectedBase } from "../context";
-import { apiEnv } from "../env";
 
 function getPermissionLevel(
   permissionLevel: GscProperty["permissionLevel"],
@@ -84,24 +82,13 @@ const listProperties = protectedBase
         });
       }),
     );
-    const env = apiEnv();
-    // 4. Initialize GSC client and fetch properties
-    const gscClients = accessTokens.map((accessToken) => {
-      return createGscClient({
-        credentials: {
-          clientId: env.AUTH_GOOGLE_CLIENT_ID,
-          clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
-          accessToken: accessToken.accessToken,
-          expiryDate: accessToken.accessTokenExpiresAt,
-          scopes: accessToken.scopes,
-          idToken: accessToken.idToken,
-        },
-      });
-    });
 
+    // 4. Fetch properties using access tokens
     const result = (
       await Promise.all(
-        gscClients.map((gscClient) => listGscProperties(gscClient)),
+        accessTokens.map((accessToken) =>
+          listGscProperties(accessToken.accessToken),
+        ),
       )
     )
       .map((result, index) => {
@@ -122,6 +109,7 @@ const listProperties = protectedBase
       })
       .filter((result) => result !== null)
       .flat();
+    console.log("Google Search Console properties", result);
 
     return {
       properties: result,
@@ -169,16 +157,7 @@ const connectToProject = protectedBase
     }
 
     // Check if property already exists for this organization
-    const env = apiEnv();
-    const gscClient = createGscClient({
-      credentials: {
-        clientId: env.AUTH_GOOGLE_CLIENT_ID,
-        clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
-        accessToken: accessToken.value.accessToken,
-        expiryDate: accessToken.value.accessTokenExpiresAt,
-      },
-    });
-    const properties = await listGscProperties(gscClient);
+    const properties = await listGscProperties(accessToken.value.accessToken);
     if (!properties.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: `Failed to get GSC properties`,

@@ -1,26 +1,6 @@
-import {
-  auth,
-  searchconsole as searchConsole,
-  type searchconsole_v1,
-} from "@googleapis/searchconsole";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 
-export interface GscClientConfig {
-  credentials: {
-    clientId: string;
-    clientSecret: string;
-    accessToken: string;
-    refreshToken?: string | undefined;
-    scopes?: string[] | undefined;
-    expiryDate?: Date | undefined;
-    idToken?: string | undefined;
-  };
-  onTokenRefresh?: (tokens: {
-    accessToken: string;
-    refreshToken?: string;
-    expiresAt: Date;
-  }) => Promise<void>;
-}
+const GSC_BASE_URL = "https://www.googleapis.com/webmasters/v3";
 
 export interface GscProperty {
   domain: string;
@@ -46,70 +26,66 @@ export interface GscAnalyticsResponse {
 }
 
 /**
- * Create a Google Search Console client
+ * Make a request to the Google Search Console API
  */
-export function createGscClient(
-  config: GscClientConfig,
-): searchconsole_v1.Searchconsole {
-  const oauthClient = new auth.OAuth2({
-    clientId: config.credentials.clientId,
-    clientSecret: config.credentials.clientSecret,
-  });
-  oauthClient.setCredentials({
-    access_token: config.credentials.accessToken,
-    refresh_token: config.credentials.refreshToken ?? null,
-    expiry_date: config.credentials.expiryDate?.getTime() ?? null,
-    id_token: config.credentials.idToken ?? null,
-    ...(config.credentials.scopes
-      ? { scope: config.credentials.scopes.join(" ") }
-      : {}),
-  });
+async function makeGscRequest<T>(
+  accessToken: string,
+  endpoint: string,
+  options?: {
+    method?: "GET" | "POST";
+    body?: unknown;
+  },
+): Promise<Result<T, Error>> {
+  const url = `${GSC_BASE_URL}${endpoint}`;
 
-  // Listen for token refresh events
-  oauthClient.on("tokens", async (tokens) => {
-    if (config.onTokenRefresh && tokens.access_token) {
-      const tokenUpdate: {
-        accessToken: string;
-        refreshToken?: string;
-        expiresAt: Date;
-      } = {
-        accessToken: tokens.access_token,
-        expiresAt: new Date(tokens.expiry_date || Date.now() + 3600 * 1000),
-      };
+  const response = await safe(async () => {
+    const res = await fetch(url, {
+      method: options?.method ?? "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      ...(options?.body ? { body: JSON.stringify(options.body) } : {}),
+    });
 
-      if (tokens.refresh_token) {
-        tokenUpdate.refreshToken = tokens.refresh_token;
-      }
-
-      await config.onTokenRefresh(tokenUpdate);
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`GSC API request failed (${res.status}): ${errorText}`);
     }
+
+    return await res.json();
   });
 
-  const searchConsoleApi = searchConsole({
-    version: "v1",
-    auth: oauthClient,
-  });
+  if (!response.ok) {
+    return err(response.error);
+  }
 
-  return searchConsoleApi;
+  return ok(response.value as T);
+}
+
+interface GscSitesListResponse {
+  siteEntry?: Array<{
+    siteUrl?: string;
+    permissionLevel?: string;
+  }>;
 }
 
 /**
  * List all GSC properties the user has access to
  */
 export async function listProperties(
-  searchConsoleApi: searchconsole_v1.Searchconsole,
+  accessToken: string,
 ): Promise<Result<GscProperty[], Error>> {
-  const response = await safe(() => searchConsoleApi.sites.list({}));
+  const response = await makeGscRequest<GscSitesListResponse>(
+    accessToken,
+    "/sites",
+  );
+
   if (!response.ok) {
     return err(response.error);
   }
-  if (!response.value.ok) {
-    return err(
-      new Error(`Failed to list properties: ${await response.value.text()}`),
-    );
-  }
 
-  const properties: GscProperty[] = (response.value.data.siteEntry || [])
+  const properties: GscProperty[] = (response.value.siteEntry || [])
     .filter((entry) => !!entry.siteUrl)
     .map((entry) => {
       const siteUrl = entry.siteUrl;
@@ -131,9 +107,21 @@ export async function listProperties(
   return ok(properties);
 }
 
+interface GscSearchAnalyticsResponse {
+  rows?: Array<{
+    keys?: string[];
+    clicks?: number;
+    impressions?: number;
+    ctr?: number;
+    position?: number;
+  }>;
+  responseAggregationType?: "auto" | "byProperty" | "byPage";
+}
+
 /**
  * Get search analytics for a property
  *
+ * @param accessToken - Google OAuth access token
  * @param args.siteUrl - The GSC property URL (e.g., "https://example.com/")
  * @param args.startDate - Start date in YYYY-MM-DD format
  * @param args.endDate - End date in YYYY-MM-DD format
@@ -143,7 +131,7 @@ export async function listProperties(
  * @param args.startRow - Starting row for pagination
  */
 export async function getSearchAnalytics(
-  searchConsoleApi: searchconsole_v1.Searchconsole,
+  accessToken: string,
   args: {
     siteUrl: string;
     startDate: string;
@@ -160,75 +148,76 @@ export async function getSearchAnalytics(
     startRow?: number;
   },
 ): Promise<Result<GscAnalyticsResponse, Error>> {
-  try {
-    const requestBody: {
-      startDate: string;
-      endDate: string;
-      dimensions: string[];
-      dimensionFilterGroups?: Array<{
-        filters: Array<{
-          dimension: string;
-          operator: string;
-          expression: string;
-        }>;
+  const requestBody: {
+    startDate: string;
+    endDate: string;
+    dimensions: string[];
+    dimensionFilterGroups?: Array<{
+      filters: Array<{
+        dimension: string;
+        operator: string;
+        expression: string;
       }>;
-      rowLimit: number;
-      startRow: number;
-    } = {
-      startDate: args.startDate,
-      endDate: args.endDate,
-      dimensions: args.dimensions || ["query"],
-      rowLimit: Math.min(args.rowLimit || 25000, 25000), // GSC API max
-      startRow: args.startRow || 0,
-    };
+    }>;
+    rowLimit: number;
+    startRow: number;
+  } = {
+    startDate: args.startDate,
+    endDate: args.endDate,
+    dimensions: args.dimensions || ["query"],
+    rowLimit: Math.min(args.rowLimit || 25000, 25000), // GSC API max
+    startRow: args.startRow || 0,
+  };
 
-    if (args.filters && args.filters.length > 0) {
-      requestBody.dimensionFilterGroups = [
-        {
-          filters: args.filters.map((f) => ({
-            dimension: f.dimension,
-            operator: f.operator.toUpperCase() as
-              | "EQUALS"
-              | "CONTAINS"
-              | "NOT_CONTAINS",
-            expression: f.expression,
-          })),
-        },
-      ];
-    }
-
-    const response = await searchConsoleApi.searchanalytics.query({
-      siteUrl: args.siteUrl,
-      requestBody,
-    });
-
-    const rows: GscAnalyticsRow[] = (response.data.rows || []).map((row) => ({
-      keys: row.keys ?? [],
-      clicks: row.clicks ?? 0,
-      impressions: row.impressions ?? 0,
-      ctr: row.ctr ?? 0,
-      position: row.position ?? 0,
-    }));
-
-    return ok({
-      rows,
-      responseAggregationType: (response.data.responseAggregationType ??
-        "auto") as "auto" | "byProperty" | "byPage",
-    });
-  } catch (error) {
-    return err(
-      error instanceof Error
-        ? error
-        : new Error("Failed to fetch search analytics"),
-    );
+  if (args.filters && args.filters.length > 0) {
+    requestBody.dimensionFilterGroups = [
+      {
+        filters: args.filters.map((f) => ({
+          dimension: f.dimension,
+          operator: f.operator.toUpperCase() as
+            | "EQUALS"
+            | "CONTAINS"
+            | "NOT_CONTAINS",
+          expression: f.expression,
+        })),
+      },
+    ];
   }
+
+  // URL encode the siteUrl for the endpoint
+  const encodedSiteUrl = encodeURIComponent(args.siteUrl);
+  const response = await makeGscRequest<GscSearchAnalyticsResponse>(
+    accessToken,
+    `/sites/${encodedSiteUrl}/searchAnalytics/query`,
+    {
+      method: "POST",
+      body: requestBody,
+    },
+  );
+
+  if (!response.ok) {
+    return err(response.error);
+  }
+
+  const rows: GscAnalyticsRow[] = (response.value.rows || []).map((row) => ({
+    keys: row.keys ?? [],
+    clicks: row.clicks ?? 0,
+    impressions: row.impressions ?? 0,
+    ctr: row.ctr ?? 0,
+    position: row.position ?? 0,
+  }));
+
+  return ok({
+    rows,
+    responseAggregationType: response.value.responseAggregationType ?? "auto",
+  });
 }
 
 /**
  * Get keywords a specific page ranks for
  */
 export function getKeywordsForPage(
-  searchConsoleApi: searchconsole_v1.Searchconsole,
+  accessToken: string,
   args: {
     siteUrl: string;
     pageUrl: string;
@@ -237,7 +226,7 @@ export function getKeywordsForPage(
     minImpressions?: number;
   },
 ): Promise<Result<GscAnalyticsResponse, Error>> {
-  return getSearchAnalytics(searchConsoleApi, {
+  return getSearchAnalytics(accessToken, {
     siteUrl: args.siteUrl,
     startDate: args.startDate,
     endDate: args.endDate,
@@ -257,7 +246,7 @@ export function getKeywordsForPage(
  * Get top pages by clicks
  */
 export function getTopPages(
-  searchConsoleApi: searchconsole_v1.Searchconsole,
+  accessToken: string,
   args: {
     siteUrl: string;
     startDate: string;
@@ -265,7 +254,7 @@ export function getTopPages(
     limit?: number;
   },
 ): Promise<Result<GscAnalyticsResponse, Error>> {
-  return getSearchAnalytics(searchConsoleApi, {
+  return getSearchAnalytics(accessToken, {
     siteUrl: args.siteUrl,
     startDate: args.startDate,
     endDate: args.endDate,
