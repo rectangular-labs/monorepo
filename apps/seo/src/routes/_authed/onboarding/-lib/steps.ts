@@ -35,18 +35,6 @@ const steps = [
     description: "Let's make sure everything looks good.",
   },
   {
-    id: "connect-gsc",
-    title: "Connect Search Console",
-    description:
-      "Link your Google Search Console account to enable more accurate data.",
-  },
-  {
-    id: "connect-gsc-property",
-    title: "Select Property",
-    description:
-      "Choose which Google Search Console property to connect to your project.",
-  },
-  {
     id: "all-set",
     title: "You're all set!",
     description:
