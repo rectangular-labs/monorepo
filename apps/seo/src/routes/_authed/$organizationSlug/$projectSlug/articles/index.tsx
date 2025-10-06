@@ -28,7 +28,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { GridListToggle, useGridListMode } from "~/components/grid-list-toggle";
 import { getApiClientRq } from "~/lib/api";
-import { LoadingError } from "../../../-components/loading-error";
+import { LoadingError } from "~/routes/_authed/-components/loading-error";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/articles/",

@@ -23,6 +23,7 @@ import { useSearch } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
+import { useMetadata } from "../-lib/use-metadata";
 
 const backgroundSchema = type({
   url: type("string.url").configure({ message: () => "Must be a valid URL" }),
@@ -39,23 +40,22 @@ export function OnboardingWebsiteInfo({
   const { type } = useSearch({
     from: "/_authed/onboarding/",
   });
+  const { data, set: setMetadata } = useMetadata("website-info");
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
+    defaultValues: {
+      url: data?.websiteUrl ?? "",
+    },
   });
 
   const { mutate: createProject, isPending } = useMutation(
     getApiClientRq().project.create.mutationOptions({
       onSuccess: (data, { websiteUrl }) => {
-        matcher.setMetadata("website-info", {
+        setMetadata({
           websiteUrl,
           taskId: data.taskId,
           projectId: data.id,
           organizationId: data.organizationId,
-        } satisfies {
-          taskId: string;
-          projectId: string;
-          websiteUrl: string;
-          organizationId: string;
         });
         matcher.next();
       },

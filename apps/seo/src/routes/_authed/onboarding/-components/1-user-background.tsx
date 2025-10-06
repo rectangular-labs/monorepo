@@ -29,6 +29,7 @@ import { useMutation } from "@tanstack/react-query";
 import { type } from "arktype";
 import { authClient } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
+import { useMetadata } from "../-lib/use-metadata";
 
 const sourceOptions = [
   { value: "x", label: "X" },
@@ -76,18 +77,16 @@ export function OnboardingUserBackground({
   title: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-  const defaultValues =
-    matcher.getMetadata<Partial<typeof backgroundSchema.infer>>(
-      "user-background",
-    ) ?? {};
+  const { data: savedMetadata, set: setMetadata } =
+    useMetadata("user-background");
 
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
     defaultValues: {
-      source: defaultValues.source ?? "",
-      goal: defaultValues.goal ?? "",
-      otherGoal: defaultValues.otherGoal ?? "",
-      otherSource: defaultValues.otherSource ?? "",
+      source: savedMetadata?.source ?? "",
+      goal: savedMetadata?.goal ?? "",
+      otherGoal: savedMetadata?.otherGoal ?? "",
+      otherSource: savedMetadata?.otherSource ?? "",
     },
   });
   const isOtherSource = form.watch("source") === "other";
@@ -108,7 +107,7 @@ export function OnboardingUserBackground({
       return values;
     },
     onSuccess: (data) => {
-      matcher.setMetadata("user-background", data);
+      setMetadata(data);
       matcher.next();
     },
   });

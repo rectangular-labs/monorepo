@@ -9,7 +9,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import { Link } from "@tanstack/react-router";
 import { AUTO_ROUTE_ORG } from "~/lib/constants";
-import { OnboardingSteps } from "../-lib/steps";
+import { useMetadata } from "../-lib/use-metadata";
 
 export function OnboardingAllSet({
   description,
@@ -18,11 +18,9 @@ export function OnboardingAllSet({
   description: string;
   title: string;
 }) {
-  const matcher = OnboardingSteps.useStepper();
-  const { slug, name } = matcher.getMetadata<{
-    name: string;
-    slug: string;
-  }>("review-project");
+  const { data: reviewProjectMetadata } = useMetadata("review-project");
+  const { slug = "", name = "" } = reviewProjectMetadata ?? {};
+
   return (
     <Card className="w-full rounded-none sm:rounded-lg">
       <CardHeader>

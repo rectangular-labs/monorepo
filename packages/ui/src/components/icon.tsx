@@ -15,6 +15,7 @@ import {
   FileTextIcon,
   FolderIcon,
   GridIcon,
+  InfoIcon,
   ListIcon,
   Loader2,
   LogOutIcon,
@@ -63,6 +64,7 @@ export const File = FileIcon;
 export const FileText = FileTextIcon;
 export const Folder = FolderIcon;
 export const Grid = GridIcon;
+export const Info = InfoIcon;
 export const List = ListIcon;
 export const LogOut = LogOutIcon;
 export const Menu = MenuIcon;

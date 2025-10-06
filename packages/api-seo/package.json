@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.6.1",
+    "@types/node": "^24.6.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -47,6 +47,7 @@
     "@rectangular-labs/api-core": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
+    "@rectangular-labs/google-apis": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/task": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
