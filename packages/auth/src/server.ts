@@ -10,21 +10,41 @@ import {
   twoFactor,
 } from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey";
-import { authEnv } from "./env";
 
 interface DB {
   // biome-ignore lint/suspicious/noExplicitAny: better-auth types
   [key: string]: any;
 }
 
-export function initAuthHandler(baseURL: string, db: DB) {
-  const env = authEnv();
-
-  const useDiscord = !!env.AUTH_DISCORD_ID && !!env.AUTH_DISCORD_SECRET;
-  const useGithub = !!env.AUTH_GITHUB_ID && !!env.AUTH_GITHUB_SECRET;
-  const useReddit = !!env.AUTH_REDDIT_ID && !!env.AUTH_REDDIT_SECRET;
-  const useGoogle =
-    !!env.AUTH_GOOGLE_CLIENT_SECRET && !!env.AUTH_GOOGLE_CLIENT_ID;
+export function initAuthHandler({
+  baseURL,
+  db,
+  encryptionKey,
+  discordClientId,
+  discordClientSecret,
+  githubClientId,
+  githubClientSecret,
+  redditClientId,
+  redditClientSecret,
+  googleClientId,
+  googleClientSecret,
+}: {
+  baseURL: string;
+  db: DB;
+  encryptionKey: string;
+  discordClientId?: string | undefined;
+  discordClientSecret?: string | undefined;
+  githubClientId?: string | undefined;
+  githubClientSecret?: string | undefined;
+  redditClientId?: string | undefined;
+  redditClientSecret?: string | undefined;
+  googleClientId?: string | undefined;
+  googleClientSecret?: string | undefined;
+}) {
+  const useDiscord = !!discordClientId && !!discordClientSecret;
+  const useGithub = !!githubClientId && !!githubClientSecret;
+  const useReddit = !!redditClientId && !!redditClientSecret;
+  const useGoogle = !!googleClientId && !!googleClientSecret;
 
   const productionUrl =
     baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
@@ -35,7 +55,7 @@ export function initAuthHandler(baseURL: string, db: DB) {
 
   const config = {
     baseURL,
-    secret: env.AUTH_ENCRYPTION_KEY,
+    secret: encryptionKey,
     account: {
       encryptOAuthTokens: true,
       accountLinking: {
@@ -128,29 +148,29 @@ export function initAuthHandler(baseURL: string, db: DB) {
     socialProviders: {
       ...(useDiscord && {
         discord: {
-          clientId: env.AUTH_DISCORD_ID,
-          clientSecret: env.AUTH_DISCORD_SECRET,
+          clientId: discordClientId,
+          clientSecret: discordClientSecret,
           redirectURI: `${productionUrl}/api/auth/callback/discord`,
         },
       }),
       ...(useGithub && {
         github: {
-          clientId: env.AUTH_GITHUB_ID,
-          clientSecret: env.AUTH_GITHUB_SECRET,
+          clientId: githubClientId,
+          clientSecret: githubClientSecret,
           redirectURI: `${productionUrl}/api/auth/callback/github`,
         },
       }),
       ...(useReddit && {
         reddit: {
-          clientId: env.AUTH_REDDIT_ID,
-          clientSecret: env.AUTH_REDDIT_SECRET,
+          clientId: redditClientId,
+          clientSecret: redditClientSecret,
           redirectURI: `${productionUrl}/api/auth/callback/reddit`,
         },
       }),
       ...(useGoogle && {
         google: {
-          clientId: env.AUTH_GOOGLE_CLIENT_ID,
-          clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
           redirectURI: `${productionUrl}/api/auth/callback/google`,
           accessType: "offline",
           prompt: "select_account consent",

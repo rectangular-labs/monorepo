@@ -12,7 +12,11 @@ import type { InitialContext } from "./types";
 export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
   const db = createDb();
   return {
-    auth: initAuthHandler(args.url.origin, db) as Auth,
+    auth: initAuthHandler({
+      baseURL: args.url.origin,
+      db,
+      encryptionKey: "",
+    }) as Auth,
     db,
     ...args,
   };
