@@ -1,5 +1,4 @@
 {
-  "biome.lsp.bin": "node_modules/@biomejs/biome/bin/biome",
   "tailwindCSS.experimental.configFile": "packages/ui/src/styles.css",
   // allow autocomplete for ArkType expressions like "string | num"
   "editor.quickSuggestions": {
