@@ -18,4 +18,8 @@ import { type Auth, initAuthHandler } from "./server";
  * @warning Use the main auth configuration from "./server.ts" for your application.
  */
 
-export const auth: Auth = initAuthHandler("", {});
+export const auth: Auth = initAuthHandler({
+  baseURL: "",
+  encryptionKey: "",
+  db: {},
+});

@@ -6,13 +6,25 @@ import {
 import { loggerMiddleware } from "@rectangular-labs/api-core/lib/logger";
 import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
 import { createDb } from "@rectangular-labs/db";
+import { apiEnv } from "./env";
 import { authMiddleware } from "./lib/auth";
 import type { InitialContext } from "./types";
 
 export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
   const db = createDb();
+  const env = apiEnv();
   return {
-    auth: initAuthHandler(args.url.origin, db) as Auth,
+    auth: initAuthHandler({
+      baseURL: args.url.origin,
+      db,
+      encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
+      discordClientId: env.AUTH_SEO_DISCORD_ID,
+      discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
+      githubClientId: env.AUTH_SEO_GITHUB_ID,
+      githubClientSecret: env.AUTH_SEO_GITHUB_SECRET,
+      googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
+      googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
+    }) as Auth,
     db,
     ...args,
   };

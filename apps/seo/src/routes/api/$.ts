@@ -14,10 +14,18 @@ const blogSearch = createBlogSearchServer();
 
 async function handle({ request }: { request: Request }) {
   if (new URL(request.url).pathname.startsWith("/api/auth/")) {
-    const authServerHandler = initAuthHandler(
-      serverEnv().VITE_SEO_URL,
-      createDb(),
-    );
+    const env = serverEnv();
+    const authServerHandler = initAuthHandler({
+      baseURL: env.VITE_SEO_URL,
+      db: createDb(),
+      encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
+      discordClientId: env.AUTH_SEO_DISCORD_ID,
+      discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
+      githubClientId: env.AUTH_SEO_GITHUB_ID,
+      githubClientSecret: env.AUTH_SEO_GITHUB_SECRET,
+      googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
+      googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
+    });
     return await authServerHandler.handler(request);
   }
 

@@ -20,7 +20,7 @@
     "production": {
       "routes": [
         {
-          "pattern": "seo.rectangularlabs.com",
+          "pattern": "fluidposts.com",
           "custom_domain": true
         }
       ]
@@ -28,7 +28,7 @@
     "{env.PULL_REQUEST}": {
       "routes": [
         {
-          "pattern": "{env.PULL_REQUEST}.seo.rectangularlabs.com",
+          "pattern": "{env.PULL_REQUEST}.fluidposts.com",
           "custom_domain": true
         }
       ]

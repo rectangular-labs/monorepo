@@ -10,9 +10,6 @@
     "./client": {
       "default": "./src/client.ts"
     },
-    "./env": {
-      "default": "./src/env.ts"
-    },
     "./components/*": {
       "default": "./src/components/*.tsx"
     }
