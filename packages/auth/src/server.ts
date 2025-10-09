@@ -48,7 +48,7 @@ export function initAuthHandler({
 
   const productionUrl =
     baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
-      ? `https://preview.seo.rectangularlabs.com`
+      ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}` // preview.fluidposts.com or preview.rectangularlabs.com
       : baseURL;
 
   console.log("productionUrl", productionUrl);
