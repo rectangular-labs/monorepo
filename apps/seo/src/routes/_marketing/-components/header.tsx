@@ -1,15 +1,11 @@
-import {
-  GitHubIcon,
-  Logo,
-  Menu,
-  X,
-} from "@rectangular-labs/ui/components/icon";
+import { Menu, X } from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { SeoLogo } from "./seo-logo";
 
 const menuItems = [
   { name: "How it works", href: "#how-it-works" },
@@ -38,7 +34,7 @@ export function Header() {
                 className="flex items-center gap-2 text-muted-foreground"
                 to="/"
               >
-                <Logo className="size-6" /> Rectangular Labs
+                <SeoLogo /> Fluid Posts
               </Link>
 
               <button
@@ -91,15 +87,7 @@ export function Header() {
                         <span>Start free trial</span>
                       </a>
                     </Button>
-                    <Button asChild size="icon" variant="outline">
-                      <a
-                        href="https://github.com/rectangular-labs/"
-                        rel="noopener"
-                        target="_blank"
-                      >
-                        <GitHubIcon />
-                      </a>
-                    </Button>
+
                     <ThemeToggle variant="outline" />
                   </div>
                 </motion.div>

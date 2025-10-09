@@ -22,8 +22,8 @@ export function Footer() {
           ))}
         </div>
         <p className="mt-6 text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} Rectangular Labs — SEO performance
-          analytics, keyword monitoring, and AI content suggestions.
+          © {new Date().getFullYear()} Fluid Posts — SEO performance analytics,
+          keyword monitoring, and AI content suggestions.
         </p>
       </Section>
     </div>

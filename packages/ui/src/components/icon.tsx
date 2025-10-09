@@ -46,7 +46,7 @@ import {
 } from "lucide-react";
 import type { SVGProps } from "react";
 
-type IconProps = React.HTMLAttributes<SVGElement>;
+export type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const ArrowDown = ArrowDownIcon;
 export const ArrowLeft = ArrowLeftIcon;
