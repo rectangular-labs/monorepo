@@ -5,7 +5,7 @@ import { type } from "arktype";
 
 export const apiEnv = () =>
   createEnv({
-    extends: [dbEnv(),  taskEnv()],
+    extends: [dbEnv(), taskEnv()],
     server: {
       AUTH_SEO_ENCRYPTION_KEY: type("string"),
       AUTH_SEO_DISCORD_ID: type("string"),
