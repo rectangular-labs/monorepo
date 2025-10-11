@@ -39,21 +39,21 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.6.2",
+    "@types/node": "^24.7.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.15",
-    "@orpc/client": "^1.9.0",
-    "@orpc/contract": "^1.9.0",
-    "@orpc/server": "^1.9.0",
-    "@orpc/tanstack-query": "^1.9.0",
+    "@ai-sdk/google": "^2.0.20",
+    "@orpc/client": "^1.9.3",
+    "@orpc/contract": "^1.9.3",
+    "@orpc/server": "^1.9.3",
+    "@orpc/tanstack-query": "^1.9.3",
     "@rectangular-labs/api-core": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.57",
+    "ai": "^5.0.68",
     "arktype": "^2.1.22"
   },
   "overrides": {
