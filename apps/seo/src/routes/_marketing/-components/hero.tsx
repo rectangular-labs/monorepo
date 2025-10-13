@@ -1,46 +1,78 @@
-import { Badge } from "@rectangular-labs/ui/components/ui/badge";
+import { CrowdCanvas } from "@rectangular-labs/ui/components/background/crowd";
+import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { useNavigate } from "@tanstack/react-router";
+import { motion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
 
 export const Hero = () => {
-  const navigate = useNavigate();
+  const [titleNumber, setTitleNumber] = useState(0);
+  const titles = useMemo(() => ["website traffic?", "leads?", "sales?"], []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (titleNumber === titles.length - 1) {
+        setTitleNumber(0);
+      } else {
+        setTitleNumber(titleNumber + 1);
+      }
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [titleNumber, titles]);
+
   return (
-    <Section>
-      <div className="container mx-auto">
-        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
-          <div className="flex flex-col gap-4">
-            <div>
-              <Badge variant="outline">1k Challenge</Badge>
-            </div>
-            <div className="flex flex-col gap-4">
-              <h1 className="max-w-xl text-left font-regular text-4xl tracking-tighter md:text-6xl">
-                Stuck on page 2?
-                <br />
-                Get 1,000 more visits in 60 days.
-              </h1>
-              <p className="max-w-xl text-left text-muted-foreground text-xl leading-relaxed tracking-tight">
-                The 1k Challenge: 1,000 more monthly organic visits within 60
-                days for $1,000 or your money back.
-                <br />
-                Take our 3 minute quiz to see your biggest wins.
-              </p>
-            </div>
-            <div className="flex flex-row gap-4">
-              <Button onClick={() => navigate({ to: "/quiz" })} size="lg">
-                Get more traffic now
-              </Button>
-            </div>
+    <div className="relative min-h-screen w-full lg:min-h-[calc(100vh-70px)]">
+      <Section>
+        <div className="flex flex-col items-center gap-8">
+          {/* <div>
+            <Button className="gap-4" size="sm" variant="secondary">
+              Read our launch article <MoveRight className="h-4 w-4" />
+            </Button>
+          </div> */}
+          <div className="flex flex-col gap-4 pt-10 lg:pt-20">
+            <h1 className="max-w-2xl text-center font-regular text-3xl tracking-tighter md:text-6xl">
+              <span>Are you ready to get more</span>
+              <span className="relative flex w-full justify-center overflow-hidden text-center md:pt-1 md:pb-4">
+                &nbsp;
+                {titles.map((title, index) => (
+                  <motion.span
+                    animate={
+                      titleNumber === index
+                        ? {
+                            y: 0,
+                            opacity: 1,
+                          }
+                        : {
+                            y: titleNumber > index ? -150 : 150,
+                            opacity: 0,
+                          }
+                    }
+                    className="absolute font-semibold"
+                    initial={{ opacity: 0, y: "-100" }}
+                    key={title}
+                    transition={{ type: "spring", stiffness: 50 }}
+                  >
+                    {title}
+                  </motion.span>
+                ))}
+              </span>
+            </h1>
+
+            <p className="max-w-2xl text-center text-lg text-muted-foreground leading-relaxed tracking-tight md:text-xl">
+              Answer 16 questions to get a simple personalized plan to get more
+              traffic.
+            </p>
           </div>
-          <div className="aspect-square overflow-hidden rounded-md bg-muted">
-            <img
-              alt="SEO growth hero"
-              className="h-full w-full object-cover"
-              src="/hero-image.png"
-            />
+          <div className="flex flex-row gap-3">
+            <Button className="gap-4" size="lg">
+              Get your plan now <MoveRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
+      </Section>
+      <div className="absolute bottom-0 h-full w-screen">
+        <CrowdCanvas cols={7} rows={15} src="/peeps.png" />
       </div>
-    </Section>
+    </div>
   );
 };
