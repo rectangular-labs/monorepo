@@ -732,9 +732,6 @@ importers:
       '@types/node':
         specifier: ^24.6.2
         version: 24.6.2
-      jiti:
-        specifier: ^2.6.0
-        version: 2.6.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
