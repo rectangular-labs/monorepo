@@ -5,7 +5,8 @@
  * illustration by https://www.openpeeps.com/
  */
 import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
-import { gsap } from "gsap";
+import { animate } from "motion";
+import { cubicBezier } from "motion/react";
 import { useEffect, useRef } from "react";
 
 interface CrowdCanvasProps {
@@ -13,6 +14,30 @@ interface CrowdCanvasProps {
   rows?: number;
   cols?: number;
 }
+
+type Peep = {
+  image: HTMLImageElement;
+  rect: number[];
+  width: number;
+  height: number;
+  drawArgs: (HTMLImageElement | number)[];
+  x: number;
+  y: number;
+  anchorY: number;
+  scaleX: number;
+  walk: WalkControls | null;
+  setRect: (rect: number[]) => void;
+  render: (ctx: CanvasRenderingContext2D) => void;
+};
+
+type Stage = {
+  width: number;
+  height: number;
+};
+
+type WalkControls = {
+  cancel: () => void;
+};
 
 const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,20 +59,19 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     // UTILS
     const randomRange = (min: number, max: number) =>
       min + Math.random() * (max - min);
-    const randomIndex = (array: any[]) => randomRange(0, array.length) | 0;
-    const removeFromArray = (array: any[], i: number) => array.splice(i, 1)[0];
-    const removeItemFromArray = (array: any[], item: any) =>
+    const randomIndex = <T,>(array: T[]) => randomRange(0, array.length) | 0;
+    const removeFromArray = <T,>(array: T[], i: number) =>
+      array.splice(i, 1)[0];
+    const removeItemFromArray = <T,>(array: T[], item: T) =>
       removeFromArray(array, array.indexOf(item));
-    const removeRandomFromArray = (array: any[]) =>
+    const removeRandomFromArray = <T,>(array: T[]) =>
       removeFromArray(array, randomIndex(array));
-    const getRandomFromArray = (array: any[]) => array[randomIndex(array) | 0];
 
     // TWEEN FACTORIES
-    const resetPeep = ({ stage, peep }: { stage: any; peep: any }) => {
+    const resetPeep = ({ stage, peep }: { stage: Stage; peep: Peep }) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
-      const offsetY =
-        (isMobile ? 200 : 100) -
-        250 * gsap.parseEase("power2.in")(Math.random());
+      const ease = cubicBezier(0.55, 0, 1, 0.45);
+      const offsetY = (isMobile ? 200 : 100) - 250 * ease(Math.random());
       const startY = stage.height - peep.height + offsetY;
       let startX: number;
       let endX: number;
@@ -73,52 +97,65 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       };
     };
 
-    const normalWalk = ({ peep, props }: { peep: any; props: any }) => {
+    const normalWalk = ({
+      peep,
+      props,
+      progress = 0,
+    }: {
+      peep: Peep;
+      props: {
+        startX: number;
+        startY: number;
+        endX: number;
+      };
+      progress?: number;
+    }): WalkControls => {
       const { startX, startY, endX } = props;
-      const xDuration = 10;
-      const yDuration = 0.25;
 
-      const tl = gsap.timeline();
-      tl.timeScale(randomRange(0.5, 1.5));
-      tl.to(
-        peep,
-        {
-          duration: xDuration,
-          x: endX,
-          ease: "none",
+      const baseXDuration = 10;
+      const baseYDuration = 0.25;
+      const timeScale = randomRange(0.5, 1.5);
+      const xDuration = baseXDuration / timeScale;
+      const yDuration = baseYDuration / timeScale;
+
+      // Align vertical bobbing phase with horizontal progress
+      const initialX = startX + (endX - startX) * progress;
+      const elapsedX = progress * xDuration;
+
+      // Horizontal walk
+      const xAnim = animate(initialX, endX, {
+        duration: xDuration - elapsedX,
+        elapsed: progress * xDuration,
+        type: "tween",
+        onUpdate: (v) => {
+          peep.x = v;
         },
-        0,
-      );
-      tl.to(
-        peep,
-        {
-          duration: yDuration,
-          repeat: xDuration / yDuration,
-          yoyo: true,
-          y: startY - 10,
+      });
+
+      // Vertical bobbing
+      const yAnim = animate(startY, startY - 10, {
+        duration: yDuration,
+        repeat: xDuration / yDuration,
+        repeatType: "reverse",
+        onUpdate: (v) => {
+          peep.y = v;
         },
-        0,
-      );
+      });
 
-      return tl;
-    };
+      const controls: WalkControls = {
+        cancel: () => {
+          xAnim.cancel();
+          yAnim.cancel();
+        },
+      };
 
-    const walks = [normalWalk];
+      // Invoke onComplete when horizontal walk finishes
+      xAnim.finished.then(() => {
+        removePeepFromCrowd(peep);
+        addPeepToCrowd();
+      });
 
-    // TYPES
-    type Peep = {
-      image: HTMLImageElement;
-      rect: number[];
-      width: number;
-      height: number;
-      drawArgs: any[];
-      x: number;
-      y: number;
-      anchorY: number;
-      scaleX: number;
-      walk: any;
-      setRect: (rect: number[]) => void;
-      render: (ctx: CanvasRenderingContext2D) => void;
+      return controls;
     };
 
     // FACTORY FUNCTIONS
@@ -142,8 +179,8 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
         walk: null,
         setRect: (rect: number[]) => {
           peep.rect = rect;
-          peep.width = rect[2];
-          peep.height = rect[3];
+          peep.width = rect[2] ?? 0;
+          peep.height = rect[3] ?? 0;
           peep.drawArgs = [peep.image, ...rect, 0, 0, peep.width, peep.height];
         },
         render: (ctx: CanvasRenderingContext2D) => {
@@ -152,10 +189,10 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
           ctx.scale(peep.scaleX, 1);
           ctx.drawImage(
             peep.image,
-            peep.rect[0],
-            peep.rect[1],
-            peep.rect[2],
-            peep.rect[3],
+            peep.rect[0] ?? 0,
+            peep.rect[1] ?? 0,
+            peep.rect[2] ?? 0,
+            peep.rect[3] ?? 0,
             0,
             0,
             peep.width,
@@ -204,28 +241,25 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
 
     const initCrowd = () => {
       while (availablePeeps.length) {
-        addPeepToCrowd().walk.progress(Math.random());
+        addPeepToCrowd(Math.random());
       }
     };
 
-    const addPeepToCrowd = () => {
+    const addPeepToCrowd = (progress?: number) => {
       const peep = removeRandomFromArray(availablePeeps);
-      const walk = getRandomFromArray(walks)({
+      if (!peep) return;
+      const walk = normalWalk({
         peep,
         props: resetPeep({
           peep,
           stage,
         }),
-      }).eventCallback("onComplete", () => {
-        removePeepFromCrowd(peep);
-        addPeepToCrowd();
+        progress,
       });
-
       peep.walk = walk;
 
       crowd.push(peep);
       crowd.sort((a, b) => a.anchorY - b.anchorY);
-
       return peep;
     };
 
@@ -255,7 +289,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       canvas.height = stage.height * devicePixelRatio;
 
       crowd.forEach((peep) => {
-        peep.walk.kill();
+        peep.walk?.cancel();
       });
 
       crowd.length = 0;
@@ -265,23 +299,27 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       initCrowd();
     };
 
+    let rafId = 0;
+    const loop = () => {
+      render();
+      rafId = requestAnimationFrame(loop);
+    };
+
     const init = () => {
       createPeeps();
       resize();
-      gsap.ticker.add(render);
+      loop();
     };
-
     img.onload = init;
     img.src = config.src;
 
     const handleResize = () => resize();
     window.addEventListener("resize", handleResize);
-
     return () => {
       window.removeEventListener("resize", handleResize);
-      gsap.ticker.remove(render);
+      if (rafId) cancelAnimationFrame(rafId);
       crowd.forEach((peep) => {
-        if (peep.walk) peep.walk.kill();
+        if (peep.walk) peep.walk?.cancel();
       });
     };
   }, [cols, rows, src, isMobile]);

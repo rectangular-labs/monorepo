@@ -23,7 +23,7 @@ export function Benefits() {
   ];
 
   return (
-    <Section id="forecast">
+    <Section id="benefits">
       <div className="container mx-auto">
         <div className="flex flex-col items-start gap-4">
           <div>

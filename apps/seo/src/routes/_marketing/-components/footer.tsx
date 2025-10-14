@@ -2,10 +2,9 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 
 export function Footer() {
   const links = [
-    { title: "How it works", href: "#how-it-works" },
-    { title: "Pricing", href: "#pricing" },
+    { title: "Benefits", href: "#benefits" },
+    { title: "Who we are", href: "#credentials" },
     { title: "FAQ", href: "#faq" },
-    { title: "Open Source", href: "https://github.com/rectangular-labs/" },
   ];
   return (
     <div className="border-t">
@@ -22,8 +21,7 @@ export function Footer() {
           ))}
         </div>
         <p className="mt-6 text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} Fluid Posts — SEO performance analytics,
-          keyword monitoring, and AI content suggestions.
+          © {new Date().getFullYear()} Fluid Posts. All rights reserved.
         </p>
       </Section>
     </div>

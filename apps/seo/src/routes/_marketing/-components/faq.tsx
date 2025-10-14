@@ -1,4 +1,3 @@
-import { PhoneCall } from "@rectangular-labs/ui/components/icon";
 import {
   Accordion,
   AccordionContent,
@@ -6,41 +5,49 @@ import {
   AccordionTrigger,
 } from "@rectangular-labs/ui/components/ui/accordion";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 
 const faqs = [
   {
-    id: "site-understanding",
-    q: "How do you understand my site?",
-    a: "We crawl your site to map information architecture, parse metadata and internal links, and (optionally) connect Search Console and Analytics for richer context.",
+    id: "quiz-free",
+    q: "Is the SEO quiz really free?",
+    a: "Yes—it's 100% free and takes only a few minutes. No credit card required.",
   },
   {
-    id: "content-writing",
-    q: "Do you write the content?",
-    a: "We deliver ready‑to‑write briefs with outlines, headings, keywords, and internal links. You can write in‑house or add our writing add‑on.",
+    id: "quiz-duration",
+    q: "How long does the quiz take?",
+    a: "Most people finish in 3-5 minutes.",
   },
   {
-    id: "forecast-accuracy",
-    q: "How accurate are the forecasts?",
-    a: "Forecasts are expressed as ranges with confidence bands and are recalibrated weekly as data accrues. They’re designed for planning, not guarantees.",
+    id: "quiz-results",
+    q: "What do I get after the quiz?",
+    a: "A shareable mini-report with target opportunities, a sample keyword universe, traffic and revenue forecast ranges, recommended content themes, and suggested internal links—tailored to your domain.",
   },
   {
-    id: "time-to-results",
-    q: "How long to see results?",
-    a: "Most teams see early lift within 2–6 weeks depending on domain authority, competition, and publishing cadence.",
+    id: "quiz-catch",
+    q: "What's the catch?",
+    a: "No catch. We want to help you get more traffic. Our belief is that you'll eventually work with us if you need more specialized help.",
   },
   {
-    id: "integrations",
-    q: "Which integrations and CMSs are supported?",
-    a: "We support popular CMSs and native connections to Search Console and Analytics, with more integrations added regularly.",
+    id: "quiz-gsc",
+    q: "Is Search Console access required?",
+    a: "Nope, not at all. That said, having some statistics about your site at ready will help us give you the most accurate results.",
   },
   {
-    id: "google-updates",
-    q: "What about Google updates?",
-    a: "We monitor core updates and adjust campaigns and forecasts accordingly to keep you on track.",
+    id: "quiz-impact",
+    q: "Will the quiz affect my site or rankings?",
+    a: "Not at all. We rely on you to provide us with the information we need to give you the most accurate results.",
   },
-  { id: "billing", q: "Is there a free trial?", a: "Yes, start free." },
+  {
+    id: "quiz-share",
+    q: "Can I share the results with my team?",
+    a: "Yes. You'll get a link you can share.",
+  },
+  {
+    id: "quiz-multiple",
+    q: "Can I run the quiz for multiple domains/times?",
+    a: "Yes—run it as many times as you like for any number of domains. You can also re-run it for the same domain after you've made the changes to see how your site has improved.",
+  },
 ];
 
 export const FAQ = () => (
@@ -54,18 +61,17 @@ export const FAQ = () => (
             </div>
             <div className="flex flex-col gap-2">
               <h4 className="max-w-xl text-left font-regular text-3xl tracking-tighter md:text-5xl">
-                Everything about campaigns, forecasts, and scheduling
+                Everything you might want to know before you get started
               </h4>
               <p className="max-w-xl text-left text-lg text-muted-foreground leading-relaxed tracking-tight lg:max-w-lg">
-                From site understanding to scheduled content, plan SEO with
-                clarity and confidence—not guesswork.
+                Take our free quiz to get a tailored mini-report with actionable
+                insights on what you can improve. If you still have questions,
+                please{" "}
+                <a className="underline" href="mailto:contact@fluidposts.com">
+                  reach out
+                </a>
+                .
               </p>
-            </div>
-            <div className="">
-              <Button className="gap-4" variant="outline">
-                Still have a question? Talk to us{" "}
-                <PhoneCall className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </div>
