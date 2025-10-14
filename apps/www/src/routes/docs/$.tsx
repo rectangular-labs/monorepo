@@ -1,4 +1,4 @@
-import { docSource } from "@rectangular-labs/content";
+import { blogSource, docSource } from "@rectangular-labs/content";
 import { getPostsOverview } from "@rectangular-labs/content/get-posts-overview";
 import { DocPage } from "@rectangular-labs/content/ui/doc-page";
 import { createFileRoute, notFound } from "@tanstack/react-router";
@@ -12,7 +12,7 @@ const getDocData = createServerFn({
     const page = docSource.getPage(slugs);
     if (!page) throw notFound();
 
-    const postsOverview = await getPostsOverview();
+    const postsOverview = await getPostsOverview(blogSource);
 
     return {
       path: page.path,

@@ -26,7 +26,6 @@
     "@rectangular-labs/typescript": "workspace:*",
     "@trigger.dev/build": "4.0.4",
     "@types/node": "^24.6.2",
-    "jiti": "^2.6.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {

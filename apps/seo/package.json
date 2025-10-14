@@ -38,7 +38,8 @@
     "arktype": "^2.1.22",
     "motion": "^12.23.19",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "tanstack-router-sitemap": "^1.0.13"
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",

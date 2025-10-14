@@ -6,8 +6,8 @@
   "exports": {
     "./styles.css": "./src/styles.css",
     ".": {
-      "types": "./dist/src/source.d.tsx",
-      "default": "./src/source.tsx"
+      "types": "./dist/src/source.d.ts",
+      "default": "./src/source.ts"
     },
     "./search": {
       "types": "./dist/src/lib/search.d.ts",

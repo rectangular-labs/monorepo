@@ -6,6 +6,8 @@ import {
   allMetas,
   allPostMetas,
   allPosts,
+  allSeoPostMetas,
+  allSeoPosts,
 } from "../.content-collections/generated";
 
 export const docSource = loader({
@@ -39,6 +41,17 @@ export const docSource = loader({
 
 export const blogSource = loader({
   source: createMDXSource(allPosts, allPostMetas),
+  baseUrl: "/blog",
+  icon(icon) {
+    if (!icon) return;
+    // biome-ignore lint/performance/noDynamicNamespaceImportAccess: We need to access the icons dynamically
+    if (icon in icons) return icons[icon as keyof typeof icons];
+    return;
+  },
+});
+
+export const seoBlogSource = loader({
+  source: createMDXSource(allSeoPosts, allSeoPostMetas),
   baseUrl: "/blog",
   icon(icon) {
     if (!icon) return;

@@ -1,3 +1,4 @@
+import { seoBlogSource } from "@rectangular-labs/content";
 import { getPostsOverview } from "@rectangular-labs/content/get-posts-overview";
 import { BlogSection } from "@rectangular-labs/content/ui/blog-section";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
@@ -5,7 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
 const getBlogTree = createServerFn({ method: "GET" }).handler(() =>
-  getPostsOverview(),
+  getPostsOverview(seoBlogSource),
 );
 
 export const Route = createFileRoute("/_marketing/blog/")({

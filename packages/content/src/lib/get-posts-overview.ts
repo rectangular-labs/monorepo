@@ -1,5 +1,5 @@
 import type { PageTree } from "fumadocs-core/server";
-import { blogSource } from "../source";
+import type { blogSource } from "../source";
 import type { AuthorSchema } from "./schema";
 
 export type ExtractedPost = {
@@ -39,14 +39,14 @@ function extractPostsFromTree(tree: PageTree.Folder) {
   return items;
 }
 
-export function getPostsOverview(): ExtractedPost[] {
-  const { pageTree } = blogSource;
+export function getPostsOverview(source: typeof blogSource): ExtractedPost[] {
+  const { pageTree } = source;
 
   const extractedPosts = extractPostsFromTree(pageTree as PageTree.Folder);
 
   const items: ExtractedPost[] = [];
   for (const post of extractedPosts) {
-    const p = blogSource.getPage(post.url.split("/").slice(2));
+    const p = source.getPage(post.url.split("/").slice(2));
     items.push({
       url: post.url,
       title: post.title,
