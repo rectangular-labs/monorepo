@@ -23,9 +23,7 @@ const config = defineConfig({
         enabled: true,
         crawlLinks: true,
         filter: ({ path }) =>
-          path.startsWith("/") ||
-          path.startsWith("/blog") ||
-          path.startsWith("/quiz"),
+          path === "/" || path.startsWith("/blog") || path.startsWith("/quiz"),
         concurrency: 14,
         // Number of times to retry a failed prerender job
         retryCount: 2,
