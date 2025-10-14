@@ -1,6 +1,5 @@
 import { Menu, X } from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
@@ -8,10 +7,9 @@ import { useEffect, useState } from "react";
 import { SeoLogo } from "./seo-logo";
 
 const menuItems = [
-  { name: "How it works", href: "#how-it-works" },
-  { name: "Pricing", href: "#pricing" },
+  { name: "Benefits", href: "#benefits" },
+  { name: "Who we are", href: "#credentials" },
   { name: "FAQ", href: "#faq" },
-  { name: "Login", href: "/login" },
 ];
 export function Header() {
   const isMobile = useIsMobile();
@@ -82,12 +80,6 @@ export function Header() {
                   </div>
 
                   <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit lg:border-l lg:pl-6">
-                    <Button asChild size="sm">
-                      <a href="#pricing">
-                        <span>Start free trial</span>
-                      </a>
-                    </Button>
-
                     <ThemeToggle variant="outline" />
                   </div>
                 </motion.div>

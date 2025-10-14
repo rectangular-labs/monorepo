@@ -82,7 +82,7 @@ export function TwoFactorForm({
     }
     setCoolDownSeconds(60);
     initialSendRef.current = false;
-  }, [authClient, form.setError, isSendingOtp, coolDownSeconds]);
+  }, [authClient, form, isSendingOtp, coolDownSeconds]);
 
   useEffect(() => {
     if (method === "otp" && coolDownSeconds <= 0 && !initialSendRef.current) {

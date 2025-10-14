@@ -172,7 +172,7 @@ export const DialogStackOverlay = ({
 
   const handleClick = useCallback(() => {
     context.setIsOpen(false);
-  }, [context.setIsOpen]);
+  }, [context]);
 
   if (!context.isOpen) {
     return null;

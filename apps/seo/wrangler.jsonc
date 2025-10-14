@@ -20,7 +20,7 @@
     "production": {
       "routes": [
         {
-          "pattern": "fluidposts.com",
+          "pattern": "www.fluidposts.com",
           "custom_domain": true
         }
       ]
