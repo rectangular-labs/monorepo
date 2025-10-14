@@ -71,7 +71,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const resetPeep = ({ stage, peep }: { stage: Stage; peep: Peep }) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
       const ease = cubicBezier(0.55, 0, 1, 0.45);
-      const offsetY = (isMobile ? 200 : 100) - 250 * ease(Math.random());
+      const offsetY = (isMobile ? 175 : 100) - 250 * ease(Math.random());
       const startY = stage.height - peep.height + offsetY;
       let startX: number;
       let endX: number;
