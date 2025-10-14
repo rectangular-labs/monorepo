@@ -333,7 +333,7 @@ const CrowdCanvas = ({
   return (
     <canvas
       className={cn(
-        "pointer-events-none absolute bottom-0 w-full select-none",
+        "pointer-events-none absolute bottom-0 h-[90vh] w-full select-none",
         className,
       )}
       draggable={false}
