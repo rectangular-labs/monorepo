@@ -231,7 +231,7 @@ const CrowdCanvas = ({
       const rectWidth = width / rows;
       const rectHeight = height / cols;
 
-      for (let i = 0; i < total; i++) {
+      for (let i = 0; i < (isMobile ? total * 0.5 : 0.8 * total); i++) {
         allPeeps.push(
           createPeep({
             image: img,
@@ -279,6 +279,7 @@ const CrowdCanvas = ({
       if (!canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
+
       ctx.scale(devicePixelRatio, devicePixelRatio);
 
       crowd.forEach((peep) => {
