@@ -3,12 +3,15 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 
 export function Credentials() {
   return (
-    <Section id="credentials">
+    <Section aria-labelledby="credentials-heading" id="credentials">
       <div className="space-y-6">
         <div>
           <Badge variant="outline">Credentials</Badge>
         </div>
-        <h2 className="mt-2 font-semibold text-3xl tracking-tight">
+        <h2
+          className="mt-2 font-semibold text-3xl tracking-tight"
+          id="credentials-heading"
+        >
           Why trust us?
         </h2>
       </div>
@@ -34,7 +37,7 @@ export function Credentials() {
         <p>
           Winston spent 5 years in Silicon Valley building automation systems
           for startups. Now he uses that same engineering precision to automate
-          SEO processes and get results fast.
+          growth processes and get results fast.
         </p>
         <p>
           Aaron, trained in law at Oxford, knows how to make words rank.
@@ -42,9 +45,9 @@ export function Credentials() {
           clarity, and intent-driven writing.
         </p>
         <p>
-          Together, we&apos;ve already ranked sitesThe data shows that making
-          optimizing your from 0 to 1,000+ organic visitors in weeks and
-          we&apos;re applying the same system to our clients.
+          Together, we&apos;ve already ranked sites from 0 to 1,000+ organic
+          visitors in weeks and we&apos;re applying the same system to our
+          clients.
         </p>
       </div>
     </Section>

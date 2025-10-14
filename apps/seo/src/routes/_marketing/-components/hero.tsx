@@ -1,9 +1,9 @@
 import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { buttonVariants } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { ONBOARD_LINK } from "./constants";
 
 const CrowdCanvas = lazy(() =>
   import("@rectangular-labs/ui/components/background/crowd").then((m) => ({
@@ -66,15 +66,17 @@ export const Hero = () => {
             </p>
           </div>
           <div className="flex flex-row gap-3">
-            <Link
+            <a
               className={buttonVariants({
                 className: "z-10 gap-4",
                 size: "lg",
               })}
-              to="/quiz"
+              href={ONBOARD_LINK}
+              rel="noopener"
+              target="_blank"
             >
-              Get your plan now <MoveRight className="h-4 w-4" />
-            </Link>
+              Onboard with us now <MoveRight className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </Section>

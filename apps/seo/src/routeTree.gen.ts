@@ -17,11 +17,9 @@ import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as MarketingBlogRouteRouteImport } from './routes/_marketing/blog/route'
 import { Route as AuthedOrganizationSlugRouteRouteImport } from './routes/_authed/$organizationSlug/route'
-import { Route as MarketingQuizIndexRouteImport } from './routes/_marketing/quiz/index'
 import { Route as MarketingBlogIndexRouteImport } from './routes/_marketing/blog/index'
 import { Route as AuthedOnboardingIndexRouteImport } from './routes/_authed/onboarding/index'
 import { Route as AuthedOrganizationSlugIndexRouteImport } from './routes/_authed/$organizationSlug/index'
-import { Route as MarketingQuizResultsRouteImport } from './routes/_marketing/quiz/results'
 import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog/$'
 import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/route'
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
@@ -63,11 +61,6 @@ const AuthedOrganizationSlugRouteRoute =
     path: '/$organizationSlug',
     getParentRoute: () => AuthedRouteRoute,
   } as any)
-const MarketingQuizIndexRoute = MarketingQuizIndexRouteImport.update({
-  id: '/quiz/',
-  path: '/quiz/',
-  getParentRoute: () => MarketingRouteRoute,
-} as any)
 const MarketingBlogIndexRoute = MarketingBlogIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -84,11 +77,6 @@ const AuthedOrganizationSlugIndexRoute =
     path: '/',
     getParentRoute: () => AuthedOrganizationSlugRouteRoute,
   } as any)
-const MarketingQuizResultsRoute = MarketingQuizResultsRouteImport.update({
-  id: '/quiz/results',
-  path: '/quiz/results',
-  getParentRoute: () => MarketingRouteRoute,
-} as any)
 const MarketingBlogSplatRoute = MarketingBlogSplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -148,11 +136,9 @@ export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/blog/$': typeof MarketingBlogSplatRoute
-  '/quiz/results': typeof MarketingQuizResultsRoute
   '/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog/': typeof MarketingBlogIndexRoute
-  '/quiz': typeof MarketingQuizIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/$organizationSlug/$projectSlug/articles': typeof AuthedOrganizationSlugProjectSlugArticlesIndexRoute
@@ -162,11 +148,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof MarketingIndexRoute
   '/blog/$': typeof MarketingBlogSplatRoute
-  '/quiz/results': typeof MarketingQuizResultsRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog': typeof MarketingBlogIndexRoute
-  '/quiz': typeof MarketingQuizIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/$organizationSlug/$projectSlug/articles': typeof AuthedOrganizationSlugProjectSlugArticlesIndexRoute
@@ -182,11 +166,9 @@ export interface FileRoutesById {
   '/_marketing/': typeof MarketingIndexRoute
   '/_authed/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/_marketing/blog/$': typeof MarketingBlogSplatRoute
-  '/_marketing/quiz/results': typeof MarketingQuizResultsRoute
   '/_authed/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
   '/_marketing/blog/': typeof MarketingBlogIndexRoute
-  '/_marketing/quiz/': typeof MarketingQuizIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/_authed/$organizationSlug/$projectSlug/articles/': typeof AuthedOrganizationSlugProjectSlugArticlesIndexRoute
@@ -201,11 +183,9 @@ export interface FileRouteTypes {
     | '/'
     | '/$organizationSlug/$projectSlug'
     | '/blog/$'
-    | '/quiz/results'
     | '/$organizationSlug/'
     | '/onboarding'
     | '/blog/'
-    | '/quiz'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug/'
     | '/$organizationSlug/$projectSlug/articles'
@@ -215,11 +195,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/'
     | '/blog/$'
-    | '/quiz/results'
     | '/$organizationSlug'
     | '/onboarding'
     | '/blog'
-    | '/quiz'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug'
     | '/$organizationSlug/$projectSlug/articles'
@@ -234,11 +212,9 @@ export interface FileRouteTypes {
     | '/_marketing/'
     | '/_authed/$organizationSlug/$projectSlug'
     | '/_marketing/blog/$'
-    | '/_marketing/quiz/results'
     | '/_authed/$organizationSlug/'
     | '/_authed/onboarding/'
     | '/_marketing/blog/'
-    | '/_marketing/quiz/'
     | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/$projectSlug/'
     | '/_authed/$organizationSlug/$projectSlug/articles/'
@@ -324,13 +300,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugRouteRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
-    '/_marketing/quiz/': {
-      id: '/_marketing/quiz/'
-      path: '/quiz'
-      fullPath: '/quiz'
-      preLoaderRoute: typeof MarketingQuizIndexRouteImport
-      parentRoute: typeof MarketingRouteRoute
-    }
     '/_marketing/blog/': {
       id: '/_marketing/blog/'
       path: '/'
@@ -351,13 +320,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/$organizationSlug/'
       preLoaderRoute: typeof AuthedOrganizationSlugIndexRouteImport
       parentRoute: typeof AuthedOrganizationSlugRouteRoute
-    }
-    '/_marketing/quiz/results': {
-      id: '/_marketing/quiz/results'
-      path: '/quiz/results'
-      fullPath: '/quiz/results'
-      preLoaderRoute: typeof MarketingQuizResultsRouteImport
-      parentRoute: typeof MarketingRouteRoute
     }
     '/_marketing/blog/$': {
       id: '/_marketing/blog/$'
@@ -501,15 +463,11 @@ const MarketingBlogRouteRouteWithChildren =
 interface MarketingRouteRouteChildren {
   MarketingBlogRouteRoute: typeof MarketingBlogRouteRouteWithChildren
   MarketingIndexRoute: typeof MarketingIndexRoute
-  MarketingQuizResultsRoute: typeof MarketingQuizResultsRoute
-  MarketingQuizIndexRoute: typeof MarketingQuizIndexRoute
 }
 
 const MarketingRouteRouteChildren: MarketingRouteRouteChildren = {
   MarketingBlogRouteRoute: MarketingBlogRouteRouteWithChildren,
   MarketingIndexRoute: MarketingIndexRoute,
-  MarketingQuizResultsRoute: MarketingQuizResultsRoute,
-  MarketingQuizIndexRoute: MarketingQuizIndexRoute,
 }
 
 const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
