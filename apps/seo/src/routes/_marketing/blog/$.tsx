@@ -12,7 +12,7 @@ const getBlogData = createServerFn({ method: "GET" })
     return {
       tree: seoBlogSource.pageTree as object,
       data: page.data,
-      postsOverview: await getPostsOverview(),
+      postsOverview: await getPostsOverview(seoBlogSource),
     };
   });
 

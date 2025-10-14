@@ -1,4 +1,3 @@
-import { seoBlogSource } from "@rectangular-labs/content";
 import type { Sitemap } from "tanstack-router-sitemap";
 import type { FileRouteTypes } from "~/routeTree.gen";
 export type TRoutes = FileRouteTypes["fullPaths"];
@@ -16,7 +15,8 @@ export const sitemap: Sitemap<TRoutes> = {
       changeFrequency: "daily",
     },
     // Dynamic route example
-    "/blog/$": () => {
+    "/blog/$": async () => {
+      const { seoBlogSource } = await import("@rectangular-labs/content");
       return seoBlogSource.generateParams().map((params) => ({
         path: `/blog/${params.slug}`,
         priority: 0.8,
