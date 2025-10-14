@@ -1,10 +1,12 @@
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
+import { generateSitemap } from "tanstack-router-sitemap";
 import mkcert from "vite-plugin-mkcert";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 import { serverEnv } from "./src/lib/env";
+import { sitemap } from "./src/lib/sitemap";
 
 // validate env
 serverEnv();
@@ -16,6 +18,7 @@ const config = defineConfig({
     }),
     tailwindcss(),
     mkcert(),
+    generateSitemap(sitemap),
     tanstackStart({
       customViteReactPlugin: true,
       target: "cloudflare-module",

@@ -88,6 +88,14 @@ const posts = defineCollection({
   transform: (document, context) => mdxTransformer(document, context),
 });
 
+const seoPosts = defineCollection({
+  name: "seoPosts",
+  directory: "../../apps/seo/content",
+  include: "**/*.mdx",
+  schema: PostSchema,
+  transform: (document, context) => mdxTransformer(document, context),
+});
+
 const metas = defineCollection({
   name: "meta",
   directory: "../",
@@ -105,6 +113,14 @@ const postMetas = defineCollection({
   schema: MetaSchema,
 });
 
+const seoPostMetas = defineCollection({
+  name: "seoPostMetas",
+  directory: "../../apps/seo/content",
+  include: "**/meta.json",
+  parser: "json",
+  schema: MetaSchema,
+});
+
 const authors = defineCollection({
   name: "authors",
   directory: "authors",
@@ -114,5 +130,5 @@ const authors = defineCollection({
 });
 
 export default defineConfig({
-  collections: [docs, metas, posts, postMetas, authors],
+  collections: [docs, metas, posts, postMetas, authors, seoPosts, seoPostMetas],
 });

@@ -1,4 +1,4 @@
-import { blogSource } from "@rectangular-labs/content";
+import { seoBlogSource } from "@rectangular-labs/content";
 import { getPostsOverview } from "@rectangular-labs/content/get-posts-overview";
 import { BlogPost } from "@rectangular-labs/content/ui/blog-post";
 import { createFileRoute, notFound } from "@tanstack/react-router";
@@ -7,10 +7,10 @@ import { createServerFn } from "@tanstack/react-start";
 const getBlogData = createServerFn({ method: "GET" })
   .validator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
-    const page = blogSource.getPage(slugs);
+    const page = seoBlogSource.getPage(slugs);
     if (!page) throw notFound();
     return {
-      tree: blogSource.pageTree as object,
+      tree: seoBlogSource.pageTree as object,
       data: page.data,
       postsOverview: await getPostsOverview(),
     };
