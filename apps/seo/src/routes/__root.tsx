@@ -24,19 +24,19 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: "apple-mobile-web-app-title",
-        content: "Mentions",
+        content: "Fluid Posts",
       },
       {
         name: "application-name",
-        content: "Mentions",
+        content: "Fluid Posts",
       },
       ...seo({
         title:
-          "Mentions — AI SEO that Understands, Plans, Forecasts, and Ships",
+          "Fluid Posts — AI SEO employee that Understands, Plans, Forecasts, and Ships",
         description:
-          "Mentions analyzes your site, plans campaigns by intent, forecasts ranking ranges, and schedules content that actually ships.",
+          "Fluid Posts analyzes your site, plans campaigns by intent, forecasts ranking ranges, and schedules content that actually ranks.",
         keywords:
-          "AI SEO employee, SEO automation, SEO forecasting, content calendar, keyword clusters",
+          "AI SEO employee, SEO automation, SEO forecasting, SEO, Keyword research, content calendar, keyword clusters",
       }),
     ],
     links: [
@@ -50,7 +50,7 @@ export const Route = createRootRouteWithContext<{
         rel: "alternate",
         type: "application/rss+xml",
         href: "/blog/rss.xml",
-        title: "Blog RSS",
+        title: "Fluid Posts Blog RSS",
       },
       { rel: "stylesheet", href: appCss },
       {
