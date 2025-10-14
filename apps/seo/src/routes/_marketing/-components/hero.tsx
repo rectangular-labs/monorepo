@@ -1,14 +1,19 @@
-import { CrowdCanvas } from "@rectangular-labs/ui/components/background/crowd";
 import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { buttonVariants } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { Link } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+
+const CrowdCanvas = lazy(() =>
+  import("@rectangular-labs/ui/components/background/crowd").then((m) => ({
+    default: m.CrowdCanvas,
+  })),
+);
 
 export const Hero = () => {
   const [titleNumber, setTitleNumber] = useState(0);
-  const titles = useMemo(() => ["website traffic?", "leads?", "sales?"], []);
+  const titles = useMemo(() => ["traffic", "leads", "sales"], []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -17,7 +22,7 @@ export const Hero = () => {
       } else {
         setTitleNumber(titleNumber + 1);
       }
-    }, 2000);
+    }, 4000);
     return () => clearTimeout(timeoutId);
   }, [titleNumber, titles]);
 
@@ -32,36 +37,32 @@ export const Hero = () => {
           </div> */}
           <div className="flex flex-col gap-4 pt-10 lg:pt-20">
             <h1 className="z-10 max-w-2xl text-center font-regular text-3xl tracking-tighter md:text-6xl">
-              <span>Are you ready to get more</span>
-              <span className="relative flex w-full justify-center overflow-hidden text-center md:pt-1 md:pb-4">
-                &nbsp;
-                {titles.map((title, index) => (
+              <span>Get more </span>
+              <span className="inline-flex overflow-hidden align-bottom">
+                <AnimatePresence mode="wait">
                   <motion.span
-                    animate={
-                      titleNumber === index
-                        ? {
-                            y: 0,
-                            opacity: 1,
-                          }
-                        : {
-                            y: titleNumber > index ? -150 : 150,
-                            opacity: 0,
-                          }
-                    }
-                    className="absolute font-semibold"
-                    initial={{ opacity: 0, y: "-100" }}
-                    key={title}
-                    transition={{ type: "spring", stiffness: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="inline-block font-semibold"
+                    exit={{ opacity: 0, y: -50 }}
+                    initial={{ opacity: 0, y: 50 }}
+                    key={titles[titleNumber]}
+                    transition={{
+                      type: "spring",
+                      stiffness: 50,
+                      damping: 8,
+                      duration: 0.1,
+                    }}
                   >
-                    {title}
+                    {titles[titleNumber]}
                   </motion.span>
-                ))}
+                </AnimatePresence>
               </span>
+              <span> with our autonomous growth agent</span>
             </h1>
 
             <p className="z-10 max-w-2xl text-center text-lg text-muted-foreground leading-relaxed tracking-tight md:text-xl">
-              Answer 16 questions to get a simple personalized plan to get more
-              traffic.
+              Just enter your site and we&apos;ll analyze keywords, create
+              content, and track results.
             </p>
           </div>
           <div className="flex flex-row gap-3">
@@ -77,7 +78,9 @@ export const Hero = () => {
           </div>
         </div>
       </Section>
-      <CrowdCanvas className="z-0" cols={7} rows={15} src="/peeps.png" />
+      <Suspense fallback={null}>
+        <CrowdCanvas className="z-0" cols={7} rows={15} src="/peeps.png" />
+      </Suspense>
     </div>
   );
 };
