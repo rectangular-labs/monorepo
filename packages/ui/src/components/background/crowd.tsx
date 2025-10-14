@@ -5,12 +5,14 @@
  * illustration by https://www.openpeeps.com/
  */
 import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import { animate } from "motion";
 import { cubicBezier } from "motion/react";
 import { useEffect, useRef } from "react";
 
 interface CrowdCanvasProps {
   src: string;
+  className?: string;
   rows?: number;
   cols?: number;
 }
@@ -39,7 +41,12 @@ type WalkControls = {
   cancel: () => void;
 };
 
-const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
+const CrowdCanvas = ({
+  src,
+  className,
+  rows = 15,
+  cols = 7,
+}: CrowdCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isMobile = useIsMobile();
 
@@ -324,7 +331,14 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     };
   }, [cols, rows, src, isMobile]);
   return (
-    <canvas className="absolute bottom-0 h-[90vh] w-full" ref={canvasRef} />
+    <canvas
+      className={cn(
+        "pointer-events-none absolute bottom-0 w-full select-none",
+        className,
+      )}
+      draggable={false}
+      ref={canvasRef}
+    />
   );
 };
 
