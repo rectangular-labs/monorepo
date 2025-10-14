@@ -74,7 +74,7 @@ export function ManageOrganizationForm({
       name: organization.name ?? "",
       logo: organization.logo ?? "",
     });
-  }, [organization, form.reset]);
+  }, [organization, form]);
 
   return (
     <AutoHeight contentId={`organization-form-${organization?.id}`}>

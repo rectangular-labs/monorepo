@@ -111,23 +111,23 @@ function ResultsPage() {
             </div>
             <div className="grid gap-2">
               <div>Technical</div>
-              <Progress value={subs["Technical"] ?? 0} />
+              <Progress value={subs.Technical ?? 0} />
             </div>
             <div className="grid gap-2">
               <div>On‑page</div>
-              <Progress value={subs["OnPage"] ?? 0} />
+              <Progress value={subs.OnPage ?? 0} />
             </div>
             <div className="grid gap-2">
               <div>Content</div>
-              <Progress value={subs["Content"] ?? 0} />
+              <Progress value={subs.Content ?? 0} />
             </div>
             <div className="grid gap-2">
               <div>Authority</div>
-              <Progress value={subs["Authority"] ?? 0} />
+              <Progress value={subs.Authority ?? 0} />
             </div>
             <div className="grid gap-2">
               <div>Tracking</div>
-              <Progress value={subs["Tracking"] ?? 0} />
+              <Progress value={subs.Tracking ?? 0} />
             </div>
           </CardContent>
         </Card>
