@@ -1,9 +1,8 @@
-import type {
-  EmailAddress,
-  EmailDriver,
-  EmailOptions,
-  EmailResult,
-} from "../types.js";
+import type { EmailDriver, EmailOptions, EmailResult } from "../types.js";
+import {
+  normalizeEmailAddressesToObject,
+  normalizeEmailAddressToObject,
+} from "../utils.js";
 
 interface ScalewayConfig {
   region: string;
@@ -35,35 +34,15 @@ interface ScalewayEmailRequest {
   }>;
 }
 
-function normalizeEmailAddress(addr: string | EmailAddress): {
-  name: string;
-  email: string;
-} {
-  if (typeof addr === "string") {
-    return { name: "", email: addr };
-  }
-  return { name: addr.name || "", email: addr.address };
-}
-
-function normalizeEmailAddresses(
-  addrs?: string | string[] | EmailAddress | EmailAddress[],
-): Array<{ name: string; email: string }> {
-  if (!addrs) return [];
-  if (Array.isArray(addrs)) {
-    return addrs.map(normalizeEmailAddress);
-  }
-  return [normalizeEmailAddress(addrs)];
-}
-
 export function scalewayDriver(config: ScalewayConfig): EmailDriver {
   return {
     name: "scaleway",
     async send(options: EmailOptions): Promise<EmailResult> {
       try {
-        const fromAddress = normalizeEmailAddress(options.from);
-        const toAddresses = normalizeEmailAddresses(options.to);
-        const ccAddresses = normalizeEmailAddresses(options.cc);
-        const bccAddresses = normalizeEmailAddresses(options.bcc);
+        const fromAddress = normalizeEmailAddressToObject(options.from);
+        const toAddresses = normalizeEmailAddressesToObject(options.to);
+        const ccAddresses = normalizeEmailAddressesToObject(options.cc);
+        const bccAddresses = normalizeEmailAddressesToObject(options.bcc);
 
         // Prepare email request
         const emailRequest: ScalewayEmailRequest = {
@@ -111,7 +90,7 @@ export function scalewayDriver(config: ScalewayConfig): EmailDriver {
         }
 
         if (options.replyTo) {
-          const replyToAddress = normalizeEmailAddress(options.replyTo);
+          const replyToAddress = normalizeEmailAddressToObject(options.replyTo);
           additionalHeaders.push({
             key: "Reply-To",
             value: replyToAddress.name
