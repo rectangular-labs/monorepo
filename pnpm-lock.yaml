@@ -543,6 +543,9 @@ importers:
       '@aws-sdk/client-sesv2':
         specifier: ^3.894.0
         version: 3.896.0
+      '@inboundemail/sdk':
+        specifier: ^4.3.0
+        version: 4.3.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@plunk/node':
         specifier: ^3.0.3
         version: 3.0.3
@@ -3188,6 +3191,13 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
+
+  '@inboundemail/sdk@4.3.0':
+    resolution: {integrity: sha512-UkKnPmGgRVyaJRp6T9Z0fv6C9b0Jz18BchR3HFmC/AiB3K57yhIPKQbdgu2EhkrwsTwwag7nIqec3UB51btMvA==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@inquirer/external-editor@1.0.1':
     resolution: {integrity: sha512-Oau4yL24d2B5IL4ma4UpbQigkVhzPDXLoqy1ggK4gnHg/stmkffJE4oOXHXF3uz0UEpywG68KcyXsyYpA1Re/Q==}
@@ -15572,6 +15582,11 @@ snapshots:
 
   '@img/sharp-win32-x64@0.33.5':
     optional: true
+
+  '@inboundemail/sdk@4.3.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+    dependencies:
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
 
   '@inquirer/external-editor@1.0.1(@types/node@24.6.2)':
     dependencies:

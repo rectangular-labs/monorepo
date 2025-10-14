@@ -58,6 +58,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-sesv2": "^3.894.0",
+    "@inboundemail/sdk": "^4.3.0",
     "@plunk/node": "^3.0.3",
     "@rectangular-labs/typescript": "workspace:*",
     "@sendgrid/mail": "^8.1.6",
@@ -77,6 +78,7 @@
   },
   "peerDependencies": {
     "@aws-sdk/client-sesv2": "^3.894.0",
+    "@inboundemail/sdk": "^4.3.0",
     "@sendgrid/mail": "^8.1.6",
     "mailersend": "^2.6.0",
     "nodemailer": "^7.0.6",
@@ -84,6 +86,9 @@
     "resend": "^6.1.0"
   },
   "peerDependenciesMeta": {
+    "@inboundemail/sdk": {
+      "optional": true
+    },
     "@aws-sdk/client-sesv2": {
       "optional": true
     },
