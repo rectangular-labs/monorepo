@@ -1,7 +1,8 @@
 import { CrowdCanvas } from "@rectangular-labs/ui/components/background/crowd";
 import { MoveRight } from "@rectangular-labs/ui/components/icon";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { buttonVariants } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
+import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -30,7 +31,7 @@ export const Hero = () => {
             </Button>
           </div> */}
           <div className="flex flex-col gap-4 pt-10 lg:pt-20">
-            <h1 className="max-w-2xl text-center font-regular text-3xl tracking-tighter md:text-6xl">
+            <h1 className="z-10 max-w-2xl text-center font-regular text-3xl tracking-tighter md:text-6xl">
               <span>Are you ready to get more</span>
               <span className="relative flex w-full justify-center overflow-hidden text-center md:pt-1 md:pb-4">
                 &nbsp;
@@ -58,21 +59,25 @@ export const Hero = () => {
               </span>
             </h1>
 
-            <p className="max-w-2xl text-center text-lg text-muted-foreground leading-relaxed tracking-tight md:text-xl">
+            <p className="z-10 max-w-2xl text-center text-lg text-muted-foreground leading-relaxed tracking-tight md:text-xl">
               Answer 16 questions to get a simple personalized plan to get more
               traffic.
             </p>
           </div>
           <div className="flex flex-row gap-3">
-            <Button className="gap-4" size="lg">
+            <Link
+              className={buttonVariants({
+                className: "z-10 gap-4",
+                size: "lg",
+              })}
+              to="/quiz"
+            >
               Get your plan now <MoveRight className="h-4 w-4" />
-            </Button>
+            </Link>
           </div>
         </div>
       </Section>
-      <div className="absolute bottom-0 h-full w-screen">
-        <CrowdCanvas cols={7} rows={15} src="/peeps.png" />
-      </div>
+      <CrowdCanvas className="z-0" cols={7} rows={15} src="/peeps.png" />
     </div>
   );
 };

@@ -10,7 +10,7 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 const faqs = [
   {
     id: "quiz-free",
-    q: "Is the SEO quiz really free?",
+    q: "Is the quiz really free?",
     a: "Yes—it's 100% free and takes only a few minutes. No credit card required.",
   },
   {
