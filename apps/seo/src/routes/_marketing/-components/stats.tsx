@@ -14,7 +14,7 @@ export const Stats = () => (
             Why should you care
           </h2>
           <p className="text-left text-lg text-muted-foreground leading-relaxed tracking-tight lg:max-w-sm">
-            Your website is more than just a front. The data shows that making
+            Your website is more than just a front. The data shows that
             optimizing your site for search traffic is a great way to grow your
             business.
           </p>

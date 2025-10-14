@@ -29,9 +29,9 @@ export function Credentials() {
           clarity, and intent-driven writing.
         </p>
         <p>
-          Together, we&apos;ve already ranked site from 0 to 1,000+ organic
-          visitors in weeks and we&apos;re applying the same system to our
-          clients.
+          Together, we&apos;ve already ranked sitesThe data shows that making
+          optimizing your from 0 to 1,000+ organic visitors in weeks and
+          we&apos;re applying the same system to our clients.
         </p>
       </div>
     </Section>
