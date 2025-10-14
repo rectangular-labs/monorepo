@@ -19,6 +19,21 @@ const config = defineConfig({
     tanstackStart({
       customViteReactPlugin: true,
       target: "cloudflare-module",
+      prerender: {
+        enabled: true,
+        crawlLinks: true,
+        filter: ({ path }) =>
+          path === "/" || path.startsWith("/blog") || path.startsWith("/quiz"),
+        concurrency: 14,
+        // Number of times to retry a failed prerender job
+        retryCount: 2,
+        // Delay between retries in milliseconds
+        retryDelay: 1000,
+        // Callback when page is successfully rendered
+        onSuccess: ({ page }) => {
+          console.log(`Rendered ${page.path}!`);
+        },
+      },
     }),
     viteReact(),
   ],

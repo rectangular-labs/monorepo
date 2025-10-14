@@ -31,14 +31,21 @@ export const Route = createRootRouteWithContext<{
         content: "Mentions",
       },
       ...seo({
-        title: "The AI SEO employee — Understand. Plan. Forecast. Ship.",
+        title:
+          "Mentions — AI SEO that Understands, Plans, Forecasts, and Ships",
         description:
-          "Hire the first AI SEO employee. Understand your site, plan campaigns by intent, forecast ranking ranges, and schedule content that ships.",
+          "Mentions analyzes your site, plans campaigns by intent, forecasts ranking ranges, and schedules content that actually ships.",
         keywords:
           "AI SEO employee, SEO automation, SEO forecasting, content calendar, keyword clusters",
       }),
     ],
     links: [
+      {
+        rel: "preload",
+        href: appCss,
+        as: "style",
+        fetchPriority: "high",
+      },
       {
         rel: "alternate",
         type: "application/rss+xml",
