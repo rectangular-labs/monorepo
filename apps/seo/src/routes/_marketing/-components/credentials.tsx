@@ -13,16 +13,16 @@ export function Credentials() {
         </h2>
       </div>
 
-      <div className="flex h-fit items-center gap-6 rounded-md dark:my-2 dark:bg-muted">
+      <div className="flex h-fit w-fit items-center gap-6 rounded-md dark:my-2 dark:bg-muted">
         <img
           alt="Illustration of a person"
           className="o h-auto w-56"
-          src="/peep-21.png"
+          src="/peep-21.svg"
         />
         <img
           alt="Illustration of a person"
           className="-scale-x-100 h-auto w-56"
-          src="/peep-47.png"
+          src="/peep-47.svg"
         />
       </div>
 
