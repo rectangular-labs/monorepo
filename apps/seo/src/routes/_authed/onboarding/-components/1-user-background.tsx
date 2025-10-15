@@ -35,6 +35,8 @@ const sourceOptions = [
   { value: "x", label: "X" },
   { value: "reddit", label: "Reddit" },
   { value: "hacker-news", label: "Hacker News" },
+  { value: "google", label: "Google" },
+  { value: "ai-conversations", label: "AI conversations" },
   { value: "other", label: "Other" },
 ];
 const goalOptions = [
