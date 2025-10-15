@@ -38,9 +38,9 @@ const sourceOptions = [
   { value: "other", label: "Other" },
 ];
 const goalOptions = [
-  { value: "sentiment", label: "Figuring out customer sentiment" },
-  { value: "monitor", label: "Monitor conversation around a topic" },
-  { value: "problems", label: "Find problems" },
+  { value: "brand-authority", label: "Increase brand authority" },
+  { value: "traffic", label: "Increase site traffic" },
+  { value: "leads", label: "Get more leads" },
   { value: "other", label: "Other" },
 ];
 
@@ -185,7 +185,7 @@ export function OnboardingUserBackground({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Where would you want Mentions to help with the most?
+                      Where would you want Fluid Posts to help with the most?
                     </FormLabel>
                     <FormControl>
                       <Select
