@@ -19,6 +19,7 @@ export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
       db,
       encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
       fromEmail: env.AUTH_SEO_FROM_EMAIL,
+      inboundApiKey: env.SEO_INBOUND_API_KEY,
       credentialVerificationType: env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
       discordClientId: env.AUTH_SEO_DISCORD_ID,
       discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
