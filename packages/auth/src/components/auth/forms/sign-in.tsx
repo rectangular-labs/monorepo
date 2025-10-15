@@ -43,8 +43,16 @@ export function SignInForm({
   const usernameEnabled = credentials?.useUsername;
   const rememberMeEnabled = credentials?.enableRememberMe;
   const schema = type({
-    email: usernameEnabled ? "string > 0" : "string.email >= 1",
-    password: "string > 0",
+    email: usernameEnabled
+      ? type("string").atLeastLength(1).configure({
+          message: "Username is required",
+        })
+      : type("string.email").configure({
+          message: () => "Email is required",
+        }),
+    password: type("string > 0").configure({
+      message: "Password is required",
+    }),
     rememberMe: "boolean",
   });
 
@@ -184,6 +192,7 @@ export function SignInForm({
                 <PasswordInput
                   autoComplete="current-password webauthn"
                   disabled={isSubmitting || shouldDisable}
+                  enableToggle
                   placeholder="Your password"
                   {...field}
                 />

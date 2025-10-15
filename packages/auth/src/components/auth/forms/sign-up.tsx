@@ -43,7 +43,9 @@ export function SignUpForm({
   const additionalFields = credentials?.additionalFields ?? {};
 
   const baseSchema = type({
-    email: "string.email >= 1",
+    email: type("string.email >= 1").configure({
+      message: "Email is required",
+    }),
     password: PasswordSchema,
     username: usernameEnabled ? "string >= 3" : "undefined",
     confirmPassword: confirmPasswordEnabled
