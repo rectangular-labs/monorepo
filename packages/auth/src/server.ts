@@ -54,9 +54,10 @@ export function initAuthHandler({
   const useReddit = !!redditClientId && !!redditClientSecret;
   const useGoogle = !!googleClientId && !!googleClientSecret;
 
+  const domain = new URL(baseURL).hostname.split(".").slice(-2).join(".");
   const productionUrl =
     baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
-      ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}` // preview.fluidposts.com or preview.rectangularlabs.com
+      ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
       : baseURL;
 
   const emailDriver = createEmailClient({
@@ -212,7 +213,15 @@ export function initAuthHandler({
         },
       }),
     },
-    trustedOrigins: ["expo://"],
+    advanced: {
+      cookiePrefix: domain.split(".").at(0) ?? "",
+      crossSubDomainCookies: {
+        enabled: productionUrl !== baseURL,
+        domain: `.${domain}`,
+      },
+      useSecureCookies: true,
+    },
+    trustedOrigins: ["expo://", productionUrl, baseURL],
   } satisfies BetterAuthOptions;
 
   return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;

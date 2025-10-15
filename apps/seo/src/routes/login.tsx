@@ -48,9 +48,9 @@ function Login() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const normalizedSuccessCallbackURL = search.next
-    ? `${search.next}`
-    : `/organization`;
-  const newUserCallbackURL = `/onboarding?next=${normalizedSuccessCallbackURL}`;
+    ? `${clientEnv().VITE_SEO_URL}${search.next}`
+    : `${clientEnv().VITE_SEO_URL}/organization`;
+  const newUserCallbackURL = `${clientEnv().VITE_SEO_URL}/onboarding?next=${normalizedSuccessCallbackURL}`;
 
   return (
     <div className="flex min-h-screen items-center justify-center">
