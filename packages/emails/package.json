@@ -13,7 +13,8 @@
     "postmark",
     "resend",
     "scaleway",
-    "sendgrid"
+    "sendgrid",
+    "inbound"
   ],
   "publishConfig": {
     "access": "public"

@@ -9,7 +9,6 @@ export default defineConfig((options) => {
     splitting: true, //technically true by default for esm, but we'll be explicit
     sourcemap: !isWatch,
     minify: !isWatch,
-    clean: !isWatch,
     onSuccess: "tsc -p tsconfig.build.json",
   };
 });
