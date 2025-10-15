@@ -154,7 +154,6 @@ export function VerificationForm({
       if (mode === "verification-email-code") {
         // email verification is completed here. This only happens for new users.
         window.location.href = newUserCallbackURL;
-        newUserCallbackURL;
       }
       //email otp login, and email verification are completed here.
       await successHandler();

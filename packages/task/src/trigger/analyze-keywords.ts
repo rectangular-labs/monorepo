@@ -25,7 +25,7 @@ export const analyzeKeywordsTask: ReturnType<
 > = schemaTask({
   id: "analyze-keywords",
   maxDuration: 60 * 15, // 15 minutes
-  machine: "micro",
+  machine: "small-1x",
   schema: analyzeKeywordsTaskInputSchema,
   run: async (payload) => {
     setTaskMetadata({
