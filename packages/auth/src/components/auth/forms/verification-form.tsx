@@ -270,7 +270,9 @@ export function VerificationForm({
             />
 
             {form.formState.errors.root && (
-              <FormMessage>{form.formState.errors.root.message}</FormMessage>
+              <FormMessage className="text-destructive">
+                {form.formState.errors.root.message}
+              </FormMessage>
             )}
 
             <Button disabled={isSubmitting || isDisabled} type="submit">

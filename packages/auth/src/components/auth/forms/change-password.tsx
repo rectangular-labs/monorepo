@@ -181,7 +181,9 @@ export function ChangePasswordForm(props: ChangePasswordProps) {
         )}
 
         {form.formState.errors.root && (
-          <FormMessage>{form.formState.errors.root.message}</FormMessage>
+          <FormMessage className="text-destructive">
+            {form.formState.errors.root.message}
+          </FormMessage>
         )}
 
         <Button className={"w-full"} disabled={isSubmitting} type="submit">

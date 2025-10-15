@@ -1,7 +1,7 @@
 import type { EmailDriver, EmailOptions, EmailResult } from "./types.js";
 
 export interface EmailClientConfig<T extends EmailDriver> {
-  driver?: T;
+  driver?: T | undefined;
 }
 
 export function createEmailClient<T extends EmailDriver>(

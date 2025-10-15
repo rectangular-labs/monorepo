@@ -31,7 +31,13 @@ export function SignInForm({
   setShouldDisable: (disabled: boolean) => void;
   setVerificationInfo: (verificationInfo: VerificationInfo) => void;
 }) {
-  const { authClient, viewPaths, credentials, successHandler } = useAuth();
+  const {
+    authClient,
+    viewPaths,
+    credentials,
+    successHandler,
+    successCallbackURL,
+  } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const usernameEnabled = credentials?.useUsername;
@@ -76,6 +82,10 @@ export function SignInForm({
       if (response.error.status === 403) {
         // Redirect to verify email address
         if (credentials?.verificationMode === "code") {
+          void authClient.emailOtp.sendVerificationOtp({
+            email,
+            type: "email-verification",
+          });
           setView(viewPaths.IDENTITY_VERIFICATION);
           setVerificationInfo({
             mode: "verification-email-code",
@@ -83,6 +93,10 @@ export function SignInForm({
           });
         }
         if (credentials?.verificationMode === "token") {
+          void authClient.sendVerificationEmail({
+            email,
+            callbackURL: successCallbackURL,
+          });
           setView(viewPaths.IDENTITY_VERIFICATION);
           setVerificationInfo({
             mode: "verification-email-token",
@@ -200,7 +214,9 @@ export function SignInForm({
           />
         )}
         {form.formState.errors.root && (
-          <FormMessage>{form.formState.errors.root.message}</FormMessage>
+          <FormMessage className="text-destructive">
+            {form.formState.errors.root.message}
+          </FormMessage>
         )}
         <Button
           className={"w-full"}

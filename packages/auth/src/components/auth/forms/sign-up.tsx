@@ -351,7 +351,9 @@ export function SignUpForm({
           })}
 
         {form.formState.errors.root && (
-          <FormMessage>{form.formState.errors.root.message}</FormMessage>
+          <FormMessage className="text-destructive">
+            {form.formState.errors.root.message}
+          </FormMessage>
         )}
 
         <Button
