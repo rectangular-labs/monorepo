@@ -7,6 +7,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
 import {
   ManageProjectForm,
@@ -17,17 +18,19 @@ import { useMetadata } from "../-lib/use-metadata";
 
 export function OnboardingReviewProject() {
   const matcher = OnboardingSteps.useStepper();
+  const navigate = useNavigate();
   const { data: defaultValues } = useMetadata("understanding-site");
-  const { set: setReviewProjectMetadata } = useMetadata("review-project");
 
   const { mutateAsync: updateProject, isPending } = useMutation(
     getApiClientRq().project.update.mutationOptions({
       onSuccess: (data) => {
-        setReviewProjectMetadata({
-          slug: data.slug ?? undefined,
-          name: data.name ?? undefined,
-          projectId: data.id,
-          organizationId: data.organizationId,
+        void navigate({
+          to: "/onboarding",
+          search: (prev) => ({
+            ...prev,
+            projectId: data.id,
+            organizationId: data.organizationId,
+          }),
         });
         matcher.next();
       },

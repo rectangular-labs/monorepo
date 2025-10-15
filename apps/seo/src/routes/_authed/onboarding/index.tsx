@@ -5,7 +5,6 @@ import { type } from "arktype";
 import { getApiClientRq } from "~/lib/api";
 import { OnboardingContent } from "./-components/content";
 import { type OnboardingStep, OnboardingSteps } from "./-lib/steps";
-import { useMetadata } from "./-lib/use-metadata";
 
 export const Route = createFileRoute("/_authed/onboarding/")({
   validateSearch: type({
@@ -100,10 +99,6 @@ function getInitialStep(
 function OnboardingPage() {
   const { type } = Route.useSearch();
   const { organizations, gscConnectionStatus, project } = Route.useLoaderData();
-  const { data: websiteInfoMetadata, set: setWebsiteInfoMetadata } =
-    useMetadata("website-info");
-  const { data: reviewProjectMetadata, set: setReviewProjectMetadata } =
-    useMetadata("review-project");
 
   const initialStep = getInitialStep(
     type,
@@ -111,25 +106,6 @@ function OnboardingPage() {
     project,
     gscConnectionStatus,
   );
-  if (initialStep === "website-info" && project && !websiteInfoMetadata) {
-    // prefill the website info so that users don't have to re-enter the website URL
-    setWebsiteInfoMetadata({
-      websiteUrl: project.websiteUrl,
-      taskId: "",
-      projectId: project.id,
-      organizationId: project.organizationId,
-    });
-  }
-
-  if (initialStep.startsWith("connect-gsc") && !reviewProjectMetadata) {
-    // so that we have the project ID and organization ID to navigate too on completion of the onboarding.
-    setReviewProjectMetadata({
-      projectId: project?.id,
-      organizationId: project?.organizationId,
-      name: project?.name ?? undefined,
-      slug: project?.slug ?? undefined,
-    });
-  }
 
   return (
     <OnboardingSteps.Scoped initialStep={initialStep}>

@@ -29,12 +29,7 @@ export interface OnboardingMetadata {
       websiteUrl: string;
     }
   >;
-  "review-project": {
-    slug?: string;
-    name?: string;
-    projectId?: string;
-    organizationId?: string;
-  };
+  "review-project": Record<string, never>;
   "connect-gsc": Record<string, never>;
   "connect-gsc-property": Record<string, never>;
   "all-set": Record<string, never>;

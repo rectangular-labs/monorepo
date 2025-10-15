@@ -26,7 +26,6 @@ import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { getUrlDomain } from "~/lib/url";
 import { OnboardingSteps } from "../-lib/steps";
-import { useMetadata } from "../-lib/use-metadata";
 
 export function OnboardingConnectGscProperty({
   description,
@@ -38,8 +37,6 @@ export function OnboardingConnectGscProperty({
   const stepper = OnboardingSteps.useStepper();
 
   const searchParams = useSearch({ from: "/_authed/onboarding/" });
-  const { data: reviewProjectMetadata } = useMetadata("review-project");
-  const projectId = searchParams.projectId || reviewProjectMetadata?.projectId;
   const api = getApiClientRq();
 
   const [selectedProperty, setSelectedProperty] = useState<
@@ -50,7 +47,6 @@ export function OnboardingConnectGscProperty({
     showPotentialMissingPropertyWarning,
     setShowPotentialMissingPropertyWarning,
   ] = useState(false);
-
   const {
     data: propertiesData,
     isLoading,
@@ -59,10 +55,10 @@ export function OnboardingConnectGscProperty({
   const { data: projectData } = useQuery(
     api.project.get.queryOptions({
       input: {
-        identifier: projectId ?? "",
-        organizationIdentifier: reviewProjectMetadata?.organizationId ?? "",
+        identifier: searchParams.projectId ?? "",
+        organizationIdentifier: searchParams.organizationId ?? "",
       },
-      enabled: !!projectId && !!reviewProjectMetadata?.organizationId,
+      enabled: !!searchParams.projectId && !!searchParams.organizationId,
     }),
   );
 
@@ -79,13 +75,13 @@ export function OnboardingConnectGscProperty({
   );
 
   const handleConnect = async () => {
-    if (!selectedProperty || !projectId) {
+    if (!selectedProperty || !searchParams.projectId) {
       toast.error("Missing project or property information");
       return;
     }
 
     await connectProperty({
-      projectId,
+      projectId: searchParams.projectId,
       accountId: selectedProperty.accountId,
       domain: selectedProperty.domain,
       propertyType: selectedProperty.type,
@@ -97,6 +93,13 @@ export function OnboardingConnectGscProperty({
     stepper.next();
   };
 
+  console.log("propertiesData?.properties", propertiesData?.properties);
+  console.log("selectedProperty", selectedProperty);
+  console.log(
+    "showPotentialMissingPropertyWarning",
+    showPotentialMissingPropertyWarning,
+  );
+  console.log("projectData?.websiteUrl", projectData?.websiteUrl);
   if (
     propertiesData?.properties &&
     propertiesData.properties.length > 0 &&
@@ -148,6 +151,15 @@ export function OnboardingConnectGscProperty({
             </div>
           )}
 
+          {showPotentialMissingPropertyWarning && (
+            <Alert>
+              <AlertIcon />
+              <AlertTitle>Potential Misconfiguration</AlertTitle>
+              <AlertDescription>
+                <AddProperty websiteUrl={projectData?.websiteUrl} />
+              </AlertDescription>
+            </Alert>
+          )}
           {propertiesData?.properties &&
           propertiesData.properties.length > 0 ? (
             propertiesData.properties.map((property) => {
@@ -223,15 +235,6 @@ export function OnboardingConnectGscProperty({
               </p>
               <AddProperty />
             </div>
-          )}
-          {showPotentialMissingPropertyWarning && (
-            <Alert>
-              <AlertIcon />
-              <AlertTitle>Potential Missing Property</AlertTitle>
-              <AlertDescription>
-                <AddProperty />
-              </AlertDescription>
-            </Alert>
           )}
         </CardContent>
         <CardFooter className="flex justify-between">
