@@ -55,12 +55,12 @@ export function initAuthHandler({
   const useGoogle = !!googleClientId && !!googleClientSecret;
 
   const domain = new URL(baseURL).hostname.split(".").slice(-2).join(".");
-  const productionUrl =
-    baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
-      ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
-      : baseURL;
-  console.log("productionUrl", productionUrl);
-  console.log("baseURL", baseURL);
+  const isPreview =
+    baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.");
+
+  const productionUrl = isPreview
+    ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
+    : baseURL; // prod / localhost domains
   const emailDriver = createEmailClient({
     driver: inboundApiKey ? inboundDriver(inboundApiKey) : undefined,
   });
@@ -127,7 +127,10 @@ export function initAuthHandler({
     },
     plugins: [
       oAuthProxy({
-        productionURL: productionUrl,
+        productionURL: isPreview
+          ? productionUrl.replace("preview.", "") // this is so that the preview server will proxy request without state checks.
+          : // under the hood better auth doesn't allow proxying if the baseUrl === productionUrl.
+            productionUrl,
       }),
       emailOTP({
         overrideDefaultEmailVerification: credentialVerificationType === "code",
