@@ -215,7 +215,7 @@ export function initAuthHandler({
       useSecureCookies: true,
     },
     trustedOrigins: ["expo://", productionUrl, baseURL],
-  } satisfies BetterAuthOptions;
+  } as const satisfies BetterAuthOptions;
 
   return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;
 }
