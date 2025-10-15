@@ -25,6 +25,7 @@ import {
   MoveDownLeftIcon,
   MoveRightIcon,
   MoveUpRightIcon,
+  OctagonAlertIcon,
   PartyPopperIcon,
   PhoneCallIcon,
   PlusIcon,
@@ -48,6 +49,7 @@ import type { SVGProps } from "react";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
+export const AlertIcon = OctagonAlertIcon;
 export const ArrowDown = ArrowDownIcon;
 export const ArrowLeft = ArrowLeftIcon;
 export const ArrowRight = ArrowRightIcon;

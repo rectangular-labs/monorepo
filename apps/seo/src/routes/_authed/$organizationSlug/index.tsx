@@ -15,7 +15,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { GridListToggle, useGridListMode } from "~/components/grid-list-toggle";
 import { getApiClientRq } from "~/lib/api";
-import { getFaviconUrl } from "~/lib/get-favicon-url";
+import { getFaviconUrl } from "~/lib/url";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 
 export const Route = createFileRoute("/_authed/$organizationSlug/")({

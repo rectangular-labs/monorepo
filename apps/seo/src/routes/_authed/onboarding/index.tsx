@@ -50,7 +50,6 @@ export const Route = createFileRoute("/_authed/onboarding/")({
         : [new Promise<null>((resolve) => resolve(null))]),
     ]);
 
-    console.log("project", project);
     return {
       organizations,
       gscConnectionStatus: {

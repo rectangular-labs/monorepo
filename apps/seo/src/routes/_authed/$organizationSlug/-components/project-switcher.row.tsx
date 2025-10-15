@@ -7,7 +7,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/avatar";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { cn } from "@rectangular-labs/ui/utils/cn";
-import { getFaviconUrl } from "~/lib/get-favicon-url";
+import { getFaviconUrl } from "~/lib/url";
 
 type Project = RouterOutputs["project"]["list"]["data"][0];
 export function ProjectSwitcherRow({
