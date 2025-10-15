@@ -112,19 +112,16 @@ export function initAuthHandler({
       },
     },
     emailVerification: {
-      sendVerificationEmail: async ({ user, url }) => {
-        if (credentialVerificationType === "code") {
-          throw new Error(
-            "Email verification of type 'otp' should not be done through token verification",
-          );
-        }
-        await emailDriver.send({
-          from: fromEmail,
-          to: user.email,
-          subject: "Verify your email",
-          text: `Verify your email at ${url}`,
-        });
-      },
+      ...(credentialVerificationType === "token" && {
+        sendVerificationEmail: async ({ user, url }) => {
+          await emailDriver.send({
+            from: fromEmail,
+            to: user.email,
+            subject: "Verify your email",
+            text: `Verify your email at ${url}`,
+          });
+        },
+      }),
     },
     plugins: [
       oAuthProxy({
