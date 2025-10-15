@@ -59,7 +59,8 @@ export function initAuthHandler({
     baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
       ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
       : baseURL;
-
+  console.log("productionUrl", productionUrl);
+  console.log("baseURL", baseURL);
   const emailDriver = createEmailClient({
     driver: inboundApiKey ? inboundDriver(inboundApiKey) : undefined,
   });
@@ -215,10 +216,6 @@ export function initAuthHandler({
     },
     advanced: {
       cookiePrefix: domain.split(".").at(0) ?? "",
-      crossSubDomainCookies: {
-        enabled: productionUrl !== baseURL,
-        domain: `.${domain}`,
-      },
       useSecureCookies: true,
     },
     trustedOrigins: ["expo://", productionUrl, baseURL],
