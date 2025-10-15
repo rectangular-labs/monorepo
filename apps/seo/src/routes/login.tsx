@@ -6,6 +6,7 @@ import {
   GoogleIcon,
 } from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClientRq } from "~/lib/api";
@@ -45,10 +46,11 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const normalizedSuccessCallbackURL = search.next
-    ? `${clientEnv().VITE_SEO_URL}${search.next}`
-    : `${clientEnv().VITE_SEO_URL}/organization`;
-  const newUserCallbackURL = `${clientEnv().VITE_SEO_URL}/onboarding?next=${normalizedSuccessCallbackURL}`;
+    ? `${search.next}`
+    : `/organization`;
+  const newUserCallbackURL = `/onboarding?next=${normalizedSuccessCallbackURL}`;
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -65,7 +67,14 @@ function Login() {
         redirects={{
           successCallbackURL: normalizedSuccessCallbackURL,
           onSuccess: () => {
-            void navigate({ to: normalizedSuccessCallbackURL });
+            void queryClient
+              .invalidateQueries({
+                queryKey: getApiClientRq().auth.session.current.queryKey(),
+                refetchType: "active",
+              })
+              .finally(() => {
+                void navigate({ to: normalizedSuccessCallbackURL });
+              });
           },
           newUserCallbackURL,
         }}

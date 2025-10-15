@@ -50,7 +50,9 @@ export function UserDropdown({ user }: UserDropdownProps) {
   const { mutate: signOut, isPending: isSigningOut } = useMutation(
     getApiClientRq().auth.session.signOut.mutationOptions({
       onSuccess: async () => {
-        queryClient.clear();
+        await queryClient.invalidateQueries({
+          queryKey: getApiClientRq().auth.session.current.queryKey(),
+        });
         await navigate({ to: "/login" });
       },
     }),
