@@ -1,25 +1,9 @@
 import type { SESv2Client, SendEmailCommandInput } from "@aws-sdk/client-sesv2";
-import type {
-  EmailAddress,
-  EmailDriver,
-  EmailOptions,
-  EmailResult,
-} from "../types.js";
-
-function normalizeEmailAddress(addr: string | EmailAddress): string {
-  if (typeof addr === "string") return addr;
-  return addr.name ? `"${addr.name}" <${addr.address}>` : addr.address;
-}
-
-function normalizeEmailAddresses(
-  addresses?: string | string[] | EmailAddress | EmailAddress[],
-): string[] {
-  if (!addresses) return [];
-  if (Array.isArray(addresses)) {
-    return addresses.map(normalizeEmailAddress);
-  }
-  return [normalizeEmailAddress(addresses)];
-}
+import type { EmailDriver, EmailOptions, EmailResult } from "../types.js";
+import {
+  normalizeEmailAddressesToString,
+  normalizeEmailAddressToString,
+} from "../utils.js";
 
 export function awsSesDriver(
   ...config: NonNullable<ConstructorParameters<typeof SESv2Client>>
@@ -37,12 +21,12 @@ export function awsSesDriver(
 
         const client = new SESv2Client(config);
 
-        const toAddresses = normalizeEmailAddresses(options.to);
-        const ccAddresses = normalizeEmailAddresses(options.cc);
-        const bccAddresses = normalizeEmailAddresses(options.bcc);
+        const toAddresses = normalizeEmailAddressesToString(options.to);
+        const ccAddresses = normalizeEmailAddressesToString(options.cc);
+        const bccAddresses = normalizeEmailAddressesToString(options.bcc);
 
         const command = new SendEmailCommand({
-          FromEmailAddress: normalizeEmailAddress(options.from),
+          FromEmailAddress: normalizeEmailAddressToString(options.from),
           Destination: {
             ToAddresses: toAddresses,
             CcAddresses: ccAddresses,
@@ -71,7 +55,7 @@ export function awsSesDriver(
             },
           },
           ...(options.replyTo && {
-            ReplyToAddresses: [normalizeEmailAddress(options.replyTo)],
+            ReplyToAddresses: [normalizeEmailAddressToString(options.replyTo)],
           }),
           ...(messageOverrides && {
             ...messageOverrides,

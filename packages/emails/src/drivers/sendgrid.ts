@@ -1,10 +1,9 @@
 import type { MailDataRequired, MailService } from "@sendgrid/mail";
-import type {
-  EmailAddress,
-  EmailDriver,
-  EmailOptions,
-  EmailResult,
-} from "../types.js";
+import type { EmailDriver, EmailOptions, EmailResult } from "../types.js";
+import {
+  normalizeEmailAddressesToString,
+  normalizeEmailAddressToString,
+} from "../utils.js";
 
 export type SendgridConfig =
   | {
@@ -13,24 +12,6 @@ export type SendgridConfig =
   | {
       client: Parameters<MailService["setClient"]>[0];
     };
-
-function normalizeEmailAddress(addr: string | EmailAddress): {
-  email: string;
-  name?: string;
-} {
-  if (typeof addr === "string") return { email: addr };
-  return { email: addr.address, ...(addr.name && { name: addr.name }) };
-}
-
-function normalizeEmailAddresses(
-  addrs?: string | string[] | EmailAddress | EmailAddress[],
-): { email: string; name?: string }[] {
-  if (!addrs) return [];
-  if (Array.isArray(addrs)) {
-    return addrs.map(normalizeEmailAddress);
-  }
-  return [normalizeEmailAddress(addrs)];
-}
 
 export function sendgridDriver(config: SendgridConfig) {
   return {
@@ -60,14 +41,18 @@ export function sendgridDriver(config: SendgridConfig) {
           : // biome-ignore lint/suspicious/noExplicitAny: Hacking around for the types now. Sendgrid doesn't export the right types to make type inference work properly.
             [{ type: "text/plain", value: "" }]) as unknown as any;
         const msg: MailDataRequired = {
-          from: normalizeEmailAddress(options.from),
-          to: normalizeEmailAddresses(options.to),
+          from: normalizeEmailAddressToString(options.from),
+          to: normalizeEmailAddressesToString(options.to),
           subject: options.subject,
           content,
-          ...(options.cc && { cc: normalizeEmailAddresses(options.cc) }),
-          ...(options.bcc && { bcc: normalizeEmailAddresses(options.bcc) }),
+          ...(options.cc && {
+            cc: normalizeEmailAddressesToString(options.cc),
+          }),
+          ...(options.bcc && {
+            bcc: normalizeEmailAddressesToString(options.bcc),
+          }),
           ...(options.replyTo && {
-            replyTo: normalizeEmailAddress(options.replyTo),
+            replyTo: normalizeEmailAddressToString(options.replyTo),
           }),
           ...(options.attachments && {
             attachments: options.attachments.map((att) => ({

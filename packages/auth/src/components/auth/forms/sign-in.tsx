@@ -31,14 +31,28 @@ export function SignInForm({
   setShouldDisable: (disabled: boolean) => void;
   setVerificationInfo: (verificationInfo: VerificationInfo) => void;
 }) {
-  const { authClient, viewPaths, credentials, successHandler } = useAuth();
+  const {
+    authClient,
+    viewPaths,
+    credentials,
+    successHandler,
+    successCallbackURL,
+  } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const usernameEnabled = credentials?.useUsername;
   const rememberMeEnabled = credentials?.enableRememberMe;
   const schema = type({
-    email: usernameEnabled ? "string > 0" : "string.email >= 1",
-    password: "string > 0",
+    email: usernameEnabled
+      ? type("string").atLeastLength(1).configure({
+          message: "Username is required",
+        })
+      : type("string.email").configure({
+          message: () => "Email is required",
+        }),
+    password: type("string > 0").configure({
+      message: "Password is required",
+    }),
     rememberMe: "boolean",
   });
 
@@ -76,6 +90,10 @@ export function SignInForm({
       if (response.error.status === 403) {
         // Redirect to verify email address
         if (credentials?.verificationMode === "code") {
+          void authClient.emailOtp.sendVerificationOtp({
+            email,
+            type: "email-verification",
+          });
           setView(viewPaths.IDENTITY_VERIFICATION);
           setVerificationInfo({
             mode: "verification-email-code",
@@ -83,6 +101,10 @@ export function SignInForm({
           });
         }
         if (credentials?.verificationMode === "token") {
+          void authClient.sendVerificationEmail({
+            email,
+            callbackURL: successCallbackURL,
+          });
           setView(viewPaths.IDENTITY_VERIFICATION);
           setVerificationInfo({
             mode: "verification-email-token",
@@ -170,6 +192,7 @@ export function SignInForm({
                 <PasswordInput
                   autoComplete="current-password webauthn"
                   disabled={isSubmitting || shouldDisable}
+                  enableToggle
                   placeholder="Your password"
                   {...field}
                 />
@@ -200,7 +223,9 @@ export function SignInForm({
           />
         )}
         {form.formState.errors.root && (
-          <FormMessage>{form.formState.errors.root.message}</FormMessage>
+          <FormMessage className="text-destructive">
+            {form.formState.errors.root.message}
+          </FormMessage>
         )}
         <Button
           className={"w-full"}

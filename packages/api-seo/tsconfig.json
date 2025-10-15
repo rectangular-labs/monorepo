@@ -2,7 +2,9 @@
   "extends": "@rectangular-labs/typescript/tsconfig.compiled-package.json",
   "compilerOptions": {
     "rootDir": "src",
-    "lib": ["dom", "dom.iterable", "esnext"]
+    "lib": ["dom", "dom.iterable", "esnext"],
+    // because of better auth
+    "exactOptionalPropertyTypes": false
   },
   "include": ["src"],
   "exclude": ["node_modules"]

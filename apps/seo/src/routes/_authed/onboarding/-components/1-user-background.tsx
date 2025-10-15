@@ -35,12 +35,14 @@ const sourceOptions = [
   { value: "x", label: "X" },
   { value: "reddit", label: "Reddit" },
   { value: "hacker-news", label: "Hacker News" },
+  { value: "google", label: "Google" },
+  { value: "ai-conversations", label: "AI conversations" },
   { value: "other", label: "Other" },
 ];
 const goalOptions = [
-  { value: "sentiment", label: "Figuring out customer sentiment" },
-  { value: "monitor", label: "Monitor conversation around a topic" },
-  { value: "problems", label: "Find problems" },
+  { value: "brand-authority", label: "Increase brand authority" },
+  { value: "traffic", label: "Increase site traffic" },
+  { value: "leads", label: "Get more leads" },
   { value: "other", label: "Other" },
 ];
 
@@ -185,7 +187,7 @@ export function OnboardingUserBackground({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Where would you want Mentions to help with the most?
+                      Where would you want Fluid Posts to help with the most?
                     </FormLabel>
                     <FormControl>
                       <Select

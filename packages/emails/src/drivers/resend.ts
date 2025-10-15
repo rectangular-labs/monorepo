@@ -1,26 +1,10 @@
 import { Buffer } from "node:buffer";
 import type { CreateEmailOptions, Resend } from "resend";
-import type {
-  EmailAddress,
-  EmailDriver,
-  EmailOptions,
-  EmailResult,
-} from "../types.js";
-
-function normalizeEmailAddress(addr: string | EmailAddress): string {
-  if (typeof addr === "string") return addr;
-  return addr.name ? `"${addr.name}" <${addr.address}>` : addr.address;
-}
-
-function normalizeEmailAddresses(
-  addrs?: string | string[] | EmailAddress | EmailAddress[],
-): string[] {
-  if (!addrs) return [];
-  if (Array.isArray(addrs)) {
-    return addrs.map(normalizeEmailAddress);
-  }
-  return [normalizeEmailAddress(addrs)];
-}
+import type { EmailDriver, EmailOptions, EmailResult } from "../types.js";
+import {
+  normalizeEmailAddressesToString,
+  normalizeEmailAddressToString,
+} from "../utils.js";
 
 export function resendDriver(...config: ConstructorParameters<typeof Resend>) {
   return {
@@ -35,15 +19,19 @@ export function resendDriver(...config: ConstructorParameters<typeof Resend>) {
         const resend = new Resend(...config);
 
         const email: CreateEmailOptions = {
-          from: normalizeEmailAddress(options.from),
-          to: normalizeEmailAddresses(options.to),
+          from: normalizeEmailAddressToString(options.from),
+          to: normalizeEmailAddressesToString(options.to),
           subject: options.subject,
           text: options.text ?? "",
           ...(options.html ? { html: options.html } : {}),
-          ...(options.cc ? { cc: normalizeEmailAddresses(options.cc) } : {}),
-          ...(options.bcc ? { bcc: normalizeEmailAddresses(options.bcc) } : {}),
+          ...(options.cc
+            ? { cc: normalizeEmailAddressesToString(options.cc) }
+            : {}),
+          ...(options.bcc
+            ? { bcc: normalizeEmailAddressesToString(options.bcc) }
+            : {}),
           ...(options.replyTo
-            ? { replyTo: normalizeEmailAddress(options.replyTo) }
+            ? { replyTo: normalizeEmailAddressToString(options.replyTo) }
             : {}),
           ...(options.attachments
             ? {

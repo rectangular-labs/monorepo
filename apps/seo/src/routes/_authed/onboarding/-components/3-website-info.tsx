@@ -18,7 +18,7 @@ import {
   useForm,
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClient, getApiClientRq } from "~/lib/api";
@@ -37,14 +37,24 @@ export function OnboardingWebsiteInfo({
   title: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-  const { type } = useSearch({
+  const { type, projectId, organizationId } = useSearch({
     from: "/_authed/onboarding/",
   });
   const { data, set: setMetadata } = useMetadata("website-info");
+  const { data: project } = useQuery(
+    getApiClientRq().project.get.queryOptions({
+      input: {
+        identifier: projectId ?? "",
+        organizationIdentifier: organizationId ?? "",
+      },
+      enabled: !!projectId && !!organizationId,
+    }),
+  );
+
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
     defaultValues: {
-      url: data?.websiteUrl ?? "",
+      url: data?.websiteUrl ?? project?.websiteUrl ?? "",
     },
   });
 

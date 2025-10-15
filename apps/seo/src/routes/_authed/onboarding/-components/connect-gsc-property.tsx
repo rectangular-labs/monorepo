@@ -1,12 +1,15 @@
-import type {
-  seoGscPermissionLevelSchema,
-  seoGscPropertyTypeSchema,
-} from "@rectangular-labs/db/parsers";
+import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import {
+  AlertIcon,
   GoogleIcon,
   Info,
   Spinner,
 } from "@rectangular-labs/ui/components/icon";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
@@ -21,15 +24,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
+import { getUrlDomain } from "~/lib/url";
 import { OnboardingSteps } from "../-lib/steps";
-import { useMetadata } from "../-lib/use-metadata";
-
-type GscProperty = {
-  accountId: string;
-  domain: string;
-  type: typeof seoGscPropertyTypeSchema.infer;
-  permissionLevel: typeof seoGscPermissionLevelSchema.infer;
-};
 
 export function OnboardingConnectGscProperty({
   description,
@@ -41,27 +37,34 @@ export function OnboardingConnectGscProperty({
   const stepper = OnboardingSteps.useStepper();
 
   const searchParams = useSearch({ from: "/_authed/onboarding/" });
-  const { data: reviewProjectMetadata } = useMetadata("review-project");
-  const projectId = searchParams.projectId || reviewProjectMetadata?.projectId;
   const api = getApiClientRq();
 
-  const [selectedProperty, setSelectedProperty] = useState<GscProperty | null>(
-    null,
-  );
-
+  const [selectedProperty, setSelectedProperty] = useState<
+    | RouterOutputs["googleSearchConsole"]["listProperties"]["properties"][0]
+    | null
+  >(null);
+  const [
+    showPotentialMissingPropertyWarning,
+    setShowPotentialMissingPropertyWarning,
+  ] = useState(false);
   const {
     data: propertiesData,
     isLoading,
     error,
   } = useQuery(api.googleSearchConsole.listProperties.queryOptions({}));
+  const { data: projectData } = useQuery(
+    api.project.get.queryOptions({
+      input: {
+        identifier: searchParams.projectId ?? "",
+        organizationIdentifier: searchParams.organizationId ?? "",
+      },
+      enabled: !!searchParams.projectId && !!searchParams.organizationId,
+    }),
+  );
 
   const { mutateAsync: connectProperty, isPending } = useMutation(
     api.googleSearchConsole.connectToProject.mutationOptions({
-      onSuccess: (data) => {
-        stepper.setMetadata("connect-gsc-property", {
-          gscPropertyId: data.gscPropertyId,
-          projectId: data.projectId,
-        });
+      onSuccess: () => {
         toast.success("Google Search Console connected successfully!");
         stepper.next();
       },
@@ -72,13 +75,13 @@ export function OnboardingConnectGscProperty({
   );
 
   const handleConnect = async () => {
-    if (!selectedProperty || !projectId) {
+    if (!selectedProperty || !searchParams.projectId) {
       toast.error("Missing project or property information");
       return;
     }
 
     await connectProperty({
-      projectId,
+      projectId: searchParams.projectId,
       accountId: selectedProperty.accountId,
       domain: selectedProperty.domain,
       propertyType: selectedProperty.type,
@@ -89,6 +92,34 @@ export function OnboardingConnectGscProperty({
   const handleSkip = () => {
     stepper.next();
   };
+
+  console.log("propertiesData?.properties", propertiesData?.properties);
+  console.log("selectedProperty", selectedProperty);
+  console.log(
+    "showPotentialMissingPropertyWarning",
+    showPotentialMissingPropertyWarning,
+  );
+  console.log("projectData?.websiteUrl", projectData?.websiteUrl);
+  if (
+    propertiesData?.properties &&
+    propertiesData.properties.length > 0 &&
+    !selectedProperty &&
+    !showPotentialMissingPropertyWarning &&
+    projectData?.websiteUrl
+  ) {
+    // properties and project data has loaded properly and we haven't selected a property yet, so let's try to find a matching property.
+    const websiteDomain = getUrlDomain(projectData.websiteUrl);
+
+    const matched = propertiesData.properties.find((property) => {
+      if (property.type === "URL_PREFIX") {
+        const propertyDomain = getUrlDomain(property.domain);
+        return propertyDomain === websiteDomain;
+      }
+      return property.domain === websiteDomain;
+    });
+    setSelectedProperty(matched ?? null);
+    setShowPotentialMissingPropertyWarning(!matched);
+  }
 
   return (
     <div className="space-y-6">
@@ -120,6 +151,15 @@ export function OnboardingConnectGscProperty({
             </div>
           )}
 
+          {showPotentialMissingPropertyWarning && (
+            <Alert>
+              <AlertIcon />
+              <AlertTitle>Potential Misconfiguration</AlertTitle>
+              <AlertDescription>
+                <AddProperty websiteUrl={projectData?.websiteUrl} />
+              </AlertDescription>
+            </Alert>
+          )}
           {propertiesData?.properties &&
           propertiesData.properties.length > 0 ? (
             propertiesData.properties.map((property) => {
@@ -189,22 +229,11 @@ export function OnboardingConnectGscProperty({
               );
             })
           ) : (
-            <div className="py-6 text-center">
+            <div className="space-y-2 py-6 text-center">
               <p className="text-muted-foreground">
                 No Search Console properties found for your account.
               </p>
-              <p className="mt-2 text-muted-foreground text-sm">
-                Make sure your website is added to{" "}
-                <a
-                  className="underline"
-                  href="https://search.google.com/search-console"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Google Search Console
-                </a>
-                .
-              </p>
+              <AddProperty />
             </div>
           )}
         </CardContent>
@@ -232,5 +261,23 @@ export function OnboardingConnectGscProperty({
         at any time.
       </p>
     </div>
+  );
+}
+
+function AddProperty({ websiteUrl }: { websiteUrl?: string }) {
+  const websiteDomain = websiteUrl ? getUrlDomain(websiteUrl) : null;
+  return (
+    <p className="text-muted-foreground text-sm">
+      Make sure your website {websiteDomain} is added to{" "}
+      <a
+        className="underline"
+        href="https://search.google.com/search-console"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        Google Search Console
+      </a>
+      .
+    </p>
   );
 }

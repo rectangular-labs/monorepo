@@ -219,7 +219,9 @@ function EmailForm({
           )}
         />
         {form.formState.errors.root && (
-          <FormMessage>{form.formState.errors.root.message}</FormMessage>
+          <FormMessage className="text-destructive">
+            {form.formState.errors.root.message}
+          </FormMessage>
         )}
         {children ?? (
           <Button
@@ -350,7 +352,9 @@ function PhoneForm({
           )}
         />
         {form.formState.errors.root && (
-          <FormMessage>{form.formState.errors.root.message}</FormMessage>
+          <FormMessage className="text-destructive">
+            {form.formState.errors.root.message}
+          </FormMessage>
         )}
         {children ?? (
           <Button

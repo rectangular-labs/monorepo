@@ -27,7 +27,7 @@ export const understandSiteTask: ReturnType<
 > = schemaTask({
   id: "understand-site",
   maxDuration: 300,
-  machine: "micro",
+  machine: "small-1x",
   schema: inputSchema,
   run: async (payload) => {
     setTaskMetadata({

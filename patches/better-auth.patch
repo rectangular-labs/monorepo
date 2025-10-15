@@ -1,32 +1,23 @@
-diff --git a/dist/shared/better-auth.CpZXDeOc.mjs b/dist/shared/better-auth.CpZXDeOc.mjs
-index b6d7d535e57e3b17f34de8bbdefed4c70d76a62e..28bfc2fb237c49ca038a71df546c9cfc440f2ce3 100644
---- a/dist/shared/better-auth.CpZXDeOc.mjs
-+++ b/dist/shared/better-auth.CpZXDeOc.mjs
-@@ -6408,9 +6408,11 @@ const getAccessToken = createAuthEndpoint(
-       let newTokens = null;
-       const accessTokenExpired = account.accessTokenExpiresAt && new Date(account.accessTokenExpiresAt).getTime() - Date.now() < 5e3;
-       if (account.refreshToken && accessTokenExpired && provider.refreshAccessToken) {
--        newTokens = await provider.refreshAccessToken(
--          account.refreshToken
--        );
-+        const refreshToken = await decryptOAuthToken(
-+					account.refreshToken,
-+					ctx.context,
-+				);
-+        newTokens = await provider.refreshAccessToken(refreshToken);
-         await ctx.context.internalAdapter.updateAccount(account.id, {
-           accessToken: await setTokenUtil(newTokens.accessToken, ctx.context),
-           accessTokenExpiresAt: newTokens.accessTokenExpiresAt,
-@@ -6419,10 +6421,8 @@ const getAccessToken = createAuthEndpoint(
-         });
-       }
-       const tokens = {
--        accessToken: await decryptOAuthToken(
--          newTokens?.accessToken ?? account.accessToken ?? "",
--          ctx.context
--        ),
-+        accessToken: newTokens?.accessToken ??
-+          (await decryptOAuthToken(account.accessToken ?? "", ctx.context)),
-         accessTokenExpiresAt: newTokens?.accessTokenExpiresAt ?? account.accessTokenExpiresAt ?? void 0,
-         scopes: account.scope?.split(",") ?? [],
-         idToken: newTokens?.idToken ?? account.idToken ?? void 0
+diff --git a/dist/api-DbsSdk6D.cjs b/dist/api-DbsSdk6D.cjs
+index 1ffa6e7dcf6caa9723c00831b7abdfa1f7486c45..a26d5c07ebc0b5d517d3c8848a05e6cc13fce846 100644
+--- a/dist/api-DbsSdk6D.cjs
++++ b/dist/api-DbsSdk6D.cjs
+@@ -2301,7 +2301,8 @@ const getAccessToken = (0, __better_auth_core_middleware.createAuthEndpoint)("/g
+ 		let newTokens = null;
+ 		const accessTokenExpired = account.accessTokenExpiresAt && new Date(account.accessTokenExpiresAt).getTime() - Date.now() < 5e3;
+ 		if (account.refreshToken && accessTokenExpired && provider.refreshAccessToken) {
+-			newTokens = await provider.refreshAccessToken(account.refreshToken);
++			const refreshToken = await decryptOAuthToken(account.refreshToken, ctx.context);
++			newTokens = await provider.refreshAccessToken(refreshToken);
+ 			await ctx.context.internalAdapter.updateAccount(account.id, {
+ 				accessToken: await setTokenUtil(newTokens.accessToken, ctx.context),
+ 				accessTokenExpiresAt: newTokens.accessTokenExpiresAt,
+@@ -2310,7 +2311,7 @@ const getAccessToken = (0, __better_auth_core_middleware.createAuthEndpoint)("/g
+ 			});
+ 		}
+ 		const tokens = {
+-			accessToken: await decryptOAuthToken(newTokens?.accessToken ?? account.accessToken ?? "", ctx.context),
++			accessToken: newTokens?.accessToken ?? (await decryptOAuthToken(account.accessToken ?? "", ctx.context)),
+ 			accessTokenExpiresAt: newTokens?.accessTokenExpiresAt ?? account.accessTokenExpiresAt ?? void 0,
+ 			scopes: account.scope?.split(",") ?? [],
+ 			idToken: newTokens?.idToken ?? account.idToken ?? void 0

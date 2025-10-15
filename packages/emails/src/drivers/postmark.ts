@@ -1,25 +1,9 @@
 import type { Message, ServerClient } from "postmark";
-import type {
-  EmailAddress,
-  EmailDriver,
-  EmailOptions,
-  EmailResult,
-} from "../types.js";
-
-function normalizeEmailAddress(addr: string | EmailAddress): string {
-  if (typeof addr === "string") return addr;
-  return addr.name ? `"${addr.name}" <${addr.address}>` : addr.address;
-}
-
-function normalizeEmailAddresses(
-  addrs?: string | string[] | EmailAddress | EmailAddress[],
-): string[] {
-  if (!addrs) return [];
-  if (Array.isArray(addrs)) {
-    return addrs.map(normalizeEmailAddress);
-  }
-  return [normalizeEmailAddress(addrs)];
-}
+import type { EmailDriver, EmailOptions, EmailResult } from "../types.js";
+import {
+  normalizeEmailAddressesToString,
+  normalizeEmailAddressToString,
+} from "../utils.js";
 
 export function postmarkDriver(
   ...config: ConstructorParameters<typeof ServerClient>
@@ -35,12 +19,12 @@ export function postmarkDriver(
 
         const client = new ServerClient(...config);
 
-        const toAddresses = normalizeEmailAddresses(options.to);
-        const ccAddresses = normalizeEmailAddresses(options.cc);
-        const bccAddresses = normalizeEmailAddresses(options.bcc);
+        const toAddresses = normalizeEmailAddressesToString(options.to);
+        const ccAddresses = normalizeEmailAddressesToString(options.cc);
+        const bccAddresses = normalizeEmailAddressesToString(options.bcc);
 
         const emailData: Message = {
-          From: normalizeEmailAddress(options.from),
+          From: normalizeEmailAddressToString(options.from),
           To: toAddresses.join(", "),
           Subject: options.subject,
           ...(options.html && { HtmlBody: options.html }),
@@ -48,7 +32,7 @@ export function postmarkDriver(
           ...(ccAddresses.length > 0 && { Cc: ccAddresses.join(", ") }),
           ...(bccAddresses.length > 0 && { Bcc: bccAddresses.join(", ") }),
           ...(options.replyTo && {
-            ReplyTo: normalizeEmailAddress(options.replyTo),
+            ReplyTo: normalizeEmailAddressToString(options.replyTo),
           }),
           ...(options.attachments && {
             Attachments: options.attachments.map((att) => ({

@@ -1,4 +1,6 @@
 import { expo } from "@better-auth/expo";
+import { createEmailClient } from "@rectangular-labs/emails";
+import { inboundDriver } from "@rectangular-labs/emails/drivers/inbound";
 import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -20,6 +22,9 @@ export function initAuthHandler({
   baseURL,
   db,
   encryptionKey,
+  fromEmail,
+  inboundApiKey,
+  credentialVerificationType,
   discordClientId,
   discordClientSecret,
   githubClientId,
@@ -32,6 +37,9 @@ export function initAuthHandler({
   baseURL: string;
   db: DB;
   encryptionKey: string;
+  fromEmail: string;
+  credentialVerificationType?: "code" | "token";
+  inboundApiKey?: string | undefined;
   discordClientId?: string | undefined;
   discordClientSecret?: string | undefined;
   githubClientId?: string | undefined;
@@ -46,12 +54,16 @@ export function initAuthHandler({
   const useReddit = !!redditClientId && !!redditClientSecret;
   const useGoogle = !!googleClientId && !!googleClientSecret;
 
-  const productionUrl =
-    baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.")
-      ? `https://preview.${new URL(baseURL).hostname.split(".").slice(-2).join(".")}` // preview.fluidposts.com or preview.rectangularlabs.com
-      : baseURL;
+  const domain = new URL(baseURL).hostname.split(".").slice(-2).join(".");
+  const isPreview =
+    baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.");
 
-  console.log("productionUrl", productionUrl);
+  const productionUrl = isPreview
+    ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
+    : baseURL; // prod / localhost domains
+  const emailDriver = createEmailClient({
+    driver: inboundApiKey ? inboundDriver(inboundApiKey) : undefined,
+  });
 
   const config = {
     baseURL,
@@ -85,48 +97,74 @@ export function initAuthHandler({
       errorURL: "/login",
     },
     emailAndPassword: {
-      enabled: true,
+      enabled: !!credentialVerificationType,
       requireEmailVerification: true,
       sendResetPassword: async (data) => {
-        await Promise.resolve();
-        console.log("sendResetPassword", JSON.stringify(data, null, 2));
+        if (credentialVerificationType === "code") {
+          throw new Error(
+            "Password reset should be done through the email OTP plugin",
+          );
+        }
+        await emailDriver.send({
+          from: fromEmail,
+          to: data.user.email,
+          subject: "Reset your password",
+          text: `Reset your password at ${data.url}`,
+        });
       },
     },
     emailVerification: {
-      sendVerificationEmail: async ({ user, url, token }) => {
-        await Promise.resolve();
-        console.log(
-          "sendVerificationEmail",
-          JSON.stringify({ user, url, token }, null, 2),
-        );
-      },
+      ...(credentialVerificationType === "token" && {
+        sendVerificationEmail: async ({ user, url }) => {
+          await emailDriver.send({
+            from: fromEmail,
+            to: user.email,
+            subject: "Verify your email",
+            text: `Verify your email at ${url}`,
+          });
+        },
+      }),
     },
     plugins: [
       oAuthProxy({
-        /**
-         * Auto-inference blocked by https://github.com/better-auth/better-auth/pull/2891
-         */
-        currentURL: baseURL,
-        productionURL: productionUrl,
+        productionURL: isPreview
+          ? // this is so that the preview server will proxy request without state checks.
+            // under the hood better auth doesn't allow proxying if the baseUrl === productionUrl.
+            // https://github.com/better-auth/better-auth/commit/2d64fe38#diff-b1ff58ed51c13c92048fae09d3623dcdac496968932823c956661cd81f292cbb
+            productionUrl.replace("preview.", "")
+          : productionUrl,
       }),
       emailOTP({
-        async sendVerificationOTP({ email, otp, type }) {
-          await Promise.resolve();
-          console.log(`[auth] Email OTP (${type}) for ${email}: ${otp}`);
+        overrideDefaultEmailVerification: credentialVerificationType === "code",
+        async sendVerificationOTP({ email, otp }) {
+          await emailDriver.send({
+            from: fromEmail,
+            to: email,
+            subject: `${otp} is your verification code`,
+            text: `Your one-time verification code is ${otp}`,
+          });
         },
       }),
       magicLink({
-        sendMagicLink: async ({ email, token, url }) => {
-          await Promise.resolve();
-          console.log(`[auth] Magic link for ${email}: ${token} ${url}`);
+        sendMagicLink: async ({ email, url }) => {
+          await emailDriver.send({
+            from: fromEmail,
+            to: email,
+            subject: "Your login link",
+            text: `Your login link is ${url}`,
+          });
         },
       }),
       passkey(),
       twoFactor(),
       organization({
-        sendInvitationEmail: async ({ email, id }) => {
-          await Promise.resolve();
-          console.log(`[auth] Invitation email for ${email}: ${id}`);
+        sendInvitationEmail: async ({ email, id, organization, inviter }) => {
+          await emailDriver.send({
+            from: fromEmail,
+            to: email,
+            subject: `You have been invited to join ${organization.name} by ${inviter.user.name}`,
+            text: `You have been invited to join ${organization.name} by ${inviter.user.name}. Accept the invitation by entering the following code: ${id}`,
+          });
         },
         organizationHooks: {
           beforeCreateOrganization: ({ organization }) => {
@@ -177,8 +215,12 @@ export function initAuthHandler({
         },
       }),
     },
-    trustedOrigins: ["expo://"],
-  } satisfies BetterAuthOptions;
+    advanced: {
+      cookiePrefix: domain.split(".").at(0) ?? "",
+      useSecureCookies: true,
+    },
+    trustedOrigins: ["expo://", productionUrl, baseURL],
+  } as const satisfies BetterAuthOptions;
 
   return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;
 }
