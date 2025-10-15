@@ -127,10 +127,6 @@ export function initAuthHandler({
     },
     plugins: [
       oAuthProxy({
-        /**
-         * Auto-inference blocked by https://github.com/better-auth/better-auth/pull/2891
-         */
-        currentURL: baseURL,
         productionURL: productionUrl,
       }),
       emailOTP({
