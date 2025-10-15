@@ -128,9 +128,11 @@ export function initAuthHandler({
     plugins: [
       oAuthProxy({
         productionURL: isPreview
-          ? productionUrl.replace("preview.", "") // this is so that the preview server will proxy request without state checks.
-          : // under the hood better auth doesn't allow proxying if the baseUrl === productionUrl.
-            productionUrl,
+          ? // this is so that the preview server will proxy request without state checks.
+            // under the hood better auth doesn't allow proxying if the baseUrl === productionUrl.
+            // https://github.com/better-auth/better-auth/commit/2d64fe38#diff-b1ff58ed51c13c92048fae09d3623dcdac496968932823c956661cd81f292cbb
+            productionUrl.replace("preview.", "")
+          : productionUrl,
       }),
       emailOTP({
         overrideDefaultEmailVerification: credentialVerificationType === "code",
