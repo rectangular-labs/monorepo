@@ -56,7 +56,8 @@ function Login() {
       <AuthProvider
         authClient={authClient}
         credentials={{
-          verificationMode: "token",
+          verificationMode:
+            clientEnv().VITE_AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
           enableForgotPassword: true,
           enableConfirmPassword: true,
           enableRememberMe: true,

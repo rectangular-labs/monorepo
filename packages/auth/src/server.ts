@@ -38,7 +38,7 @@ export function initAuthHandler({
   db: DB;
   encryptionKey: string;
   fromEmail: string;
-  credentialVerificationType?: "otp" | "token";
+  credentialVerificationType?: "code" | "token";
   inboundApiKey?: string | undefined;
   discordClientId?: string | undefined;
   discordClientSecret?: string | undefined;
@@ -98,7 +98,7 @@ export function initAuthHandler({
       enabled: !!credentialVerificationType,
       requireEmailVerification: true,
       sendResetPassword: async (data) => {
-        if (credentialVerificationType === "otp") {
+        if (credentialVerificationType === "code") {
           throw new Error(
             "Password reset should be done through the email OTP plugin",
           );
@@ -113,7 +113,7 @@ export function initAuthHandler({
     },
     emailVerification: {
       sendVerificationEmail: async ({ user, url }) => {
-        if (credentialVerificationType === "otp") {
+        if (credentialVerificationType === "code") {
           throw new Error(
             "Email verification of type 'otp' should not be done through token verification",
           );
@@ -135,7 +135,7 @@ export function initAuthHandler({
         productionURL: productionUrl,
       }),
       emailOTP({
-        overrideDefaultEmailVerification: credentialVerificationType === "otp",
+        overrideDefaultEmailVerification: credentialVerificationType === "code",
         async sendVerificationOTP({ email, otp }) {
           await emailDriver.send({
             from: fromEmail,

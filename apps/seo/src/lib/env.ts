@@ -8,6 +8,7 @@ export const clientEnv = () =>
     clientPrefix: "VITE_",
     client: {
       VITE_SEO_URL: type("string"),
+      VITE_AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE: type("'code' | 'token'"),
     },
     runtimeEnv: import.meta.env,
     emptyStringAsUndefined: true,

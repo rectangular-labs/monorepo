@@ -20,6 +20,7 @@ async function handle({ request }: { request: Request }) {
       db: createDb(),
       encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
       fromEmail: env.AUTH_SEO_FROM_EMAIL,
+      credentialVerificationType: env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
       discordClientId: env.AUTH_SEO_DISCORD_ID,
       discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
       githubClientId: env.AUTH_SEO_GITHUB_ID,
