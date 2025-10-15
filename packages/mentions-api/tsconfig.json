@@ -1,9 +1,0 @@
-{
-  "extends": "@rectangular-labs/typescript/tsconfig.compiled-package.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "lib": ["dom", "dom.iterable", "esnext"]
-  },
-  "include": ["src"],
-  "exclude": ["node_modules"]
-}
