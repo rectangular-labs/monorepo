@@ -16,6 +16,7 @@ export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
       baseURL: args.url.origin,
       db,
       encryptionKey: "",
+      fromEmail: "no-reply@rectangularlabs.com",
     }) as Auth,
     db,
     ...args,

@@ -7,6 +7,7 @@ export const apiEnv = () =>
   createEnv({
     extends: [dbEnv(), taskEnv()],
     server: {
+      AUTH_SEO_FROM_EMAIL: type("string.email"),
       AUTH_SEO_ENCRYPTION_KEY: type("string"),
       AUTH_SEO_DISCORD_ID: type("string"),
       AUTH_SEO_DISCORD_SECRET: type("string"),

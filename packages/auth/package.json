@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@better-auth/expo": "^1.3.26",
+    "@rectangular-labs/emails": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.22",

@@ -22,4 +22,5 @@ export const auth: Auth = initAuthHandler({
   baseURL: "",
   encryptionKey: "",
   db: {},
+  fromEmail: "",
 });
