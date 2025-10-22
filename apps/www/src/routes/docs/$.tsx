@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 const getDocData = createServerFn({
   method: "GET",
 })
-  .validator((slugs: string[]) => slugs)
+  .inputValidator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = docSource.getPage(slugs);
     if (!page) throw notFound();

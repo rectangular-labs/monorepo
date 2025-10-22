@@ -8,8 +8,6 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createServerRootRoute } from '@tanstack/react-start/server'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DocsRouteRouteImport } from './routes/docs/route'
 import { Route as MarketingRouteRouteImport } from './routes/_marketing/route'
@@ -19,9 +17,6 @@ import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as MarketingBlogRouteRouteImport } from './routes/_marketing/blog/route'
 import { Route as MarketingBlogIndexRouteImport } from './routes/_marketing/blog/index'
 import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog/$'
-import { ServerRoute as MarketingBlogRssDotxmlServerRouteImport } from './routes/_marketing/blog/rss[.]xml'
-
-const rootServerRouteImport = createServerRootRoute()
 
 const DocsRouteRoute = DocsRouteRouteImport.update({
   id: '/docs',
@@ -62,12 +57,6 @@ const MarketingBlogSplatRoute = MarketingBlogSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => MarketingBlogRouteRoute,
 } as any)
-const MarketingBlogRssDotxmlServerRoute =
-  MarketingBlogRssDotxmlServerRouteImport.update({
-    id: '/_marketing/blog/rss.xml',
-    path: '/blog/rss.xml',
-    getParentRoute: () => rootServerRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/docs': typeof DocsRouteRouteWithChildren
@@ -123,27 +112,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   MarketingRouteRoute: typeof MarketingRouteRouteWithChildren
   DocsRouteRoute: typeof DocsRouteRouteWithChildren
-}
-export interface FileServerRoutesByFullPath {
-  '/blog/rss.xml': typeof MarketingBlogRssDotxmlServerRoute
-}
-export interface FileServerRoutesByTo {
-  '/blog/rss.xml': typeof MarketingBlogRssDotxmlServerRoute
-}
-export interface FileServerRoutesById {
-  __root__: typeof rootServerRouteImport
-  '/_marketing/blog/rss.xml': typeof MarketingBlogRssDotxmlServerRoute
-}
-export interface FileServerRouteTypes {
-  fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/blog/rss.xml'
-  fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/blog/rss.xml'
-  id: '__root__' | '/_marketing/blog/rss.xml'
-  fileServerRoutesById: FileServerRoutesById
-}
-export interface RootServerRouteChildren {
-  MarketingBlogRssDotxmlServerRoute: typeof MarketingBlogRssDotxmlServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -206,17 +174,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-declare module '@tanstack/react-start/server' {
-  interface ServerFileRoutesByPath {
-    '/_marketing/blog/rss.xml': {
-      id: '/_marketing/blog/rss.xml'
-      path: '/blog/rss.xml'
-      fullPath: '/blog/rss.xml'
-      preLoaderRoute: typeof MarketingBlogRssDotxmlServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-  }
-}
 
 interface MarketingBlogRouteRouteChildren {
   MarketingBlogSplatRoute: typeof MarketingBlogSplatRoute
@@ -266,9 +223,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-const rootServerRouteChildren: RootServerRouteChildren = {
-  MarketingBlogRssDotxmlServerRoute: MarketingBlogRssDotxmlServerRoute,
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
 }
-export const serverRouteTree = rootServerRouteImport
-  ._addFileChildren(rootServerRouteChildren)
-  ._addFileTypes<FileServerRouteTypes>()

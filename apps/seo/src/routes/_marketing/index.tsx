@@ -17,8 +17,11 @@ export const Route = createFileRoute("/_marketing/")({
           Math.random().toString(36).substring(7),
         async: true,
         defer: true,
-        onload:
-          "window.trackingFunctions.onLoad({appId:'68e8553db8cc65001148717d'})",
+        onLoad: () =>
+          // biome-ignore lint/suspicious/noExplicitAny: apollo tracking
+          (window as any).trackingFunctions.onLoad({
+            appId: "68e8553db8cc65001148717d",
+          }),
       },
     ],
   }),
