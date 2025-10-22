@@ -121,7 +121,6 @@ jobs:
           workingDirectory: apps/www
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          environment: ${{ steps.resolve.outputs.environment }}
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
       - name: Deploy SEO
@@ -133,7 +132,6 @@ jobs:
           workingDirectory: apps/seo
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          environment: ${{ steps.resolve.outputs.environment }}
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
       - name: Comment for deployment details
