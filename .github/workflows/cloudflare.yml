@@ -107,7 +107,7 @@ jobs:
           env_path: ${{ steps.resolve.outputs.env_path }}
 
       - name: Build
-        run: pnpm run build:${{ steps.resolve.outputs.stage }} --mode ${{ steps.resolve.outputs.ENVIRONMENT }}
+        run: pnpm run build:${{ steps.resolve.outputs.stage }} -- --mode ${{ steps.resolve.outputs.ENVIRONMENT }}
 
       - name: Migrate Database
         run: pnpm run db:mp:${{ steps.resolve.outputs.stage }}
