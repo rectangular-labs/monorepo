@@ -53,17 +53,14 @@ jobs:
           ENVIRONMENT="preview"
           ENV_PATH=".env"
           DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY"
-          DEPLOY_CMD="deploy --env $ENVIRONMENT"
 
           if [[ "$EVENT" == "push" && "$REF" == "refs/heads/main" ]]; then
             STAGE="production"
             ENVIRONMENT="production"
             ENV_PATH=".env.production"
             DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY_PRODUCTION"
-            DEPLOY_CMD="deploy --env production"
           elif [[ "$EVENT" == "pull_request" ]]; then
             ENVIRONMENT="pr-${{ github.event.number }}"
-            DEPLOY_CMD="deploy --env $ENVIRONMENT"
           elif [[ "$EVENT" == "workflow_dispatch" ]]; then
             case "$INPUT_ENV" in
               preview)
@@ -73,7 +70,6 @@ jobs:
                 DOTENV_KEY_NAME="DOTENV_PRIVATE_KEY_PRODUCTION"
                 STAGE="production"
                 ENVIRONMENT="production"
-                DEPLOY_CMD="deploy --env $ENVIRONMENT"
                 ;;
               *)
                 echo "Unknown manual environment: $INPUT_ENV" >&2
@@ -89,7 +85,6 @@ jobs:
           echo "environment=$ENVIRONMENT" >> "$GITHUB_OUTPUT"
           echo "env_path=$ENV_PATH" >> "$GITHUB_OUTPUT"
           echo "dotenv_key_name=$DOTENV_KEY_NAME" >> "$GITHUB_OUTPUT"
-          echo "deploy_command=$DEPLOY_CMD" >> "$GITHUB_OUTPUT"
 
       - name: Update Environment Variables for Preview
         if: ${{ steps.resolve.outputs.stage == 'preview' }}
@@ -112,7 +107,7 @@ jobs:
           env_path: ${{ steps.resolve.outputs.env_path }}
 
       - name: Build
-        run: pnpm run build:${{ steps.resolve.outputs.stage }}
+        run: pnpm run build:${{ steps.resolve.outputs.stage }} --mode ${{ steps.resolve.outputs.ENVIRONMENT }}
 
       - name: Migrate Database
         run: pnpm run db:mp:${{ steps.resolve.outputs.stage }}
@@ -121,11 +116,11 @@ jobs:
         id: deploy_www
         uses: cloudflare/wrangler-action@v3
         with:
+          command: deploy
           packageManager: pnpm
           workingDirectory: apps/www
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: ${{ steps.resolve.outputs.deploy_command }}
           environment: ${{ steps.resolve.outputs.environment }}
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
@@ -133,11 +128,11 @@ jobs:
         id: deploy_seo
         uses: cloudflare/wrangler-action@v3
         with:
+          command: deploy
           packageManager: pnpm
           workingDirectory: apps/seo
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: ${{ steps.resolve.outputs.deploy_command }}
           environment: ${{ steps.resolve.outputs.environment }}
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
