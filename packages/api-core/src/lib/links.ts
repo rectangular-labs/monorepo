@@ -1,8 +1,8 @@
 import { RPCLink } from "@orpc/client/fetch";
+import { RPCLink as WebSocketRPCLink } from "@orpc/client/websocket";
 import type { AnyContractRouter } from "@orpc/contract";
 import { OpenAPILink } from "@orpc/openapi-client/fetch";
 import { onError } from "@orpc/server";
-
 export const createRpcLink = ({
   baseUrl,
   path = "/api/rpc",
@@ -19,6 +19,9 @@ export const createRpcLink = ({
       });
     },
   });
+
+export const createWebsocketLink = ({ websocket }: { websocket: WebSocket }) =>
+  new WebSocketRPCLink({ websocket });
 
 export const createOpenApiLink = ({
   contract,
