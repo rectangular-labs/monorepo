@@ -29,9 +29,9 @@ export const Route = createFileRoute("/login")({
 
     if (session) {
       if (deps.next) {
-        return redirect({ to: deps.next });
+        throw redirect({ to: deps.next });
       }
-      return redirect({
+      throw redirect({
         to: "/$organizationSlug",
         params: {
           organizationSlug: "organization",

@@ -6,7 +6,7 @@ import {
   createSeoBlogSearchServer,
 } from "@rectangular-labs/content/search";
 import { createDb } from "@rectangular-labs/db";
-import { createServerFileRoute } from "@tanstack/react-start/server";
+import { createFileRoute } from "@tanstack/react-router";
 import { serverEnv } from "~/lib/env";
 
 const docsSearch = createDocsSearchServer();
@@ -62,11 +62,15 @@ async function handle({ request }: { request: Request }) {
   return response ?? new Response("Not Found", { status: 404 });
 }
 
-export const ServerRoute = createServerFileRoute("/api/$").methods({
-  HEAD: handle,
-  GET: handle,
-  POST: handle,
-  PUT: handle,
-  PATCH: handle,
-  DELETE: handle,
+export const Route = createFileRoute("/api/$")({
+  server: {
+    handlers: {
+      HEAD: handle,
+      GET: handle,
+      POST: handle,
+      PUT: handle,
+      PATCH: handle,
+      DELETE: handle,
+    },
+  },
 });

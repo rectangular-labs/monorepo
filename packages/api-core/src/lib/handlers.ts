@@ -8,6 +8,7 @@ import {
 import type { Context, Router } from "@orpc/server";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
+import { HibernationPlugin } from "@orpc/server/hibernation";
 import {
   RequestHeadersPlugin,
   ResponseHeadersPlugin,
@@ -18,7 +19,11 @@ export const createRpcHandler = <C extends Context>(
   router: Router<any, C>,
 ) =>
   new RPCHandler(router, {
-    plugins: [new RequestHeadersPlugin(), new ResponseHeadersPlugin()],
+    plugins: [
+      new RequestHeadersPlugin(),
+      new ResponseHeadersPlugin(),
+      new HibernationPlugin(),
+    ],
     interceptors: [
       onError((error) => {
         console.error("RPC Error:", error);

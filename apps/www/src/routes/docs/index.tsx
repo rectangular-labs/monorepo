@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
 const getPageTree = createServerFn({ method: "GET" })
-  .validator((input: null | undefined) => input)
+  .inputValidator((input: null | undefined) => input)
   .handler(() => docSource.pageTree as object);
 
 export const Route = createFileRoute("/docs/")({

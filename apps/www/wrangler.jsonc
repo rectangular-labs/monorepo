@@ -1,10 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rectangular-labs-www",
-  "main": ".output/server/index.mjs",
-  "preview_urls": false,
   "compatibility_date": "2025-09-07",
   "compatibility_flags": ["nodejs_compat"],
+  "preview_urls": false,
+  "main": "@tanstack/react-start/server-entry",
   "assets": {
     "directory": ".output/public"
   },

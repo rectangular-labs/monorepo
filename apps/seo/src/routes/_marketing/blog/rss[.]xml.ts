@@ -1,5 +1,5 @@
 import { getBlogRSS } from "@rectangular-labs/content/rss";
-import { createServerFileRoute } from "@tanstack/react-start/server";
+import { createFileRoute } from "@tanstack/react-router";
 import { serverEnv } from "~/lib/env";
 
 function handle() {
@@ -8,8 +8,10 @@ function handle() {
   return new Response(xml);
 }
 
-export const ServerRoute = createServerFileRoute(
-  "/_marketing/blog/rss.xml",
-).methods({
-  GET: handle,
+export const Route = createFileRoute("/_marketing/blog/rss.xml")({
+  server: {
+    handlers: {
+      GET: handle,
+    },
+  },
 });

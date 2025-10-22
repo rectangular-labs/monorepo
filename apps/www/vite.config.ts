@@ -1,3 +1,4 @@
+import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
@@ -16,10 +17,8 @@ const config = defineConfig({
     }),
     tailwindcss(),
     mkcert(),
-    tanstackStart({
-      customViteReactPlugin: true,
-      target: "cloudflare-module",
-    }),
+    tanstackStart(),
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
     viteReact(),
   ],
   test: {
@@ -27,7 +26,6 @@ const config = defineConfig({
     environment: "jsdom",
   },
   server: {
-    proxy: {},
     port: 6969,
   },
 });
