@@ -4,7 +4,7 @@
   "compatibility_date": "2025-09-07",
   "compatibility_flags": ["nodejs_compat"],
   "preview_urls": false,
-  "main": "./dist/server/index.js",
+  "main": "./src/server.ts",
   "assets": {
     "directory": ".output/public"
   },
