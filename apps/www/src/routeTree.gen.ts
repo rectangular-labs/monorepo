@@ -16,6 +16,7 @@ import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as MarketingBlogRouteRouteImport } from './routes/_marketing/blog/route'
 import { Route as MarketingBlogIndexRouteImport } from './routes/_marketing/blog/index'
+import { Route as MarketingBlogRssDotxmlRouteImport } from './routes/_marketing/blog/rss[.]xml'
 import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog/$'
 
 const DocsRouteRoute = DocsRouteRouteImport.update({
@@ -52,6 +53,11 @@ const MarketingBlogIndexRoute = MarketingBlogIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MarketingBlogRouteRoute,
 } as any)
+const MarketingBlogRssDotxmlRoute = MarketingBlogRssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
+  getParentRoute: () => MarketingBlogRouteRoute,
+} as any)
 const MarketingBlogSplatRoute = MarketingBlogSplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/blog/$': typeof MarketingBlogSplatRoute
+  '/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
   '/blog/': typeof MarketingBlogIndexRoute
 }
 export interface FileRoutesByTo {
@@ -72,6 +79,7 @@ export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
   '/docs': typeof DocsIndexRoute
   '/blog/$': typeof MarketingBlogSplatRoute
+  '/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
   '/blog': typeof MarketingBlogIndexRoute
 }
 export interface FileRoutesById {
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/_marketing/': typeof MarketingIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/_marketing/blog/$': typeof MarketingBlogSplatRoute
+  '/_marketing/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
   '/_marketing/blog/': typeof MarketingBlogIndexRoute
 }
 export interface FileRouteTypes {
@@ -94,9 +103,10 @@ export interface FileRouteTypes {
     | '/'
     | '/docs/'
     | '/blog/$'
+    | '/blog/rss.xml'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/docs/$' | '/' | '/docs' | '/blog/$' | '/blog'
+  to: '/docs/$' | '/' | '/docs' | '/blog/$' | '/blog/rss.xml' | '/blog'
   id:
     | '__root__'
     | '/_marketing'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/_marketing/'
     | '/docs/'
     | '/_marketing/blog/$'
+    | '/_marketing/blog/rss.xml'
     | '/_marketing/blog/'
   fileRoutesById: FileRoutesById
 }
@@ -165,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingBlogIndexRouteImport
       parentRoute: typeof MarketingBlogRouteRoute
     }
+    '/_marketing/blog/rss.xml': {
+      id: '/_marketing/blog/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/blog/rss.xml'
+      preLoaderRoute: typeof MarketingBlogRssDotxmlRouteImport
+      parentRoute: typeof MarketingBlogRouteRoute
+    }
     '/_marketing/blog/$': {
       id: '/_marketing/blog/$'
       path: '/$'
@@ -177,11 +195,13 @@ declare module '@tanstack/react-router' {
 
 interface MarketingBlogRouteRouteChildren {
   MarketingBlogSplatRoute: typeof MarketingBlogSplatRoute
+  MarketingBlogRssDotxmlRoute: typeof MarketingBlogRssDotxmlRoute
   MarketingBlogIndexRoute: typeof MarketingBlogIndexRoute
 }
 
 const MarketingBlogRouteRouteChildren: MarketingBlogRouteRouteChildren = {
   MarketingBlogSplatRoute: MarketingBlogSplatRoute,
+  MarketingBlogRssDotxmlRoute: MarketingBlogRssDotxmlRoute,
   MarketingBlogIndexRoute: MarketingBlogIndexRoute,
 }
 
