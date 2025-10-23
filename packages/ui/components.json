@@ -17,5 +17,8 @@
     "ui": "@rectangular-labs/ui/components/ui",
     "lib": "@rectangular-labs/ui/utils",
     "hooks": "@rectangular-labs/ui/hooks"
+  },
+  "registries": {
+    "@ai-elements": "https://registry.ai-sdk.dev/{name}.json"
   }
 }
