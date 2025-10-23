@@ -1,15 +1,11 @@
 import { createApiContext } from "@rectangular-labs/api-seo/context";
 import { openAPIHandler } from "@rectangular-labs/api-seo/server";
 import { initAuthHandler } from "@rectangular-labs/auth/server";
-import {
-  createDocsSearchServer,
-  createSeoBlogSearchServer,
-} from "@rectangular-labs/content/search";
+import { createSeoBlogSearchServer } from "@rectangular-labs/content/search";
 import { createDb } from "@rectangular-labs/db";
 import { createFileRoute } from "@tanstack/react-router";
 import { serverEnv } from "~/lib/env";
 
-const docsSearch = createDocsSearchServer();
 const seoBlogSearch = createSeoBlogSearchServer();
 
 async function handle({ request }: { request: Request }) {
@@ -30,13 +26,6 @@ async function handle({ request }: { request: Request }) {
       googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
     });
     return await authServerHandler.handler(request);
-  }
-
-  if (new URL(request.url).pathname.startsWith("/api/docs/search")) {
-    if (request.method !== "GET") {
-      return new Response("Method not allowed", { status: 405 });
-    }
-    return await docsSearch.GET(request);
   }
   if (new URL(request.url).pathname.startsWith("/api/blog/search")) {
     if (request.method !== "GET") {
