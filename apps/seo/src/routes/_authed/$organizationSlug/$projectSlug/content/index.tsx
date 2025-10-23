@@ -31,7 +31,7 @@ import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 
 export const Route = createFileRoute(
-  "/_authed/$organizationSlug/$projectSlug/articles/",
+  "/_authed/$organizationSlug/$projectSlug/content/",
 )({
   loader: async ({ context, params }) => {
     const activeProject = await context.queryClient.ensureQueryData(
@@ -128,7 +128,6 @@ function PageComponent() {
         </div>
         <NewCampaignButton projectId={activeProject?.id ?? ""} />
       </div>
-
       {/* Overview Stats */}
       {isLoadingOverview ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -197,7 +196,6 @@ function PageComponent() {
           </Card>
         </div>
       ) : null}
-
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-4">
           <div className="max-w-sm flex-1">
@@ -234,7 +232,6 @@ function PageComponent() {
 
         <GridListToggle onChange={setViewMode} value={viewMode} />
       </div>
-
       <LoadingError
         error={error || errorActiveProject}
         errorDescription="Something went wrong while loading campaigns. Please try again."
@@ -243,14 +240,12 @@ function PageComponent() {
         loadingComponent={<CampaignSkeletons viewMode={viewMode} />}
         onRetry={refetch}
       />
-
       {!isLoading && !error && filteredCampaigns.length === 0 && (
         <EmptyState
           projectId={activeProject?.id ?? ""}
           searchQuery={searchQuery}
         />
       )}
-
       {!isLoading && !error && filteredCampaigns.length > 0 && (
         <div
           className={cn(
@@ -268,7 +263,6 @@ function PageComponent() {
           ))}
         </div>
       )}
-
       {!error && !isLoading && hasNextPage && (
         <div className="flex justify-center pt-6">
           <Button
@@ -345,7 +339,7 @@ function CampaignCard({
         <Link
           className="absolute inset-0 z-10"
           params={{ organizationSlug, projectSlug, contentId: campaign.id }}
-          to="/$organizationSlug/$projectSlug/articles/$contentId"
+          to="/$organizationSlug/$projectSlug/content/$contentId"
         >
           <span className="sr-only">View {campaign.pathname} campaign</span>
         </Link>
@@ -385,7 +379,7 @@ function CampaignCard({
       <Link
         className="absolute inset-0 z-10"
         params={{ organizationSlug, projectSlug, contentId: campaign.id }}
-        to="/$organizationSlug/$projectSlug/articles/$contentId"
+        to="/$organizationSlug/$projectSlug/content/$contentId"
       >
         <span className="sr-only">View {campaign.pathname} campaign</span>
       </Link>

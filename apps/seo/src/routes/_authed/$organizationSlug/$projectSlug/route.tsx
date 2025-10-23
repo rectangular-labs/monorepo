@@ -52,9 +52,9 @@ function RouteComponent() {
           activeProps={activeProps}
           className={className}
           params={{ organizationSlug, projectSlug }}
-          to="/$organizationSlug/$projectSlug/articles"
+          to="/$organizationSlug/$projectSlug/content"
         >
-          Articles
+          Content
         </Link>
         <Link
           activeProps={activeProps}
@@ -66,7 +66,7 @@ function RouteComponent() {
         </Link>
       </ul>
 
-      <main className="mx-auto max-w-7xl flex-1">
+      <main className="mx-auto max-w-7xl">
         <Outlet />
       </main>
     </div>

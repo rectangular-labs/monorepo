@@ -31,7 +31,7 @@ import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 
 export const Route = createFileRoute(
-  "/_authed/$organizationSlug/$projectSlug/articles/$contentId/",
+  "/_authed/$organizationSlug/$projectSlug/content/$contentId/",
 )({
   component: PageComponent,
 });
