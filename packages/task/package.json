@@ -25,7 +25,7 @@
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
     "@trigger.dev/build": "4.0.4",
-    "@types/node": "^24.6.2",
+    "@types/node": "^24.9.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -38,7 +38,7 @@
     "@t3-oss/env-core": "^0.13.8",
     "@trigger.dev/sdk": "4.0.4",
     "ai": "^5.0.57",
-    "arktype": "^2.1.22",
+    "arktype": "^2.1.23",
     "crawlee": "^3.15.0",
     "defuddle": "^0.6.6",
     "jsdom": "^26.1.0",
