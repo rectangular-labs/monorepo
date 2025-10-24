@@ -49,6 +49,9 @@ importers:
       '@rectangular-labs/api-seo':
         specifier: workspace:*
         version: link:../../packages/api-seo
+      '@rectangular-labs/api-user-vm':
+        specifier: workspace:*
+        version: link:../../packages/api-user-vm
       '@rectangular-labs/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -106,7 +109,7 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.13.14
-        version: 1.13.14(vite@7.1.7(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))(workerd@1.20251011.0)(wrangler@4.44.0)
+        version: 1.13.14(vite@7.1.7(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))(workerd@1.20251011.0)(wrangler@4.44.0(@cloudflare/workers-types@4.20251014.0))
       '@rectangular-labs/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
@@ -157,7 +160,7 @@ importers:
         version: 5.1.0
       wrangler:
         specifier: ^4.44.0
-        version: 4.44.0
+        version: 4.44.0(@cloudflare/workers-types@4.20251014.0)
 
   apps/www:
     dependencies:
@@ -212,7 +215,7 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.13.14
-        version: 1.13.14(vite@7.1.7(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))(workerd@1.20251011.0)(wrangler@4.44.0)
+        version: 1.13.14(vite@7.1.7(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))(workerd@1.20251011.0)(wrangler@4.44.0(@cloudflare/workers-types@4.20251014.0))
       '@rectangular-labs/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
@@ -266,13 +269,13 @@ importers:
         version: 5.1.0
       wrangler:
         specifier: ^4.44.0
-        version: 4.44.0
+        version: 4.44.0(@cloudflare/workers-types@4.20251014.0)
 
   packages/api-core:
     dependencies:
       '@orpc/arktype':
-        specifier: ^1.9.0
-        version: 1.9.0(@ark/schema@0.50.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.10.0(@opentelemetry/api@1.9.0))(arktype@2.1.23)(crossws@0.3.5)(ws@8.18.3)
+        specifier: ^1.10.0
+        version: 1.10.0(@ark/schema@0.50.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.10.0(@opentelemetry/api@1.9.0))(arktype@2.1.23)(crossws@0.3.5)(ws@8.18.3)
       '@orpc/client':
         specifier: ^1.10.0
         version: 1.10.0(@opentelemetry/api@1.9.0)
@@ -280,17 +283,23 @@ importers:
         specifier: ^1.10.0
         version: 1.10.0(@opentelemetry/api@1.9.0)
       '@orpc/json-schema':
-        specifier: ^1.9.0
-        version: 1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+        specifier: ^1.10.0
+        version: 1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
       '@orpc/openapi':
-        specifier: ^1.9.0
-        version: 1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+        specifier: ^1.10.0
+        version: 1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
       '@orpc/openapi-client':
-        specifier: ^1.9.0
-        version: 1.9.0(@opentelemetry/api@1.9.0)
+        specifier: ^1.10.0
+        version: 1.10.0(@opentelemetry/api@1.9.0)
       '@orpc/server':
         specifier: ^1.10.0
         version: 1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+      '@rectangular-labs/auth':
+        specifier: workspace:*
+        version: link:../auth
+      arktype:
+        specifier: ^2.1.23
+        version: 2.1.23
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -305,7 +314,7 @@ importers:
   packages/api-seo:
     dependencies:
       '@ai-sdk/google':
-        specifier: ^2.0.15
+        specifier: ^2.0.16
         version: 2.0.16(zod@4.1.9)
       '@orpc/client':
         specifier: ^1.10.0
@@ -359,6 +368,12 @@ importers:
 
   packages/api-user-vm:
     dependencies:
+      '@ai-sdk/google':
+        specifier: ^2.0.16
+        version: 2.0.16(zod@4.1.9)
+      '@cloudflare/containers':
+        specifier: ^0.0.28
+        version: 0.0.28
       '@orpc/client':
         specifier: ^1.10.0
         version: 1.10.0(@opentelemetry/api@1.9.0)
@@ -371,6 +386,9 @@ importers:
       '@rectangular-labs/api-core':
         specifier: workspace:*
         version: link:../api-core
+      '@rectangular-labs/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@rectangular-labs/db':
         specifier: workspace:*
         version: link:../db
@@ -566,10 +584,10 @@ importers:
         version: 2.1.23
       drizzle-arktype:
         specifier: ^0.1.3
-        version: 0.1.3(arktype@2.1.23)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)))
+        version: 0.1.3(arktype@2.1.23)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)))
       drizzle-orm:
         specifier: ^0.44.5
-        version: 0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
+        version: 0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
       postgres:
         specifier: ^3.4.7
         version: 3.4.7
@@ -684,7 +702,7 @@ importers:
   packages/task:
     dependencies:
       '@ai-sdk/google':
-        specifier: ^2.0.15
+        specifier: ^2.0.16
         version: 2.0.16(zod@4.1.9)
       '@ai-sdk/openai':
         specifier: ^2.0.39
@@ -727,7 +745,7 @@ importers:
         version: 1.55.1
       unstorage:
         specifier: ^1.17.1
-        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0)
+        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0)
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -1899,6 +1917,9 @@ packages:
     peerDependencies:
       '@clerc/core': '*'
 
+  '@cloudflare/containers@0.0.28':
+    resolution: {integrity: sha512-wzR9UWcGvZ9znd4elkXklilPcHX6srncsjSkx696SZRZyTygNbWsLlHegvc1C+e9gn28HRZU3dLiAzXiC9IY1w==}
+
   '@cloudflare/kv-asset-handler@0.4.0':
     resolution: {integrity: sha512-+tv3z+SPp+gqTIcImN9o0hqE9xyfQjI1XD9pL6NuKjua9B1y7mNYv0S9cP+QEbA4ppVgGZEmKOvHX5G5Ei1CVA==}
     engines: {node: '>=18.0.0'}
@@ -1948,8 +1969,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20250414.0':
-    resolution: {integrity: sha512-ZHl8LiyUMWiIxYqpasen8Lc75Ef+0afqL26TEd95eRIi5kgkEbjDJ7uIUnpxMoZTRI0J8Hy5YEPtt4nFXt+TpA==}
+  '@cloudflare/workers-types@4.20251014.0':
+    resolution: {integrity: sha512-tEW98J/kOa0TdylIUOrLKRdwkUw0rvvYVlo+Ce0mqRH3c8kSoxLzUH9gfCvwLe0M89z1RkzFovSKAW2Nwtyn3w==}
 
   '@content-collections/cli@0.1.7':
     resolution: {integrity: sha512-dZn8vd6JSu2mXE1KYOEEq6Y7pwZ3vWjHE/LDj+9aSXNEddfXRGem2NNMO24NCuqFH/uIoVpS00Wnkj6gNqqnQw==}
@@ -3643,53 +3664,33 @@ packages:
     resolution: {integrity: sha512-Iq4RxYC7y0pA/hLgcUGpYYs5Vze4qNmJk0Qi1uIrg2bHGpm6A06nbjWcH9h4HQsddkDFFlanLj/zYBH3Sxdb4w==}
     engines: {node: '>= 20.0.0'}
 
-  '@orpc/arktype@1.9.0':
-    resolution: {integrity: sha512-0iasMubKU+xrb+ZKTr30JSB/HuHz0W9xASuSI8R9yIP6fwMYxm5gZK7Aa009Zn3yxST9Has5fwbbXXGGwEHHmQ==}
+  '@orpc/arktype@1.10.0':
+    resolution: {integrity: sha512-V3umn9td2irKObN9++w7z4M1QNDE8d9/bbz7UOD0LEmQFIudubmIPlYEtd3djXnnTHSE0qhWUNSGESLb5890eA==}
     peerDependencies:
       '@ark/schema': '*'
-      '@orpc/contract': 1.9.0
+      '@orpc/contract': 1.10.0
       arktype: '*'
 
   '@orpc/client@1.10.0':
     resolution: {integrity: sha512-5KDvC5eoZ3hCtn4lrWthXAXe+cV4UtWuAO96nRoMfJLBvGwARKbhK6mKZYq7xJuaRqpByzCAhbYAY5BNRxOK8Q==}
 
-  '@orpc/client@1.9.0':
-    resolution: {integrity: sha512-EkSzVSmXAUZWDCsT/n+lmD1ghf+/rnb3sPR8+Lr42d1YPt7OL7JciSMGt0pTOaVYjX1VLUMZ6i/FtnPDG1A2og==}
-
   '@orpc/contract@1.10.0':
     resolution: {integrity: sha512-hbpYOTZBaA6dMY+Uo+xvfKCCX/2PCx4VWS4s5XT3vzrY5QocrNSFzqa7MwNXkAmJJVCYYJhd0vlur6K2n58gfw==}
-
-  '@orpc/contract@1.9.0':
-    resolution: {integrity: sha512-MfhQMWEZtHUI/Xz0AdOjAUHz2uH8qxS+XhOvCaPScLw7oyezhxDwQrXE30PTMKrb5IQQvMrzKPWvIvxgs7bQWQ==}
 
   '@orpc/interop@1.10.0':
     resolution: {integrity: sha512-8PHHb3IRzSWNhfeOjtcwTZD4BUsJMPsuRQpMTt1n2fwvcvupodtMPASg4LNK19dY+IZp8nuCxFhUutnBUuIDjA==}
 
-  '@orpc/interop@1.9.0':
-    resolution: {integrity: sha512-BDOJggDMWOIqHi0r4YUH4TFUfad6zreP0cFgsjkLcMwYaIzgHINaA2Tzf21lLims/gksL8qsnkX8NCYZeGknuA==}
+  '@orpc/json-schema@1.10.0':
+    resolution: {integrity: sha512-zEytOUTa52pYlIW768MsGQYRmUvD3HRcPSSKf/2FVBL0dg2fZqnDpel909YW/d2vjJcDae0+jLvdesCmxaZKjg==}
 
-  '@orpc/json-schema@1.9.0':
-    resolution: {integrity: sha512-d3QCbmMPSWjjt9FMAKHVVD7PHqQwNZ8z6rMTFep7+hA48zNfHEnexdzj1ee/rIg+yU/u/ihauVqEMl7eOZ8V6Q==}
+  '@orpc/openapi-client@1.10.0':
+    resolution: {integrity: sha512-6QgE9yfO/g3dmGRh2Rfe1f+oRqJgmcrrZR3dEfD9LU8Hvv2/VKZfNgBGUVGbSsvEV9pDK4y1mwuQaun/Nd8ldA==}
 
-  '@orpc/openapi-client@1.9.0':
-    resolution: {integrity: sha512-X0JQN1P1iHAGTS7vGnYT4AK5Uc4xwBxN7bifIYXhnIGYlEMR6i1DJOxlGHrS6dD5D58QZsfZ+TiFP77z8LoJag==}
-
-  '@orpc/openapi@1.9.0':
-    resolution: {integrity: sha512-mdIyE6ciHymBigsNrSu+OHODa8GCK4ZKObMqe/p9hghMuf877eG9t7i2qNK//jiBZQX8aZdyoyPNRO+ecke3DQ==}
+  '@orpc/openapi@1.10.0':
+    resolution: {integrity: sha512-YXHCRjN+pA+VSH4v3FdqavBEJVJycpjBJq1j6x5lyRAG22aP9faGbRshRC8mNi2Br3B93CCoWGLL6TYnkjHcvQ==}
 
   '@orpc/server@1.10.0':
     resolution: {integrity: sha512-6aNHQaGG3nhByGezXcrns74f0kyTi0Cz0aDcH8DR7tsKtcxhADrNKVy5o3hz/gDvFU0eX8FGV41Fl750a8URyw==}
-    peerDependencies:
-      crossws: '>=0.3.4'
-      ws: '>=8.18.1'
-    peerDependenciesMeta:
-      crossws:
-        optional: true
-      ws:
-        optional: true
-
-  '@orpc/server@1.9.0':
-    resolution: {integrity: sha512-Y00wK3RuMq5d4AC+Qj6yZBRgnpw0y/sq3kML3MGyxCbNOzh9DYAuAC3aFUUDVj20PhASAOckgXnquNmqBaeKxA==}
     peerDependencies:
       crossws: '>=0.3.4'
       ws: '>=8.18.1'
@@ -3707,43 +3708,20 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@orpc/shared@1.9.0':
-    resolution: {integrity: sha512-Aa67z0TzppHksEnzZuaIlXdx202OMfLZsFBmnjzej8ObwZ7RLVF1B5L11IcQJSiO4IU7RGa5fW2J0BSAbMZOkQ==}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.9.0'
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-
   '@orpc/standard-server-aws-lambda@1.10.0':
     resolution: {integrity: sha512-ScVS4wciV++8AfLXlBBt85IfSKk8RpCsmUQVAXBTXW63YE/8YDQOIaf0NZLtIfKsN8ZI+UCwahg/Yf/a6L7pNQ==}
-
-  '@orpc/standard-server-aws-lambda@1.9.0':
-    resolution: {integrity: sha512-LMq9Yd8143FNwbnLNarm8Ze/ECR40HaMLTFhs5OH5f1zZuVtLUBQFpXFpFnYekPtzbzxKgpQ16VRXsHJ02Z2KA==}
 
   '@orpc/standard-server-fetch@1.10.0':
     resolution: {integrity: sha512-cERB8pPOKtqqsykmIw/TxIEoJsqIROlpBXj2LFO5iPJ5gwso0QhDhBmiaOUj9Cz+xigjIHBJvzWWokyO+mVbZw==}
 
-  '@orpc/standard-server-fetch@1.9.0':
-    resolution: {integrity: sha512-ZT7GhCnRD4T3FCpT7zihte1Nkl4JxO68snEe1Ld2UF5pp5ktqZr2yq9BTDU0jHDBcseB/4YIfSEMWIJPr6TAkw==}
-
   '@orpc/standard-server-node@1.10.0':
     resolution: {integrity: sha512-/JO4+gPL8ULycRuQI2mzmOT8WbWHvOThXv8RsarJD7/trrG0y/3k4YWY5mZFg7XMkUu+E8apOeUrlwi2SL1mqg==}
-
-  '@orpc/standard-server-node@1.9.0':
-    resolution: {integrity: sha512-WwFVGZ8kDxLuR/1Zp9V4qp+umOGyRnqeN4PUkyDJlY7sU4p+W9aVusIrf4lfMCKzCaOoQ9uO9eW6yY1FwyorhQ==}
 
   '@orpc/standard-server-peer@1.10.0':
     resolution: {integrity: sha512-km8lTZeykmvSmM8tcnH+eiZUfHCWSG061bXDyau7FJUoyFvYWVoHKbPzYDsoje9iU0BLDyDo37HHInqQ5bHiUA==}
 
-  '@orpc/standard-server-peer@1.9.0':
-    resolution: {integrity: sha512-Y4cxNN3JDFywuUHPqEAqHAh5HQj2bY5Gc4LmFTH0MViIiKgTKBg0grAagPDexzHHREZMz2XYlReJMDVCOLiqOg==}
-
   '@orpc/standard-server@1.10.0':
     resolution: {integrity: sha512-VX+0PIivl+fdxhHqsKMAjBVOUg65bXD2QBnOZE73KVxFPfWs++h+E8GO9KvhBqQbmHO0tQl1gnHqIqd9ICGuPA==}
-
-  '@orpc/standard-server@1.9.0':
-    resolution: {integrity: sha512-qgeznH8eiiVld5mHEHkdliXgoXAdaDdJXCNMItNqk2Y/8uknsyONPvbgh5KVVPLWNtosO4EqNHWPozDi+BdzPw==}
 
   '@orpc/tanstack-query@1.10.0':
     resolution: {integrity: sha512-M54OhO3vOxTeZxnKJNVAHfSpvdOc2M9izrHD1gSmWSGbABkni39UZYo28qhZWndyyc75l64EEBOOPxtq55vGnw==}
@@ -11372,8 +11350,8 @@ packages:
   rou3@0.5.1:
     resolution: {integrity: sha512-OXMmJ3zRk2xeXFGfA3K+EOPHC5u7RDFG7lIOx0X1pdnhUkI8MdVrbV+sNsD80ElpUZ+MRHdyxPnFthq9VHs8uQ==}
 
-  rou3@0.7.3:
-    resolution: {integrity: sha512-KKenF/hB2iIhS1ohj226LT+/8uKCBpSMqeS4V1UPN9vad99uLoyIhrULRRB1skaB40LQHcBlSsAi3sT8MaoDDQ==}
+  rou3@0.7.8:
+    resolution: {integrity: sha512-21X/el5fdOaEsqwl3an/d9kpZ8hshVIyrwFCpsoleJ4ccAGRbN+PVoxyXzWXkHDxfMkVnLe4yzx+imz2qoem2Q==}
 
   roughjs@4.6.6:
     resolution: {integrity: sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ==}
@@ -12268,10 +12246,6 @@ packages:
   type-fest@4.41.0:
     resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
     engines: {node: '>=16'}
-
-  type-fest@5.0.1:
-    resolution: {integrity: sha512-9MpwAI52m8H6ssA542UxSLnSiSD2dsC3/L85g6hVubLSXd82wdI80eZwTWhdOfN67NlA+D+oipAs1MlcTcu3KA==}
-    engines: {node: '>=20'}
 
   type-fest@5.1.0:
     resolution: {integrity: sha512-wQ531tuWvB6oK+pchHIu5lHe5f5wpSCqB8Kf4dWQRbOYc9HTge7JL0G4Qd44bh6QuJCccIzL3bugb8GI0MwHrg==}
@@ -14562,6 +14536,8 @@ snapshots:
     dependencies:
       '@clerc/core': 0.44.0
 
+  '@cloudflare/containers@0.0.28': {}
+
   '@cloudflare/kv-asset-handler@0.4.0':
     dependencies:
       mime: 3.0.0
@@ -14572,7 +14548,7 @@ snapshots:
     optionalDependencies:
       workerd: 1.20251011.0
 
-  '@cloudflare/vite-plugin@1.13.14(vite@7.1.7(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))(workerd@1.20251011.0)(wrangler@4.44.0)':
+  '@cloudflare/vite-plugin@1.13.14(vite@7.1.7(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))(workerd@1.20251011.0)(wrangler@4.44.0(@cloudflare/workers-types@4.20251014.0))':
     dependencies:
       '@cloudflare/unenv-preset': 2.7.8(unenv@2.0.0-rc.21)(workerd@1.20251011.0)
       '@remix-run/node-fetch-server': 0.8.1
@@ -14582,7 +14558,7 @@ snapshots:
       tinyglobby: 0.2.15
       unenv: 2.0.0-rc.21
       vite: 7.1.7(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1)
-      wrangler: 4.44.0
+      wrangler: 4.44.0(@cloudflare/workers-types@4.20251014.0)
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
@@ -14604,7 +14580,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20251011.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20250414.0':
+  '@cloudflare/workers-types@4.20251014.0':
     optional: true
 
   '@content-collections/cli@0.1.7(@content-collections/core@0.11.1(typescript@5.9.3))':
@@ -16326,11 +16302,11 @@ snapshots:
 
   '@orama/orama@3.1.14': {}
 
-  '@orpc/arktype@1.9.0(@ark/schema@0.50.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.10.0(@opentelemetry/api@1.9.0))(arktype@2.1.23)(crossws@0.3.5)(ws@8.18.3)':
+  '@orpc/arktype@1.10.0(@ark/schema@0.50.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.10.0(@opentelemetry/api@1.9.0))(arktype@2.1.23)(crossws@0.3.5)(ws@8.18.3)':
     dependencies:
       '@ark/schema': 0.50.0
       '@orpc/contract': 1.10.0(@opentelemetry/api@1.9.0)
-      '@orpc/openapi': 1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+      '@orpc/openapi': 1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
       arktype: 2.1.23
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -16346,15 +16322,6 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/client@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-fetch': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-peer': 1.9.0(@opentelemetry/api@1.9.0)
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/contract@1.10.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@orpc/client': 1.10.0(@opentelemetry/api@1.9.0)
@@ -16364,50 +16331,39 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/contract@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@orpc/client': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@standard-schema/spec': 1.0.0
-      openapi-types: 12.1.3
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/interop@1.10.0': {}
 
-  '@orpc/interop@1.9.0': {}
-
-  '@orpc/json-schema@1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)':
+  '@orpc/json-schema@1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)':
     dependencies:
-      '@orpc/contract': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/interop': 1.9.0
-      '@orpc/openapi': 1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
-      '@orpc/server': 1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/interop': 1.10.0
+      '@orpc/openapi': 1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+      '@orpc/server': 1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+      '@orpc/shared': 1.10.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - crossws
       - ws
 
-  '@orpc/openapi-client@1.9.0(@opentelemetry/api@1.9.0)':
+  '@orpc/openapi-client@1.10.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/client': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
+      '@orpc/client': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/shared': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server': 1.10.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/openapi@1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)':
+  '@orpc/openapi@1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)':
     dependencies:
-      '@orpc/client': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/interop': 1.9.0
-      '@orpc/openapi-client': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/server': 1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
-      rou3: 0.7.3
+      '@orpc/client': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/interop': 1.10.0
+      '@orpc/openapi-client': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/server': 1.10.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
+      '@orpc/shared': 1.10.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server': 1.10.0(@opentelemetry/api@1.9.0)
+      rou3: 0.7.8
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - crossws
@@ -16431,35 +16387,10 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/server@1.9.0(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)':
-    dependencies:
-      '@orpc/client': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/interop': 1.9.0
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-aws-lambda': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-fetch': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-node': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-peer': 1.9.0(@opentelemetry/api@1.9.0)
-      cookie: 1.0.2
-    optionalDependencies:
-      crossws: 0.3.5
-      ws: 8.18.3
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/shared@1.10.0(@opentelemetry/api@1.9.0)':
     dependencies:
       radash: 12.1.1
       type-fest: 5.1.0
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.0
-
-  '@orpc/shared@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      radash: 12.1.1
-      type-fest: 5.0.1
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
 
@@ -16472,26 +16403,10 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server-aws-lambda@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-fetch': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-node': 1.9.0(@opentelemetry/api@1.9.0)
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/standard-server-fetch@1.10.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@orpc/shared': 1.10.0(@opentelemetry/api@1.9.0)
       '@orpc/standard-server': 1.10.0(@opentelemetry/api@1.9.0)
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
-  '@orpc/standard-server-fetch@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -16503,14 +16418,6 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server-node@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-fetch': 1.9.0(@opentelemetry/api@1.9.0)
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/standard-server-peer@1.10.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@orpc/shared': 1.10.0(@opentelemetry/api@1.9.0)
@@ -16518,22 +16425,9 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server-peer@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.9.0(@opentelemetry/api@1.9.0)
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/standard-server@1.10.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@orpc/shared': 1.10.0(@opentelemetry/api@1.9.0)
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
-  '@orpc/standard-server@1.9.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@orpc/shared': 1.9.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -20776,10 +20670,10 @@ snapshots:
 
   dayjs@1.11.18: {}
 
-  db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))):
+  db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))):
     optionalDependencies:
       better-sqlite3: 11.9.1
-      drizzle-orm: 0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
+      drizzle-orm: 0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
     optional: true
 
   debug@2.6.9:
@@ -20973,10 +20867,10 @@ snapshots:
 
   draco3d@1.5.7: {}
 
-  drizzle-arktype@0.1.3(arktype@2.1.23)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))):
+  drizzle-arktype@0.1.3(arktype@2.1.23)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))):
     dependencies:
       arktype: 2.1.23
-      drizzle-orm: 0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
+      drizzle-orm: 0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
 
   drizzle-kit@0.31.5:
     dependencies:
@@ -20987,9 +20881,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)):
+  drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250414.0
+      '@cloudflare/workers-types': 4.20251014.0
       '@neondatabase/serverless': 1.0.1
       '@opentelemetry/api': 1.9.0
       '@prisma/client': 6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3)
@@ -22120,7 +22014,7 @@ snapshots:
     dependencies:
       cookie-es: 2.0.0
       fetchdts: 0.1.7
-      rou3: 0.7.3
+      rou3: 0.7.8
       srvx: 0.8.16
 
   hachure-fill@0.5.2: {}
@@ -25698,7 +25592,7 @@ snapshots:
 
   rou3@0.5.1: {}
 
-  rou3@0.7.3: {}
+  rou3@0.7.8: {}
 
   roughjs@4.6.6:
     dependencies:
@@ -26677,10 +26571,6 @@ snapshots:
 
   type-fest@4.41.0: {}
 
-  type-fest@5.0.1:
-    dependencies:
-      tagged-tag: 1.0.0
-
   type-fest@5.1.0:
     dependencies:
       tagged-tag: 1.0.0
@@ -26805,7 +26695,7 @@ snapshots:
       picomatch: 4.0.3
       webpack-virtual-modules: 0.6.2
 
-  unstorage@1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0):
+  unstorage@1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0):
     dependencies:
       anymatch: 3.1.3
       chokidar: 4.0.3
@@ -26818,7 +26708,7 @@ snapshots:
     optionalDependencies:
       '@netlify/blobs': 9.1.2
       aws4fetch: 1.0.20
-      db0: 0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250414.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)))
+      db0: 0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)))
       ioredis: 5.7.0
 
   update-browserslist-db@1.1.3(browserslist@4.24.4):
@@ -27184,7 +27074,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251011.0
       '@cloudflare/workerd-windows-64': 1.20251011.0
 
-  wrangler@4.44.0:
+  wrangler@4.44.0(@cloudflare/workers-types@4.20251014.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
       '@cloudflare/unenv-preset': 2.7.8(unenv@2.0.0-rc.21)(workerd@1.20251011.0)
@@ -27195,6 +27085,7 @@ snapshots:
       unenv: 2.0.0-rc.21
       workerd: 1.20251011.0
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20251014.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil

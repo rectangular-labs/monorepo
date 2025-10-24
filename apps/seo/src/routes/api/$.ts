@@ -1,3 +1,4 @@
+import { env as CloudflareEnv } from "cloudflare:workers";
 import { createApiContext } from "@rectangular-labs/api-seo/context";
 import { openAPIHandler } from "@rectangular-labs/api-seo/server";
 import { initAuthHandler } from "@rectangular-labs/auth/server";
@@ -32,6 +33,13 @@ async function handle({ request }: { request: Request }) {
       return new Response("Method not allowed", { status: 405 });
     }
     return await seoBlogSearch.GET(request);
+  }
+
+  if (new URL(request.url).pathname.startsWith("/api/user-vm/")) {
+    // TODO: cloudflare session ID
+    const containerStub =
+      CloudflareEnv.USER_VM_CONTAINER.getByName("test-session");
+    return containerStub.fetch(request);
   }
 
   const env = serverEnv();
