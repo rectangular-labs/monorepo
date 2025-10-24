@@ -12,9 +12,9 @@ import type { InitialContext } from "./types";
  * Use this instead of the raw `os` import for type-safe dependency injection
  */
 const base = os
-  // .$route({
-  //   path: "/api/user-vm",
-  // })
+  .$route({
+    path: "/api/user-vm",
+  })
   .$context<InitialContext>()
   .use(loggerMiddleware)
   .use(asyncStorageMiddleware<InitialContext>())

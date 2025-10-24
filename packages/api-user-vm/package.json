@@ -6,29 +6,29 @@
   "exports": {
     "./client": {
       "types": "./dist/client.d.ts",
-      "default": "./src/client.ts"
+      "default": "./dist/client.js"
     },
     "./context": {
       "types": "./dist/context.d.ts",
-      "default": "./src/context.ts"
+      "default": "./dist/context.js"
     },
     "./container": {
       "types": "./dist/container.d.ts",
-      "default": "./src/container.ts"
+      "default": "./dist/container.js"
     },
     "./env": {
       "types": "./dist/env.d.ts",
-      "default": "./src/env.ts"
+      "default": "./dist/env.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",
-      "default": "./src/types.ts"
+      "default": "./dist/types.js"
     },
     "./Dockerfile": "./Dockerfile"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc && tsx ./src/_open-api/open-api-resolver.ts",
+    "build": "tsup",
+    "dev": "tsx ./src/_open-api/open-api-resolver.ts && tsup",
     "clean": "git clean -xdf .turbo node_modules dist .cache",
     "format": "pnpx @biomejs/biome format . --write",
     "lint": "pnpx @biomejs/biome lint . --write",
@@ -37,6 +37,7 @@
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
     "@types/node": "^24.9.1",
+    "tsup": "^8.5.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {

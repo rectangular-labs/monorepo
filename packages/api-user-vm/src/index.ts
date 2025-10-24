@@ -22,10 +22,17 @@ const handler = (apiUrl: string) =>
     },
   });
 
-const server = createServer(async (req, res) => {
-  const env = userVmApiEnv();
+const env = userVmApiEnv();
 
-  const url = new URL(`http://${env.HOST ?? "localhost"}${req.url}`);
+const server = createServer(async (req, res) => {
+  console.log("Request received", req.url);
+  if (req.url === "/") {
+    res.statusCode = 200;
+    res.end("Hello World");
+    return;
+  }
+
+  const url = new URL(`http://${env.USER_VM_HOST ?? "localhost"}${req.url}`);
   const db = createDb();
 
   const result = await handler(url.href).handle(req, res, {
@@ -36,12 +43,15 @@ const server = createServer(async (req, res) => {
       auth: initAuthHandler({
         baseURL: url.origin,
         db,
-        encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
-        fromEmail: env.AUTH_SEO_FROM_EMAIL,
-        inboundApiKey: env.SEO_INBOUND_API_KEY,
-        credentialVerificationType: env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
+        encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY ?? "",
+        fromEmail: env.AUTH_SEO_FROM_EMAIL ?? "",
+        inboundApiKey: env.SEO_INBOUND_API_KEY ?? "",
+        credentialVerificationType: env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE as
+          | "token"
+          | "code"
+          | undefined,
         discordClientId: env.AUTH_SEO_DISCORD_ID,
-        discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
+        discordClientSecret: env.AUTH_SEO_DISCORD_SECRET ?? "",
         githubClientId: env.AUTH_SEO_GITHUB_ID,
         githubClientSecret: env.AUTH_SEO_GITHUB_SECRET,
         googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
@@ -51,14 +61,15 @@ const server = createServer(async (req, res) => {
   });
 
   if (!result.matched) {
+    console.log("Not Found", req.url);
     res.statusCode = 404;
     res.end("Not Found");
   }
 });
 
-const PORT = userVmApiEnv().PORT ?? 3000;
+const PORT = parseInt(env.USER_VM_PORT ?? "3000", 10);
 server.listen(PORT, () => {
-  console.log(`API User VM server listening on  ${PORT}`);
+  console.log(`API User VM server listening on ${PORT}`);
 });
 
 // Graceful shutdown

@@ -56,4 +56,5 @@ RUN adduser --system --uid 1001 user-vm
 USER user-vm
 COPY --from=installer /app .
 
-CMD node packages/api-user-vm/dist/index.js
+EXPOSE 3999
+CMD ["node", "packages/api-user-vm/dist/index.js"]

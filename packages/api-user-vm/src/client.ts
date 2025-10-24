@@ -4,11 +4,12 @@ import contract from "./_open-api/orpc-contract.json";
 import type { Router, RouterClient } from "./types";
 
 export { eventIteratorToUnproxiedDataStream } from "@orpc/client";
-export const openApiClient = (baseUrl: string): RouterClient =>
-  createORPCClient(
+export const openApiClient = (baseUrl: string): RouterClient => {
+  return createORPCClient(
     createOpenApiLink({
       contract: contract as unknown as Router,
       baseUrl,
-      path: "/api/user-vm",
+      path: "/",
     }),
   );
+};

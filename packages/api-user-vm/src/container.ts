@@ -1,21 +1,19 @@
-import { Container } from "@cloudflare/containers";
+import { Container, type StopParams } from "@cloudflare/containers";
+import { userVmApiEnv } from "./env";
 
 export class UserVMContainer extends Container {
-  defaultPort = 3000;
-  sleepAfter = "10s";
-  envVars = {
-    MESSAGE: "I was passed in via the container class!",
-  };
+  defaultPort = parseInt(userVmApiEnv().USER_VM_PORT ?? "3000", 10);
+  sleepAfter = "5m";
 
   override onStart() {
-    console.log("Container successfully started");
+    console.log("Container successfully started.");
   }
 
-  override onStop() {
-    console.log("Container successfully shut down");
+  override onStop({ exitCode, reason }: StopParams) {
+    console.log("Container successfully shut down.", { exitCode, reason });
   }
 
   override onError(error: unknown) {
-    console.log("Container error:", error);
+    console.error("Something went wrong in the container:", error);
   }
 }

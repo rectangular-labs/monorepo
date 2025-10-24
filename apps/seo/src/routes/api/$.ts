@@ -10,8 +10,8 @@ import { serverEnv } from "~/lib/env";
 const seoBlogSearch = createSeoBlogSearchServer();
 
 async function handle({ request }: { request: Request }) {
+  const env = serverEnv();
   if (new URL(request.url).pathname.startsWith("/api/auth/")) {
-    const env = serverEnv();
     const authServerHandler = initAuthHandler({
       baseURL: env.VITE_SEO_URL,
       db: createDb(),
@@ -37,12 +37,30 @@ async function handle({ request }: { request: Request }) {
 
   if (new URL(request.url).pathname.startsWith("/api/user-vm/")) {
     // TODO: cloudflare session ID
-    const containerStub =
-      CloudflareEnv.USER_VM_CONTAINER.getByName("test-session");
-    return containerStub.fetch(request);
+    const userVmInstance = CloudflareEnv.USER_VM_CONTAINER.getByName(
+      new URL(request.url).pathname,
+    );
+    await userVmInstance.startAndWaitForPorts({
+      ports: [parseInt(env.USER_VM_PORT ?? "3000", 10)],
+      startOptions: {
+        enableInternet: true,
+        envVars: {
+          ...Object.fromEntries(
+            Object.entries(env).filter(([_, value]) => value !== undefined),
+          ),
+          DATABASE_URL: env.DATABASE_URL.replace(
+            "localhost",
+            "host.docker.internal",
+          ),
+        },
+      },
+    });
+    console.log(`container started: ${userVmInstance.id}`);
+    const response = await userVmInstance.fetch(request);
+    console.log("response", response);
+    return response;
   }
 
-  const env = serverEnv();
   const context = createApiContext({
     url: new URL(request.url),
     reqHeaders: request.headers,

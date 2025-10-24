@@ -51,9 +51,13 @@
     "typescript": "^5.9.3"
   },
   "pnpm": {
+    "overrides": {
+      "vite": "7.1.2"
+    },
     "ignoredBuiltDependencies": [
       "@prisma/client",
       "@prisma/engines",
+      "better-sqlite3",
       "oxc-resolver",
       "prisma",
       "protobufjs"
@@ -63,7 +67,6 @@
       "@parcel/watcher",
       "@tailwindcss/oxide",
       "aws-sdk",
-      "better-sqlite3",
       "core-js-pure",
       "esbuild",
       "sharp",

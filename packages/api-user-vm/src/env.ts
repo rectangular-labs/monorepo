@@ -9,8 +9,8 @@ export const userVmApiEnv = () =>
     server: {
       ...authEnvSchema,
       ANTHROPIC_API_KEY: type("string"),
-      PORT: type("number|undefined"),
-      HOST: type("string|undefined"),
+      USER_VM_PORT: type("string|undefined"),
+      USER_VM_HOST: type("string|undefined"),
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
