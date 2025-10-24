@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/client";
+import { ORPCError } from "@orpc/server";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
 import { protectedBase } from "../context";

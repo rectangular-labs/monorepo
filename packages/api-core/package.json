@@ -29,6 +29,8 @@
     "@orpc/json-schema": "^1.10.0",
     "@orpc/openapi": "^1.10.0",
     "@orpc/openapi-client": "^1.10.0",
-    "@orpc/server": "^1.10.0"
+    "@orpc/server": "^1.10.0",
+    "@rectangular-labs/auth": "workspace:*",
+    "arktype": "^2.1.23"
   }
 }

@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/client";
+import { ORPCError } from "@orpc/server";
 import { schema } from "@rectangular-labs/db";
 import type { taskInputSchema } from "@rectangular-labs/db/parsers";
 import { err, ok, safe } from "@rectangular-labs/result";

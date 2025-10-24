@@ -1,4 +1,5 @@
 import { ORPCError, os } from "@orpc/server";
+import { authMiddleware } from "@rectangular-labs/api-core/lib/auth";
 import {
   asyncStorageMiddleware,
   getContext as getBaseContext,
@@ -7,7 +8,6 @@ import { loggerMiddleware } from "@rectangular-labs/api-core/lib/logger";
 import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
 import { createDb } from "@rectangular-labs/db";
 import { apiEnv } from "./env";
-import { authMiddleware } from "./lib/auth";
 import type { InitialContext } from "./types";
 
 export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
