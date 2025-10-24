@@ -187,7 +187,7 @@ function ContentDetailView({
       <Link
         className="inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
         params={{ organizationSlug, projectSlug }}
-        to="/$organizationSlug/$projectSlug/articles"
+        to="/$organizationSlug/$projectSlug/content"
       >
         <Icons.ArrowLeft className="h-4 w-4" />
         Back to Content
