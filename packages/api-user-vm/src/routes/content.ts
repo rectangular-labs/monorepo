@@ -17,6 +17,6 @@ const write = protectedBase
       messages: convertToModelMessages(input.messages),
     });
 
-    streamToEventIterator(result.toUIMessageStream());
+    return streamToEventIterator(result.toUIMessageStream());
   });
 export default protectedBase.prefix("/content").router({ write });

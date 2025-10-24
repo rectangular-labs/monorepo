@@ -9,6 +9,6 @@ export const openApiClient = (baseUrl: string): RouterClient =>
     createOpenApiLink({
       contract: contract as unknown as Router,
       baseUrl,
-      path: "/api",
+      path: "/api/user-vm",
     }),
   );
