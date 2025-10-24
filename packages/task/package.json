@@ -29,7 +29,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.15",
+    "@ai-sdk/google": "^2.0.16",
     "@ai-sdk/openai": "^2.0.39",
     "@orama/orama": "^3.1.14",
     "@rectangular-labs/dataforseo": "workspace:*",

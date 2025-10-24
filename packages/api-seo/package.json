@@ -39,7 +39,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.15",
+    "@ai-sdk/google": "^2.0.16",
     "@orpc/client": "^1.10.0",
     "@orpc/contract": "^1.10.0",
     "@orpc/server": "^1.10.0",

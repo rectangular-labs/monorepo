@@ -23,12 +23,12 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@orpc/arktype": "^1.9.0",
+    "@orpc/arktype": "^1.10.0",
     "@orpc/client": "^1.10.0",
     "@orpc/contract": "^1.10.0",
-    "@orpc/json-schema": "^1.9.0",
-    "@orpc/openapi": "^1.9.0",
-    "@orpc/openapi-client": "^1.9.0",
+    "@orpc/json-schema": "^1.10.0",
+    "@orpc/openapi": "^1.10.0",
+    "@orpc/openapi-client": "^1.10.0",
     "@orpc/server": "^1.10.0"
   }
 }
