@@ -1,0 +1,14 @@
+diff --git a/out/registry.js b/out/registry.js
+index 9e79ce1aa939ec2a7548feafef0d08cc0bdf2f4e..804f4286db5efcb75a05cde3d22d86073d1d95c5 100644
+--- a/out/registry.js
++++ b/out/registry.js
+@@ -10,7 +10,8 @@ export const arkUtilVersion = "0.50.0";
+ export const initialRegistryContents = {
+     version: arkUtilVersion,
+     filename: isomorphic.fileName(),
+-    FileConstructor
++    FileConstructor, 
++    config: {jitless: true}
+ };
+ export const registry = initialRegistryContents;
+ const namesByResolution = new Map();

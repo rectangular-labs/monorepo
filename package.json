@@ -73,7 +73,8 @@
       "workerd"
     ],
     "patchedDependencies": {
-      "better-auth": "patches/better-auth.patch"
+      "better-auth": "patches/better-auth.patch",
+      "@ark/util": "patches/@ark__util.patch"
     }
   },
   "packageManager": "pnpm@10.17.1"
