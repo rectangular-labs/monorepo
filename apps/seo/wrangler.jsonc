@@ -21,6 +21,7 @@
     {
       "class_name": "UserVMContainer",
       "image": "../../packages/api-user-vm/Dockerfile",
+      "image_build_context": "../..",
       "name": "user-vm-container"
     }
   ],

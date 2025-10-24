@@ -5,8 +5,6 @@ import { createDb } from "@rectangular-labs/db";
 import { userVmApiEnv } from "./env";
 import { router } from "./routes";
 
-const PORT = process.env.PORT || 3000;
-
 const handler = (apiUrl: string) =>
   createNodeOpenAPIHandler({
     router,
@@ -25,10 +23,10 @@ const handler = (apiUrl: string) =>
   });
 
 const server = createServer(async (req, res) => {
-  const url = new URL(`http://${process.env.HOST ?? "localhost"}${req.url}`);
-
-  const db = createDb();
   const env = userVmApiEnv();
+
+  const url = new URL(`http://${env.HOST ?? "localhost"}${req.url}`);
+  const db = createDb();
 
   const result = await handler(url.href).handle(req, res, {
     context: {
@@ -58,8 +56,9 @@ const server = createServer(async (req, res) => {
   }
 });
 
+const PORT = userVmApiEnv().PORT ?? 3000;
 server.listen(PORT, () => {
-  console.log(`API User VM server listening on port ${PORT}`);
+  console.log(`API User VM server listening on  ${PORT}`);
 });
 
 // Graceful shutdown

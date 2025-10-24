@@ -6,7 +6,12 @@ import { type } from "arktype";
 export const userVmApiEnv = () =>
   createEnv({
     extends: [dbEnv()],
-    server: { ...authEnvSchema, ANTHROPIC_API_KEY: type("string") },
+    server: {
+      ...authEnvSchema,
+      ANTHROPIC_API_KEY: type("string"),
+      PORT: type("number|undefined"),
+      HOST: type("string|undefined"),
+    },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
   });
