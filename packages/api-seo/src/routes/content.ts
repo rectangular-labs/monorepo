@@ -272,5 +272,5 @@ const overview = withOrganizationIdBase
   });
 
 export default withOrganizationIdBase
-  .prefix("/project/{projectId}/campaign")
+  .prefix("/project/{projectId}/content")
   .router({ create, get, list, updateFormat, saveVersion, overview });
