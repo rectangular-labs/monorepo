@@ -3,7 +3,7 @@ import { userVmApiEnv } from "./env";
 
 export class UserVMContainer extends Container {
   defaultPort = parseInt(userVmApiEnv().USER_VM_PORT ?? "3000", 10);
-  sleepAfter = "5m";
+  sleepAfter = "3m";
 
   override onStart() {
     console.log("Container successfully started.");

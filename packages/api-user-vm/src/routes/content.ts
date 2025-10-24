@@ -17,16 +17,28 @@ const write = protectedBase
           "Read",
           "Write",
           "Edit",
-          "LS",
-          "Bash(*)",
           "Grep",
           "Glob",
+          "Bash",
+          "BashOutput",
+          "KillShell",
+          "Task",
+          "TodoWrite",
           "WebFetch",
+          "WebSearch",
         ],
       }),
       messages: convertToModelMessages(input.messages),
+      onStepFinish: (step) => {
+        console.log("step", step);
+      },
     });
 
-    return streamToEventIterator(result.toUIMessageStream());
+    return streamToEventIterator(
+      result.toUIMessageStream({
+        sendSources: true,
+        sendReasoning: true,
+      }),
+    );
   });
 export default protectedBase.prefix("/api/user-vm/content").router({ write });
