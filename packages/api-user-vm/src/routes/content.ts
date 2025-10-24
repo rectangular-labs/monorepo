@@ -32,6 +32,9 @@ const write = protectedBase
       onStepFinish: (step) => {
         console.log("step", step);
       },
+      onFinish: (result) => {
+        console.log("result", result);
+      },
     });
 
     return streamToEventIterator(
