@@ -49,9 +49,6 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.76
         version: 2.0.76(react@19.1.1)(zod@4.1.9)
-      '@cloudflare/containers':
-        specifier: ^0.0.28
-        version: 0.0.28
       '@rectangular-labs/api-seo':
         specifier: workspace:*
         version: link:../../packages/api-seo
