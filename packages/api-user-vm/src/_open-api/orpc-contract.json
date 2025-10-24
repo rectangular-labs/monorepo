@@ -1,1 +1,1 @@
-{"content":{"write":{"~orpc":{"errorMap":{},"meta":{},"route":{"path":"/api/user-vm/content/write","method":"POST"}}}}}
+{"content":{"write":{"~orpc":{"errorMap":{},"meta":{},"route":{"method":"POST","path":"/api/user-vm/content/write"}}}}}

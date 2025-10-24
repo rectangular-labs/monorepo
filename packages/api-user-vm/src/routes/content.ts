@@ -13,10 +13,20 @@ const write = protectedBase
       model: claudeCode("haiku", {
         systemPrompt: { type: "preset", preset: "claude_code" },
         settingSources: ["user", "project", "local"],
+        allowedTools: [
+          "Read",
+          "Write",
+          "Edit",
+          "LS",
+          "Bash(*)",
+          "Grep",
+          "Glob",
+          "WebFetch",
+        ],
       }),
       messages: convertToModelMessages(input.messages),
     });
 
     return streamToEventIterator(result.toUIMessageStream());
   });
-export default protectedBase.prefix("/content").router({ write });
+export default protectedBase.prefix("/api/user-vm/content").router({ write });
