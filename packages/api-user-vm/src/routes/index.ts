@@ -1,6 +1,6 @@
 import { lazy } from "@orpc/server";
-import { base } from "../context";
+import { protectedBase } from "../context";
 
-export const router = base.router({
+export const router = protectedBase.router({
   content: lazy(() => import("./content")),
 });

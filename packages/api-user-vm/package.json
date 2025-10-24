@@ -4,13 +4,17 @@
   "version": "0.0.1",
   "type": "module",
   "exports": {
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "default": "./src/server.ts"
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./src/client.ts"
     },
     "./context": {
       "types": "./dist/context.d.ts",
       "default": "./src/context.ts"
+    },
+    "./container": {
+      "types": "./dist/container.d.ts",
+      "default": "./src/container.ts"
     },
     "./env": {
       "types": "./dist/env.d.ts",
@@ -19,7 +23,8 @@
     "./types": {
       "types": "./dist/types.d.ts",
       "default": "./src/types.ts"
-    }
+    },
+    "./Dockerfile": "./Dockerfile"
   },
   "scripts": {
     "build": "tsc",
@@ -35,10 +40,13 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.16",
+    "@cloudflare/containers": "^0.0.28",
     "@orpc/client": "^1.10.0",
     "@orpc/contract": "^1.10.0",
     "@orpc/server": "^1.10.0",
     "@rectangular-labs/api-core": "workspace:*",
+    "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
