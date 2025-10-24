@@ -7,6 +7,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
+  CopyIcon,
   DotIcon,
   ExternalLinkIcon,
   EyeIcon,
@@ -14,6 +15,7 @@ import {
   FileIcon,
   FileTextIcon,
   FolderIcon,
+  GlobeIcon,
   GridIcon,
   InfoIcon,
   ListIcon,
@@ -29,6 +31,7 @@ import {
   PartyPopperIcon,
   PhoneCallIcon,
   PlusIcon,
+  RefreshCcwIcon,
   RotateCcwIcon,
   SaveIcon,
   SearchIcon,
@@ -58,6 +61,7 @@ export const Check = CheckIcon;
 export const ChevronDown = ChevronDownIcon;
 export const ChevronRight = ChevronRightIcon;
 export const ChevronsUpDown = ChevronsUpDownIcon;
+export const Copy = CopyIcon;
 export const Dot = DotIcon;
 export const EyeOff = EyeOffIcon;
 export const EyeOn = EyeIcon;
@@ -65,6 +69,7 @@ export const ExternalLink = ExternalLinkIcon;
 export const File = FileIcon;
 export const FileText = FileTextIcon;
 export const Folder = FolderIcon;
+export const Globe = GlobeIcon;
 export const Grid = GridIcon;
 export const Info = InfoIcon;
 export const List = ListIcon;
@@ -77,6 +82,7 @@ export const MoveUpRight = MoveUpRightIcon;
 export const PartyPopper = PartyPopperIcon;
 export const PhoneCall = PhoneCallIcon;
 export const Plus = PlusIcon;
+export const RefreshCcw = RefreshCcwIcon;
 export const RotateCcw = RotateCcwIcon;
 export const Save = SaveIcon;
 export const Search = SearchIcon;
