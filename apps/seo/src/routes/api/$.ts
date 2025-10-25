@@ -1,20 +1,17 @@
+import { env as CloudflareEnv } from "cloudflare:workers";
 import { createApiContext } from "@rectangular-labs/api-seo/context";
 import { openAPIHandler } from "@rectangular-labs/api-seo/server";
 import { initAuthHandler } from "@rectangular-labs/auth/server";
-import {
-  createDocsSearchServer,
-  createSeoBlogSearchServer,
-} from "@rectangular-labs/content/search";
+import { createSeoBlogSearchServer } from "@rectangular-labs/content/search";
 import { createDb } from "@rectangular-labs/db";
 import { createFileRoute } from "@tanstack/react-router";
 import { serverEnv } from "~/lib/env";
 
-const docsSearch = createDocsSearchServer();
 const seoBlogSearch = createSeoBlogSearchServer();
 
 async function handle({ request }: { request: Request }) {
+  const env = serverEnv();
   if (new URL(request.url).pathname.startsWith("/api/auth/")) {
-    const env = serverEnv();
     const authServerHandler = initAuthHandler({
       baseURL: env.VITE_SEO_URL,
       db: createDb(),
@@ -31,13 +28,6 @@ async function handle({ request }: { request: Request }) {
     });
     return await authServerHandler.handler(request);
   }
-
-  if (new URL(request.url).pathname.startsWith("/api/docs/search")) {
-    if (request.method !== "GET") {
-      return new Response("Method not allowed", { status: 405 });
-    }
-    return await docsSearch.GET(request);
-  }
   if (new URL(request.url).pathname.startsWith("/api/blog/search")) {
     if (request.method !== "GET") {
       return new Response("Method not allowed", { status: 405 });
@@ -45,7 +35,32 @@ async function handle({ request }: { request: Request }) {
     return await seoBlogSearch.GET(request);
   }
 
-  const env = serverEnv();
+  if (new URL(request.url).pathname.startsWith("/api/user-vm/")) {
+    // TODO: cloudflare session ID
+    const userVmInstance = CloudflareEnv.USER_VM_CONTAINER.getByName(
+      new URL(request.url).pathname,
+    );
+    await userVmInstance.startAndWaitForPorts({
+      ports: [parseInt(env.USER_VM_PORT ?? "3000", 10)],
+      startOptions: {
+        enableInternet: true,
+        envVars: {
+          ...Object.fromEntries(
+            Object.entries(env).filter(([_, value]) => value !== undefined),
+          ),
+          DATABASE_URL: env.DATABASE_URL.replace(
+            "localhost",
+            "host.docker.internal",
+          ),
+        },
+      },
+    });
+    console.log(`container started: ${userVmInstance.id}`);
+    const response = await userVmInstance.fetch(request);
+    console.log("response", response);
+    return response;
+  }
+
   const context = createApiContext({
     url: new URL(request.url),
     reqHeaders: request.headers,

@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/client";
+import { ORPCError } from "@orpc/server";
 import { and, eq, schema } from "@rectangular-labs/db";
 import { campaignTypeSchema } from "@rectangular-labs/db/parsers";
 import { type } from "arktype";
@@ -272,5 +272,5 @@ const overview = withOrganizationIdBase
   });
 
 export default withOrganizationIdBase
-  .prefix("/project/{projectId}/campaign")
+  .prefix("/project/{projectId}/content")
   .router({ create, get, list, updateFormat, saveVersion, overview });

@@ -1,4 +1,5 @@
 import { apiEnv } from "@rectangular-labs/api-seo/env";
+import { userVmApiEnv } from "@rectangular-labs/api-user-vm/env";
 import { createEnv } from "@t3-oss/env-core";
 import { type } from "arktype";
 
@@ -18,8 +19,10 @@ export const clientEnv = () =>
 
 export const serverEnv = () =>
   createEnv({
-    extends: [clientEnv(), apiEnv()],
-    server: {},
+    extends: [clientEnv(), apiEnv(), userVmApiEnv()],
+    server: {
+      NODE_ENV: type("string"),
+    },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
     skipValidation:

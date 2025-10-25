@@ -17,3 +17,5 @@ export default {
     });
   },
 };
+
+export { UserVMContainer } from "@rectangular-labs/api-user-vm/container";

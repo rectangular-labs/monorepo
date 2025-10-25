@@ -4,7 +4,8 @@ import {
   websocketClient,
 } from "@rectangular-labs/api-seo/client";
 import { serverClient } from "@rectangular-labs/api-seo/server";
-import { createIsomorphicFn } from "@tanstack/react-start";
+import { openApiClient } from "@rectangular-labs/api-user-vm/client";
+import { createClientOnlyFn, createIsomorphicFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 
 export const getApiClient = createIsomorphicFn()
@@ -23,6 +24,10 @@ export const getApiClient = createIsomorphicFn()
     return client;
   });
 export const getApiClientRq = () => createTanstackQueryUtils(getApiClient());
+
+export const getUserVMClient = createClientOnlyFn(() =>
+  openApiClient(window.location.origin),
+);
 
 export const getWebsocketClient = createIsomorphicFn()
   .server(() => {

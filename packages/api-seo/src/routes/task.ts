@@ -1,5 +1,5 @@
 "use server";
-import { ORPCError } from "@orpc/client";
+import { ORPCError } from "@orpc/server";
 import {
   taskInputSchema,
   taskOutputSchema,

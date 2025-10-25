@@ -1,0 +1,58 @@
+{
+  "name": "@rectangular-labs/api-user-vm",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./context": {
+      "types": "./dist/context.d.ts",
+      "default": "./dist/context.js"
+    },
+    "./container": {
+      "types": "./dist/container.d.ts",
+      "default": "./dist/container.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "default": "./dist/env.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
+    },
+    "./Dockerfile": "./Dockerfile"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx ./src/_open-api/open-api-resolver.ts && tsup",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "pnpx @biomejs/biome format . --write",
+    "lint": "pnpx @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@rectangular-labs/typescript": "workspace:*",
+    "@types/node": "^24.9.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^2.0.16",
+    "@cloudflare/containers": "^0.0.28",
+    "@orpc/client": "^1.10.0",
+    "@orpc/contract": "^1.10.0",
+    "@orpc/server": "^1.10.0",
+    "@rectangular-labs/api-core": "workspace:*",
+    "@rectangular-labs/auth": "workspace:*",
+    "@rectangular-labs/db": "workspace:*",
+    "@rectangular-labs/result": "workspace:*",
+    "@t3-oss/env-core": "^0.13.8",
+    "ai": "^5.0.57",
+    "ai-sdk-provider-claude-code": "^2.1.0",
+    "arktype": "^2.1.23"
+  }
+}

@@ -21,8 +21,10 @@ out
 .conductor
 .cursor
 .github
+.tanstack
 .turbo
 .vscode
+.wrangler
 
 # git folder
 .git
