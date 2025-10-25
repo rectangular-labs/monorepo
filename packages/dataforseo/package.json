@@ -37,7 +37,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@hey-api/openapi-ts": "^0.84.4",
+    "@hey-api/openapi-ts": "^0.86.4",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.23"
