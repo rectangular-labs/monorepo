@@ -41,17 +41,17 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.16",
-    "@cloudflare/containers": "^0.0.28",
-    "@orpc/client": "^1.10.0",
-    "@orpc/contract": "^1.10.0",
-    "@orpc/server": "^1.10.0",
+    "@ai-sdk/google": "^2.0.23",
+    "@cloudflare/containers": "^0.0.29",
+    "@orpc/client": "^1.10.1",
+    "@orpc/contract": "^1.10.1",
+    "@orpc/server": "^1.10.1",
     "@rectangular-labs/api-core": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.57",
+    "ai": "^5.0.79",
     "ai-sdk-provider-claude-code": "^2.1.0",
     "arktype": "^2.1.23"
   }
