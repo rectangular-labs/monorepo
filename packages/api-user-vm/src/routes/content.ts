@@ -3,7 +3,7 @@ import { streamToEventIterator } from "@orpc/client";
 import { type } from "@orpc/server";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { claudeCode } from "ai-sdk-provider-claude-code";
-import { protectedBase } from "../context";
+import { protectedBase } from "../lib/context";
 
 const write = protectedBase
   .route({ method: "POST", path: "/write" })

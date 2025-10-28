@@ -1,7 +1,7 @@
 import { createORPCClient } from "@orpc/client";
 import { createOpenApiLink } from "@rectangular-labs/api-core/lib/links";
 import contract from "./_open-api/orpc-contract.json";
-import type { Router, RouterClient } from "./types";
+import type { Router, RouterClient } from "./lib/types";
 
 export { eventIteratorToUnproxiedDataStream } from "@orpc/client";
 export const openApiClient = (baseUrl: string): RouterClient => {
