@@ -60,6 +60,14 @@ function RouteComponent() {
           activeProps={activeProps}
           className={className}
           params={{ organizationSlug, projectSlug }}
+          to="/$organizationSlug/$projectSlug/calendar"
+        >
+          Calendar
+        </Link>
+        <Link
+          activeProps={activeProps}
+          className={className}
+          params={{ organizationSlug, projectSlug }}
           to="/$organizationSlug/$projectSlug/settings"
         >
           Settings

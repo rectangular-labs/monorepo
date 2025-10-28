@@ -25,6 +25,7 @@ import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog
 import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/route'
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings'
+import { Route as AuthedOrganizationSlugProjectSlugCalendarRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/calendar'
 import { Route as AuthedOrganizationSlugProjectSlugContentIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/index'
 import { Route as AuthedOrganizationSlugProjectSlugContentWriteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/write'
 import { Route as AuthedOrganizationSlugProjectSlugContentContentIdIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/$contentId.index'
@@ -112,6 +113,12 @@ const AuthedOrganizationSlugProjectSlugSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
   } as any)
+const AuthedOrganizationSlugProjectSlugCalendarRoute =
+  AuthedOrganizationSlugProjectSlugCalendarRouteImport.update({
+    id: '/calendar',
+    path: '/calendar',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
+  } as any)
 const AuthedOrganizationSlugProjectSlugContentIndexRoute =
   AuthedOrganizationSlugProjectSlugContentIndexRouteImport.update({
     id: '/content/',
@@ -144,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog/': typeof MarketingBlogIndexRoute
+  '/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/$organizationSlug/$projectSlug/content/write': typeof AuthedOrganizationSlugProjectSlugContentWriteRoute
@@ -160,6 +168,7 @@ export interface FileRoutesByTo {
   '/$organizationSlug': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog': typeof MarketingBlogIndexRoute
+  '/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/$organizationSlug/$projectSlug/content/write': typeof AuthedOrganizationSlugProjectSlugContentWriteRoute
@@ -182,6 +191,7 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
   '/_marketing/blog/': typeof MarketingBlogIndexRoute
+  '/_authed/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/_authed/$organizationSlug/$projectSlug/content/write': typeof AuthedOrganizationSlugProjectSlugContentWriteRoute
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/$organizationSlug/'
     | '/onboarding'
     | '/blog/'
+    | '/$organizationSlug/$projectSlug/calendar'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug/'
     | '/$organizationSlug/$projectSlug/content/write'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/$organizationSlug'
     | '/onboarding'
     | '/blog'
+    | '/$organizationSlug/$projectSlug/calendar'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug'
     | '/$organizationSlug/$projectSlug/content/write'
@@ -240,6 +252,7 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug/'
     | '/_authed/onboarding/'
     | '/_marketing/blog/'
+    | '/_authed/$organizationSlug/$projectSlug/calendar'
     | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/$projectSlug/'
     | '/_authed/$organizationSlug/$projectSlug/content/write'
@@ -369,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
     }
+    '/_authed/$organizationSlug/$projectSlug/calendar': {
+      id: '/_authed/$organizationSlug/$projectSlug/calendar'
+      path: '/calendar'
+      fullPath: '/$organizationSlug/$projectSlug/calendar'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCalendarRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
+    }
     '/_authed/$organizationSlug/$projectSlug/content/': {
       id: '/_authed/$organizationSlug/$projectSlug/content/'
       path: '/content'
@@ -394,6 +414,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedOrganizationSlugProjectSlugRouteRouteChildren {
+  AuthedOrganizationSlugProjectSlugCalendarRoute: typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   AuthedOrganizationSlugProjectSlugSettingsRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   AuthedOrganizationSlugProjectSlugIndexRoute: typeof AuthedOrganizationSlugProjectSlugIndexRoute
   AuthedOrganizationSlugProjectSlugContentWriteRoute: typeof AuthedOrganizationSlugProjectSlugContentWriteRoute
@@ -403,6 +424,8 @@ interface AuthedOrganizationSlugProjectSlugRouteRouteChildren {
 
 const AuthedOrganizationSlugProjectSlugRouteRouteChildren: AuthedOrganizationSlugProjectSlugRouteRouteChildren =
   {
+    AuthedOrganizationSlugProjectSlugCalendarRoute:
+      AuthedOrganizationSlugProjectSlugCalendarRoute,
     AuthedOrganizationSlugProjectSlugSettingsRoute:
       AuthedOrganizationSlugProjectSlugSettingsRoute,
     AuthedOrganizationSlugProjectSlugIndexRoute:
