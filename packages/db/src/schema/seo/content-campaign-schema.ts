@@ -32,6 +32,7 @@ export const seoContentCampaign = pgSeoTable(
     createdByUserId: text()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    title: text().notNull(),
     status: text({
       enum: [
         "draft",

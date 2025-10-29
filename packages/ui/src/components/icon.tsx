@@ -13,10 +13,12 @@ import {
   EyeIcon,
   EyeOffIcon,
   FileIcon,
+  FilesIcon,
   FileTextIcon,
   FolderIcon,
   GlobeIcon,
   GridIcon,
+  HistoryIcon,
   InfoIcon,
   ListIcon,
   Loader2,
@@ -68,10 +70,12 @@ export const EyeOff = EyeOffIcon;
 export const EyeOn = EyeIcon;
 export const ExternalLink = ExternalLinkIcon;
 export const File = FileIcon;
+export const Files = FilesIcon;
 export const FileText = FileTextIcon;
 export const Folder = FolderIcon;
 export const Globe = GlobeIcon;
 export const Grid = GridIcon;
+export const History = HistoryIcon;
 export const Info = InfoIcon;
 export const List = ListIcon;
 export const LogOut = LogOutIcon;

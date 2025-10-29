@@ -1,43 +1,9 @@
 import { err, ok, safe } from "@rectangular-labs/result";
 import { type DB, eq, schema } from "../../client";
-import { buildConflictUpdateColumns } from "../../schema/_helper";
 import type {
-  seoContentInsertSchema,
   seoContentSearchKeywordInsertSchema,
   seoContentUpdateSchema,
 } from "../../schema/seo";
-
-export async function upsertContent(
-  db: DB,
-  values: typeof seoContentInsertSchema.infer,
-) {
-  const result = await safe(() =>
-    db
-      .insert(schema.seoContent)
-      .values(values)
-      .onConflictDoUpdate({
-        target: [schema.seoContent.pathname],
-        set: buildConflictUpdateColumns(schema.seoContent, [
-          "campaignType",
-          "contentCategory",
-          "impactScore",
-          "markdownVersions",
-          "pathname",
-          "proposedFormat",
-          "status",
-        ]),
-      })
-      .returning()
-      .then((rows) => rows[0]),
-  );
-  if (!result.ok) {
-    return result;
-  }
-  if (!result.value) {
-    return err(new Error("Failed to create content"));
-  }
-  return ok(result.value);
-}
 
 export async function addKeywordsToContent(
   db: DB,

@@ -4,7 +4,7 @@ import { base } from "../context";
 export const router = base.router({
   project: lazy(() => import("./project")),
   content: lazy(() => import("./content")),
-  campaign: lazy(() => import("./campaign")),
+  campaign: lazy(() => import("./content-campaign")),
   contentSchedule: lazy(() => import("./content-schedule")),
   task: lazy(() => import("./task")),
   googleSearchConsole: lazy(() => import("./google-search-console")),

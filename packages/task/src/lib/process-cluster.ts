@@ -2,13 +2,12 @@ import type { DB, schema } from "@rectangular-labs/db";
 import {
   addKeywordsToContent,
   updateSearchKeyword,
-  upsertContent,
 } from "@rectangular-labs/db/operations";
 import { inferContentType } from "./ai-tools/infer-content-type.js";
 import { selectPrimaryKeyword } from "./ai-tools/select-primary-keyword.js";
 import { fetchPageAsMarkdown, fetchSerpResults } from "./jina-ai.js";
 
-function getContentCategory(
+function _getContentCategory(
   keyword: typeof schema.seoSearchKeywordSelectSchema.infer,
 ) {
   return keyword.intent === "transactional"
@@ -63,31 +62,10 @@ export async function processCluster(args: {
     }
   }
   if (bestKeyword?.currentPosition && bestKeyword.currentPosition <= 10) {
-    const content = await upsertContent(db, {
-      organizationId: project.organizationId,
-      projectId: project.id,
-      campaignType: "do-nothing",
-      status: "ready",
-      contentCategory: getContentCategory(bestKeyword),
-      pathname: new URL(pageUrl).pathname,
-      markdownVersions: [
-        {
-          createdAt: new Date().toISOString(),
-          title: pageData.value.title,
-          description: pageData.value.description,
-          markdown: pageMarkdown,
-        },
-      ],
-    });
-    if (!content.ok) {
-      console.error(`Failed to create content for ${pageUrl}`, content.error);
-      return null;
-    }
-
     await addKeywordsToContent(
       db,
       keywords.map((kw) => ({
-        contentId: content.value.id,
+        contentId: "content.value.id",
         searchKeywordId: kw.id,
         type:
           kw.normalizedPhrase === bestKeyword.normalizedPhrase
@@ -106,7 +84,7 @@ export async function processCluster(args: {
       })),
     );
 
-    return content.value;
+    return null;
   }
 
   // Step 2: Select primary keyword for content improvement
@@ -195,34 +173,11 @@ export async function processCluster(args: {
       : 0);
 
   // Step 6: Create content
-  const content = await upsertContent(db, {
-    organizationId: project.organizationId,
-    projectId: project.id,
-    campaignType: "improvement",
-    status: "new",
-    impactScore: impactScore.toFixed(2),
-    proposedFormat: contentType,
-    contentCategory: getContentCategory(primaryKeywordData),
-    pathname: new URL(pageUrl).pathname,
-    markdownVersions: [
-      {
-        createdAt: new Date().toISOString(),
-        title: pageData.value.title,
-        description: pageData.value.description,
-        markdown: pageMarkdown,
-      },
-    ],
-  });
-
-  if (!content.ok) {
-    console.error(`Failed to create campaign for ${pageUrl}`, content.error);
-    return null;
-  }
 
   await addKeywordsToContent(
     db,
     keywords.map((kw) => ({
-      contentId: content.value.id,
+      contentId: "content.value.id",
       searchKeywordId: kw.id,
       type: kw.normalizedPhrase === primaryKeyword ? "primary" : "secondary",
       serpDetail: kw.currentPosition
@@ -238,7 +193,7 @@ export async function processCluster(args: {
     })),
   );
 
-  console.log(`Created campaign ${content.value.id} for ${pageUrl}`);
+  console.log(`Created campaign for ${pageUrl}`);
 
-  return content.value;
+  return null;
 }

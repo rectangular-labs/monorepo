@@ -52,18 +52,19 @@ function RouteComponent() {
           activeProps={activeProps}
           className={className}
           params={{ organizationSlug, projectSlug }}
-          to="/$organizationSlug/$projectSlug/content"
+          to="/$organizationSlug/$projectSlug/calendar"
         >
-          Content
+          Calendar
         </Link>
         <Link
           activeProps={activeProps}
           className={className}
           params={{ organizationSlug, projectSlug }}
-          to="/$organizationSlug/$projectSlug/calendar"
+          to="/$organizationSlug/$projectSlug/campaign"
         >
-          Calendar
+          Campaigns
         </Link>
+
         <Link
           activeProps={activeProps}
           className={className}

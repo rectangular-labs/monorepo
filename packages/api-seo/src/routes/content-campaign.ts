@@ -63,6 +63,7 @@ const create = withOrganizationIdBase
     const [created] = await context.db
       .insert(schema.seoContentCampaign)
       .values({
+        title: input.title,
         projectId: input.projectId,
         organizationId: context.session.activeOrganizationId,
         createdByUserId: context.user.id,
