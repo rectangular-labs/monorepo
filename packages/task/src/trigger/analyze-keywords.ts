@@ -162,17 +162,12 @@ export const analyzeKeywordsTask: ReturnType<
             console.log(
               `Processing cluster for ${url} with ${keywords.length} keywords`,
             );
-            const content = await processCluster({
+            const _content = await processCluster({
               db,
               project,
               pageUrl: url,
               keywords,
             });
-            if (content && content.campaignType === "improvement") {
-              improvementContentIds.push(content.id);
-            } else if (content && content.campaignType === "do-nothing") {
-              doNothingContentIds.push(content.id);
-            }
           }),
         );
         // Ensure minimum batch duration
