@@ -39,12 +39,7 @@ export function CalendarDndListener({
         ) {
           return;
         }
-        console.log("calendarEvent.end.getTime()", calendarEvent.end.getTime());
-        console.log(
-          "calendarEvent.start.getTime()",
-          calendarEvent.start.getTime(),
-        );
-        console.log("timeBlock.start.getTime() ", timeBlock.start.getTime());
+
         eventUpdateRef.current({
           ...calendarEvent,
           start: timeBlock.start,

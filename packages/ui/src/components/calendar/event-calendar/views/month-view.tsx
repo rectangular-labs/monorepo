@@ -44,8 +44,6 @@ export function MonthView({
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
-    console.log("calendarStart", calendarStart);
-    console.log("calendarEnd", calendarEnd);
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentDate]);
 

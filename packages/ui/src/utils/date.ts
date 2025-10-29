@@ -98,8 +98,6 @@ export function endOfWeek(
   options?: { weekStartsOn?: 0 | 1 },
 ): Date {
   const result = new Date(date);
-  console.log("result", result);
-  console.log("result.getDay()", result.getDay());
 
   result.setDate(
     result.getDate() + (7 - result.getDay()) + (options?.weekStartsOn ?? 0) - 1,
