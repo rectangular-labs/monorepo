@@ -96,11 +96,24 @@ export const seoContentScheduleRelations = relations(
 
 export const seoContentScheduleInsertSchema = createInsertSchema(
   seoContentSchedule,
-).omit("id", "createdAt", "updatedAt");
+).omit("id", "createdAt", "updatedAt", "organizationId");
 export const seoContentScheduleSelectSchema =
   createSelectSchema(seoContentSchedule);
 export const seoContentScheduleUpdateSchema = createUpdateSchema(
   seoContentSchedule,
 )
-  .omit("createdAt", "updatedAt")
-  .merge(type({ id: "string.uuid" }));
+  .omit(
+    "createdAt",
+    "updatedAt",
+    "organizationId",
+    "projectId",
+    "contentId",
+    "originatingContentCampaignId",
+  )
+  .merge(
+    type({
+      id: "string.uuid",
+      projectId: "string.uuid",
+      contentId: "string.uuid",
+    }),
+  );

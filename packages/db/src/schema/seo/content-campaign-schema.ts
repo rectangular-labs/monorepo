@@ -74,11 +74,11 @@ export const seoContentCampaignRelations = relations(
 
 export const seoContentCampaignInsertSchema = createInsertSchema(
   seoContentCampaign,
-).omit("id", "createdAt", "updatedAt");
+).omit("id", "createdAt", "updatedAt", "organizationId", "createdByUserId");
 export const seoContentCampaignSelectSchema =
   createSelectSchema(seoContentCampaign);
 export const seoContentCampaignUpdateSchema = createUpdateSchema(
   seoContentCampaign,
 )
-  .omit("createdAt", "updatedAt")
-  .merge(type({ id: "string.uuid" }));
+  .omit("createdAt", "updatedAt", "organizationId", "createdByUserId")
+  .merge(type({ id: "string.uuid", projectId: "string.uuid" }));
