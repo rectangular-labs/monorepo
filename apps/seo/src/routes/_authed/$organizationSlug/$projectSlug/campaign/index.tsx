@@ -188,7 +188,6 @@ function PageComponent() {
 }
 
 type Campaign = RouterOutputs["campaign"]["list"]["data"][0];
-
 function StatusBadge({ status }: { status: Campaign["status"] }) {
   const variants: Record<
     Campaign["status"],
@@ -214,22 +213,23 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
     projectSlug,
     campaignId: campaign.id,
   } as const;
-  const sessionPath = `/${organizationSlug}/${projectSlug}/campaign/${campaign.id}`;
+  console.log("window.location.origin", window.location.origin);
+  const sessionPath = `${window.location.origin}/${organizationSlug}/${projectSlug}/campaign/${campaign.id}`;
 
   return (
     <Card className="relative transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
       <Link
-        className="absolute inset-0 z-10"
+        className="absolute inset-0"
         params={hrefParams}
         to="/$organizationSlug/$projectSlug/campaign/$campaignId"
       >
         <span className="sr-only">Open campaign {campaign.title}</span>
       </Link>
       <CardContent>
-        <div className="flex items-center justify-between gap-4 py-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
             <CardTitle className="truncate font-semibold text-lg">
-              {campaign.id}
+              {campaign.title}
             </CardTitle>
             <div className="mt-1 flex items-center gap-2 text-muted-foreground text-sm">
               <StatusBadge status={campaign.status} />
@@ -240,15 +240,22 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
             <span>Last Mod {updated}</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="ghost">
+                <Button
+                  className="z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
                   <Icons.MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Open menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={(e) => {
-                    e.preventDefault();
+                  onClick={() => {
                     void navigator.clipboard.writeText(sessionPath);
                   }}
                 >

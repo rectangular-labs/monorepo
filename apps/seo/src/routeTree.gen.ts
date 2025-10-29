@@ -28,7 +28,7 @@ import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteImport } from '.
 import { Route as AuthedOrganizationSlugProjectSlugCalendarRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/calendar'
 import { Route as AuthedOrganizationSlugProjectSlugCampaignIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/campaign/index'
 import { Route as AuthedOrganizationSlugProjectSlugContentWriteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/write'
-import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug.campaign.$campaignId.index'
+import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId.index'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
