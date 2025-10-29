@@ -5,23 +5,11 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import {
-  index,
-  jsonb,
-  numeric,
-  text,
-  uniqueIndex,
-  uuid,
-} from "drizzle-orm/pg-core";
-import type {
-  campaignTypeSchema,
-  contentCategorySchema,
-  contentTypeSchema,
-  statusSchema,
-} from "../../schema-parsers/content-parsers";
+import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
-import { organization } from "../auth-schema";
+import { organization, user } from "../auth-schema";
+import { seoContentSchedule } from "./content-schedule-schema";
 import { seoContentSearchKeyword } from "./content-search-keywords-schema";
 import { seoProject } from "./project-schema";
 
@@ -42,66 +30,29 @@ export const seoContent = pgSeoTable(
         onUpdate: "cascade",
       }),
 
-    // Campaign metadata
-    campaignType: text({
-      enum: [
-        "do-nothing",
-        "improvement",
-        "new-content",
-      ] as const satisfies (typeof campaignTypeSchema.infer)[],
-    }).notNull(),
-    status: text({
-      enum: [
-        "analyzing",
-        "new",
-        "ready",
-        "generating-content",
-        "content-ready",
-        "published",
-      ] as const satisfies (typeof statusSchema.infer)[],
-    })
+    // Slim content model
+    slug: text().notNull(),
+    title: text().notNull(),
+    createdByUserId: text()
       .notNull()
-      .default("analyzing"),
-    pathname: text().notNull(),
-    markdownVersions: jsonb()
-      .$type<
-        {
-          title: string;
-          description?: string;
-          markdown: string;
-          createdAt: string;
-        }[]
-      >()
+      .references(() => user.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    tags: jsonb()
+      .$type<string[]>()
       .$defaultFn(() => []),
-    impactScore: numeric({ precision: 10, scale: 2 }).notNull().default("0"),
-
-    // Content strategy
-    proposedFormat: text({
-      enum: [
-        "blog",
-        "listicle",
-        "guide",
-        "comparison",
-        "how-to",
-        "checklist",
-        "case-study",
-        "other",
-      ] as const satisfies (typeof contentTypeSchema.infer)[],
-    }),
-    contentCategory: text({
-      enum: [
-        "money-page",
-        "authority-builder",
-        "quick-win",
-      ] as const satisfies (typeof contentCategorySchema.infer)[],
-    }).notNull(),
+    publishDestinations: jsonb()
+      .$type<string[]>()
+      .$defaultFn(() => []),
 
     ...timestamps,
   },
   (table) => [
     index("seo_content_organization_idx").on(table.organizationId),
     index("seo_content_project_idx").on(table.projectId),
-    uniqueIndex("seo_content_pathname_unique").on(table.pathname),
+    index("seo_content_created_by_user_idx").on(table.createdByUserId),
+    unique("seo_content_project_slug_idx").on(table.projectId, table.slug),
   ],
 );
 
@@ -114,7 +65,12 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
     fields: [seoContent.organizationId],
     references: [organization.id],
   }),
+  createdByUser: one(user, {
+    fields: [seoContent.createdByUserId],
+    references: [user.id],
+  }),
   searchKeywordsMap: many(seoContentSearchKeyword),
+  schedules: many(seoContentSchedule),
 }));
 
 export const seoContentInsertSchema = createInsertSchema(seoContent).omit(

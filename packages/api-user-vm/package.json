@@ -8,10 +8,6 @@
       "types": "./dist/client.d.ts",
       "default": "./dist/client.js"
     },
-    "./context": {
-      "types": "./dist/context.d.ts",
-      "default": "./dist/context.js"
-    },
     "./container": {
       "types": "./dist/container.d.ts",
       "default": "./dist/container.js"
@@ -19,12 +15,7 @@
     "./env": {
       "types": "./dist/env.d.ts",
       "default": "./dist/env.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "default": "./dist/types.js"
-    },
-    "./Dockerfile": "./Dockerfile"
+    }
   },
   "scripts": {
     "build": "tsup",

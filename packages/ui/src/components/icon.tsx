@@ -13,10 +13,12 @@ import {
   EyeIcon,
   EyeOffIcon,
   FileIcon,
+  FilesIcon,
   FileTextIcon,
   FolderIcon,
   GlobeIcon,
   GridIcon,
+  HistoryIcon,
   InfoIcon,
   ListIcon,
   Loader2,
@@ -24,6 +26,7 @@ import {
   XIcon as LucideXIcon,
   MenuIcon,
   MoonIcon,
+  MoreHorizontalIcon,
   MoveDownLeftIcon,
   MoveRightIcon,
   MoveUpRightIcon,
@@ -67,15 +70,18 @@ export const EyeOff = EyeOffIcon;
 export const EyeOn = EyeIcon;
 export const ExternalLink = ExternalLinkIcon;
 export const File = FileIcon;
+export const Files = FilesIcon;
 export const FileText = FileTextIcon;
 export const Folder = FolderIcon;
 export const Globe = GlobeIcon;
 export const Grid = GridIcon;
+export const History = HistoryIcon;
 export const Info = InfoIcon;
 export const List = ListIcon;
 export const LogOut = LogOutIcon;
 export const Menu = MenuIcon;
 export const Moon = MoonIcon;
+export const MoreHorizontal = MoreHorizontalIcon;
 export const MoveDownLeft = MoveDownLeftIcon;
 export const MoveRight = MoveRightIcon;
 export const MoveUpRight = MoveUpRightIcon;

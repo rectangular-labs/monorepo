@@ -1,3 +1,5 @@
+export * from "./content-campaign-schema";
+export * from "./content-schedule-schema";
 export * from "./content-schema";
 export * from "./content-search-keywords-schema";
 export * from "./gsc-property-schema";
