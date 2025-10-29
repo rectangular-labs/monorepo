@@ -81,6 +81,7 @@
     "react-hook-form": "^7.63.0",
     "react-markdown": "^10.1.0",
     "react-phone-number-input": "^3.4.12",
+    "react-resizable-panels": "^3.0.6",
     "react-syntax-highlighter": "^16.0.0",
     "remark-gfm": "^4.0.1",
     "shiki": "^3.13.0",

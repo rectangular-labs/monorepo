@@ -24,6 +24,7 @@ import {
   XIcon as LucideXIcon,
   MenuIcon,
   MoonIcon,
+  MoreHorizontalIcon,
   MoveDownLeftIcon,
   MoveRightIcon,
   MoveUpRightIcon,
@@ -76,6 +77,7 @@ export const List = ListIcon;
 export const LogOut = LogOutIcon;
 export const Menu = MenuIcon;
 export const Moon = MoonIcon;
+export const MoreHorizontal = MoreHorizontalIcon;
 export const MoveDownLeft = MoveDownLeftIcon;
 export const MoveRight = MoveRightIcon;
 export const MoveUpRight = MoveUpRightIcon;
