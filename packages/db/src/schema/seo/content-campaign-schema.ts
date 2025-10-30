@@ -6,7 +6,11 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, text, uuid } from "drizzle-orm/pg-core";
-import type { contentSessionStatusSchema } from "../../schema-parsers/content-parsers";
+import {
+  CAMPAIGN_DEFAULT_STATUS,
+  CAMPAIGN_DEFAULT_TITLE,
+  type contentCampaignStatusSchema,
+} from "../../schema-parsers/content-campaign-parser";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
@@ -32,18 +36,18 @@ export const seoContentCampaign = pgSeoTable(
     createdByUserId: text()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    title: text().notNull().default("Untitled Campaign"),
+    title: text().notNull().default(CAMPAIGN_DEFAULT_TITLE),
     status: text({
       enum: [
         "draft",
         "review",
         "accepted",
         "denied",
-      ] as const satisfies (typeof contentSessionStatusSchema.infer)[],
+      ] as const satisfies (typeof contentCampaignStatusSchema.infer)[],
     })
       .notNull()
-      .default("draft"),
-    workspaceBlobUri: text().notNull(),
+      .default(CAMPAIGN_DEFAULT_STATUS),
+    workspaceBlobUri: text(),
     ...timestamps,
   },
   (table) => [

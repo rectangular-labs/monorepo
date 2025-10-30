@@ -14,10 +14,6 @@ export const intentSchema = type(
   "'transactional'|'informational'|'navigational'|'commercial'",
 );
 
-// New enums for sessions and schedules
-export const contentSessionStatusSchema = type(
-  "'draft'|'review'|'accepted'|'denied'",
-);
 export const contentScheduleStatusSchema = type(
   "'draft'|'scheduled'|'published'",
 );

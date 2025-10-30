@@ -1,15 +1,13 @@
 import { ORPCError } from "@orpc/server";
-import { and, eq, schema, uuidv7 } from "@rectangular-labs/db";
+import { and, eq, schema } from "@rectangular-labs/db";
 import {
   createContentCampaign,
-  getSeoProjectById,
-  updateSeoProject,
+  getDefaultContentCampaign,
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
-import { LoroDoc } from "loro-crdt";
+import { CAMPAIGN_DEFAULT_TITLE } from "../../../db/src/schema-parsers/content-campaign-parser";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import { createWorkspaceBlobUri } from "../lib/workspace";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -31,10 +29,11 @@ const list = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
     const campaigns = await context.db.query.seoContentCampaign.findMany({
-      where: (table, { eq, and }) =>
+      where: (table, { eq, and, ne }) =>
         and(
           eq(table.projectId, input.projectId),
           eq(table.organizationId, input.organizationId),
+          ne(table.title, CAMPAIGN_DEFAULT_TITLE),
           input.status ? eq(table.status, input.status) : undefined,
         ),
       orderBy: (fields, { desc }) => [desc(fields.id)],
@@ -75,55 +74,28 @@ const create = withOrganizationIdBase
   .output(schema.seoContentCampaignSelectSchema)
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
-    const doc = new LoroDoc();
-    const projectResult = await getSeoProjectById(context.db, input.projectId);
-    if (!projectResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Error fetching project",
-        cause: projectResult.error,
-      });
-    }
-    if (!projectResult.value?.workspaceBlobUri) {
-      throw new ORPCError("BAD_REQUEST", {
-        message:
-          "Project does not have a workspace. Please refresh the page and try again.",
-      });
-    }
-    const { workspaceBlobUri } = projectResult.value;
-    const workspaceBlob =
-      await context.workspaceStorage.getSnapshot(workspaceBlobUri);
-    if (!workspaceBlob) {
-      await updateSeoProject(context.db, {
-        id: input.projectId,
-        organizationId: context.session.activeOrganizationId,
-        workspaceBlobUri: null,
-      });
-      throw new ORPCError("BAD_REQUEST", {
-        message:
-          "Project workspace not found. Please refresh the page and try again.",
-      });
-    }
-    doc.import(workspaceBlob);
-    const campaignId = uuidv7();
-    const forkDoc = doc.fork();
-    const forkBlobUri = createWorkspaceBlobUri({
-      orgId: context.organization.id,
+    const existingDefaultCampaignResult = await getDefaultContentCampaign({
+      db: context.db,
       projectId: input.projectId,
-      campaignId,
+      organizationId: context.session.activeOrganizationId,
+      userId: context.user.id,
     });
-    await context.workspaceStorage.setItemRaw(
-      forkBlobUri,
-      // TODO: Shallow copy of main
-      forkDoc.export({ mode: "snapshot" }),
-    );
+    if (!existingDefaultCampaignResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to get default campaign",
+        cause: existingDefaultCampaignResult.error,
+      });
+    }
+    if (existingDefaultCampaignResult.value) {
+      return existingDefaultCampaignResult.value;
+    }
+
     const createContentCampaignResult = await createContentCampaign(
       context.db,
       {
-        id: campaignId,
         projectId: input.projectId,
         organizationId: context.organization.id,
         createdByUserId: context.user.id,
-        workspaceBlobUri: forkBlobUri,
       },
     );
     if (!createContentCampaignResult.ok) {
