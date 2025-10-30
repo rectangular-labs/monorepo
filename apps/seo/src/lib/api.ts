@@ -7,7 +7,7 @@ import { serverClient } from "@rectangular-labs/api-seo/server";
 import { openApiClient } from "@rectangular-labs/api-user-vm/client";
 import { createClientOnlyFn, createIsomorphicFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { workspaceStorage } from "./storage";
+import { createWorkspaceStorage } from "./storage";
 
 export const getApiClient = createIsomorphicFn()
   .server(() => {
@@ -17,7 +17,7 @@ export const getApiClient = createIsomorphicFn()
       // The request isn't populated in the server context, so we need to pass it in manually
       reqHeaders: request.headers,
       resHeaders: new Headers(),
-      workspaceStorage,
+      workspaceStorage: createWorkspaceStorage(),
     });
     return client;
   })

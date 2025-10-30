@@ -22,8 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rectangular-labs/ui/components/ui/select";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -45,7 +51,8 @@ export const Route = createFileRoute(
     await context.queryClient.ensureInfiniteQueryData(
       getApiClientRq().campaign.list.infiniteOptions({
         input: (pageParam) => ({
-          projectId: activeProject?.id ?? "",
+          organizationId: activeProject.organizationId,
+          projectId: activeProject.id,
           cursor: pageParam,
           limit: 10,
         }),
@@ -88,6 +95,7 @@ function PageComponent() {
   } = useInfiniteQuery(
     getApiClientRq().campaign.list.infiniteOptions({
       input: (pageParam) => ({
+        organizationId: activeProject?.organizationId ?? "",
         projectId: activeProject?.id ?? "",
         limit: 10,
         cursor: pageParam,
@@ -150,7 +158,10 @@ function PageComponent() {
             </SelectContent>
           </Select>
         </div>
-        <Button>New Campaign</Button>
+        <NewCampaignButton
+          organizationId={activeProject?.organizationId ?? ""}
+          projectId={activeProject?.id ?? ""}
+        />
       </div>
 
       <LoadingError
@@ -213,8 +224,6 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
     projectSlug,
     campaignId: campaign.id,
   } as const;
-  console.log("window.location.origin", window.location.origin);
-  const sessionPath = `${window.location.origin}/${organizationSlug}/${projectSlug}/campaign/${campaign.id}`;
 
   return (
     <Card className="relative transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
@@ -256,6 +265,7 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   onClick={() => {
+  const sessionPath = `${window.location.origin}/${organizationSlug}/${projectSlug}/campaign/${campaign.id}`;
                     void navigator.clipboard.writeText(sessionPath);
                   }}
                 >
@@ -306,5 +316,47 @@ function EmptyState() {
         Try adjusting your search or status filter.
       </p>
     </div>
+  );
+}
+
+function NewCampaignButton({
+  organizationId,
+  projectId,
+}: {
+  organizationId: string;
+  projectId: string;
+}) {
+  const navigate = useNavigate();
+  const { mutate: createCampaign, isPending } = useMutation(
+    getApiClientRq().campaign.create.mutationOptions({
+      onSuccess: (data) => {
+        toast.success("Campaign created");
+        void navigate({
+          from: "/$organizationSlug/$projectSlug/campaign",
+          to: "/$organizationSlug/$projectSlug/campaign/$campaignId",
+          params: (prev) => ({
+            ...prev,
+            campaignId: data.id,
+          }),
+        });
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    }),
+  );
+  return (
+    <Button
+      isLoading={isPending}
+      onClick={() =>
+        createCampaign({
+          organizationId: organizationId,
+          projectId: projectId,
+        })
+      }
+    >
+      <Icons.Plus className="size-4" />
+      New Campaign
+    </Button>
   );
 }
