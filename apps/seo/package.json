@@ -59,6 +59,8 @@
     "typescript": "^5.9.3",
     "vite": "7.1.2",
     "vite-plugin-mkcert": "^1.17.8",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
     "web-vitals": "^5.1.0",
