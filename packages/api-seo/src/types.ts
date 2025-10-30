@@ -21,5 +21,8 @@ export type RouterOutputs = InferRouterOutputs<Router>;
 export interface InitialContext extends BaseContextWithAuth {
   db: DB;
   url: URL;
-  workspaceStorage: Storage<Uint8Array>;
+  workspaceStorage: Storage<Uint8Array> & {
+    getSnapshot: (key: string) => Promise<Uint8Array | null>;
+    setSnapshot: (key: string, snapshot: Uint8Array) => Promise<void>;
+  };
 }
