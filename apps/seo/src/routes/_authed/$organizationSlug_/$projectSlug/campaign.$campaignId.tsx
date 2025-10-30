@@ -34,7 +34,11 @@ export const Route = createFileRoute(
     if (!project) throw notFound();
     await context.queryClient.ensureQueryData(
       getApiClientRq().campaign.get.queryOptions({
-        input: { id: params.campaignId, projectId: project.id },
+        input: {
+          id: params.campaignId,
+          projectId: project.id,
+          organizationId: project.organizationId,
+        },
       }),
     );
     return { project };
@@ -54,8 +58,12 @@ function PageComponent() {
   );
   const { data, isLoading, error, refetch } = useQuery(
     getApiClientRq().campaign.get.queryOptions({
-      input: { id: campaignId, projectId: project?.id ?? "" },
-      enabled: !!project?.id,
+      input: {
+        id: campaignId,
+        projectId: project?.id ?? "",
+        organizationId: project?.organizationId ?? "",
+      },
+      enabled: !!project?.id && !!project?.organizationId,
     }),
   );
 
