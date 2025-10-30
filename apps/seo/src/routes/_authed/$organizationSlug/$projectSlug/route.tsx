@@ -4,7 +4,7 @@ import {
   notFound,
   Outlet,
 } from "@tanstack/react-router";
-import { getApiClientRq } from "~/lib/api";
+import { getApiClient, getApiClientRq } from "~/lib/api";
 
 export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
   {
@@ -18,9 +18,21 @@ export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
         }),
       );
       if (!activeProject) throw notFound();
-      return {
-        activeProject,
-      };
+
+      if (!activeProject.workspaceBlobUri) {
+        await getApiClient().project.setUpWorkspace({
+          projectId: activeProject.id,
+          organizationIdentifier: params.organizationSlug,
+        });
+        await context.queryClient.invalidateQueries({
+          queryKey: getApiClientRq().project.get.queryKey({
+            input: {
+              organizationIdentifier: params.organizationSlug,
+              identifier: params.projectSlug,
+            },
+          }),
+        });
+      }
     },
     component: RouteComponent,
   },

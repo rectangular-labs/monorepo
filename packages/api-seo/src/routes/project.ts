@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
+import { LoroDoc } from "loro-crdt";
 import { protectedBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
@@ -106,6 +107,35 @@ const get = protectedBase
     return row ?? null;
   });
 
+const setUpWorkspace = protectedBase
+  .route({ method: "POST", path: "/{projectId}/setup-workspace" })
+  .input(type({ projectId: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(type({ workspaceBlobUri: "string" }))
+  .handler(async ({ context, input }) => {
+    const workspaceDoc = new LoroDoc();
+    const workspaceBlobUri = `project_${input.projectId}/main.loro`;
+
+    await Promise.all([
+      context.workspaceStorage.setItemRaw(
+        workspaceBlobUri,
+        workspaceDoc.export({ mode: "snapshot" }),
+      ),
+      context.db
+        .update(schema.seoProject)
+        .set({
+          workspaceBlobUri,
+        })
+        .where(
+          and(
+            eq(schema.seoProject.id, input.projectId),
+            eq(schema.seoProject.organizationId, context.organization.id),
+          ),
+        ),
+    ]);
+    return { workspaceBlobUri } as const;
+  });
+
 const create = protectedBase
   .route({ method: "POST", path: "/" })
   .input(
@@ -193,4 +223,4 @@ const remove = protectedBase
 
 export default protectedBase
   .prefix("/organization/{organizationIdentifier}/project")
-  .router({ list, create, update, remove, checkName, get });
+  .router({ list, create, update, remove, checkName, get, setUpWorkspace });

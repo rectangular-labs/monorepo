@@ -6,6 +6,7 @@ import type {
 } from "@orpc/server";
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { DB } from "@rectangular-labs/db";
+import type { Storage } from "unstorage";
 import type { router } from "./routes";
 
 export type Router = UnlaziedRouter<typeof router>;
@@ -20,4 +21,5 @@ export type RouterOutputs = InferRouterOutputs<Router>;
 export interface InitialContext extends BaseContextWithAuth {
   db: DB;
   url: URL;
+  workspaceStorage: Storage<Uint8Array>;
 }

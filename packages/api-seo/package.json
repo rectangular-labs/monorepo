@@ -52,7 +52,9 @@
     "@rectangular-labs/task": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.57",
-    "arktype": "^2.1.23"
+    "arktype": "^2.1.23",
+    "loro-crdt": "^1.8.5",
+    "unstorage": "^1.17.1"
   },
   "overrides": {
     "@tanstack/react-query": "5.90.2"

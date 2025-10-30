@@ -20,7 +20,7 @@ import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 
 export const Route = createFileRoute(
-  "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/",
+  "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId",
 )({
   loader: async ({ context, params }) => {
     const project = await context.queryClient.ensureQueryData(

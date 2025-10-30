@@ -56,7 +56,7 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(loro-crdt@1.8.5)
       loro-crdt:
-        specifier: ^1.8.0
+        specifier: ^1.8.5
         version: 1.8.5
       loro-mirror:
         specifier: 1.0.0
@@ -167,6 +167,9 @@ importers:
       tanstack-router-sitemap:
         specifier: ^1.0.13
         version: 1.0.13
+      unstorage:
+        specifier: ^1.17.1
+        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0)
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.13.14
@@ -416,6 +419,12 @@ importers:
       arktype:
         specifier: ^2.1.23
         version: 2.1.23
+      loro-crdt:
+        specifier: ^1.8.5
+        version: 1.8.5
+      unstorage:
+        specifier: ^1.17.1
+        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0)
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*

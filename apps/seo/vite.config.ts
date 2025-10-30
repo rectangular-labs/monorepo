@@ -4,6 +4,8 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { generateSitemap } from "tanstack-router-sitemap";
 import mkcert from "vite-plugin-mkcert";
+import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 import { serverEnv } from "./src/lib/env";
@@ -39,6 +41,8 @@ const config = defineConfig({
     }),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     viteReact(),
+    wasm(),
+    topLevelAwait(),
   ],
   test: {
     globals: true,

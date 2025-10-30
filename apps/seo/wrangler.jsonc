@@ -39,6 +39,12 @@
       "tag": "v1"
     }
   ],
+  "r2_buckets": [
+    {
+      "bucket_name": "seo-content-workspaces",
+      "binding": "seo_content_workspaces"
+    }
+  ],
   "env": {
     "production": {
       "containers": [
@@ -62,6 +68,12 @@
         {
           "new_sqlite_classes": ["UserVMContainer"],
           "tag": "v1"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "bucket_name": "seo-content-workspaces-production",
+          "binding": "seo_content_workspaces"
         }
       ],
       "routes": [
@@ -94,6 +106,12 @@
         {
           "new_sqlite_classes": ["UserVMContainer"],
           "tag": "v1"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "bucket_name": "seo-content-workspaces-preview",
+          "binding": "seo_content_workspaces"
         }
       ],
       "routes": [

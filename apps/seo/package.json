@@ -41,7 +41,8 @@
     "motion": "^12.23.22",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "tanstack-router-sitemap": "^1.0.13"
+    "tanstack-router-sitemap": "^1.0.13",
+    "unstorage": "^1.17.1"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.13.14",
