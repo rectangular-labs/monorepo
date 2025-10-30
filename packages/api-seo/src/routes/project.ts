@@ -1,11 +1,13 @@
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
+import { updateSeoProject } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { LoroDoc } from "loro-crdt";
 import { protectedBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { createWorkspaceBlobUri } from "../lib/workspace";
 
 const list = protectedBase
   .route({ method: "GET", path: "/" })
@@ -114,25 +116,22 @@ const setUpWorkspace = protectedBase
   .output(type({ workspaceBlobUri: "string" }))
   .handler(async ({ context, input }) => {
     const workspaceDoc = new LoroDoc();
-    const workspaceBlobUri = `project_${input.projectId}/main.loro`;
-
+    const workspaceBlobUri = createWorkspaceBlobUri({
+      orgId: context.organization.id,
+      projectId: input.projectId,
+    });
     await Promise.all([
-      context.workspaceStorage.setItemRaw(
+      context.workspaceStorage.setSnapshot(
         workspaceBlobUri,
         workspaceDoc.export({ mode: "snapshot" }),
       ),
-      context.db
-        .update(schema.seoProject)
-        .set({
-          workspaceBlobUri,
-        })
-        .where(
-          and(
-            eq(schema.seoProject.id, input.projectId),
-            eq(schema.seoProject.organizationId, context.organization.id),
-          ),
-        ),
+      updateSeoProject(context.db, {
+        id: input.projectId,
+        organizationId: context.organization.id,
+        workspaceBlobUri,
+      }),
     ]);
+
     return { workspaceBlobUri } as const;
   });
 
