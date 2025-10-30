@@ -32,7 +32,7 @@ export const seoContentCampaign = pgSeoTable(
     createdByUserId: text()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    title: text().notNull(),
+    title: text().notNull().default("Untitled Campaign"),
     status: text({
       enum: [
         "draft",
@@ -75,7 +75,14 @@ export const seoContentCampaignRelations = relations(
 
 export const seoContentCampaignInsertSchema = createInsertSchema(
   seoContentCampaign,
-).omit("id", "createdAt", "updatedAt", "organizationId", "createdByUserId");
+).omit(
+  "id",
+  "createdAt",
+  "updatedAt",
+  "organizationId",
+  "createdByUserId",
+  "workspaceBlobUri",
+);
 export const seoContentCampaignSelectSchema =
   createSelectSchema(seoContentCampaign);
 export const seoContentCampaignUpdateSchema = createUpdateSchema(
