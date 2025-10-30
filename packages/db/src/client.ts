@@ -28,6 +28,6 @@ export const createDb = () => {
   const db = neonDrizzle({ client: sql, schema, casing: "snake_case" });
   return db;
 };
-
+export { uuidv7 } from "./schema/_helper";
 export type DB = ReturnType<typeof createDb>;
 export type DBTransaction = Parameters<Parameters<DB["transaction"]>[0]>[0];
