@@ -1,5 +1,5 @@
 import { err, safe } from "@rectangular-labs/result";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { type DB, schema } from "../../client";
 import type { seoProjectUpdateSchema } from "../../schema/seo";
 
@@ -11,7 +11,14 @@ export async function updateSeoProject(
     db
       .update(schema.seoProject)
       .set(values)
-      .where(eq(schema.seoProject.id, values.id))
+      .where(
+        and(
+          eq(schema.seoProject.id, values.id),
+          values.organizationId
+            ? eq(schema.seoProject.organizationId, values.organizationId)
+            : undefined,
+        ),
+      )
       .returning(),
   );
   if (!result.ok) {

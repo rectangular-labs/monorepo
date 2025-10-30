@@ -1,3 +1,4 @@
+export * from "./seo/content-campaign-operations";
 export * from "./seo/content-operations";
 export * from "./seo/gsc-property-operations";
 export * from "./seo/project-operations";
