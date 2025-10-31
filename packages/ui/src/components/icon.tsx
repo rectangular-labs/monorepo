@@ -31,6 +31,8 @@ import {
   MoveRightIcon,
   MoveUpRightIcon,
   OctagonAlertIcon,
+  PanelLeftCloseIcon,
+  PanelLeftIcon,
   PartyPopperIcon,
   PhoneCallIcon,
   PlusIcon,
@@ -85,6 +87,8 @@ export const MoreHorizontal = MoreHorizontalIcon;
 export const MoveDownLeft = MoveDownLeftIcon;
 export const MoveRight = MoveRightIcon;
 export const MoveUpRight = MoveUpRightIcon;
+export const PanelLeft = PanelLeftIcon;
+export const PanelLeftClose = PanelLeftCloseIcon;
 export const PartyPopper = PartyPopperIcon;
 export const PhoneCall = PhoneCallIcon;
 export const Plus = PlusIcon;
