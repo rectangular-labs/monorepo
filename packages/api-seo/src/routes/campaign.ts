@@ -4,8 +4,8 @@ import {
   createContentCampaign,
   getDefaultContentCampaign,
 } from "@rectangular-labs/db/operations";
+import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/db/parsers";
 import { type } from "arktype";
-import { CAMPAIGN_DEFAULT_TITLE } from "../../../db/src/schema-parsers/content-campaign-parser";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
