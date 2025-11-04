@@ -6,10 +6,10 @@ import {
 import { Separator } from "@rectangular-labs/ui/components/ui/separator";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ChatPanel } from "~/components/chat-panel";
 import { getApiClientRq } from "~/lib/api";
 import { CampaignHeader } from "~/routes/_authed/$organizationSlug_/-components/campaign-header";
 import { CampaignsSidebar } from "~/routes/_authed/$organizationSlug_/-components/campaigns-sidebar";
+import { ChatPanel } from "~/routes/_authed/$organizationSlug_/-components/chat-panel";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId",
@@ -103,10 +103,8 @@ function PageComponent() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         {/* Main workspace: chat for now */}
-        <ResizablePanel defaultSize={78} minSize={40}>
-          <div className="h-full p-3">
-            <ChatPanel />
-          </div>
+        <ResizablePanel className="bg-muted p-1" defaultSize={78} minSize={40}>
+          <ChatPanel />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
