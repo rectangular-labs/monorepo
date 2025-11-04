@@ -147,12 +147,7 @@ export function AppHeader() {
             </>
           )}
         </ol>
-        {activeOrganization && (
-          <UserDropdown
-            organizationSlug={activeOrganization.slug}
-            user={session?.user}
-          />
-        )}
+        {activeOrganization && <UserDropdown user={session?.user} />}
       </nav>
     </header>
   );
