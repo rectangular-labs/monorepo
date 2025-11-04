@@ -29,15 +29,15 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.16",
-    "@ai-sdk/openai": "^2.0.39",
+    "@ai-sdk/google": "^2.0.27",
+    "@ai-sdk/openai": "^2.0.62",
     "@orama/orama": "^3.1.14",
     "@rectangular-labs/dataforseo": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "@trigger.dev/sdk": "4.0.4",
-    "ai": "^5.0.57",
+    "ai": "^5.0.87",
     "arktype": "^2.1.23",
     "crawlee": "^3.15.0",
     "defuddle": "^0.6.6",
