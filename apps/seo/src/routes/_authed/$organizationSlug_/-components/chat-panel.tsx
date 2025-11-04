@@ -51,14 +51,22 @@ import {
 } from "@rectangular-labs/ui/components/ai-elements/sources";
 import { Copy, Globe, RefreshCcw } from "@rectangular-labs/ui/components/icon";
 import { Fragment, useState } from "react";
-import { getUserVMClient } from "~/lib/api";
+import { getApiClient } from "~/lib/api";
 
 const models = [
   { name: "GPT 4o", value: "openai/gpt-4o" },
   { name: "Deepseek R1", value: "deepseek/deepseek-r1" },
 ];
 
-export function ChatPanel() {
+export function ChatPanel({
+  campaignId,
+  projectId,
+  organizationId,
+}: {
+  campaignId: string;
+  projectId: string;
+  organizationId: string;
+}) {
   const [input, setInput] = useState("");
   const [model, setModel] = useState<string>(models[0]?.value ?? "");
   const [webSearch, setWebSearch] = useState(false);
@@ -66,8 +74,11 @@ export function ChatPanel() {
     transport: {
       async sendMessages(options) {
         return eventIteratorToUnproxiedDataStream(
-          await getUserVMClient().content.write(
+          await getApiClient().campaign.write(
             {
+              id: campaignId,
+              projectId,
+              organizationId,
               chatId: options.chatId,
               messages: options.messages,
             },

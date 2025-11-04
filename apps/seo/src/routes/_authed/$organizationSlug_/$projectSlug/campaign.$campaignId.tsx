@@ -104,7 +104,11 @@ function PageComponent() {
         <ResizableHandle withHandle />
         {/* Main workspace: chat for now */}
         <ResizablePanel className="bg-muted p-1" defaultSize={78} minSize={40}>
-          <ChatPanel />
+          <ChatPanel
+            campaignId={campaignId}
+            organizationId={project.organizationId}
+            projectId={project.id}
+          />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

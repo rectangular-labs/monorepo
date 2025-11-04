@@ -39,7 +39,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.16",
+    "@ai-sdk/anthropic": "^2.0.41",
+    "@ai-sdk/google": "^2.0.27",
+    "@ai-sdk/openai": "^2.0.62",
     "@orpc/client": "^1.10.0",
     "@orpc/contract": "^1.10.0",
     "@orpc/server": "^1.10.0",
@@ -51,7 +53,7 @@
     "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/task": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.57",
+    "ai": "^5.0.87",
     "arktype": "^2.1.23",
     "loro-crdt": "^1.8.5",
     "unstorage": "^1.17.1"
