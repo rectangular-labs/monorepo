@@ -24,12 +24,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/select";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
-import {
-  createFileRoute,
-  Link,
-  notFound,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -47,7 +42,6 @@ export const Route = createFileRoute(
         },
       }),
     );
-    if (!activeProject) throw notFound();
     await context.queryClient.ensureInfiniteQueryData(
       getApiClientRq().campaign.list.infiniteOptions({
         input: (pageParam) => ({
@@ -265,7 +259,7 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   onClick={() => {
-  const sessionPath = `${window.location.origin}/${organizationSlug}/${projectSlug}/campaign/${campaign.id}`;
+                    const sessionPath = `${window.location.origin}/${organizationSlug}/${projectSlug}/campaign/${campaign.id}`;
                     void navigator.clipboard.writeText(sessionPath);
                   }}
                 >
@@ -334,10 +328,9 @@ function NewCampaignButton({
         void navigate({
           from: "/$organizationSlug/$projectSlug/campaign",
           to: "/$organizationSlug/$projectSlug/campaign/$campaignId",
-          params: (prev) => ({
-            ...prev,
+          params: {
             campaignId: data.id,
-          }),
+          },
         });
       },
       onError: (error) => {
