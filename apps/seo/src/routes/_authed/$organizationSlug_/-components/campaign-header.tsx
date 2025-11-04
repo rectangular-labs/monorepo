@@ -8,8 +8,8 @@ import {
 import { InlineEdit } from "@rectangular-labs/ui/components/ui/inline-edit";
 import { getInitials } from "@rectangular-labs/ui/utils/format/initials";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { Link, useParams } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { getFaviconUrl } from "~/lib/url";
 import { UserDropdown } from "~/routes/_authed/$organizationSlug/-components/user-dropdown";
@@ -31,12 +31,17 @@ export function CampaignHeader({
   initialTitle,
 }: CampaignHeaderProps) {
   const queryClient = useQueryClient();
-
+  const { organizationSlug, projectSlug } = useParams({
+    from: "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId",
+  });
   const { data: sessionData } = useQuery(
     getApiClientRq().auth.session.current.queryOptions(),
   );
   const faviconUrl = getFaviconUrl(projectWebsiteUrl);
   const [title, setTitle] = useState(initialTitle);
+  useEffect(() => {
+    setTitle(initialTitle);
+  }, [initialTitle]);
 
   const { mutateAsync: updateTitle } = useMutation(
     getApiClientRq().campaign.update.mutationOptions({
@@ -90,7 +95,7 @@ export function CampaignHeader({
           />
           <ul className="flex items-center gap-4 text-muted-foreground text-sm">
             <NavLink
-              from="/$organizationSlug/$projectSlug/campaign/$campaignId"
+              params={{ organizationSlug, projectSlug, campaignId }}
               to="/$organizationSlug/$projectSlug/campaign/$campaignId"
             >
               Edit
@@ -99,7 +104,7 @@ export function CampaignHeader({
               activeOptions={{
                 exact: true,
               }}
-              from="/$organizationSlug/$projectSlug/campaign/$campaignId"
+              params={{ organizationSlug, projectSlug }}
               to="/$organizationSlug/$projectSlug/campaign"
             >
               Review & Publish
