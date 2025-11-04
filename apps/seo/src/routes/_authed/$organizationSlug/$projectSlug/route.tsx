@@ -1,10 +1,6 @@
-import {
-  createFileRoute,
-  Link,
-  notFound,
-  Outlet,
-} from "@tanstack/react-router";
+import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
+import { NavLink } from "../../-components/nav-link";
 
 export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
   {
@@ -40,51 +36,38 @@ export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
 
 function RouteComponent() {
   const { organizationSlug, projectSlug } = Route.useParams();
-  const activeProps = {
-    className:
-      "text-foreground after:absolute after:bottom-[-8px] after:left-0 after:h-[2px] after:w-full after:bg-current after:content-['']",
-  };
-  const className = "relative transition-colors hover:text-foreground";
 
   return (
     <div>
       <ul className="flex items-center gap-4 overflow-x-auto border-b px-4 pb-2 text-muted-foreground">
-        <Link
+        <NavLink
           activeOptions={{
             exact: true,
           }}
-          activeProps={activeProps}
-          className={className}
           params={{ organizationSlug, projectSlug }}
           to="/$organizationSlug/$projectSlug"
         >
           Overview
-        </Link>
-        <Link
-          activeProps={activeProps}
-          className={className}
+        </NavLink>
+        <NavLink
           params={{ organizationSlug, projectSlug }}
           to="/$organizationSlug/$projectSlug/calendar"
         >
           Calendar
-        </Link>
-        <Link
-          activeProps={activeProps}
-          className={className}
+        </NavLink>
+        <NavLink
           params={{ organizationSlug, projectSlug }}
           to="/$organizationSlug/$projectSlug/campaign"
         >
           Campaigns
-        </Link>
+        </NavLink>
 
-        <Link
-          activeProps={activeProps}
-          className={className}
+        <NavLink
           params={{ organizationSlug, projectSlug }}
           to="/$organizationSlug/$projectSlug/settings"
         >
           Settings
-        </Link>
+        </NavLink>
       </ul>
 
       <main className="mx-auto max-w-7xl">
