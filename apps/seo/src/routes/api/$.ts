@@ -36,7 +36,10 @@ async function handle({ request }: { request: Request }) {
     return await seoBlogSearch.GET(request);
   }
 
-  if (new URL(request.url).pathname.startsWith("/api/user-vm/")) {
+  if (
+    new URL(request.url).pathname.startsWith("/api/user-vm/") &&
+    "USER_VM_CONTAINER" in CloudflareEnv
+  ) {
     // TODO: cloudflare session ID
     const userVmInstance = CloudflareEnv.USER_VM_CONTAINER.getByName(
       new URL(request.url).pathname,

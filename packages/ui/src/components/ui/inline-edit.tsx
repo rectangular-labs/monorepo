@@ -270,7 +270,7 @@ const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
       (event: React.KeyboardEvent) => {
         if (event.key === "Enter" && saveOnEnter) {
           event.preventDefault();
-          saveChanges();
+          void saveChanges();
         } else if (event.key === "Escape" && cancelOnEscape) {
           event.preventDefault();
           cancelEditing();
@@ -289,7 +289,7 @@ const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
 
     const handleInputBlur = React.useCallback(() => {
       if (saveOnBlur && !showActionButtons) {
-        saveChanges();
+        void saveChanges();
       } else if (!showActionButtons) {
         endEditing();
       }
