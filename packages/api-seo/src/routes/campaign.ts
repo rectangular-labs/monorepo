@@ -48,6 +48,7 @@ const list = withOrganizationIdBase
 const get = withOrganizationIdBase
   .route({ method: "GET", path: "/{id}" })
   .input(type({ id: "string", projectId: "string", organizationId: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .output(type({ campaign: schema.seoContentCampaignSelectSchema }))
   .handler(async ({ context, input }) => {
     const campaign = await context.db.query.seoContentCampaign.findFirst({
@@ -55,7 +56,7 @@ const get = withOrganizationIdBase
         and(
           eq(table.id, input.id),
           eq(table.projectId, input.projectId),
-          eq(table.organizationId, context.session.activeOrganizationId),
+          eq(table.organizationId, context.organization.id),
         ),
     });
     if (!campaign) {
@@ -110,12 +111,28 @@ const create = withOrganizationIdBase
 
 const update = withOrganizationIdBase
   .route({ method: "PATCH", path: "/{id}" })
-  .input(schema.seoContentCampaignUpdateSchema)
+  .input(
+    schema.seoContentCampaignUpdateSchema.merge(
+      type({ organizationId: "string" }),
+    ),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .output(schema.seoContentCampaignSelectSchema)
   .handler(async ({ context, input }) => {
+    if (input.title === CAMPAIGN_DEFAULT_TITLE) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Title cannot be the default title",
+      });
+    }
+    if (!input.title && !input.status && !input.workspaceBlobUri) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "At least one field must be provided",
+      });
+    }
     const [updated] = await context.db
       .update(schema.seoContentCampaign)
       .set({
+        title: input.title,
         status: input.status,
         workspaceBlobUri: input.workspaceBlobUri,
       })
@@ -123,10 +140,7 @@ const update = withOrganizationIdBase
         and(
           eq(schema.seoContentCampaign.id, input.id),
           eq(schema.seoContentCampaign.projectId, input.projectId),
-          eq(
-            schema.seoContentCampaign.organizationId,
-            context.session.activeOrganizationId,
-          ),
+          eq(schema.seoContentCampaign.organizationId, context.organization.id),
         ),
       )
       .returning();
