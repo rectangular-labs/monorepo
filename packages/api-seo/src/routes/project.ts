@@ -65,12 +65,7 @@ const get = protectedBase
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      "...": schema.seoProjectSelectSchema,
-      tasks: schema.seoTaskRunSelectSchema.array(),
-    }).or(type.null),
-  )
+  .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
     if (input.identifier.startsWith("http")) {
       const row = await context.db.query.seoProject.findFirst({
@@ -78,16 +73,13 @@ const get = protectedBase
           eq(schema.seoProject.websiteUrl, input.identifier),
           eq(schema.seoProject.organizationId, context.organization.id),
         ),
-        with: {
-          tasks: {
-            orderBy(fields, { desc }) {
-              return [desc(fields.createdAt)];
-            },
-            limit: 1,
-          },
-        },
       });
-      return row ?? null;
+      if (!row) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "No project found with website URL.",
+        });
+      }
+      return row;
     }
     const isSlug = type("string.uuid")(input.identifier) instanceof type.errors;
     const row = await context.db.query.seoProject.findFirst({
@@ -97,16 +89,13 @@ const get = protectedBase
           : eq(schema.seoProject.id, input.identifier),
         eq(schema.seoProject.organizationId, context.organization.id),
       ),
-      with: {
-        tasks: {
-          orderBy(fields, { desc }) {
-            return [desc(fields.createdAt)];
-          },
-          limit: 1,
-        },
-      },
     });
-    return row ?? null;
+    if (!row) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No project found with identifier.",
+      });
+    }
+    return row;
   });
 
 const setUpWorkspace = protectedBase
