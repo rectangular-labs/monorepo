@@ -4,7 +4,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { index, text, uuid } from "drizzle-orm/pg-core";
 import {
   CAMPAIGN_DEFAULT_STATUS,
@@ -47,7 +47,7 @@ export const seoContentCampaign = pgSeoTable(
     })
       .notNull()
       .default(CAMPAIGN_DEFAULT_STATUS),
-    workspaceBlobUri: text(),
+    workspaceBlobUri: text().notNull(),
     ...timestamps,
   },
   (table) => [
@@ -55,6 +55,10 @@ export const seoContentCampaign = pgSeoTable(
     index("seo_content_campaign_project_idx").on(table.projectId),
     index("seo_content_campaign_created_by_user_idx").on(table.createdByUserId),
     index("seo_content_campaign_status_idx").on(table.status),
+    index("seo_content_campaign_title_idx").using(
+      "gin",
+      sql`to_tsvector('english', ${table.title})`,
+    ),
   ],
 );
 

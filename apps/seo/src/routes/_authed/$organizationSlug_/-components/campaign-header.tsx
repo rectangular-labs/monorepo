@@ -71,7 +71,7 @@ export function CampaignHeader({
   };
 
   return (
-    <div className="flex h-16 items-center justify-between px-4">
+    <div className="flex h-16 items-center justify-between bg-background px-4">
       <div className="flex items-center gap-4">
         <Link to="..">
           <Avatar className="size-6">

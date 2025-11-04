@@ -62,7 +62,6 @@ function PageComponent() {
       },
     }),
   );
-
   const {
     data: { campaign },
   } = useSuspenseQuery(
@@ -86,23 +85,23 @@ function PageComponent() {
       />
       <Separator />
       <ResizablePanelGroup
-        className="h-[calc(100vh-10rem)]"
+        className="max-h-[calc(100vh-70px)] min-h-[calc(100vh-70px)]"
         direction="horizontal"
       >
         {/* Left sidebar */}
         <ResizablePanel
-          className="border-r"
+          className="bg-muted p-1"
           defaultSize={22}
           maxSize={30}
           minSize={15}
         >
           <CampaignsSidebar
+            currentCampaign={campaign}
             organizationId={project?.organizationId ?? ""}
             projectId={project?.id ?? ""}
           />
         </ResizablePanel>
         <ResizableHandle withHandle />
-
         {/* Main workspace: chat for now */}
         <ResizablePanel defaultSize={78} minSize={40}>
           <div className="h-full p-3">

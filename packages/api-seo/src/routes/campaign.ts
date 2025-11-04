@@ -8,6 +8,7 @@ import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/db/parsers";
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { createWorkspaceBlobUri } from "../lib/workspace";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -18,6 +19,7 @@ const list = withOrganizationIdBase
       limit: "1<=number<=100 = 20",
       "cursor?": "string.uuid|undefined",
       "status?": type("'draft'|'review'|'accepted'|'denied'|undefined"),
+      "search?": "string|undefined",
     }),
   )
   .output(
@@ -29,12 +31,14 @@ const list = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
     const campaigns = await context.db.query.seoContentCampaign.findMany({
-      where: (table, { eq, and, ne }) =>
+      where: (table, { eq, and, ne, ilike, lt }) =>
         and(
           eq(table.projectId, input.projectId),
           eq(table.organizationId, input.organizationId),
           ne(table.title, CAMPAIGN_DEFAULT_TITLE),
+          input.cursor ? lt(table.id, input.cursor) : undefined,
           input.status ? eq(table.status, input.status) : undefined,
+          input.search ? ilike(table.title, `%${input.search}%`) : undefined,
         ),
       orderBy: (fields, { desc }) => [desc(fields.id)],
       limit: input.limit + 1,
@@ -97,6 +101,10 @@ const create = withOrganizationIdBase
         projectId: input.projectId,
         organizationId: context.organization.id,
         createdByUserId: context.user.id,
+        workspaceBlobUri: createWorkspaceBlobUri({
+          orgId: context.organization.id,
+          projectId: input.projectId,
+        }),
       },
     );
     if (!createContentCampaignResult.ok) {
