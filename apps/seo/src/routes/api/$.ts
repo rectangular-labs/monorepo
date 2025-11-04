@@ -38,7 +38,11 @@ async function handle({ request }: { request: Request }) {
 
   if (
     new URL(request.url).pathname.startsWith("/api/user-vm/") &&
-    "USER_VM_CONTAINER" in CloudflareEnv
+    "USER_VM_CONTAINER" in CloudflareEnv &&
+    typeof CloudflareEnv.USER_VM_CONTAINER === "object" &&
+    CloudflareEnv.USER_VM_CONTAINER &&
+    "getByName" in CloudflareEnv.USER_VM_CONTAINER &&
+    typeof CloudflareEnv.USER_VM_CONTAINER.getByName === "function"
   ) {
     // TODO: cloudflare session ID
     const userVmInstance = CloudflareEnv.USER_VM_CONTAINER.getByName(
