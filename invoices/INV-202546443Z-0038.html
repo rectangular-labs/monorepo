@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice INV-202546443Z-0038</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .company-info h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .company-info p {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 2px 0;
+        }
+        
+        .invoice-meta {
+            text-align: right;
+        }
+        
+        .invoice-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+        
+        .invoice-details {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .invoice-details p {
+            margin: 4px 0;
+        }
+        
+        .invoice-details strong {
+            color: #374151;
+        }
+        
+        .parties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 48px;
+        }
+        
+        .party h2 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+        
+        .party-details {
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .party-details p {
+            margin: 4px 0;
+        }
+        
+        .party-details strong {
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .line-items {
+            margin-bottom: 48px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        thead {
+            background-color: #f9fafb;
+        }
+        
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        th:last-child {
+            text-align: right;
+        }
+        
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+        
+        td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .item-description {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        
+        .totals {
+            margin-left: auto;
+            width: 300px;
+            margin-bottom: 48px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 14px;
+        }
+        
+        .total-row.grand-total {
+            border-top: 2px solid #e5e7eb;
+            margin-top: 8px;
+            padding-top: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .payment-info {
+            background-color: #f9fafb;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+            page-break-before: always;
+        }
+        
+        .payment-info h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+        }
+        
+        .payment-details {
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .payment-details p {
+            margin: 6px 0;
+        }
+        
+        .payment-details strong {
+            display: inline-block;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #9ca3af;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media print {
+            body {
+                padding: 20px;
+            }
+            
+            @page {
+                margin: 0;
+            }
+            
+            html, body {
+                margin: 0;
+                padding: 40px;
+            }
+        }
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-header">
+        <div class="company-info">
+            <h1>FLUID POSTS PTE. LTD.</h1>
+            <p>42 Rosyth Rd</p>
+            <p>Singapore 546208</p>
+            <p>UEN: 202546443Z</p>
+            <p>winston@fluidposts.com</p>
+        </div>
+        <div class="invoice-meta">
+            <div class="invoice-title">INVOICE</div>
+            <div class="invoice-details">
+                <p><strong>Invoice Number:</strong> INV-202546443Z-0038</p>
+                <p><strong>Invoice Date:</strong> November 3, 2025</p>
+                <p><strong>Payment Due:</strong> November 10, 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="parties">
+        <div class="party">
+            <h2>Bill To</h2>
+            <div class="party-details">
+                <p><strong>PT Quantum Teknologi Nusantara</strong></p>
+                <p>Graha BIP</p>
+                <p>Jl. Gatot Subroto No.23, RT.2/RW.2</p>
+                <p>Karet Semanggi, Kecamatan Setiabudi</p>
+                <p>Kota Jakarta Selatan</p>
+                <p>Daerah Khusus Ibukota Jakarta 12930</p>
+                <p style="margin-top: 12px;">finance1.quantumteknologi@gmail.com</p>
+            </div>
+        </div>
+        <div class="party">
+            <h2>Service Period</h2>
+            <div class="party-details">
+                <p>November 3, 2025 - December 2, 2025</p>
+                <p style="margin-top: 12px; color: #6b7280;">Recurring: Monthly (Annual commitment)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="line-items">
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div><strong>Content Strategist (Annual plan, billed monthly)</strong></div>
+                        <div class="item-description">Billing month: November 2025</div>
+                    </td>
+                    <td>$1,190.00 USD</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal:</span>
+            <span>$1,190.00 USD</span>
+        </div>
+        <div class="total-row grand-total">
+            <span>Total Due:</span>
+            <span>$1,190.00 USD</span>
+        </div>
+    </div>
+
+    <div class="payment-info">
+        <h2>Payment Instructions</h2>
+        <div class="payment-details">
+            <p><strong>Beneficiary Name:</strong> YouBiz on behalf of FLUID POSTS PTE. LTD.</p>
+            <p><strong>Beneficiary Address:</strong> 12 Marina Boulevard, DBS Asia Central, Marina Bay Financial Centre Tower 3, SINGAPORE 018982</p>
+            <p><strong>Account Number:</strong> 885165868882</p>
+            <p><strong>Bank Name:</strong> DBS Bank Ltd</p>
+            <p><strong>SWIFT / TT:</strong> DBSSSGSG</p>
+            <p style="margin-top: 16px; color: #6b7280;">Please include invoice number <strong style="color: #374151;">INV-202546443Z-0038</strong> in the payment reference.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for your business.</p>
+    </div>
+</body>
+</html>
+
