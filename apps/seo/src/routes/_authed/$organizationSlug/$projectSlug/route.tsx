@@ -16,6 +16,8 @@ export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
       if (!activeProject) throw notFound();
 
       if (!activeProject.workspaceBlobUri) {
+        // Note, there's technically a possibility of a race condition here if multiple users are trying to access the new project at the same time.
+        // Should be highly unlikely though, but just noting it here.
         await getApiClient().project.setUpWorkspace({
           projectId: activeProject.id,
           organizationIdentifier: params.organizationSlug,
