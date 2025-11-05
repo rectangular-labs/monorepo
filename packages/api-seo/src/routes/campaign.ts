@@ -1,5 +1,5 @@
 import { ORPCError } from "@orpc/server";
-import { and, eq, schema } from "@rectangular-labs/db";
+import { and, eq, schema, sql } from "@rectangular-labs/db";
 import {
   createContentCampaign,
   getDefaultContentCampaign,
@@ -39,7 +39,10 @@ const list = withOrganizationIdBase
           ne(table.title, CAMPAIGN_DEFAULT_TITLE),
           input.cursor ? lt(table.id, input.cursor) : undefined,
           input.status ? eq(table.status, input.status) : undefined,
-          input.search ? ilike(table.title, `%${input.search}%`) : undefined,
+          // https://orm.drizzle.team/docs/guides/postgresql-full-text-search
+          input.search
+            ? sql`to_tsvector('english', ${table.title}) @@ websearch_to_tsquery('english', ${input.search})`
+            : undefined,
         ),
       orderBy: (fields, { desc }) => [desc(fields.id)],
       limit: input.limit + 1,
