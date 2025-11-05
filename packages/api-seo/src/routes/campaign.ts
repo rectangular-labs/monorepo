@@ -32,7 +32,7 @@ const list = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
     const campaigns = await context.db.query.seoContentCampaign.findMany({
-      where: (table, { eq, and, ne, ilike, lt }) =>
+      where: (table, { eq, and, ne, lt }) =>
         and(
           eq(table.projectId, input.projectId),
           eq(table.organizationId, input.organizationId),
