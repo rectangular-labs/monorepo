@@ -37,7 +37,7 @@ export async function processCluster(args: {
     estimatedSearchVolume: number | null;
   })[];
 }): Promise<typeof schema.seoContentSelectSchema.infer | null> {
-  const { db, project, pageUrl, keywords } = args;
+  const { db, pageUrl, keywords } = args;
 
   // Step 1: Fetch page content as markdown
   let pageMarkdown = "";
@@ -159,7 +159,7 @@ export async function processCluster(args: {
   // Keyword difficulty 30%
   // Intent 20%
   // Current position 10%
-  const impactScore =
+  const _impactScore =
     (totalSearchVolume / 100) * 0.4 +
     (100 - avgKeywordDifficulty) * 0.3 +
     (primaryKeywordData?.intent === "transactional"

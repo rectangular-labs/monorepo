@@ -1,0 +1,1 @@
+ALTER TABLE "seo_content_campaign" ALTER COLUMN "title" SET DEFAULT 'Untitled Campaign';

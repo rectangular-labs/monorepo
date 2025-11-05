@@ -63,7 +63,7 @@ export const Route = createFileRoute("/_authed/onboarding/")({
 function getInitialStep(
   type: "new-user" | "new-project",
   organizations: Organization[],
-  project: RouterOutputs["project"]["get"],
+  project: RouterOutputs["project"]["get"] | null,
   gscConnectionStatus: {
     hasGscScopes: boolean;
   } | null,

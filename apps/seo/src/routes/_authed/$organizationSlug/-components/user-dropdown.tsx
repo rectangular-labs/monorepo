@@ -19,6 +19,7 @@ import {
   DropDrawerSeparator,
   DropDrawerTrigger,
 } from "@rectangular-labs/ui/components/ui/dropdrawer";
+import { getInitials } from "@rectangular-labs/ui/utils/format/initials";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
@@ -26,20 +27,12 @@ import { getApiClientRq } from "~/lib/api";
 type User = NonNullable<RouterOutputs["auth"]["session"]["current"]>["user"];
 export type UserDropdownProps = {
   user?: User | undefined;
-  organizationSlug: string;
 };
 
 export function UserDropdown({ user }: UserDropdownProps) {
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n: string) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : user?.email
-      ? user.email[0]?.toUpperCase()
-      : "U";
+  const userInitials = getInitials(user?.name ?? user?.email ?? "")
+    .toUpperCase()
+    .slice(0, 2);
   const { setTheme } = useTheme();
   const toggleTheme = () => {
     setTheme((theme) => (theme === "dark" ? "light" : "dark"));

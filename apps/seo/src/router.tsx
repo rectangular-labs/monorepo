@@ -3,6 +3,7 @@ import { createRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { DefaultCatchBoundary } from "./components/error-boundary";
 import { NotFound } from "./components/not-found";
+import { Pending } from "./components/pending";
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
@@ -20,6 +21,9 @@ export function getRouter() {
     defaultPreload: "intent",
     defaultErrorComponent: DefaultCatchBoundary,
     defaultNotFoundComponent: () => <NotFound />,
+    defaultPendingComponent: Pending,
+    defaultPendingMs: 500,
+    defaultPendingMinMs: 500,
     scrollRestoration: true,
     defaultStructuralSharing: true,
   });

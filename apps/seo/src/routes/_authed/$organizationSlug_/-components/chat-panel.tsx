@@ -50,28 +50,23 @@ import {
   SourcesTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/sources";
 import { Copy, Globe, RefreshCcw } from "@rectangular-labs/ui/components/icon";
-import { createFileRoute } from "@tanstack/react-router";
 import { Fragment, useState } from "react";
-import { getUserVMClient } from "~/lib/api";
-
-export const Route = createFileRoute(
-  "/_authed/$organizationSlug/$projectSlug/content/write",
-)({
-  component: ChatBotDemo,
-});
+import { getApiClient } from "~/lib/api";
 
 const models = [
-  {
-    name: "GPT 4o",
-    value: "openai/gpt-4o",
-  },
-  {
-    name: "Deepseek R1",
-    value: "deepseek/deepseek-r1",
-  },
+  { name: "GPT 4o", value: "openai/gpt-4o" },
+  { name: "Deepseek R1", value: "deepseek/deepseek-r1" },
 ];
 
-function ChatBotDemo() {
+export function ChatPanel({
+  campaignId,
+  projectId,
+  organizationId,
+}: {
+  campaignId: string;
+  projectId: string;
+  organizationId: string;
+}) {
   const [input, setInput] = useState("");
   const [model, setModel] = useState<string>(models[0]?.value ?? "");
   const [webSearch, setWebSearch] = useState(false);
@@ -79,8 +74,11 @@ function ChatBotDemo() {
     transport: {
       async sendMessages(options) {
         return eventIteratorToUnproxiedDataStream(
-          await getUserVMClient().content.write(
+          await getApiClient().campaign.write(
             {
+              id: campaignId,
+              projectId,
+              organizationId,
               chatId: options.chatId,
               messages: options.messages,
             },
@@ -116,9 +114,8 @@ function ChatBotDemo() {
     );
     setInput("");
   };
-
   return (
-    <div className="flex h-[calc(100vh-100px)] flex-col">
+    <div className="flex h-full flex-col gap-4 rounded-md bg-background p-3">
       <Conversation className="h-full">
         <ConversationContent>
           {messages.map((message) => (
@@ -204,7 +201,7 @@ function ChatBotDemo() {
         <ConversationScrollButton />
       </Conversation>
 
-      <PromptInput className="mt-4" globalDrop multiple onSubmit={handleSubmit}>
+      <PromptInput globalDrop multiple onSubmit={handleSubmit}>
         <PromptInputBody>
           <PromptInputAttachments>
             {(attachment) => <PromptInputAttachment data={attachment} />}

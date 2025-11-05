@@ -7,6 +7,7 @@ import {
 import contract from "./_open-api/orpc-contract.json";
 import type { Router, RouterClient } from "./types";
 
+export { eventIteratorToUnproxiedDataStream } from "@orpc/client";
 export const rpcClient = (baseUrl: string): RouterClient =>
   createORPCClient(createRpcLink({ baseUrl, path: "/api/rpc" }));
 

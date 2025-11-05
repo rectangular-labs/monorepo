@@ -17,51 +17,63 @@
   // mostly a workaround to avoid issues with the build and next themes
   "keep_names": false,
   // container need containers, durable_objects, and migrations settings
-  "containers": [
+  // "containers": [
+  //   {
+  //     "class_name": "UserVMContainer",
+  //     "image": "../../packages/api-user-vm/Dockerfile",
+  //     "image_build_context": "../..",
+  //     "name": "user-vm-container"
+  //   }
+  // ],
+  // "durable_objects": {
+  //   "bindings": [
+  //     {
+  //       "class_name": "UserVMContainer",
+  //       "name": "USER_VM_CONTAINER"
+  //     }
+  //   ]
+  // },
+  // "migrations": [
+  //   {
+  //     "new_sqlite_classes": ["UserVMContainer"],
+  //     "tag": "v1"
+  //   }
+  // ],
+  "r2_buckets": [
     {
-      "class_name": "UserVMContainer",
-      "image": "../../packages/api-user-vm/Dockerfile",
-      "image_build_context": "../..",
-      "name": "user-vm-container"
-    }
-  ],
-  "durable_objects": {
-    "bindings": [
-      {
-        "class_name": "UserVMContainer",
-        "name": "USER_VM_CONTAINER"
-      }
-    ]
-  },
-  "migrations": [
-    {
-      "new_sqlite_classes": ["UserVMContainer"],
-      "tag": "v1"
+      "bucket_name": "seo-content-workspaces",
+      "binding": "seo_content_workspaces"
     }
   ],
   "env": {
     "production": {
-      "containers": [
+      // "containers": [
+      //   {
+      //     "class_name": "UserVMContainer",
+      //     "image": "../../packages/api-user-vm/Dockerfile",
+      //     "image_build_context": "../..",
+      //     "name": "user-vm-container-production",
+      //     "instance_type": "basic"
+      //   }
+      // ],
+      // "durable_objects": {
+      //   "bindings": [
+      //     {
+      //       "class_name": "UserVMContainer",
+      //       "name": "USER_VM_CONTAINER"
+      //     }
+      //   ]
+      // },
+      // "migrations": [
+      //   {
+      //     "new_sqlite_classes": ["UserVMContainer"],
+      //     "tag": "v1"
+      //   }
+      // ],
+      "r2_buckets": [
         {
-          "class_name": "UserVMContainer",
-          "image": "../../packages/api-user-vm/Dockerfile",
-          "image_build_context": "../..",
-          "name": "user-vm-container-production",
-          "instance_type": "basic"
-        }
-      ],
-      "durable_objects": {
-        "bindings": [
-          {
-            "class_name": "UserVMContainer",
-            "name": "USER_VM_CONTAINER"
-          }
-        ]
-      },
-      "migrations": [
-        {
-          "new_sqlite_classes": ["UserVMContainer"],
-          "tag": "v1"
+          "bucket_name": "seo-content-workspaces-production",
+          "binding": "seo_content_workspaces"
         }
       ],
       "routes": [
@@ -72,28 +84,34 @@
       ]
     },
     "{env.PULL_REQUEST}": {
-      "containers": [
+      // "containers": [
+      //   {
+      //     "class_name": "UserVMContainer",
+      //     "image": "../../packages/api-user-vm/Dockerfile",
+      //     "image_build_context": "../..",
+      //     "name": "user-vm-container-{env.PULL_REQUEST}",
+      //     "max_instances": 2,
+      //     "instance_type": "lite"
+      //   }
+      // ],
+      // "durable_objects": {
+      //   "bindings": [
+      //     {
+      //       "class_name": "UserVMContainer",
+      //       "name": "USER_VM_CONTAINER"
+      //     }
+      //   ]
+      // },
+      // "migrations": [
+      //   {
+      //     "new_sqlite_classes": ["UserVMContainer"],
+      //     "tag": "v1"
+      //   }
+      // ],
+      "r2_buckets": [
         {
-          "class_name": "UserVMContainer",
-          "image": "../../packages/api-user-vm/Dockerfile",
-          "image_build_context": "../..",
-          "name": "user-vm-container-{env.PULL_REQUEST}",
-          "max_instances": 2,
-          "instance_type": "lite"
-        }
-      ],
-      "durable_objects": {
-        "bindings": [
-          {
-            "class_name": "UserVMContainer",
-            "name": "USER_VM_CONTAINER"
-          }
-        ]
-      },
-      "migrations": [
-        {
-          "new_sqlite_classes": ["UserVMContainer"],
-          "tag": "v1"
+          "bucket_name": "seo-content-workspaces-preview",
+          "binding": "seo_content_workspaces"
         }
       ],
       "routes": [

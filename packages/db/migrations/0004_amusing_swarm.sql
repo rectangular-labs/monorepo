@@ -1,0 +1,1 @@
+CREATE INDEX "seo_content_campaign_title_idx" ON "seo_content_campaign" USING gin (to_tsvector('english', "title"));

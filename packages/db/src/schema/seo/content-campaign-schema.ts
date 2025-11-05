@@ -4,9 +4,13 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { index, text, uuid } from "drizzle-orm/pg-core";
-import type { contentSessionStatusSchema } from "../../schema-parsers/content-parsers";
+import {
+  CAMPAIGN_DEFAULT_STATUS,
+  CAMPAIGN_DEFAULT_TITLE,
+  type contentCampaignStatusSchema,
+} from "../../schema-parsers/content-campaign-parser";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
@@ -32,17 +36,17 @@ export const seoContentCampaign = pgSeoTable(
     createdByUserId: text()
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    title: text().notNull(),
+    title: text().notNull().default(CAMPAIGN_DEFAULT_TITLE),
     status: text({
       enum: [
         "draft",
         "review",
         "accepted",
         "denied",
-      ] as const satisfies (typeof contentSessionStatusSchema.infer)[],
+      ] as const satisfies (typeof contentCampaignStatusSchema.infer)[],
     })
       .notNull()
-      .default("draft"),
+      .default(CAMPAIGN_DEFAULT_STATUS),
     workspaceBlobUri: text().notNull(),
     ...timestamps,
   },
@@ -51,6 +55,10 @@ export const seoContentCampaign = pgSeoTable(
     index("seo_content_campaign_project_idx").on(table.projectId),
     index("seo_content_campaign_created_by_user_idx").on(table.createdByUserId),
     index("seo_content_campaign_status_idx").on(table.status),
+    index("seo_content_campaign_title_idx").using(
+      "gin",
+      sql`to_tsvector('english', ${table.title})`,
+    ),
   ],
 );
 
@@ -75,7 +83,14 @@ export const seoContentCampaignRelations = relations(
 
 export const seoContentCampaignInsertSchema = createInsertSchema(
   seoContentCampaign,
-).omit("id", "createdAt", "updatedAt", "organizationId", "createdByUserId");
+).omit(
+  "id",
+  "createdAt",
+  "updatedAt",
+  "organizationId",
+  "createdByUserId",
+  "workspaceBlobUri",
+);
 export const seoContentCampaignSelectSchema =
   createSelectSchema(seoContentCampaign);
 export const seoContentCampaignUpdateSchema = createUpdateSchema(

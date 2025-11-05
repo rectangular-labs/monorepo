@@ -6,6 +6,7 @@ import { createSeoBlogSearchServer } from "@rectangular-labs/content/search";
 import { createDb } from "@rectangular-labs/db";
 import { createFileRoute } from "@tanstack/react-router";
 import { serverEnv } from "~/lib/env";
+import { createWorkspaceStorage } from "~/lib/storage";
 
 const seoBlogSearch = createSeoBlogSearchServer();
 
@@ -35,7 +36,14 @@ async function handle({ request }: { request: Request }) {
     return await seoBlogSearch.GET(request);
   }
 
-  if (new URL(request.url).pathname.startsWith("/api/user-vm/")) {
+  if (
+    new URL(request.url).pathname.startsWith("/api/user-vm/") &&
+    "USER_VM_CONTAINER" in CloudflareEnv &&
+    typeof CloudflareEnv.USER_VM_CONTAINER === "object" &&
+    CloudflareEnv.USER_VM_CONTAINER &&
+    "getByName" in CloudflareEnv.USER_VM_CONTAINER &&
+    typeof CloudflareEnv.USER_VM_CONTAINER.getByName === "function"
+  ) {
     // TODO: cloudflare session ID
     const userVmInstance = CloudflareEnv.USER_VM_CONTAINER.getByName(
       new URL(request.url).pathname,
@@ -64,6 +72,7 @@ async function handle({ request }: { request: Request }) {
   const context = createApiContext({
     url: new URL(request.url),
     reqHeaders: request.headers,
+    workspaceStorage: createWorkspaceStorage(),
   });
 
   const { response } = await openAPIHandler(`${env.VITE_SEO_URL}/api`).handle(

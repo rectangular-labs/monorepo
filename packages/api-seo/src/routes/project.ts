@@ -1,10 +1,13 @@
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
+import { updateSeoProject } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
+import { LoroDoc } from "loro-crdt";
 import { protectedBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { createWorkspaceBlobUri } from "../lib/workspace";
 
 const list = protectedBase
   .route({ method: "GET", path: "/" })
@@ -62,12 +65,7 @@ const get = protectedBase
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      "...": schema.seoProjectSelectSchema,
-      tasks: schema.seoTaskRunSelectSchema.array(),
-    }).or(type.null),
-  )
+  .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
     if (input.identifier.startsWith("http")) {
       const row = await context.db.query.seoProject.findFirst({
@@ -75,16 +73,13 @@ const get = protectedBase
           eq(schema.seoProject.websiteUrl, input.identifier),
           eq(schema.seoProject.organizationId, context.organization.id),
         ),
-        with: {
-          tasks: {
-            orderBy(fields, { desc }) {
-              return [desc(fields.createdAt)];
-            },
-            limit: 1,
-          },
-        },
       });
-      return row ?? null;
+      if (!row) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "No project found with website URL.",
+        });
+      }
+      return row;
     }
     const isSlug = type("string.uuid")(input.identifier) instanceof type.errors;
     const row = await context.db.query.seoProject.findFirst({
@@ -94,16 +89,39 @@ const get = protectedBase
           : eq(schema.seoProject.id, input.identifier),
         eq(schema.seoProject.organizationId, context.organization.id),
       ),
-      with: {
-        tasks: {
-          orderBy(fields, { desc }) {
-            return [desc(fields.createdAt)];
-          },
-          limit: 1,
-        },
-      },
     });
-    return row ?? null;
+    if (!row) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No project found with identifier.",
+      });
+    }
+    return row;
+  });
+
+const setUpWorkspace = protectedBase
+  .route({ method: "POST", path: "/{projectId}/setup-workspace" })
+  .input(type({ projectId: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(type({ workspaceBlobUri: "string" }))
+  .handler(async ({ context, input }) => {
+    const workspaceDoc = new LoroDoc();
+    const workspaceBlobUri = createWorkspaceBlobUri({
+      orgId: context.organization.id,
+      projectId: input.projectId,
+    });
+    await Promise.all([
+      context.workspaceStorage.setSnapshot(
+        workspaceBlobUri,
+        workspaceDoc.export({ mode: "snapshot" }),
+      ),
+      updateSeoProject(context.db, {
+        id: input.projectId,
+        organizationId: context.organization.id,
+        workspaceBlobUri,
+      }),
+    ]);
+
+    return { workspaceBlobUri } as const;
   });
 
 const create = protectedBase
@@ -193,4 +211,4 @@ const remove = protectedBase
 
 export default protectedBase
   .prefix("/organization/{organizationIdentifier}/project")
-  .router({ list, create, update, remove, checkName, get });
+  .router({ list, create, update, remove, checkName, get, setUpWorkspace });

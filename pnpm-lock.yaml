@@ -20,8 +20,8 @@ importers:
   .:
     devDependencies:
       '@biomejs/biome':
-        specifier: 2.2.6
-        version: 2.2.6
+        specifier: 2.3.3
+        version: 2.3.3
       '@changesets/cli':
         specifier: ^2.29.7
         version: 2.29.7(@types/node@24.9.1)
@@ -56,7 +56,7 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(loro-crdt@1.8.5)
       loro-crdt:
-        specifier: ^1.8.0
+        specifier: ^1.8.5
         version: 1.8.5
       loro-mirror:
         specifier: 1.0.0
@@ -155,6 +155,18 @@ importers:
       arktype:
         specifier: ^2.1.23
         version: 2.1.23
+      idb-keyval:
+        specifier: ^6.2.2
+        version: 6.2.2
+      loro-crdt:
+        specifier: ^1.8.5
+        version: 1.8.5
+      loro-mirror:
+        specifier: 1.0.0
+        version: 1.0.0(loro-crdt@1.8.5)
+      loro-mirror-react:
+        specifier: 1.0.0
+        version: 1.0.0(loro-crdt@1.8.5)(loro-mirror@1.0.0(loro-crdt@1.8.5))(react@19.1.1)
       motion:
         specifier: ^12.23.22
         version: 12.23.22(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -167,6 +179,9 @@ importers:
       tanstack-router-sitemap:
         specifier: ^1.0.13
         version: 1.0.13
+      unstorage:
+        specifier: ^1.17.1
+        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(idb-keyval@6.2.2)(ioredis@5.7.0)
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.13.14
@@ -210,6 +225,12 @@ importers:
       vite-plugin-mkcert:
         specifier: ^1.17.8
         version: 1.17.8(vite@7.1.2(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))
+      vite-plugin-top-level-await:
+        specifier: ^1.6.0
+        version: 1.6.0(rollup@4.49.0)(vite@7.1.2(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))
+      vite-plugin-wasm:
+        specifier: ^3.5.0
+        version: 3.5.0(vite@7.1.2(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.3)(vite@7.1.2(@types/node@24.9.1)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.39.0)(tsx@4.20.5)(yaml@2.8.1))
@@ -374,9 +395,15 @@ importers:
 
   packages/api-seo:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^2.0.41
+        version: 2.0.41(zod@4.1.9)
       '@ai-sdk/google':
-        specifier: ^2.0.16
-        version: 2.0.16(zod@4.1.9)
+        specifier: ^2.0.27
+        version: 2.0.27(zod@4.1.9)
+      '@ai-sdk/openai':
+        specifier: ^2.0.62
+        version: 2.0.62(zod@4.1.9)
       '@orpc/client':
         specifier: ^1.10.0
         version: 1.10.0(@opentelemetry/api@1.9.0)
@@ -411,11 +438,17 @@ importers:
         specifier: ^0.13.8
         version: 0.13.8(arktype@2.1.23)(typescript@5.9.3)(zod@4.1.9)
       ai:
-        specifier: ^5.0.57
-        version: 5.0.57(zod@4.1.9)
+        specifier: ^5.0.87
+        version: 5.0.87(zod@4.1.9)
       arktype:
         specifier: ^2.1.23
         version: 2.1.23
+      loro-crdt:
+        specifier: ^1.8.5
+        version: 1.8.5
+      unstorage:
+        specifier: ^1.17.1
+        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(idb-keyval@6.2.2)(ioredis@5.7.0)
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -430,8 +463,8 @@ importers:
   packages/api-user-vm:
     dependencies:
       '@ai-sdk/google':
-        specifier: ^2.0.16
-        version: 2.0.16(zod@4.1.9)
+        specifier: ^2.0.27
+        version: 2.0.27(zod@4.1.9)
       '@cloudflare/containers':
         specifier: ^0.0.28
         version: 0.0.28
@@ -460,8 +493,8 @@ importers:
         specifier: ^0.13.8
         version: 0.13.8(arktype@2.1.23)(typescript@5.9.3)(zod@4.1.9)
       ai:
-        specifier: ^5.0.57
-        version: 5.0.76(zod@4.1.9)
+        specifier: ^5.0.87
+        version: 5.0.87(zod@4.1.9)
       ai-sdk-provider-claude-code:
         specifier: ^2.1.0
         version: 2.1.0(zod@4.1.9)
@@ -766,11 +799,11 @@ importers:
   packages/task:
     dependencies:
       '@ai-sdk/google':
-        specifier: ^2.0.16
-        version: 2.0.16(zod@4.1.9)
+        specifier: ^2.0.27
+        version: 2.0.27(zod@4.1.9)
       '@ai-sdk/openai':
-        specifier: ^2.0.39
-        version: 2.0.39(zod@4.1.9)
+        specifier: ^2.0.62
+        version: 2.0.62(zod@4.1.9)
       '@orama/orama':
         specifier: ^3.1.14
         version: 3.1.14
@@ -788,10 +821,10 @@ importers:
         version: 0.13.8(arktype@2.1.23)(typescript@5.9.3)(zod@4.1.9)
       '@trigger.dev/sdk':
         specifier: 4.0.4
-        version: 4.0.4(ai@5.0.57(zod@4.1.9))(zod@4.1.9)
+        version: 4.0.4(ai@5.0.87(zod@4.1.9))(zod@4.1.9)
       ai:
-        specifier: ^5.0.57
-        version: 5.0.57(zod@4.1.9)
+        specifier: ^5.0.87
+        version: 5.0.87(zod@4.1.9)
       arktype:
         specifier: ^2.1.23
         version: 2.1.23
@@ -809,7 +842,7 @@ importers:
         version: 1.55.1
       unstorage:
         specifier: ^1.17.1
-        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0)
+        version: 1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(idb-keyval@6.2.2)(ioredis@5.7.0)
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -914,8 +947,8 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2(@types/react@19.1.13)(react@19.1.1)
       ai:
-        specifier: ^5.0.57
-        version: 5.0.57(zod@4.1.9)
+        specifier: ^5.0.87
+        version: 5.0.87(zod@4.1.9)
       arktype:
         specifier: ^2.1.23
         version: 2.1.23
@@ -1043,8 +1076,8 @@ packages:
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
 
-  '@ai-sdk/gateway@1.0.30':
-    resolution: {integrity: sha512-QdrSUryr/CLcsCISokLHOImcHj1adGXk1yy4B3qipqLhcNc33Kj/O/3crI790Qp85oDx7sc4vm7R4raf9RA/kg==}
+  '@ai-sdk/anthropic@2.0.41':
+    resolution: {integrity: sha512-ZQebpyE6rM3JoeEyhJXUNDiRfVegw8ZrxT+rB8yurxI5JXDnlGpYQvSPmdR8TQfMbps4YkggfbcOwMeEZaTS+g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1055,26 +1088,32 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@2.0.16':
-    resolution: {integrity: sha512-VN9QO1syIyKxYfAiS5QPZkw0caV6n/mmyvJui3T+lkhGPS2RXTv7nDrtRv8TroNzdPcPWoaZMgJRJD2W7oEZ+g==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4
-
-  '@ai-sdk/openai@2.0.39':
-    resolution: {integrity: sha512-137yPzoP58kAouF3ss/9EkTBs9iZrNCZ2IPZdSMAf0h/r5nk8dSqpAjmK7iBlZAmSmRWnc20QfSdZ/TaE4hpCw==}
+  '@ai-sdk/gateway@2.0.6':
+    resolution: {integrity: sha512-FmhR6Tle09I/RUda8WSPpJ57mjPWzhiVVlB50D+k+Qf/PBW0CBtnbAUxlNSR5v+NIZNLTK3C56lhb23ntEdxhQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider-utils@3.0.10':
-    resolution: {integrity: sha512-T1gZ76gEIwffep6MWI0QNy9jgoybUHE7TRaHB5k54K8mF91ciGFlbtCGxDYhMH3nCRergKwYFIDeFF0hJSIQHQ==}
+  '@ai-sdk/google@2.0.27':
+    resolution: {integrity: sha512-PGjtRWrw1MqP0fi7lNdAiPini+pTriS9Pmdbz2pUfHjNzTye1HJynTH1Tq6IQ++UCIX5l3UNh1p9yIpjitR48w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai@2.0.62':
+    resolution: {integrity: sha512-ZHUhUV6yyBBb0bCbuqAkML7nYIOWyXZYbZQ59mlr1TpIJzSHjQzF4BndZHIIieOMm4ZrpZw15Cn78BTyaIAUwQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
   '@ai-sdk/provider-utils@3.0.12':
     resolution: {integrity: sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@3.0.16':
+    resolution: {integrity: sha512-lsWQY9aDXHitw7C1QRYIbVGmgwyT98TF3MfM8alNIXKpdJdi+W782Rzd9f1RyOfgRmZ08gJ2EYNDhWNK7RqpEA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1832,55 +1871,55 @@ packages:
   '@better-fetch/fetch@1.1.18':
     resolution: {integrity: sha512-rEFOE1MYIsBmoMJtQbl32PGHHXuG2hDxvEd7rUHE0vCBoFQVSDqaVs9hkZEtHCxRoY+CljXKFCOuJ8uxqw1LcA==}
 
-  '@biomejs/biome@2.2.6':
-    resolution: {integrity: sha512-yKTCNGhek0rL5OEW1jbLeZX8LHaM8yk7+3JRGv08my+gkpmtb5dDE+54r2ZjZx0ediFEn1pYBOJSmOdDP9xtFw==}
+  '@biomejs/biome@2.3.3':
+    resolution: {integrity: sha512-zn/P1pRBCpDdhi+VNSMnpczOz9DnqzOA2c48K8xgxjDODvi5O8gs3a2H233rck/5HXpkFj6TmyoqVvxirZUnvg==}
     engines: {node: '>=14.21.3'}
     hasBin: true
 
-  '@biomejs/cli-darwin-arm64@2.2.6':
-    resolution: {integrity: sha512-UZPmn3M45CjTYulgcrFJFZv7YmK3pTxTJDrFYlNElT2FNnkkX4fsxjExTSMeWKQYoZjvekpH5cvrYZZlWu3yfA==}
+  '@biomejs/cli-darwin-arm64@2.3.3':
+    resolution: {integrity: sha512-5+JtW6RKmjqL9un0UtHV0ezOslAyYBzyl5ZhYiu7GHesX2x8NCDl6tXYrenv9m7e1RLbkO5E5Kh04kseMtz6lw==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [darwin]
 
-  '@biomejs/cli-darwin-x64@2.2.6':
-    resolution: {integrity: sha512-HOUIquhHVgh/jvxyClpwlpl/oeMqntlteL89YqjuFDiZ091P0vhHccwz+8muu3nTyHWM5FQslt+4Jdcd67+xWQ==}
+  '@biomejs/cli-darwin-x64@2.3.3':
+    resolution: {integrity: sha512-UPmKRalkHicvIpeccuKqq+/gA2HYV8FUnAEDJnqYBlGlycKqe6xrovWqvWTE4TTNpIFf4UQyuaDzLkN6Kz6tbA==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [darwin]
 
-  '@biomejs/cli-linux-arm64-musl@2.2.6':
-    resolution: {integrity: sha512-TjCenQq3N6g1C+5UT3jE1bIiJb5MWQvulpUngTIpFsL4StVAUXucWD0SL9MCW89Tm6awWfeXBbZBAhJwjyFbRQ==}
+  '@biomejs/cli-linux-arm64-musl@2.3.3':
+    resolution: {integrity: sha512-KhCDMV+V7Yu72v40ssGJTHuv/j0n7JQ6l0s/c+EMcX5zPYLMLr4XpmI+WXhp4Vfkz0T5Xnh5wbrTBI3f2UTpjQ==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
 
-  '@biomejs/cli-linux-arm64@2.2.6':
-    resolution: {integrity: sha512-BpGtuMJGN+o8pQjvYsUKZ+4JEErxdSmcRD/JG3mXoWc6zrcA7OkuyGFN1mDggO0Q1n7qXxo/PcupHk8gzijt5g==}
+  '@biomejs/cli-linux-arm64@2.3.3':
+    resolution: {integrity: sha512-zeiKwALNB/hax7+LLhCYqhqzlWdTfgE9BGkX2Z8S4VmCYnGFrf2fON/ec6KCos7mra5MDm6fYICsEWN2+HKZhw==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
 
-  '@biomejs/cli-linux-x64-musl@2.2.6':
-    resolution: {integrity: sha512-1ZcBux8zVM3JhWN2ZCPaYf0+ogxXG316uaoXJdgoPZcdK/rmRcRY7PqHdAos2ExzvjIdvhQp72UcveI98hgOog==}
+  '@biomejs/cli-linux-x64-musl@2.3.3':
+    resolution: {integrity: sha512-IyqQ+jYzU5MVy9CK5NV0U+NnUMPUAhYMrB/x4QgL/Dl1MqzBVc61bHeyhLnKM6DSEk73/TQYrk/8/QmVHudLdQ==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
 
-  '@biomejs/cli-linux-x64@2.2.6':
-    resolution: {integrity: sha512-1HaM/dpI/1Z68zp8ZdT6EiBq+/O/z97a2AiHMl+VAdv5/ELckFt9EvRb8hDHpk8hUMoz03gXkC7VPXOVtU7faA==}
+  '@biomejs/cli-linux-x64@2.3.3':
+    resolution: {integrity: sha512-05CjPLbvVVU8J6eaO6iSEoA0FXKy2l6ddL+1h/VpiosCmIp3HxRKLOa1hhC1n+D13Z8g9b1DtnglGtM5U3sTag==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
 
-  '@biomejs/cli-win32-arm64@2.2.6':
-    resolution: {integrity: sha512-h3A88G8PGM1ryTeZyLlSdfC/gz3e95EJw9BZmA6Po412DRqwqPBa2Y9U+4ZSGUAXCsnSQE00jLV8Pyrh0d+jQw==}
+  '@biomejs/cli-win32-arm64@2.3.3':
+    resolution: {integrity: sha512-NtlLs3pdFqFAQYZjlEHKOwJEn3GEaz7rtR2oCrzaLT2Xt3Cfd55/VvodQ5V+X+KepLa956QJagckJrNL+DmumQ==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [win32]
 
-  '@biomejs/cli-win32-x64@2.2.6':
-    resolution: {integrity: sha512-yx0CqeOhPjYQ5ZXgPfu8QYkgBhVJyvWe36as7jRuPrKPO5ylVDfwVtPQ+K/mooNTADW0IhxOZm3aPu16dP8yNQ==}
+  '@biomejs/cli-win32-x64@2.3.3':
+    resolution: {integrity: sha512-klJKPPQvUk9Rlp0Dd56gQw/+Wt6uUprHdHWtbDC93f3Iv+knA2tLWpcYoOZJgPV+9s+RBmYv0DGy4mUlr20esg==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
@@ -6225,14 +6264,14 @@ packages:
     peerDependencies:
       zod: ^3.0.0 || ^4.0.0
 
-  ai@5.0.57:
-    resolution: {integrity: sha512-g4K881HFl9aGqvnp1Z/gRXYmfjORn5q5pyPIVmMndT+5AjiBRvUVzFZn1rXdzL61cjbMNyjO4NPfEbBE6Z/W3A==}
+  ai@5.0.76:
+    resolution: {integrity: sha512-ZCxi1vrpyCUnDbtYrO/W8GLvyacV9689f00yshTIQ3mFFphbD7eIv40a2AOZBv3GGRA7SSRYIDnr56wcS/gyQg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  ai@5.0.76:
-    resolution: {integrity: sha512-ZCxi1vrpyCUnDbtYrO/W8GLvyacV9689f00yshTIQ3mFFphbD7eIv40a2AOZBv3GGRA7SSRYIDnr56wcS/gyQg==}
+  ai@5.0.87:
+    resolution: {integrity: sha512-9Cjx7o8IY9zAczigX0Tk/BaQwjPe/M6DpEjejKSBNrf8mOPIvyM+pJLqJSC10IsKci3FPsnaizJeJhoetU1Wfw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -8686,6 +8725,9 @@ packages:
   iconv-lite@0.7.0:
     resolution: {integrity: sha512-cf6L2Ds3h57VVmkZe+Pn+5APsT7FpqJtEhhieDCvrE2MK5Qk9MyffgQyuxQTm6BChfeZNtcOLHp9IcWRVcIcBQ==}
     engines: {node: '>=0.10.0'}
+
+  idb-keyval@6.2.2:
+    resolution: {integrity: sha512-yjD9nARJ/jb1g+CvD0tlhUHOrJ9Sy0P8T9MF3YaLlHnSRpwPfpTX0XIvpmw3gAJUmEu3FiICLBDPXVwyEvrleg==}
 
   idcac-playwright@0.1.3:
     resolution: {integrity: sha512-VVYQ4sv6OrUJKVzYaIP1hq0qAHd1O22HW5LnL1Wf6zkrLStQ/QEg4iJ0rllIOEpd+Rmm+635AJD59A+Vw+2PgQ==}
@@ -12956,10 +12998,10 @@ snapshots:
 
   '@adobe/css-tools@4.4.4': {}
 
-  '@ai-sdk/gateway@1.0.30(zod@4.1.9)':
+  '@ai-sdk/anthropic@2.0.41(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@4.1.9)
+      '@ai-sdk/provider-utils': 3.0.16(zod@4.1.9)
       zod: 4.1.9
 
   '@ai-sdk/gateway@2.0.0(zod@4.1.9)':
@@ -12969,26 +13011,33 @@ snapshots:
       '@vercel/oidc': 3.0.3
       zod: 4.1.9
 
-  '@ai-sdk/google@2.0.16(zod@4.1.9)':
+  '@ai-sdk/gateway@2.0.6(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.9(zod@4.1.9)
+      '@ai-sdk/provider-utils': 3.0.16(zod@4.1.9)
+      '@vercel/oidc': 3.0.3
       zod: 4.1.9
 
-  '@ai-sdk/openai@2.0.39(zod@4.1.9)':
+  '@ai-sdk/google@2.0.27(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@4.1.9)
+      '@ai-sdk/provider-utils': 3.0.16(zod@4.1.9)
       zod: 4.1.9
 
-  '@ai-sdk/provider-utils@3.0.10(zod@4.1.9)':
+  '@ai-sdk/openai@2.0.62(zod@4.1.9)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.16(zod@4.1.9)
+      zod: 4.1.9
+
+  '@ai-sdk/provider-utils@3.0.12(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.6
       zod: 4.1.9
 
-  '@ai-sdk/provider-utils@3.0.12(zod@4.1.9)':
+  '@ai-sdk/provider-utils@3.0.16(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
@@ -14142,39 +14191,39 @@ snapshots:
 
   '@better-fetch/fetch@1.1.18': {}
 
-  '@biomejs/biome@2.2.6':
+  '@biomejs/biome@2.3.3':
     optionalDependencies:
-      '@biomejs/cli-darwin-arm64': 2.2.6
-      '@biomejs/cli-darwin-x64': 2.2.6
-      '@biomejs/cli-linux-arm64': 2.2.6
-      '@biomejs/cli-linux-arm64-musl': 2.2.6
-      '@biomejs/cli-linux-x64': 2.2.6
-      '@biomejs/cli-linux-x64-musl': 2.2.6
-      '@biomejs/cli-win32-arm64': 2.2.6
-      '@biomejs/cli-win32-x64': 2.2.6
+      '@biomejs/cli-darwin-arm64': 2.3.3
+      '@biomejs/cli-darwin-x64': 2.3.3
+      '@biomejs/cli-linux-arm64': 2.3.3
+      '@biomejs/cli-linux-arm64-musl': 2.3.3
+      '@biomejs/cli-linux-x64': 2.3.3
+      '@biomejs/cli-linux-x64-musl': 2.3.3
+      '@biomejs/cli-win32-arm64': 2.3.3
+      '@biomejs/cli-win32-x64': 2.3.3
 
-  '@biomejs/cli-darwin-arm64@2.2.6':
+  '@biomejs/cli-darwin-arm64@2.3.3':
     optional: true
 
-  '@biomejs/cli-darwin-x64@2.2.6':
+  '@biomejs/cli-darwin-x64@2.3.3':
     optional: true
 
-  '@biomejs/cli-linux-arm64-musl@2.2.6':
+  '@biomejs/cli-linux-arm64-musl@2.3.3':
     optional: true
 
-  '@biomejs/cli-linux-arm64@2.2.6':
+  '@biomejs/cli-linux-arm64@2.3.3':
     optional: true
 
-  '@biomejs/cli-linux-x64-musl@2.2.6':
+  '@biomejs/cli-linux-x64-musl@2.3.3':
     optional: true
 
-  '@biomejs/cli-linux-x64@2.2.6':
+  '@biomejs/cli-linux-x64@2.3.3':
     optional: true
 
-  '@biomejs/cli-win32-arm64@2.2.6':
+  '@biomejs/cli-win32-arm64@2.3.3':
     optional: true
 
-  '@biomejs/cli-win32-x64@2.2.6':
+  '@biomejs/cli-win32-x64@2.3.3':
     optional: true
 
   '@borewit/text-codec@0.1.1': {}
@@ -18523,7 +18572,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.0.4(ai@5.0.57(zod@4.1.9))(zod@4.1.9)':
+  '@trigger.dev/sdk@4.0.4(ai@5.0.87(zod@4.1.9))(zod@4.1.9)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -18539,7 +18588,7 @@ snapshots:
       ws: 8.18.3
       zod: 4.1.9
     optionalDependencies:
-      ai: 5.0.57(zod@4.1.9)
+      ai: 5.0.87(zod@4.1.9)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -19246,19 +19295,19 @@ snapshots:
       jsonc-parser: 3.3.1
       zod: 4.1.9
 
-  ai@5.0.57(zod@4.1.9):
-    dependencies:
-      '@ai-sdk/gateway': 1.0.30(zod@4.1.9)
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@4.1.9)
-      '@opentelemetry/api': 1.9.0
-      zod: 4.1.9
-
   ai@5.0.76(zod@4.1.9):
     dependencies:
       '@ai-sdk/gateway': 2.0.0(zod@4.1.9)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.12(zod@4.1.9)
+      '@opentelemetry/api': 1.9.0
+      zod: 4.1.9
+
+  ai@5.0.87(zod@4.1.9):
+    dependencies:
+      '@ai-sdk/gateway': 2.0.6(zod@4.1.9)
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.16(zod@4.1.9)
       '@opentelemetry/api': 1.9.0
       zod: 4.1.9
 
@@ -22056,6 +22105,8 @@ snapshots:
   iconv-lite@0.7.0:
     dependencies:
       safer-buffer: 2.1.2
+
+  idb-keyval@6.2.2: {}
 
   idcac-playwright@0.1.3: {}
 
@@ -26446,7 +26497,7 @@ snapshots:
       picomatch: 4.0.3
       webpack-virtual-modules: 0.6.2
 
-  unstorage@1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(ioredis@5.7.0):
+  unstorage@1.17.1(@netlify/blobs@9.1.2)(aws4fetch@1.0.20)(db0@0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))))(idb-keyval@6.2.2)(ioredis@5.7.0):
     dependencies:
       anymatch: 3.1.3
       chokidar: 4.0.3
@@ -26460,6 +26511,7 @@ snapshots:
       '@netlify/blobs': 9.1.2
       aws4fetch: 1.0.20
       db0: 0.3.2(better-sqlite3@11.9.1)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20251014.0)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)))
+      idb-keyval: 6.2.2
       ioredis: 5.7.0
 
   update-browserslist-db@1.1.3(browserslist@4.24.4):
