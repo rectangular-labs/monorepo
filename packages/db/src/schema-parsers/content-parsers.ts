@@ -10,10 +10,10 @@ export const contentCategorySchema = type(
 export const campaignTypeSchema = type(
   "'improvement'|'new-content'|'do-nothing'",
 );
+
 export const intentSchema = type(
   "'transactional'|'informational'|'navigational'|'commercial'",
 );
-
 export const contentScheduleStatusSchema = type(
   "'draft'|'scheduled'|'published'",
 );

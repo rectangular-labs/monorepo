@@ -11,8 +11,10 @@ export default defineConfig({
         include: [
           "GET /v3/dataforseo_labs/status",
           "POST /v3/serp/google/organic/live/regular",
+          "POST /v3/serp/google/organic/live/advanced",
           "POST /v3/dataforseo_labs/google/keyword_suggestions/live",
           "POST /v3/dataforseo_labs/google/ranked_keywords/live",
+          "POST /v3/dataforseo_labs/google/relevant_pages/live",
         ],
       },
     },

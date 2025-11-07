@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DataforseoLabsStatusData, DataforseoLabsStatusResponses, GoogleKeywordSuggestionsLiveData, GoogleKeywordSuggestionsLiveResponses, GoogleOrganicLiveRegularData, GoogleOrganicLiveRegularResponses, GoogleRankedKeywordsLiveData, GoogleRankedKeywordsLiveResponses } from './types.gen';
+import type { DataforseoLabsStatusData, DataforseoLabsStatusResponses, GoogleKeywordSuggestionsLiveData, GoogleKeywordSuggestionsLiveResponses, GoogleOrganicLiveAdvancedData, GoogleOrganicLiveAdvancedResponses, GoogleOrganicLiveRegularData, GoogleOrganicLiveRegularResponses, GoogleRankedKeywordsLiveData, GoogleRankedKeywordsLiveResponses, GoogleRelevantPagesLiveData, GoogleRelevantPagesLiveResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -31,6 +31,27 @@ export const googleOrganicLiveRegular = <ThrowOnError extends boolean = false>(o
             }
         ],
         url: '/v3/serp/google/organic/live/regular',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options?.headers
+        }
+    });
+};
+
+/**
+ * ‌
+ * for more info please visit 'https://docs.dataforseo.com/v3/serp/google/organic/live/advanced/?bash'
+ */
+export const googleOrganicLiveAdvanced = <ThrowOnError extends boolean = false>(options?: Options<GoogleOrganicLiveAdvancedData, ThrowOnError>) => {
+    return (options?.client ?? client).post<GoogleOrganicLiveAdvancedResponses, unknown, ThrowOnError>({
+        security: [
+            {
+                scheme: 'basic',
+                type: 'http'
+            }
+        ],
+        url: '/v3/serp/google/organic/live/advanced',
         ...options,
         headers: {
             'Content-Type': 'application/json',
@@ -93,6 +114,27 @@ export const googleRankedKeywordsLive = <ThrowOnError extends boolean = false>(o
             }
         ],
         url: '/v3/dataforseo_labs/google/ranked_keywords/live',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options?.headers
+        }
+    });
+};
+
+/**
+ * ‌
+ * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/google/relevant_pages/live/?bash'
+ */
+export const googleRelevantPagesLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleRelevantPagesLiveData, ThrowOnError>) => {
+    return (options?.client ?? client).post<GoogleRelevantPagesLiveResponses, unknown, ThrowOnError>({
+        security: [
+            {
+                scheme: 'basic',
+                type: 'http'
+            }
+        ],
+        url: '/v3/dataforseo_labs/google/relevant_pages/live',
         ...options,
         headers: {
             'Content-Type': 'application/json',
