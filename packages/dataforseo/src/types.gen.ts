@@ -1269,8 +1269,6 @@ export type DataforseoLabsGoogleKeywordSuggestionsLiveRequestInfo = {
      * for more information about filters, please refer to Dataforseo Labs – Filters or this help center guide
      */
     filters?: Array<string | string[]> | null;
-        [key: string]: unknown;
-    } | null> | null;
     /**
      * results sorting rules
      * optional field
