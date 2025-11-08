@@ -90,23 +90,3 @@ export const seoWebsiteInfoSchema = type({
     .array()
     .describe("List of URLs of direct competitors. Leave blank if none."),
 });
-
-export const seoSerpTrafficSchema = type({
-  position1_10: type("number"),
-  position11_20: type("number"),
-  position21_30: type("number"),
-  estimatedTrafficVolume: type("number"),
-});
-
-export const seoSerpSnapshotSchema = type({
-  nextEarliestFetchAt: type("string.date"),
-  provider: type("'dataforseo'"),
-  current: type({
-    organic: seoSerpTrafficSchema,
-    dateFetchedAt: type("string"),
-  }),
-  previous: type({
-    organic: seoSerpTrafficSchema,
-    dateFetchedAt: type("string"),
-  }).or(type.null),
-});

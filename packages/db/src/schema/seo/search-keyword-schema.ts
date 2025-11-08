@@ -15,7 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 import type {
   backlinkInfoSchema,
-  intentSchema,
+  keywordIntentSchema,
   serpResultSchema,
 } from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
@@ -37,7 +37,7 @@ export const seoSearchKeyword = pgSeoTable(
         "informational",
         "navigational",
         "commercial",
-      ] as const satisfies (typeof intentSchema.infer)[],
+      ] as const satisfies (typeof keywordIntentSchema.infer)[],
     }).notNull(),
     backlinkInfo: jsonb().$type<typeof backlinkInfoSchema.infer>(),
     serpFeatures: text().array(),
