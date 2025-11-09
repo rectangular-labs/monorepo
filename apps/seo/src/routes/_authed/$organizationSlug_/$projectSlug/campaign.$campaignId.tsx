@@ -6,10 +6,16 @@ import {
 import { Separator } from "@rectangular-labs/ui/components/ui/separator";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { CampaignHeader } from "~/routes/_authed/$organizationSlug_/-components/campaign-header";
 import { CampaignsSidebar } from "~/routes/_authed/$organizationSlug_/-components/campaigns-sidebar";
-import { ChatPanel } from "~/routes/_authed/$organizationSlug_/-components/chat-panel";
+
+const ChatPanelLazy = lazy(() =>
+  import("~/routes/_authed/$organizationSlug_/-components/chat-panel").then(
+    (mod) => ({ default: mod.ChatPanel }),
+  ),
+);
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId",
@@ -104,11 +110,17 @@ function PageComponent() {
         <ResizableHandle withHandle />
         {/* Main workspace: chat for now */}
         <ResizablePanel className="bg-muted p-1" defaultSize={78} minSize={40}>
-          <ChatPanel
-            campaignId={campaignId}
-            organizationId={project.organizationId}
-            projectId={project.id}
-          />
+          <Suspense
+            fallback={
+              <div className="h-full w-full rounded-md bg-background" />
+            }
+          >
+            <ChatPanelLazy
+              campaignId={campaignId}
+              organizationId={project.organizationId}
+              projectId={project.id}
+            />
+          </Suspense>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

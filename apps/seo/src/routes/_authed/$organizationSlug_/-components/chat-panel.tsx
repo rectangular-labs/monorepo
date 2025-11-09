@@ -49,13 +49,26 @@ import {
   SourcesContent,
   SourcesTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/sources";
-import { Copy, Globe, RefreshCcw } from "@rectangular-labs/ui/components/icon";
+import { TaskItemFile } from "@rectangular-labs/ui/components/ai-elements/task";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@rectangular-labs/ui/components/ai-elements/tool";
+import {
+  Copy,
+  File,
+  Globe,
+  RefreshCcw,
+} from "@rectangular-labs/ui/components/icon";
 import { Fragment, useState } from "react";
 import { getApiClient } from "~/lib/api";
 
 const models = [
-  { name: "GPT 4o", value: "openai/gpt-4o" },
-  { name: "Deepseek R1", value: "deepseek/deepseek-r1" },
+  { name: "Claude", value: "anthropic/claude-haiku-4-5" },
+  { name: "Open AI", value: "openai/gpt-5-mini" },
 ];
 
 export function ChatPanel({
@@ -91,6 +104,7 @@ export function ChatPanel({
       },
     },
   });
+  console.log("messages", messages);
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -190,6 +204,38 @@ export function ChatPanel({
                         <ReasoningContent>{part.text}</ReasoningContent>
                       </Reasoning>
                     );
+                  case "file": {
+                    return (
+                      <TaskItemFile>
+                        <File className="size-4" />
+                        <span>{part.filename}</span>
+                      </TaskItemFile>
+                    );
+                  }
+                  case "tool-get_serp_for_keyword":
+                  case "tool-get_keywords_overview":
+                  case "tool-get_keyword_suggestions":
+                  case "tool-get_ranked_pages_for_site":
+                  case "tool-get_ranked_keywords_for_site": {
+                    return (
+                      <Tool defaultOpen={false}>
+                        <ToolHeader state={part.state} type={part.type} />
+                        <ToolContent>
+                          <ToolInput input={part.input} />
+                          <ToolOutput
+                            className="max-h-[500px] overflow-y-auto"
+                            errorText={part.errorText}
+                            output={JSON.stringify(
+                              part.output as object,
+                              null,
+                              2,
+                            )}
+                          />
+                        </ToolContent>
+                      </Tool>
+                    );
+                  }
+
                   default:
                     return null;
                 }
