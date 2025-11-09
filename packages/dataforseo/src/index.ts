@@ -22,6 +22,7 @@ export async function fetchRankedKeywordsForSite(args: {
   hostname: string;
   locationName: string;
   languageCode: string;
+  includeGenderAndAgeDistribution?: boolean;
   positionFrom?: number;
   positionTo?: number;
   limit?: number;
@@ -52,26 +53,30 @@ export async function fetchRankedKeywordsForSite(args: {
         filters: [
           ...(args.positionFrom
             ? [
-                "ranked_serp_element.serp_item.rank_absolute",
-                ">=",
-                args.positionFrom.toString(),
+                [
+                  "ranked_serp_element.serp_item.rank_absolute",
+                  ">=",
+                  args.positionFrom.toString(),
+                ],
+                "and",
               ]
             : []),
-          "and",
           ...(args.positionTo
             ? [
-                "ranked_serp_element.serp_item.rank_absolute",
-                "<=",
-                args.positionTo.toString(),
+                [
+                  "ranked_serp_element.serp_item.rank_absolute",
+                  "<=",
+                  args.positionTo.toString(),
+                ],
+                "and",
               ]
             : []),
-          "and",
           ["keyword_data.keyword_info.search_volume", ">=", "100"],
         ],
-        order_by: ["keyword_data.clickstream_keyword_info.search_volume,desc"],
+        order_by: ["keyword_data.keyword_info.search_volume,desc"],
         offset: args.offset ?? 0,
         limit: args.limit ?? 1000,
-        include_clickstream_data: true,
+        include_clickstream_data: args.includeGenderAndAgeDistribution ?? false,
       },
     ],
   });
@@ -89,11 +94,21 @@ export async function fetchRankedKeywordsForSite(args: {
       ),
     );
   }
+  const task = json.data.tasks?.[0];
+  if (task?.status_code !== 20000) {
+    return err(
+      new Error(
+        `DataForSEO returned an error: ${task?.status_code} - ${task?.status_message}`,
+      ),
+    );
+  }
 
-  const result = json.data.tasks?.[0]?.result?.[0];
+  const result = task?.result?.[0];
   if (!result) {
     return err(
-      new Error("No result returned from DataForSEO for ranked keywords"),
+      new Error(
+        `No result returned from DataForSEO for ranked keywords for site ${args.hostname}`,
+      ),
     );
   }
   if ((result.items_count ?? 0) < (result.total_count ?? 0)) {
@@ -166,6 +181,7 @@ export async function fetchRankedPagesForSite(args: {
   languageCode: string;
   limit?: number;
   offset?: number;
+  includeGenderAndAgeDistribution?: boolean;
 }): Promise<
   Result<
     {
@@ -186,7 +202,7 @@ export async function fetchRankedPagesForSite(args: {
         location_name: args.locationName,
         language_code: args.languageCode,
         item_types: ["organic", "paid", "featured_snippet", "local_pack"],
-        include_clickstream_data: true,
+        include_clickstream_data: args.includeGenderAndAgeDistribution ?? false,
         limit: args.limit ?? 100,
         offset: args.offset ?? 0,
         filters: [["metrics.organic.count", ">", "100"]],
@@ -196,6 +212,7 @@ export async function fetchRankedPagesForSite(args: {
   });
 
   if (json.error) {
+    console.error("fetchRankedPagesForSite error", json.error);
     return err(json.error);
   }
   if (!json.data) {
@@ -208,11 +225,22 @@ export async function fetchRankedPagesForSite(args: {
       ),
     );
   }
+  const task = json.data.tasks?.[0];
+  if (task?.status_code !== 20000) {
+    return err(
+      new Error(
+        `DataForSEO returned an error: ${task?.status_code} - ${task?.status_message}`,
+      ),
+    );
+  }
 
-  const nextEarliestUpdate = await getNextEarliestUpdate();
-  const result = json.data.tasks?.[0]?.result?.[0];
+  const result = task?.result?.[0];
   if (!result) {
-    return err(new Error("No result returned from DataForSEO"));
+    return err(
+      new Error(
+        `No result returned from DataForSEO for ranked pages for site ${args.target}`,
+      ),
+    );
   }
 
   const rankedPages = (result.items ?? [])
@@ -228,6 +256,7 @@ export async function fetchRankedPagesForSite(args: {
     })
     .filter((item) => !!item);
 
+  const nextEarliestUpdate = await getNextEarliestUpdate();
   return ok({
     cost: json.data.cost ?? 0,
     provider: "dataforseo",
@@ -264,8 +293,8 @@ export async function fetchKeywordSuggestions(args: {
         keyword: args.seedKeyword,
         location_name: args.locationName,
         language_code: args.languageCode,
-        limit: args.limit,
-        offset: args.offset,
+        limit: args.limit ?? 100,
+        offset: args.offset ?? 0,
         include_seed_keyword: args.includeSeedKeyword ?? false,
         include_clickstream_data: args.includeGenderAndAgeDistribution ?? false,
         include_serp_info: true,
@@ -276,6 +305,7 @@ export async function fetchKeywordSuggestions(args: {
   });
 
   if (json.error) {
+    console.error("fetchKeywordSuggestions error", json.error);
     return err(json.error);
   }
   if (!json.data) {
@@ -288,12 +318,21 @@ export async function fetchKeywordSuggestions(args: {
       ),
     );
   }
+  const task = json.data.tasks?.[0];
+  if (task?.status_code !== 20000) {
+    return err(
+      new Error(
+        `DataForSEO returned an error: ${task?.status_code} - ${task?.status_message}`,
+      ),
+    );
+  }
 
-  const nextEarliestUpdate = await getNextEarliestUpdate();
-  const result = json.data.tasks?.[0]?.result?.[0];
+  const result = task?.result?.[0];
   if (!result) {
     return err(
-      new Error("No result returned from DataForSEO for keyword suggestions"),
+      new Error(
+        `No result returned from DataForSEO for keyword suggestions for seed keyword ${args.seedKeyword}`,
+      ),
     );
   }
 
@@ -319,6 +358,7 @@ export async function fetchKeywordSuggestions(args: {
     })
     .filter((item) => !!item);
 
+  const nextEarliestUpdate = await getNextEarliestUpdate();
   return ok({
     cost: json.data.cost ?? 0,
     provider: "dataforseo",
@@ -358,6 +398,7 @@ export async function fetchKeywordsOverview(args: {
   });
 
   if (json.error) {
+    console.error("fetchKeywordsOverview error", json.error);
     return err(json.error);
   }
   if (!json.data) {
@@ -370,11 +411,21 @@ export async function fetchKeywordsOverview(args: {
       ),
     );
   }
+  const task = json.data.tasks?.[0];
+  if (task?.status_code !== 20000) {
+    return err(
+      new Error(
+        `DataForSEO returned an error: ${task?.status_code} - ${task?.status_message}`,
+      ),
+    );
+  }
 
-  const result = json.data.tasks?.[0]?.result?.[0];
+  const result = task?.result?.[0];
   if (!result) {
     return err(
-      new Error("No result returned from DataForSEO for keyword data"),
+      new Error(
+        `No result returned from DataForSEO for keyword data for keywords ${args.keywords.join(", ")}`,
+      ),
     );
   }
 
@@ -397,7 +448,6 @@ export async function fetchKeywordsOverview(args: {
     .filter((item) => !!item);
 
   const nextEarliestUpdate = await getNextEarliestUpdate();
-
   return ok({
     cost: json.data.cost ?? 0,
     provider: "dataforseo",
@@ -434,8 +484,10 @@ export async function fetchSerp(args: {
         location_name: args.locationName,
         language_code: args.languageCode,
         depth: args.depth ?? 10,
-        device: args.device,
-        os: args.os ?? (args.device === "desktop" ? "macos" : "ios"),
+        device: args.device ?? "desktop",
+        os:
+          args.os ??
+          ((args.device ?? "desktop") === "desktop" ? "macos" : "ios"),
         group_organic_results: true,
         load_async_ai_overview: false,
       },
@@ -443,6 +495,7 @@ export async function fetchSerp(args: {
   });
 
   if (json.error) {
+    console.error("fetchSerp error", json.error);
     return err(json.error);
   }
   if (!json.data) {
@@ -455,16 +508,25 @@ export async function fetchSerp(args: {
       ),
     );
   }
+  const task = json.data.tasks?.[0];
+  if (task?.status_code !== 20000) {
+    return err(
+      new Error(
+        `DataForSEO returned an error: ${task?.status_code} - ${task?.status_message}`,
+      ),
+    );
+  }
 
-  const result = json.data.tasks?.[0]?.result?.[0];
+  const result = task?.result?.[0];
   if (!result) {
     return err(
-      new Error("No result returned from DataForSEO for serp advanced"),
+      new Error(
+        `No result returned from DataForSEO for serp advanced for keyword ${args.keyword}`,
+      ),
     );
   }
 
   const normalized = parseSerpAdvancedToItems(result);
-
   return ok({
     cost: json.data.cost ?? 0,
     provider: "dataforseo",

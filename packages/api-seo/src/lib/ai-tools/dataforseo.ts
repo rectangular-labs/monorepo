@@ -47,6 +47,7 @@ const rankedKeywordsInputSchema = type({
       "The lowest position ranking keywords that the site currently ranks for. The default of 100 means that any search keyword that has the site ranking at position 100 or higher will be fetched.",
     )
     .default(100),
+  includeGenderAndAgeDistribution: genderAndAgeDistributionSchema,
   limit: limitSchema("keywords", 250),
   offset: offsetSchema("keywords", 0),
 });
@@ -54,6 +55,7 @@ const rankedKeywordsInputSchema = type({
 // 2) Ranked Pages for site
 const rankedPagesInputSchema = type({
   hostname: hostnameSchema,
+  includeGenderAndAgeDistribution: genderAndAgeDistributionSchema,
   limit: limitSchema("pages", 250),
   offset: offsetSchema("pages", 0),
 });
@@ -123,13 +125,21 @@ export function createDataforseoTool(
     inputSchema: jsonSchema<typeof rankedKeywordsInputSchema.infer>(
       rankedKeywordsInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute({ hostname, positionFrom, positionTo, limit, offset }) {
+    async execute({
+      hostname,
+      positionFrom,
+      positionTo,
+      limit,
+      offset,
+      includeGenderAndAgeDistribution,
+    }) {
       console.log("fetchRankedKeywordsForSite", {
         hostname,
         positionFrom,
         positionTo,
         limit,
         offset,
+        includeGenderAndAgeDistribution,
       });
       const result = await fetchRankedKeywordsForSite({
         hostname,
@@ -139,10 +149,15 @@ export function createDataforseoTool(
         positionTo,
         limit,
         offset,
+        includeGenderAndAgeDistribution,
       });
       if (!result?.ok) {
+        console.error("DFS ranked_keywords error", result.error);
         throw new Error(
           `DFS ranked_keywords error: ${JSON.stringify(result.error, null, 2)}`,
+          {
+            cause: result.error,
+          },
         );
       }
       return result.value;
@@ -155,18 +170,33 @@ export function createDataforseoTool(
     inputSchema: jsonSchema<typeof rankedPagesInputSchema.infer>(
       rankedPagesInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute({ hostname, limit, offset }) {
-      console.log("fetchRankedPagesForSite", { hostname, limit, offset });
+    async execute({
+      hostname,
+      limit,
+      offset,
+      includeGenderAndAgeDistribution,
+    }) {
+      console.log("fetchRankedPagesForSite", {
+        hostname,
+        limit,
+        offset,
+        includeGenderAndAgeDistribution,
+      });
       const result = await fetchRankedPagesForSite({
         target: hostname,
         locationName,
         languageCode,
         limit,
         offset,
+        includeGenderAndAgeDistribution,
       });
       if (!result?.ok) {
+        console.error("DFS ranked_pages error", result.error);
         throw new Error(
           `DFS ranked_pages error: ${JSON.stringify(result.error, null, 2)}`,
+          {
+            cause: result.error,
+          },
         );
       }
       return result.value;
@@ -205,6 +235,9 @@ export function createDataforseoTool(
       if (!result.ok) {
         throw new Error(
           `DFS keyword_suggestions error: ${JSON.stringify(result.error, null, 2)}`,
+          {
+            cause: result.error,
+          },
         );
       }
       return result.value;
@@ -231,6 +264,9 @@ export function createDataforseoTool(
       if (!result.ok) {
         throw new Error(
           `DFS keywords_overview error: ${JSON.stringify(result.error, null, 2)}`,
+          {
+            cause: result.error,
+          },
         );
       }
       return result.value;
@@ -256,6 +292,9 @@ export function createDataforseoTool(
       if (!result.ok) {
         throw new Error(
           `DFS serp error: ${JSON.stringify(result.error, null, 2)}`,
+          {
+            cause: result.error,
+          },
         );
       }
       return result.value;
