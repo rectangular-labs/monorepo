@@ -3,6 +3,9 @@ import { streamToEventIterator } from "@orpc/client";
 import { ORPCError, type } from "@orpc/server";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { withOrganizationIdBase } from "../context";
+import { createDataforseoTool } from "../lib/ai-tools/dataforseo";
+import { createGscTool } from "../lib/ai-tools/google-search-console";
+import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { getProjectByIdentifier } from "../lib/database/project";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
@@ -27,6 +30,23 @@ export const write = withOrganizationIdBase
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
     }
     const project = projectResult.value;
+    const gscProperty = await (async () => {
+      if (!project.gscPropertyId) {
+        return null;
+      }
+      const property = await getGSCPropertyById(project.gscPropertyId);
+      if (!property.ok) {
+        console.error(
+          "Google Search Console property not found",
+          property.error,
+        );
+        throw new ORPCError("NOT_FOUND", {
+          message: `Google Search Console property not found: ${project.gscPropertyId}`,
+        });
+      }
+      return property.value;
+    })();
+
     const systemPrompt = `You are an SEO content assistant for ${
       project.name ?? project.websiteUrl
     }.
@@ -44,11 +64,17 @@ Project background:
 
     const result = streamText({
       model: anthropic("claude-haiku-4-5"),
-      messages: convertToModelMessages(input.messages),
       system: systemPrompt,
+      messages: convertToModelMessages(input.messages),
       tools: {
         web_search: anthropic.tools.webSearch_20250305({ maxUses: 3 }),
         web_fetch: anthropic.tools.webFetch_20250910({ maxUses: 2 }),
+        ...createGscTool({
+          accessToken: gscProperty?.accessToken ?? null,
+          siteUrl: gscProperty?.domain ?? null,
+          siteType: gscProperty?.type ?? null,
+        }),
+        ...createDataforseoTool(project),
         // Minimal text edit tool stub to allow the model to propose edits without filesystem side-effects
         str_replace_based_edit_tool: anthropic.tools.textEditor_20250728({
           maxCharacters: 8000,
@@ -70,6 +96,9 @@ Project background:
       },
       onFinish: (final) => {
         console.log("campaign.write result", final);
+      },
+      onError: (error) => {
+        console.error("campaign.write error", error);
       },
     });
 

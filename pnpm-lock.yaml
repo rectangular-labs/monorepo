@@ -422,6 +422,9 @@ importers:
       '@rectangular-labs/auth':
         specifier: workspace:*
         version: link:../auth
+      '@rectangular-labs/dataforseo':
+        specifier: workspace:*
+        version: link:../dataforseo
       '@rectangular-labs/db':
         specifier: workspace:*
         version: link:../db
