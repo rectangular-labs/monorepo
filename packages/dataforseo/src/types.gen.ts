@@ -677,6 +677,185 @@ export type DataforseoLabsRankedKeywordsLiveItem = {
     ranked_serp_element?: RankedSerpElement | null;
 };
 
+export type DataforseoLabsGoogleKeywordOverviewLiveResponseInfo = BaseResponseInfo & {
+    /**
+     * array of tasks
+     */
+    tasks?: Array<DataforseoLabsGoogleKeywordOverviewLiveTaskInfo | null> | null;
+};
+
+export type DataforseoLabsGoogleKeywordOverviewLiveItem = {
+    /**
+     * search engine type
+     */
+    se_type?: string | null;
+    /**
+     * keyword
+     * keyword is returned with decoded %## (plus character ‘+’ will be decoded to a space character)
+     */
+    keyword?: string | null;
+    /**
+     * location code in a POST array
+     * if there is no data, then the value is null
+     */
+    location_code?: number | null;
+    /**
+     * language code in a POST array
+     */
+    language_code?: string | null;
+    /**
+     * indicates data for Google and partner sites
+     * if true, the results are returned for owned, operated, and syndicated networks across Google and partner sites that host Google search;
+     * if false, the results are returned for Google search sites only
+     */
+    search_partners?: boolean | null;
+    /**
+     * keyword data for the returned keyword
+     */
+    keyword_info?: KeywordInfo | null;
+    /**
+     * contains keyword search volume normalized with Bing search volume
+     */
+    keyword_info_normalized_with_bing?: KeywordInfoNormalizedWithInfo | null;
+    /**
+     * contains keyword search volume normalized with clickstream data
+     */
+    keyword_info_normalized_with_clickstream?: KeywordInfoNormalizedWithInfo | null;
+    /**
+     * clickstream data for the returned keyword
+     * to retrieve results for this field, the parameter include_clickstream_data must be set to true
+     */
+    clickstream_keyword_info?: ClickstreamKeywordInfo | null;
+    /**
+     * additional information about the keyword
+     */
+    keyword_properties?: KeywordProperties | null;
+    /**
+     * SERP data
+     * the value will be null if you didn’t set the field include_serp_info to true in the POST array or if there is no SERP data for this keyword in our database
+     */
+    serp_info?: SerpInfo | null;
+    /**
+     * backlink data for the returned keyword
+     * this object provides the average number of backlinks, referring pages and domains, as well as the average rank values among the top-10 websites ranking organically for the keyword
+     */
+    avg_backlinks_info?: AvgBacklinksInfo | null;
+    /**
+     * search intent info for the returned keyword
+     * learn about search intent in this help center article
+     */
+    search_intent_info?: SearchIntentInfo | null;
+};
+
+export type DataforseoLabsGoogleKeywordOverviewLiveResultInfo = {
+    /**
+     * search engine type
+     */
+    se_type?: string | null;
+    /**
+     * location code in a POST array
+     */
+    location_code?: number | null;
+    /**
+     * language code in a POST array
+     */
+    language_code?: string | null;
+    /**
+     * the number of results returned in the items array
+     */
+    items_count?: number | null;
+    /**
+     * contains keywords and related data
+     */
+    items?: Array<DataforseoLabsGoogleKeywordOverviewLiveItem | null> | null;
+};
+
+export type DataforseoLabsGoogleKeywordOverviewLiveTaskInfo = BaseResponseTaskInfo & {
+    /**
+     * array of results
+     */
+    result?: Array<DataforseoLabsGoogleKeywordOverviewLiveResultInfo | null> | null;
+};
+
+export type DataforseoLabsGoogleKeywordOverviewLiveRequestInfo = {
+    /**
+     * keywords
+     * required field
+     * The maximum number of keywords you can specify: 700
+     * The maximum number of characters for each keyword: 80
+     * The maximum number of words for each keyword phrase: 10
+     * the specified keywords will be converted to lowercase format, data will be provided in a separate array
+     * note that if some of the keywords specified in this array are omitted in the results you receive, then our database doesn’t contain such keywords and cannot return data on them
+     * you will not be charged for the keywords omitted in the results
+     * learn more about rules and limitations of keyword and keywords fields in DataForSEO APIs in this Help Center article
+     */
+    keywords?: Array<string>;
+    /**
+     * full name of the location
+     * required field if you don’t specify location_code
+     * Note: it is required to specify either location_name or location_code
+     * you can receive the list of available locations with their location_name by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * United Kingdom
+     */
+    location_name?: string | null;
+    /**
+     * location code
+     * required field if you don’t specify location_name
+     * Note: it is required to specify either location_name or location_code
+     * you can receive the list of available locations with their location_code by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * 2840
+     */
+    location_code?: number | null;
+    /**
+     * full name of the language
+     * required field if you don’t specify language_code
+     * Note: it is required to specify either language_name or language_code
+     * you can receive the list of available locations with their language_name by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * English
+     */
+    language_name?: string | null;
+    /**
+     * language code
+     * required field if you don’t specify language_name
+     * Note: it is required to specify either language_name or language_code
+     * you can receive the list of available locations with their language_code by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * en
+     */
+    language_code?: string | null;
+    /**
+     * include data from SERP for each keyword
+     * optional field
+     * if set to true, we will return a serp_info array containing SERP data (number of search results, relevant URL, and SERP features) for every keyword in the response
+     * default value: false
+     */
+    include_serp_info?: boolean | null;
+    /**
+     * include or exclude data from clickstream-based metrics in the result
+     * optional field
+     * if the parameter is set to true, you will receive clickstream_keyword_info, keyword_info_normalized_with_clickstream, and keyword_info_normalized_with_bing fields in the response
+     * default value: false
+     * with this parameter enabled, you will be charged double the price for the request
+     * learn more about how clickstream-based metrics are calculated in this help center article
+     */
+    include_clickstream_data?: boolean | null;
+    /**
+     * user-defined task identifier
+     * optional field
+     * the character limit is 255
+     * you can use this parameter to identify the task and match it with the result
+     * you will find the specified tag value in the data object of the response
+     */
+    tag?: string | null;
+};
+
 export type DataforseoLabsGoogleRelevantPagesLiveResponseInfo = BaseResponseInfo & {
     /**
      * array of tasks
@@ -2161,3 +2340,19 @@ export type GoogleRelevantPagesLiveResponses = {
 };
 
 export type GoogleRelevantPagesLiveResponse = GoogleRelevantPagesLiveResponses[keyof GoogleRelevantPagesLiveResponses];
+
+export type GoogleKeywordOverviewLiveData = {
+    body?: Array<DataforseoLabsGoogleKeywordOverviewLiveRequestInfo | null>;
+    path?: never;
+    query?: never;
+    url: '/v3/dataforseo_labs/google/keyword_overview/live';
+};
+
+export type GoogleKeywordOverviewLiveResponses = {
+    /**
+     * Successful operation
+     */
+    200: DataforseoLabsGoogleKeywordOverviewLiveResponseInfo | null;
+};
+
+export type GoogleKeywordOverviewLiveResponse = GoogleKeywordOverviewLiveResponses[keyof GoogleKeywordOverviewLiveResponses];

@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DataforseoLabsStatusData, DataforseoLabsStatusResponses, GoogleKeywordSuggestionsLiveData, GoogleKeywordSuggestionsLiveResponses, GoogleOrganicLiveAdvancedData, GoogleOrganicLiveAdvancedResponses, GoogleOrganicLiveRegularData, GoogleOrganicLiveRegularResponses, GoogleRankedKeywordsLiveData, GoogleRankedKeywordsLiveResponses, GoogleRelevantPagesLiveData, GoogleRelevantPagesLiveResponses } from './types.gen';
+import type { DataforseoLabsStatusData, DataforseoLabsStatusResponses, GoogleKeywordOverviewLiveData, GoogleKeywordOverviewLiveResponses, GoogleKeywordSuggestionsLiveData, GoogleKeywordSuggestionsLiveResponses, GoogleOrganicLiveAdvancedData, GoogleOrganicLiveAdvancedResponses, GoogleOrganicLiveRegularData, GoogleOrganicLiveRegularResponses, GoogleRankedKeywordsLiveData, GoogleRankedKeywordsLiveResponses, GoogleRelevantPagesLiveData, GoogleRelevantPagesLiveResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -135,6 +135,28 @@ export const googleRelevantPagesLive = <ThrowOnError extends boolean = false>(op
             }
         ],
         url: '/v3/dataforseo_labs/google/relevant_pages/live',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options?.headers
+        }
+    });
+};
+
+/**
+ * ‌‌
+ * This endpoint provides Google keyword data for specified keywords. For each keyword, you will receive current cost-per-click, competition values for paid search, search volume, search intent, monthly searches, as well as SERP and backlink information. Additionally, you can obtain clickstream data, such as clickstream search volume, by specifying the include_clickstream_data parameter.
+ * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/google/keyword_overview/live/?bash'
+ */
+export const googleKeywordOverviewLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleKeywordOverviewLiveData, ThrowOnError>) => {
+    return (options?.client ?? client).post<GoogleKeywordOverviewLiveResponses, unknown, ThrowOnError>({
+        security: [
+            {
+                scheme: 'basic',
+                type: 'http'
+            }
+        ],
+        url: '/v3/dataforseo_labs/google/keyword_overview/live',
         ...options,
         headers: {
             'Content-Type': 'application/json',
