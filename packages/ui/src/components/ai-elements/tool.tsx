@@ -137,15 +137,13 @@ export const ToolOutput = ({
   if (typeof output === "object" && !isValidElement(output)) {
     Output = (
       <CodeBlock
-        className={props.className}
+        className={className}
         code={JSON.stringify(output, null, 2)}
         language="json"
       />
     );
   } else if (typeof output === "string") {
-    Output = (
-      <CodeBlock className={props.className} code={output} language="json" />
-    );
+    Output = <CodeBlock className={className} code={output} language="json" />;
   }
 
   return (
