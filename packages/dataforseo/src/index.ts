@@ -20,10 +20,10 @@ import {
 
 export async function fetchRankedKeywordsForSite(args: {
   hostname: string;
-  positionFrom: number;
-  positionTo: number;
   locationName: string;
   languageCode: string;
+  positionFrom?: number;
+  positionTo?: number;
   limit?: number;
   offset?: number;
 }): Promise<
@@ -50,17 +50,21 @@ export async function fetchRankedKeywordsForSite(args: {
         location_name: args.locationName,
         language_code: args.languageCode,
         filters: [
-          [
-            "ranked_serp_element.serp_item.rank_absolute",
-            ">=",
-            args.positionFrom.toString(),
-          ],
+          ...(args.positionFrom
+            ? [
+                "ranked_serp_element.serp_item.rank_absolute",
+                ">=",
+                args.positionFrom.toString(),
+              ]
+            : []),
           "and",
-          [
-            "ranked_serp_element.serp_item.rank_absolute",
-            "<=",
-            args.positionTo.toString(),
-          ],
+          ...(args.positionTo
+            ? [
+                "ranked_serp_element.serp_item.rank_absolute",
+                "<=",
+                args.positionTo.toString(),
+              ]
+            : []),
           "and",
           ["keyword_data.keyword_info.search_volume", ">=", "100"],
         ],
@@ -433,7 +437,7 @@ export async function fetchSerp(args: {
         device: args.device,
         os: args.os ?? (args.device === "desktop" ? "macos" : "ios"),
         group_organic_results: true,
-        load_async_ai_overview: true,
+        load_async_ai_overview: false,
       },
     ],
   });
