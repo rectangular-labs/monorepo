@@ -9,6 +9,7 @@ import {
 } from "ai";
 import { withOrganizationIdBase } from "../context";
 import { createDataforseoTool } from "../lib/ai-tools/dataforseo";
+import { createGscTool } from "../lib/ai-tools/google-search-console";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { getProjectByIdentifier } from "../lib/database/project";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
@@ -34,7 +35,7 @@ export const write = withOrganizationIdBase
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
     }
     const project = projectResult.value;
-    const _gscProperty = await (async () => {
+    const gscProperty = await (async () => {
       if (!project.gscPropertyId) {
         return null;
       }
@@ -97,11 +98,11 @@ Output requirements:
       tools: {
         web_search: anthropic.tools.webSearch_20250305({ maxUses: 3 }),
         web_fetch: anthropic.tools.webFetch_20250910({ maxUses: 2 }),
-        // ...createGscTool({
-        //   accessToken: gscProperty?.accessToken ?? null,
-        //   siteUrl: gscProperty?.domain ?? null,
-        //   siteType: gscProperty?.type ?? null,
-        // }),
+        ...createGscTool({
+          accessToken: gscProperty?.accessToken ?? null,
+          siteUrl: gscProperty?.domain ?? null,
+          siteType: gscProperty?.type ?? null,
+        }),
         ...createDataforseoTool(project),
         // Minimal text edit tool stub to allow the model to propose edits without filesystem side-effects
         str_replace_based_edit_tool: anthropic.tools.textEditor_20250728({
