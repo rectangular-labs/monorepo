@@ -48,7 +48,7 @@ const rankedKeywordsInputSchema = type({
     )
     .default(100),
   includeGenderAndAgeDistribution: genderAndAgeDistributionSchema,
-  limit: limitSchema("keywords", 250),
+  limit: limitSchema("keywords", 100),
   offset: offsetSchema("keywords", 0),
 });
 
@@ -56,7 +56,7 @@ const rankedKeywordsInputSchema = type({
 const rankedPagesInputSchema = type({
   hostname: hostnameSchema,
   includeGenderAndAgeDistribution: genderAndAgeDistributionSchema,
-  limit: limitSchema("pages", 250),
+  limit: limitSchema("pages", 100),
   offset: offsetSchema("pages", 0),
 });
 
@@ -71,7 +71,7 @@ const keywordSuggestionsInputSchema = type({
     )
     .default(true),
   includeGenderAndAgeDistribution: genderAndAgeDistributionSchema,
-  limit: limitSchema("suggestions", 250),
+  limit: limitSchema("suggestions", 100),
   offset: offsetSchema("suggestions", 0),
 });
 
@@ -160,7 +160,33 @@ export function createDataforseoTool(
           },
         );
       }
-      return result.value;
+      return {
+        siteTraffic: result.value.siteTraffic,
+        keywords: result.value.keywords.map((keyword) => ({
+          keyword: keyword.keyword,
+          keywordDifficulty: keyword.keywordDifficulty,
+          mainIntent: keyword.mainIntent,
+          searchVolume: {
+            monthlyAverage: keyword.searchVolume.monthlyAverage,
+            percentageChange: keyword.searchVolume.percentageChange,
+            ...(includeGenderAndAgeDistribution
+              ? {
+                  approximateGenderDistributionPercentage:
+                    keyword.searchVolume
+                      .approximateGenderDistributionPercentage,
+                  approximateAgeDistributionPercentage:
+                    keyword.searchVolume.approximateAgeDistributionPercentage,
+                }
+              : {}),
+          },
+          competition: keyword.competition,
+          serpInfo: {
+            itemTypes: keyword.serpInfo?.itemTypes,
+            resultCount: keyword.serpInfo?.resultCount,
+          },
+          backlinkInfo: keyword.backlinkInfo,
+        })),
+      };
     },
   });
 
@@ -199,7 +225,10 @@ export function createDataforseoTool(
           },
         );
       }
-      return result.value;
+      return {
+        targetSite: result.value.targetSite,
+        rankedPages: result.value.rankedPages,
+      };
     },
   });
 
@@ -240,7 +269,32 @@ export function createDataforseoTool(
           },
         );
       }
-      return result.value;
+      return {
+        keywords: result.value.keywords.map((keyword) => ({
+          keyword: keyword.keyword,
+          keywordDifficulty: keyword.keywordDifficulty,
+          mainIntent: keyword.mainIntent,
+          searchVolume: {
+            monthlyAverage: keyword.searchVolume.monthlyAverage,
+            percentageChange: keyword.searchVolume.percentageChange,
+            ...(includeGenderAndAgeDistribution
+              ? {
+                  approximateGenderDistributionPercentage:
+                    keyword.searchVolume
+                      .approximateGenderDistributionPercentage,
+                  approximateAgeDistributionPercentage:
+                    keyword.searchVolume.approximateAgeDistributionPercentage,
+                }
+              : {}),
+          },
+          competition: keyword.competition,
+          serpInfo: {
+            itemTypes: keyword.serpInfo?.itemTypes,
+            resultCount: keyword.serpInfo?.resultCount,
+          },
+          backlinkInfo: keyword.backlinkInfo,
+        })),
+      };
     },
   });
 
@@ -269,7 +323,32 @@ export function createDataforseoTool(
           },
         );
       }
-      return result.value;
+      return {
+        keywords: result.value.keywords.map((keyword) => ({
+          keyword: keyword.keyword,
+          keywordDifficulty: keyword.keywordDifficulty,
+          mainIntent: keyword.mainIntent,
+          searchVolume: {
+            monthlyAverage: keyword.searchVolume.monthlyAverage,
+            percentageChange: keyword.searchVolume.percentageChange,
+            ...(includeGenderAndAgeDistribution
+              ? {
+                  approximateGenderDistributionPercentage:
+                    keyword.searchVolume
+                      .approximateGenderDistributionPercentage,
+                  approximateAgeDistributionPercentage:
+                    keyword.searchVolume.approximateAgeDistributionPercentage,
+                }
+              : {}),
+          },
+          competition: keyword.competition,
+          serpInfo: {
+            itemTypes: keyword.serpInfo?.itemTypes,
+            resultCount: keyword.serpInfo?.resultCount,
+          },
+          backlinkInfo: keyword.backlinkInfo,
+        })),
+      };
     },
   });
 
@@ -297,7 +376,10 @@ export function createDataforseoTool(
           },
         );
       }
-      return result.value;
+      return {
+        searchTerm: result.value.searchTerm,
+        searchResult: result.value.searchResult,
+      };
     },
   });
 

@@ -223,7 +223,6 @@ export function ChatPanel({
                         <ToolContent>
                           <ToolInput input={part.input} />
                           <ToolOutput
-                            className="max-h-[500px] overflow-y-auto"
                             errorText={part.errorText}
                             output={JSON.stringify(
                               part.output as object,
