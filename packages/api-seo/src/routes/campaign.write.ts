@@ -29,7 +29,7 @@ export const write = withOrganizationIdBase
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
     }
     const project = projectResult.value;
-    const gscProperty = await (async () => {
+    const _gscProperty = await (async () => {
       if (!project.gscPropertyId) {
         return null;
       }
