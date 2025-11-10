@@ -235,7 +235,7 @@ export function ChatPanel({
                       ) {
                         // we only need to show one connection screen.
                         // ignore subsequent attempts to request for connection.
-                        return;
+                        return null;
                       }
                       // TODO: make this show the connection card
                       return (
@@ -283,7 +283,6 @@ export function ChatPanel({
                       </Tool>
                     );
                   }
-
                   default:
                     return null;
                 }
