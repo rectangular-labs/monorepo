@@ -1,7 +1,8 @@
 import { dataforseoLabsStatus } from "../sdk.gen";
 
 /**
- * Update schedule https://dataforseo.com/help-center/dataforseo-labs-api-update-time
+ * DataForSEO Labs updates approximately once per month (~30 days)
+ * Update schedule: https://dataforseo.com/help-center/dataforseo-labs-api-update-time
  * @returns The next earliest update date for the DataForSEO Labs API
  */
 export async function getNextEarliestUpdate() {

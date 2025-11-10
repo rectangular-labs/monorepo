@@ -79,13 +79,13 @@ const keywordSerpInfoSchema = type({
 });
 
 export const backlinkInfoSchema = type({
-  averageBacklinkCount: "number| null",
-  averageDoFollowLinkCount: "number| null",
-  averageReferringPageCount: "number| null",
-  averageReferringDomainCount: "number| null",
-  averageReferringMainDomainCount: "number| null",
-  averagePageRank: "number| null",
-  averageMainDomainRank: "number| null",
+  averageBacklinkCount: "number | null",
+  averageDoFollowLinkCount: "number | null",
+  averageReferringPageCount: "number | null",
+  averageReferringDomainCount: "number | null",
+  averageReferringMainDomainCount: "number | null",
+  averagePageRank: "number | null",
+  averageMainDomainRank: "number | null",
 });
 
 export const contentKeywordSchema = type({
