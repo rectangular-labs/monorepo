@@ -767,6 +767,9 @@ importers:
 
   packages/google-apis:
     dependencies:
+      '@rectangular-labs/db':
+        specifier: workspace:*
+        version: link:../db
       '@rectangular-labs/result':
         specifier: workspace:*
         version: link:../result

@@ -1,6 +1,6 @@
-import { err, ok, type Result, safe } from "@rectangular-labs/result";
-
-const GSC_BASE_URL = "https://www.googleapis.com/webmasters/v3";
+import type { getSearchAnalyticsArgsSchema } from "@rectangular-labs/db/parsers";
+import { err, ok, type Result } from "@rectangular-labs/result";
+import { makeGscRequest } from "./google-search-console.fetch";
 
 export interface GscProperty {
   domain: string;
@@ -12,64 +12,12 @@ export interface GscProperty {
     | "siteUnverifiedUser";
 }
 
-export interface GscAnalyticsRow {
-  keys: string[]; // Values for each dimension
-  clicks: number;
-  impressions: number;
-  ctr: number;
-  position: number;
-}
-
-export interface GscAnalyticsResponse {
-  rows: GscAnalyticsRow[];
-  responseAggregationType?: "auto" | "byProperty" | "byPage";
-}
-
-/**
- * Make a request to the Google Search Console API
- */
-async function makeGscRequest<T>(
-  accessToken: string,
-  endpoint: string,
-  options?: {
-    method?: "GET" | "POST";
-    body?: unknown;
-  },
-): Promise<Result<T, Error>> {
-  const url = `${GSC_BASE_URL}${endpoint}`;
-
-  const response = await safe(async () => {
-    const res = await fetch(url, {
-      method: options?.method ?? "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      ...(options?.body ? { body: JSON.stringify(options.body) } : {}),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`GSC API request failed (${res.status}): ${errorText}`);
-    }
-
-    return await res.json();
-  });
-
-  if (!response.ok) {
-    return err(response.error);
-  }
-
-  return ok(response.value as T);
-}
-
 interface GscSitesListResponse {
   siteEntry?: Array<{
     siteUrl?: string;
     permissionLevel?: string;
   }>;
 }
-
 /**
  * List all GSC properties the user has access to
  */
@@ -107,85 +55,65 @@ export async function listProperties(
   return ok(properties);
 }
 
-interface GscSearchAnalyticsResponse {
-  rows?: Array<{
-    keys?: string[];
-    clicks?: number;
-    impressions?: number;
-    ctr?: number;
-    position?: number;
+export interface GscSearchAnalyticsResponse {
+  rows: Array<{
+    keys: string[];
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
   }>;
-  responseAggregationType?: "auto" | "byProperty" | "byPage";
+  responseAggregationType: "auto" | "byProperty" | "byPage";
 }
-
 /**
- * Get search analytics for a property
+ * Get search analytics for a specific GSC property
  *
  * @param accessToken - Google OAuth access token
  * @param args.siteUrl - The GSC property URL (e.g., "https://example.com/")
- * @param args.startDate - Start date in YYYY-MM-DD format
- * @param args.endDate - End date in YYYY-MM-DD format
- * @param args.dimensions - Dimensions to group by (query, page, country, device, searchAppearance)
+ * @param args.siteType - The type of GSC property (URL_PREFIX or DOMAIN)
+ * @param args.startDate - Start date of the query window
+ * @param args.endDate - End date of the query window
+ * @param args.dimensions default: ["query"] - Dimensions to group by (query, page, country, device, searchAppearance)
+ * @param args.type default: "web" - The type of search to perform (discover, googleNews, news, video, image, web).
+ * @param args.aggregationType default: "auto" - The type of aggregation to use (auto, byProperty, byPage, byNewsShowcasePanel).
  * @param args.filters - Dimension filters to apply
- * @param args.rowLimit - Max rows to return (max 25000)
- * @param args.startRow - Starting row for pagination
+ * @param args.filters.dimension - The dimension to filter by (query, page, country, device, searchAppearance)
+ * @param args.filters.operator - The operator to use (equals, notEquals, contains, notContains, includingRegex, excludingRegex)
+ * @param args.filters.expression - The value for the filter to match or exclude, depending on the operator.
+ * @param args.rowLimit default: 1000 - Max rows to return (max 25000)
+ * @param args.startRow default: 0 - Starting row for pagination
  */
 export async function getSearchAnalytics(
   accessToken: string,
-  args: {
-    siteUrl: string;
-    startDate: string;
-    endDate: string;
-    dimensions?: Array<
-      "query" | "page" | "country" | "device" | "searchAppearance"
-    >;
-    filters?: Array<{
-      dimension: "query" | "page" | "country" | "device" | "searchAppearance";
-      operator: "equals" | "contains" | "notContains";
-      expression: string;
-    }>;
-    rowLimit?: number;
-    startRow?: number;
-  },
-): Promise<Result<GscAnalyticsResponse, Error>> {
-  const requestBody: {
-    startDate: string;
-    endDate: string;
-    dimensions: string[];
-    dimensionFilterGroups?: Array<{
-      filters: Array<{
-        dimension: string;
-        operator: string;
-        expression: string;
-      }>;
-    }>;
-    rowLimit: number;
-    startRow: number;
-  } = {
+  args: typeof getSearchAnalyticsArgsSchema.infer,
+): Promise<Result<GscSearchAnalyticsResponse, Error>> {
+  const requestBody = {
     startDate: args.startDate,
     endDate: args.endDate,
-    dimensions: args.dimensions || ["query"],
-    rowLimit: Math.min(args.rowLimit || 25000, 25000), // GSC API max
-    startRow: args.startRow || 0,
+    type: args.type ?? "web",
+    dimensions: args.dimensions ?? ["query"],
+    aggregationType: args.aggregationType ?? "auto",
+    rowLimit: Math.min(args.rowLimit ?? 1_000, 25_000), // GSC API max: 25,000
+    startRow: args.startRow ?? 0,
+    ...(args.filters?.length
+      ? {
+          dimensionFilterGroups: [
+            {
+              filters: args.filters.map((f) => ({
+                dimension: f.dimension,
+                operator: f.operator,
+                expression: f.expression,
+              })),
+            },
+          ],
+        }
+      : {}),
   };
 
-  if (args.filters && args.filters.length > 0) {
-    requestBody.dimensionFilterGroups = [
-      {
-        filters: args.filters.map((f) => ({
-          dimension: f.dimension,
-          operator: f.operator.toUpperCase() as
-            | "EQUALS"
-            | "CONTAINS"
-            | "NOT_CONTAINS",
-          expression: f.expression,
-        })),
-      },
-    ];
-  }
-
   // URL encode the siteUrl for the endpoint
-  const encodedSiteUrl = encodeURIComponent(args.siteUrl);
+  const encodedSiteUrl = encodeURIComponent(
+    args.siteType === "DOMAIN" ? `sc-domain:${args.siteUrl}` : args.siteUrl,
+  );
   const response = await makeGscRequest<GscSearchAnalyticsResponse>(
     accessToken,
     `/sites/${encodedSiteUrl}/searchAnalytics/query`,
@@ -194,22 +122,13 @@ export async function getSearchAnalytics(
       body: requestBody,
     },
   );
-
   if (!response.ok) {
     return err(response.error);
   }
 
-  const rows: GscAnalyticsRow[] = (response.value.rows || []).map((row) => ({
-    keys: row.keys ?? [],
-    clicks: row.clicks ?? 0,
-    impressions: row.impressions ?? 0,
-    ctr: row.ctr ?? 0,
-    position: row.position ?? 0,
-  }));
-
   return ok({
-    rows,
-    responseAggregationType: response.value.responseAggregationType ?? "auto",
+    rows: response.value.rows,
+    responseAggregationType: response.value.responseAggregationType,
   });
 }
 
@@ -220,14 +139,15 @@ export function getKeywordsForPage(
   accessToken: string,
   args: {
     siteUrl: string;
+    siteType: GscProperty["type"];
     pageUrl: string;
     startDate: string;
     endDate: string;
-    minImpressions?: number;
   },
-): Promise<Result<GscAnalyticsResponse, Error>> {
+): Promise<Result<GscSearchAnalyticsResponse, Error>> {
   return getSearchAnalytics(accessToken, {
     siteUrl: args.siteUrl,
+    siteType: args.siteType,
     startDate: args.startDate,
     endDate: args.endDate,
     dimensions: ["query"],
@@ -238,7 +158,6 @@ export function getKeywordsForPage(
         expression: args.pageUrl,
       },
     ],
-    rowLimit: 25000,
   });
 }
 
@@ -249,13 +168,15 @@ export function getTopPages(
   accessToken: string,
   args: {
     siteUrl: string;
+    siteType: GscProperty["type"];
     startDate: string;
     endDate: string;
     limit?: number;
   },
-): Promise<Result<GscAnalyticsResponse, Error>> {
+): Promise<Result<GscSearchAnalyticsResponse, Error>> {
   return getSearchAnalytics(accessToken, {
     siteUrl: args.siteUrl,
+    siteType: args.siteType,
     startDate: args.startDate,
     endDate: args.endDate,
     dimensions: ["page"],
@@ -266,7 +187,7 @@ export function getTopPages(
 /**
  * Helper to format dates for GSC API (YYYY-MM-DD)
  */
-export function formatGscDate(date: Date): string {
+function formatGscDate(date: Date): string {
   return date.toISOString().split("T")[0] ?? "";
 }
 

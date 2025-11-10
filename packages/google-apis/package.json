@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@rectangular-labs/result": "workspace:*",
+    "@rectangular-labs/db": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.23"
   }
