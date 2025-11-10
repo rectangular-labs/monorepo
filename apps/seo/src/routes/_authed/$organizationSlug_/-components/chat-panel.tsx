@@ -1,7 +1,9 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import type { AiSeoUIMessage } from "@rectangular-labs/api-seo/types";
 import { eventIteratorToUnproxiedDataStream } from "@rectangular-labs/api-user-vm/client";
+import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
 import {
   Action,
   Actions,
@@ -83,27 +85,29 @@ export function ChatPanel({
   const [input, setInput] = useState("");
   const [model, setModel] = useState<string>(models[0]?.value ?? "");
   const [webSearch, setWebSearch] = useState(false);
-  const { messages, sendMessage, status, regenerate } = useChat({
-    transport: {
-      async sendMessages(options) {
-        return eventIteratorToUnproxiedDataStream(
-          await getApiClient().campaign.write(
-            {
-              id: campaignId,
-              projectId,
-              organizationId,
-              chatId: options.chatId,
-              messages: options.messages,
-            },
-            { signal: options.abortSignal },
-          ),
-        );
-      },
-      reconnectToStream() {
-        throw new Error("Unsupported");
+  const { messages, sendMessage, status, regenerate } = useChat<AiSeoUIMessage>(
+    {
+      transport: {
+        async sendMessages(options) {
+          return eventIteratorToUnproxiedDataStream(
+            await getApiClient().campaign.write(
+              {
+                id: campaignId,
+                projectId,
+                organizationId,
+                chatId: options.chatId,
+                messages: options.messages,
+              },
+              { signal: options.abortSignal },
+            ),
+          );
+        },
+        reconnectToStream() {
+          throw new Error("Unsupported");
+        },
       },
     },
-  });
+  );
   console.log("messages", messages);
 
   const handleSubmit = (message: PromptInputMessage) => {
@@ -212,11 +216,38 @@ export function ChatPanel({
                       </TaskItemFile>
                     );
                   }
-                  case "tool-get_serp_for_keyword":
-                  case "tool-get_keywords_overview":
-                  case "tool-get_keyword_suggestions":
-                  case "tool-get_ranked_pages_for_site":
-                  case "tool-get_ranked_keywords_for_site": {
+                  case "tool-google_search_console_query": {
+                    if (
+                      !part.output?.success &&
+                      part.output?.next_step === NO_SEARCH_CONSOLE_ERROR_MESSAGE
+                    ) {
+                      const firstNoConnectionPart = message.parts.find(
+                        (part) =>
+                          part.type === "tool-google_search_console_query" &&
+                          !part.output?.success &&
+                          part.output?.next_step ===
+                            NO_SEARCH_CONSOLE_ERROR_MESSAGE,
+                      );
+                      if (
+                        firstNoConnectionPart?.type ===
+                          "tool-google_search_console_query" &&
+                        firstNoConnectionPart.toolCallId !== part.toolCallId
+                      ) {
+                        // we only need to show one connection screen.
+                        // ignore subsequent attempts to request for connection.
+                        return;
+                      }
+                      // TODO: make this show the connection card
+                      return (
+                        <Message from={message.role}>
+                          <MessageContent>
+                            <Response>
+                              {NO_SEARCH_CONSOLE_ERROR_MESSAGE}
+                            </Response>
+                          </MessageContent>
+                        </Message>
+                      );
+                    }
                     return (
                       <Tool defaultOpen={false}>
                         <ToolHeader state={part.state} type={part.type} />
@@ -229,6 +260,24 @@ export function ChatPanel({
                               null,
                               2,
                             )}
+                          />
+                        </ToolContent>
+                      </Tool>
+                    );
+                  }
+                  case "tool-get_serp_for_keyword":
+                  case "tool-get_keywords_overview":
+                  case "tool-get_keyword_suggestions":
+                  case "tool-get_ranked_pages_for_site":
+                  case "tool-get_ranked_keywords_for_site": {
+                    return (
+                      <Tool defaultOpen={false}>
+                        <ToolHeader state={part.state} type={part.type} />
+                        <ToolContent>
+                          <ToolInput input={part.input} />
+                          <ToolOutput
+                            errorText={part.errorText}
+                            output={JSON.stringify(part.output, null, 2)}
                           />
                         </ToolContent>
                       </Tool>
