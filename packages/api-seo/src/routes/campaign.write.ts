@@ -1,7 +1,12 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { streamToEventIterator } from "@orpc/client";
 import { ORPCError, type } from "@orpc/server";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  stepCountIs,
+  streamText,
+  type UIMessage,
+} from "ai";
 import { withOrganizationIdBase } from "../context";
 import { createDataforseoTool } from "../lib/ai-tools/dataforseo";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
@@ -123,6 +128,7 @@ Output requirements:
       onError: (error) => {
         console.error("campaign.write error", error);
       },
+      stopWhen: stepCountIs(10),
     });
 
     return streamToEventIterator(
