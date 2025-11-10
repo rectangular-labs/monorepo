@@ -316,7 +316,7 @@ export const shoppingSearchItemSchema = type({
     rating: ratingSchema.or(type.null),
     price: priceSchema.or(type.null),
     url: "string.url | null",
-    isPaid: "'true'",
+    isPaid: "true",
   })
     .array()
     .default(() => []),

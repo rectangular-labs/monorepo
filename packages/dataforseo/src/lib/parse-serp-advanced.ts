@@ -546,7 +546,7 @@ export function parseSerpAdvancedToItems(
                   }
                 : null,
               url: it.url ?? null,
-              isPaid: "true",
+              isPaid: true,
             })) ?? [],
         });
         break;
