@@ -43,31 +43,34 @@ export function parseKeywordData(
             yearly: item.keyword_info?.search_volume_trend?.yearly ?? null,
           }
         : null,
-      approximateGenderDistributionPercentage: item.clickstream_keyword_info
-        ?.gender_distribution
-        ? {
-            male:
-              ((item.clickstream_keyword_info?.gender_distribution?.male ?? 0) /
-                totalGenderDistribution) *
-              100,
-            female:
-              ((item.clickstream_keyword_info?.gender_distribution?.female ??
-                0) /
-                totalGenderDistribution) *
-              100,
-          }
-        : null,
-      approximateAgeDistributionPercentage: item.clickstream_keyword_info
-        ?.age_distribution
-        ? Object.fromEntries(
-            Object.entries(
-              item.clickstream_keyword_info?.age_distribution ?? {},
-            ).map(([age, count]) => [
-              age,
-              ((count ?? 0) / totalAgeDistribution) * 100,
-            ]),
-          )
-        : null,
+      approximateGenderDistributionPercentage:
+        item.clickstream_keyword_info?.gender_distribution &&
+        totalGenderDistribution > 0
+          ? {
+              male:
+                ((item.clickstream_keyword_info?.gender_distribution?.male ??
+                  0) /
+                  totalGenderDistribution) *
+                100,
+              female:
+                ((item.clickstream_keyword_info?.gender_distribution?.female ??
+                  0) /
+                  totalGenderDistribution) *
+                100,
+            }
+          : null,
+      approximateAgeDistributionPercentage:
+        item.clickstream_keyword_info?.age_distribution &&
+        totalAgeDistribution > 0
+          ? Object.fromEntries(
+              Object.entries(
+                item.clickstream_keyword_info?.age_distribution ?? {},
+              ).map(([age, count]) => [
+                age,
+                ((count ?? 0) / totalAgeDistribution) * 100,
+              ]),
+            )
+          : null,
     },
     competition: {
       cpc: item.keyword_info?.cpc ?? null,
