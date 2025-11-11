@@ -28,7 +28,7 @@
     "format": "bun x @biomejs/biome format . --write",
     "lint": "bun x @biomejs/biome lint . --write",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "generate-api": "mv ./src/env.ts ./ && mv ./src/index.ts ./ && pnpm openapi-ts && mv ./env.ts ./src/ && mv ./index.ts ./src/ "
+    "generate-api": "mv ./src/env.ts ./ && mv ./src/index.ts ./ && mv ./src/lib ./ && pnpm openapi-ts && mv ./env.ts ./src/ && mv ./index.ts ./src/ && mv ./lib ./src/"
   },
   "devDependencies": {
     "@rectangular-labs/db": "workspace:*",

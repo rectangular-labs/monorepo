@@ -93,13 +93,6 @@ export function OnboardingConnectGscProperty({
     stepper.next();
   };
 
-  console.log("propertiesData?.properties", propertiesData?.properties);
-  console.log("selectedProperty", selectedProperty);
-  console.log(
-    "showPotentialMissingPropertyWarning",
-    showPotentialMissingPropertyWarning,
-  );
-  console.log("projectData?.websiteUrl", projectData?.websiteUrl);
   if (
     propertiesData?.properties &&
     propertiesData.properties.length > 0 &&

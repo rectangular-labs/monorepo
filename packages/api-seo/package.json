@@ -48,6 +48,7 @@
     "@orpc/tanstack-query": "^1.10.0",
     "@rectangular-labs/api-core": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
+    "@rectangular-labs/dataforseo": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/google-apis": "workspace:*",
     "@rectangular-labs/result": "workspace:*",

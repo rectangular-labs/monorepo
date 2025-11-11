@@ -1,7 +1,9 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import type { AiSeoUIMessage } from "@rectangular-labs/api-seo/types";
 import { eventIteratorToUnproxiedDataStream } from "@rectangular-labs/api-user-vm/client";
+import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
 import {
   Action,
   Actions,
@@ -49,13 +51,27 @@ import {
   SourcesContent,
   SourcesTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/sources";
-import { Copy, Globe, RefreshCcw } from "@rectangular-labs/ui/components/icon";
+import { TaskItemFile } from "@rectangular-labs/ui/components/ai-elements/task";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@rectangular-labs/ui/components/ai-elements/tool";
+import {
+  Copy,
+  File,
+  Globe,
+  RefreshCcw,
+} from "@rectangular-labs/ui/components/icon";
 import { Fragment, useState } from "react";
 import { getApiClient } from "~/lib/api";
+import { GscConnectionCard } from "./gsc-connection-card";
 
 const models = [
-  { name: "GPT 4o", value: "openai/gpt-4o" },
-  { name: "Deepseek R1", value: "deepseek/deepseek-r1" },
+  { name: "Claude", value: "anthropic/claude-haiku-4-5" },
+  { name: "Open AI", value: "openai/gpt-5-mini" },
 ];
 
 export function ChatPanel({
@@ -70,27 +86,30 @@ export function ChatPanel({
   const [input, setInput] = useState("");
   const [model, setModel] = useState<string>(models[0]?.value ?? "");
   const [webSearch, setWebSearch] = useState(false);
-  const { messages, sendMessage, status, regenerate } = useChat({
-    transport: {
-      async sendMessages(options) {
-        return eventIteratorToUnproxiedDataStream(
-          await getApiClient().campaign.write(
-            {
-              id: campaignId,
-              projectId,
-              organizationId,
-              chatId: options.chatId,
-              messages: options.messages,
-            },
-            { signal: options.abortSignal },
-          ),
-        );
-      },
-      reconnectToStream() {
-        throw new Error("Unsupported");
+  const { messages, sendMessage, status, regenerate } = useChat<AiSeoUIMessage>(
+    {
+      transport: {
+        async sendMessages(options) {
+          return eventIteratorToUnproxiedDataStream(
+            await getApiClient().campaign.write(
+              {
+                id: campaignId,
+                projectId,
+                organizationId,
+                chatId: options.chatId,
+                messages: options.messages,
+              },
+              { signal: options.abortSignal },
+            ),
+          );
+        },
+        reconnectToStream() {
+          throw new Error("Unsupported");
+        },
       },
     },
-  });
+  );
+  console.log("messages", messages);
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -190,6 +209,68 @@ export function ChatPanel({
                         <ReasoningContent>{part.text}</ReasoningContent>
                       </Reasoning>
                     );
+                  case "file": {
+                    return (
+                      <TaskItemFile>
+                        <File className="size-4" />
+                        <span>{part.filename}</span>
+                      </TaskItemFile>
+                    );
+                  }
+                  case "tool-google_search_console_query": {
+                    if (
+                      !part.output?.success &&
+                      part.output?.next_step === NO_SEARCH_CONSOLE_ERROR_MESSAGE
+                    ) {
+                      return null;
+                    }
+                    return (
+                      <Tool defaultOpen={false}>
+                        <ToolHeader state={part.state} type={part.type} />
+                        <ToolContent>
+                          <ToolInput input={part.input} />
+                          <ToolOutput
+                            errorText={part.errorText}
+                            output={JSON.stringify(
+                              part.output as object,
+                              null,
+                              2,
+                            )}
+                          />
+                        </ToolContent>
+                      </Tool>
+                    );
+                  }
+                  case "tool-manage_google_search_property": {
+                    return (
+                      <Message from={message.role}>
+                        <MessageContent>
+                          <GscConnectionCard
+                            organizationId={organizationId}
+                            projectId={projectId}
+                          />
+                        </MessageContent>
+                      </Message>
+                    );
+                  }
+                  case "tool-get_serp_for_keyword":
+                  case "tool-get_keywords_overview":
+                  case "tool-get_keyword_suggestions":
+                  case "tool-get_ranked_pages_for_site":
+                  case "tool-get_ranked_keywords_for_site": {
+                    return (
+                      <Tool defaultOpen={false}>
+                        <ToolHeader state={part.state} type={part.type} />
+                        <ToolContent>
+                          <ToolInput input={part.input} />
+                          <ToolOutput
+                            errorText={part.errorText}
+                            output={JSON.stringify(part.output, null, 2)}
+                          />
+                        </ToolContent>
+                      </Tool>
+                    );
+                  }
                   default:
                     return null;
                 }

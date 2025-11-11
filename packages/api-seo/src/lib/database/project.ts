@@ -1,4 +1,5 @@
 import { type DBTransaction, schema } from "@rectangular-labs/db";
+import { getSeoProjectByIdentifierAndOrgId } from "@rectangular-labs/db/operations";
 import { err, ok, safe } from "@rectangular-labs/result";
 import { getContext } from "../../context";
 
@@ -7,16 +8,14 @@ export async function getProjectByIdentifier(
   orgId: string,
 ) {
   const context = await getContext();
-
-  const project = await context.db.query.seoProject.findFirst({
-    where: (table, { eq, and, or }) =>
-      or(
-        and(eq(table.id, projectIdentifier), eq(table.organizationId, orgId)),
-        and(eq(table.slug, projectIdentifier), eq(table.organizationId, orgId)),
-      ),
-  });
-  if (!project) return err(new Error("Project not found"));
-  return ok(project);
+  const project = await getSeoProjectByIdentifierAndOrgId(
+    context.db,
+    projectIdentifier,
+    orgId,
+  );
+  if (!project.ok) return project;
+  if (!project.value) return err(new Error("Project not found"));
+  return ok(project.value);
 }
 
 export async function upsertProject(

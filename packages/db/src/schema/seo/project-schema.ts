@@ -6,10 +6,8 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
-import type {
-  seoSerpSnapshotSchema,
-  seoWebsiteInfoSchema,
-} from "../../schema-parsers/project-parsers";
+import type { serpTrafficSchema } from "../../schema-parsers";
+import type { seoWebsiteInfoSchema } from "../../schema-parsers/project-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
@@ -31,7 +29,7 @@ export const seoProject = pgSeoTable(
       }),
     websiteUrl: text().notNull(),
     websiteInfo: jsonb().$type<typeof seoWebsiteInfoSchema.infer>(),
-    serpSnapshot: jsonb().$type<typeof seoSerpSnapshotSchema.infer>(),
+    serpSnapshot: jsonb().$type<typeof serpTrafficSchema.infer>(),
     gscPropertyId: uuid().references(() => seoGscProperty.id, {
       onDelete: "set null",
       onUpdate: "cascade",

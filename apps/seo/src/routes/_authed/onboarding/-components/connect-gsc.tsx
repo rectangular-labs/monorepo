@@ -10,17 +10,8 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import { authClient } from "~/lib/auth";
+import { linkGoogleAccountForGsc } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
-
-const GSC_SCOPE = "https://www.googleapis.com/auth/webmasters";
-function linkGoogleAccountForGsc(options: { callbackURL: string }) {
-  return authClient.linkSocial({
-    provider: "google",
-    callbackURL: options.callbackURL,
-    scopes: [GSC_SCOPE],
-  });
-}
 
 export function OnboardingConnectGsc({
   description,

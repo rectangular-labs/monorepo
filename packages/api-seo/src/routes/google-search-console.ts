@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import {
   connectGscPropertyToProject,
+  disconnectGscPropertyFromProject,
   upsertGscProperty,
 } from "@rectangular-labs/db/operations";
 import {
@@ -119,6 +120,55 @@ const listProperties = protectedBase
   });
 
 /**
+ * Get the connected GSC property for a project (if any)
+ */
+const getConnectedPropertyForProject = protectedBase
+  .route({ method: "GET", path: "/{gscPropertyId}/project/{projectId}" })
+  .input(
+    type({
+      gscPropertyId: type("string.uuid").or(type.null),
+      projectId: "string.uuid",
+    }),
+  )
+  .output(
+    type({
+      property: type({
+        domain: "string",
+        type: seoGscPropertyTypeSchema,
+        permissionLevel: seoGscPermissionLevelSchema,
+      }).or(type.null),
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    if (!input.gscPropertyId) {
+      return { property: null };
+    }
+
+    const project = await context.db.query.seoProject.findFirst({
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.id, input.projectId),
+          eq(table.gscPropertyId, input.gscPropertyId ?? ""),
+        ),
+      with: { gscProperty: true },
+    });
+
+    if (!project) {
+      throw new ORPCError("NOT_FOUND", { message: "Project not found" });
+    }
+    if (!project.gscProperty) {
+      return { property: null };
+    }
+    return {
+      property: {
+        domain: project.gscProperty.domain,
+        type: project.gscProperty.type,
+        permissionLevel: project.gscProperty.permissionLevel,
+      },
+    };
+  });
+
+/**
  * Connect a GSC property to a project
  */
 const connectToProject = protectedBase
@@ -217,6 +267,47 @@ const connectToProject = protectedBase
     };
   });
 
-export default protectedBase
-  .prefix("/google-search-console")
-  .router({ listProperties, connectToProject });
+/**
+ * Disconnect the connected GSC property from a project
+ */
+const disconnectFromProject = protectedBase
+  .route({ method: "DELETE", path: "/project/{projectId}" })
+  .input(
+    type({
+      projectId: "string.uuid",
+    }),
+  )
+  .output(
+    type({
+      projectId: "string.uuid",
+      success: "true",
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    // Ensure project exists
+    const project = await context.db.query.seoProject.findFirst({
+      where: (table, { eq }) => eq(table.id, input.projectId),
+      columns: { id: true },
+    });
+    if (!project) {
+      throw new ORPCError("NOT_FOUND", { message: "Project not found" });
+    }
+
+    const result = await disconnectGscPropertyFromProject(
+      context.db,
+      input.projectId,
+    );
+    if (!result.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: `Failed to disconnect GSC property from project: ${result.error.message}`,
+      });
+    }
+    return { projectId: input.projectId, success: true as const };
+  });
+
+export default protectedBase.prefix("/google-search-console").router({
+  listProperties,
+  getConnectedPropertyForProject,
+  connectToProject,
+  disconnectFromProject,
+});

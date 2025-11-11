@@ -66,7 +66,7 @@ phrase: ${args.keyword.normalizedPhrase}
 search volume: ${args.keyword.searchVolume ?? "N/A"}
 intent: ${args.keyword.intent}
 cost per click (usd cents): ${args.keyword.cpcUsdCents}
-backlink info: ${args.keyword.backlinkInfo?.avgBacklinks ?? "N/A"}
+backlink info: ${args.keyword.backlinkInfo?.averageBacklinkCount ?? "N/A"}
 serp features: ${args.keyword.serpFeatures ?? "N/A"}
 
 ## Top 10 SERP Results CSV for keyword

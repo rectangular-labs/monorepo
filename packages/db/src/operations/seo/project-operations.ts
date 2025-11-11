@@ -37,3 +37,19 @@ export function getSeoProjectById(db: DB, id: string) {
     }),
   );
 }
+
+export function getSeoProjectByIdentifierAndOrgId(
+  db: DB,
+  identifier: string,
+  orgId: string,
+) {
+  return safe(() =>
+    db.query.seoProject.findFirst({
+      where: (table, { eq, and, or }) =>
+        or(
+          and(eq(table.id, identifier), eq(table.organizationId, orgId)),
+          and(eq(table.slug, identifier), eq(table.organizationId, orgId)),
+        ),
+    }),
+  );
+}

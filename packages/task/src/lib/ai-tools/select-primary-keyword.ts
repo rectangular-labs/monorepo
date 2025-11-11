@@ -24,7 +24,7 @@ export async function selectPrimaryKeyword(args: {
     "normalizedPhrase, Search Volume, Keyword Difficulty, Cost per click ( USD Cents), keyword intent, average backlinks, article current position, article estimated volume",
     ...args.keywords.map(
       (kw) =>
-        `${kw.normalizedPhrase}, ${kw.searchVolume ?? "N/A"}, ${kw.keywordDifficulty ?? "N/A"}, ${kw.cpcUsdCents}, ${kw.intent}, ${kw.backlinkInfo?.avgBacklinks ?? "N/A"}, ${kw.currentPosition ?? "N/A"}, ${kw.estimatedSearchVolume ?? "N/A"}`,
+        `${kw.normalizedPhrase}, ${kw.searchVolume ?? "N/A"}, ${kw.keywordDifficulty ?? "N/A"}, ${kw.cpcUsdCents}, ${kw.intent}, ${kw.backlinkInfo?.averageBacklinkCount ?? "N/A"}, ${kw.currentPosition ?? "N/A"}, ${kw.estimatedSearchVolume ?? "N/A"}`,
     ),
   ].join("\n");
 
