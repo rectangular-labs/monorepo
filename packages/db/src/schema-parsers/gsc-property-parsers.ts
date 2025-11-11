@@ -1,7 +1,7 @@
 import { type } from "arktype";
 
 export const NO_SEARCH_CONSOLE_ERROR_MESSAGE =
-  "No Google Search Console account connected. Please connect an account to the project and try again.";
+  "No Google Search Console account connected. Please call the manage_google_search_property tool to allow the user to connect an account to the project and try again.";
 
 export const seoGscPermissionLevelSchema = type(
   "'write'|'read-only'|'needs-verification'",

@@ -3,6 +3,7 @@ import { streamToEventIterator } from "@orpc/client";
 import { ORPCError, type } from "@orpc/server";
 import {
   convertToModelMessages,
+  hasToolCall,
   stepCountIs,
   streamText,
   type UIMessage,
@@ -129,7 +130,7 @@ Output requirements:
       onError: (error) => {
         console.error("campaign.write error", error);
       },
-      stopWhen: stepCountIs(10),
+      stopWhen: [stepCountIs(10), hasToolCall("manage_google_search_property")],
     });
 
     return streamToEventIterator(

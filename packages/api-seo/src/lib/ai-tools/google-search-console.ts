@@ -5,11 +5,16 @@ import {
 } from "@rectangular-labs/db/parsers";
 import { getSearchAnalytics } from "@rectangular-labs/google-apis/google-search-console";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { type } from "arktype";
 
 const gscQueryInputSchema = getSearchAnalyticsArgsSchema.omit(
   "siteType",
   "siteUrl",
 );
+
+const manageGscPropertyInputSchema = type({
+  type: "'manage'",
+});
 
 export function createGscTool({
   accessToken,
@@ -52,7 +57,20 @@ export function createGscTool({
     },
   });
 
+  const manageGscPropertyTool = tool({
+    description:
+      "Manage the project's Google Search Console property. This tool allows you to connect, disconnect, and manage the property.",
+    inputSchema: jsonSchema<typeof manageGscPropertyInputSchema.infer>(
+      manageGscPropertyInputSchema.toJsonSchema() as JSONSchema7,
+    ),
+    async execute() {
+      await Promise.resolve();
+      return { status: "Pending User Action" as const };
+    },
+  });
+
   return {
     google_search_console_query: gscTool,
+    manage_google_search_property: manageGscPropertyTool,
   } as const;
 }
