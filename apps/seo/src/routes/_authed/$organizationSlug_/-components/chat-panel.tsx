@@ -67,6 +67,7 @@ import {
 } from "@rectangular-labs/ui/components/icon";
 import { Fragment, useState } from "react";
 import { getApiClient } from "~/lib/api";
+import { GscConnectionCard } from "./gsc-connection-card";
 
 const models = [
   { name: "Claude", value: "anthropic/claude-haiku-4-5" },
@@ -221,32 +222,7 @@ export function ChatPanel({
                       !part.output?.success &&
                       part.output?.next_step === NO_SEARCH_CONSOLE_ERROR_MESSAGE
                     ) {
-                      const firstNoConnectionPart = message.parts.find(
-                        (part) =>
-                          part.type === "tool-google_search_console_query" &&
-                          !part.output?.success &&
-                          part.output?.next_step ===
-                            NO_SEARCH_CONSOLE_ERROR_MESSAGE,
-                      );
-                      if (
-                        firstNoConnectionPart?.type ===
-                          "tool-google_search_console_query" &&
-                        firstNoConnectionPart.toolCallId !== part.toolCallId
-                      ) {
-                        // we only need to show one connection screen.
-                        // ignore subsequent attempts to request for connection.
-                        return null;
-                      }
-                      // TODO: make this show the connection card
-                      return (
-                        <Message from={message.role}>
-                          <MessageContent>
-                            <Response>
-                              {NO_SEARCH_CONSOLE_ERROR_MESSAGE}
-                            </Response>
-                          </MessageContent>
-                        </Message>
-                      );
+                      return null;
                     }
                     return (
                       <Tool defaultOpen={false}>
@@ -263,6 +239,18 @@ export function ChatPanel({
                           />
                         </ToolContent>
                       </Tool>
+                    );
+                  }
+                  case "tool-manage_google_search_property": {
+                    return (
+                      <Message from={message.role}>
+                        <MessageContent>
+                          <GscConnectionCard
+                            organizationId={organizationId}
+                            projectId={projectId}
+                          />
+                        </MessageContent>
+                      </Message>
                     );
                   }
                   case "tool-get_serp_for_keyword":
