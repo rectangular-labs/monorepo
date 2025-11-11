@@ -52,32 +52,34 @@ export function parseSiteMetrics(
           position41_50: metrics.organic?.pos_41_50 ?? 0,
           estimatedTrafficVolume: metrics.organic?.etv ?? 0,
           rankedKeywords: metrics.organic?.count ?? 0,
-          approximateAgeDistributionPercentage: metrics.organic
-            ?.clickstream_age_distribution
-            ? Object.fromEntries(
-                Object.entries(
-                  metrics.organic?.clickstream_age_distribution ?? {},
-                ).map(([age, count]) => [
-                  age,
-                  ((count ?? 0) / totalOrganicAgeDistribution) * 100,
-                ]),
-              )
-            : null,
-          approximateGenderDistributionPercentage: metrics.organic
-            ?.clickstream_gender_distribution
-            ? {
-                male:
-                  ((metrics.organic?.clickstream_gender_distribution?.male ??
-                    0) /
-                    totalOrganicGenderDistribution) *
-                  100,
-                female:
-                  ((metrics.organic?.clickstream_gender_distribution?.female ??
-                    0) /
-                    totalOrganicGenderDistribution) *
-                  100,
-              }
-            : null,
+          approximateAgeDistributionPercentage:
+            metrics.organic?.clickstream_age_distribution &&
+            totalOrganicAgeDistribution > 0
+              ? Object.fromEntries(
+                  Object.entries(
+                    metrics.organic?.clickstream_age_distribution ?? {},
+                  ).map(([age, count]) => [
+                    age,
+                    ((count ?? 0) / totalOrganicAgeDistribution) * 100,
+                  ]),
+                )
+              : null,
+          approximateGenderDistributionPercentage:
+            metrics.organic?.clickstream_gender_distribution &&
+            totalOrganicGenderDistribution > 0
+              ? {
+                  male:
+                    ((metrics.organic?.clickstream_gender_distribution?.male ??
+                      0) /
+                      totalOrganicGenderDistribution) *
+                    100,
+                  female:
+                    ((metrics.organic?.clickstream_gender_distribution
+                      ?.female ?? 0) /
+                      totalOrganicGenderDistribution) *
+                    100,
+                }
+              : null,
         }
       : null,
     paid: metrics.paid
@@ -92,31 +94,34 @@ export function parseSiteMetrics(
           position41_50: metrics.paid?.pos_41_50 ?? 0,
           rankedKeywords: metrics.paid?.count ?? 0,
           estimatedTrafficVolume: metrics.paid?.etv ?? 0,
-          approximateAgeDistributionPercentage: metrics.paid
-            ?.clickstream_age_distribution
-            ? Object.fromEntries(
-                Object.entries(
-                  metrics.paid?.clickstream_age_distribution ?? {},
-                ).map(([age, count]) => [
-                  age,
-                  ((count ?? 0) / totalPaidAgeDistribution) * 100,
-                ]),
-              )
-            : null,
-          approximateGenderDistributionPercentage: metrics.paid
-            ?.clickstream_gender_distribution
-            ? {
-                male:
-                  ((metrics.paid?.clickstream_gender_distribution?.male ?? 0) /
-                    totalPaidGenderDistribution) *
-                  100,
-                female:
-                  ((metrics.paid?.clickstream_gender_distribution?.female ??
-                    0) /
-                    totalPaidGenderDistribution) *
-                  100,
-              }
-            : null,
+          approximateAgeDistributionPercentage:
+            metrics.paid?.clickstream_age_distribution &&
+            totalPaidAgeDistribution > 0
+              ? Object.fromEntries(
+                  Object.entries(
+                    metrics.paid?.clickstream_age_distribution ?? {},
+                  ).map(([age, count]) => [
+                    age,
+                    ((count ?? 0) / totalPaidAgeDistribution) * 100,
+                  ]),
+                )
+              : null,
+          approximateGenderDistributionPercentage:
+            metrics.paid?.clickstream_gender_distribution &&
+            totalPaidGenderDistribution > 0
+              ? {
+                  male:
+                    ((metrics.paid?.clickstream_gender_distribution?.male ??
+                      0) /
+                      totalPaidGenderDistribution) *
+                    100,
+                  female:
+                    ((metrics.paid?.clickstream_gender_distribution?.female ??
+                      0) /
+                      totalPaidGenderDistribution) *
+                    100,
+                }
+              : null,
         }
       : null,
     featured_snippet: metrics.featured_snippet
@@ -131,32 +136,35 @@ export function parseSiteMetrics(
           position41_50: metrics.featured_snippet?.pos_41_50 ?? 0,
           rankedKeywords: metrics.featured_snippet?.count ?? 0,
           estimatedTrafficVolume: metrics.featured_snippet?.etv ?? 0,
-          approximateAgeDistributionPercentage: metrics.featured_snippet
-            ?.clickstream_age_distribution
-            ? Object.fromEntries(
-                Object.entries(
-                  metrics.featured_snippet?.clickstream_age_distribution ?? {},
-                ).map(([age, count]) => [
-                  age,
-                  ((count ?? 0) / totalFeaturedSnippetAgeDistribution) * 100,
-                ]),
-              )
-            : null,
-          approximateGenderDistributionPercentage: metrics.featured_snippet
-            ?.clickstream_gender_distribution
-            ? {
-                male:
-                  ((metrics.featured_snippet?.clickstream_gender_distribution
-                    ?.male ?? 0) /
-                    totalFeaturedSnippetGenderDistribution) *
-                  100,
-                female:
-                  ((metrics.featured_snippet?.clickstream_gender_distribution
-                    ?.female ?? 0) /
-                    totalFeaturedSnippetGenderDistribution) *
-                  100,
-              }
-            : null,
+          approximateAgeDistributionPercentage:
+            metrics.featured_snippet?.clickstream_age_distribution &&
+            totalFeaturedSnippetAgeDistribution > 0
+              ? Object.fromEntries(
+                  Object.entries(
+                    metrics.featured_snippet?.clickstream_age_distribution ??
+                      {},
+                  ).map(([age, count]) => [
+                    age,
+                    ((count ?? 0) / totalFeaturedSnippetAgeDistribution) * 100,
+                  ]),
+                )
+              : null,
+          approximateGenderDistributionPercentage:
+            metrics.featured_snippet?.clickstream_gender_distribution &&
+            totalFeaturedSnippetGenderDistribution > 0
+              ? {
+                  male:
+                    ((metrics.featured_snippet?.clickstream_gender_distribution
+                      ?.male ?? 0) /
+                      totalFeaturedSnippetGenderDistribution) *
+                    100,
+                  female:
+                    ((metrics.featured_snippet?.clickstream_gender_distribution
+                      ?.female ?? 0) /
+                      totalFeaturedSnippetGenderDistribution) *
+                    100,
+                }
+              : null,
         }
       : null,
     local_pack: metrics.local_pack
@@ -171,32 +179,34 @@ export function parseSiteMetrics(
           position41_50: metrics.local_pack?.pos_41_50 ?? 0,
           rankedKeywords: metrics.local_pack?.count ?? 0,
           estimatedTrafficVolume: metrics.local_pack?.etv ?? 0,
-          approximateAgeDistributionPercentage: metrics.local_pack
-            ?.clickstream_age_distribution
-            ? Object.fromEntries(
-                Object.entries(
-                  metrics.local_pack?.clickstream_age_distribution ?? {},
-                ).map(([age, count]) => [
-                  age,
-                  ((count ?? 0) / totalLocalPackAgeDistribution) * 100,
-                ]),
-              )
-            : null,
-          approximateGenderDistributionPercentage: metrics.local_pack
-            ?.clickstream_gender_distribution
-            ? {
-                male:
-                  ((metrics.local_pack?.clickstream_gender_distribution?.male ??
-                    0) /
-                    totalLocalPackGenderDistribution) *
-                  100,
-                female:
-                  ((metrics.local_pack?.clickstream_gender_distribution
-                    ?.female ?? 0) /
-                    totalLocalPackGenderDistribution) *
-                  100,
-              }
-            : null,
+          approximateAgeDistributionPercentage:
+            metrics.local_pack?.clickstream_age_distribution &&
+            totalLocalPackAgeDistribution > 0
+              ? Object.fromEntries(
+                  Object.entries(
+                    metrics.local_pack?.clickstream_age_distribution ?? {},
+                  ).map(([age, count]) => [
+                    age,
+                    ((count ?? 0) / totalLocalPackAgeDistribution) * 100,
+                  ]),
+                )
+              : null,
+          approximateGenderDistributionPercentage:
+            metrics.local_pack?.clickstream_gender_distribution &&
+            totalLocalPackGenderDistribution > 0
+              ? {
+                  male:
+                    ((metrics.local_pack?.clickstream_gender_distribution
+                      ?.male ?? 0) /
+                      totalLocalPackGenderDistribution) *
+                    100,
+                  female:
+                    ((metrics.local_pack?.clickstream_gender_distribution
+                      ?.female ?? 0) /
+                      totalLocalPackGenderDistribution) *
+                    100,
+                }
+              : null,
         }
       : null,
   };
