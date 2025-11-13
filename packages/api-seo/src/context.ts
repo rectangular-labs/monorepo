@@ -6,11 +6,14 @@ import {
 } from "@rectangular-labs/api-core/lib/context-storage";
 import { loggerMiddleware } from "@rectangular-labs/api-core/lib/logger";
 import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
-import { createDb } from "@rectangular-labs/db";
+import { createDb, type schema } from "@rectangular-labs/db";
 import { apiEnv } from "./env";
+import { createWorkspaceBucket } from "./lib/bucket";
 import type { InitialContext } from "./types";
 
-export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
+export const createApiContext = (
+  args: Omit<InitialContext, "db" | "auth" | "workspaceBucket">,
+) => {
   const db = createDb();
   const env = apiEnv();
   return {
@@ -29,6 +32,7 @@ export const createApiContext = (args: Omit<InitialContext, "db" | "auth">) => {
       googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
     }) as Auth,
     db,
+    workspaceBucket: createWorkspaceBucket(),
     ...args,
   };
 };
@@ -56,6 +60,7 @@ export const protectedBase = base.use(({ context, next }) => {
     },
   });
 });
+
 export const withOrganizationIdBase = protectedBase.use(({ context, next }) => {
   const { session } = context;
   const activeOrganizationId = session.activeOrganizationId;
@@ -71,5 +76,16 @@ export const withOrganizationIdBase = protectedBase.use(({ context, next }) => {
     },
   });
 });
-
 export const getContext = getBaseContext<InitialContext>;
+
+export const websocketBase = os
+  .$context<
+    InitialContext & {
+      senderWebSocket: WebSocket;
+      allWebSockets: WebSocket[];
+      project: typeof schema.seoProject.$inferSelect;
+      campaign: typeof schema.seoContentCampaign.$inferSelect;
+    }
+  >()
+  .use(loggerMiddleware)
+  .use(asyncStorageMiddleware<InitialContext>());

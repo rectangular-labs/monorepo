@@ -6,13 +6,13 @@ import { createSeoBlogSearchServer } from "@rectangular-labs/content/search";
 import { createDb } from "@rectangular-labs/db";
 import { createFileRoute } from "@tanstack/react-router";
 import { serverEnv } from "~/lib/env";
-import { createWorkspaceStorage } from "~/lib/storage";
 
 const seoBlogSearch = createSeoBlogSearchServer();
 
 async function handle({ request }: { request: Request }) {
   const env = serverEnv();
-  if (new URL(request.url).pathname.startsWith("/api/auth/")) {
+  const requestUrl = new URL(request.url);
+  if (requestUrl.pathname.startsWith("/api/auth/")) {
     const authServerHandler = initAuthHandler({
       baseURL: env.VITE_SEO_URL,
       db: createDb(),
@@ -27,9 +27,10 @@ async function handle({ request }: { request: Request }) {
       googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
       googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
     });
+
     return await authServerHandler.handler(request);
   }
-  if (new URL(request.url).pathname.startsWith("/api/blog/search")) {
+  if (requestUrl.pathname.startsWith("/api/blog/search")) {
     if (request.method !== "GET") {
       return new Response("Method not allowed", { status: 405 });
     }
@@ -37,7 +38,7 @@ async function handle({ request }: { request: Request }) {
   }
 
   if (
-    new URL(request.url).pathname.startsWith("/api/user-vm/") &&
+    requestUrl.pathname.startsWith("/api/user-vm/") &&
     "USER_VM_CONTAINER" in CloudflareEnv &&
     typeof CloudflareEnv.USER_VM_CONTAINER === "object" &&
     CloudflareEnv.USER_VM_CONTAINER &&
@@ -46,7 +47,7 @@ async function handle({ request }: { request: Request }) {
   ) {
     // TODO: cloudflare session ID
     const userVmInstance = CloudflareEnv.USER_VM_CONTAINER.getByName(
-      new URL(request.url).pathname,
+      requestUrl.pathname,
     );
     await userVmInstance.startAndWaitForPorts({
       ports: [parseInt(env.USER_VM_PORT ?? "3000", 10)],
@@ -69,10 +70,15 @@ async function handle({ request }: { request: Request }) {
     return response;
   }
 
+  if (requestUrl.pathname.startsWith("/api/websocket/")) {
+    const roomId = requestUrl.pathname.split("/api/websocket/").pop() ?? "";
+    const stub = CloudflareEnv.WEBSOCKET_SERVER.getByName(roomId);
+    return stub.fetch(request);
+  }
+
   const context = createApiContext({
-    url: new URL(request.url),
+    url: requestUrl,
     reqHeaders: request.headers,
-    workspaceStorage: createWorkspaceStorage(),
   });
 
   const { response } = await openAPIHandler(`${env.VITE_SEO_URL}/api`).handle(
