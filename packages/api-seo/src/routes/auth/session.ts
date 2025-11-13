@@ -11,17 +11,14 @@ const current = base
       user: schema.userSelectSchema,
     }).or(type.null),
   )
-  .handler(async ({ context }) => {
-    if (!context.reqHeaders) {
+  .handler(({ context }) => {
+    if (!context.user || !context.session) {
       return null;
     }
-    const result = await context.auth.api.getSession({
-      headers: context.reqHeaders,
-    });
-
-    if (!result) {
-      return null;
-    }
+    const result = {
+      session: context.session,
+      user: context.user,
+    };
     return {
       session: {
         ...result.session,
