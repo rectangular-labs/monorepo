@@ -4,7 +4,7 @@ import cloudflareR2BindingDriver from "unstorage/drivers/cloudflare-r2-binding";
 
 export const createWorkspaceStorage = () => {
   const storage = createStorage({
-    driver: cloudflareR2BindingDriver({ binding: env.seo_content_workspaces }),
+    driver: cloudflareR2BindingDriver({ binding: env.SEO_WORKSPACE_BUCKET }),
   });
   const baseStorage = prefixStorage<Uint8Array>(storage, "content_workspaces");
   return {
