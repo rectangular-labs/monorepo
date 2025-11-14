@@ -18,4 +18,5 @@ export default {
   },
 };
 
+export { WebSocketServer } from "@rectangular-labs/api-seo/websocket-server";
 export { UserVMContainer } from "@rectangular-labs/api-user-vm/container";

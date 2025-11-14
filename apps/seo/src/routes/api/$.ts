@@ -70,9 +70,8 @@ async function handle({ request }: { request: Request }) {
     return response;
   }
 
-  if (requestUrl.pathname.startsWith("/api/websocket/")) {
-    const roomId = requestUrl.pathname.split("/api/websocket/").pop() ?? "";
-    const stub = CloudflareEnv.WEBSOCKET_SERVER.getByName(roomId);
+  if (requestUrl.pathname.startsWith("/api/realtime/")) {
+    const stub = CloudflareEnv.WEBSOCKET_SERVER.getByName(requestUrl.pathname);
     return stub.fetch(request);
   }
 

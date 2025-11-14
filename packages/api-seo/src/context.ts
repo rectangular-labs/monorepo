@@ -6,10 +6,10 @@ import {
 } from "@rectangular-labs/api-core/lib/context-storage";
 import { loggerMiddleware } from "@rectangular-labs/api-core/lib/logger";
 import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
-import { createDb, type schema } from "@rectangular-labs/db";
+import { createDb } from "@rectangular-labs/db";
 import { apiEnv } from "./env";
 import { createWorkspaceBucket } from "./lib/bucket";
-import type { InitialContext } from "./types";
+import type { InitialContext, WebSocketContext } from "./types";
 
 export const createApiContext = (
   args: Omit<InitialContext, "db" | "auth" | "workspaceBucket">,
@@ -79,13 +79,7 @@ export const withOrganizationIdBase = protectedBase.use(({ context, next }) => {
 export const getContext = getBaseContext<InitialContext>;
 
 export const websocketBase = os
-  .$context<
-    InitialContext & {
-      senderWebSocket: WebSocket;
-      allWebSockets: WebSocket[];
-      project: typeof schema.seoProject.$inferSelect;
-      campaign: typeof schema.seoContentCampaign.$inferSelect;
-    }
-  >()
+  .$context<WebSocketContext>()
   .use(loggerMiddleware)
-  .use(asyncStorageMiddleware<InitialContext>());
+  .use(asyncStorageMiddleware<WebSocketContext>());
+export const getWebsocketContext = getBaseContext<WebSocketContext>;

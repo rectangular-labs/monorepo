@@ -13,3 +13,7 @@ export const router = base.router({
     organization: lazy(() => import("./auth/organization")),
   },
 });
+
+export const websocketRouter = {
+  campaign: lazy(() => import("./campaign.room")),
+};

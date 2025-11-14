@@ -1,5 +1,4 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { streamToEventIterator } from "@orpc/client";
 import { ORPCError, type } from "@orpc/server";
 import {
   convertToModelMessages,
@@ -8,29 +7,24 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
-import { withOrganizationIdBase } from "../context";
+import { websocketBase } from "../context";
 import { createDataforseoTool } from "../lib/ai-tools/dataforseo";
 import { createGscTool } from "../lib/ai-tools/google-search-console";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { getProjectByIdentifier } from "../lib/database/project";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
-export const write = withOrganizationIdBase
-  .route({ method: "POST", path: "/{id}/write" })
+const room = websocketBase
+  .route({ method: "GET", path: "/{id}/room" })
   .input(
     type<{
-      organizationId: string;
-      projectId: string;
       chatId: string;
-      id: string;
       messages: UIMessage[];
     }>(),
   )
-  .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
     const projectResult = await getProjectByIdentifier(
-      input.projectId,
-      context.organization.id,
+      context.projectId,
+      context.organizationId,
     );
     if (!projectResult.ok) {
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
@@ -133,10 +127,20 @@ Output requirements:
       stopWhen: [stepCountIs(10), hasToolCall("manage_google_search_property")],
     });
 
-    return streamToEventIterator(
-      result.toUIMessageStream({
-        sendSources: true,
-        sendReasoning: true,
-      }),
-    );
+    // Handle streaming text chunks using UIMessageStream
+    for await (const chunk of result.toUIMessageStream({
+      sendSources: true,
+      sendReasoning: true,
+    })) {
+      for (const ws of context.allWebSockets) {
+        console.log(`sending chunk to ws ${context.userId}`);
+        ws.send(JSON.stringify(chunk));
+      }
+    }
   });
+
+export default websocketBase
+  .prefix(
+    "/api/realtime/organization/{organizationId}/project/{projectId}/campaign",
+  )
+  .router({ room });
