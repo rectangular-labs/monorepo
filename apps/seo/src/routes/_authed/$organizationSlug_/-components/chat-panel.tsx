@@ -1,8 +1,6 @@
 "use client";
-
 import { useChat } from "@ai-sdk/react";
 import type { AiSeoUIMessage } from "@rectangular-labs/api-seo/types";
-import { eventIteratorToUnproxiedDataStream } from "@rectangular-labs/api-user-vm/client";
 import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
 import {
   Action,
@@ -66,7 +64,7 @@ import {
   RefreshCcw,
 } from "@rectangular-labs/ui/components/icon";
 import { Fragment, useState } from "react";
-import { getApiClient } from "~/lib/api";
+import { WebsocketChatTransport } from "~/lib/ai-transport";
 import { GscConnectionCard } from "./gsc-connection-card";
 
 const models = [
@@ -86,31 +84,38 @@ export function ChatPanel({
   const [input, setInput] = useState("");
   const [model, setModel] = useState<string>(models[0]?.value ?? "");
   const [webSearch, setWebSearch] = useState(false);
+
+  const transport = new WebsocketChatTransport({
+    url: `${typeof window !== "undefined" ? window.location.origin.replace("https", "wss") : "https://localhost:3000"}/api/realtime/organization/${organizationId}/project/${projectId}/campaign/${campaignId}/room`,
+  });
   const { messages, sendMessage, status, regenerate } = useChat<AiSeoUIMessage>(
     {
-      transport: {
-        async sendMessages(options) {
-          return eventIteratorToUnproxiedDataStream(
-            await getApiClient().campaign.write(
-              {
-                id: campaignId,
-                projectId,
-                organizationId,
-                chatId: options.chatId,
-                messages: options.messages,
-              },
-              { signal: options.abortSignal },
-            ),
-          );
-        },
-        reconnectToStream() {
-          throw new Error("Unsupported");
-        },
+      // transport: {
+      //   async sendMessages(options) {
+      //     return eventIteratorToUnproxiedDataStream(
+      //       await getApiClient().campaign.write(
+      //         {
+      //           id: campaignId,
+      //           projectId,
+      //           organizationId,
+      //           chatId: options.chatId,
+      //           messages: options.messages,
+      //         },
+      //         { signal: options.abortSignal },
+      //       ),
+      //     );
+      //   },
+      //   reconnectToStream() {
+      //     throw new Error("Unsupported");
+      //   },
+      // },
+      transport,
+      onError: (error) => {
+        console.error("error", error);
       },
     },
   );
   console.log("messages", messages);
-
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
@@ -133,6 +138,7 @@ export function ChatPanel({
     );
     setInput("");
   };
+
   return (
     <div className="flex h-full flex-col gap-4 rounded-md bg-background p-3">
       <Conversation className="h-full">

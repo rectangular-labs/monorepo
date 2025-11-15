@@ -9,13 +9,26 @@ import {
 import type { Context, Router } from "@orpc/server";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
-import { HibernationPlugin } from "@orpc/server/hibernation";
 import { RPCHandler as NodeRpcHandler } from "@orpc/server/node";
 import {
   CORSPlugin,
   RequestHeadersPlugin,
   ResponseHeadersPlugin,
 } from "@orpc/server/plugins";
+import { RPCHandler as WebSocketRPCHandler } from "@orpc/server/websocket";
+
+export const createWebSocketRpcHandler = <C extends Context>(
+  // biome-ignore lint/suspicious/noExplicitAny: User defined router
+  router: Router<any, C>,
+) =>
+  new WebSocketRPCHandler(router, {
+    plugins: [],
+    interceptors: [
+      onError((error) => {
+        console.error("WebSocket RPC Error:", error);
+      }),
+    ],
+  });
 
 export const createRpcHandler = <C extends Context>(
   // biome-ignore lint/suspicious/noExplicitAny: User defined router
@@ -26,7 +39,6 @@ export const createRpcHandler = <C extends Context>(
       new CORSPlugin(),
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
-      new HibernationPlugin(),
     ],
     interceptors: [
       onError((error) => {
@@ -44,7 +56,6 @@ export const createNodeRpcHandler = <C extends Context>(
       new CORSPlugin(),
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
-      new HibernationPlugin(),
     ],
     interceptors: [
       onError((error) => {

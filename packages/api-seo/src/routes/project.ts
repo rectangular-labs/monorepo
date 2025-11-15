@@ -110,7 +110,7 @@ const setUpWorkspace = protectedBase
       projectId: input.projectId,
     });
     await Promise.all([
-      context.workspaceStorage.setSnapshot(
+      context.workspaceBucket.setSnapshot(
         workspaceBlobUri,
         workspaceDoc.export({ mode: "snapshot" }),
       ),

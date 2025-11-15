@@ -4,7 +4,8 @@
     "rootDir": "src",
     "lib": ["dom", "dom.iterable", "esnext"],
     // because of better auth
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+    "types": ["@cloudflare/workers-types"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]

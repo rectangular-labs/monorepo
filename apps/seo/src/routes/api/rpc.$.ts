@@ -1,13 +1,11 @@
 import { createApiContext } from "@rectangular-labs/api-seo/context";
 import { RpcHandler } from "@rectangular-labs/api-seo/server";
 import { createFileRoute } from "@tanstack/react-router";
-import { createWorkspaceStorage } from "~/lib/storage";
 
 async function handle({ request }: { request: Request }) {
   const context = createApiContext({
     url: new URL(request.url),
     reqHeaders: request.headers,
-    workspaceStorage: createWorkspaceStorage(),
   });
 
   const { response } = await RpcHandler.handle(request, {

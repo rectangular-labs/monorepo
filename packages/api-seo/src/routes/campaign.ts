@@ -9,7 +9,6 @@ import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import { createWorkspaceBlobUri } from "../lib/workspace";
-import { write } from "./campaign.write";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -190,4 +189,4 @@ const remove = withOrganizationIdBase
 
 export default withOrganizationIdBase
   .prefix("/organization/{organizationId}/project/{projectId}/campaign")
-  .router({ list, get, create, update, remove, write });
+  .router({ list, get, create, update, remove });

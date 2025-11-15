@@ -25,24 +25,32 @@
   //     "name": "user-vm-container"
   //   }
   // ],
-  // "durable_objects": {
-  //   "bindings": [
-  //     {
-  //       "class_name": "UserVMContainer",
-  //       "name": "USER_VM_CONTAINER"
-  //     }
-  //   ]
-  // },
-  // "migrations": [
-  //   {
-  //     "new_sqlite_classes": ["UserVMContainer"],
-  //     "tag": "v1"
-  //   }
-  // ],
+  "durable_objects": {
+    "bindings": [
+      // {
+      //   "class_name": "UserVMContainer",
+      //   "name": "USER_VM_CONTAINER"
+      // },
+      {
+        "class_name": "WebSocketServer",
+        "name": "WEBSOCKET_SERVER"
+      }
+    ]
+  },
+  "migrations": [
+    // {
+    //   "new_sqlite_classes": ["UserVMContainer"],
+    //   "tag": "v1"
+    // },
+    {
+      "new_sqlite_classes": ["WebSocketServer"],
+      "tag": "v1"
+    }
+  ],
   "r2_buckets": [
     {
       "bucket_name": "seo-content-workspaces",
-      "binding": "seo_content_workspaces"
+      "binding": "SEO_WORKSPACE_BUCKET"
     }
   ],
   "env": {
@@ -56,24 +64,32 @@
       //     "instance_type": "basic"
       //   }
       // ],
-      // "durable_objects": {
-      //   "bindings": [
-      //     {
-      //       "class_name": "UserVMContainer",
-      //       "name": "USER_VM_CONTAINER"
-      //     }
-      //   ]
-      // },
-      // "migrations": [
-      //   {
-      //     "new_sqlite_classes": ["UserVMContainer"],
-      //     "tag": "v1"
-      //   }
-      // ],
+      "durable_objects": {
+        "bindings": [
+          // {
+          //   "class_name": "UserVMContainer",
+          //   "name": "USER_VM_CONTAINER"
+          // },
+          {
+            "class_name": "WebSocketServer",
+            "name": "WEBSOCKET_SERVER"
+          }
+        ]
+      },
+      "migrations": [
+        // {
+        //   "new_sqlite_classes": ["UserVMContainer"],
+        //   "tag": "v1"
+        // },
+        {
+          "new_sqlite_classes": ["WebSocketServer"],
+          "tag": "v1"
+        }
+      ],
       "r2_buckets": [
         {
           "bucket_name": "seo-content-workspaces-production",
-          "binding": "seo_content_workspaces"
+          "binding": "SEO_WORKSPACE_BUCKET"
         }
       ],
       "routes": [
@@ -94,24 +110,32 @@
       //     "instance_type": "lite"
       //   }
       // ],
-      // "durable_objects": {
-      //   "bindings": [
-      //     {
-      //       "class_name": "UserVMContainer",
-      //       "name": "USER_VM_CONTAINER"
-      //     }
-      //   ]
-      // },
-      // "migrations": [
-      //   {
-      //     "new_sqlite_classes": ["UserVMContainer"],
-      //     "tag": "v1"
-      //   }
-      // ],
+      "durable_objects": {
+        "bindings": [
+          // {
+          //   "class_name": "UserVMContainer",
+          //   "name": "USER_VM_CONTAINER"
+          // },
+          {
+            "class_name": "WebSocketServer",
+            "name": "WEBSOCKET_SERVER"
+          }
+        ]
+      },
+      "migrations": [
+        // {
+        //   "new_sqlite_classes": ["UserVMContainer"],
+        //   "tag": "v1"
+        // },
+        {
+          "new_sqlite_classes": ["WebSocketServer"],
+          "tag": "v1"
+        }
+      ],
       "r2_buckets": [
         {
           "bucket_name": "seo-content-workspaces-preview",
-          "binding": "seo_content_workspaces"
+          "binding": "SEO_WORKSPACE_BUCKET"
         }
       ],
       "routes": [

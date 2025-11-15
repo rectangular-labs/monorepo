@@ -12,6 +12,10 @@
       "types": "./dist/server.d.ts",
       "default": "./src/server.ts"
     },
+    "./websocket-server": {
+      "types": "./dist/server.websocket.d.ts",
+      "default": "./src/server.websocket.ts"
+    },
     "./context": {
       "types": "./dist/context.d.ts",
       "default": "./src/context.ts"
@@ -34,6 +38,7 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251111.0",
     "@rectangular-labs/typescript": "workspace:*",
     "@types/node": "^24.9.1",
     "typescript": "^5.9.3"
