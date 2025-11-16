@@ -7,6 +7,8 @@ import type {
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { DB } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage } from "ai";
+import type { CrdtServerAdaptor } from "loro-adaptors";
+import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
 import type { createDataforseoTool } from "./lib/ai-tools/dataforseo";
 import type { createGscTool } from "./lib/ai-tools/google-search-console";
 import type { createWorkspaceBucket } from "./lib/bucket";
@@ -34,6 +36,24 @@ export interface InitialContext extends BaseContextWithAuth {
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
 }
 
+export interface RoomDocument {
+  data: Uint8Array;
+  dirty: boolean;
+  lastSaved: number;
+  descriptor: {
+    shouldPersist: boolean;
+    allowBackfillWhenNoOtherClients: boolean;
+    adaptor: CrdtServerAdaptor;
+  };
+}
+
+export interface UserFragment {
+  data: Uint8Array[];
+  totalSize: number;
+  received: number;
+  header: DocUpdateFragmentHeader;
+}
+
 export interface WebSocketContext extends InitialContext {
   senderWebSocket: WebSocket;
   allWebSockets: WebSocket[];
@@ -42,4 +62,6 @@ export interface WebSocketContext extends InitialContext {
   projectId: string;
   campaignId: string;
   organizationId: string;
+  roomDocumentMap: Map<string, RoomDocument>;
+  userFragments: Map<HexString, UserFragment>;
 }

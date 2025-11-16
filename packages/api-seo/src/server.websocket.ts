@@ -1,12 +1,17 @@
 import { DurableObject } from "cloudflare:workers";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createWebSocketRpcHandler } from "@rectangular-labs/api-core/lib/handlers";
-import console from "console";
+import { decode, type HexString } from "loro-protocol";
 import { createApiContext } from "./context";
 import type { apiEnv } from "./env";
 import { websocketRouter } from "./routes";
+import { handleLoroMessage } from "./routes/campaign.loro";
 import { serverClient } from "./server";
+import type { RoomDocument, UserFragment, WebSocketContext } from "./types";
 
 const webSocketHandler = createWebSocketRpcHandler(websocketRouter);
+const asyncLocalStorage = new AsyncLocalStorage<WebSocketContext>();
+
 interface SessionAttachment {
   userId: string;
   sessionId: string;
@@ -21,6 +26,11 @@ export class WebSocketServer extends DurableObject {
   // Keeps track of all WebSocket connections
   // When the DO hibernates, gets reconstructed in the constructor
   sessions: Map<WebSocket, SessionAttachment>;
+  // Keep track of the loro document for the workspace.
+  // currently this is the chat document and the content document.
+  roomDocuments: Map<string, RoomDocument>;
+  // keeps track of the fragments for the user when sending large updates.
+  userFragments: Map<WebSocket, Map<HexString, UserFragment>>;
 
   constructor(ctx: DurableObjectState, env: ReturnType<typeof apiEnv>) {
     super(ctx, env);
@@ -41,6 +51,9 @@ export class WebSocketServer extends DurableObject {
         this.sessions.set(ws, { ...attachment });
       }
     });
+
+    this.roomDocuments = new Map();
+    this.userFragments = new Map();
 
     // Sets an application level auto response that does not wake hibernated WebSockets.
     this.ctx.setWebSocketAutoResponse(
@@ -148,18 +161,38 @@ export class WebSocketServer extends DurableObject {
     const context = createApiContext({
       url: new URL(session.url),
     });
-    await webSocketHandler.message(ws, message, {
-      context: {
-        allWebSockets: Array.from(this.sessions.keys()),
-        senderWebSocket: ws,
-        userId: session.userId,
-        sessionId: session.sessionId,
-        projectId: session.projectId,
-        campaignId: session.campaignId,
-        organizationId: session.organizationId,
-        ...context,
-      },
-    });
+
+    let userFragments = this.userFragments.get(ws);
+    if (!userFragments) {
+      this.userFragments.set(ws, new Map());
+      userFragments = this.userFragments.get(ws);
+    }
+    const webSocketContext: WebSocketContext = {
+      allWebSockets: Array.from(this.sessions.keys()),
+      senderWebSocket: ws,
+      userId: session.userId,
+      sessionId: session.sessionId,
+      projectId: session.projectId,
+      campaignId: session.campaignId,
+      organizationId: session.organizationId,
+      roomDocumentMap: this.roomDocuments,
+      userFragments: userFragments ?? new Map(),
+      ...context,
+    };
+    if (typeof message === "string") {
+      return await webSocketHandler.message(ws, message, {
+        context: webSocketContext,
+      });
+    }
+
+    // loro messages are binary
+    const uintArray = new Uint8Array(message);
+    const loroMessage = decode(uintArray);
+    await asyncLocalStorage.run(webSocketContext, () =>
+      handleLoroMessage({
+        message: loroMessage,
+      }),
+    );
   }
 
   webSocketClose(

@@ -48,6 +48,7 @@ export const seoContentCampaign = pgSeoTable(
       .notNull()
       .default(CAMPAIGN_DEFAULT_STATUS),
     workspaceBlobUri: text().notNull(),
+    messagesBlobUri: text(),
     ...timestamps,
   },
   (table) => [

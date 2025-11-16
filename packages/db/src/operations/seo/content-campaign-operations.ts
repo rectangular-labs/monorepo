@@ -48,3 +48,26 @@ export async function getDefaultContentCampaign({
 
   return existingCampaignResult;
 }
+
+export async function getContentCampaignById({
+  db,
+  id,
+  projectId,
+  organizationId,
+}: {
+  db: DB;
+  id: string;
+  projectId: string;
+  organizationId: string;
+}) {
+  return await safe(() =>
+    db.query.seoContentCampaign.findFirst({
+      where: (table, { eq, and }) =>
+        and(
+          eq(table.id, id),
+          eq(table.projectId, projectId),
+          eq(table.organizationId, organizationId),
+        ),
+    }),
+  );
+}
