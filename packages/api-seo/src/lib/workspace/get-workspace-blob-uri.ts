@@ -1,4 +1,4 @@
-export const createWorkspaceBlobUri = ({
+export const getWorkspaceBlobUri = ({
   orgId,
   projectId,
   campaignId,
