@@ -1,6 +1,6 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
-import type { AiSeoUIMessage } from "@rectangular-labs/api-seo/types";
+import type { SeoChatMessage } from "@rectangular-labs/api-seo/types";
 import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
 import {
   Action,
@@ -63,8 +63,10 @@ import {
   Globe,
   RefreshCcw,
 } from "@rectangular-labs/ui/components/icon";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { WebsocketChatTransport } from "~/lib/ai-transport";
+import { getApiClientRq } from "~/lib/api";
 import { GscConnectionCard } from "./gsc-connection-card";
 
 const models = [
@@ -88,7 +90,26 @@ export function ChatPanel({
   const transport = new WebsocketChatTransport({
     url: `${typeof window !== "undefined" ? window.location.origin.replace("https", "wss") : "https://localhost:3000"}/api/realtime/organization/${organizationId}/project/${projectId}/campaign/${campaignId}/room`,
   });
-  const { messages, sendMessage, status, regenerate } = useChat<AiSeoUIMessage>(
+
+  const { data: messagePages } = useInfiniteQuery(
+    getApiClientRq().campaign.messages.infiniteOptions({
+      input: (pageParam) => ({
+        id: campaignId,
+        organizationId,
+        projectId,
+        limit: 10,
+        cursor: pageParam,
+      }),
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage) => lastPage.nextPageCursor,
+    }),
+  );
+
+  const historyMessages = (messagePages?.pages ?? [])
+    .flatMap((page) => page.data)
+    .reverse() as SeoChatMessage[];
+
+  const { messages, sendMessage, status, regenerate } = useChat<SeoChatMessage>(
     {
       // transport: {
       //   async sendMessages(options) {
@@ -113,9 +134,11 @@ export function ChatPanel({
       onError: (error) => {
         console.error("error", error);
       },
+      id: campaignId,
     },
   );
-  console.log("messages", messages);
+  const allMessages = [...historyMessages, ...messages];
+  console.log("allMessages", allMessages);
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
@@ -143,7 +166,7 @@ export function ChatPanel({
     <div className="flex h-full flex-col gap-4 rounded-md bg-background p-3">
       <Conversation className="h-full">
         <ConversationContent>
-          {messages.map((message) => (
+          {allMessages.map((message) => (
             <div key={message.id}>
               {message.role === "assistant" &&
                 message.parts.filter((part) => part.type === "source-url")
