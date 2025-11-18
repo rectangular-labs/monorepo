@@ -1,36 +1,16 @@
 import { err, ok, safe } from "@rectangular-labs/result";
-import type { UIMessage } from "ai";
 import { type DB, schema } from "../../client";
+import type { seoContentCampaignMessageInsertSchema } from "../../schema/seo";
 
-export async function createContentCampaignMessage<T extends UIMessage>({
+export async function createContentCampaignMessage({
   db,
-  organizationId,
-  projectId,
-  campaignId,
-  userId,
-  source,
-  message,
+  value,
 }: {
   db: DB;
-  organizationId: string;
-  projectId: string;
-  campaignId: string;
-  message: T;
-  userId: string | null;
-  source: "user" | "assistant";
+  value: typeof seoContentCampaignMessageInsertSchema.infer;
 }) {
   const result = await safe(() =>
-    db
-      .insert(schema.seoContentCampaignMessageSchema)
-      .values({
-        organizationId,
-        projectId,
-        campaignId,
-        userId,
-        source,
-        message,
-      })
-      .returning(),
+    db.insert(schema.seoContentCampaignMessage).values(value).returning(),
   );
   if (!result.ok) {
     return result;
@@ -58,7 +38,7 @@ export async function listContentCampaignMessages({
   cursor?: string;
 }) {
   const result = await safe(() =>
-    db.query.seoContentCampaignMessageSchema.findMany({
+    db.query.seoContentCampaignMessage.findMany({
       where: (table, { and, eq, lt }) =>
         and(
           eq(table.organizationId, organizationId),

@@ -8,7 +8,7 @@ import { organization, user } from "../auth-schema";
 import { seoContentCampaign } from "./content-campaign-schema";
 import { seoProject } from "./project-schema";
 
-export const seoContentCampaignMessageSchema = pgSeoTable(
+export const seoContentCampaignMessage = pgSeoTable(
   "content_campaign_message",
   {
     id: uuid().primaryKey().$defaultFn(uuidv7),
@@ -37,7 +37,7 @@ export const seoContentCampaignMessageSchema = pgSeoTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    message: jsonb().$type<UIMessage>().notNull(),
+    message: jsonb().$type<UIMessage["parts"]>().notNull(),
     ...timestamps,
   },
   (table) => [
@@ -51,18 +51,18 @@ export const seoContentCampaignMessageSchema = pgSeoTable(
 );
 
 export const seoContentCampaignMessageRelations = relations(
-  seoContentCampaignMessageSchema,
+  seoContentCampaignMessage,
   ({ one }) => ({
     campaign: one(seoContentCampaign, {
-      fields: [seoContentCampaignMessageSchema.campaignId],
+      fields: [seoContentCampaignMessage.campaignId],
       references: [seoContentCampaign.id],
     }),
   }),
 );
 
 export const seoContentCampaignMessageInsertSchema = createInsertSchema(
-  seoContentCampaignMessageSchema,
-).omit("id", "createdAt", "updatedAt", "userId", "source");
+  seoContentCampaignMessage,
+).omit("id", "createdAt", "updatedAt");
 export const seoContentCampaignMessageSelectSchema = createSelectSchema(
-  seoContentCampaignMessageSchema,
+  seoContentCampaignMessage,
 );
