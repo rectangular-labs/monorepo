@@ -1,3 +1,4 @@
+export * from "./content-campaign-message-schema";
 export * from "./content-campaign-schema";
 export * from "./content-schedule-schema";
 export * from "./content-schema";
