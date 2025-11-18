@@ -4,13 +4,10 @@ import { LoroServerAdaptor } from "loro-adaptors";
 import { CrdtType } from "loro-protocol";
 import { getWebsocketContext } from "../../context";
 import type { RoomDocument } from "../../types";
-import {
-  WORKSPACE_CONTENT_ROOM_ID,
-  WORKSPACE_MESSAGE_ROOM_ID,
-} from "./constants";
+import { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
 
 function getRoomKey(
-  roomId: typeof WORKSPACE_MESSAGE_ROOM_ID | typeof WORKSPACE_CONTENT_ROOM_ID,
+  roomId: typeof WORKSPACE_CONTENT_ROOM_ID,
   crdtType: CrdtType,
 ): string {
   return `${roomId}:${crdtType}`;
@@ -24,7 +21,7 @@ function getRoomKey(
  * @returns A result containing the room document or an error
  */
 export async function getOrCreateRoomDocument(
-  roomId: typeof WORKSPACE_MESSAGE_ROOM_ID | typeof WORKSPACE_CONTENT_ROOM_ID,
+  roomId: typeof WORKSPACE_CONTENT_ROOM_ID,
   crdtType: CrdtType,
 ): Promise<Result<RoomDocument, Error>> {
   const roomKey = getRoomKey(roomId, crdtType);
@@ -61,18 +58,7 @@ export async function getOrCreateRoomDocument(
     return err(new Error(`Campaign (${context.campaignId}) not found`));
   }
 
-  if (roomKey === getRoomKey(WORKSPACE_MESSAGE_ROOM_ID, CrdtType.Loro)) {
-    // TODO: handle case where messagesBlobUri is null
-    const blob = await context.workspaceBucket.getSnapshot(
-      campaign.messagesBlobUri ?? "",
-    );
-    if (!blob) {
-      return err(
-        new Error(`Messages blob (${campaign.messagesBlobUri}) not found`),
-      );
-    }
-    newRoomDoc.data = blob;
-  } else if (roomKey === getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro)) {
+  if (roomKey === getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro)) {
     // TODO: handle the case where we haven't yet forked the workspace blob from main.
     const blob = await context.workspaceBucket.getSnapshot(
       campaign.workspaceBlobUri,
@@ -91,9 +77,6 @@ export async function getOrCreateRoomDocument(
   return ok(newRoomDoc);
 }
 export { broadcastToRoom } from "./broadcast-to-room";
-export {
-  WORKSPACE_CONTENT_ROOM_ID,
-  WORKSPACE_MESSAGE_ROOM_ID,
-} from "./constants";
-export { createWorkspaceBlobUri } from "./create-workspace-blob-uri";
+export { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
+export { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
 export { replyToSender } from "./reply-to-sender";

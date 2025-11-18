@@ -16,7 +16,6 @@ import {
   getOrCreateRoomDocument,
   replyToSender,
   WORKSPACE_CONTENT_ROOM_ID,
-  WORKSPACE_MESSAGE_ROOM_ID,
 } from "../lib/workspace";
 
 export async function handleLoroMessage({
@@ -78,10 +77,7 @@ export async function handleLoroMessage({
 async function handleJoinRequest(
   message: JoinRequest,
 ): Promise<Result<void, Error>> {
-  if (
-    message.roomId !== WORKSPACE_MESSAGE_ROOM_ID &&
-    message.roomId !== WORKSPACE_CONTENT_ROOM_ID
-  ) {
+  if (message.roomId !== WORKSPACE_CONTENT_ROOM_ID) {
     return err(new Error(`Unsupported room ID: ${message.roomId}`));
   }
   const roomDocResult = await getOrCreateRoomDocument(
@@ -144,10 +140,7 @@ async function handleDocUpdate(
     });
     return ok(undefined);
   }
-  if (
-    message.roomId !== WORKSPACE_MESSAGE_ROOM_ID &&
-    message.roomId !== WORKSPACE_CONTENT_ROOM_ID
-  ) {
+  if (message.roomId !== WORKSPACE_CONTENT_ROOM_ID) {
     return err(new Error(`Unsupported room ID: ${message.roomId}`));
   }
 
@@ -230,10 +223,7 @@ async function handleFragment(
   batch.data[message.index] = message.fragment;
   batch.received++;
 
-  if (
-    message.roomId !== WORKSPACE_MESSAGE_ROOM_ID &&
-    message.roomId !== WORKSPACE_CONTENT_ROOM_ID
-  ) {
+  if (message.roomId !== WORKSPACE_CONTENT_ROOM_ID) {
     return err(new Error(`Unsupported room ID: ${message.roomId}`));
   }
 
