@@ -158,9 +158,6 @@ importers:
       arktype:
         specifier: ^2.1.23
         version: 2.1.23
-      idb-keyval:
-        specifier: ^6.2.2
-        version: 6.2.2
       loro-crdt:
         specifier: ^1.8.5
         version: 1.8.5
@@ -22381,7 +22378,8 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  idb-keyval@6.2.2: {}
+  idb-keyval@6.2.2:
+    optional: true
 
   idcac-playwright@0.1.3: {}
 
