@@ -201,6 +201,9 @@ function handleFragmentHeader(message: DocUpdateFragmentHeader): void {
     received: 0,
     header: message,
   });
+  setTimeout(() => {
+    context.userFragments.delete(message.batchId);
+  }, 30_000); // 30 seconds
 }
 
 async function handleFragment(

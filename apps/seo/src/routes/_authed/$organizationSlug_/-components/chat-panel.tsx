@@ -119,7 +119,12 @@ export function ChatPanel({
         return;
       }
       const data = dataResult.value;
-      if (typeof data !== "object" || data === null || !("type" in data)) {
+      if (
+        typeof data !== "object" ||
+        data === null ||
+        !("type" in data) ||
+        typeof data.type !== "string"
+      ) {
         // irrelevant message
         return;
       }
@@ -232,8 +237,6 @@ export function ChatPanel({
               pendingStreams.delete(clientMessageId);
             },
             start: (controller) => {
-              console.log("start", clientMessageId);
-              pendingStreams.get(clientMessageId)?.controller.close();
               pendingStreams.set(clientMessageId, { controller });
             },
           });
@@ -243,6 +246,7 @@ export function ChatPanel({
               pendingStreams
                 .get(clientMessageId)
                 ?.controller.error(new Error("Aborted"));
+              pendingStreams.get(clientMessageId)?.controller.close();
               pendingStreams.delete(clientMessageId);
             });
           }

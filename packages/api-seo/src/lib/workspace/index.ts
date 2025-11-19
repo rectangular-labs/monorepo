@@ -34,6 +34,7 @@ export async function getOrCreateRoomDocument(
   }
 
   // TODO: handle different CRDT types here.
+  // Right now this only handles Loro CRDTs and persistent ephemeral CRDTs.
   const newRoomDoc: RoomDocument = {
     data: new Uint8Array(),
     dirty: false,

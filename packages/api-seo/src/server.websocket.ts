@@ -164,8 +164,8 @@ export class WebSocketServer extends DurableObject {
 
     let userFragments = this.userFragments.get(ws);
     if (!userFragments) {
-      this.userFragments.set(ws, new Map());
-      userFragments = this.userFragments.get(ws);
+      userFragments = new Map();
+      this.userFragments.set(ws, userFragments);
     }
     const webSocketContext: WebSocketContext = {
       allWebSockets: Array.from(this.sessions.keys()),
@@ -176,7 +176,7 @@ export class WebSocketServer extends DurableObject {
       campaignId: session.campaignId,
       organizationId: session.organizationId,
       roomDocumentMap: this.roomDocuments,
-      userFragments: userFragments ?? new Map(),
+      userFragments,
       ...context,
     };
     if (typeof message === "string") {

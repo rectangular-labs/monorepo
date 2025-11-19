@@ -225,6 +225,7 @@ const messages = withOrganizationIdBase
       });
     }
     const { data, nextPageCursor } = result.value;
+    // todo: maybe not validate / cache validation
     const uiMessageSchema = await validateUIMessages<SeoChatMessage>({
       messages: data.map((row) => {
         return {
