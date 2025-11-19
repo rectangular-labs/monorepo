@@ -12,7 +12,7 @@ import {
 } from "loro-protocol";
 import { getWebsocketContext } from "../context";
 import {
-  broadcastToRoom,
+  broadcastLoroToRoom,
   getOrCreateRoomDocument,
   replyToSender,
   WORKSPACE_CONTENT_ROOM_ID,
@@ -188,7 +188,7 @@ async function handleDocUpdate(
       roomId: message.roomId,
       updates: updatesForBroadcast,
     };
-    broadcastToRoom(outgoing);
+    broadcastLoroToRoom(outgoing);
   }
   return ok(undefined);
 }
@@ -277,14 +277,14 @@ async function handleFragment(
 
     // Broadcast original fragments to other clients in the room
     const header = batch.header;
-    broadcastToRoom(header);
+    broadcastLoroToRoom(header);
     const batchDataLength = batch.data.length;
     for (let i = 0; i < batchDataLength; ++i) {
       const fragment = batch.data[i];
       if (!fragment) {
         continue;
       }
-      broadcastToRoom({
+      broadcastLoroToRoom({
         type: MessageType.DocUpdateFragment,
         crdt: message.crdt,
         roomId: message.roomId,
