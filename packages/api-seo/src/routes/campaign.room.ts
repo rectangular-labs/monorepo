@@ -1,11 +1,13 @@
 import { ORPCError, type } from "@orpc/server";
+import { uuidv7 } from "@rectangular-labs/db";
 import { createContentCampaignMessage } from "@rectangular-labs/db/operations";
-import { safeSync } from "@rectangular-labs/result";
-import { createIdGenerator, hasToolCall, stepCountIs, streamText } from "ai";
+import { hasToolCall, stepCountIs, streamText } from "ai";
 import { websocketBase } from "../context";
 import { createSeoAgent } from "../lib/ai/seo-agent";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { getProjectByIdentifier } from "../lib/database/project";
+import { broadcastMessageToRoom } from "../lib/workspace/broadcast-to-room";
+import { sendWebsocketMessage } from "../lib/workspace/send-websocket-message";
 import type { SeoChatMessage } from "../types";
 
 // TODO: broadcasting to clients when messages are done
@@ -14,6 +16,7 @@ const room = websocketBase
   .input(
     type<{
       messages: SeoChatMessage[];
+      clientMessageId: string;
     }>(),
   )
   .handler(async ({ context, input }) => {
@@ -44,22 +47,35 @@ const room = websocketBase
       .find((message) => message.role === "user");
 
     if (latestUserMessage) {
-      latestUserMessage.metadata ??= {
-        userId: context.userId,
-        sentAt: new Date().toISOString(),
-      };
-
-      await createContentCampaignMessage({
+      const messageResult = await createContentCampaignMessage({
         db: context.db,
         value: {
           organizationId: context.organizationId,
           projectId: context.projectId,
           campaignId: context.campaignId,
-          userId: latestUserMessage.metadata.userId,
+          userId: context.userId,
           message: latestUserMessage.parts,
           source: "user",
         },
       });
+      if (!messageResult.ok) {
+        throw messageResult.error;
+      }
+      broadcastMessageToRoom(
+        {
+          type: "new-msg",
+          message: {
+            id: messageResult.value.id,
+            role: "user",
+            parts: latestUserMessage.parts,
+            metadata: {
+              sentAt: messageResult.value.createdAt.toISOString(),
+              userId: messageResult.value.userId,
+            },
+          },
+        },
+        true,
+      );
     }
 
     const result = streamText({
@@ -77,8 +93,6 @@ const room = websocketBase
       stopWhen: [stepCountIs(10), hasToolCall("manage_google_search_property")],
     });
 
-    void result.consumeStream();
-
     // Handle streaming text chunks using UIMessageStream
     for await (const chunk of result.toUIMessageStream({
       sendSources: true,
@@ -91,15 +105,12 @@ const room = websocketBase
         }
         return;
       },
-      // Generate consistent server-side IDs for persistence:
-      generateMessageId: createIdGenerator({
-        prefix: "msg",
-        size: 16,
-      }),
+      generateMessageId: uuidv7,
       onFinish: async ({ responseMessage }) => {
         await createContentCampaignMessage({
           db: context.db,
           value: {
+            id: responseMessage.id,
             organizationId: context.organizationId,
             projectId: context.projectId,
             campaignId: context.campaignId,
@@ -112,18 +123,14 @@ const room = websocketBase
       },
     })) {
       for (const ws of context.allWebSockets) {
-        const wsSendResult = safeSync(() => ws.send(JSON.stringify(chunk)));
-        if (
-          !wsSendResult.ok &&
-          wsSendResult.error.message.includes(
-            "Can't call WebSocket send() after close().",
-          )
-        ) {
-          continue;
-        }
-        if (!wsSendResult.ok) {
-          throw wsSendResult.error;
-        }
+        sendWebsocketMessage(
+          ws,
+          JSON.stringify({
+            type: "msg-chunk",
+            clientMessageId: input.clientMessageId,
+            chunk,
+          }),
+        );
       }
     }
   });

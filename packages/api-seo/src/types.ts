@@ -7,7 +7,7 @@ import type {
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { DB } from "@rectangular-labs/db";
 import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/db/parsers";
-import type { InferUITools, UIDataTypes, UIMessage } from "ai";
+import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
 import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
 import type { createDataforseoTool } from "./lib/ai/dataforseo-tool";
@@ -31,6 +31,16 @@ export type SeoChatMessage = UIMessage<
   UIDataTypes,
   AiTools
 >;
+export type WebSocketMessages =
+  | { type: "new-msg"; message: SeoChatMessage }
+  | {
+      type: "msg-chunk";
+      clientMessageId: string;
+      chunk: UIMessageChunk<
+        typeof contentCampaignMessageMetadataSchema.infer,
+        UIDataTypes
+      >;
+    };
 
 /**
  * Initial context type definition for oRPC procedures

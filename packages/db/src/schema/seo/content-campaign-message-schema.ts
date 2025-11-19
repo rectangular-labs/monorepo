@@ -62,7 +62,7 @@ export const seoContentCampaignMessageRelations = relations(
 
 export const seoContentCampaignMessageInsertSchema = createInsertSchema(
   seoContentCampaignMessage,
-).omit("id", "createdAt", "updatedAt");
+).omit("createdAt", "updatedAt");
 export const seoContentCampaignMessageSelectSchema = createSelectSchema(
   seoContentCampaignMessage,
 );

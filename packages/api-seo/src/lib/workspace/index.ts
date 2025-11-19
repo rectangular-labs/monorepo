@@ -76,7 +76,10 @@ export async function getOrCreateRoomDocument(
   context.roomDocumentMap.set(roomKey, newRoomDoc);
   return ok(newRoomDoc);
 }
-export { broadcastToRoom } from "./broadcast-to-room";
+export {
+  broadcastLoroToRoom,
+  broadcastMessageToRoom,
+} from "./broadcast-to-room";
 export { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
 export { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
 export { replyToSender } from "./reply-to-sender";
