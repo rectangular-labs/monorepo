@@ -17,6 +17,15 @@ import {
 } from "@orpc/server/plugins";
 import { RPCHandler as WebSocketRPCHandler } from "@orpc/server/websocket";
 
+const corsPlugin = new CORSPlugin({
+  origin: (origin) => {
+    return origin;
+  },
+  allowMethods: ["GET", "HEAD", "POST", "DELETE", "PATCH"],
+  credentials: true,
+  maxAge: 600,
+});
+
 export const createWebSocketRpcHandler = <C extends Context>(
   // biome-ignore lint/suspicious/noExplicitAny: User defined router
   router: Router<any, C>,
@@ -36,7 +45,7 @@ export const createRpcHandler = <C extends Context>(
 ) =>
   new RPCHandler(router, {
     plugins: [
-      new CORSPlugin(),
+      corsPlugin,
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
     ],
@@ -53,7 +62,7 @@ export const createNodeRpcHandler = <C extends Context>(
 ) =>
   new NodeRpcHandler(router, {
     plugins: [
-      new CORSPlugin(),
+      corsPlugin,
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
     ],
@@ -79,6 +88,7 @@ export const createOpenAPIHandler = <C extends Context>({
       }),
     ],
     plugins: [
+      corsPlugin,
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
       new SmartCoercionPlugin({
@@ -108,6 +118,7 @@ export const createNodeOpenAPIHandler = <C extends Context>({
       }),
     ],
     plugins: [
+      corsPlugin,
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
       new SmartCoercionPlugin({
