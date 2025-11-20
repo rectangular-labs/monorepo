@@ -21,7 +21,7 @@
     "cf-typegen": "wrangler types --env-interface Env"
   },
   "dependencies": {
-    "@ai-sdk/react": "^2.0.97",
+    "@ai-sdk/react": "^2.0.98",
     "@rectangular-labs/api-seo": "workspace:*",
     "@rectangular-labs/api-user-vm": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
@@ -37,7 +37,7 @@
     "@tanstack/react-router-devtools": "^1.136.18",
     "@tanstack/react-router-ssr-query": "^1.136.18",
     "@tanstack/react-start": "^1.137.0",
-    "ai": "^5.0.97",
+    "ai": "^5.0.98",
     "arktype": "^2.1.27",
     "loro-crdt": "^1.9.0",
     "loro-mirror": "1.1.1",
