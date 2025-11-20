@@ -73,7 +73,6 @@
       "workerd"
     ],
     "patchedDependencies": {
-      "better-auth": "patches/better-auth.patch",
       "@ark/util": "patches/@ark__util.patch"
     }
   },

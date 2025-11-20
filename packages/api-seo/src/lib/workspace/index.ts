@@ -1,6 +1,6 @@
 import { getContentCampaignById } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
-import { LoroServerAdaptor } from "loro-adaptors";
+import { LoroServerAdaptor } from "loro-adaptors/loro";
 import { CrdtType } from "loro-protocol";
 import { getWebsocketContext } from "../../context";
 import type { RoomDocument } from "../../types";

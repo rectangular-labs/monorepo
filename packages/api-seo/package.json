@@ -64,7 +64,7 @@
     "loro-adaptors": "0.4.0",
     "loro-crdt": "^1.9.0",
     "loro-protocol": "^0.2.0",
-    "unstorage": "^1.17.2"
+    "unstorage": "1.17.1"
   },
   "overrides": {
     "@tanstack/react-query": "5.90.10"
