@@ -1,3 +1,4 @@
+export * from "./content-campaign-message-parser";
 export * from "./content-campaign-parser";
 export * from "./content-parsers";
 export * from "./gsc-property-parsers";

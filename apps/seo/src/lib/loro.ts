@@ -39,7 +39,10 @@ const nodeSchema = schema.LoroMap(
   { withCid: true },
 );
 const workspaceContentSchema = schema({
-  root: schema.LoroTree(nodeSchema),
+  root: schema.LoroTree(nodeSchema, {
+    defaultValue: [],
+    description: "The root of the workspace content tree",
+  }),
 });
 
 // Create a context

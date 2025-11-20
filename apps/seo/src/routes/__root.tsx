@@ -93,7 +93,7 @@ function RootLayout() {
           <Toaster />
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-left" />
-        <ReactQueryDevtools buttonPosition="bottom-right" />
+        <ReactQueryDevtools buttonPosition="bottom-left" />
         <Scripts />
       </body>
     </html>

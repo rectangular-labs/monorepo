@@ -7,7 +7,7 @@ import { protectedBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import { createWorkspaceBlobUri } from "../lib/workspace";
+import { getWorkspaceBlobUri } from "../lib/workspace";
 
 const list = protectedBase
   .route({ method: "GET", path: "/" })
@@ -105,9 +105,10 @@ const setUpWorkspace = protectedBase
   .output(type({ workspaceBlobUri: "string" }))
   .handler(async ({ context, input }) => {
     const workspaceDoc = new LoroDoc();
-    const workspaceBlobUri = createWorkspaceBlobUri({
+    const workspaceBlobUri = getWorkspaceBlobUri({
       orgId: context.organization.id,
       projectId: input.projectId,
+      campaignId: undefined,
     });
     await Promise.all([
       context.workspaceBucket.setSnapshot(

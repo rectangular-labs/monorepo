@@ -31,7 +31,11 @@ function handleError<E>(
   mapError?: (error: Error) => E,
 ): E | Error {
   const normalizedError =
-    error instanceof Error ? error : new Error(String(error));
+    error instanceof Error
+      ? error
+      : new Error(`Something went wrong. ${String(error)}`, {
+          cause: error,
+        });
   if (mapError) {
     return mapError(normalizedError);
   }
