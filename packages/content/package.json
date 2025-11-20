@@ -38,32 +38,32 @@
   },
   "devDependencies": {
     "@content-collections/cli": "^0.1.7",
-    "@content-collections/core": "^0.11.1",
+    "@content-collections/core": "^0.12.0",
     "@content-collections/mdx": "^0.2.2",
-    "@fumadocs/content-collections": "^1.2.2",
+    "@fumadocs/content-collections": "^1.2.4",
     "@rectangular-labs/typescript": "workspace:*",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.9.1",
-    "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
     "concurrently": "^9.2.1",
-    "fumadocs-typescript": "^4.0.8",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "fumadocs-typescript": "^4.0.13",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "reading-time": "^1.5.0",
     "rehype-external-links": "^3.0.0",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "dependencies": {
     "@rectangular-labs/ui": "workspace:*",
-    "arktype": "^2.1.23",
+    "arktype": "^2.1.27",
     "feed": "^5.1.0",
-    "fumadocs-core": "^15.7.13",
-    "fumadocs-ui": "^15.7.13",
-    "lucide-static": "^0.544.0"
+    "fumadocs-core": "^15.8.5",
+    "fumadocs-ui": "^15.8.5",
+    "lucide-static": "^0.554.0"
   }
 }
