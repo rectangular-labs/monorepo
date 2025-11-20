@@ -60,6 +60,10 @@ pnpm new:package
 
 This command will walk you through the process of scaffolding a new package directory under `packages/`with the necessary basic configuration files.
 
+### Overrides
+
+`unstorage` on `1.17.1` because of `1.17.2` breaks type exports
+
 ## Credits
 
 This repository was originally inspired by via [create t3 turbo](https://github.com/t3-oss/create-t3-turbo) and wouldn't be possible without all the other open source tooling.
