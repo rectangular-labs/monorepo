@@ -43,6 +43,7 @@
     "loro-mirror": "1.1.1",
     "loro-mirror-react": "1.1.1",
     "motion": "^12.23.24",
+    "partysocket": "^1.1.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tanstack-router-sitemap": "^1.0.13"
