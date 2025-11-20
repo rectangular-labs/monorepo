@@ -19,18 +19,18 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@orpc/arktype": "^1.10.0",
-    "@orpc/client": "^1.10.0",
-    "@orpc/contract": "^1.10.0",
-    "@orpc/json-schema": "^1.10.0",
-    "@orpc/openapi": "^1.10.0",
-    "@orpc/openapi-client": "^1.10.0",
-    "@orpc/server": "^1.10.0",
+    "@orpc/arktype": "^1.11.3",
+    "@orpc/client": "^1.11.3",
+    "@orpc/contract": "^1.11.3",
+    "@orpc/json-schema": "^1.11.3",
+    "@orpc/openapi": "^1.11.3",
+    "@orpc/openapi-client": "^1.11.3",
+    "@orpc/server": "^1.11.3",
     "@rectangular-labs/auth": "workspace:*",
-    "arktype": "^2.1.23"
+    "arktype": "^2.1.27"
   }
 }
