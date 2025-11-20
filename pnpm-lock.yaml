@@ -92,8 +92,8 @@ importers:
         specifier: ^1.136.18
         version: 1.136.18(@tanstack/query-core@5.90.10)(@tanstack/react-query@5.90.10(react@19.2.0))(@tanstack/react-router@1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(@tanstack/router-core@1.136.17)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@tanstack/react-start':
-        specifier: ^1.137.0
-        version: 1.137.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))
+        specifier: ^1.138.0
+        version: 1.138.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))
       ai:
         specifier: ^5.0.98
         version: 5.0.98(zod@4.1.12)
@@ -219,8 +219,8 @@ importers:
         specifier: ^1.136.18
         version: 1.136.18(@tanstack/query-core@5.90.10)(@tanstack/react-query@5.90.10(react@19.2.0))(@tanstack/react-router@1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(@tanstack/router-core@1.136.17)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@tanstack/react-start':
-        specifier: ^1.137.0
-        version: 1.137.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))
+        specifier: ^1.138.0
+        version: 1.138.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))
       arktype:
         specifier: ^2.1.27
         version: 2.1.27
@@ -6009,8 +6009,8 @@ packages:
       react: '>=18.0.0 || >=19.0.0'
       react-dom: '>=18.0.0 || >=19.0.0'
 
-  '@tanstack/react-start@1.137.0':
-    resolution: {integrity: sha512-Ajpr66Q7DnrOr2yKCxbhTnJWNT/rPex+LV6Zi1nh5jQjR1TMcgMtYzxbKKBSBivO14jtHzTUViA7b4Z0hqQq+w==}
+  '@tanstack/react-start@1.138.0':
+    resolution: {integrity: sha512-K7QP+KV0yIJJfuUMMyQ/H83ZajQOJfzU8eJLz+j4mJ2m1rRcBbAX0pEAZFXecvro5LkhQSX5ZTHDlvJc09dMvw==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       react: '>=18.0.0 || >=19.0.0'
@@ -6082,8 +6082,8 @@ packages:
     resolution: {integrity: sha512-C7MndwH4SWnc+0BtqJiF9BO1TxV5zSRzhSs9zmpWQoCdcq2i9TaIJvHMphaYK200m1tlmsqq3wfr//MoYN8EDA==}
     engines: {node: '>=22.12.0'}
 
-  '@tanstack/start-plugin-core@1.137.0':
-    resolution: {integrity: sha512-xtZpRwLetV/bTFjdDPv2vaSesOppPpP5oNrMSVh9kuH1wZIZgCtXnNvvlgGl4tZWHcUHuIJcCdMINNEi6EO/5A==}
+  '@tanstack/start-plugin-core@1.138.0':
+    resolution: {integrity: sha512-kKxB3rUJlE1FEcATsLOqneFfN/4ad0DZ8GFxKrIU4BVZj657dZWWJsoW32ikYkMsKDy2plKGn29aQ/WSZZbTbw==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       vite: 7.2.4
@@ -8491,9 +8491,6 @@ packages:
 
   exponential-backoff@3.1.2:
     resolution: {integrity: sha512-8QxYTVXUkuy7fIIoitQkPwGonB8F3Zj8eEO8Sqg9Zv/bkI7RJAzowee4gr81Hak/dUTpA2Z7VfQgoijjPNlUZA==}
-
-  exsolve@1.0.7:
-    resolution: {integrity: sha512-VO5fQUzZtI6C+vx4w/4BWJpg3s/5l+6pRQEHzFRM8WFi4XffSP1Z+4qi7GbjWbvRQEbdIco5mIMq+zX4rPuLrw==}
 
   exsolve@1.0.8:
     resolution: {integrity: sha512-LmDxfWXwcTArk8fUEnOfSZpHOJ6zOMUJKOtFLFqJLoKJetuQG874Uc7/Kki7zFLzYybmZhp1M7+98pfMqeX8yA==}
@@ -19217,14 +19214,14 @@ snapshots:
     transitivePeerDependencies:
       - crossws
 
-  '@tanstack/react-start@1.137.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))':
+  '@tanstack/react-start@1.138.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))':
     dependencies:
       '@tanstack/react-router': 1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@tanstack/react-start-client': 1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@tanstack/react-start-server': 1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@tanstack/router-utils': 1.133.19
       '@tanstack/start-client-core': 1.136.17
-      '@tanstack/start-plugin-core': 1.137.0(@tanstack/react-router@1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))
+      '@tanstack/start-plugin-core': 1.138.0(@tanstack/react-router@1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))
       '@tanstack/start-server-core': 1.136.17
       pathe: 2.0.3
       react: 19.2.0
@@ -19355,7 +19352,7 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
-  '@tanstack/start-plugin-core@1.137.0(@tanstack/react-router@1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))':
+  '@tanstack/start-plugin-core@1.138.0(@tanstack/react-router@1.136.18(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))':
     dependencies:
       '@babel/code-frame': 7.26.2
       '@babel/core': 7.28.5
@@ -19370,7 +19367,7 @@ snapshots:
       '@tanstack/start-server-core': 1.136.17
       babel-dead-code-elimination: 1.0.10
       cheerio: 1.1.2
-      exsolve: 1.0.7
+      exsolve: 1.0.8
       pathe: 2.0.3
       srvx: 0.8.16
       tinyglobby: 0.2.15
@@ -20696,7 +20693,7 @@ snapshots:
       confbox: 0.2.2
       defu: 6.1.4
       dotenv: 16.6.1
-      exsolve: 1.0.7
+      exsolve: 1.0.8
       giget: 2.0.0
       jiti: 2.6.1
       ohash: 2.0.11
@@ -22326,8 +22323,6 @@ snapshots:
 
   exponential-backoff@3.1.2:
     optional: true
-
-  exsolve@1.0.7: {}
 
   exsolve@1.0.8: {}
 
@@ -28278,7 +28273,7 @@ snapshots:
       '@oozcitak/dom': 2.0.1
       '@oozcitak/infra': 2.0.1
       '@oozcitak/util': 9.0.4
-      js-yaml: 4.1.0
+      js-yaml: 4.1.1
 
   xmlbuilder@11.0.1:
     optional: true
