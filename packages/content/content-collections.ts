@@ -6,7 +6,6 @@ import {
 } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
 import { remarkNpm } from "fumadocs-core/mdx-plugins";
-import { createGenerator, remarkAutoTypeTable } from "fumadocs-typescript";
 import rehypeExternalLinks from "rehype-external-links";
 import { getContentReadingTime } from "./src/lib/markdown/get-reading-time";
 import { getTimestamps } from "./src/lib/markdown/get-timestamps";
@@ -17,7 +16,6 @@ import {
   PostSchema,
 } from "./src/lib/schema";
 
-const generator = createGenerator();
 const mdxTransformer = async <
   D extends {
     _meta: Meta;
@@ -33,10 +31,7 @@ const mdxTransformer = async <
   });
   const timestamps = getTimestamps({ filepath: document._meta.filePath });
   const mdx = await transformMDX(document, context, {
-    remarkPlugins: [
-      [remarkAutoTypeTable, { generator }],
-      [remarkNpm, { persist: { id: "package-manager" } }],
-    ],
+    remarkPlugins: [[remarkNpm, { persist: { id: "package-manager" } }]],
     rehypePlugins: [
       [
         rehypeExternalLinks,
@@ -48,7 +43,7 @@ const mdxTransformer = async <
       ],
     ],
   });
-  let authorDetail = null;
+  let authorDetail: typeof AuthorSchema.infer | null = null;
   if ("author" in mdx && typeof mdx.author === "string") {
     const author = context.documents(authors).find((author) => {
       if (author._meta.path === mdx.author) {
@@ -60,7 +55,7 @@ const mdxTransformer = async <
     if (author) {
       authorDetail = { name: author.name, image: author.image };
     } else {
-      authorDetail = { name: mdx.author };
+      authorDetail = { name: mdx.author, image: "" };
     }
   }
 

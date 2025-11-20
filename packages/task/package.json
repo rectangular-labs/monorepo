@@ -15,8 +15,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "deploy": "pnpx trigger.dev@4.0.4 deploy",
-    "dev:trigger": "pnpm dotenvx run -f ../../.env.local -f ../../.env -- pnpx trigger.dev@4.0.4 dev",
+    "deploy": "pnpx trigger.dev@4.1.1 deploy",
+    "dev:trigger": "pnpm dotenvx run -f ../../.env.local -f ../../.env -- pnpx trigger.dev@4.1.1 dev",
     "clean": "git clean -xdf .turbo node_modules dist .cache .trigger storage",
     "format": "bun x @biomejs/biome format . --write",
     "lint": "bun x @biomejs/biome lint . --write",
@@ -24,25 +24,24 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@trigger.dev/build": "4.0.4",
-    "@types/node": "^24.9.1",
+    "@trigger.dev/build": "4.1.1",
+    "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.27",
-    "@ai-sdk/openai": "^2.0.62",
-    "@orama/orama": "^3.1.14",
+    "@ai-sdk/google": "^2.0.39",
+    "@ai-sdk/openai": "^2.0.69",
+    "@orama/orama": "^3.1.16",
     "@rectangular-labs/dataforseo": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "@trigger.dev/sdk": "4.0.4",
-    "ai": "^5.0.87",
-    "arktype": "^2.1.23",
-    "crawlee": "^3.15.0",
+    "@trigger.dev/sdk": "4.1.1",
+    "ai": "^5.0.97",
+    "arktype": "^2.1.27",
+    "crawlee": "^3.15.3",
     "defuddle": "^0.6.6",
     "jsdom": "^26.1.0",
-    "playwright": "1.55.1",
-    "unstorage": "^1.17.1"
+    "playwright": "1.56.1"
   }
 }

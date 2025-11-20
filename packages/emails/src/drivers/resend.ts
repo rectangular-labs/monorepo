@@ -22,8 +22,6 @@ export function resendDriver(...config: ConstructorParameters<typeof Resend>) {
           from: normalizeEmailAddressToString(options.from),
           to: normalizeEmailAddressesToString(options.to),
           subject: options.subject,
-          text: options.text ?? "",
-          ...(options.html ? { html: options.html } : {}),
           ...(options.cc
             ? { cc: normalizeEmailAddressesToString(options.cc) }
             : {}),
@@ -45,9 +43,13 @@ export function resendDriver(...config: ConstructorParameters<typeof Resend>) {
                 })),
               }
             : {}),
-          ...(messageOverrides && {
-            ...messageOverrides,
-          }),
+          ...(messageOverrides
+            ? messageOverrides
+            : {
+                ...(options.text
+                  ? { text: options.text }
+                  : { html: options.html ?? "" }),
+              }),
         };
 
         const result = await resend.emails.send(email);

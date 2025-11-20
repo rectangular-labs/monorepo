@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@rectangular-labs/result";
+import { err, ok, type Result, safeSync } from "@rectangular-labs/result";
 import {
   type DocUpdate,
   type DocUpdateFragment,
@@ -91,7 +91,6 @@ async function handleJoinRequest(
   const joinResult = roomDoc.descriptor.adaptor.handleJoinRequest(
     roomDoc.data,
     message.version,
-    "write",
   );
 
   // Send join response with current document version
@@ -153,34 +152,19 @@ async function handleDocUpdate(
   }
 
   const roomDoc = roomDocResult.value;
-  const newDocumentData = roomDoc.descriptor.adaptor.applyUpdates(
-    roomDoc.data,
-    message.updates,
-    "write",
+  const newDocumentData = safeSync(() =>
+    roomDoc.descriptor.adaptor.applyUpdates(roomDoc.data, message.updates),
   );
-
-  if (!newDocumentData.success) {
-    replyToSender({
-      ...(newDocumentData.error ?? {
-        type: MessageType.UpdateError,
-        code: UpdateErrorCode.InvalidUpdate,
-        message: "Invalid update",
-      }),
-      roomId: message.roomId,
-      crdt: message.crdt,
-    });
-    return ok(undefined);
+  if (!newDocumentData.ok) {
+    return newDocumentData;
   }
+  roomDoc.data = newDocumentData.value;
 
-  if (newDocumentData.newDocumentData) {
-    roomDoc.data = newDocumentData.newDocumentData;
-  }
   if (roomDoc.descriptor.shouldPersist) {
     roomDoc.dirty = true;
   }
 
-  const updatesForBroadcast =
-    newDocumentData.broadcastUpdates ?? message.updates;
+  const updatesForBroadcast = message.updates;
   if (updatesForBroadcast.length > 0) {
     const outgoing: DocUpdate = {
       type: MessageType.DocUpdate,
@@ -251,29 +235,14 @@ async function handleFragment(
     }
 
     const roomDoc = roomDocResult.value;
-    const newDocumentData = roomDoc.descriptor.adaptor.applyUpdates(
-      roomDoc.data,
-      [totalData],
-      "write",
+    const newDocumentData = safeSync(() =>
+      roomDoc.descriptor.adaptor.applyUpdates(roomDoc.data, [totalData]),
     );
+    if (!newDocumentData.ok) {
+      return newDocumentData;
+    }
+    roomDoc.data = newDocumentData.value;
 
-    if (!newDocumentData.success) {
-      replyToSender({
-        ...(newDocumentData.error ?? {
-          type: MessageType.UpdateError,
-          code: UpdateErrorCode.InvalidUpdate,
-          message: "Invalid update",
-        }),
-        crdt: message.crdt,
-        roomId: message.roomId,
-        batchId: message.batchId,
-      });
-      context.userFragments.delete(message.batchId);
-      return ok(undefined);
-    }
-    if (newDocumentData.newDocumentData) {
-      roomDoc.data = newDocumentData.newDocumentData;
-    }
     if (roomDoc.descriptor.shouldPersist) {
       roomDoc.dirty = true;
     }

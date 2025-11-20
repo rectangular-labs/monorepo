@@ -40,20 +40,20 @@
     "with-env-production": "dotenvx run -f ../../.env.production -- "
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.1",
+    "@neondatabase/serverless": "^1.0.2",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.87",
-    "arktype": "^2.1.23",
+    "ai": "^5.0.97",
+    "arktype": "^2.1.27",
     "drizzle-arktype": "^0.1.3",
-    "drizzle-orm": "^0.44.5",
+    "drizzle-orm": "^0.44.7",
     "postgres": "^3.4.7",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.9.1",
-    "drizzle-kit": "^0.31.5",
+    "@types/node": "^24.10.1",
+    "drizzle-kit": "^0.31.7",
     "typescript": "^5.9.3"
   }
 }
