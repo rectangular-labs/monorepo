@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
     ) {
       throw redirect({
         from: "/$organizationSlug",
-        to: ".",
+        to: "/$organizationSlug",
         params: (params) => ({
           ...params,
           organizationSlug: activeOrganization.slug,
@@ -63,17 +63,18 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
     if (!result) {
       throw redirect({
         from: "/$organizationSlug",
-        to: ".",
+        to: "/$organizationSlug",
         params: (params) => ({
           ...params,
           organizationSlug: activeOrganization?.slug || AUTO_ROUTE_ORG,
         }),
       });
     }
+    console.log("result", result);
     if (params.organizationSlug === AUTO_ROUTE_ORG) {
       throw redirect({
         from: "/$organizationSlug",
-        to: ".",
+        to: "/$organizationSlug",
         params: (params) => ({
           ...params,
           organizationSlug: result.slug,

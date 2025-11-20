@@ -92,7 +92,7 @@ export function ChatPanel({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
-    getApiClientRq().campaign.messages.infiniteOptions({
+    getApiClientRq().campaigns.messages.infiniteOptions({
       input: (pageParam) => ({
         id: campaignId,
         organizationId,

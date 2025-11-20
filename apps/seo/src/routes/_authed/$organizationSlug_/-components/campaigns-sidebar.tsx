@@ -13,7 +13,7 @@ import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "../../-components/loading-error";
 
-type Campaign = RouterOutputs["campaign"]["list"]["data"][0];
+type Campaign = RouterOutputs["campaigns"]["list"]["data"][0];
 type CampaignsSidebarProps = {
   projectId: string;
   organizationId: string;
@@ -37,7 +37,7 @@ export function CampaignsSidebar({
     refetch,
     error,
   } = useInfiniteQuery(
-    getApiClientRq().campaign.list.infiniteOptions({
+    getApiClientRq().campaigns.list.infiniteOptions({
       input: (pageParam) => ({
         organizationId,
         projectId,
@@ -172,7 +172,7 @@ function NewCampaignButton({
     from: "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId",
   });
   const { mutate: createCampaign, isPending } = useMutation(
-    getApiClientRq().campaign.create.mutationOptions({
+    getApiClientRq().campaigns.create.mutationOptions({
       onSuccess: (data) => {
         toast.success("Campaign created");
         void navigate({

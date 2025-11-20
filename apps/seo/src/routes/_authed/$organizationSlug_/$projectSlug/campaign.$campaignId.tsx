@@ -31,7 +31,7 @@ export const Route = createFileRoute(
     );
     await Promise.all([
       context.queryClient.ensureQueryData(
-        getApiClientRq().campaign.get.queryOptions({
+        getApiClientRq().campaigns.get.queryOptions({
           input: {
             id: params.campaignId,
             projectId: activeProject.id,
@@ -40,7 +40,7 @@ export const Route = createFileRoute(
         }),
       ),
       context.queryClient.ensureInfiniteQueryData(
-        getApiClientRq().campaign.list.infiniteOptions({
+        getApiClientRq().campaigns.list.infiniteOptions({
           input: (pageParam) => ({
             organizationId: activeProject.organizationId,
             projectId: activeProject.id,
@@ -71,7 +71,7 @@ function PageComponent() {
   const {
     data: { campaign },
   } = useSuspenseQuery(
-    getApiClientRq().campaign.get.queryOptions({
+    getApiClientRq().campaigns.get.queryOptions({
       input: {
         id: campaignId,
         projectId: project.id,

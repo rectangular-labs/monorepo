@@ -97,7 +97,7 @@ export class WebSocketServer extends DurableObject {
     }
 
     const [{ campaign }, authDetails] = await Promise.all([
-      serverHandler.campaign
+      serverHandler.campaigns
         .get({
           id: campaignId,
           projectId: projectId,

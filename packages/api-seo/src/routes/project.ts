@@ -3,13 +3,13 @@ import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import { updateSeoProject } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { LoroDoc } from "loro-crdt";
-import { protectedBase } from "../context";
+import { withOrganizationIdBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import { getWorkspaceBlobUri } from "../lib/workspace";
 
-const list = protectedBase
+const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
   .input(
     type({
@@ -40,7 +40,7 @@ const list = protectedBase
     return { data, nextPageCursor };
   });
 
-const checkName = protectedBase
+const checkName = withOrganizationIdBase
   .route({ method: "GET", path: "/check-name/{name}" })
   .input(type({ name: "string", organizationIdentifier: "string" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
@@ -56,7 +56,7 @@ const checkName = protectedBase
     return { exists: !!row };
   });
 
-const get = protectedBase
+const get = withOrganizationIdBase
   .route({ method: "GET", path: "/{identifier}" })
   .input(
     type({
@@ -98,7 +98,7 @@ const get = protectedBase
     return row;
   });
 
-const setUpWorkspace = protectedBase
+const setUpWorkspace = withOrganizationIdBase
   .route({ method: "POST", path: "/{projectId}/setup-workspace" })
   .input(type({ projectId: "string", organizationIdentifier: "string" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
@@ -125,7 +125,7 @@ const setUpWorkspace = protectedBase
     return { workspaceBlobUri } as const;
   });
 
-const create = protectedBase
+const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
   .input(
     schema.seoProjectInsertSchema.pick("websiteUrl").merge(
@@ -159,7 +159,7 @@ const create = protectedBase
     return { ...upsertProjectResult.value, taskId: createTaskResult.value.id };
   });
 
-const update = protectedBase
+const update = withOrganizationIdBase
   .route({ method: "PATCH", path: "/{id}" })
   .input(
     schema.seoProjectUpdateSchema.merge(
@@ -187,7 +187,7 @@ const update = protectedBase
     return row;
   });
 
-const remove = protectedBase
+const remove = withOrganizationIdBase
   .route({ method: "DELETE", path: "/{id}" })
   .input(type({ id: "string", organizationIdentifier: "string" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
@@ -210,6 +210,6 @@ const remove = protectedBase
     return { success: true } as const;
   });
 
-export default protectedBase
+export default withOrganizationIdBase
   .prefix("/organization/{organizationIdentifier}/project")
   .router({ list, create, update, remove, checkName, get, setUpWorkspace });
