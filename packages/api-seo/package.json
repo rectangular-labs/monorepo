@@ -61,7 +61,9 @@
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.97",
     "arktype": "^2.1.27",
+    "loro-adaptors": "0.4.0",
     "loro-crdt": "^1.9.0",
+    "loro-protocol": "^0.2.0",
     "unstorage": "^1.17.2"
   },
   "overrides": {

@@ -14,6 +14,7 @@ import {
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
+import { seoContentCampaignMessage } from "./content-campaign-message-schema";
 import { seoContentSchedule } from "./content-schedule-schema";
 import { seoProject } from "./project-schema";
 
@@ -78,6 +79,7 @@ export const seoContentCampaignRelations = relations(
       references: [user.id],
     }),
     scheduledContents: many(seoContentSchedule),
+    messages: many(seoContentCampaignMessage),
   }),
 );
 

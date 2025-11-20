@@ -1,7 +1,12 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
-import type { AiSeoUIMessage } from "@rectangular-labs/api-seo/types";
+import { websocketClient } from "@rectangular-labs/api-seo/client";
+import type {
+  SeoChatMessage,
+  WebSocketMessages,
+} from "@rectangular-labs/api-seo/types";
 import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
+import { safeSync } from "@rectangular-labs/result";
 import {
   Action,
   Actions,
@@ -25,7 +30,6 @@ import {
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
-  PromptInputButton,
   PromptInputFooter,
   type PromptInputMessage,
   PromptInputModelSelect,
@@ -57,14 +61,12 @@ import {
   ToolInput,
   ToolOutput,
 } from "@rectangular-labs/ui/components/ai-elements/tool";
-import {
-  Copy,
-  File,
-  Globe,
-  RefreshCcw,
-} from "@rectangular-labs/ui/components/icon";
-import { Fragment, useState } from "react";
-import { WebsocketChatTransport } from "~/lib/ai-transport";
+import { Copy, File, RefreshCcw } from "@rectangular-labs/ui/components/icon";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { readUIMessageStream, type UIMessageChunk } from "ai";
+import { useWebSocket } from "partysocket/react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { getApiClientRq } from "~/lib/api";
 import { GscConnectionCard } from "./gsc-connection-card";
 
 const models = [
@@ -83,47 +85,249 @@ export function ChatPanel({
 }) {
   const [input, setInput] = useState("");
   const [model, setModel] = useState<string>(models[0]?.value ?? "");
-  const [webSearch, setWebSearch] = useState(false);
 
-  const transport = new WebsocketChatTransport({
-    url: `${typeof window !== "undefined" ? window.location.origin.replace("https", "wss") : "https://localhost:3000"}/api/realtime/organization/${organizationId}/project/${projectId}/campaign/${campaignId}/room`,
+  const {
+    data: messagePages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(
+    getApiClientRq().campaign.messages.infiniteOptions({
+      input: (pageParam) => ({
+        id: campaignId,
+        organizationId,
+        projectId,
+        limit: 10,
+        cursor: pageParam,
+      }),
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage) => lastPage.nextPageCursor,
+    }),
+  );
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const [pendingStreams] = useState<
+    Map<string, { controller: ReadableStreamDefaultController<UIMessageChunk> }>
+  >(new Map());
+
+  const webSocketUrl = `${typeof window !== "undefined" ? window.location.origin.replace("https", "wss") : "https://localhost:3000"}/api/realtime/organization/${organizationId}/project/${projectId}/campaign/${campaignId}/room`;
+  const webSocketClient = useWebSocket(webSocketUrl, undefined, {
+    onMessage: async (event) => {
+      const dataResult = safeSync(() => JSON.parse(event.data));
+      if (!dataResult.ok) {
+        console.error("Error parsing WebSocket message:", dataResult.error);
+        return;
+      }
+      const data = dataResult.value;
+      if (
+        typeof data !== "object" ||
+        data === null ||
+        !("type" in data) ||
+        typeof data.type !== "string"
+      ) {
+        // irrelevant message
+        return;
+      }
+      const castData = data as WebSocketMessages;
+      switch (castData.type) {
+        case "msg-chunk": {
+          const { chunk, clientMessageId } = castData;
+          let controller = pendingStreams.get(clientMessageId)?.controller;
+          if (!controller) {
+            console.log("no existing controller, creating new one");
+            const newController = await navigator.locks.request(
+              clientMessageId,
+              { mode: "exclusive" },
+              async () => {
+                const controller =
+                  pendingStreams.get(clientMessageId)?.controller;
+                if (controller) {
+                  return controller;
+                }
+                // external message, we create a custom stream for processing it
+                const stream = new ReadableStream<UIMessageChunk>({
+                  cancel: () => {
+                    console.log("cancel", clientMessageId);
+                    pendingStreams.delete(clientMessageId);
+                  },
+                  start: (controller) => {
+                    console.log("start", clientMessageId);
+                    pendingStreams.get(clientMessageId)?.controller.close();
+                    pendingStreams.set(clientMessageId, { controller });
+                  },
+                });
+                for await (const uiMessage of readUIMessageStream<SeoChatMessage>(
+                  { stream },
+                )) {
+                  const messageId = (() => {
+                    if (chunk.type === "start") {
+                      return chunk.messageId;
+                    }
+                    return;
+                  })();
+                  const metadata = (() => {
+                    if (chunk.type === "start") {
+                      return chunk.messageMetadata;
+                    }
+                    return;
+                  })();
+                  uiMessage.id = messageId ?? "";
+                  uiMessage.metadata = metadata;
+                  setMessages((prev) => {
+                    let isExisting = false;
+                    const newMessages = prev.map((message) => {
+                      if (message.id === uiMessage.id) {
+                        isExisting = true;
+                        return uiMessage;
+                      }
+                      return message;
+                    });
+                    if (isExisting) {
+                      return newMessages;
+                    }
+                    return [...newMessages, uiMessage];
+                  });
+                }
+                return pendingStreams.get(clientMessageId)?.controller;
+              },
+            );
+            controller = newController;
+          }
+          if (!controller) {
+            return;
+          }
+          controller.enqueue(chunk);
+          // Handle completion events
+          if (chunk.type === "finish" || chunk.type === "error") {
+            controller.close();
+            pendingStreams.delete(clientMessageId);
+          }
+          break;
+        }
+        case "new-msg": {
+          const { message } = castData;
+          setMessages((prev) => [...prev, message]);
+          break;
+        }
+        default:
+          console.warn("Invalid WebSocket message type:", data.type);
+          return;
+      }
+    },
   });
-  const { messages, sendMessage, status, regenerate } = useChat<AiSeoUIMessage>(
-    {
-      // transport: {
-      //   async sendMessages(options) {
-      //     return eventIteratorToUnproxiedDataStream(
-      //       await getApiClient().campaign.write(
-      //         {
-      //           id: campaignId,
-      //           projectId,
-      //           organizationId,
-      //           chatId: options.chatId,
-      //           messages: options.messages,
-      //         },
-      //         { signal: options.abortSignal },
-      //       ),
-      //     );
-      //   },
-      //   reconnectToStream() {
-      //     throw new Error("Unsupported");
-      //   },
-      // },
-      transport,
+
+  const { messages, setMessages, sendMessage, status, regenerate, stop } =
+    useChat<SeoChatMessage>({
+      transport: {
+        reconnectToStream: async () => null,
+        sendMessages: ({
+          abortSignal,
+          chatId,
+          messageId,
+          messages,
+          trigger,
+          ...options
+        }) => {
+          const clientMessageId = crypto.randomUUID();
+
+          // Create the stream
+          const stream = new ReadableStream<UIMessageChunk>({
+            cancel: () => {
+              console.log("cancel", clientMessageId);
+              pendingStreams.delete(clientMessageId);
+            },
+            start: (controller) => {
+              pendingStreams.set(clientMessageId, { controller });
+            },
+          });
+          if (abortSignal) {
+            abortSignal.addEventListener("abort", () => {
+              console.log("abort", clientMessageId);
+              pendingStreams
+                .get(clientMessageId)
+                ?.controller.error(new Error("Aborted"));
+              pendingStreams.get(clientMessageId)?.controller.close();
+              pendingStreams.delete(clientMessageId);
+            });
+          }
+
+          // Send the message to the agent
+          // The websocket client from ORPC listens to messages coming back from the server, but we don't want to listen to them here since we handle it on our own.
+          // Thus we proxy the websocket client to prevent it from listening to messages coming back from the server.
+          const proxyWs = new Proxy(webSocketClient, {
+            get(target, prop, receiver) {
+              if (prop === "addEventListener") {
+                return (
+                  type: string,
+                  listener: EventListenerOrEventListenerObject,
+                  options?: boolean | AddEventListenerOptions,
+                ) => {
+                  if (type === "message") {
+                    return;
+                  }
+                  return target.addEventListener(type, listener, options);
+                };
+              }
+              return Reflect.get(target, prop, receiver);
+            },
+          });
+          const wsClient = websocketClient(proxyWs as unknown as WebSocket);
+
+          wsClient.campaign.room({
+            messages: messages as SeoChatMessage[],
+            clientMessageId,
+            ...options,
+          });
+
+          return Promise.resolve(stream);
+        },
+      },
       onError: (error) => {
         console.error("error", error);
       },
-    },
-  );
-  console.log("messages", messages);
-  const handleSubmit = (message: PromptInputMessage) => {
-    const hasText = Boolean(message.text);
-    const hasAttachments = Boolean(message.files?.length);
+      id: campaignId,
+    });
+  useEffect(() => {
+    const historyMessages = (messagePages?.pages ?? [])
+      .flatMap((page) => page.data)
+      .reverse();
+    setMessages(historyMessages);
+  }, [messagePages, setMessages]);
 
-    if (!(hasText || hasAttachments)) {
+  useEffect(() => {
+    if (!hasNextPage || !loadMoreRef.current) {
       return;
     }
 
+    const target = loadMoreRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      {
+        // Trigger when the sentinel gets near the top of the viewport
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(target);
+    return () => {
+      observer.unobserve(target);
+      observer.disconnect();
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const handleSubmit = (message: PromptInputMessage) => {
+    const hasText = Boolean(message.text);
+    const hasAttachments = Boolean(message.files?.length);
+    if (!(hasText || hasAttachments)) {
+      return;
+    }
     sendMessage(
       {
         text: message.text || "Sent with attachments",
@@ -132,7 +336,6 @@ export function ChatPanel({
       {
         body: {
           model: model,
-          webSearch: webSearch,
         },
       },
     );
@@ -143,6 +346,16 @@ export function ChatPanel({
     <div className="flex h-full flex-col gap-4 rounded-md bg-background p-3">
       <Conversation className="h-full">
         <ConversationContent>
+          {hasNextPage && (
+            <div
+              className="flex justify-center py-2 text-muted-foreground text-xs"
+              ref={loadMoreRef}
+            >
+              {isFetchingNextPage
+                ? "Loading more messages..."
+                : "Scroll up to load previous messages"}
+            </div>
+          )}
           {messages.map((message) => (
             <div key={message.id}>
               {message.role === "assistant" &&
@@ -306,13 +519,6 @@ export function ChatPanel({
                 <PromptInputActionAddAttachments />
               </PromptInputActionMenuContent>
             </PromptInputActionMenu>
-            <PromptInputButton
-              onClick={() => setWebSearch(!webSearch)}
-              variant={webSearch ? "default" : "ghost"}
-            >
-              <Globe size={16} />
-              <span>Search</span>
-            </PromptInputButton>
             <PromptInputModelSelect
               onValueChange={(value) => {
                 setModel(value);
@@ -334,7 +540,15 @@ export function ChatPanel({
               </PromptInputModelSelectContent>
             </PromptInputModelSelect>
           </PromptInputTools>
-          <PromptInputSubmit disabled={!input && !status} status={status} />
+          <PromptInputSubmit
+            disabled={!input && !status}
+            onClick={() => {
+              if (status === "streaming") {
+                stop?.();
+              }
+            }}
+            status={status}
+          />
         </PromptInputFooter>
       </PromptInput>
     </div>

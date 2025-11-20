@@ -1,14 +1,20 @@
-import { ORPCError } from "@orpc/server";
+import { ORPCError, type as orpcType } from "@orpc/server";
 import { and, eq, schema, sql } from "@rectangular-labs/db";
 import {
   createContentCampaign,
   getDefaultContentCampaign,
+  listContentCampaignMessages,
 } from "@rectangular-labs/db/operations";
-import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/db/parsers";
+import {
+  CAMPAIGN_DEFAULT_TITLE,
+  contentCampaignMessageMetadataSchema,
+} from "@rectangular-labs/db/parsers";
+import { validateUIMessages } from "ai";
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import { createWorkspaceBlobUri } from "../lib/workspace";
+import { getWorkspaceBlobUri } from "../lib/workspace";
+import type { SeoChatMessage } from "../types";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -104,9 +110,10 @@ const create = withOrganizationIdBase
         projectId: input.projectId,
         organizationId: context.organization.id,
         createdByUserId: context.user.id,
-        workspaceBlobUri: createWorkspaceBlobUri({
+        workspaceBlobUri: getWorkspaceBlobUri({
           orgId: context.organization.id,
           projectId: input.projectId,
+          campaignId: undefined,
         }),
       },
     );
@@ -187,6 +194,55 @@ const remove = withOrganizationIdBase
     return { success: true } as const;
   });
 
+const messages = withOrganizationIdBase
+  .route({ method: "GET", path: "/{id}/messages" })
+  .input(
+    type({
+      id: "string.uuid",
+      projectId: "string.uuid",
+      organizationId: "string",
+      limit: "1<=number<=100 = 10",
+      "cursor?": "string.uuid|undefined",
+    }),
+  )
+  .output(
+    orpcType<{ data: SeoChatMessage[]; nextPageCursor: string | undefined }>(),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationId)
+  .handler(async ({ context, input }) => {
+    const result = await listContentCampaignMessages({
+      db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
+      campaignId: input.id,
+      limit: input.limit,
+      cursor: input.cursor,
+    });
+    if (!result.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to list campaign messages",
+        cause: result.error,
+      });
+    }
+    const { data, nextPageCursor } = result.value;
+    // todo: maybe not validate / cache validation
+    const uiMessageSchema = await validateUIMessages<SeoChatMessage>({
+      messages: data.map((row) => {
+        return {
+          id: row.id,
+          role: row.source,
+          parts: row.message,
+          metadata: {
+            sentAt: row.createdAt.toISOString(),
+            userId: row.userId,
+          },
+        };
+      }),
+      metadataSchema: contentCampaignMessageMetadataSchema,
+    });
+    return { data: uiMessageSchema, nextPageCursor };
+  });
+
 export default withOrganizationIdBase
   .prefix("/organization/{organizationId}/project/{projectId}/campaign")
-  .router({ list, get, create, update, remove });
+  .router({ list, get, create, update, remove, messages });
