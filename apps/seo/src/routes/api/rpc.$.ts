@@ -7,7 +7,7 @@ async function handle({ request }: { request: Request }) {
     url: new URL(request.url),
     reqHeaders: request.headers,
   });
-
+  console.log("Handling request", context.url.href);
   const { response } = await RpcHandler.handle(request, {
     prefix: "/api/rpc",
     context,

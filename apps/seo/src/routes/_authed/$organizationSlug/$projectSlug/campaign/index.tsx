@@ -54,7 +54,7 @@ export const Route = createFileRoute(
         getNextPageParam: (lastPage) => lastPage.nextPageCursor ?? undefined,
       }),
     );
-    return { activeProject };
+    return null;
   },
   component: PageComponent,
 });
