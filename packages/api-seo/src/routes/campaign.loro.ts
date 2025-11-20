@@ -1,4 +1,4 @@
-import { err, ok, safeSync, type Result } from "@rectangular-labs/result";
+import { err, ok, type Result, safeSync } from "@rectangular-labs/result";
 import {
   type DocUpdate,
   type DocUpdateFragment,

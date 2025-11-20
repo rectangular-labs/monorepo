@@ -13,19 +13,19 @@ export const createRpcLink = ({
 }) =>
   new RPCLink({
     url: `${baseUrl}${path}`,
-    method: ({ context}, path) => {
-    // Use GET for cached responses
-    if (context?.cache) {
-      return 'GET'
-    }
+    method: ({ context }, path) => {
+      // Use GET for cached responses
+      if (context?.cache) {
+        return "GET";
+      }
 
-    // Use GET for read-like operations
-    if (path.at(-1)?.match(/^(?:get|find|list|search)(?:[A-Z].*)?$/)) {
-      return 'GET'
-    }
+      // Use GET for read-like operations
+      if (path.at(-1)?.match(/^(?:get|find|list|search)(?:[A-Z].*)?$/)) {
+        return "GET";
+      }
 
-    return 'POST'
-  },
+      return "POST";
+    },
     fetch(request, init) {
       return globalThis.fetch(request, {
         ...init,
