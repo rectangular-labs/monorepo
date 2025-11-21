@@ -71,7 +71,12 @@ Output requirements:
     messages: convertToModelMessages(messages),
     tools: {
       web_search: anthropic.tools.webSearch_20250305({ maxUses: 3 }),
-      web_fetch: anthropic.tools.webFetch_20250910({ maxUses: 2 }),
+      web_fetch: anthropic.tools.webFetch_20250910({
+        maxUses: 2,
+        citations: {
+          enabled: true,
+        },
+      }),
       ...createGscTool({
         accessToken: gscProperty?.accessToken ?? null,
         siteUrl: gscProperty?.domain ?? null,
