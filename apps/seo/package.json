@@ -39,7 +39,7 @@
     "@tanstack/react-start": "^1.139.0",
     "ai": "^5.0.98",
     "arktype": "^2.1.27",
-    "loro-crdt": "^1.9.0",
+    "loro-crdt": "^1.10.0",
     "loro-mirror": "1.1.1",
     "loro-mirror-react": "1.1.1",
     "motion": "^12.23.24",

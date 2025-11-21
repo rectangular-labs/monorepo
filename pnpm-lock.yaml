@@ -101,14 +101,14 @@ importers:
         specifier: ^2.1.27
         version: 2.1.27
       loro-crdt:
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
       loro-mirror:
         specifier: 1.1.1
-        version: 1.1.1(loro-crdt@1.9.0)
+        version: 1.1.1(loro-crdt@1.10.0)
       loro-mirror-react:
         specifier: 1.1.1
-        version: 1.1.1(loro-crdt@1.9.0)(loro-mirror@1.1.1(loro-crdt@1.9.0))(react@19.2.0)
+        version: 1.1.1(loro-crdt@1.10.0)(loro-mirror@1.1.1(loro-crdt@1.10.0))(react@19.2.0)
       motion:
         specifier: ^12.23.24
         version: 12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -390,10 +390,10 @@ importers:
         version: 2.1.27
       loro-adaptors:
         specifier: 0.4.0
-        version: 0.4.0(@loro-dev/flock@1.1.1)(loro-crdt@1.9.0)
+        version: 0.4.0(@loro-dev/flock@1.1.1)(loro-crdt@1.10.0)
       loro-crdt:
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
       loro-protocol:
         specifier: ^0.2.0
         version: 0.2.0
@@ -9902,8 +9902,8 @@ packages:
       yjs:
         optional: true
 
-  loro-crdt@1.9.0:
-    resolution: {integrity: sha512-twXAoypRaqSj8t0KJxKPis7ceqcJufrolcB8GLRkq2iGdqJ2EKT+rCJgwVoVgx8dhgFfbJjJEnpLKRs/bY6TcQ==}
+  loro-crdt@1.10.0:
+    resolution: {integrity: sha512-Fms27q9IaDANUe5OACQL6qLMhJasMXzjRkyK+NAIiPQXGBK2VAp6C7pAr9fzuKbL71YyDgA4Pv69RGwiScWSPg==}
 
   loro-mirror-react@1.1.1:
     resolution: {integrity: sha512-YmuI4dUQkuKSz7voXk14F8ljHkeeO6gwSdryARFUDvhzHL1PSnOQ/SPm07e/uXF9SsCzPjcdrdxhoCnlorUj2A==}
@@ -24025,25 +24025,25 @@ snapshots:
     dependencies:
       js-tokens: 4.0.0
 
-  loro-adaptors@0.4.0(@loro-dev/flock@1.1.1)(loro-crdt@1.9.0):
+  loro-adaptors@0.4.0(@loro-dev/flock@1.1.1)(loro-crdt@1.10.0):
     dependencies:
       loro-protocol: 0.2.0
     optionalDependencies:
       '@loro-dev/flock': 1.1.1
-      loro-crdt: 1.9.0
+      loro-crdt: 1.10.0
 
-  loro-crdt@1.9.0: {}
+  loro-crdt@1.10.0: {}
 
-  loro-mirror-react@1.1.1(loro-crdt@1.9.0)(loro-mirror@1.1.1(loro-crdt@1.9.0))(react@19.2.0):
+  loro-mirror-react@1.1.1(loro-crdt@1.10.0)(loro-mirror@1.1.1(loro-crdt@1.10.0))(react@19.2.0):
     dependencies:
-      loro-crdt: 1.9.0
-      loro-mirror: 1.1.1(loro-crdt@1.9.0)
+      loro-crdt: 1.10.0
+      loro-mirror: 1.1.1(loro-crdt@1.10.0)
       react: 19.2.0
 
-  loro-mirror@1.1.1(loro-crdt@1.9.0):
+  loro-mirror@1.1.1(loro-crdt@1.10.0):
     dependencies:
       immer: 10.2.0
-      loro-crdt: 1.9.0
+      loro-crdt: 1.10.0
 
   loro-protocol@0.2.0: {}
 
