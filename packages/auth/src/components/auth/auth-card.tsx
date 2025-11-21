@@ -221,11 +221,11 @@ export function AuthCard({
             <>
               {hasForm && (
                 <div className={"flex items-center gap-2"}>
-                  <Separator className={"!w-auto grow"} />
-                  <span className="flex-shrink-0 text-muted-foreground text-sm">
+                  <Separator className={"w-auto! grow"} />
+                  <span className="shrink-0 text-muted-foreground text-sm">
                     Or continue with
                   </span>
-                  <Separator className={"!w-auto grow"} />
+                  <Separator className={"w-auto! grow"} />
                 </div>
               )}
               <div className="grid gap-4">
