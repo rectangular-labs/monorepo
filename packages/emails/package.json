@@ -58,7 +58,7 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
-    "@aws-sdk/client-sesv2": "^3.936.0",
+    "@aws-sdk/client-sesv2": "^3.938.0",
     "@inboundemail/sdk": "^4.4.0",
     "@plunk/node": "^3.0.3",
     "@rectangular-labs/typescript": "workspace:*",
@@ -78,7 +78,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "@aws-sdk/client-sesv2": "^3.936.0",
+    "@aws-sdk/client-sesv2": "^3.938.0",
     "@inboundemail/sdk": "^4.4.0",
     "@sendgrid/mail": "^8.1.6",
     "mailersend": "^2.6.0",
