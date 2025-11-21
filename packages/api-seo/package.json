@@ -38,7 +38,7 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251120.0",
+    "@cloudflare/workers-types": "^4.20251121.0",
     "@rectangular-labs/typescript": "workspace:*",
     "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
@@ -46,7 +46,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.45",
     "@ai-sdk/google": "^2.0.40",
-    "@ai-sdk/openai": "^2.0.69",
+    "@ai-sdk/openai": "^2.0.71",
     "@orpc/client": "^1.11.3",
     "@orpc/contract": "^1.11.3",
     "@orpc/server": "^1.11.3",
