@@ -1,7 +1,18 @@
+import { anthropic } from "@ai-sdk/anthropic";
 import { ORPCError, type } from "@orpc/server";
 import { uuidv7 } from "@rectangular-labs/db";
-import { createContentCampaignMessage } from "@rectangular-labs/db/operations";
-import { hasToolCall, stepCountIs, streamText } from "ai";
+import {
+  createContentCampaignMessage,
+  updateContentCampaign,
+} from "@rectangular-labs/db/operations";
+import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/db/parsers";
+import {
+  convertToModelMessages,
+  generateText,
+  hasToolCall,
+  stepCountIs,
+  streamText,
+} from "ai";
 import { websocketBase } from "../context";
 import { createSeoAgent } from "../lib/ai/seo-agent";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
@@ -16,6 +27,7 @@ const room = websocketBase
   .input(
     type<{
       messages: SeoChatMessage[];
+      messageId?: string;
       clientMessageId: string;
     }>(),
   )
@@ -42,11 +54,8 @@ const room = websocketBase
       return property.value;
     })();
 
-    const latestUserMessage = [...input.messages]
-      .reverse()
-      .find((message) => message.role === "user");
-
-    if (latestUserMessage) {
+    const latestUserMessage = input.messages.at(-1);
+    if (latestUserMessage && latestUserMessage.role === "user") {
       const messageResult = await createContentCampaignMessage({
         db: context.db,
         value: {
@@ -76,6 +85,41 @@ const room = websocketBase
         },
         true,
       );
+    }
+
+    if (context.campaignTitle === CAMPAIGN_DEFAULT_TITLE && latestUserMessage) {
+      console.log("Generating title for campaign", context.campaignId);
+      const updatedTitle = await generateText({
+        model: anthropic("claude-haiku-4-5"),
+        system:
+          "Based on the user's message extract out the main topic and generate a concise and succinct title for this campaign. JUST RETURN WITH A TITLE AND NOTHING ELSE. The title should be no more than 10 words.",
+        messages: convertToModelMessages([
+          latestUserMessage,
+          {
+            role: "user",
+            parts: [
+              {
+                type: "text",
+                text: `The above is my initial question/task for my site ${project.name}. Use that to generate a title for this campaign`,
+              },
+            ],
+          },
+        ]),
+      });
+      await updateContentCampaign({
+        db: context.db,
+        values: {
+          id: context.campaignId,
+          projectId: context.projectId,
+          organizationId: context.organizationId,
+          title: updatedTitle.text.split(" ").slice(0, 10).join(" "),
+        },
+      });
+      const senderAttachment = context.senderWebSocket.deserializeAttachment();
+      context.senderWebSocket.serializeAttachment({
+        ...senderAttachment,
+        campaignTitle: context.campaignTitle,
+      });
     }
 
     const result = streamText({

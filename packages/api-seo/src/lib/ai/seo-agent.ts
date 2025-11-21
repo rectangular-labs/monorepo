@@ -66,7 +66,7 @@ Output requirements:
 - If proposing edits to existing content, describe them clearly;`;
 
   return {
-    model: anthropic("claude-haiku-4-5"),
+    model: anthropic("claude-sonnet-4-5"),
     system: systemPrompt,
     messages: convertToModelMessages(messages),
     tools: {

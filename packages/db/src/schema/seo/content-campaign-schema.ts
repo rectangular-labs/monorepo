@@ -98,5 +98,11 @@ export const seoContentCampaignSelectSchema =
 export const seoContentCampaignUpdateSchema = createUpdateSchema(
   seoContentCampaign,
 )
-  .omit("createdAt", "updatedAt", "organizationId", "createdByUserId")
-  .merge(type({ id: "string.uuid", projectId: "string.uuid" }));
+  .omit("createdAt", "updatedAt", "createdByUserId")
+  .merge(
+    type({
+      id: "string.uuid",
+      projectId: "string.uuid",
+      organizationId: "string",
+    }),
+  );
