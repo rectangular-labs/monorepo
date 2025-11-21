@@ -40,20 +40,15 @@ export function ProviderButton({
       if (provider.method === "social") {
         return authClient.signIn.social({
           provider: provider.provider,
-          disableRedirect: true,
           ...callbackValues,
         });
       } else {
         return authClient.signIn.oauth2({
           providerId: provider.provider,
-          disableRedirect: true,
           ...callbackValues,
         });
       }
     })();
-    if (response.data?.url) {
-      window.location.href = response.data.url;
-    }
     setShouldDisable(false);
     setIsSubmitting(false);
 

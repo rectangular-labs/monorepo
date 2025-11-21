@@ -20,8 +20,9 @@ import { RPCHandler as WebSocketRPCHandler } from "@orpc/server/websocket";
 const corsPlugin = new CORSPlugin({
   origin: (origin) => {
     const rectangularLabsRegex =
-      /^https:\/\/(?:preview\.|pr-\d+\.)?rectangularlabs\.com/;
-    const fluidpostsRegex = /^https:\/\/(?:preview\.|pr-\d+\.)?fluidposts\.com/;
+      /^https:\/\/(?:preview\.|pr-\d+\.|www\.)?rectangularlabs\.com/;
+    const fluidpostsRegex =
+      /^https:\/\/(?:preview\.|pr-\d+\.|www\.)?fluidposts\.com/;
     const match =
       rectangularLabsRegex.test(origin) || fluidpostsRegex.test(origin);
     if (match) {
