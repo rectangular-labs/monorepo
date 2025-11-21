@@ -6,8 +6,8 @@ export interface GscProperty {
   domain: string;
   type: "URL_PREFIX" | "DOMAIN";
   permissionLevel:
-    | "siteFull"
-    | "siteRestricted"
+    | "siteFullUser"
+    | "siteRestrictedUser"
     | "siteOwner"
     | "siteUnverifiedUser";
 }

@@ -34,7 +34,7 @@ export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/campaign/",
 )({
   loader: async ({ context, params }) => {
-    const activeProject = await context.queryClient.ensureQueryData(
+    await context.queryClient.ensureQueryData(
       getApiClientRq().project.get.queryOptions({
         input: {
           organizationIdentifier: params.organizationSlug,
@@ -42,18 +42,7 @@ export const Route = createFileRoute(
         },
       }),
     );
-    await context.queryClient.ensureInfiniteQueryData(
-      getApiClientRq().campaign.list.infiniteOptions({
-        input: (pageParam) => ({
-          organizationId: activeProject.organizationId,
-          projectId: activeProject.id,
-          cursor: pageParam,
-          limit: 10,
-        }),
-        initialPageParam: undefined as string | undefined,
-        getNextPageParam: (lastPage) => lastPage.nextPageCursor ?? undefined,
-      }),
-    );
+
     return null;
   },
   component: PageComponent,
@@ -87,7 +76,7 @@ function PageComponent() {
     isFetchingNextPage,
     fetchNextPage,
   } = useInfiniteQuery(
-    getApiClientRq().campaign.list.infiniteOptions({
+    getApiClientRq().campaigns.list.infiniteOptions({
       input: (pageParam) => ({
         organizationId: activeProject?.organizationId ?? "",
         projectId: activeProject?.id ?? "",
@@ -192,7 +181,7 @@ function PageComponent() {
   );
 }
 
-type Campaign = RouterOutputs["campaign"]["list"]["data"][0];
+type Campaign = RouterOutputs["campaigns"]["list"]["data"][0];
 function StatusBadge({ status }: { status: Campaign["status"] }) {
   const variants: Record<
     Campaign["status"],
@@ -322,7 +311,7 @@ function NewCampaignButton({
 }) {
   const navigate = useNavigate();
   const { mutate: createCampaign, isPending } = useMutation(
-    getApiClientRq().campaign.create.mutationOptions({
+    getApiClientRq().campaigns.create.mutationOptions({
       onSuccess: (data) => {
         toast.success("Campaign created");
         void navigate({

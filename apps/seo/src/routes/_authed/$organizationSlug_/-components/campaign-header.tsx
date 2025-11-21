@@ -44,14 +44,14 @@ export function CampaignHeader({
   }, [initialTitle]);
 
   const { mutateAsync: updateTitle } = useMutation(
-    getApiClientRq().campaign.update.mutationOptions({
+    getApiClientRq().campaigns.update.mutationOptions({
       onSuccess: async (updated) => {
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: getApiClientRq().campaign.get.key(),
+            queryKey: getApiClientRq().campaigns.get.key(),
           }),
           queryClient.invalidateQueries({
-            queryKey: getApiClientRq().campaign.list.key({ type: "infinite" }),
+            queryKey: getApiClientRq().campaigns.list.key({ type: "infinite" }),
           }),
         ]);
         setTitle(updated.title);

@@ -32,6 +32,7 @@ export const Route = createFileRoute("/login")({
         throw redirect({ to: deps.next });
       }
       throw redirect({
+        from: "/login",
         to: "/$organizationSlug",
         params: {
           organizationSlug: "organization",

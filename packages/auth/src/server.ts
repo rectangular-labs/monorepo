@@ -69,7 +69,7 @@ export function initAuthHandler({
     baseURL,
     secret: encryptionKey,
     account: {
-      encryptOAuthTokens: true,
+      encryptOAuthTokens: false,
       accountLinking: {
         enabled: true,
         allowDifferentEmails: true,

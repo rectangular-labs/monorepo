@@ -19,10 +19,10 @@ import { protectedBase } from "../context";
 function getPermissionLevel(
   permissionLevel: GscProperty["permissionLevel"],
 ): typeof seoGscPermissionLevelSchema.infer {
-  if (permissionLevel === "siteOwner" || permissionLevel === "siteFull") {
+  if (permissionLevel === "siteOwner" || permissionLevel === "siteFullUser") {
     return "write";
   }
-  if (permissionLevel === "siteRestricted") {
+  if (permissionLevel === "siteRestrictedUser") {
     return "read-only";
   }
   return "needs-verification";
@@ -101,12 +101,15 @@ const listProperties = protectedBase
         if (!account) {
           return null;
         }
-        return result.value.map((property) => ({
-          accountId: account.id,
-          domain: property.domain,
-          type: property.type,
-          permissionLevel: getPermissionLevel(property.permissionLevel),
-        }));
+        return result.value.map((property) => {
+          console.log("property.permissionLevel", property.permissionLevel);
+          return {
+            accountId: account.id,
+            domain: property.domain,
+            type: property.type,
+            permissionLevel: getPermissionLevel(property.permissionLevel),
+          };
+        });
       })
       .filter((result) => result !== null)
       .flat();

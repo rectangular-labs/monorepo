@@ -1,5 +1,5 @@
 import { err, ok, safe } from "@rectangular-labs/result";
-import { type DB, schema } from "../../client";
+import { and, type DB, eq, schema } from "../../client";
 import {
   CAMPAIGN_DEFAULT_STATUS,
   CAMPAIGN_DEFAULT_TITLE,
@@ -69,5 +69,27 @@ export async function getContentCampaignById({
           eq(table.organizationId, organizationId),
         ),
     }),
+  );
+}
+
+export async function updateContentCampaign({
+  db,
+  values,
+}: {
+  db: DB;
+  values: typeof schema.seoContentCampaignUpdateSchema.infer;
+}) {
+  return await safe(() =>
+    db
+      .update(schema.seoContentCampaign)
+      .set(values)
+      .where(
+        and(
+          eq(schema.seoContentCampaign.id, values.id),
+          eq(schema.seoContentCampaign.projectId, values.projectId),
+          eq(schema.seoContentCampaign.organizationId, values.organizationId),
+        ),
+      )
+      .returning(),
   );
 }

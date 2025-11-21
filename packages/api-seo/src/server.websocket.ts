@@ -19,6 +19,7 @@ interface SessionAttachment {
   campaignId: string;
   organizationId: string;
   url: string;
+  campaignTitle: string;
 }
 
 // Durable Object
@@ -97,7 +98,7 @@ export class WebSocketServer extends DurableObject {
     }
 
     const [{ campaign }, authDetails] = await Promise.all([
-      serverHandler.campaign
+      serverHandler.campaigns
         .get({
           id: campaignId,
           projectId: projectId,
@@ -135,6 +136,7 @@ export class WebSocketServer extends DurableObject {
       campaignId: campaign.id,
       organizationId: campaign.organizationId,
       url: url.toString(),
+      campaignTitle: campaign.title,
     };
     // Attach the session ID to the WebSocket connection and serialize it.
     // This is necessary to restore the state of the connection when the Durable Object wakes up.
@@ -174,6 +176,7 @@ export class WebSocketServer extends DurableObject {
       sessionId: session.sessionId,
       projectId: session.projectId,
       campaignId: session.campaignId,
+      campaignTitle: session.campaignTitle,
       organizationId: session.organizationId,
       roomDocumentMap: this.roomDocuments,
       userFragments,

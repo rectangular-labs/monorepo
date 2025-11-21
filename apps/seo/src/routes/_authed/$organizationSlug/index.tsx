@@ -164,7 +164,7 @@ function ProjectCard({
           <div className="flex items-center justify-between">
             <div className="flex flex-1 items-center gap-3">
               {/* Favicon */}
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 {faviconUrl ? (
                   <img
                     alt={`${project.name} favicon`}
@@ -192,7 +192,7 @@ function ProjectCard({
                 </p>
               </div>
             </div>
-            <div className="flex-shrink-0 text-right text-muted-foreground text-sm">
+            <div className="shrink-0 text-right text-muted-foreground text-sm">
               <p>Updated {formatDate(project.updatedAt)}</p>
               <p>Created {formatDate(project.createdAt)}</p>
             </div>
@@ -217,7 +217,7 @@ function ProjectCard({
       <CardHeader>
         <div className="flex items-center gap-3">
           {/* Favicon */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {faviconUrl ? (
               <img
                 alt={`${project.name} favicon`}
@@ -267,7 +267,7 @@ function ProjectSkeletons({ viewMode }: { viewMode: "grid" | "list" }) {
               <div className="flex items-center justify-between">
                 <div className="flex flex-1 items-center gap-3">
                   {/* Favicon skeleton */}
-                  <Skeleton className="h-8 w-8 flex-shrink-0 rounded-sm" />
+                  <Skeleton className="h-8 w-8 shrink-0 rounded-sm" />
 
                   {/* Title and URL skeleton */}
                   <div className="min-w-0 flex-1 space-y-1">
@@ -275,7 +275,7 @@ function ProjectSkeletons({ viewMode }: { viewMode: "grid" | "list" }) {
                     <Skeleton className="h-4 w-48" />
                   </div>
                 </div>
-                <div className="flex-shrink-0 space-y-1 text-right">
+                <div className="shrink-0 space-y-1 text-right">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-24" />
                 </div>
@@ -294,7 +294,7 @@ function ProjectSkeletons({ viewMode }: { viewMode: "grid" | "list" }) {
           <CardHeader>
             <div className="flex items-center gap-3">
               {/* Favicon skeleton */}
-              <Skeleton className="h-8 w-8 flex-shrink-0 rounded-sm" />
+              <Skeleton className="h-8 w-8 shrink-0 rounded-sm" />
 
               {/* Title and URL skeleton */}
               <div className="min-w-0 flex-1 space-y-1">

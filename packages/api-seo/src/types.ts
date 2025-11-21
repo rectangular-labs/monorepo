@@ -77,6 +77,7 @@ export interface WebSocketContext extends InitialContext {
   sessionId: string;
   projectId: string;
   campaignId: string;
+  campaignTitle: string;
   organizationId: string;
   roomDocumentMap: Map<string, RoomDocument>;
   userFragments: Map<HexString, UserFragment>;
