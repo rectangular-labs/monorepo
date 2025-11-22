@@ -472,6 +472,11 @@ export function ChatPanel({
                       </Message>
                     );
                   }
+                  case "tool-ls":
+                  case "tool-cat":
+                  case "tool-rm":
+                  case "tool-mv":
+                  case "tool-write_file":
                   case "tool-get_serp_for_keyword":
                   case "tool-get_keywords_overview":
                   case "tool-get_keyword_suggestions":

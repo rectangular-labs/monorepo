@@ -21,7 +21,7 @@ const active = protectedBase
   });
 
 const setActive = protectedBase
-  .route({ method: "POST", path: "/set-default" })
+  .route({ method: "POST", path: "/set-active" })
   .input(
     type({ organizationId: "string|null", organizationSlug: "string|null" }),
   )
@@ -37,7 +37,7 @@ const setActive = protectedBase
         returnHeaders: true,
       })
       .catch((e) => {
-        if (e.statusCode === 400) {
+        if (e.statusCode >= 400 && e.statusCode < 500) {
           return null;
         }
         throw e;

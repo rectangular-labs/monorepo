@@ -7,10 +7,16 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+# Required for OIDC: https://docs.npmjs.com/trusted-publishers
+permissions:
+  id-token: write
+
 jobs:
   release:
     name: Create PR or publish to NPM
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - uses: actions/checkout@v5
 

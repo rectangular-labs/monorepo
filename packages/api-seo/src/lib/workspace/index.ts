@@ -1,12 +1,14 @@
 import { getContentCampaignById } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import { LoroServerAdaptor } from "loro-adaptors/loro";
+import { LoroDoc } from "loro-crdt";
 import { CrdtType } from "loro-protocol";
 import { getWebsocketContext } from "../../context";
 import type { RoomDocument } from "../../types";
 import { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
+import { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
 
-function getRoomKey(
+export function getRoomKey(
   roomId: typeof WORKSPACE_CONTENT_ROOM_ID,
   crdtType: CrdtType,
 ): string {
@@ -59,23 +61,45 @@ export async function getOrCreateRoomDocument(
     return err(new Error(`Campaign (${context.campaignId}) not found`));
   }
 
-  if (roomKey === getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro)) {
-    // TODO: handle the case where we haven't yet forked the workspace blob from main.
-    const blob = await context.workspaceBucket.getSnapshot(
-      campaign.workspaceBlobUri,
-    );
-    if (!blob) {
-      return err(
-        new Error(`Workspace blob (${campaign.workspaceBlobUri}) not found`),
+  switch (roomKey) {
+    case getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro): {
+      const campaignWorkspaceBlobUri = getWorkspaceBlobUri({
+        orgId: context.organizationId,
+        projectId: context.projectId,
+        campaignId: context.campaignId,
+      });
+      const blob = await context.workspaceBucket.getSnapshot(
+        campaign.workspaceBlobUri,
       );
+      if (!blob) {
+        return err(
+          new Error(`Workspace blob (${campaign.workspaceBlobUri}) not found`),
+        );
+      }
+      if (campaign.workspaceBlobUri !== campaignWorkspaceBlobUri) {
+        const doc = new LoroDoc();
+        doc.import(blob);
+        const forkedDoc = doc.fork();
+        const forkedBuffer = forkedDoc.export({
+          mode: "shallow-snapshot",
+          frontiers: doc.oplogFrontiers(),
+        });
+        await context.workspaceBucket.setSnapshot(
+          campaignWorkspaceBlobUri,
+          forkedBuffer,
+        );
+        newRoomDoc.data = forkedBuffer;
+        newRoomDoc.lastSaved = Date.now();
+      } else {
+        newRoomDoc.data = blob;
+      }
+      context.roomDocumentMap.set(roomKey, newRoomDoc);
+      return ok(newRoomDoc);
     }
-    newRoomDoc.data = blob;
-  } else {
-    return err(new Error(`Unsupported room key: ${roomKey}`));
+    default: {
+      return err(new Error(`Unsupported room key: ${roomKey}`));
+    }
   }
-
-  context.roomDocumentMap.set(roomKey, newRoomDoc);
-  return ok(newRoomDoc);
 }
 export {
   broadcastLoroToRoom,
