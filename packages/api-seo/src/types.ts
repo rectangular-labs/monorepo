@@ -11,6 +11,7 @@ import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
 import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
 import type { createDataforseoTool } from "./lib/ai/dataforseo-tool";
+import type { createFileTools } from "./lib/ai/file-tool";
 import type { createGscTool } from "./lib/ai/google-search-console-tool";
 import type { createWorkspaceBucket } from "./lib/bucket";
 import type { router, websocketRouter } from "./routes";
@@ -24,7 +25,9 @@ export type WebsocketRouter = UnlaziedRouter<typeof websocketRouter>;
 export type WebsocketRouterClient = ORPCRouterClient<WebsocketRouter>;
 
 type AiTools = InferUITools<
-  ReturnType<typeof createDataforseoTool> & ReturnType<typeof createGscTool>
+  ReturnType<typeof createDataforseoTool> &
+    ReturnType<typeof createGscTool> &
+    ReturnType<typeof createFileTools>
 >;
 export type SeoChatMessage = UIMessage<
   typeof contentCampaignMessageMetadataSchema.infer,
