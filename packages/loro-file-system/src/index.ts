@@ -1,14 +1,14 @@
-import type { Container, LoroTree, LoroTreeNode } from "loro-crdt";
+import type { Container, LoroText, LoroTree, LoroTreeNode } from "loro-crdt";
 
-export type BaseFileSystem =
-  | {
-      type: "dir";
-      name: "__root__" | (string & {});
-    }
-  | {
-      type: "file";
-      name: string;
-    };
+export type BaseDirectory = {
+  type: "dir";
+  name: "__root__" | (string & {});
+};
+export type BaseFile = {
+  type: "file";
+  name: string;
+};
+export type BaseFileSystem = BaseDirectory | BaseFile;
 
 /**
  * Normalizes a given path
@@ -157,10 +157,7 @@ export function traverseNode<
  */
 export function defaultNodeFormatter<
   T extends Record<string, unknown> &
-    (
-      | (Extract<BaseFileSystem, { type: "file" }> & { fileExtension: string })
-      | Extract<BaseFileSystem, { type: "dir" }>
-    ),
+    ((BaseFile & { fileExtension: string }) | BaseDirectory),
 >(node: LoroTreeNode<T>, path: string): string {
   if (node.data.get("type") === "dir") {
     const children = node.children() ?? [];
@@ -237,16 +234,16 @@ export function catOutput<T extends Record<string, unknown> & BaseFileSystem>({
 }: {
   tree: LoroTree<T>;
   path: string;
-  readContent: (node: LoroTreeNode<T>) => string;
+  readContent: (node: LoroTreeNode<Extract<T, { type: "file" }>>) => string;
 }): string {
   const node = resolvePath({ tree, path });
   if (!node) {
     return `Path ${path} not found`;
   }
   if (node.data.get("type") !== "file") {
-    return `Path ${path} is not a file`;
+    return `Cannot read contents from ${path} because it is not a file`;
   }
-  return readContent(node);
+  return readContent(node as LoroTreeNode<Extract<T, { type: "file" }>>);
 }
 
 /**
@@ -332,9 +329,95 @@ export function moveNode<T extends Record<string, unknown> & BaseFileSystem>({
     return { success: false, message: `Path ${toPath} not found` };
   }
   if (toNode.data.get("type") !== "dir") {
-    return { success: false, message: `Path ${toPath} is not a directory` };
+    return {
+      success: false,
+      message: `Cannot move ${fromPath} to ${toPath} because ${toPath} is not a directory`,
+    };
   }
 
   fromNode.move(toNode);
+  return { success: true };
+}
+
+/**
+ * Creates the nodes along the path and returns the final node
+ * @param args.tree - The tree to create the nodes in
+ * @param args.path - The path to create the nodes along
+ * @param args.finalNodeType - The type of the final node
+ * @returns {LoroTreeNode<T>} The final node
+ */
+function createNodesForPath<
+  T extends Record<string, unknown> & BaseFileSystem,
+>({
+  tree,
+  path,
+  finalNodeType,
+}: {
+  tree: LoroTree<T>;
+  path: string;
+  finalNodeType: BaseFileSystem["type"];
+}): LoroTreeNode<T> {
+  const segments = splitPath(path);
+  const rootNode = resolvePath({ tree, path: "/" });
+  if (!rootNode) {
+    throw new Error(`BAD_STATE: No root node found`);
+  }
+  let currentNode = rootNode;
+  let currentPath = "";
+  for (const segment of segments) {
+    currentPath += `/${segment}`;
+    const existingNode = resolvePath({ tree, path: currentPath });
+    if (!existingNode) {
+      currentNode = currentNode.createNode();
+      currentNode.data.set("name", segment);
+      currentNode.data.set("type", "dir" as Exclude<T["type"], Container>);
+    } else {
+      currentNode = existingNode;
+    }
+  }
+  if (finalNodeType === "file") {
+    currentNode.data.set("type", "file" as Exclude<T["type"], Container>);
+  }
+
+  return currentNode;
+}
+
+export function writeToFile<
+  T extends Record<string, unknown> & BaseFileSystem,
+>({
+  tree,
+  path,
+  content,
+  createIfMissing = false,
+  contentMapKey = "content",
+}: {
+  tree: LoroTree<T>;
+  path: string;
+  content: string;
+  createIfMissing?: boolean;
+  contentMapKey?: string;
+}): { success: true } | { success: false; message: string } {
+  const node = resolvePath({ tree, path });
+  if (!node) {
+    if (createIfMissing) {
+      createNodesForPath({ tree, path, finalNodeType: "file" });
+      return writeToFile({
+        tree,
+        path,
+        content,
+        createIfMissing: false,
+        contentMapKey,
+      });
+    }
+    return { success: false, message: `Path ${path} not found` };
+  }
+  if (node.data.get("type") !== "file") {
+    return {
+      success: false,
+      message: `Cannot write to ${path} because it is not a file`,
+    };
+  }
+  const textContainer = node.data.get(contentMapKey) as LoroText;
+  textContainer.updateByLine(content);
   return { success: true };
 }
