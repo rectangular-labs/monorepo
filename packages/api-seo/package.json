@@ -56,6 +56,7 @@
     "@rectangular-labs/dataforseo": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/google-apis": "workspace:*",
+    "@rectangular-labs/loro-file-system": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/task": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",

@@ -8,6 +8,7 @@ import {
   type UIMessage,
 } from "ai";
 import { createDataforseoTool } from "./dataforseo-tool";
+import { createFileTools } from "./file-tool";
 import { createGscTool } from "./google-search-console-tool";
 
 export function createSeoAgent({
@@ -58,7 +59,10 @@ What to deliver:
 - Highlighting opportunities:
   - Suggest guerrilla marketing and distribution tactics (e.g., targeted Reddit threads, X posts, community forums, PR/backlinks, features) with concrete next steps and candidate targets.
   - Recommend internal linking, schema, and technical quick wins where relevant.
-  
+- Navigating the Content Management System:
+  - We have a content management system to manage all the content that we need to write and update.
+  - We have tools such as ls, cat, rm, mv, write_file, etc. to read and write to the content management system.
+
 Output requirements:
 - Be concise but actionable; use bullet points and short sections.
 - When more data is needed, ask clearly for what you need.
@@ -83,6 +87,7 @@ Output requirements:
         siteType: gscProperty?.type ?? null,
       }),
       ...createDataforseoTool(project),
+      ...createFileTools(),
       // Minimal text edit tool stub to allow the model to propose edits without filesystem side-effects
       //   str_replace_based_edit_tool: anthropic.tools.textEditor_20250728({
       //     maxCharacters: 8000,
