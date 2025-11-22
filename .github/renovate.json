@@ -7,12 +7,12 @@
       "matchPackageNames": ["/^@rectangular-labs//", "/^unstorage/"]
     },
     {
-      "description": "Schedule all non-major dependencies updates on Tuesday Between 12noon and 5pm",
+      "description": "Schedule all non-major dependencies updates on Tuesday Between 8am and 10am",
       "matchPackagePatterns": ["*"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
-      "schedule": ["* 12-17 * * 2"],
+      "schedule": ["* 8-10 * * 2"],
       "timezone": "America/New_York"
     }
   ],
