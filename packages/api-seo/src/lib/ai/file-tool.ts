@@ -19,6 +19,8 @@ type FsNodePayload =
   | {
       type: "dir";
       name: string;
+      fileExtension?: string;
+      content?: LoroText;
     }
   | {
       type: "file";
@@ -151,7 +153,7 @@ export function createFileTools() {
             tree,
             path,
             readContent: (node) => {
-              return node.data.get("content").toString();
+              return node.data.get("content")?.toString() ?? "";
             },
           }),
         shouldPersist: false,
