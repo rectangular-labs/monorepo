@@ -31,16 +31,43 @@ type LoroDocMapping = {
   fs: FsRoot;
 };
 
+async function withLoroTree<TResult>({
+  handler,
+  shouldPersist,
+}: {
+  handler: (args: { tree: FsRoot }) => TResult | Promise<TResult>;
+  shouldPersist: boolean | ((result: TResult) => boolean);
+}): Promise<TResult> {
+  const roomResult = await getOrCreateRoomDocument(
+    WORKSPACE_CONTENT_ROOM_ID,
+    CrdtType.Loro,
+  );
+  if (!roomResult.ok) {
+    throw roomResult.error;
+  }
+  const roomDoc = roomResult.value;
+  const loroDoc = loadDocFromRoom(roomDoc.data);
+  const tree = getFsRoot(loroDoc);
+
+  const result = await handler({ tree });
+
+  const persist =
+    typeof shouldPersist === "boolean" ? shouldPersist : shouldPersist(result);
+
+  if (persist) {
+    roomDoc.data = loroDoc.export({ mode: "snapshot" });
+    roomDoc.dirty = true;
+  }
+
+  return result;
+}
+
 function loadDocFromRoom(data: Uint8Array): LoroDoc<LoroDocMapping> {
   const doc = new LoroDoc<LoroDocMapping>();
   if (data.byteLength > 0) {
     doc.import(data);
   }
   return doc;
-}
-
-function exportDocToRoom(doc: LoroDoc<LoroDocMapping>): Uint8Array {
-  return doc.export({ mode: "snapshot" });
 }
 
 function getFsRoot(doc: LoroDoc<LoroDocMapping>) {
@@ -103,18 +130,11 @@ export function createFileTools() {
       lsInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ path }) {
-      const roomResult = await getOrCreateRoomDocument(
-        WORKSPACE_CONTENT_ROOM_ID,
-        CrdtType.Loro,
-      );
-      if (!roomResult.ok) {
-        throw roomResult.error;
-      }
-      const roomDoc = roomResult.value;
-      const loroDoc = loadDocFromRoom(roomDoc.data);
-      const tree = getFsRoot(loroDoc);
-
-      return lsOutput({ tree, path, formatNode: defaultNodeFormatter });
+      return await withLoroTree({
+        handler: ({ tree }) =>
+          lsOutput({ tree, path, formatNode: defaultNodeFormatter }),
+        shouldPersist: false,
+      });
     },
   });
 
@@ -125,23 +145,16 @@ export function createFileTools() {
       catInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ path }) {
-      const roomResult = await getOrCreateRoomDocument(
-        WORKSPACE_CONTENT_ROOM_ID,
-        CrdtType.Loro,
-      );
-      if (!roomResult.ok) {
-        throw roomResult.error;
-      }
-      const roomDoc = roomResult.value;
-      const loroDoc = loadDocFromRoom(roomDoc.data);
-      const tree = getFsRoot(loroDoc);
-
-      return catOutput({
-        tree,
-        path,
-        readContent: (node) => {
-          return node.data.get("content").toString();
-        },
+      return await withLoroTree({
+        handler: ({ tree }) =>
+          catOutput({
+            tree,
+            path,
+            readContent: (node) => {
+              return node.data.get("content").toString();
+            },
+          }),
+        shouldPersist: false,
       });
     },
   });
@@ -153,18 +166,10 @@ export function createFileTools() {
       rmInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ path, recursive }) {
-      const roomResult = await getOrCreateRoomDocument(
-        WORKSPACE_CONTENT_ROOM_ID,
-        CrdtType.Loro,
-      );
-      if (!roomResult.ok) {
-        throw roomResult.error;
-      }
-      const roomDoc = roomResult.value;
-      const loroDoc = loadDocFromRoom(roomDoc.data);
-      const tree = getFsRoot(loroDoc);
-
-      return removeNodeAtPath({ tree, path, recursive });
+      return await withLoroTree({
+        handler: ({ tree }) => removeNodeAtPath({ tree, path, recursive }),
+        shouldPersist: (result) => result.success === true,
+      });
     },
   });
 
@@ -175,18 +180,10 @@ export function createFileTools() {
       mvInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ fromPath, toPath }) {
-      const roomResult = await getOrCreateRoomDocument(
-        WORKSPACE_CONTENT_ROOM_ID,
-        CrdtType.Loro,
-      );
-      if (!roomResult.ok) {
-        throw roomResult.error;
-      }
-      const roomDoc = roomResult.value;
-      const loroDoc = loadDocFromRoom(roomDoc.data);
-      const tree = getFsRoot(loroDoc);
-
-      return moveNode({ tree, fromPath, toPath });
+      return await withLoroTree({
+        handler: ({ tree }) => moveNode({ tree, fromPath, toPath }),
+        shouldPersist: (result) => result.success === true,
+      });
     },
   });
 
@@ -197,25 +194,11 @@ export function createFileTools() {
       writeFileInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ path, content, createIfMissing }) {
-      const roomResult = await getOrCreateRoomDocument(
-        WORKSPACE_CONTENT_ROOM_ID,
-        CrdtType.Loro,
-      );
-      if (!roomResult.ok) {
-        throw roomResult.error;
-      }
-      const roomDoc = roomResult.value;
-      const loroDoc = loadDocFromRoom(roomDoc.data);
-      const tree = getFsRoot(loroDoc);
-
-      writeToFile({ tree, path, content, createIfMissing });
-
-      roomDoc.data = exportDocToRoom(loroDoc);
-      roomDoc.dirty = true;
-
-      return {
-        success: true,
-      };
+      return await withLoroTree({
+        handler: ({ tree }) =>
+          writeToFile({ tree, path, content, createIfMissing }),
+        shouldPersist: (result) => result.success === true,
+      });
     },
   });
 
