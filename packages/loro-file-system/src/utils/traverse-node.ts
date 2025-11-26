@@ -32,8 +32,3 @@ export function traverseNode<
     callback(node);
   }
 }
-
-
-
-
-
