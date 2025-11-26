@@ -24,7 +24,7 @@ jobs:
 
       - name: Setup
         uses: ./tooling/github/setup
-        
+
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
@@ -44,3 +44,16 @@ jobs:
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
         run: bun typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Test
+        env:
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
+        run: bun test

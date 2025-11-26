@@ -1,0 +1,7 @@
+{
+  "title": "LoroFileSystem",
+  "description": "Package docs for @rectangular-labs/loro-file-system.",
+  "root": true,
+  "icon": "FileText",
+  "defaultOpen": true
+}

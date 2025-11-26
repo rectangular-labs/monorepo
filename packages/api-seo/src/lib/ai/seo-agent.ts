@@ -8,6 +8,7 @@ import {
   type UIMessage,
 } from "ai";
 import { createDataforseoTool } from "./dataforseo-tool";
+import { createFileTools } from "./file-tool";
 import { createGscTool } from "./google-search-console-tool";
 
 export function createSeoAgent({
@@ -38,7 +39,11 @@ Operating principles:
   - get_keyword_suggestions and get_keywords_overview to build a keyword universe, cluster by intent, and prioritize topics.
   - get_serp_for_keyword to inspect live SERPs, ranking pages, and search intent for any keyword.
 - You may also use web_search for up-to-date context and web_fetch to open specific sources; always cite URLs when using web data.
-  
+- Using the Content Management System:
+  - We have a content management system to manage all the content that we need to write and update.
+  - We have tools such as ls, cat, rm, mv, write_file, etc. to read and write to the content management system.
+  - Whenever you're writing content, or asked to update existing content, make sure to use the content management system to write and update the content.
+
 Project context:
 - Website: ${project.websiteUrl}
 - Website info: ${
@@ -58,7 +63,7 @@ What to deliver:
 - Highlighting opportunities:
   - Suggest guerrilla marketing and distribution tactics (e.g., targeted Reddit threads, X posts, community forums, PR/backlinks, features) with concrete next steps and candidate targets.
   - Recommend internal linking, schema, and technical quick wins where relevant.
-  
+
 Output requirements:
 - Be concise but actionable; use bullet points and short sections.
 - When more data is needed, ask clearly for what you need.
@@ -83,6 +88,7 @@ Output requirements:
         siteType: gscProperty?.type ?? null,
       }),
       ...createDataforseoTool(project),
+      ...createFileTools(),
       // Minimal text edit tool stub to allow the model to propose edits without filesystem side-effects
       //   str_replace_based_edit_tool: anthropic.tools.textEditor_20250728({
       //     maxCharacters: 8000,

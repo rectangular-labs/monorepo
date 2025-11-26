@@ -55,7 +55,7 @@
     "vite": "7.2.4",
     "vite-plugin-mkcert": "^1.17.9",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.13",
     "web-vitals": "^5.1.0",
     "wrangler": "^4.50.0"
   }

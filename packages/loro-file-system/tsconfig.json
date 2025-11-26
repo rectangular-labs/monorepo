@@ -1,0 +1,12 @@
+{
+  "extends": "@rectangular-labs/typescript/tsconfig.compiled-package.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@rectangular-labs/loro-file-system/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@rectangular-labs/loro-file-system",
+  "version": "0.0.1",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "A library for working with the loro CRDT tree as a filesystem.",
+  "keywords": [
+    "rectangular-labs",
+    "loro",
+    "filesystem",
+    "virtual workspace",
+    "crdt"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElasticBottle/rectangular-labs.git",
+    "directory": "packages/loro-file-system"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/ElasticBottle/rectangular-labs/tree/main/packages/loro-file-system#readme",
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup",
+    "clean": "git clean -xdf .turbo node_modules dist .cache",
+    "format": "bun x @biomejs/biome format . --write",
+    "lint": "bun x @biomejs/biome lint . --write",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@rectangular-labs/typescript": "workspace:*",
+    "loro-crdt": "^1.10.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "loro-crdt": "^1.10.0"
+  }
+}

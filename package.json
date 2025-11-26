@@ -29,6 +29,7 @@
     "env:get": "bun x dotenvx get",
     "env:set": "bun x dotenvx set",
     "env:encrypt": "bun x dotenvx encrypt",
+    "test": "vitest",
     "ui:add": "cd ./packages/ui && bun run ui-add && cd ../..",
     "new:package": "turbo gen package",
     "copy:package": "turbo gen workspace --copy",
@@ -48,7 +49,8 @@
     "knip": "^5.70.1",
     "tsx": "^4.20.6",
     "turbo": "^2.6.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.13"
   },
   "pnpm": {
     "overrides": {
