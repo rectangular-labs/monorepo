@@ -13,10 +13,16 @@ import {
   stepCountIs,
   streamText,
 } from "ai";
+import { CrdtType } from "loro-protocol";
 import { websocketBase } from "../context";
 import { createSeoAgent } from "../lib/ai/seo-agent";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { getProjectByIdentifier } from "../lib/database/project";
+import {
+  getRoomKey,
+  getWorkspaceBlobUri,
+  WORKSPACE_CONTENT_ROOM_ID,
+} from "../lib/workspace";
 import { broadcastMessageToRoom } from "../lib/workspace/broadcast-to-room";
 import { sendWebsocketMessage } from "../lib/workspace/send-websocket-message";
 import type { SeoChatMessage } from "../types";
@@ -164,6 +170,21 @@ const room = websocketBase
           },
         });
         console.log("campaign.room ai message", responseMessage);
+
+        const roomDoc = context.roomDocumentMap.get(
+          getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro),
+        );
+        if (roomDoc?.dirty && roomDoc.descriptor.shouldPersist) {
+          await context.workspaceBucket.setSnapshot(
+            getWorkspaceBlobUri({
+              orgId: context.organizationId,
+              projectId: context.projectId,
+              campaignId: context.campaignId,
+            }),
+            roomDoc.data,
+          );
+          roomDoc.dirty = false;
+        }
       },
     })) {
       for (const ws of context.allWebSockets) {
