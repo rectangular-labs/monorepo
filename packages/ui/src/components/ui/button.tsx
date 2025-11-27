@@ -54,7 +54,11 @@ function Button({
 
   const finalChildren = isLoading ? (
     <div className="flex w-full items-center justify-center gap-2">
-      <Loader2 className="animate-spin" />
+      <Loader2
+        aria-label="Loading"
+        className="size-4 animate-spin"
+        role="status"
+      />
       {children}
     </div>
   ) : (
