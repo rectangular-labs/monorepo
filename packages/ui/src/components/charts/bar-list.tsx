@@ -15,6 +15,7 @@ interface BarListProps<T = unknown>
   valueFormatter?: (value: number, item: Bar<T>) => string;
   onClick?: (payload: Bar<T>) => void;
   sortOrder?: "ascending" | "descending" | "none";
+  maxValue?: number;
 }
 
 const focusRingClassNames =
@@ -26,6 +27,7 @@ function BarList<T>({
   onClick,
   sortOrder = "descending",
   className,
+  maxValue,
   ...props
 }: BarListProps<T>) {
   const Component = onClick ? "button" : "div";
@@ -40,11 +42,12 @@ function BarList<T>({
     });
   }, [data, sortOrder]);
   const widths = React.useMemo(() => {
-    const maxValue = Math.max(...sortedData.map((item) => item.value), 0);
+    const maxValueToUse =
+      maxValue ?? Math.max(...sortedData.map((item) => item.value), 0);
     return sortedData.map((item) =>
-      item.value === 0 ? 0 : Math.max((item.value / maxValue) * 100, 2),
+      item.value === 0 ? 0 : Math.max((item.value / maxValueToUse) * 100, 2),
     );
-  }, [sortedData]);
+  }, [sortedData, maxValue]);
 
   return (
     <div className={cn("flex justify-between space-x-6", className)} {...props}>
