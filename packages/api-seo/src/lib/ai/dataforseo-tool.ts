@@ -5,12 +5,13 @@ import {
   fetchRankedPagesForSite,
   fetchSerp,
 } from "@rectangular-labs/dataforseo";
-import { client } from "@rectangular-labs/dataforseo/client";
 import type { schema } from "@rectangular-labs/db";
-import { COUNTRY_CODE_MAP } from "@rectangular-labs/db/parsers";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { apiEnv } from "../../env";
+import {
+  configureDataForSeoClient,
+  getLocationAndLanguage,
+} from "../dataforseo/utils";
 
 const hostnameSchema = type("string").describe(
   "The domain name of the target website. The domain should be specified without 'https://' and 'www.'. Example: 'example.xyz', 'fluidposts.ai', 'google.com'",
@@ -101,23 +102,10 @@ const serpInputSchema = type({
     .default("macos"),
 });
 
-function getLocationAndLanguage(
-  project: typeof schema.seoProject.$inferSelect,
-) {
-  const locationName =
-    COUNTRY_CODE_MAP[project.websiteInfo?.targetCountryCode ?? "US"] ??
-    "United States";
-  const languageCode = project.websiteInfo?.languageCode ?? "en";
-  return { locationName, languageCode };
-}
-
 export function createDataforseoTool(
   project: typeof schema.seoProject.$inferSelect,
 ) {
-  client.setConfig({
-    auth: () =>
-      `${apiEnv().DATAFORSEO_USERNAME}:${apiEnv().DATAFORSEO_PASSWORD}`,
-  });
+  configureDataForSeoClient();
   const { locationName, languageCode } = getLocationAndLanguage(project);
 
   const getRankedKeywordsForSite = tool({

@@ -1,4 +1,4 @@
-import { err, safe } from "@rectangular-labs/result";
+import { ok, safe } from "@rectangular-labs/result";
 import { and, eq } from "drizzle-orm";
 import { type DB, schema } from "../../client";
 import type { seoProjectUpdateSchema } from "../../schema/seo";
@@ -24,10 +24,30 @@ export async function updateSeoProject(
   if (!result.ok) {
     return result;
   }
-  if (!result.value) {
-    return err(new Error("Failed to update project"));
+
+  return ok(result.value[0]);
+}
+
+export async function deleteSeoProject(
+  db: DB,
+  id: string,
+  organizationId: string,
+) {
+  const result = await safe(() =>
+    db
+      .delete(schema.seoProject)
+      .where(
+        and(
+          eq(schema.seoProject.id, id),
+          eq(schema.seoProject.organizationId, organizationId),
+        ),
+      )
+      .returning(),
+  );
+  if (!result.ok) {
+    return result;
   }
-  return result;
+  return ok(result.value[0]);
 }
 
 export function getSeoProjectById(db: DB, id: string) {

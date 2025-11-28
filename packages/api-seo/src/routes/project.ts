@@ -1,6 +1,9 @@
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
-import { updateSeoProject } from "@rectangular-labs/db/operations";
+import {
+  deleteSeoProject,
+  updateSeoProject,
+} from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { LoroDoc } from "loro-crdt";
 import { withOrganizationIdBase } from "../context";
@@ -8,6 +11,7 @@ import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import { getWorkspaceBlobUri } from "../lib/workspace";
+import { metrics } from "./project.metrics";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -110,7 +114,7 @@ const setUpWorkspace = withOrganizationIdBase
       projectId: input.projectId,
       campaignId: undefined,
     });
-    await Promise.all([
+    const [_, updatedProject] = await Promise.all([
       context.workspaceBucket.setSnapshot(
         workspaceBlobUri,
         workspaceDoc.export({ mode: "snapshot" }),
@@ -121,6 +125,16 @@ const setUpWorkspace = withOrganizationIdBase
         workspaceBlobUri,
       }),
     ]);
+    if (!updatedProject.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: updatedProject.error.message,
+      });
+    }
+    if (!updatedProject.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No project found to update.",
+      });
+    }
 
     return { workspaceBlobUri } as const;
   });
@@ -169,22 +183,18 @@ const update = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
-    const [row] = await context.db
-      .update(schema.seoProject)
-      .set(input)
-      .where(
-        and(
-          eq(schema.seoProject.id, input.id),
-          eq(schema.seoProject.organizationId, context.organization.id),
-        ),
-      )
-      .returning();
-    if (!row) {
+    const updateProjectResult = await updateSeoProject(context.db, input);
+    if (!updateProjectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: updateProjectResult.error.message,
+      });
+    }
+    if (!updateProjectResult.value) {
       throw new ORPCError("NOT_FOUND", {
         message: "No project found to update.",
       });
     }
-    return row;
+    return updateProjectResult.value;
   });
 
 const remove = withOrganizationIdBase
@@ -193,16 +203,17 @@ const remove = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(type({ success: "true" }))
   .handler(async ({ context, input }) => {
-    const [row] = await context.db
-      .delete(schema.seoProject)
-      .where(
-        and(
-          eq(schema.seoProject.id, input.id),
-          eq(schema.seoProject.organizationId, context.organization.id),
-        ),
-      )
-      .returning();
-    if (!row) {
+    const deleteProjectResult = await deleteSeoProject(
+      context.db,
+      input.id,
+      context.organization.id,
+    );
+    if (!deleteProjectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: deleteProjectResult.error.message,
+      });
+    }
+    if (!deleteProjectResult.value) {
       throw new ORPCError("NOT_FOUND", {
         message: "No project found to delete.",
       });
@@ -212,4 +223,13 @@ const remove = withOrganizationIdBase
 
 export default withOrganizationIdBase
   .prefix("/organization/{organizationIdentifier}/project")
-  .router({ list, create, update, remove, checkName, get, setUpWorkspace });
+  .router({
+    list,
+    create,
+    update,
+    remove,
+    checkName,
+    get,
+    setUpWorkspace,
+    metrics,
+  });
