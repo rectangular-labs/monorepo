@@ -9,11 +9,11 @@ type Bar<T> = T & {
   color?: `var(--chart-${1 | 2 | 3 | 4 | 5})` | (string & {});
 };
 
-interface BarListProps<T = unknown> extends React.ComponentPropsWithRef<"div"> {
+interface BarListProps<T = unknown>
+  extends Omit<React.ComponentPropsWithRef<"div">, "onClick"> {
   data: Bar<T>[];
-  valueFormatter?: (value: number) => string;
-  showAnimation?: boolean;
-  onValueChange?: (payload: Bar<T>) => void;
+  valueFormatter?: (value: number, item: Bar<T>) => string;
+  onClick?: (payload: Bar<T>) => void;
   sortOrder?: "ascending" | "descending" | "none";
 }
 
@@ -23,13 +23,14 @@ const focusRingClassNames =
 function BarList<T>({
   data = [],
   valueFormatter = (value) => value.toString(),
-  showAnimation = false,
-  onValueChange,
+  onClick,
   sortOrder = "descending",
   className,
   ...props
 }: BarListProps<T>) {
-  const Component = onValueChange ? "button" : "div";
+  const Component = onClick ? "button" : "div";
+  const rowHeight = "h-8";
+
   const sortedData = React.useMemo(() => {
     if (sortOrder === "none") {
       return data;
@@ -38,7 +39,6 @@ function BarList<T>({
       return sortOrder === "ascending" ? a.value - b.value : b.value - a.value;
     });
   }, [data, sortOrder]);
-
   const widths = React.useMemo(() => {
     const maxValue = Math.max(...sortedData.map((item) => item.value), 0);
     return sortedData.map((item) =>
@@ -46,76 +46,39 @@ function BarList<T>({
     );
   }, [sortedData]);
 
-  const rowHeight = "h-8";
-
   return (
     <div className={cn("flex justify-between space-x-6", className)} {...props}>
       <div className="relative w-full space-y-1.5">
         {sortedData.map((item, index) => (
           <Component
-            className={cn(
-              // base
-              "group w-full rounded-sm",
-              // focus
-              focusRingClassNames,
-              onValueChange
-                ? [
-                    "m-0! cursor-pointer",
-                    // hover
-                    "hover:bg-muted",
-                  ]
-                : "",
-            )}
+            className={`w-full ${focusRingClassNames} ${onClick ? "rounded-0 rounded-sm transition-colors hover:bg-muted/45" : ""}`}
             key={item.key ?? item.name}
             onClick={() => {
-              onValueChange?.(item);
+              onClick?.(item);
             }}
           >
             <div
-              className={cn(
-                // base
-                "flex items-center rounded-sm transition-all",
-                rowHeight,
-                // background color
-                onValueChange && "group-hover:bg-(--chart-color)/80",
-                // margin and duration
-                {
-                  "mb-0": index === sortedData.length - 1,
-                  "duration-800": showAnimation,
-                },
-              )}
+              className={`${rowHeight} flex items-center rounded-sm bg-(--chart-color) transition-all`}
               style={
                 {
                   width: `${widths[index]}%`,
-                  "--chart-color": item.color ?? "var(--chart-1)",
+                  "--chart-color": item.color ?? "var(--muted)",
                 } as React.CSSProperties
               }
             >
-              <div className={cn("absolute left-2 flex max-w-full pr-2")}>
+              <div className="absolute left-2 flex max-w-full">
                 {item.href ? (
                   <a
-                    className={cn(
-                      // base
-                      "truncate whitespace-nowrap rounded-sm text-sm",
-                      "text-muted-foreground",
-                      "hover:underline hover:underline-offset-2",
-                      focusRingClassNames,
-                    )}
+                    className={`truncate rounded-sm text-muted-foreground text-sm hover:underline hover:underline-offset-2 ${focusRingClassNames}`}
                     href={item.href}
                     onClick={(event) => event.stopPropagation()}
-                    rel="noreferrer"
+                    rel="noreferrer noopener"
                     target="_blank"
                   >
                     {item.name}
                   </a>
                 ) : (
-                  <p
-                    className={cn(
-                      // base
-                      "truncate whitespace-nowrap text-sm",
-                      "text-muted-foreground",
-                    )}
-                  >
+                  <p className="truncate text-muted-foreground text-sm">
                     {item.name}
                   </p>
                 )}
@@ -124,26 +87,14 @@ function BarList<T>({
           </Component>
         ))}
       </div>
-      <div>
-        {sortedData.map((item, index) => (
-          <div
-            className={cn(
-              "flex items-center justify-end",
-              rowHeight,
-              index === sortedData.length - 1 ? "mb-0" : "mb-1.5",
-            )}
+      <div className="space-y-1.5">
+        {sortedData.map((item) => (
+          <p
+            className={`flex items-center justify-end truncate text-muted-foreground text-sm leading-none ${rowHeight}`}
             key={item.key ?? item.name}
           >
-            <p
-              className={cn(
-                // base
-                "truncate whitespace-nowrap text-sm leading-none",
-                "text-muted-foreground",
-              )}
-            >
-              {valueFormatter(item.value)}
-            </p>
-          </div>
+            {valueFormatter(item.value, item)}
+          </p>
         ))}
       </div>
     </div>

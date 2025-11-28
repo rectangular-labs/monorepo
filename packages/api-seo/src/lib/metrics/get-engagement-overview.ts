@@ -45,7 +45,7 @@ export async function getGSCEngagementOverview({
     previous: 0,
     changePercentage: 0,
   };
-  const timeSeries: { date: string; clicks: number; impressions: number }[] =
+  const timeseries: { date: string; clicks: number; impressions: number }[] =
     [];
   for (const row of rows) {
     if (row.keys[0] === previousEndDate) {
@@ -57,7 +57,7 @@ export async function getGSCEngagementOverview({
     } else {
       clicks.current += row.clicks;
       impressions.current += row.impressions;
-      timeSeries.push({
+      timeseries.push({
         date: row.keys[0] ?? "",
         clicks: row.clicks,
         impressions: row.impressions,
@@ -68,12 +68,11 @@ export async function getGSCEngagementOverview({
     ((clicks.current - clicks.previous) / clicks.previous) * 100;
   impressions.changePercentage =
     ((impressions.current - impressions.previous) / impressions.previous) * 100;
-
   return ok({
     source: "gsc" as const,
     clicks,
     impressions,
-    timeSeries,
+    timeseries,
   });
 }
 

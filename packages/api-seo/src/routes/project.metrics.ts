@@ -163,7 +163,7 @@ export const metrics = withOrganizationIdBase
       if (gscProperty) {
         const gscOverviewResult = await getGSCEngagementOverview({
           accessToken: gscProperty.accessToken,
-          siteUrl: project.websiteUrl,
+          siteUrl: gscProperty.domain,
           siteType: gscProperty.type,
           startDate: currentDateRange.startDate,
           endDate: currentDateRange.endDate,
@@ -195,7 +195,7 @@ export const metrics = withOrganizationIdBase
       if (gscProperty) {
         const pageAnalyticsResult = await getGSCPageAnalytics({
           accessToken: gscProperty.accessToken,
-          siteUrl: project.websiteUrl,
+          siteUrl: gscProperty.domain,
           siteType: gscProperty.type,
           startDate: currentDateRange.startDate,
           endDate: currentDateRange.endDate,
@@ -226,7 +226,7 @@ export const metrics = withOrganizationIdBase
       if (gscProperty) {
         const queryAnalyticsResult = await getGSCQueryAnalytics({
           accessToken: gscProperty.accessToken,
-          siteUrl: project.websiteUrl,
+          siteUrl: gscProperty.domain,
           siteType: gscProperty.type,
           startDate: currentDateRange.startDate,
           endDate: currentDateRange.endDate,
@@ -257,7 +257,7 @@ export const metrics = withOrganizationIdBase
     if (dimensions.includes("country") && gscProperty) {
       const countryAnalyticsResult = await getGSCCountryAnalytics({
         accessToken: gscProperty.accessToken,
-        siteUrl: project.websiteUrl,
+        siteUrl: gscProperty.domain,
         siteType: gscProperty.type,
         startDate: currentDateRange.startDate,
         endDate: currentDateRange.endDate,
@@ -278,7 +278,7 @@ export const metrics = withOrganizationIdBase
     if (dimensions.includes("device") && gscProperty) {
       const deviceAnalyticsResult = await getGSCDeviceAnalytics({
         accessToken: gscProperty.accessToken,
-        siteUrl: project.websiteUrl,
+        siteUrl: gscProperty.domain,
         siteType: gscProperty.type,
         startDate: currentDateRange.startDate,
         endDate: currentDateRange.endDate,
