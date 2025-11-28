@@ -38,6 +38,7 @@ export async function getGSCPageAnalytics({
   });
 }
 
+// todo (metrics): sort out the lagging indicator where the latest month might not actually be the current month but the previous month
 export function getDataForSeoPageAnalytics({
   data,
   lookBackRange,
