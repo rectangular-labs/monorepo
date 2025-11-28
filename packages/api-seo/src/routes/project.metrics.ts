@@ -31,13 +31,13 @@ const metricsOutputSchema = type({
   // From Overview
   "clicks?": type({
     current: "number",
-    "changePercentage?": "number",
-    "previous?": "number",
+    changePercentage: "number|undefined",
+    previous: "number|undefined",
   }),
   "impressions?": type({
     current: "number",
-    "changePercentage?": "number",
-    "previous?": "number",
+    changePercentage: "number|undefined",
+    previous: "number|undefined",
   }),
   "timeseries?": type({
     date: "string",

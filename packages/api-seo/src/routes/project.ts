@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import {
   deleteSeoProject,
+  getSeoProjectByIdentifierAndOrgId,
   updateSeoProject,
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
@@ -64,42 +65,30 @@ const get = withOrganizationIdBase
   .route({ method: "GET", path: "/{identifier}" })
   .input(
     type({
-      identifier: "string.url|string",
+      identifier: "string",
       organizationIdentifier: "string",
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
-    if (input.identifier.startsWith("http")) {
-      const row = await context.db.query.seoProject.findFirst({
-        where: and(
-          eq(schema.seoProject.websiteUrl, input.identifier),
-          eq(schema.seoProject.organizationId, context.organization.id),
-        ),
+    const projectResult = await getSeoProjectByIdentifierAndOrgId(
+      context.db,
+      input.identifier,
+      context.organization.id,
+    );
+    if (!projectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: projectResult.error.message,
+        cause: projectResult.error,
       });
-      if (!row) {
-        throw new ORPCError("NOT_FOUND", {
-          message: "No project found with website URL.",
-        });
-      }
-      return row;
     }
-    const isSlug = type("string.uuid")(input.identifier) instanceof type.errors;
-    const row = await context.db.query.seoProject.findFirst({
-      where: and(
-        isSlug
-          ? eq(schema.seoProject.slug, input.identifier)
-          : eq(schema.seoProject.id, input.identifier),
-        eq(schema.seoProject.organizationId, context.organization.id),
-      ),
-    });
-    if (!row) {
+    if (!projectResult.value) {
       throw new ORPCError("NOT_FOUND", {
         message: "No project found with identifier.",
       });
     }
-    return row;
+    return projectResult.value;
   });
 
 const setUpWorkspace = withOrganizationIdBase

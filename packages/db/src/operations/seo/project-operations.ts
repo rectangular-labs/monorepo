@@ -1,4 +1,5 @@
 import { ok, safe } from "@rectangular-labs/result";
+import { type } from "arktype";
 import { and, eq } from "drizzle-orm";
 import { type DB, schema } from "../../client";
 import type { seoProjectUpdateSchema } from "../../schema/seo";
@@ -63,13 +64,22 @@ export function getSeoProjectByIdentifierAndOrgId(
   identifier: string,
   orgId: string,
 ) {
+  const isUrl = !(type("string.url")(identifier) instanceof type.errors);
+  const isSlug = type("string.uuid")(identifier) instanceof type.errors;
+  const check = (table: (typeof schema.seoProject)["_"]["columns"]) => {
+    if (isUrl) {
+      return eq(table.websiteUrl, identifier);
+    }
+    if (isSlug) {
+      return eq(table.slug, identifier);
+    }
+    return eq(table.id, identifier);
+  };
+
   return safe(() =>
     db.query.seoProject.findFirst({
-      where: (table, { eq, and, or }) =>
-        or(
-          and(eq(table.id, identifier), eq(table.organizationId, orgId)),
-          and(eq(table.slug, identifier), eq(table.organizationId, orgId)),
-        ),
+      where: (table, { eq, and }) =>
+        and(check(table), eq(table.organizationId, orgId)),
     }),
   );
 }
