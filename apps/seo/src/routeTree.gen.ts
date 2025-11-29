@@ -28,6 +28,8 @@ import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteImport } from '.
 import { Route as AuthedOrganizationSlugProjectSlugCalendarRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/calendar'
 import { Route as AuthedOrganizationSlugProjectSlugCampaignIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/campaign/index'
 import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId'
+import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId.index'
+import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId.review'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -130,6 +132,20 @@ const AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute =
     path: '/$organizationSlug/$projectSlug/campaign/$campaignId',
     getParentRoute: () => AuthedRouteRoute,
   } as any)
+const AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute =
+  AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () =>
+      AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute,
+  } as any)
+const AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute =
+  AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport.update({
+    id: '/review',
+    path: '/review',
+    getParentRoute: () =>
+      AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -147,8 +163,10 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
+  '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
   '/$organizationSlug/$projectSlug/campaign': typeof AuthedOrganizationSlugProjectSlugCampaignIndexRoute
+  '/$organizationSlug/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
+  '/$organizationSlug/$projectSlug/campaign/$campaignId/': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -163,8 +181,9 @@ export interface FileRoutesByTo {
   '/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
   '/$organizationSlug/$projectSlug/campaign': typeof AuthedOrganizationSlugProjectSlugCampaignIndexRoute
+  '/$organizationSlug/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
+  '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -185,8 +204,10 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
+  '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/campaign/': typeof AuthedOrganizationSlugProjectSlugCampaignIndexRoute
+  '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
+  '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -208,6 +229,8 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/'
     | '/$organizationSlug/$projectSlug/campaign/$campaignId'
     | '/$organizationSlug/$projectSlug/campaign'
+    | '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
+    | '/$organizationSlug/$projectSlug/campaign/$campaignId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -222,8 +245,9 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/calendar'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug'
-    | '/$organizationSlug/$projectSlug/campaign/$campaignId'
     | '/$organizationSlug/$projectSlug/campaign'
+    | '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
+    | '/$organizationSlug/$projectSlug/campaign/$campaignId'
   id:
     | '__root__'
     | '/_authed'
@@ -245,6 +269,8 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug/$projectSlug/'
     | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId'
     | '/_authed/$organizationSlug/$projectSlug/campaign/'
+    | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review'
+    | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -390,6 +416,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/': {
+      id: '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/'
+      path: '/'
+      fullPath: '/$organizationSlug/$projectSlug/campaign/$campaignId/'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
+    }
+    '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review': {
+      id: '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review'
+      path: '/review'
+      fullPath: '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
+    }
   }
 }
 
@@ -434,10 +474,28 @@ const AuthedOrganizationSlugRouteRouteWithChildren =
     AuthedOrganizationSlugRouteRouteChildren,
   )
 
+interface AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren {
+  AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
+  AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
+}
+
+const AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren: AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren =
+  {
+    AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute:
+      AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute,
+    AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute:
+      AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute,
+  }
+
+const AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren =
+  AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute._addFileChildren(
+    AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren,
+  )
+
 interface AuthedRouteRouteChildren {
   AuthedOrganizationSlugRouteRoute: typeof AuthedOrganizationSlugRouteRouteWithChildren
   AuthedOnboardingIndexRoute: typeof AuthedOnboardingIndexRoute
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
+  AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
@@ -445,7 +503,7 @@ const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
     AuthedOrganizationSlugRouteRouteWithChildren,
   AuthedOnboardingIndexRoute: AuthedOnboardingIndexRoute,
   AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute:
-    AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute,
+    AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren,
 }
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(

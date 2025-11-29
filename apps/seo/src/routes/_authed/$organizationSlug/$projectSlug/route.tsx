@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
           },
         }),
       );
+      // todo: this isn't true anymore since the above will just throw
       if (!activeProject) throw notFound();
 
       if (!activeProject.workspaceBlobUri) {

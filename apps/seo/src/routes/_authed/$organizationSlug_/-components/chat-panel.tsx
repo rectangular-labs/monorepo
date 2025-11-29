@@ -343,7 +343,7 @@ export function ChatPanel({
   };
 
   return (
-    <div className="flex h-full flex-col gap-4 rounded-md bg-background p-3">
+    <div className="flex h-full flex-col rounded-b-md bg-background pb-3 pl-3">
       <Conversation className="h-full">
         <ConversationContent>
           {hasNextPage && (
@@ -506,7 +506,7 @@ export function ChatPanel({
         <ConversationScrollButton />
       </Conversation>
 
-      <PromptInput globalDrop multiple onSubmit={handleSubmit}>
+      <PromptInput className="pr-3" globalDrop multiple onSubmit={handleSubmit}>
         <PromptInputBody>
           <PromptInputAttachments>
             {(attachment) => <PromptInputAttachment data={attachment} />}
