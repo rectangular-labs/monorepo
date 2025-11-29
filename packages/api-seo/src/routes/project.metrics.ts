@@ -165,7 +165,7 @@ export const metrics = withOrganizationIdBase
           accessToken: gscProperty.accessToken,
           siteUrl: gscProperty.domain,
           siteType: gscProperty.type,
-          startDate: currentDateRange.startDate,
+          startDate: previousDateRange.startDate,
           endDate: currentDateRange.endDate,
           previousEndDate: previousDateRange.endDate,
           days: input.dateRange * 2, // each date should be a single row. 2x to account for the previous date range

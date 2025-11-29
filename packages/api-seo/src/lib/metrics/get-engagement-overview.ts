@@ -65,9 +65,14 @@ export async function getGSCEngagementOverview({
     }
   }
   clicks.changePercentage =
-    ((clicks.current - clicks.previous) / clicks.previous) * 100;
+    clicks.previous > 0
+      ? ((clicks.current - clicks.previous) / clicks.previous) * 100
+      : 0;
   impressions.changePercentage =
-    ((impressions.current - impressions.previous) / impressions.previous) * 100;
+    impressions.previous > 0
+      ? ((impressions.current - impressions.previous) / impressions.previous) *
+        100
+      : 0;
   return ok({
     source: "gsc" as const,
     clicks,

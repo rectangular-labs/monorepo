@@ -64,8 +64,9 @@ export function getSeoProjectByIdentifierAndOrgId(
   identifier: string,
   orgId: string,
 ) {
-  const isUrl = !(type("string.url")(identifier) instanceof type.errors);
-  const isSlug = type("string.uuid")(identifier) instanceof type.errors;
+  const isUrl = type("string.url")(identifier) instanceof type.errors === false;
+  const isSlug =
+    type("string.uuid")(identifier) instanceof type.errors === true;
   const check = (table: (typeof schema.seoProject)["_"]["columns"]) => {
     if (isUrl) {
       return eq(table.websiteUrl, identifier);

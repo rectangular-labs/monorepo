@@ -35,10 +35,13 @@ const chartConfig = {
   },
 };
 
-function formatNumber(value: number | undefined): string {
+function formatNumber(
+  value: number | undefined,
+  maximumFractionDigits = 0,
+): string {
   if (value === undefined) return "-";
   return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0,
+    maximumFractionDigits,
   }).format(value);
 }
 
@@ -46,7 +49,7 @@ function formatChange(change: number | undefined): string {
   if (change === undefined) return "";
   if (change === 0) return "No change";
   const sign = change > 0 ? "+" : "-";
-  return `${sign}${Math.abs(change)}`;
+  return `${sign}${formatNumber(Math.abs(change), 2)}%`;
 }
 
 export function TrafficOverview({
@@ -60,6 +63,8 @@ export function TrafficOverview({
   error: Error | null;
   retry: () => void;
 }) {
+  console.log(metrics?.clicks);
+  console.log(metrics?.impressions);
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
