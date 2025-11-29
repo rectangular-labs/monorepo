@@ -1,5 +1,13 @@
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@rectangular-labs/ui/components/ui/empty";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 
@@ -22,8 +30,8 @@ interface LoadingErrorProps {
 
 export function LoadingError({
   isLoading,
-  error,
   loadingComponent,
+  error,
   errorTitle = "Something went wrong",
   errorDescription,
   onRetry,
@@ -31,11 +39,7 @@ export function LoadingError({
 }: LoadingErrorProps) {
   if (isLoading) {
     return (
-      loadingComponent ?? (
-        <div className={cn("py-8", className)}>
-          <DefaultLoadingComponent />
-        </div>
-      )
+      loadingComponent ?? <DefaultLoadingComponent className={className} />
     );
   }
 
@@ -44,31 +48,33 @@ export function LoadingError({
     const description = errorDescription || errorMessage;
 
     return (
-      <div className={cn("py-12 text-center", className)}>
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive">
-          <Icons.X className="h-6 w-6 text-destructive-foreground" />
-        </div>
-        <h3 className="mb-2 font-semibold text-lg">{errorTitle}</h3>
-        <p className="mb-4 text-muted-foreground">{description}</p>
-        {onRetry && (
-          <Button onClick={onRetry} variant="outline">
-            <Icons.RotateCcw className="mr-2 h-4 w-4" />
+      <Empty className={className}>
+        <EmptyHeader>
+          <EmptyMedia className="bg-destructive" variant="icon">
+            <Icons.X className="text-destructive-foreground" />
+          </EmptyMedia>
+          <EmptyTitle>{errorTitle}</EmptyTitle>
+          <EmptyDescription>{description}</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={onRetry}>
+            <Icons.RotateCcw className="size-4" />
             Try again
           </Button>
-        )}
-      </div>
+        </EmptyContent>
+      </Empty>
     );
   }
 
   return null;
 }
 
-function DefaultLoadingComponent() {
+function DefaultLoadingComponent({ className }: { className?: string }) {
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", className)}>
       <div className="space-y-2">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-96" />
+        <Skeleton className="h-8 w-1/12" />
+        <Skeleton className="h-4 w-1/6" />
       </div>
       <div className="space-y-3">
         <Skeleton className="h-10 w-full" />

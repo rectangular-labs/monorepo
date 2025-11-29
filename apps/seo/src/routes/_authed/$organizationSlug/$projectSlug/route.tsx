@@ -72,9 +72,9 @@ function RouteComponent() {
         </NavLink>
       </ul>
 
-      <main className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl">
         <Outlet />
-      </main>
+      </div>
     </div>
   );
 }

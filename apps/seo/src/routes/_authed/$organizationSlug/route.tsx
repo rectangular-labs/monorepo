@@ -98,7 +98,7 @@ function RouteComponent() {
   return (
     <>
       <AppHeader />
-      <main className="flex w-full flex-1 flex-col">
+      <main className="flex w-full flex-1 flex-col bg-background">
         <Outlet />
       </main>
     </>

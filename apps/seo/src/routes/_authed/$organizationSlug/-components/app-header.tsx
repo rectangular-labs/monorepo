@@ -80,7 +80,7 @@ export function AppHeader() {
 
   return (
     <header
-      className={`flex h-16 items-center gap-3 px-4 ${matcher({ to: "/$organizationSlug" }) ? "border-b" : ""}`}
+      className={`flex h-16 items-center gap-3 bg-background px-4 ${matcher({ to: "/$organizationSlug" }) ? "border-b" : ""}`}
     >
       <Link className="hidden font-semibold md:block" to="/">
         <Icons.Logo className="size-6" />

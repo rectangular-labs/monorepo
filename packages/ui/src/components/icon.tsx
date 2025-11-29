@@ -1,12 +1,15 @@
 import {
   ArrowDownIcon,
+  ArrowDownWideNarrowIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpIcon,
+  ArrowUpNarrowWideIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
+  CircleSlashIcon,
   CopyIcon,
   DotIcon,
   ExternalLinkIcon,
@@ -18,6 +21,7 @@ import {
   FolderIcon,
   GlobeIcon,
   GridIcon,
+  HandIcon,
   HistoryIcon,
   InfoIcon,
   ListIcon,
@@ -49,6 +53,7 @@ import {
   TerminalIcon,
   TimerIcon,
   TrendingUpIcon,
+  TriangleAlertIcon,
   UserIcon,
   UsersIcon,
   ZapIcon,
@@ -58,6 +63,7 @@ import type { SVGProps } from "react";
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const AlertIcon = OctagonAlertIcon;
+export const AlertTriangleIcon = TriangleAlertIcon;
 export const ArrowDown = ArrowDownIcon;
 export const ArrowLeft = ArrowLeftIcon;
 export const ArrowRight = ArrowRightIcon;
@@ -66,6 +72,7 @@ export const Check = CheckIcon;
 export const ChevronDown = ChevronDownIcon;
 export const ChevronRight = ChevronRightIcon;
 export const ChevronsUpDown = ChevronsUpDownIcon;
+export const CircleSlash = CircleSlashIcon;
 export const Copy = CopyIcon;
 export const Dot = DotIcon;
 export const EyeOff = EyeOffIcon;
@@ -74,9 +81,12 @@ export const ExternalLink = ExternalLinkIcon;
 export const File = FileIcon;
 export const Files = FilesIcon;
 export const FileText = FileTextIcon;
+export const FilterAscending = ArrowUpNarrowWideIcon;
+export const FilterDescending = ArrowDownWideNarrowIcon;
 export const Folder = FolderIcon;
 export const Globe = GlobeIcon;
 export const Grid = GridIcon;
+export const Hand = HandIcon;
 export const History = HistoryIcon;
 export const Info = InfoIcon;
 export const List = ListIcon;

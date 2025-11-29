@@ -54,6 +54,7 @@
   },
   "pnpm": {
     "overrides": {
+      "react-is": "^19.2.0",
       "vite": "7.2.4"
     },
     "ignoredBuiltDependencies": [
