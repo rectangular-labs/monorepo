@@ -71,7 +71,7 @@ export function TrafficOverview({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="font-medium text-sm">Total Clicks</CardTitle>
-            <Icons.Target className="h-4 w-4" />
+            <Icons.Hand className="h-4 w-4" />
           </CardHeader>
           <CardContent>
             {isLoading && <Skeleton className="h-8 w-20" />}
