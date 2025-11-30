@@ -44,7 +44,7 @@
     "@rectangular-labs/typescript": "workspace:*",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "concurrently": "^9.2.1",
     "fumadocs-typescript": "^4.0.13",
@@ -64,6 +64,6 @@
     "feed": "^5.1.0",
     "fumadocs-core": "^15.8.5",
     "fumadocs-ui": "^15.8.5",
-    "lucide-static": "^0.554.0"
+    "lucide-static": "^0.555.0"
   }
 }
