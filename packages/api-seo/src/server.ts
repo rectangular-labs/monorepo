@@ -1,8 +1,9 @@
-import { createRouterClient } from "@orpc/server";
+import { createRouterClient, onError } from "@orpc/server";
 import {
   createOpenAPIHandler,
   createRpcHandler,
 } from "@rectangular-labs/api-core/lib/handlers";
+import { type } from "arktype";
 import { createApiContext } from "./context";
 import { router } from "./routes";
 
@@ -11,11 +12,26 @@ export const serverClient = (context: Parameters<typeof createApiContext>[0]) =>
     context: () => createApiContext(context),
   });
 
-export const RpcHandler = createRpcHandler(router);
+export const RpcHandler = createRpcHandler(router, [
+  onError((error) => {
+    console.error(
+      "RPC Error:",
+      error instanceof type.errors ? error.summary : error,
+    );
+  }),
+]);
 
 export const openAPIHandler = (apiUrl: string) =>
   createOpenAPIHandler({
     router,
+    interceptors: [
+      onError((error) => {
+        console.error(
+          "OpenAPI Error:",
+          error instanceof type.errors ? error.summary : error,
+        );
+      }),
+    ],
     openApiOptions: {
       specGenerateOptions: {
         info: {

@@ -15,6 +15,7 @@ import {
   RequestHeadersPlugin,
   ResponseHeadersPlugin,
 } from "@orpc/server/plugins";
+import type { StandardHandlerOptions } from "@orpc/server/standard";
 import { RPCHandler as WebSocketRPCHandler } from "@orpc/server/websocket";
 
 const corsPlugin = new CORSPlugin({
@@ -38,10 +39,11 @@ const corsPlugin = new CORSPlugin({
 export const createWebSocketRpcHandler = <C extends Context>(
   // biome-ignore lint/suspicious/noExplicitAny: User defined router
   router: Router<any, C>,
+  interceptors?: StandardHandlerOptions<C>["interceptors"],
 ) =>
   new WebSocketRPCHandler(router, {
     plugins: [],
-    interceptors: [
+    interceptors: interceptors ?? [
       onError((error) => {
         console.error("WebSocket RPC Error:", error);
       }),
@@ -51,6 +53,7 @@ export const createWebSocketRpcHandler = <C extends Context>(
 export const createRpcHandler = <C extends Context>(
   // biome-ignore lint/suspicious/noExplicitAny: User defined router
   router: Router<any, C>,
+  interceptors?: StandardHandlerOptions<C>["interceptors"],
 ) =>
   new RPCHandler(router, {
     plugins: [
@@ -58,7 +61,7 @@ export const createRpcHandler = <C extends Context>(
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
     ],
-    interceptors: [
+    interceptors: interceptors ?? [
       onError((error) => {
         console.error("RPC Error:", error);
       }),
@@ -68,6 +71,7 @@ export const createRpcHandler = <C extends Context>(
 export const createNodeRpcHandler = <C extends Context>(
   // biome-ignore lint/suspicious/noExplicitAny: User defined router
   router: Router<any, C>,
+  interceptors?: StandardHandlerOptions<C>["interceptors"],
 ) =>
   new NodeRpcHandler(router, {
     plugins: [
@@ -75,7 +79,7 @@ export const createNodeRpcHandler = <C extends Context>(
       new RequestHeadersPlugin(),
       new ResponseHeadersPlugin(),
     ],
-    interceptors: [
+    interceptors: interceptors ?? [
       onError((error) => {
         console.error("RPC Error:", error);
       }),
@@ -85,13 +89,15 @@ export const createNodeRpcHandler = <C extends Context>(
 export const createOpenAPIHandler = <C extends Context>({
   router,
   openApiOptions = {},
+  interceptors,
 }: {
   // biome-ignore lint/suspicious/noExplicitAny: User defined router
   router: Router<any, C>;
   openApiOptions?: OpenAPIReferencePluginOptions<C>;
+  interceptors?: StandardHandlerOptions<C>["interceptors"];
 }) =>
   new OpenAPIHandler(router, {
-    interceptors: [
+    interceptors: interceptors ?? [
       onError((error) => {
         console.error("OpenAPI Error:", error);
       }),
