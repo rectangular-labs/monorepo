@@ -5,7 +5,7 @@ export const getWorkspaceBlobUri = ({
 }: {
   orgId: string;
   projectId: string;
-  campaignId?: string;
+  campaignId?: string | null;
 }) => {
   return `org_${orgId}/proj_${projectId}/${campaignId ? `c_${campaignId}` : "main"}.loro`;
 };
