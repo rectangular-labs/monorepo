@@ -95,7 +95,7 @@ export function CampaignHeader({
           {isLoadingCampaign && <Skeleton className="h-7 w-80" />}
           {!isLoadingCampaign && (
             <InlineEdit
-              className="min-h-fit text-xl"
+              className="min-h-fit w-full min-w-0 truncate text-xl"
               inputType="text"
               maxLength={100}
               onChange={setTitle}

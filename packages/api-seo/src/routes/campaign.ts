@@ -10,6 +10,7 @@ import {
 import {
   CAMPAIGN_DEFAULT_TITLE,
   contentCampaignMessageMetadataSchema,
+  contentCampaignStatusSchema,
 } from "@rectangular-labs/db/parsers";
 import { validateUIMessages } from "ai";
 import { type } from "arktype";
@@ -26,7 +27,7 @@ const list = withOrganizationIdBase
       projectId: "string",
       limit: "1<=number<=100 = 20",
       "cursor?": "string.uuid|undefined",
-      "status?": type("'draft'|'review'|'accepted'|'denied'|undefined"),
+      "status?": contentCampaignStatusSchema,
       "search?": "string|undefined",
     }),
   )

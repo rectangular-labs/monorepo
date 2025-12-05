@@ -1,7 +1,7 @@
 import { type } from "arktype";
 
 export const contentCampaignStatusSchema = type(
-  "'draft'|'review'|'accepted'|'denied'",
+  "'draft'|'review-requested'|'review-approved'|'review-denied'|'review-change-requested'",
 );
 
 export const CAMPAIGN_DEFAULT_TITLE = "Untitled Campaign";

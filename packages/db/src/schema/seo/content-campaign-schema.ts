@@ -41,9 +41,10 @@ export const seoContentCampaign = pgSeoTable(
     status: text({
       enum: [
         "draft",
-        "review",
-        "accepted",
-        "denied",
+        "review-requested",
+        "review-approved",
+        "review-denied",
+        "review-change-requested",
       ] as const satisfies (typeof contentCampaignStatusSchema.infer)[],
     })
       .notNull()
