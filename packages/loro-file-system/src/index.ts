@@ -164,7 +164,13 @@ export function removeNodeAtPath<
       message: `Directory ${path} is not empty. Set recursive=true to remove it and all of its children`,
     };
   }
-  tree.delete(node.id);
+  traverseNode({
+    node,
+    callback: (node) => {
+      tree.delete(node.id);
+    },
+    order: "post",
+  });
   return { success: true };
 }
 
@@ -257,3 +263,5 @@ export function writeToFile<
   textContainer.updateByLine(content);
   return { success: true };
 }
+export { resolvePath } from "./utils/resolve-path";
+export { traverseNode } from "./utils/traverse-node";
