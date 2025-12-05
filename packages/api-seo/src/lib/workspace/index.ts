@@ -100,5 +100,6 @@ export {
   broadcastMessageToRoom,
 } from "./broadcast-to-room";
 export { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
+export { forkAndUpdateWorkspaceBlob } from "./fork-workspace-blob";
 export { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
 export { replyToSender } from "./reply-to-sender";
