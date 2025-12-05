@@ -112,19 +112,21 @@ const room = websocketBase
           },
         ]),
       });
+      const finalTitle = updatedTitle.text.split(" ").slice(0, 10).join(" ");
       await updateContentCampaign({
         db: context.db,
         values: {
           id: context.campaignId,
           projectId: context.projectId,
           organizationId: context.organizationId,
-          title: updatedTitle.text.split(" ").slice(0, 10).join(" "),
+          title: finalTitle,
         },
       });
+      context.updateCampaignTitle(finalTitle);
       const senderAttachment = context.senderWebSocket.deserializeAttachment();
       context.senderWebSocket.serializeAttachment({
         ...senderAttachment,
-        campaignTitle: context.campaignTitle,
+        campaignTitle: finalTitle,
       });
     }
 

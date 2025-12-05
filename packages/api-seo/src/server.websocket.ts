@@ -180,6 +180,9 @@ export class WebSocketServer extends DurableObject {
       organizationId: session.organizationId,
       roomDocumentMap: this.roomDocuments,
       userFragments,
+      updateCampaignTitle: (title: string) => {
+        session.campaignTitle = title;
+      },
       ...context,
     };
     if (typeof message === "string") {
