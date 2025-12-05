@@ -21,10 +21,6 @@ const config = defineConfig({
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     viteReact(),
   ],
-  test: {
-    globals: true,
-    environment: "jsdom",
-  },
   server: {
     port: 6969,
   },

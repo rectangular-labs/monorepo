@@ -2,11 +2,19 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    projects: ["packages/*"],
-    // https://vitest.dev/guide/reporters.html#github-actions-reporter
-    reporters: process.env.GITHUB_ACTIONS ? ["dot", "github-actions"] : ["dot"],
-    coverage: {
-      provider: "v8",
-    },
+    projects: [
+      "packages/*",
+      {
+        // add "extends: true" to inherit the options from the root config
+        extends: true,
+        test: {
+          include: ["apps/seo/**/*.test.{ts,tsx}"],
+          // it is recommended to define a name when using inline configs
+          name: "seo",
+          environment: "jsdom",
+          globals: true,
+        },
+      },
+    ],
   },
 });
