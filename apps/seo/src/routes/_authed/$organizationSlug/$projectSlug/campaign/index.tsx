@@ -1,4 +1,7 @@
-import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import type {
+  RouterInputs,
+  RouterOutputs,
+} from "@rectangular-labs/api-seo/types";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
@@ -51,7 +54,7 @@ export const Route = createFileRoute(
 function PageComponent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<
-    "all" | "draft" | "review" | "accepted" | "denied"
+    "all" | RouterInputs["campaigns"]["list"]["status"]
   >("all");
   const { organizationSlug, projectSlug } = Route.useParams();
   const {
@@ -126,7 +129,9 @@ function PageComponent() {
             </div>
           </div>
           <Select
-            onValueChange={(v: typeof statusFilter) => setStatusFilter(v)}
+            onValueChange={(v) =>
+              setStatusFilter(v as RouterInputs["campaigns"]["list"]["status"])
+            }
             value={statusFilter}
           >
             <SelectTrigger className="w-[200px]">
@@ -135,9 +140,12 @@ function PageComponent() {
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="review">Review</SelectItem>
-              <SelectItem value="accepted">Accepted</SelectItem>
-              <SelectItem value="denied">Denied</SelectItem>
+              <SelectItem value="review-requested">Review Requested</SelectItem>
+              <SelectItem value="review-approved">Review Approved</SelectItem>
+              <SelectItem value="review-denied">Review Denied</SelectItem>
+              <SelectItem value="review-change-requested">
+                Review Change Requested
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -188,11 +196,19 @@ function StatusBadge({ status }: { status: Campaign["status"] }) {
     "default" | "secondary" | "outline" | "destructive"
   > = {
     draft: "outline",
-    review: "secondary",
-    accepted: "default",
-    denied: "destructive",
+    "review-requested": "secondary",
+    "review-approved": "default",
+    "review-denied": "destructive",
+    "review-change-requested": "secondary",
   };
-  return <Badge variant={variants[status]}>{status}</Badge>;
+  const labels: Record<Campaign["status"], string> = {
+    draft: "Draft",
+    "review-requested": "Review Requested",
+    "review-approved": "Approved",
+    "review-denied": "Denied",
+    "review-change-requested": "Change Requested",
+  };
+  return <Badge variant={variants[status]}>{labels[status]}</Badge>;
 }
 
 function CampaignRow({ campaign }: { campaign: Campaign }) {
