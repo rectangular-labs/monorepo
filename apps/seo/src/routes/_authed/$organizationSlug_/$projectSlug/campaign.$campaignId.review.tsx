@@ -1,8 +1,12 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { Pending } from "~/components/pending";
 import { getApiClientRq } from "~/lib/api";
-import { CampaignReviewPanel } from "~/routes/_authed/$organizationSlug_/-components/campaign-review-panel";
+import { buildTree } from "~/lib/campaign/build-tree";
+import { createSyncDocumentQueryOptions } from "~/lib/campaign/sync";
+import { LoadingError } from "../../-components/loading-error";
+import { ReviewPanel } from "../-components/review/panel";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review",
@@ -16,43 +20,90 @@ export const Route = createFileRoute(
         },
       }),
     );
-    await new Promise((resolve) => setTimeout(resolve, 10_000));
-    context.queryClient.ensureQueryData(
-      getApiClientRq().campaigns.review.queryOptions({
-        input: {
-          id: params.campaignId,
-          projectId: activeProject.id,
-          organizationId: activeProject.organizationId,
-        },
-      }),
-    );
 
-    return null;
+    return {
+      projectId: activeProject.id,
+      organizationId: activeProject.organizationId,
+      campaignId: params.campaignId,
+    };
   },
-  pendingComponent: () => <Pending />,
+  pendingComponent: Pending,
   component: PageComponent,
 });
 
 function PageComponent() {
-  const { organizationSlug, projectSlug, campaignId } = Route.useParams();
-  const { data: project } = useSuspenseQuery(
-    getApiClientRq().project.get.queryOptions({
-      input: {
-        organizationIdentifier: organizationSlug,
-        identifier: projectSlug,
-      },
+  const { projectId, organizationId, campaignId } = Route.useLoaderData();
+
+  const {
+    data: campaignLoroDoc,
+    error: campaignLoroDocError,
+    isLoading: isLoadingCampaignLoroDoc,
+    refetch: refetchCampaignLoroDoc,
+  } = useQuery(
+    createSyncDocumentQueryOptions({ organizationId, projectId, campaignId }),
+  );
+  const {
+    data: mainLoroDoc,
+    error: mainLoroDocError,
+    isLoading: isLoadingMainLoroDoc,
+    refetch: refetchMainLoroDoc,
+  } = useQuery(
+    createSyncDocumentQueryOptions({
+      organizationId,
+      projectId,
+      campaignId: null,
     }),
   );
 
-  const { data: reviewData } = useSuspenseQuery(
-    getApiClientRq().campaigns.review.queryOptions({
-      input: {
-        id: campaignId,
-        projectId: project.id,
-        organizationId: project.organizationId,
-      },
-    }),
-  );
+  const treeResult = useMemo(() => {
+    if (!campaignLoroDoc || !mainLoroDoc) {
+      return;
+    }
+    const result = buildTree(campaignLoroDoc, mainLoroDoc);
+    return result;
+  }, [campaignLoroDoc, mainLoroDoc]);
 
-  return <CampaignReviewPanel reviewData={reviewData} />;
+  if (
+    !campaignLoroDoc ||
+    campaignLoroDocError ||
+    isLoadingCampaignLoroDoc ||
+    !mainLoroDoc ||
+    mainLoroDocError ||
+    isLoadingMainLoroDoc ||
+    !treeResult
+  ) {
+    return (
+      <LoadingError
+        className="p-6"
+        error={campaignLoroDocError || mainLoroDocError}
+        errorTitle="Error loading files."
+        isLoading={isLoadingCampaignLoroDoc || isLoadingMainLoroDoc}
+        onRetry={async () => {
+          await Promise.all([refetchCampaignLoroDoc(), refetchMainLoroDoc()]);
+        }}
+      />
+    );
+  }
+
+  if (!treeResult.ok) {
+    return (
+      <LoadingError
+        error={treeResult.error}
+        errorTitle="Error figuring out what changed."
+        isLoading={false}
+      />
+    );
+  }
+
+  const tree = treeResult.value;
+  console.log("tree", tree);
+
+  return (
+    <ReviewPanel
+      campaignId={campaignId}
+      organizationId={organizationId}
+      projectId={projectId}
+      tree={tree}
+    />
+  );
 }
