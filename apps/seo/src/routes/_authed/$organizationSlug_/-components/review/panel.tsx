@@ -30,6 +30,7 @@ import {
 import { TreeListDropDrawer, useTreeListMode } from "../tree-list-drop-drawer";
 import { ReviewDiffView } from "./diff-viewer";
 import { ReviewSidebarList } from "./sidebar-list";
+import { ReviewTreeList } from "./tree-list";
 
 export function ReviewPanel({
   tree,
@@ -67,7 +68,7 @@ export function ReviewPanel({
   const [statusFilter, setStatusFilter] = useState<TreeChangeStatus | "all">(
     "all",
   );
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<
     TreeFile["treeId"] | null
   >(null);
@@ -105,8 +106,7 @@ export function ReviewPanel({
     return changedFiles.filter((node) => {
       return (
         (statusFilter === "all" || node.changes?.action === statusFilter) &&
-        (node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          node.fileExtension?.toLowerCase().includes(searchQuery.toLowerCase()))
+        node.name.toLowerCase().includes(searchQuery?.toLowerCase() ?? "")
       );
     });
   }, [changedFiles, statusFilter, searchQuery]);
@@ -168,7 +168,18 @@ export function ReviewPanel({
               <SidebarGroupLabel>Changed Files</SidebarGroupLabel>
               <TreeListDropDrawer onChange={setLayoutMode} value={layoutMode} />
             </div>
-            {
+            {layoutMode === "tree" && (
+              <ReviewTreeList
+                onItemSelect={setSelectedItemId}
+                onSearchQueryChange={setSearchQuery}
+                onStatusFilterChange={setStatusFilter}
+                searchQuery={searchQuery}
+                statusFilter={statusFilter}
+                summary={summary}
+                tree={tree}
+              />
+            )}
+            {layoutMode === "list" && (
               <ReviewSidebarList
                 changedFiles={filteredFiles}
                 onItemSelect={setSelectedItemId}
@@ -179,7 +190,7 @@ export function ReviewPanel({
                 statusFilter={statusFilter}
                 summary={summary}
               />
-            }
+            )}
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
@@ -198,7 +209,7 @@ export function ReviewPanel({
         {/* All files diff view */}
         <div className="flex-1 overflow-y-auto">
           {filteredFiles.length > 0 && (
-            <div className="space-y-8 px-8">
+            <div className="space-y-8 px-8 py-4">
               {filteredFiles.map((item) => (
                 <div
                   className={
