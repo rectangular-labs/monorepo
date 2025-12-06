@@ -2,13 +2,6 @@
 
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
-  DropDrawer,
-  DropDrawerContent,
-  DropDrawerItem,
-  DropDrawerLabel,
-  DropDrawerTrigger,
-} from "@rectangular-labs/ui/components/ui/dropdrawer";
-import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
@@ -21,6 +14,7 @@ import {
   SidebarMenuItem,
 } from "@rectangular-labs/ui/components/ui/sidebar";
 import type { TreeChangeStatus, TreeFile } from "~/lib/campaign/build-tree";
+import { FilterStatus } from "./filter-status";
 
 export function ReviewSidebarList({
   summary,
@@ -36,8 +30,8 @@ export function ReviewSidebarList({
   summary: Record<TreeChangeStatus, number> & {
     total: number;
   };
-  searchQuery: string;
-  onSearchQueryChange: (query: string) => void;
+  searchQuery: string | null;
+  onSearchQueryChange: React.Dispatch<React.SetStateAction<string | null>>;
   statusFilter: "all" | TreeChangeStatus;
   onStatusFilterChange: (filter: "all" | TreeChangeStatus) => void;
   selectedItemId: TreeFile["treeId"] | null;
@@ -54,63 +48,18 @@ export function ReviewSidebarList({
             <InputGroupInput
               onChange={(e) => onSearchQueryChange(e.target.value)}
               placeholder="Search files..."
-              value={searchQuery}
+              value={searchQuery ?? ""}
             />
             <InputGroupAddon align="inline-end">
-              <DropDrawer>
-                <DropDrawerTrigger asChild>
-                  <InputGroupButton size="icon-xs">
-                    <Icons.Filter />
-                  </InputGroupButton>
-                </DropDrawerTrigger>
-                <DropDrawerContent align="end">
-                  <DropDrawerLabel>Filter by status</DropDrawerLabel>
-                  <DropDrawerItem
-                    className="flex flex-1 items-center justify-between font-medium"
-                    onClick={() => {
-                      onStatusFilterChange("all");
-                    }}
-                  >
-                    All ({summary.total})
-                    {statusFilter === "all" && (
-                      <Icons.Check className="text-primary" />
-                    )}
-                  </DropDrawerItem>
-                  <DropDrawerItem
-                    className="flex flex-1 items-center justify-between font-medium"
-                    onClick={() => {
-                      onStatusFilterChange("created");
-                    }}
-                  >
-                    Created ({summary.created})
-                    {statusFilter === "created" && (
-                      <Icons.Check className="text-primary" />
-                    )}
-                  </DropDrawerItem>
-                  <DropDrawerItem
-                    className="flex flex-1 items-center justify-between font-medium"
-                    onClick={() => {
-                      onStatusFilterChange("updated");
-                    }}
-                  >
-                    Updated ({summary.updated})
-                    {statusFilter === "updated" && (
-                      <Icons.Check className="text-primary" />
-                    )}
-                  </DropDrawerItem>
-                  <DropDrawerItem
-                    className="flex flex-1 items-center justify-between font-medium"
-                    onClick={() => {
-                      onStatusFilterChange("deleted");
-                    }}
-                  >
-                    Deleted ({summary.deleted})
-                    {statusFilter === "deleted" && (
-                      <Icons.Check className="text-primary" />
-                    )}
-                  </DropDrawerItem>
-                </DropDrawerContent>
-              </DropDrawer>
+              <FilterStatus
+                onStatusFilterChange={onStatusFilterChange}
+                statusFilter={statusFilter}
+                summary={summary}
+              >
+                <InputGroupButton size="icon-xs">
+                  <Icons.Filter />
+                </InputGroupButton>
+              </FilterStatus>
             </InputGroupAddon>
           </InputGroup>
         </SidebarMenuItem>
