@@ -63,9 +63,7 @@ function buildTreeForNode(
 
   const contentId = node.data.get("content")?.id ?? "cid:-1@-1:Text";
   const textChanges = textChangeMap.get(contentId);
-  console.log("textChanges", textChanges);
   const originalContent = textContentMap.get(contentId);
-  console.log("originalContent", originalContent);
 
   let changes: TreeDirectory["changes"] | TreeFile["changes"] | undefined;
   // build changes since something has changed at this particular node
@@ -233,10 +231,8 @@ export function buildTree(
     const baseDocRootNode = baseDocTree.roots()[0] as
       | LoroTreeNode<FsNodePayload>
       | undefined;
-    if (!baseDocRootNode) {
-      return ok([]);
-    }
-    const baseDocRootNodeItems = [...(baseDocRootNode.children() ?? [])];
+
+    const baseDocRootNodeItems = [...(baseDocRootNode?.children() ?? [])];
     const baseFileTree: Tree = [];
     for (const nodeItems of baseDocRootNodeItems) {
       const parsed = buildTreeForNode(
@@ -256,12 +252,12 @@ export function buildTree(
       if (node.type === "file" && node.changes?.content) {
         textContentMap.set(node.content.id, node.content);
       } else if (node.changes?.action === "deleted") {
-        if (node.parentTreeId && node.parentTreeId !== baseDocRootNode.id) {
+        if (node.parentTreeId && node.parentTreeId !== baseDocRootNode?.id) {
           deletionMap.set(node.parentTreeId, [
             ...(deletionMap.get(node.parentTreeId) ?? []),
             node,
           ]);
-        } else if (node.parentTreeId === baseDocRootNode.id) {
+        } else if (node.parentTreeId === baseDocRootNode?.id) {
           deletionMap.set(ROOT_DELETION_KEY, [
             ...(deletionMap.get(ROOT_DELETION_KEY) ?? []),
             node,
