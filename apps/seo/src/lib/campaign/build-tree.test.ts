@@ -725,12 +725,22 @@ describe("buildTree: file diff operations", () => {
       ` app
 cool stuff here.`,
     );
-
+    console.log("content", content.toString());
     const result = buildTree(newDoc, baseDoc);
 
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value).toHaveLength(1);
+      const file = result.value[0];
+      if (file?.type === "file") {
+        expect(file?.content.toString()).toBe(
+          `originant is great app
+cool stuff here.`,
+        );
+        expect(file?.changes?.content?.old?.toString()).toBe(
+          "original content is great",
+        );
+      }
       expect(result.value).toMatchObject([
         {
           type: "file",
@@ -762,16 +772,6 @@ cool stuff here.`,
           },
         },
       ]);
-      const file = result.value[0];
-      if (file?.type === "file") {
-        expect(file?.content.toString()).toBe(
-          `originant is great app
-cool stuff here.`,
-        );
-        expect(file?.changes?.content?.old?.toString()).toBe(
-          "original content is great",
-        );
-      }
     }
   });
 
