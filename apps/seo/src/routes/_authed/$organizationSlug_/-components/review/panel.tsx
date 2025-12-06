@@ -209,12 +209,12 @@ export function ReviewPanel({
         {/* All files diff view */}
         <div className="flex-1 overflow-y-auto">
           {filteredFiles.length > 0 && (
-            <div className="space-y-8 px-8 py-4">
+            <div className="space-y-6 p-4">
               {filteredFiles.map((item) => (
                 <div
                   className={
                     selectedItemId === item.treeId
-                      ? "rounded-md ring-1 ring-primary ring-offset-8 ring-offset-background"
+                      ? "rounded-md ring-1 ring-primary ring-offset-4 ring-offset-background"
                       : ""
                   }
                   id={`file-${item.treeId}`}
