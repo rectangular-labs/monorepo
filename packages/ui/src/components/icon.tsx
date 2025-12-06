@@ -10,6 +10,7 @@ import {
   ChevronRightIcon,
   ChevronsUpDownIcon,
   CircleSlashIcon,
+  CircleXIcon,
   CopyIcon,
   DotIcon,
   ExternalLinkIcon,
@@ -19,12 +20,15 @@ import {
   FilesIcon,
   FileTextIcon,
   FolderIcon,
+  FolderOpenIcon,
   GlobeIcon,
   GridIcon,
   HandIcon,
   HistoryIcon,
   InfoIcon,
+  ListFilterIcon,
   ListIcon,
+  ListTreeIcon,
   Loader2,
   LogOutIcon,
   XIcon as LucideXIcon,
@@ -73,6 +77,7 @@ export const ChevronDown = ChevronDownIcon;
 export const ChevronRight = ChevronRightIcon;
 export const ChevronsUpDown = ChevronsUpDownIcon;
 export const CircleSlash = CircleSlashIcon;
+export const CircleX = CircleXIcon;
 export const Copy = CopyIcon;
 export const Dot = DotIcon;
 export const EyeOff = EyeOffIcon;
@@ -81,15 +86,18 @@ export const ExternalLink = ExternalLinkIcon;
 export const File = FileIcon;
 export const Files = FilesIcon;
 export const FileText = FileTextIcon;
+export const Filter = ListFilterIcon;
 export const FilterAscending = ArrowUpNarrowWideIcon;
 export const FilterDescending = ArrowDownWideNarrowIcon;
 export const Folder = FolderIcon;
+export const FolderOpen = FolderOpenIcon;
 export const Globe = GlobeIcon;
 export const Grid = GridIcon;
 export const Hand = HandIcon;
 export const History = HistoryIcon;
 export const Info = InfoIcon;
 export const List = ListIcon;
+export const ListTree = ListTreeIcon;
 export const LogOut = LogOutIcon;
 export const Menu = MenuIcon;
 export const Moon = MoonIcon;

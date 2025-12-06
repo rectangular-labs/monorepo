@@ -389,7 +389,7 @@ function DropDrawerContent({
       <DropdownMenuContent
         align="end"
         className={cn(
-          "max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[220px] overflow-y-auto",
+          "max-h-(--radix-dropdown-menu-content-available-height) min-w-[220px] overflow-y-auto",
           className,
         )}
         data-slot="drop-drawer-content"
