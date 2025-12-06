@@ -97,13 +97,11 @@ export type FsNodePayload =
   | {
       type: "dir";
       name: string;
-      fileExtension?: string;
       content?: LoroText;
     }
   | {
       type: "file";
       name: string;
-      fileExtension: string;
       content: LoroText;
     };
 export type LoroDocMapping = {

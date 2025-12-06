@@ -14,6 +14,14 @@ import type {
 } from "loro-crdt";
 
 export type TreeChangeStatus = "created" | "deleted" | "updated" | "moved";
+interface TreePathChange {
+  old: string | undefined;
+  new: string;
+}
+interface TreeNameChange {
+  old: string | undefined;
+  new: string;
+}
 export type TreeFile = Extract<FsNodePayload, { type: "file" }> & {
   treeId: TreeID;
   parentTreeId: TreeID | undefined;
@@ -21,8 +29,8 @@ export type TreeFile = Extract<FsNodePayload, { type: "file" }> & {
   changes:
     | {
         action: TreeChangeStatus;
-        name: string | undefined;
-        fileExtension: string | undefined;
+        path: TreePathChange | undefined;
+        name: TreeNameChange | undefined;
         content:
           | {
               old: LoroText | undefined;
@@ -34,7 +42,7 @@ export type TreeFile = Extract<FsNodePayload, { type: "file" }> & {
 };
 export type TreeDirectory = Omit<
   Extract<FsNodePayload, { type: "dir" }>,
-  "fileExtension" | "content"
+  "content"
 > & {
   treeId: TreeID;
   parentTreeId: TreeID | undefined;
@@ -43,7 +51,8 @@ export type TreeDirectory = Omit<
   changes:
     | {
         action: TreeChangeStatus;
-        name: string | undefined;
+        path: TreePathChange | undefined;
+        name: TreeNameChange | undefined;
       }
     | undefined;
 };
@@ -56,6 +65,8 @@ function buildTreeForNode(
   textChangeMap: Map<ContainerID, TextDiff["diff"]>,
   deletionMap: Map<string, Tree>,
   textContentMap: Map<ContainerID, LoroText>,
+  pathOriginalMap: Map<string, string>,
+  nameOriginalMap: Map<string, string>,
   currentPath: string = "",
 ): Result<TreeDirectory | TreeFile, Error> {
   const treeChanges = treeChangeMap.get(node.id);
@@ -64,6 +75,10 @@ function buildTreeForNode(
   const contentId = node.data.get("content")?.id ?? "cid:-1@-1:Text";
   const textChanges = textChangeMap.get(contentId);
   const originalContent = textContentMap.get(contentId);
+  const originalPath = pathOriginalMap.get(node.id);
+  const originalName = nameOriginalMap.get(node.id);
+
+  const newPath = `${currentPath}/${node.data.get("name")}`;
 
   let changes: TreeDirectory["changes"] | TreeFile["changes"] | undefined;
   // build changes since something has changed at this particular node
@@ -87,8 +102,16 @@ function buildTreeForNode(
 
     changes = {
       action,
-      name: mapChanges?.name as string | undefined,
-      fileExtension: mapChanges?.fileExtension as string | undefined,
+      path:
+        treeChanges?.action === "move" || mapChanges?.name
+          ? {
+              old: originalPath,
+              new: `${currentPath}/${mapChanges?.name ?? node.data.get("name")}`,
+            }
+          : undefined,
+      name: mapChanges?.name
+        ? { old: originalName, new: mapChanges.name as string }
+        : undefined,
       content: textChanges
         ? {
             diff: textChanges,
@@ -109,7 +132,6 @@ function buildTreeForNode(
 
   if (node.data.get("type") === "dir") {
     const deletion = deletionMap.get(node.id);
-    const newPath = `${currentPath}/${node.data.get("name")}`;
 
     const childrenResult =
       node
@@ -122,6 +144,8 @@ function buildTreeForNode(
             textChangeMap,
             deletionMap,
             textContentMap,
+            pathOriginalMap,
+            nameOriginalMap,
             newPath,
           ),
         ) ?? [];
@@ -145,7 +169,6 @@ function buildTreeForNode(
     });
   }
   if (node.data.get("type") === "file") {
-    const newPath = `${currentPath}/${node.data.get("name")}`;
     return ok({
       type: "file",
       treeId: node.id,
@@ -153,7 +176,6 @@ function buildTreeForNode(
       name: node.data.get("name"),
       path: newPath,
       content: node.data.get("content") as LoroText,
-      fileExtension: node.data.get("fileExtension") as string,
       changes: changes as TreeFile["changes"],
     });
   }
@@ -226,6 +248,10 @@ export function buildTree(
   const deletionMap = new Map<string, Tree>();
   // map from the textId to the original LoroText container before changes were applied
   const textContentMap = new Map<ContainerID, LoroText>();
+  // map from the node id to the old path of the node
+  const pathChangeMap = new Map<string, string>();
+  // map from the node id to the old name of the node
+  const nameChangeMap = new Map<string, string>();
   if (baseDocForDiff) {
     const baseDocTree = baseDocForDiff.getTree("fs");
     const baseDocRootNode = baseDocTree.roots()[0] as
@@ -242,6 +268,8 @@ export function buildTree(
         textChanges,
         deletionMap,
         textContentMap,
+        pathChangeMap,
+        nameChangeMap,
       );
       if (!parsed.ok) {
         return parsed;
@@ -251,7 +279,14 @@ export function buildTree(
     traverseTree(baseFileTree, (node) => {
       if (node.type === "file" && node.changes?.content) {
         textContentMap.set(node.content.id, node.content);
-      } else if (node.changes?.action === "deleted") {
+      }
+      if (node.changes?.path) {
+        pathChangeMap.set(node.treeId, node.path);
+      }
+      if (node.changes?.name) {
+        nameChangeMap.set(node.treeId, node.name);
+      }
+      if (node.changes?.action === "deleted") {
         if (node.parentTreeId && node.parentTreeId !== baseDocRootNode?.id) {
           deletionMap.set(node.parentTreeId, [
             ...(deletionMap.get(node.parentTreeId) ?? []),
@@ -278,6 +313,8 @@ export function buildTree(
       textChanges,
       deletionMap,
       textContentMap,
+      pathChangeMap,
+      nameChangeMap,
     );
     if (!parsed.ok) {
       return parsed;

@@ -85,7 +85,6 @@ describe("buildTree: basic tree building", () => {
           name: "file1.txt",
           parentTreeId: expect.any(String),
           treeId: expect.any(String),
-          fileExtension: "txt",
           path: "/file1.txt",
           changes: undefined,
           content: expect.any(LoroText),
@@ -95,7 +94,6 @@ describe("buildTree: basic tree building", () => {
           name: "file2.js",
           parentTreeId: expect.any(String),
           treeId: expect.any(String),
-          fileExtension: "js",
           path: "/file2.js",
           changes: undefined,
           content: expect.any(LoroText),
@@ -151,7 +149,6 @@ describe("buildTree: basic tree building", () => {
           {
             type: "file",
             name: "file1.txt",
-            fileExtension: "txt",
             content: expect.any(LoroText),
             changes: undefined,
             parentTreeId: expect.any(String),
@@ -161,7 +158,6 @@ describe("buildTree: basic tree building", () => {
           {
             type: "file",
             name: "file2.js",
-            fileExtension: "js",
             content: expect.any(LoroText),
             changes: undefined,
             parentTreeId: expect.any(String),
@@ -224,7 +220,6 @@ describe("buildTree: basic tree building", () => {
           {
             type: "file",
             name: "root-file.txt",
-            fileExtension: "txt",
             content: expect.any(LoroText),
             changes: undefined,
             parentTreeId: expect.any(String),
@@ -242,7 +237,6 @@ describe("buildTree: basic tree building", () => {
               {
                 type: "file",
                 name: "level2-file.js",
-                fileExtension: "js",
                 content: expect.any(LoroText),
                 changes: undefined,
                 parentTreeId: expect.any(String),
@@ -260,7 +254,6 @@ describe("buildTree: basic tree building", () => {
                   {
                     type: "file",
                     name: "deep-file.md",
-                    fileExtension: "md",
                     content: expect.any(LoroText),
                     changes: undefined,
                     parentTreeId: expect.any(String),
@@ -285,7 +278,6 @@ describe("buildTree: basic tree building", () => {
           {
             type: "file",
             name: "sibling-file.json",
-            fileExtension: "json",
             content: expect.any(LoroText),
             changes: undefined,
             parentTreeId: expect.any(String),
@@ -324,7 +316,14 @@ describe("buildTree: folder diff operations", () => {
         children: [],
         changes: {
           action: "updated",
-          name: "newName",
+          name: {
+            old: "oldName",
+            new: "newName",
+          },
+          path: {
+            old: "/oldName",
+            new: "/newName",
+          },
         },
       });
     }
@@ -377,6 +376,10 @@ describe("buildTree: folder diff operations", () => {
               children: [],
               changes: {
                 action: "moved",
+                path: {
+                  old: "/source/moveable",
+                  new: "/target/moveable",
+                },
               },
             },
           ],
@@ -442,7 +445,14 @@ describe("buildTree: folder diff operations", () => {
               children: [],
               changes: {
                 action: "moved",
-                name: "newName",
+                name: {
+                  old: "oldName",
+                  new: "newName",
+                },
+                path: {
+                  old: "/source/oldName",
+                  new: "/target/newName",
+                },
               },
             },
           ],
@@ -506,7 +516,6 @@ describe("buildTree: folder diff operations", () => {
                 {
                   type: "file",
                   name: "file.txt",
-                  fileExtension: "txt",
                   content: expect.any(LoroText),
                   parentTreeId: expect.any(String),
                   treeId: expect.any(String),
@@ -532,7 +541,6 @@ describe("buildTree: folder diff operations", () => {
             {
               type: "file",
               name: "file2.txt",
-              fileExtension: "txt",
               content: expect.any(LoroText),
               parentTreeId: expect.any(String),
               treeId: expect.any(String),
@@ -588,6 +596,14 @@ describe("buildTree: folder diff operations", () => {
               path: "/something/newFolder",
               changes: {
                 action: "created",
+                path: {
+                  old: undefined,
+                  new: "/something/newFolder",
+                },
+                name: {
+                  old: undefined,
+                  new: "newFolder",
+                },
               },
             },
           ],
@@ -625,52 +641,21 @@ describe("buildTree: file diff operations", () => {
       expect(result.value[0]).toMatchObject({
         type: "file",
         name: "newName.txt",
-        fileExtension: "txt",
         content: expect.any(LoroText),
         parentTreeId: expect.any(String),
         treeId: expect.any(String),
         path: "/newName.txt",
         changes: {
           action: "updated",
-          name: "newName.txt",
+          name: {
+            old: "oldName.txt",
+            new: "newName.txt",
+          },
+          path: {
+            old: "/oldName.txt",
+            new: "/newName.txt",
+          },
           content: undefined,
-        },
-      });
-    }
-  });
-
-  it("should detect file extension change", () => {
-    const baseDoc = createLoroDoc();
-    const baseTree = baseDoc.getTree("fs");
-    writeToFile({
-      tree: baseTree,
-      path: "/file.txt",
-      content: "content",
-      createIfMissing: true,
-    });
-
-    const newDoc = baseDoc.fork() as LoroDoc<LoroDocMapping>;
-    const newRoot = getRootNode(newDoc);
-    const fileToEdit = newRoot.children()?.[0];
-    if (!fileToEdit) throw new Error("File not found");
-    fileToEdit.data.set("fileExtension", "md");
-
-    const result = buildTree(newDoc, baseDoc);
-
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.value).toHaveLength(1);
-      expect(result.value[0]).toMatchObject({
-        type: "file",
-        name: "file.txt",
-        path: "/file.txt",
-        fileExtension: "md",
-        content: expect.any(LoroText),
-        parentTreeId: expect.any(String),
-        treeId: expect.any(String),
-        changes: {
-          action: "updated",
-          fileExtension: "md",
         },
       });
     }
@@ -697,14 +682,19 @@ describe("buildTree: file diff operations", () => {
         type: "file",
         name: "newFile.txt",
         path: "/newFile.txt",
-        fileExtension: "txt",
         content: expect.any(LoroText),
         parentTreeId: expect.any(String),
         treeId: expect.any(String),
         changes: {
           action: "created",
-          name: "newFile.txt",
-          fileExtension: "txt",
+          name: {
+            old: undefined,
+            new: "newFile.txt",
+          },
+          path: {
+            old: undefined,
+            new: "/newFile.txt",
+          },
           content: undefined,
         },
       });
@@ -746,7 +736,6 @@ cool stuff here.`,
           type: "file",
           name: "file.txt",
           path: "/file.txt",
-          fileExtension: "txt",
           content: expect.any(LoroText),
           parentTreeId: expect.any(String),
           treeId: expect.any(String),
@@ -779,7 +768,7 @@ cool stuff here.`,
           `originant is great app
 cool stuff here.`,
         );
-        expect(file?.changes?.content?.old.toString()).toBe(
+        expect(file?.changes?.content?.old?.toString()).toBe(
           "original content is great",
         );
       }
@@ -833,12 +822,15 @@ cool stuff here.`,
               type: "file",
               name: "moveable.txt",
               path: "/target/moveable.txt",
-              fileExtension: "txt",
               content: expect.any(LoroText),
               treeId: expect.any(String),
               parentTreeId: expect.any(String),
               changes: {
                 action: "moved",
+                path: {
+                  old: "/source/moveable.txt",
+                  new: "/target/moveable.txt",
+                },
               },
             },
           ],
@@ -883,7 +875,6 @@ cool stuff here.`,
             {
               type: "file",
               name: "file.txt",
-              fileExtension: "txt",
               content: expect.any(LoroText),
               path: "/toDelete/file.txt",
               treeId: expect.any(String),

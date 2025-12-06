@@ -41,14 +41,6 @@ export function createNodesForPath<
   }
   if (finalNodeType === "file") {
     currentNode.data.set("type", "file" as Exclude<T["type"], Container>);
-    const currentName = currentNode.data.get("name") as string;
-    currentNode.data.set(
-      "fileExtension",
-      (currentName.split(".").pop() ?? "") as Exclude<
-        T["fileExtension"],
-        Container
-      >,
-    );
   }
 
   return currentNode;
