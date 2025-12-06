@@ -54,7 +54,7 @@ jobs:
         uses: ./tooling/github/setup
 
       - name: Build Dependencies
-        run: bun build
+        run: bun run build
 
       - name: Test
         env:
