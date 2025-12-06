@@ -71,6 +71,7 @@ export function ReviewSidebarList({
                   isActive={selectedItemId === item.treeId}
                   onClick={() => onItemSelect(item.treeId)}
                   size="lg"
+                  title={item.path}
                 >
                   <Icons.File />
                   <div className="flex min-w-0 flex-col items-start">

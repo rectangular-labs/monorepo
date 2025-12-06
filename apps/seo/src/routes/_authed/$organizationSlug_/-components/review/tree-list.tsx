@@ -248,8 +248,9 @@ export function ReviewTreeList({
                   onClick={() => {
                     onItemSelect(item.getItemData().treeId);
                   }}
+                  title={item.getItemData().path}
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex w-full items-center gap-2">
                     {item.isFolder() &&
                       (item.isExpanded() ? (
                         <Icons.FolderOpen className="pointer-events-none size-4 text-muted-foreground" />
@@ -259,7 +260,7 @@ export function ReviewTreeList({
                     {item.getItemData().type === "file" && (
                       <Icons.File className="pointer-events-none size-4 text-muted-foreground" />
                     )}
-                    {item.getItemName()}
+                    <span className="truncate">{item.getItemName()}</span>
                   </span>
                 </TreeItemLabel>
               </TreeItem>
