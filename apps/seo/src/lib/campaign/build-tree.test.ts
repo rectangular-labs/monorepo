@@ -725,7 +725,6 @@ describe("buildTree: file diff operations", () => {
       ` app
 cool stuff here.`,
     );
-    console.log("content", content.toString());
     const result = buildTree(newDoc, baseDoc);
 
     expect(result.ok).toBe(true);
