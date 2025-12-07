@@ -13,9 +13,12 @@ import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { GridListToggle, useGridListMode } from "~/components/grid-list-toggle";
 import { getApiClientRq } from "~/lib/api";
 import { getFaviconUrl } from "~/lib/url";
+import {
+  GridListToggle,
+  useGridListMode,
+} from "~/routes/_authed/-components/grid-list-toggle";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 
 export const Route = createFileRoute("/_authed/$organizationSlug/")({
