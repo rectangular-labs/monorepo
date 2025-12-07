@@ -7,7 +7,7 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useDebounce } from "@rectangular-labs/ui/hooks/use-debounce";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
@@ -16,17 +16,27 @@ import { LoadingError } from "../../-components/loading-error";
 type Campaign = RouterOutputs["campaigns"]["list"]["data"][0];
 type CampaignsSidebarProps = {
   projectId: string;
+  campaignId: string;
   organizationId: string;
-  currentCampaign: Campaign;
 };
 
 export function CampaignsSidebar({
   projectId,
+  campaignId,
   organizationId,
-  currentCampaign,
 }: CampaignsSidebarProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
+
+  const { data: currentCampaign } = useQuery(
+    getApiClientRq().campaigns.get.queryOptions({
+      input: {
+        id: campaignId,
+        projectId,
+        organizationId,
+      },
+    }),
+  );
 
   const {
     data,
@@ -53,12 +63,14 @@ export function CampaignsSidebar({
 
   const displayCampaigns = useMemo(() => {
     if (search) return campaigns;
-    if (campaigns.some((c) => c.id === currentCampaign.id)) return campaigns;
+    if (campaigns.some((c) => c.id === campaignId)) return campaigns;
 
-    const withCurrent = [...campaigns, currentCampaign];
+    const withCurrent = currentCampaign?.campaign
+      ? [...campaigns, currentCampaign?.campaign]
+      : campaigns;
     withCurrent.sort((a, b) => b.id.localeCompare(a.id));
     return withCurrent;
-  }, [campaigns, currentCampaign, search]);
+  }, [campaigns, currentCampaign, campaignId, search]);
 
   return (
     <div className="flex h-full flex-col rounded-md bg-background">

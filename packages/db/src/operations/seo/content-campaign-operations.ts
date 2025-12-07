@@ -79,7 +79,7 @@ export async function updateContentCampaign({
   db: DB;
   values: typeof schema.seoContentCampaignUpdateSchema.infer;
 }) {
-  return await safe(() =>
+  const result = await safe(() =>
     db
       .update(schema.seoContentCampaign)
       .set(values)
@@ -92,4 +92,38 @@ export async function updateContentCampaign({
       )
       .returning(),
   );
+  if (!result.ok) {
+    return result;
+  }
+
+  return ok(result.value[0]);
+}
+
+export async function deleteContentCampaign({
+  db,
+  id,
+  projectId,
+  organizationId,
+}: {
+  db: DB;
+  id: string;
+  projectId: string;
+  organizationId: string;
+}) {
+  const result = await safe(() =>
+    db
+      .delete(schema.seoContentCampaign)
+      .where(
+        and(
+          eq(schema.seoContentCampaign.id, id),
+          eq(schema.seoContentCampaign.projectId, projectId),
+          eq(schema.seoContentCampaign.organizationId, organizationId),
+        ),
+      )
+      .returning(),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  return ok(result.value[0]);
 }

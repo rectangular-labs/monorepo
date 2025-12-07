@@ -1,13 +1,16 @@
 import { ORPCError, type as orpcType } from "@orpc/server";
-import { and, eq, schema, sql } from "@rectangular-labs/db";
+import { schema, sql } from "@rectangular-labs/db";
 import {
   createContentCampaign,
+  deleteContentCampaign,
   getDefaultContentCampaign,
   listContentCampaignMessages,
+  updateContentCampaign,
 } from "@rectangular-labs/db/operations";
 import {
   CAMPAIGN_DEFAULT_TITLE,
   contentCampaignMessageMetadataSchema,
+  contentCampaignStatusSchema,
 } from "@rectangular-labs/db/parsers";
 import { validateUIMessages } from "ai";
 import { type } from "arktype";
@@ -24,7 +27,7 @@ const list = withOrganizationIdBase
       projectId: "string",
       limit: "1<=number<=100 = 20",
       "cursor?": "string.uuid|undefined",
-      "status?": type("'draft'|'review'|'accepted'|'denied'|undefined"),
+      "status?": contentCampaignStatusSchema,
       "search?": "string|undefined",
     }),
   )
@@ -147,25 +150,27 @@ const update = withOrganizationIdBase
         message: "At least one field must be provided",
       });
     }
-    const [updated] = await context.db
-      .update(schema.seoContentCampaign)
-      .set({
+    const updateContentCampaignResult = await updateContentCampaign({
+      db: context.db,
+      values: {
+        id: input.id,
+        projectId: input.projectId,
+        organizationId: context.organization.id,
         title: input.title,
         status: input.status,
         workspaceBlobUri: input.workspaceBlobUri,
-      })
-      .where(
-        and(
-          eq(schema.seoContentCampaign.id, input.id),
-          eq(schema.seoContentCampaign.projectId, input.projectId),
-          eq(schema.seoContentCampaign.organizationId, context.organization.id),
-        ),
-      )
-      .returning();
-    if (!updated) {
+      },
+    });
+    if (!updateContentCampaignResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to update campaign",
+        cause: updateContentCampaignResult.error,
+      });
+    }
+    if (!updateContentCampaignResult.value) {
       throw new ORPCError("NOT_FOUND", { message: "Campaign not found" });
     }
-    return updated;
+    return updateContentCampaignResult.value;
   });
 
 const remove = withOrganizationIdBase
@@ -173,23 +178,20 @@ const remove = withOrganizationIdBase
   .input(type({ id: "string", projectId: "string" }))
   .output(type({ success: "true" }))
   .handler(async ({ context, input }) => {
-    const [row] = await context.db
-      .delete(schema.seoContentCampaign)
-      .where(
-        and(
-          eq(schema.seoContentCampaign.id, input.id),
-          eq(schema.seoContentCampaign.projectId, input.projectId),
-          eq(
-            schema.seoContentCampaign.organizationId,
-            context.session.activeOrganizationId,
-          ),
-        ),
-      )
-      .returning();
-    if (!row) {
-      throw new ORPCError("NOT_FOUND", {
-        message: "No campaign found to delete.",
+    const deleteContentCampaignResult = await deleteContentCampaign({
+      db: context.db,
+      id: input.id,
+      projectId: input.projectId,
+      organizationId: context.session.activeOrganizationId,
+    });
+    if (!deleteContentCampaignResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to delete campaign",
+        cause: deleteContentCampaignResult.error,
       });
+    }
+    if (!deleteContentCampaignResult.value) {
+      throw new ORPCError("NOT_FOUND", { message: "Campaign not found" });
     }
     return { success: true } as const;
   });

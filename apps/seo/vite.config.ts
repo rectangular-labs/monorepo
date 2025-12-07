@@ -44,10 +44,6 @@ const config = defineConfig({
     wasm(),
     topLevelAwait(),
   ],
-  test: {
-    globals: true,
-    environment: "jsdom",
-  },
   server: {
     port: 7070,
   },

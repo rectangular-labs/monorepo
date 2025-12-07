@@ -6,6 +6,7 @@ import {
   AvatarImage,
 } from "@rectangular-labs/ui/components/ui/avatar";
 import { InlineEdit } from "@rectangular-labs/ui/components/ui/inline-edit";
+import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { getInitials } from "@rectangular-labs/ui/utils/format/initials";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
@@ -20,7 +21,6 @@ type CampaignHeaderProps = {
   organizationId: string;
   campaignId: string;
   projectWebsiteUrl: string;
-  initialTitle: string;
 };
 
 export function CampaignHeader({
@@ -28,20 +28,31 @@ export function CampaignHeader({
   organizationId,
   campaignId,
   projectWebsiteUrl,
-  initialTitle,
 }: CampaignHeaderProps) {
   const queryClient = useQueryClient();
   const { organizationSlug, projectSlug } = useParams({
     from: "/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId",
   });
+
   const { data: sessionData } = useQuery(
     getApiClientRq().auth.session.current.queryOptions(),
   );
+  const { data, isLoading: isLoadingCampaign } = useQuery(
+    getApiClientRq().campaigns.get.queryOptions({
+      input: {
+        id: campaignId,
+        projectId,
+        organizationId,
+      },
+    }),
+  );
+
   const faviconUrl = getFaviconUrl(projectWebsiteUrl);
-  const [title, setTitle] = useState(initialTitle);
+  const [title, setTitle] = useState(data?.campaign.title ?? "");
+
   useEffect(() => {
-    setTitle(initialTitle);
-  }, [initialTitle]);
+    setTitle(data?.campaign.title ?? "");
+  }, [data?.campaign.title]);
 
   const { mutateAsync: updateTitle } = useMutation(
     getApiClientRq().campaigns.update.mutationOptions({
@@ -60,8 +71,7 @@ export function CampaignHeader({
   );
 
   const commitTitle = async () => {
-    if (!title || !campaignId || !projectId || !organizationId) return;
-    if (title === initialTitle) return;
+    if (!title.trim() || !campaignId || !projectId || !organizationId) return;
     await updateTitle({
       id: campaignId,
       projectId,
@@ -71,7 +81,7 @@ export function CampaignHeader({
   };
 
   return (
-    <div className="flex h-16 items-center justify-between bg-background px-4">
+    <nav className="flex h-16 items-center justify-between rounded-t-md bg-background px-4">
       <div className="flex items-center gap-4">
         <Link to="..">
           <Avatar className="size-6">
@@ -82,37 +92,40 @@ export function CampaignHeader({
           </Avatar>
         </Link>
         <div className="flex flex-col">
-          <InlineEdit
-            className="min-h-fit text-xl"
-            inputType="text"
-            maxLength={100}
-            onChange={setTitle}
-            onSave={commitTitle}
-            required
-            size="lg"
-            value={title}
-            variant="ghost"
-          />
+          {isLoadingCampaign && <Skeleton className="h-7 w-80" />}
+          {!isLoadingCampaign && (
+            <InlineEdit
+              className="min-h-fit w-full min-w-0 truncate text-xl"
+              inputType="text"
+              maxLength={100}
+              onChange={setTitle}
+              onSave={commitTitle}
+              required
+              size="lg"
+              value={title}
+              variant="ghost"
+            />
+          )}
           <ul className="flex items-center gap-4 text-muted-foreground text-sm">
             <NavLink
+              activeOptions={{
+                exact: true,
+              }}
               params={{ organizationSlug, projectSlug, campaignId }}
               to="/$organizationSlug/$projectSlug/campaign/$campaignId"
             >
               Edit
             </NavLink>
             <NavLink
-              activeOptions={{
-                exact: true,
-              }}
-              params={{ organizationSlug, projectSlug }}
-              to="/$organizationSlug/$projectSlug/campaign"
+              params={{ organizationSlug, projectSlug, campaignId }}
+              to="/$organizationSlug/$projectSlug/campaign/$campaignId/review"
             >
-              Review & Publish
+              Review
             </NavLink>
           </ul>
         </div>
       </div>
       <UserDropdown user={sessionData?.user} />
-    </div>
+    </nav>
   );
 }

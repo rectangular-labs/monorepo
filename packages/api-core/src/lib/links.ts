@@ -20,7 +20,7 @@ export const createRpcLink = ({
       }
 
       // Use GET for read-like operations
-      if (path.at(-1)?.match(/^(?:get|find|list|search)(?:[A-Z].*)?$/)) {
+      if (path.at(-1)?.match(/^(?:get|find|list|search|sync)(?:[A-Z].*)?$/)) {
         return "GET";
       }
 

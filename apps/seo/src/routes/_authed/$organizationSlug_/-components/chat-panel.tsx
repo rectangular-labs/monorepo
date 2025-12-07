@@ -111,6 +111,10 @@ export function ChatPanel({
   >(new Map());
 
   const webSocketUrl = `${typeof window !== "undefined" ? window.location.origin.replace("https", "wss") : "https://localhost:3000"}/api/realtime/organization/${organizationId}/project/${projectId}/campaign/${campaignId}/room`;
+  // Use a ref to store the websocket client so closures always access the latest instance
+  const webSocketClientRef = useRef<ReturnType<typeof useWebSocket> | null>(
+    null,
+  );
   const webSocketClient = useWebSocket(webSocketUrl, undefined, {
     onMessage: async (event) => {
       const dataResult = safeSync(() => JSON.parse(event.data));
@@ -214,7 +218,17 @@ export function ChatPanel({
           return;
       }
     },
+    onError: (event) => {
+      console.error("error", event);
+    },
+    onClose: (event) => {
+      console.error("close", event);
+    },
+    onOpen: (event) => {
+      console.log("open", event);
+    },
   });
+  webSocketClientRef.current = webSocketClient;
 
   const { messages, setMessages, sendMessage, status, regenerate, stop } =
     useChat<SeoChatMessage>({
@@ -251,10 +265,22 @@ export function ChatPanel({
             });
           }
 
+          // Use the ref to get the latest websocket client (avoids stale closure issues)
+          const currentWs = webSocketClientRef.current;
+          if (!currentWs || currentWs.readyState !== WebSocket.OPEN) {
+            console.error(
+              "WebSocket not ready:",
+              currentWs?.readyState,
+              "expected:",
+              WebSocket.OPEN,
+            );
+            throw new Error("WebSocket connection is not open");
+          }
+
           // Send the message to the agent
           // The websocket client from ORPC listens to messages coming back from the server, but we don't want to listen to them here since we handle it on our own.
           // Thus we proxy the websocket client to prevent it from listening to messages coming back from the server.
-          const proxyWs = new Proxy(webSocketClient, {
+          const proxyWs = new Proxy(currentWs, {
             get(target, prop, receiver) {
               if (prop === "addEventListener") {
                 return (
@@ -272,7 +298,6 @@ export function ChatPanel({
             },
           });
           const wsClient = websocketClient(proxyWs as unknown as WebSocket);
-
           wsClient.campaign.room({
             messages: messages as SeoChatMessage[],
             clientMessageId,
@@ -343,7 +368,7 @@ export function ChatPanel({
   };
 
   return (
-    <div className="flex h-full flex-col gap-4 rounded-md bg-background p-3">
+    <div className="flex h-full flex-col rounded-b-md bg-background pb-3 pl-3">
       <Conversation className="h-full">
         <ConversationContent>
           {hasNextPage && (
@@ -506,7 +531,7 @@ export function ChatPanel({
         <ConversationScrollButton />
       </Conversation>
 
-      <PromptInput globalDrop multiple onSubmit={handleSubmit}>
+      <PromptInput className="pr-3" globalDrop multiple onSubmit={handleSubmit}>
         <PromptInputBody>
           <PromptInputAttachments>
             {(attachment) => <PromptInputAttachment data={attachment} />}

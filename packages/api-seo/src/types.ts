@@ -9,6 +9,7 @@ import type { DB } from "@rectangular-labs/db";
 import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/db/parsers";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
+import type { LoroText, LoroTree } from "loro-crdt";
 import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
 import type { createDataforseoTool } from "./lib/ai/dataforseo-tool";
 import type { createFileTools } from "./lib/ai/file-tool";
@@ -54,7 +55,27 @@ export interface InitialContext extends BaseContextWithAuth {
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
 }
+/**
+ * This provides all the necessary context for the websocket server.
+ * Today this handles all the chat messages between the user and the assistant.
+ */
+export interface WebSocketContext extends InitialContext {
+  senderWebSocket: WebSocket;
+  allWebSockets: WebSocket[];
+  userId: string;
+  sessionId: string;
+  projectId: string;
+  campaignId: string;
+  campaignTitle: string;
+  updateCampaignTitle: (title: string) => void;
+  organizationId: string;
+  roomDocumentMap: Map<string, RoomDocument>;
+  userFragments: Map<HexString, UserFragment>;
+}
 
+/**
+ * This handles the logic for the Loro sync server.
+ */
 export interface RoomDocument {
   data: Uint8Array;
   dirty: boolean;
@@ -65,7 +86,6 @@ export interface RoomDocument {
     adaptor: CrdtServerAdaptor;
   };
 }
-
 export interface UserFragment {
   data: Uint8Array[];
   totalSize: number;
@@ -73,15 +93,17 @@ export interface UserFragment {
   header: DocUpdateFragmentHeader;
 }
 
-export interface WebSocketContext extends InitialContext {
-  senderWebSocket: WebSocket;
-  allWebSockets: WebSocket[];
-  userId: string;
-  sessionId: string;
-  projectId: string;
-  campaignId: string;
-  campaignTitle: string;
-  organizationId: string;
-  roomDocumentMap: Map<string, RoomDocument>;
-  userFragments: Map<HexString, UserFragment>;
-}
+export type FsNodePayload =
+  | {
+      type: "dir";
+      name: string;
+      content?: LoroText;
+    }
+  | {
+      type: "file";
+      name: string;
+      content: LoroText;
+    };
+export type LoroDocMapping = {
+  fs: LoroTree<FsNodePayload>;
+};

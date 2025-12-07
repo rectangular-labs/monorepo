@@ -1,11 +1,11 @@
 import { getContentCampaignById } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import { LoroServerAdaptor } from "loro-adaptors/loro";
-import { LoroDoc } from "loro-crdt";
 import { CrdtType } from "loro-protocol";
 import { getWebsocketContext } from "../../context";
 import type { RoomDocument } from "../../types";
 import { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
+import { forkAndUpdateWorkspaceBlob } from "./fork-workspace-blob";
 import { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
 
 export function getRoomKey(
@@ -77,17 +77,16 @@ export async function getOrCreateRoomDocument(
         );
       }
       if (campaign.workspaceBlobUri !== campaignWorkspaceBlobUri) {
-        const doc = new LoroDoc();
-        doc.import(blob);
-        const forkedDoc = doc.fork();
-        const forkedBuffer = forkedDoc.export({
-          mode: "shallow-snapshot",
-          frontiers: doc.oplogFrontiers(),
+        // still on main blob, fork and update
+        const forkedBuffer = await forkAndUpdateWorkspaceBlob({
+          blob,
+          newWorkspaceBlobUri: campaignWorkspaceBlobUri,
+          campaignId: context.campaignId,
+          projectId: context.projectId,
+          organizationId: context.organizationId,
+          db: context.db,
+          workspaceBucket: context.workspaceBucket,
         });
-        await context.workspaceBucket.setSnapshot(
-          campaignWorkspaceBlobUri,
-          forkedBuffer,
-        );
         newRoomDoc.data = forkedBuffer;
         newRoomDoc.lastSaved = Date.now();
       } else {
@@ -106,5 +105,6 @@ export {
   broadcastMessageToRoom,
 } from "./broadcast-to-room";
 export { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
+export { forkAndUpdateWorkspaceBlob } from "./fork-workspace-blob";
 export { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
 export { replyToSender } from "./reply-to-sender";

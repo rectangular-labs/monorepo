@@ -6,12 +6,15 @@ import {
   updateSeoProject,
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
-import { LoroDoc } from "loro-crdt";
+import { LoroDoc, VersionVector } from "loro-crdt";
 import { withOrganizationIdBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import { getWorkspaceBlobUri } from "../lib/workspace";
+import {
+  forkAndUpdateWorkspaceBlob,
+  getWorkspaceBlobUri,
+} from "../lib/workspace";
 import { metrics } from "./project.metrics";
 
 const list = withOrganizationIdBase
@@ -210,6 +213,78 @@ const remove = withOrganizationIdBase
     return { success: true } as const;
   });
 
+const syncDocument = withOrganizationIdBase
+  .route({ method: "GET", path: "/{projectId}/sync-document" })
+  .input(
+    type({
+      projectId: "string",
+      campaignId: "string|null",
+      organizationIdentifier: "string",
+      opLogVersion: type.instanceOf(Blob),
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(type({ blob: type.instanceOf(Blob) }))
+  .handler(async ({ context, input }) => {
+    const workspaceBlobUri = getWorkspaceBlobUri({
+      orgId: context.organization.id,
+      projectId: input.projectId,
+      campaignId: input.campaignId,
+    });
+    const mainBlobUri = getWorkspaceBlobUri({
+      orgId: context.organization.id,
+      projectId: input.projectId,
+      campaignId: undefined,
+    });
+    const requestedBlob = await (async () => {
+      const workspaceBlob =
+        await context.workspaceBucket.getSnapshot(workspaceBlobUri);
+      if (workspaceBlob) {
+        return workspaceBlob;
+      }
+      // no blob found for workspaceBlobUri, we try falling back to main blob if it exists.
+      // Note that campaignId has to exists in order for the workspaceBlobUri to be different
+      if (workspaceBlobUri !== mainBlobUri && input.campaignId) {
+        const mainBlob = await context.workspaceBucket.getSnapshot(mainBlobUri);
+        if (!mainBlob) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: `Main workspace blob not found for ${input.projectId}`,
+          });
+        }
+        // fork and update the workspace blob uri
+        const forkedBuffer = await forkAndUpdateWorkspaceBlob({
+          blob: mainBlob,
+          newWorkspaceBlobUri: workspaceBlobUri,
+          projectId: input.projectId,
+          campaignId: input.campaignId,
+          organizationId: context.organization.id,
+          db: context.db,
+          workspaceBucket: context.workspaceBucket,
+        });
+        return forkedBuffer;
+      }
+      return null;
+    })();
+
+    if (!requestedBlob) {
+      throw new ORPCError("NOT_FOUND", {
+        message: `Workspace blob not found.`,
+        cause: new Error(
+          `Workspace blob not found for ${input.campaignId ? `campaign ${input.campaignId}` : `project ${input.projectId}`}`,
+        ),
+      });
+    }
+    const doc = new LoroDoc();
+    doc.import(requestedBlob);
+    const updates = doc.export({
+      mode: "update",
+      from: new VersionVector(
+        new Uint8Array(await input.opLogVersion.arrayBuffer()),
+      ),
+    });
+    return { blob: new Blob([new Uint8Array(updates)]) };
+  });
+
 export default withOrganizationIdBase
   .prefix("/organization/{organizationIdentifier}/project")
   .router({
@@ -221,4 +296,5 @@ export default withOrganizationIdBase
     get,
     setUpWorkspace,
     metrics,
+    syncDocument,
   });

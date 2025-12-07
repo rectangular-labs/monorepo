@@ -15,8 +15,7 @@ export type BaseFileSystem = {
  * @returns A string representation of the node at the given path
  */
 export function defaultNodeFormatter<
-  T extends Record<string, unknown> &
-    (BaseFileSystem & { fileExtension?: string }),
+  T extends Record<string, unknown> & BaseFileSystem,
 >(node: LoroTreeNode<T>, path: string): string {
   if (node.data.get("type") === "dir") {
     const children = node.children() ?? [];
@@ -32,15 +31,16 @@ export function defaultNodeFormatter<
           callback: (node) => {
             const nodeType = node.data.get("type");
             if (nodeType === "file") {
-              const fileExtension = node.data.get("fileExtension") as
-                | string
-                | undefined;
-              if (fileExtension) {
-                childFileTypeMapping[fileExtension] =
-                  (childFileTypeMapping[fileExtension] ?? 0) + 1;
-              } else {
+              const fileSplit = node.data.get("name")?.split(".");
+              if (fileSplit?.length === 1) {
                 childFileTypeMapping.unknown =
                   (childFileTypeMapping.unknown ?? 0) + 1;
+              } else {
+                const fileExtension = fileSplit?.at(-1);
+                if (fileExtension) {
+                  childFileTypeMapping[fileExtension] =
+                    (childFileTypeMapping[fileExtension] ?? 0) + 1;
+                }
               }
             }
           },
@@ -164,7 +164,13 @@ export function removeNodeAtPath<
       message: `Directory ${path} is not empty. Set recursive=true to remove it and all of its children`,
     };
   }
-  tree.delete(node.id);
+  traverseNode({
+    node,
+    callback: (node) => {
+      tree.delete(node.id);
+    },
+    order: "post",
+  });
   return { success: true };
 }
 
@@ -257,3 +263,5 @@ export function writeToFile<
   textContainer.updateByLine(content);
   return { success: true };
 }
+export { resolvePath } from "./utils/resolve-path";
+export { traverseNode } from "./utils/traverse-node";

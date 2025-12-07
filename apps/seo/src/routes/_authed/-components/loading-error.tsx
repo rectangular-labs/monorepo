@@ -56,12 +56,14 @@ export function LoadingError({
           <EmptyTitle>{errorTitle}</EmptyTitle>
           <EmptyDescription>{description}</EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onRetry}>
-            <Icons.RotateCcw className="size-4" />
-            Try again
-          </Button>
-        </EmptyContent>
+        {onRetry && (
+          <EmptyContent>
+            <Button onClick={onRetry}>
+              <Icons.RotateCcw className="size-4" />
+              Try again
+            </Button>
+          </EmptyContent>
+        )}
       </Empty>
     );
   }

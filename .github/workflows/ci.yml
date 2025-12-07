@@ -53,6 +53,9 @@ jobs:
       - name: Setup
         uses: ./tooling/github/setup
 
+      - name: Build Dependencies
+        run: bun run build
+
       - name: Test
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}

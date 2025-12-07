@@ -12,7 +12,6 @@ import {
 import { resolvePath } from "./utils/resolve-path";
 
 type TestFileSystem = BaseFileSystem & {
-  fileExtension?: string;
   content?: LoroText;
 };
 
@@ -25,7 +24,6 @@ describe("defaultNodeFormatter", () => {
     const fileNode = rootNode.createNode();
     fileNode.data.set("name", "test.txt");
     fileNode.data.set("type", "file");
-    fileNode.data.set("fileExtension", "txt");
 
     const result = defaultNodeFormatter(rootNode, "/");
     expect(result).toEqual(`/:
@@ -44,17 +42,14 @@ describe("defaultNodeFormatter", () => {
     const file1 = dirNode.createNode();
     file1.data.set("name", "file1.txt");
     file1.data.set("type", "file");
-    file1.data.set("fileExtension", "txt");
 
     const file2 = dirNode.createNode();
     file2.data.set("name", "file2.txt");
     file2.data.set("type", "file");
-    file2.data.set("fileExtension", "txt");
 
     const file3 = dirNode.createNode();
     file3.data.set("name", "file3.js");
     file3.data.set("type", "file");
-    file3.data.set("fileExtension", "js");
 
     const result = defaultNodeFormatter(rootNode, "/");
     expect(result).toEqual(`/:
@@ -69,7 +64,6 @@ describe("defaultNodeFormatter", () => {
     const fileNode = rootNode.createNode();
     fileNode.data.set("name", "test.txt");
     fileNode.data.set("type", "file");
-    fileNode.data.set("fileExtension", "txt");
 
     const result = defaultNodeFormatter(fileNode, "/test.txt");
     expect(result).toBe("/test.txt (file)");
@@ -85,7 +79,6 @@ describe("lsOutput", () => {
     const fileNode = rootNode.createNode();
     fileNode.data.set("name", "test.txt");
     fileNode.data.set("type", "file");
-    fileNode.data.set("fileExtension", "txt");
 
     const result = lsOutput({
       tree,
@@ -140,7 +133,6 @@ describe("catOutput", () => {
     const fileNode = rootNode.createNode();
     fileNode.data.set("name", "test.txt");
     fileNode.data.set("type", "file");
-    fileNode.data.set("fileExtension", "txt");
     const content = new LoroText();
     const textContent = "Hello, World!";
     content.insert(0, textContent);
@@ -411,7 +403,6 @@ describe("writeToFile", () => {
     const fileNode = rootNode.createNode();
     fileNode.data.set("name", "test.txt");
     fileNode.data.set("type", "file");
-    fileNode.data.set("fileExtension", "txt");
     fileNode.data.setContainer("content", new LoroText());
 
     const result = writeToFile({
@@ -527,7 +518,6 @@ describe("writeToFile", () => {
     const fileNode = rootNode.createNode();
     fileNode.data.set("name", "test.txt");
     fileNode.data.set("type", "file");
-    fileNode.data.set("fileExtension", "txt");
     const content = new LoroText();
     fileNode.data.setContainer("customContent", content);
 

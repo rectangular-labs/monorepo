@@ -8,36 +8,19 @@ import {
 } from "@rectangular-labs/loro-file-system";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { LoroDoc, type LoroText, type LoroTree } from "loro-crdt";
+import { LoroDoc } from "loro-crdt";
 import { CrdtType } from "loro-protocol";
+import type { LoroDocMapping } from "../../types";
 import {
   getOrCreateRoomDocument,
   WORKSPACE_CONTENT_ROOM_ID,
 } from "../workspace";
 
-type FsNodePayload =
-  | {
-      type: "dir";
-      name: string;
-      fileExtension?: string;
-      content?: LoroText;
-    }
-  | {
-      type: "file";
-      name: string;
-      fileExtension: string;
-      content: LoroText;
-    };
-type FsRoot = LoroTree<FsNodePayload>;
-type LoroDocMapping = {
-  fs: FsRoot;
-};
-
 async function withLoroTree<TResult>({
   handler,
   shouldPersist,
 }: {
-  handler: (args: { tree: FsRoot }) => TResult | Promise<TResult>;
+  handler: (args: { tree: LoroDocMapping["fs"] }) => TResult | Promise<TResult>;
   shouldPersist: boolean | ((result: TResult) => boolean);
 }): Promise<TResult> {
   const roomResult = await getOrCreateRoomDocument(
