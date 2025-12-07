@@ -6,13 +6,18 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
-import type { serpTrafficSchema } from "../../schema-parsers";
-import type { seoWebsiteInfoSchema } from "../../schema-parsers/project-parsers";
+import type {
+  articleSettingsSchema,
+  businessBackgroundSchema,
+  imageSettingsSchema,
+  serpTrafficSchema,
+} from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
 import { seoContent } from "./content-schema";
 import { seoGscProperty } from "./gsc-property-schema";
+import { seoProjectAuthor } from "./project-author-schema";
 import { seoTaskRun } from "./task-run-schema";
 
 export const seoProject = pgSeoTable(
@@ -28,7 +33,9 @@ export const seoProject = pgSeoTable(
         onUpdate: "cascade",
       }),
     websiteUrl: text().notNull(),
-    websiteInfo: jsonb().$type<typeof seoWebsiteInfoSchema.infer>(),
+    businessBackground: jsonb().$type<typeof businessBackgroundSchema.infer>(),
+    imageSettings: jsonb().$type<typeof imageSettingsSchema.infer>(),
+    articleSettings: jsonb().$type<typeof articleSettingsSchema.infer>(),
     serpSnapshot: jsonb().$type<typeof serpTrafficSchema.infer>(),
     gscPropertyId: uuid().references(() => seoGscProperty.id, {
       onDelete: "set null",
@@ -58,6 +65,7 @@ export const seoProjectRelations = relations(seoProject, ({ one, many }) => ({
     references: [seoGscProperty.id],
   }),
   campaigns: many(seoContent),
+  authors: many(seoProjectAuthor),
   tasks: many(seoTaskRun),
 }));
 
