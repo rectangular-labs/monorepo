@@ -78,10 +78,15 @@ export async function getOrCreateRoomDocument(
       }
       if (campaign.workspaceBlobUri !== campaignWorkspaceBlobUri) {
         // still on main blob, fork and update
-        const forkedBuffer = await forkAndUpdateWorkspaceBlob(
+        const forkedBuffer = await forkAndUpdateWorkspaceBlob({
           blob,
-          campaignWorkspaceBlobUri,
-        );
+          newWorkspaceBlobUri: campaignWorkspaceBlobUri,
+          campaignId: context.campaignId,
+          projectId: context.projectId,
+          organizationId: context.organizationId,
+          db: context.db,
+          workspaceBucket: context.workspaceBucket,
+        });
         newRoomDoc.data = forkedBuffer;
         newRoomDoc.lastSaved = Date.now();
       } else {

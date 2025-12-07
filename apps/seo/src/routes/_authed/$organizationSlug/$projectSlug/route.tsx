@@ -5,15 +5,24 @@ import { NavLink } from "../../-components/nav-link";
 export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
   {
     loader: async ({ context, params }) => {
-      const activeProject = await context.queryClient.ensureQueryData(
-        getApiClientRq().project.get.queryOptions({
-          input: {
-            organizationIdentifier: params.organizationSlug,
-            identifier: params.projectSlug,
-          },
-        }),
-      );
-      // todo: this isn't true anymore since the above will just throw
+      const activeProject = await context.queryClient
+        .ensureQueryData(
+          getApiClientRq().project.get.queryOptions({
+            input: {
+              organizationIdentifier: params.organizationSlug,
+              identifier: params.projectSlug,
+            },
+          }),
+        )
+        .catch((error) => {
+          if (
+            error instanceof Error &&
+            error.message.includes("No project found")
+          ) {
+            return null;
+          }
+          throw error;
+        });
       if (!activeProject) throw notFound();
 
       if (!activeProject.workspaceBlobUri) {

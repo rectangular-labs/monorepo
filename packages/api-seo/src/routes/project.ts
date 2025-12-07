@@ -243,7 +243,8 @@ const syncDocument = withOrganizationIdBase
         return workspaceBlob;
       }
       // no blob found for workspaceBlobUri, we try falling back to main blob if it exists.
-      if (workspaceBlobUri !== mainBlobUri) {
+      // Note that campaignId has to exists in order for the workspaceBlobUri to be different
+      if (workspaceBlobUri !== mainBlobUri && input.campaignId) {
         const mainBlob = await context.workspaceBucket.getSnapshot(mainBlobUri);
         if (!mainBlob) {
           throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -251,10 +252,15 @@ const syncDocument = withOrganizationIdBase
           });
         }
         // fork and update the workspace blob uri
-        const forkedBuffer = await forkAndUpdateWorkspaceBlob(
-          mainBlob,
-          workspaceBlobUri,
-        );
+        const forkedBuffer = await forkAndUpdateWorkspaceBlob({
+          blob: mainBlob,
+          newWorkspaceBlobUri: workspaceBlobUri,
+          projectId: input.projectId,
+          campaignId: input.campaignId,
+          organizationId: context.organization.id,
+          db: context.db,
+          workspaceBucket: context.workspaceBucket,
+        });
         return forkedBuffer;
       }
       return null;
@@ -262,7 +268,10 @@ const syncDocument = withOrganizationIdBase
 
     if (!requestedBlob) {
       throw new ORPCError("NOT_FOUND", {
-        message: `Workspace blob not found for ${input.campaignId ? `campaign ${input.campaignId}` : `project ${input.projectId}`}`,
+        message: `Workspace blob not found.`,
+        cause: new Error(
+          `Workspace blob not found for ${input.campaignId ? `campaign ${input.campaignId}` : `project ${input.projectId}`}`,
+        ),
       });
     }
     const doc = new LoroDoc();

@@ -1,6 +1,7 @@
+import type { DB } from "@rectangular-labs/db";
 import { updateContentCampaign } from "@rectangular-labs/db/operations";
 import { LoroDoc } from "loro-crdt";
-import { getWebsocketContext } from "../../context";
+import type { InitialContext } from "../../types";
 
 /**
  * Forks a workspace blob and updates the campaign with the new workspace blob URI.
@@ -9,12 +10,23 @@ import { getWebsocketContext } from "../../context";
  * @param newWorkspaceBlobUri - The new workspace blob URI
  * @returns The forked buffer
  */
-export async function forkAndUpdateWorkspaceBlob(
-  blob: Uint8Array,
-  newWorkspaceBlobUri: string,
-): Promise<Uint8Array> {
-  const context = getWebsocketContext();
-
+export async function forkAndUpdateWorkspaceBlob({
+  blob,
+  newWorkspaceBlobUri,
+  campaignId,
+  projectId,
+  organizationId,
+  db,
+  workspaceBucket,
+}: {
+  blob: Uint8Array;
+  newWorkspaceBlobUri: string;
+  campaignId: string;
+  projectId: string;
+  organizationId: string;
+  db: DB;
+  workspaceBucket: InitialContext["workspaceBucket"];
+}): Promise<Uint8Array> {
   const doc = new LoroDoc();
   doc.import(blob);
   const forkedDoc = doc.fork();
@@ -24,14 +36,14 @@ export async function forkAndUpdateWorkspaceBlob(
     frontiers: doc.oplogFrontiers(),
   });
 
-  await context.workspaceBucket.setSnapshot(newWorkspaceBlobUri, forkedBuffer);
+  await workspaceBucket.setSnapshot(newWorkspaceBlobUri, forkedBuffer);
 
   await updateContentCampaign({
-    db: context.db,
+    db,
     values: {
-      id: context.campaignId,
-      projectId: context.projectId,
-      organizationId: context.organizationId,
+      id: campaignId,
+      projectId,
+      organizationId,
       workspaceBlobUri: newWorkspaceBlobUri,
     },
   });

@@ -48,7 +48,7 @@ export function createSyncDocumentQueryOptions({
           await idbDel(idbKey);
           throw importResult.error;
         }
-        await idbSet(idbKey, docUpdates);
+        await idbSet(idbKey, doc.export({ mode: "snapshot" }));
       }
 
       return doc;
