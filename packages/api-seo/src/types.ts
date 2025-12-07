@@ -14,7 +14,10 @@ import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
 import type { createDataforseoTool } from "./lib/ai/dataforseo-tool";
 import type { createFileTools } from "./lib/ai/file-tool";
 import type { createGscTool } from "./lib/ai/google-search-console-tool";
-import type { createWorkspaceBucket } from "./lib/bucket";
+import type {
+  createProjectImagesBucket,
+  createWorkspaceBucket,
+} from "./lib/bucket";
 import type { router, websocketRouter } from "./routes";
 
 export type Router = UnlaziedRouter<typeof router>;
@@ -54,6 +57,7 @@ export interface InitialContext extends BaseContextWithAuth {
   db: DB;
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
+  projectImagesBucket: ReturnType<typeof createProjectImagesBucket>;
 }
 /**
  * This provides all the necessary context for the websocket server.

@@ -25,3 +25,30 @@ export const createWorkspaceBucket = () => {
     },
   };
 };
+
+export const createProjectImagesBucket = () => {
+  const storage = createStorage({
+    driver: cloudflareR2BindingDriver({
+      // TODO: Fix this casting
+      // biome-ignore lint/suspicious/noExplicitAny: We don't pass in the actual value right now so don't have the correct typing
+      binding: (cloudflareEnv as any).SEO_IMAGES_BUCKET,
+    }),
+  });
+  const baseStorage = prefixStorage(storage, "project_images");
+  return {
+    ...baseStorage,
+    getFile: async (key: string) => {
+      const file = await baseStorage.getItemRaw(key);
+      if (!file) {
+        return null;
+      }
+      return new Uint8Array(file);
+    },
+    putFile: async (key: string, value: Uint8Array) => {
+      return await baseStorage.setItemRaw(key, value);
+    },
+    deleteFile: async (key: string) => {
+      return await baseStorage.removeItem(key);
+    },
+  };
+};
