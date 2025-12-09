@@ -12,7 +12,8 @@ import {
   CommandList,
   CommandSeparator,
 } from "@rectangular-labs/ui/components/ui/command";
-import DialogDrawer, {
+import {
+  DialogDrawer,
   DialogDrawerDescription,
   DialogDrawerHeader,
   DialogDrawerTitle,
