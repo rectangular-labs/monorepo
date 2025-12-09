@@ -77,5 +77,5 @@ export const seoProjectInsertSchema = createInsertSchema(seoProject).omit(
 );
 export const seoProjectSelectSchema = createSelectSchema(seoProject);
 export const seoProjectUpdateSchema = createUpdateSchema(seoProject)
-  .omit("createdAt", "updatedAt")
+  .omit("createdAt", "updatedAt", "articleSettings")
   .merge(type({ id: "string.uuid" }));

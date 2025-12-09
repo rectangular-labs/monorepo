@@ -1,15 +1,17 @@
 import { client } from "@rectangular-labs/dataforseo/client";
-import type { schema } from "@rectangular-labs/db";
-import { COUNTRY_CODE_MAP } from "@rectangular-labs/db/parsers";
+import {
+  type businessBackgroundSchema,
+  COUNTRY_CODE_MAP,
+} from "@rectangular-labs/db/parsers";
 import { apiEnv } from "../../env";
 
-export function getLocationAndLanguage(
-  project: typeof schema.seoProject.$inferSelect,
-) {
+export function getLocationAndLanguage(project: {
+  businessBackground?: typeof businessBackgroundSchema.infer | null;
+}) {
   const locationName =
-    COUNTRY_CODE_MAP[project.websiteInfo?.targetCountryCode ?? "US"] ??
+    COUNTRY_CODE_MAP[project.businessBackground?.targetCountryCode ?? "US"] ??
     "United States";
-  const languageCode = project.websiteInfo?.languageCode ?? "en";
+  const languageCode = project.businessBackground?.languageCode ?? "en";
   return { locationName, languageCode };
 }
 

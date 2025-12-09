@@ -16,6 +16,13 @@ import {
   getWorkspaceBlobUri,
 } from "../lib/workspace";
 import { metrics } from "./project.metrics";
+import {
+  getArticleSettings,
+  getBusinessBackground,
+  getImageSettings,
+  updateArticleSettings,
+  uploadProjectImage,
+} from "./project.settings";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -73,7 +80,14 @@ const get = withOrganizationIdBase
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(schema.seoProjectSelectSchema)
+  .output(
+    schema.seoProjectSelectSchema.omit(
+      "businessBackground",
+      "imageSettings",
+      "articleSettings",
+      "serpSnapshot",
+    ),
+  )
   .handler(async ({ context, input }) => {
     const projectResult = await getSeoProjectByIdentifierAndOrgId(
       context.db,
@@ -291,10 +305,15 @@ export default withOrganizationIdBase
     list,
     create,
     update,
+    updateArticleSettings,
     remove,
     checkName,
     get,
+    getBusinessBackground,
+    getImageSettings,
+    getArticleSettings,
     setUpWorkspace,
     metrics,
     syncDocument,
+    uploadProjectImage,
   });

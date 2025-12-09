@@ -92,7 +92,7 @@ export const businessBackgroundSchema = type({
 export const imageSettingsSchema = type({
   version: "'v1'",
   styleReferences: type({
-    uri: "string",
+    uris: "string[]",
     "instructions?": "string",
   })
     .array()
@@ -100,7 +100,7 @@ export const imageSettingsSchema = type({
       "Visual references that describe the desired style, composition, or mood.",
     ),
   brandLogos: type({
-    uri: "string",
+    uris: "string[]",
     "name?": "string",
     "instructions?": "string",
   })
