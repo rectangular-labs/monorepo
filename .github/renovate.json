@@ -4,7 +4,7 @@
   "packageRules": [
     {
       "enabled": false,
-      "matchPackageNames": ["/^@rectangular-labs//", "/^unstorage/"]
+      "matchPackageNames": ["/^@rectangular-labs//"]
     },
     {
       "description": "Schedule all non-major dependencies updates on Tuesday Between 8am and 10am",

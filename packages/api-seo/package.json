@@ -62,9 +62,9 @@
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.98",
     "arktype": "^2.1.27",
+    "aws4fetch": "^1.0.20",
     "loro-adaptors": "0.4.0",
     "loro-crdt": "^1.10.0",
-    "loro-protocol": "^0.2.0",
-    "unstorage": "1.17.1"
+    "loro-protocol": "^0.2.0"
   }
 }

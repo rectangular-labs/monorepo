@@ -11,7 +11,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
-import type { UploadImageItem } from "./-components/image-setting-modal";
+import type { ImageItem } from "./-components/image-setting-modal";
 import { ImageUploadGrid } from "./-components/image-upload-grid";
 
 export const Route = createFileRoute(
@@ -54,11 +54,19 @@ function ImageSettingsPage() {
   const [imageInstructions, setImageInstructions] = useState("");
 
   function handleSave(updateInput: {
-    styleReferences?: UploadImageItem[];
-    brandLogos?: UploadImageItem[];
+    styleReferences?: ImageItem[];
+    brandLogos?: ImageItem[];
     imageInstructions?: string;
   }) {
     if (!activeProject) return;
+
+    if (
+      !updateInput.styleReferences &&
+      !updateInput.brandLogos &&
+      !updateInput.imageInstructions?.trim()
+    ) {
+      return;
+    }
 
     toast.promise(
       updateProject({

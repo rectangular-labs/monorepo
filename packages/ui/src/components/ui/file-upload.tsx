@@ -2,33 +2,34 @@
 
 import { FileText, Upload, X } from "lucide-react";
 import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "./button";
 import { Card } from "./card";
 
-function FileItem({ file, onRemove }: { file: File; onRemove: () => void }) {
-  const isImage = file.type.startsWith("image/");
-  const imageUrl = useMemo(() => {
-    if (!isImage) return null;
-    return URL.createObjectURL(file);
-  }, [file, isImage]);
+export interface IFileUpload {
+  mimeType: string;
+  size: number;
+  name: string;
+  url: string;
+}
 
-  useEffect(() => {
-    return () => {
-      if (imageUrl) {
-        URL.revokeObjectURL(imageUrl);
-      }
-    };
-  }, [imageUrl]);
+function FileItem({
+  file,
+  onRemove,
+}: {
+  file: IFileUpload;
+  onRemove: () => void;
+}) {
+  const isImage = file.mimeType.startsWith("image/");
 
   return (
     <div className="group flex items-center gap-3 py-4">
       <div className="relative size-10 shrink-0 overflow-hidden rounded border bg-muted">
-        {isImage && imageUrl ? (
+        {isImage ? (
           <img
             alt={file.name}
             className="h-full w-full object-cover"
-            src={imageUrl}
+            src={file.url}
           />
         ) : (
           <FileText className="size-4" />
@@ -57,14 +58,14 @@ function FileItem({ file, onRemove }: { file: File; onRemove: () => void }) {
 export interface FileUploadProps
   extends React.ComponentPropsWithRef<"input">,
     React.InputHTMLAttributes<HTMLInputElement> {
-  files: File[];
-  setFiles: (files: File[]) => void;
+  files: IFileUpload[];
+  setFiles: (files: IFileUpload[]) => void;
   onDropFiles?: (event: React.DragEvent) => void;
   supportedTypes?: string[];
   maxSizeMB?: number;
 }
 
-export function FileUpload({
+export function IFileUpload({
   files,
   setFiles,
   onDropFiles: onDropFilesProp,
@@ -86,7 +87,14 @@ export function FileUpload({
   };
 
   const removeUploadById = (index: number) => {
-    setFiles(files.filter((_, i) => i !== index));
+    setFiles(
+      files.filter((file, i) => {
+        if (i === index && file.url) {
+          URL.revokeObjectURL(file.url);
+        }
+        return i !== index;
+      }),
+    );
   };
 
   return (
@@ -138,7 +146,7 @@ export function FileUpload({
           {files.map((file, index) => (
             <FileItem
               file={file}
-              key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
+              key={`${file.name}-${file.size}-${index}`}
               onRemove={() => removeUploadById(index)}
             />
           ))}

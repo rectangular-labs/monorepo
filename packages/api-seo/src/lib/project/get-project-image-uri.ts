@@ -2,11 +2,11 @@ import { uuidv7 } from "@rectangular-labs/db";
 import { type } from "arktype";
 
 export const ProjectImageKindSchema = type(
-  "'style-reference'|'brand-logo'|'author-avatar'",
+  "'style-reference'|'brand-logo'|'author-avatar'|'content-image'",
 );
 type ProjectImageKind = typeof ProjectImageKindSchema.infer;
 
-export const createProjectImageUri = ({
+export const getPrivateImageUri = ({
   orgId,
   projectId,
   kind,
@@ -19,12 +19,19 @@ export const createProjectImageUri = ({
 } & {
   kind: ProjectImageKind;
 }): string => {
-  const key = [
-    `org_${orgId}`,
-    `proj_${projectId}`,
-    `img_${kind}`,
-    `${uuidv7()}__${fileName}`,
-  ].join("/");
+  return `org_${orgId}/proj_${projectId}/${kind}/${uuidv7()}__${fileName}`;
+};
 
-  return key;
+export const getPublicImageUri = ({
+  orgId,
+  projectId,
+  kind,
+  fileName,
+}: {
+  orgId: string;
+  projectId: string;
+  kind: ProjectImageKind;
+  fileName: string;
+}): string => {
+  return `org_${orgId}/proj_${projectId}/${kind}/${uuidv7()}__${fileName}`;
 };

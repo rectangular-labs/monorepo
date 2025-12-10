@@ -5,7 +5,7 @@ export function SettingsSidebar(params: {
   projectSlug: string;
 }) {
   return (
-    <aside className="shrink-0 pt-6 pr-4 md:w-64 md:border-r">
+    <aside className="shrink-0 px-4 pt-6 md:w-64 md:border-r">
       <div className="mb-4">
         <h2 className="font-semibold text-lg">Settings</h2>
       </div>

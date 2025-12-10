@@ -16,12 +16,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@rectangular-labs/ui/components/ui/carousel";
-import { useEffect, useMemo, useState } from "react";
-import type {
-  ImageItem,
-  ProjectImageKind,
-  UploadImageItem,
-} from "./image-setting-modal";
+import { useState } from "react";
+import type { ImageItem, ProjectImageKind } from "./image-setting-modal";
 import { ImageSettingModal } from "./image-setting-modal";
 
 interface ImageUploadGridProps {
@@ -31,65 +27,53 @@ interface ImageUploadGridProps {
   projectId: string;
   organizationId: string;
   items: ImageItem[];
-  onChange: (items: UploadImageItem[]) => void;
+  onChange: (items: ImageItem[]) => void;
 }
 
 function ImageItemCard({
   item,
-  onEdit,
-  onRemove,
+  onClick,
 }: {
   item: ImageItem;
-  onEdit: () => void;
-  onRemove: () => void;
+  onClick: () => void;
 }) {
-  const imageUrls = useMemo(() => {
-    if (!item.images) return [];
-    return item.images.map((file) => URL.createObjectURL(file));
-  }, [item.images]);
-
-  useEffect(() => {
-    return () => {
-      for (const url of imageUrls) {
-        URL.revokeObjectURL(url);
-      }
-    };
-  }, [imageUrls]);
-
   const displayName = item.name;
-
+  console.log("item.uris", item.uris);
   return (
-    <div className="flex flex-col justify-between rounded-md border bg-muted/40 p-3 text-xs">
-      {imageUrls.length > 0 && (
-        <div className="-mx-3 -mt-3 mb-3">
-          <Carousel className="w-full">
-            <CarouselContent>
-              {imageUrls.map((url, imgIndex) => (
-                <CarouselItem key={url}>
-                  <div className="relative aspect-video w-full overflow-hidden rounded-t-md bg-muted">
-                    <img
-                      alt={
-                        displayName
-                          ? `${displayName} - Image ${imgIndex + 1}`
-                          : `Image ${imgIndex + 1}`
-                      }
-                      className="h-full w-full object-cover"
-                      src={url}
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {imageUrls.length > 1 && (
-              <>
-                <CarouselPrevious className="left-2 size-6" />
-                <CarouselNext className="right-2 size-6" />
-              </>
-            )}
-          </Carousel>
-        </div>
+    <div className="relative flex flex-col justify-between rounded-md border bg-muted/40 text-xs">
+      <button
+        className="absolute inset-0 hover:cursor-pointer"
+        onClick={onClick}
+        type="button"
+      />
+      {item.uris.length > 0 && (
+        <Carousel>
+          <CarouselContent>
+            {item.uris.map((uri, imgIndex) => (
+              <CarouselItem key={uri}>
+                <div className="relative aspect-video w-full overflow-hidden rounded-t-md bg-muted">
+                  <img
+                    alt={
+                      displayName
+                        ? `${displayName} - Image ${imgIndex + 1}`
+                        : `Image ${imgIndex + 1}`
+                    }
+                    className="h-full w-full object-cover"
+                    src={uri}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {item.uris.length > 1 && (
+            <>
+              <CarouselPrevious className="left-2 size-6" />
+              <CarouselNext className="right-2 size-6" />
+            </>
+          )}
+        </Carousel>
       )}
-      <div className="space-y-1">
+      <div className="min-h-18 space-y-1 p-3">
         {displayName ? (
           <div className="flex items-center justify-between gap-2">
             <span className="line-clamp-1 font-medium text-xs">
@@ -97,22 +81,10 @@ function ImageItemCard({
             </span>
           </div>
         ) : null}
-        {item.instructions ? (
-          <p className="line-clamp-3 text-muted-foreground text-xs">
-            {item.instructions}
-          </p>
-        ) : null}
-      </div>
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <Button onClick={onEdit} size="icon-xs" variant="ghost">
-          <Icons.Pencil className="h-3 w-3" />
-          <span className="sr-only">Edit</span>
-        </Button>
 
-        <Button onClick={onRemove} size="icon-xs" variant="ghost">
-          <Icons.Trash className="h-3 w-3" />
-          <span className="sr-only">Remove</span>
-        </Button>
+        <p className="line-clamp-3 text-muted-foreground text-xs">
+          {item.instructions ?? <em>No Description</em>}
+        </p>
       </div>
     </div>
   );
@@ -132,18 +104,18 @@ export function ImageUploadGrid({
     undefined,
   );
 
-  function handleAdd(item: UploadImageItem) {
+  function handleAdd(item: ImageItem) {
     onChange([...items, item]);
   }
-  function handleEdit(item: UploadImageItem) {
+  function handleEdit(item: ImageItem) {
     onChange(
       items.map((existingItem, index) =>
         index === currentItemIndex ? item : existingItem,
       ),
     );
   }
-  function handleRemove(index: number) {
-    onChange(items.filter((_, i) => i !== index));
+  function handleRemove(item: ImageItem) {
+    onChange(items.filter((i) => i.uris.join(".") !== item.uris.join(".")));
     setCurrentItemIndex(undefined);
   }
 
@@ -182,11 +154,10 @@ export function ImageUploadGrid({
                 <ImageItemCard
                   item={item}
                   key={item.uris.join(".")}
-                  onEdit={() => {
+                  onClick={() => {
                     setOpen(true);
                     setCurrentItemIndex(index);
                   }}
-                  onRemove={() => handleRemove(index)}
                 />
               ))}
             </div>
@@ -196,6 +167,7 @@ export function ImageUploadGrid({
       <ImageSettingModal
         initial={isEditing ? items[currentItemIndex] : undefined}
         kind={kind}
+        onRemove={handleRemove}
         onSubmit={isEditing ? handleEdit : handleAdd}
         open={open}
         organizationId={organizationId}

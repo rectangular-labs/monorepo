@@ -15,7 +15,7 @@ import type { createDataforseoTool } from "./lib/ai/dataforseo-tool";
 import type { createFileTools } from "./lib/ai/file-tool";
 import type { createGscTool } from "./lib/ai/google-search-console-tool";
 import type {
-  createProjectImagesBucket,
+  createPublicImagesBucket,
   createWorkspaceBucket,
 } from "./lib/bucket";
 import type { router, websocketRouter } from "./routes";
@@ -57,7 +57,7 @@ export interface InitialContext extends BaseContextWithAuth {
   db: DB;
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
-  projectImagesBucket: ReturnType<typeof createProjectImagesBucket>;
+  publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
 }
 /**
  * This provides all the necessary context for the websocket server.
