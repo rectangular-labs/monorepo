@@ -7,10 +7,10 @@ import {
 import { relations } from "drizzle-orm";
 import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
 import type {
-  articleSettingsSchema,
   businessBackgroundSchema,
   imageSettingsSchema,
   serpTrafficSchema,
+  writingSettingsSchema,
 } from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
@@ -35,7 +35,7 @@ export const seoProject = pgSeoTable(
     websiteUrl: text().notNull(),
     businessBackground: jsonb().$type<typeof businessBackgroundSchema.infer>(),
     imageSettings: jsonb().$type<typeof imageSettingsSchema.infer>(),
-    articleSettings: jsonb().$type<typeof articleSettingsSchema.infer>(),
+    writingSettings: jsonb().$type<typeof writingSettingsSchema.infer>(),
     serpSnapshot: jsonb().$type<typeof serpTrafficSchema.infer>(),
     gscPropertyId: uuid().references(() => seoGscProperty.id, {
       onDelete: "set null",
@@ -77,5 +77,5 @@ export const seoProjectInsertSchema = createInsertSchema(seoProject).omit(
 );
 export const seoProjectSelectSchema = createSelectSchema(seoProject);
 export const seoProjectUpdateSchema = createUpdateSchema(seoProject)
-  .omit("createdAt", "updatedAt", "articleSettings")
+  .omit("createdAt", "updatedAt")
   .merge(type({ id: "string.uuid" }));

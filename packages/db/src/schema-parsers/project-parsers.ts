@@ -111,7 +111,7 @@ export const imageSettingsSchema = type({
   ),
 });
 
-export const articleSettingsSchema = type({
+export const writingSettingsSchema = type({
   version: "'v1'",
   brandVoice: type("string")
     .atLeastLength(1)
@@ -130,4 +130,18 @@ export const articleSettingsSchema = type({
   })
     .array()
     .describe("Named metadata presets used for content generation."),
+});
+
+export const authorSettingsSchema = type({
+  name: type("string").describe("The name of the author."),
+  title: type("string").describe("The title of the author."),
+  bio: type("string").describe("The bio of the author."),
+  avatarUri: type("string").describe("The avatar URI of the author."),
+  socialLinks: type({
+    platform: "string",
+    url: "string.url",
+  })
+    .array()
+    .or(type.null)
+    .describe("The social links of the author."),
 });

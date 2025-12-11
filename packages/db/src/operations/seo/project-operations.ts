@@ -1,22 +1,23 @@
-import { ok, type Result, safe } from "@rectangular-labs/result";
+import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import { type } from "arktype";
-import { and, eq } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
 import { type DB, schema } from "../../client";
+import { buildConflictUpdateColumns } from "../../schema/_helper";
 import type {
   seoProjectSelectSchema,
   seoProjectUpdateSchema,
 } from "../../schema/seo";
 import type {
-  articleSettingsSchema,
   businessBackgroundSchema,
   imageSettingsSchema,
   serpTrafficSchema,
+  writingSettingsSchema,
 } from "../../schema-parsers";
 
 export async function updateSeoProject(
   db: DB,
   values: typeof seoProjectUpdateSchema.infer & {
-    articleSettings?: typeof articleSettingsSchema.infer;
+    articleSettings?: typeof writingSettingsSchema.infer;
   },
 ) {
   const result = await safe(() =>
@@ -101,7 +102,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
           ? { imageSettings: typeof imageSettingsSchema.infer }
           : Record<string, never>) &
         (A extends true
-          ? { articleSettings: typeof articleSettingsSchema.infer }
+          ? { articleSettings: typeof writingSettingsSchema.infer }
           : Record<string, never>) &
         (S extends true
           ? { serpSnapshot: typeof serpTrafficSchema.infer }
@@ -146,4 +147,93 @@ export async function getSeoProjectByIdentifierAndOrgId<
   }
   // biome-ignore lint/suspicious/noExplicitAny: type hacking
   return ok((result.value as any) ?? null);
+}
+
+export async function getSeoProjectWithWritingSettingAndAuthors(
+  db: DB,
+  projectSlug: string,
+  organizationId: string,
+) {
+  const result = await safe(() =>
+    db.query.seoProject.findFirst({
+      columns: {
+        id: true,
+        writingSettings: true,
+      },
+      where: (table, { eq }) =>
+        and(
+          eq(table.slug, projectSlug),
+          eq(table.organizationId, organizationId),
+        ),
+      with: {
+        authors: true,
+      },
+    }),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  return ok(result.value);
+}
+
+export async function upsertSeoProjectAuthors(
+  db: DB,
+  projectId: string,
+  authors: (typeof schema.seoProjectAuthorInsertSchema.infer)[],
+) {
+  if (!authors.length) {
+    return ok([]);
+  }
+  const result = await safe(() =>
+    db
+      .insert(schema.seoProjectAuthor)
+      .values(
+        authors.map((author) => ({
+          ...author,
+          projectId,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [
+          schema.seoProjectAuthor.projectId,
+          schema.seoProjectAuthor.name,
+        ],
+        set: buildConflictUpdateColumns(schema.seoProjectAuthor, [
+          "bio",
+          "avatarUri",
+          "socialLinks",
+          "title",
+        ]),
+      })
+      .returning(),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  if (result.value.length !== authors.length) {
+    return err(new Error("Failed to upsert all authors"));
+  }
+  return ok(result.value);
+}
+
+export async function deleteRemainingSeoProjectAuthors(
+  db: DB,
+  projectId: string,
+  authorIdsToKeep: string[],
+) {
+  const result = await safe(() =>
+    db
+      .delete(schema.seoProjectAuthor)
+      .where(
+        and(
+          eq(schema.seoProjectAuthor.projectId, projectId),
+          notInArray(schema.seoProjectAuthor.id, authorIdsToKeep),
+        ),
+      )
+      .returning(),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  return ok(result.value);
 }

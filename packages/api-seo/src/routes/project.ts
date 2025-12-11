@@ -20,8 +20,8 @@ import {
   getArticleSettings,
   getBusinessBackground,
   getImageSettings,
-  updateArticleSettings,
   uploadProjectImage,
+  upsertAuthors,
 } from "./project.settings";
 
 const list = withOrganizationIdBase
@@ -84,7 +84,7 @@ const get = withOrganizationIdBase
     schema.seoProjectSelectSchema.omit(
       "businessBackground",
       "imageSettings",
-      "articleSettings",
+      "writingSettings",
       "serpSnapshot",
     ),
   )
@@ -305,7 +305,7 @@ export default withOrganizationIdBase
     list,
     create,
     update,
-    updateArticleSettings,
+    upsertAuthors,
     remove,
     checkName,
     get,

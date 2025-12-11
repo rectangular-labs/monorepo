@@ -60,7 +60,7 @@ export const seoProjectAuthorRelations = relations(
 
 export const seoProjectAuthorInsertSchema = createInsertSchema(
   seoProjectAuthor,
-).omit("id", "createdAt", "updatedAt");
+).omit("id", "createdAt", "updatedAt", "projectId");
 export const seoProjectAuthorSelectSchema =
   createSelectSchema(seoProjectAuthor);
 export const seoProjectAuthorUpdateSchema = createUpdateSchema(seoProjectAuthor)

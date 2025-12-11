@@ -1,0 +1,290 @@
+import { ORPCError } from "@orpc/client";
+import { schema } from "@rectangular-labs/db";
+import {
+  deleteRemainingSeoProjectAuthors,
+  getSeoProjectByIdentifierAndOrgId,
+  getSeoProjectWithWritingSettingAndAuthors,
+  upsertSeoProjectAuthors,
+} from "@rectangular-labs/db/operations";
+import {
+  imageSettingsSchema,
+  writingSettingsSchema,
+} from "@rectangular-labs/db/parsers";
+import { type } from "arktype";
+import { withOrganizationIdBase } from "../context";
+import { apiEnv } from "../env";
+import { getImageSettingImages } from "../lib/project/get-image-setting-images";
+import {
+  getPrivateImageUri,
+  getPublicImageUri,
+  ProjectImageKindSchema,
+} from "../lib/project/get-project-image-uri";
+import { validateOrganizationMiddleware } from "../lib/validate-organization";
+
+export const getBusinessBackground = withOrganizationIdBase
+  .route({ method: "GET", path: "/{identifier}/business-background" })
+  .input(type({ identifier: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    schema.seoProjectSelectSchema
+      .pick("businessBackground")
+      .merge({ id: "string", organizationId: "string" }),
+  )
+  .handler(async ({ context, input }) => {
+    const projectResult = await getSeoProjectByIdentifierAndOrgId(
+      context.db,
+      input.identifier,
+      context.organization.id,
+      {
+        businessBackground: true,
+      },
+    );
+    if (!projectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: projectResult.error.message,
+        cause: projectResult.error,
+      });
+    }
+    if (!projectResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No project found with identifier.",
+      });
+    }
+    return {
+      businessBackground: projectResult.value.businessBackground,
+      organizationId: context.organization.id,
+      id: projectResult.value.id,
+    };
+  });
+
+export const getImageSettings = withOrganizationIdBase
+  .route({ method: "GET", path: "/{identifier}/image-settings" })
+  .input(type({ identifier: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      id: "string",
+      organizationId: "string",
+      imageSettings: imageSettingsSchema.or(type.null),
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const projectResult = await getSeoProjectByIdentifierAndOrgId(
+      context.db,
+      input.identifier,
+      context.organization.id,
+      {
+        imageSettings: true,
+      },
+    );
+    if (!projectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: projectResult.error.message,
+        cause: projectResult.error,
+      });
+    }
+    if (!projectResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No project found with identifier.",
+      });
+    }
+
+    if (!projectResult.value.imageSettings) {
+      return {
+        imageSettings: null,
+        id: projectResult.value.id,
+        organizationId: context.organization.id,
+      };
+    }
+
+    const imagesResult = await getImageSettingImages(
+      projectResult.value.imageSettings,
+    );
+    if (!imagesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: imagesResult.error.message,
+        cause: imagesResult.error,
+      });
+    }
+    return {
+      imageSettings: {
+        ...projectResult.value.imageSettings,
+        ...imagesResult.value,
+      },
+      id: projectResult.value.id,
+      organizationId: context.organization.id,
+    };
+  });
+
+export const getArticleSettings = withOrganizationIdBase
+  .route({ method: "GET", path: "/{identifier}/article-settings" })
+  .input(type({ identifier: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      id: "string",
+      organizationId: "string",
+      writingSettings: writingSettingsSchema.or(type.null),
+      authors: schema.seoProjectAuthorSelectSchema.array(),
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const projectResult = await getSeoProjectWithWritingSettingAndAuthors(
+      context.db,
+      input.identifier,
+      context.organization.id,
+    );
+    if (!projectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: projectResult.error.message,
+        cause: projectResult.error,
+      });
+    }
+    if (!projectResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No project found with identifier.",
+      });
+    }
+
+    const projectWithAuthors = projectResult.value;
+
+    return {
+      ...projectWithAuthors,
+      organizationId: context.organization.id,
+    };
+  });
+
+export const upsertAuthors = withOrganizationIdBase
+  .route({ method: "PATCH", path: "/{id}/authors" })
+  .input(
+    type({
+      id: "string",
+      organizationIdentifier: "string",
+      authors: schema.seoProjectAuthorInsertSchema.array(),
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(schema.seoProjectAuthorSelectSchema.array())
+  .handler(async ({ context, input }) => {
+    const result = await upsertSeoProjectAuthors(
+      context.db,
+      input.id,
+      input.authors,
+    );
+    if (!result.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: result.error.message,
+        cause: result.error,
+      });
+    }
+
+    const deletedResult = await deleteRemainingSeoProjectAuthors(
+      context.db,
+      input.id,
+      result.value.map((author) => author.id),
+    );
+
+    if (!deletedResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: deletedResult.error.message,
+        cause: deletedResult.error,
+      });
+    }
+    console.log("deletedResult.value", deletedResult.value);
+    return result.value;
+  });
+
+export const uploadProjectImage = withOrganizationIdBase
+  .route({ method: "POST", path: "/{id}/image" })
+  .input(
+    type({
+      id: "string",
+      organizationIdentifier: "string",
+      kind: ProjectImageKindSchema,
+      files: type({
+        mimeType: "string",
+        size: "number",
+        name: "string",
+        url: "string.url",
+      }).array(),
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      publicUris: "string[]",
+      privateUris: "string[]",
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const { files, kind, id } = input;
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ] as const;
+
+    const maxSize =
+      kind === "author-avatar"
+        ? 500_000 // 500KB
+        : 5_000_000; // 5MB
+
+    const privateStore: { key: string; value: Blob }[] = [];
+    const publicStore: { key: string; value: Blob }[] = [];
+    for (const file of files) {
+      if (
+        !allowedTypes.includes(file.mimeType as (typeof allowedTypes)[number])
+      ) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Unsupported image type. Use jpeg, png, gif, or webp.",
+        });
+      }
+      if (file.size > maxSize) {
+        throw new ORPCError("BAD_REQUEST", {
+          message:
+            kind === "author-avatar"
+              ? "Author avatar must be at most 500KB."
+              : "Image must be at most 5MB.",
+        });
+      }
+      const blob = await fetch(file.url).then((res) => res.blob());
+      if (kind === "author-avatar" || kind === "content-image") {
+        publicStore.push({
+          key: getPublicImageUri({
+            orgId: context.organization.id,
+            projectId: id,
+            kind,
+            fileName: file.name,
+          }),
+          value: blob,
+        });
+      } else {
+        privateStore.push({
+          key: getPrivateImageUri({
+            orgId: context.organization.id,
+            projectId: id,
+            kind,
+            fileName: file.name,
+          }),
+          value: blob,
+        });
+      }
+    }
+
+    await Promise.all([
+      ...publicStore.map(({ key, value }) =>
+        context.publicImagesBucket.storeImage(key, value),
+      ),
+      ...privateStore.map(({ key, value }) =>
+        context.workspaceBucket.storeImage(key, value),
+      ),
+    ]);
+
+    return {
+      publicUris: publicStore.map(
+        ({ key }) => `${apiEnv().SEO_PUBLIC_BUCKET_URL}/${key}`,
+      ),
+      privateUris: privateStore.map(({ key }) => key),
+    } as const;
+  });
