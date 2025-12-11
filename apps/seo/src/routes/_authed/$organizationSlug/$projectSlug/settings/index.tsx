@@ -2,14 +2,9 @@ import {
   businessBackgroundSchema,
   COUNTRY_CODE_MAP,
 } from "@rectangular-labs/db/parsers";
-import { safe } from "@rectangular-labs/result";
 import { AutoHeight } from "@rectangular-labs/ui/animation/auto-height";
 import { X } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
-import {
-  CardContent,
-  CardFooter,
-} from "@rectangular-labs/ui/components/ui/card";
 import {
   arktypeResolver,
   Form,
@@ -19,7 +14,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  type UseFormReturn,
   useFieldArray,
   useForm,
 } from "@rectangular-labs/ui/components/ui/form";
@@ -31,14 +25,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rectangular-labs/ui/components/ui/select";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
-import { cn } from "@rectangular-labs/ui/utils/cn";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useBlocker } from "@tanstack/react-router";
 import { type } from "arktype";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect
-} from "react";
+import { useCallback, useEffect } from "react";
+import { getApiClientRq } from "~/lib/api";
+import { LoadingError } from "~/routes/_authed/-components/loading-error";
+import { FloatingToolbar } from "./-components/floating-toolbar";
+
+export const Route = createFileRoute(
+  "/_authed/$organizationSlug/$projectSlug/settings/",
+)({
+  component: BusinessBackgroundForm,
+});
 
 const formSchema = type({
   name: type("string")
@@ -51,64 +52,74 @@ const formSchema = type({
     .configure({
       message: () => "Must be a valid URL",
     }),
-}).merge(businessBackgroundSchema.omit("version"));
-export type ManageProjectFormValues = typeof formSchema.infer;
+}).merge(businessBackgroundSchema);
+type ManageProjectFormValues = typeof formSchema.infer;
 
-export interface ManageProjectFormRef {
-  form: UseFormReturn<ManageProjectFormValues>;
-  isDirty: boolean;
-  resetForm: () => void;
-}
+function BusinessBackgroundForm() {
+  const { organizationSlug, projectSlug } = Route.useParams();
+  const queryClient = useQueryClient();
+  const {
+    data: activeProject,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery(
+    getApiClientRq().project.getBusinessBackground.queryOptions({
+      input: {
+        organizationIdentifier: organizationSlug,
+        identifier: projectSlug,
+      },
+    }),
+  );
+  const { mutate: updateProject, isPending } = useMutation(
+    getApiClientRq().project.update.mutationOptions({
+      onError: (error) => {
+        form.setError("root", { message: error.message });
+      },
+      onSuccess: async () => {
+        toast.success("Business background updated");
+        await queryClient.invalidateQueries({
+          queryKey: getApiClientRq().project.getBusinessBackground.queryKey({
+            input: {
+              organizationIdentifier: organizationSlug,
+              identifier: projectSlug,
+            },
+          }),
+        });
+      },
+    }),
+  );
 
-export function ManageProjectForm({
-  defaultValues,
-  onSubmit,
-  children,
-  className,
-}: {
-  defaultValues?: Partial<ManageProjectFormValues>;
-  onSubmit: (values: ManageProjectFormValues) => void | Promise<void>;
-  className?: string;
-  children?: ReactNode;
-}) {
   const form = useForm({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
-      name: defaultValues?.name || "",
-      websiteUrl: defaultValues?.websiteUrl || "",
-      businessOverview: defaultValues?.businessOverview || "",
-      targetAudience: defaultValues?.targetAudience || "",
-      serviceRegion: defaultValues?.serviceRegion || "",
-      targetCountryCode: defaultValues?.targetCountryCode || "",
-      targetCity: defaultValues?.targetCity || "",
-      industry: defaultValues?.industry || "",
-      languageCode: defaultValues?.languageCode || "",
-      competitorsWebsites: defaultValues?.competitorsWebsites || [],
+      name: activeProject?.name || "",
+      websiteUrl: activeProject?.websiteUrl || "",
+      version: "v1" as const,
+      businessOverview:
+        activeProject?.businessBackground?.businessOverview || "",
+      targetAudience: activeProject?.businessBackground?.targetAudience || "",
+      caseStudies: activeProject?.businessBackground?.caseStudies || [],
+      industry: activeProject?.businessBackground?.industry || "",
+      serviceRegion: activeProject?.businessBackground?.serviceRegion || "",
+      targetCountryCode:
+        activeProject?.businessBackground?.targetCountryCode || "",
+      targetCity: activeProject?.businessBackground?.targetCity || "",
+      languageCode: activeProject?.businessBackground?.languageCode || "",
+      competitorsWebsites:
+        activeProject?.businessBackground?.competitorsWebsites || [],
     },
   });
-
   const resetForm = useCallback(() => {
-    if (!defaultValues) return;
-    form.reset({
-      name: defaultValues.name || "",
-      websiteUrl: defaultValues.websiteUrl || "",
-      businessOverview: defaultValues.businessOverview || "",
-      targetAudience: defaultValues.targetAudience || "",
-      serviceRegion: defaultValues.serviceRegion || "",
-      targetCountryCode: defaultValues.targetCountryCode || "",
-      targetCity: defaultValues.targetCity || "",
-      industry: defaultValues.industry || "",
-      languageCode: defaultValues.languageCode || "",
-      competitorsWebsites: defaultValues.competitorsWebsites || [],
-    });
-  }, [defaultValues, form]);
+    if (!activeProject) return;
+    form.reset();
+  }, [activeProject, form]);
 
   useEffect(() => {
-    if (defaultValues) {
+    if (activeProject) {
       resetForm();
     }
-  }, [defaultValues, resetForm]);
-
+  }, [activeProject, resetForm]);
 
   const {
     fields: competitorFields,
@@ -120,20 +131,62 @@ export function ManageProjectForm({
     keyName: "url",
   });
 
-  const submitForm = async (values: ManageProjectFormValues) => {
-    const result = await safe(() => Promise.resolve(onSubmit(values)));
-    if (!result.ok) {
-      form.setError("root", {
-        message: result.error.message,
-      });
+  const submitForm = (values: ManageProjectFormValues) => {
+    if (!activeProject) {
+      return;
     }
+    updateProject({
+      id: activeProject.id,
+      organizationIdentifier: activeProject.organizationId,
+      businessBackground: {
+        version: values.version,
+        businessOverview: values.businessOverview,
+        targetAudience: values.targetAudience,
+        caseStudies: values.caseStudies,
+        competitorsWebsites: values.competitorsWebsites,
+        industry: values.industry,
+        languageCode: values.languageCode,
+        serviceRegion: values.serviceRegion,
+        targetCountryCode: values.targetCountryCode,
+        targetCity: values.targetCity,
+      },
+      websiteUrl: values.websiteUrl,
+      name: values.name,
+    });
   };
 
+  const isDirty = form.formState.isDirty;
+  const formError = form.formState.errors.root?.message;
+  useBlocker({
+    shouldBlockFn: () => isDirty,
+    enableBeforeUnload: isDirty,
+  });
+
+  if (!activeProject || isLoading || error) {
+    return (
+      <LoadingError
+        error={error}
+        errorDescription="There was an error loading the project details. Please try again."
+        errorTitle="Error loading project"
+        isLoading={isLoading}
+        onRetry={refetch}
+      />
+    );
+  }
+
   return (
-    <AutoHeight contentId={`manage-project-form`}>
-      <Form {...form}>
-        <form className="grid gap-6" onSubmit={form.handleSubmit(submitForm)}>
-          <CardContent className={cn("grid gap-6 px-0", className)}>
+    <div className="relative w-full space-y-6">
+      <div className="space-y-2">
+        <h1 className="font-semibold text-3xl tracking-tight">
+          Business Background
+        </h1>
+        <p className="text-muted-foreground">
+          Tell us about your business and audience.
+        </p>
+      </div>
+      <AutoHeight contentId={`manage-project-form`}>
+        <Form {...form}>
+          <form className="grid gap-6" onSubmit={form.handleSubmit(submitForm)}>
             <FormField
               control={form.control}
               name="name"
@@ -156,6 +209,42 @@ export function ManageProjectForm({
                   <FormLabel>Website URL</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="https://42.com" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="businessOverview"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Overview</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="What does your business do? The more detail, the better."
+                      rows={5}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="targetAudience"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Audience</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Who are you serving? Like business overview, the more detail here, the better!"
+                      rows={5}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -318,51 +407,18 @@ export function ManageProjectForm({
               </div>
             </FormItem>
 
-            <FormField
-              control={form.control}
-              name="businessOverview"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Overview</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="What does your business do? The more detail, the better."
-                      rows={5}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="targetAudience"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target Audience</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Who are you serving? Like business overview, the more detail here, the better!"
-                      rows={5}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-         
-
             {form.formState.errors.root && (
               <FormMessage>{form.formState.errors.root.message}</FormMessage>
             )}
-          </CardContent>
-          {children && <CardFooter className="px-0">{children}</CardFooter>}
-        </form>
-      </Form>
-    </AutoHeight>
+            <FloatingToolbar
+              errors={formError}
+              isSaving={isPending}
+              isVisible={isDirty}
+              onCancel={resetForm}
+            />
+          </form>
+        </Form>
+      </AutoHeight>
+    </div>
   );
 }

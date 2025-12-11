@@ -48,17 +48,17 @@ export function OnboardingReviewProject() {
       websiteUrl: values.websiteUrl,
       name: values.name,
       slug,
-      websiteInfo: {
+      businessBackground: {
         version: "v1",
         businessOverview: values.businessOverview,
-        idealCustomer: values.idealCustomer,
-        serviceRegion: values.serviceRegion,
+        targetAudience: values.targetAudience,
+        caseStudies: values.caseStudies,
+        competitorsWebsites: values.competitorsWebsites,
         industry: values.industry,
         languageCode: values.languageCode,
+        serviceRegion: values.serviceRegion,
         targetCountryCode: values.targetCountryCode,
         targetCity: values.targetCity,
-        writingStyle: values.writingStyle,
-        competitorsWebsites: values.competitorsWebsites,
       },
     });
   };
