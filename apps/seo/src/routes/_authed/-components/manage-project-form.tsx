@@ -34,11 +34,7 @@ import {
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { type } from "arktype";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect
-} from "react";
+import { type ReactNode, useCallback, useEffect } from "react";
 
 const formSchema = type({
   name: type("string")
@@ -108,7 +104,6 @@ export function ManageProjectForm({
       resetForm();
     }
   }, [defaultValues, resetForm]);
-
 
   const {
     fields: competitorFields,
@@ -353,8 +348,6 @@ export function ManageProjectForm({
                 </FormItem>
               )}
             />
-
-         
 
             {form.formState.errors.root && (
               <FormMessage>{form.formState.errors.root.message}</FormMessage>
