@@ -59,6 +59,20 @@ function AuthorEdit({
       socialLinks: value.socialLinks ?? [],
     },
   });
+  const avatarUri = authorForm.watch("avatarUri");
+  console.log('avatarUri', avatarUri)
+  if (avatarUri) {
+    fetch(avatarUri)
+      .then(async (res) => {
+        const blob = await res.blob();
+        console.log("avatarUri file info:", {
+          blob,
+        });
+      })
+      .catch((err) => {
+        console.error("Error fetching avatarUri blob:", err);
+      });
+  }
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
@@ -91,13 +105,20 @@ function AuthorEdit({
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
+              if (file.size > 500_000) {
+                authorForm.setError("avatarUri", {
+                  message: "Avatar must be less than 500KB",
+                });
+                return;
+              }
+              authorForm.clearErrors("avatarUri");
               authorForm.setValue("avatarUri", URL.createObjectURL(file));
             }
           }}
           ref={fileInputRef}
           type="file"
         />
-        <div className="flex w-full items-center justify-center gap-2">
+        <div className="flex w-full flex-col items-center justify-center gap-2">
           <Avatar
             className="size-18"
             onClick={() => fileInputRef.current?.click()}
@@ -109,6 +130,11 @@ function AuthorEdit({
                 .toUpperCase()}
             </AvatarFallback>
           </Avatar>
+          {authorForm.formState.errors.avatarUri && (
+            <FormMessage className="text-destructive">
+              {authorForm.formState.errors.avatarUri.message}
+            </FormMessage>
+          )}
         </div>
 
         <FormField

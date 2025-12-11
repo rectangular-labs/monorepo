@@ -1,3 +1,4 @@
+import { getExtensionFromMimeType } from "@rectangular-labs/api-seo/client";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useBlocker } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
+import { convertBlobUrlToDataUrl } from "~/lib/url";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { AuthorProfileCard } from "./-components/author-profile-card";
 import { AuthorProfileModal } from "./-components/author-profile-modal";
@@ -52,34 +54,31 @@ function WritingSettingsPage() {
     }),
   );
   const {
-    mutate: updateWritingSettings,
+    mutateAsync: updateWritingSettings,
     isPending: isUpdatingWritingSettings,
   } = useMutation(
     getApiClientRq().project.update.mutationOptions({
-      onSuccess: async () => {
-        toast.success("Article settings saved");
-        await queryClient.invalidateQueries({
-          queryKey: getApiClientRq().project.getArticleSettings.queryKey({
-            input: {
-              organizationIdentifier: organizationSlug,
-              identifier: projectSlug,
-            },
-          }),
-        });
+      onError: (error) => {
+        form.setError("root", { message: error.message });
       },
     }),
   );
-  const { mutate: upsertAuthors, isPending: isUpsertingAuthors } = useMutation(
-    getApiClientRq().project.upsertAuthors.mutationOptions({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: getApiClientRq().project.getArticleSettings.queryKey({
-            input: {
-              organizationIdentifier: organizationSlug,
-              identifier: projectSlug,
-            },
-          }),
-        });
+  const { mutateAsync: upsertAuthors, isPending: isUpsertingAuthors } =
+    useMutation(
+      getApiClientRq().project.upsertAuthors.mutationOptions({
+        onError: (error) => {
+          form.setError("root", { message: error.message });
+        },
+      }),
+    );
+
+  const {
+    mutateAsync: uploadAuthorAvatars,
+    isPending: isUploadingAuthorAvatars,
+  } = useMutation(
+    getApiClientRq().project.uploadProjectImage.mutationOptions({
+      onError: (error) => {
+        form.setError("root", { message: error.message });
       },
     }),
   );
@@ -174,24 +173,78 @@ function WritingSettingsPage() {
         })) ?? [],
     });
   }, [activeProject, form]);
+
   useEffect(() => {
     resetForm();
   }, [resetForm]);
 
-  function handleSave(values: WritingSettingFormSchema) {
+  async function handleSave(values: WritingSettingFormSchema) {
     if (!activeProject) return;
 
-    const { authors, ...writingSettings } = values;
+    let { authors, ...writingSettings } = values;
 
-    updateWritingSettings({
-      id: activeProject.id,
-      organizationIdentifier: organizationSlug,
-      writingSettings,
-    });
-    upsertAuthors({
-      id: activeProject.id,
-      organizationIdentifier: organizationSlug,
-      authors,
+    const authorPfpToUpload = await Promise.all(
+      authors.map(async (author) => {
+        if (author.avatarUri.startsWith("blob:")) {
+          const mimeType = await fetch(author.avatarUri)
+            .then((res) => res.blob())
+            .then((blob) => blob.type);
+          const blob = await convertBlobUrlToDataUrl(author.avatarUri);
+          return {
+            ...author,
+            url: blob,
+            fileName: `${author.name}.${getExtensionFromMimeType(mimeType)}`,
+          };
+        }
+        return author;
+      }),
+    );
+
+    if (authorPfpToUpload.length > 0) {
+      const result = await uploadAuthorAvatars({
+        id: activeProject.id,
+        organizationIdentifier: organizationSlug,
+        kind: "author-avatar",
+        files: authorPfpToUpload
+          .filter((author) => "url" in author)
+          .map((author) => ({
+            name: author.fileName,
+            url: author.url,
+          })),
+      });
+      let currentIndex = 0;
+      authors = authorPfpToUpload.map((author) => {
+        if ("url" in author) {
+          return {
+            ...author,
+            avatarUri: result.publicUris[currentIndex++] ?? "",
+          };
+        }
+        return author;
+      });
+    }
+
+    await Promise.all([
+      updateWritingSettings({
+        id: activeProject.id,
+        organizationIdentifier: organizationSlug,
+        writingSettings,
+      }),
+      upsertAuthors({
+        id: activeProject.id,
+        organizationIdentifier: organizationSlug,
+        authors,
+      }),
+    ]);
+
+    toast.success("Article settings saved");
+    await queryClient.invalidateQueries({
+      queryKey: getApiClientRq().project.getArticleSettings.queryKey({
+        input: {
+          organizationIdentifier: organizationSlug,
+          identifier: projectSlug,
+        },
+      }),
     });
   }
 
@@ -287,7 +340,12 @@ function WritingSettingsPage() {
                   Manage author profiles for your content.
                 </CardDescription>
               </div>
-              <Button onClick={addAuthor} size="sm" variant="outline">
+              <Button
+                onClick={addAuthor}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
                 <Icons.Plus className="size-4" />
                 <span className="hidden sm:block">Add author</span>
               </Button>
@@ -324,7 +382,12 @@ function WritingSettingsPage() {
                   included in the generated content.
                 </CardDescription>
               </div>
-              <Button onClick={addMetadata} size="sm" variant="outline">
+              <Button
+                onClick={addMetadata}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
                 <Icons.Plus className="size-4" />
                 <span className="hidden sm:block">Add metadata</span>
               </Button>
@@ -352,7 +415,12 @@ function WritingSettingsPage() {
           </CardContent>
         </Card>
         <FloatingToolbar
-          isSaving={isUpdatingWritingSettings || isUpsertingAuthors}
+          errors={form.formState.errors.root?.message}
+          isSaving={
+            isUpdatingWritingSettings ||
+            isUpsertingAuthors ||
+            isUploadingAuthorAvatars
+          }
           isVisible={isDirty}
           onCancel={resetForm}
         />
