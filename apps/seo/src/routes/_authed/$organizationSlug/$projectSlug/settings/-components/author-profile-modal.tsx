@@ -60,7 +60,7 @@ function AuthorEdit({
     },
   });
   const avatarUri = authorForm.watch("avatarUri");
-  console.log('avatarUri', avatarUri)
+  console.log("avatarUri", avatarUri);
   if (avatarUri) {
     fetch(avatarUri)
       .then(async (res) => {
@@ -199,60 +199,65 @@ function AuthorEdit({
           </p>
         )}
         {socialLinkFields.map((field, socialIndex) => (
-          <div className="flex gap-2" key={field.id}>
-            <FormField
-              control={authorForm.control}
-              name={`socialLinks.${socialIndex}.platform`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      list="platforms"
-                      placeholder="X, LinkedIn, etc."
-                      {...field}
-                    />
-                  </FormControl>
-                  <datalist id="platforms">
-                    <option value="X" />
-                    <option value="TikTok" />
-                    <option value="YouTube" />
-                    <option value="LinkedIn" />
-                    <option value="Facebook" />
-                    <option value="Instagram" />
-                  </datalist>
+          <div className="flex items-center gap-2" key={field.id}>
+            <div className="flex items-start gap-2">
+              <FormField
+                control={authorForm.control}
+                name={`socialLinks.${socialIndex}.platform`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Platform</FormLabel>
+                    <FormControl>
+                      <Input
+                        list="platforms"
+                        placeholder="X, LinkedIn, etc."
+                        {...field}
+                      />
+                    </FormControl>
+                    <datalist id="platforms">
+                      <option value="X" />
+                      <option value="TikTok" />
+                      <option value="YouTube" />
+                      <option value="LinkedIn" />
+                      <option value="Facebook" />
+                      <option value="Instagram" />
+                    </datalist>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={authorForm.control}
-              name={`socialLinks.${socialIndex}.url`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="https://www.linkedin.com/in/your-profile"
-                      {...field}
-                    />
-                  </FormControl>
-                  {authorForm.formState.errors.socialLinks?.root?.message?.includes(
-                    `socialLinks[${socialIndex}].url`,
-                  ) && (
-                    <FormMessage className="text-destructive">
-                      platform link must be a valid URL
-                    </FormMessage>
-                  )}
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={authorForm.control}
+                name={`socialLinks.${socialIndex}.url`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="https://www.linkedin.com/in/your-profile"
+                        {...field}
+                      />
+                    </FormControl>
+                    {authorForm.formState.errors.socialLinks?.root?.message?.includes(
+                      `socialLinks[${socialIndex}].url`,
+                    ) && (
+                      <FormMessage className="text-destructive">
+                        platform link must be a valid URL
+                      </FormMessage>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <Button
               onClick={() => removeSocialLink(socialIndex)}
               size="icon-sm"
               type="button"
               variant="ghost"
             >
-              <Icons.Trash className="h-4 w-4" />
+              <Icons.Trash />
             </Button>
           </div>
         ))}
