@@ -41,7 +41,7 @@ export const seoProjectAuthor = pgSeoTable(
     ...timestamps,
   },
   (table) => [
-    unique("seo_project_author_project_name_unique").on(
+    unique("seo_project_author_project_id_name_unique").on(
       table.projectId,
       table.name,
     ),

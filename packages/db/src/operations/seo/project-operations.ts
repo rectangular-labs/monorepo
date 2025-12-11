@@ -194,13 +194,11 @@ export async function upsertSeoProjectAuthors(
         })),
       )
       .onConflictDoUpdate({
-        target: [
-          schema.seoProjectAuthor.projectId,
-          schema.seoProjectAuthor.name,
-        ],
+        target: [schema.seoProjectAuthor.id],
         set: buildConflictUpdateColumns(schema.seoProjectAuthor, [
-          "bio",
           "avatarUri",
+          "bio",
+          "name",
           "socialLinks",
           "title",
         ]),
