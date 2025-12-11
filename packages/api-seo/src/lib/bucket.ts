@@ -7,7 +7,7 @@ export function createWorkspaceBucket() {
   const binding = (cloudflareEnv as any).SEO_WORKSPACE_BUCKET as R2Bucket;
 
   return {
-    getSnapshot: async (key: string, options: R2GetOptions) => {
+    getSnapshot: async (key: string, options?: R2GetOptions) => {
       const snapshot = await binding.get(key, options);
       if (!snapshot) {
         return null;
@@ -17,7 +17,7 @@ export function createWorkspaceBucket() {
     setSnapshot: async (
       key: string,
       snapshot: Uint8Array,
-      options: R2PutOptions,
+      options?: R2PutOptions,
     ) => {
       return await binding.put(key, snapshot, options);
     },
