@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "assist": {
     "actions": {
       "source": { "organizeImports": "on", "useSortedAttributes": "on" }
@@ -99,6 +99,8 @@
       ".cursor/**",
       "!packages/dataforseo/src/client/index.ts",
       "!packages/dataforseo/src/**/*.gen.ts",
+      // bug in biome with for loops, so we exclude this file for now
+      "!!packages/ui/src/components/ui/dropdrawer.tsx",
       "!**/migrations",
       "!**/worker-configuration.d.ts",
       "!**/.content-collections",
@@ -109,6 +111,7 @@
       "!**/.turbo",
       "!**/.cache",
       "!**/dist",
+      "!**/docs",
       "!**/.output",
       "!**/.tanstack",
       "!**/.turbo",
