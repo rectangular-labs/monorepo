@@ -163,7 +163,13 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 
 export { arktypeResolver } from "@hookform/resolvers/arktype";
 export type { Control } from "react-hook-form";
-export { useFieldArray, useForm } from "react-hook-form";
+export {
+  type UseFieldArrayRemove,
+  type UseFieldArrayUpdate,
+  type UseFormReturn,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 export {
   Form,
   FormControl,

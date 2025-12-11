@@ -65,7 +65,7 @@ export interface FileUploadProps
   maxSizeMB?: number;
 }
 
-export function IFileUpload({
+export function FileUpload({
   files,
   setFiles,
   onDropFiles: onDropFilesProp,
@@ -146,7 +146,7 @@ export function IFileUpload({
           {files.map((file, index) => (
             <FileItem
               file={file}
-              key={`${file.name}-${file.size}-${index}`}
+              key={`${file.name}-${file.mimeType}-${index}`}
               onRemove={() => removeUploadById(index)}
             />
           ))}
