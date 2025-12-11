@@ -96,16 +96,16 @@ export async function getSeoProjectByIdentifierAndOrgId<
         | "serpSnapshot"
       > &
         (B extends true
-          ? { businessBackground: typeof businessBackgroundSchema.infer }
+          ? { businessBackground: typeof businessBackgroundSchema.infer | null }
           : Record<string, never>) &
         (I extends true
-          ? { imageSettings: typeof imageSettingsSchema.infer }
+          ? { imageSettings: typeof imageSettingsSchema.infer | null }
           : Record<string, never>) &
         (A extends true
-          ? { articleSettings: typeof writingSettingsSchema.infer }
+          ? { articleSettings: typeof writingSettingsSchema.infer | null }
           : Record<string, never>) &
         (S extends true
-          ? { serpSnapshot: typeof serpTrafficSchema.infer }
+          ? { serpSnapshot: typeof serpTrafficSchema.infer | null }
           : Record<string, never>))
     | null,
     Error

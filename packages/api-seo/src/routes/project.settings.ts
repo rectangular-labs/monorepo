@@ -7,6 +7,7 @@ import {
   upsertSeoProjectAuthors,
 } from "@rectangular-labs/db/operations";
 import {
+  businessBackgroundSchema,
   imageSettingsSchema,
   writingSettingsSchema,
 } from "@rectangular-labs/db/parsers";
@@ -26,9 +27,13 @@ export const getBusinessBackground = withOrganizationIdBase
   .input(type({ identifier: "string", organizationIdentifier: "string" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
-    schema.seoProjectSelectSchema
-      .pick("businessBackground")
-      .merge({ id: "string", organizationId: "string" }),
+    type({
+      id: "string",
+      name: "string|null",
+      organizationId: "string",
+      websiteUrl: "string.url",
+      businessBackground: businessBackgroundSchema.or(type.null),
+    }),
   )
   .handler(async ({ context, input }) => {
     const projectResult = await getSeoProjectByIdentifierAndOrgId(
@@ -51,9 +56,11 @@ export const getBusinessBackground = withOrganizationIdBase
       });
     }
     return {
-      businessBackground: projectResult.value.businessBackground,
-      organizationId: context.organization.id,
       id: projectResult.value.id,
+      name: projectResult.value.name,
+      organizationId: context.organization.id,
+      websiteUrl: projectResult.value.websiteUrl,
+      businessBackground: projectResult.value.businessBackground,
     };
   });
 
@@ -161,7 +168,7 @@ export const upsertAuthors = withOrganizationIdBase
       id: "string",
       organizationIdentifier: "string",
       authors: schema.seoProjectAuthorInsertSchema
-        .merge(type({ id: "string.uuid" }))
+        .merge(type({ "id?": "string.uuid" }))
         .array(),
     }),
   )

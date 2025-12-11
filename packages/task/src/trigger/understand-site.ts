@@ -1,7 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { create, insertMultiple } from "@orama/orama";
 import {
-  seoWebsiteInfoSchema,
+  businessBackgroundSchema,
   understandSiteTaskInputSchema,
   type understandSiteTaskOutputSchema,
 } from "@rectangular-labs/db/parsers";
@@ -90,7 +90,7 @@ export const understandSiteTask: ReturnType<
     const StructuredSeoSchema = type({
       name: type.string.describe("The name of the site."),
     })
-      .merge(seoWebsiteInfoSchema)
+      .merge(businessBackgroundSchema)
       .describe("Normalized business context for downstream SEO planning.");
 
     // Guide the model to use tools to ground the output
