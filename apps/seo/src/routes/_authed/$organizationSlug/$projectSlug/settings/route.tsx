@@ -16,8 +16,7 @@ function SettingsLayout() {
         organizationSlug={organizationSlug}
         projectSlug={projectSlug}
       />
-      {/* 97px is the height of the header and padding around the page */}
-      <div className="mx-auto h-full max-w-4xl flex-1 overflow-y-auto px-6 py-4 md:max-h-[calc(100vh-97px)]">
+      <div className="mx-auto h-full max-w-4xl flex-1 px-6 py-4">
         <Outlet />
       </div>
     </div>
