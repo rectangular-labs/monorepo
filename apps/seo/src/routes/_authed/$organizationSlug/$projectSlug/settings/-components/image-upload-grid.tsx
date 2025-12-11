@@ -45,7 +45,9 @@ function ImageItemCard({
         className="absolute inset-0 hover:cursor-pointer"
         onClick={onClick}
         type="button"
-      />
+      >
+        <span className="sr-only">Edit {item.name ?? "image"} settings</span>
+      </button>
       {item.uris.length > 0 && (
         <Carousel>
           <CarouselContent>

@@ -15,7 +15,10 @@ import {
   DialogDrawerHeader,
   DialogDrawerTitle,
 } from "@rectangular-labs/ui/components/ui/dialog-drawer";
-import { IFileUpload } from "@rectangular-labs/ui/components/ui/file-upload";
+import {
+  FileUpload,
+  type IFileUpload,
+} from "@rectangular-labs/ui/components/ui/file-upload";
 import {
   arktypeResolver,
   Form,
@@ -32,6 +35,7 @@ import { useMutation } from "@tanstack/react-query";
 import { type } from "arktype";
 import { useEffect } from "react";
 import { getApiClientRq } from "~/lib/api";
+import { convertBlobUrlToDataUrl } from "~/lib/url";
 
 export type ProjectImageKind = Exclude<
   RouterInputs["project"]["uploadProjectImage"]["kind"],
@@ -48,7 +52,7 @@ const ALLOWED_TYPES = [
   "image/gif",
   "image/webp",
 ] as const;
-const MAX_SIZE = 5_000_000; // 5MB
+const MAX_SIZE = 3_000_000; // 3MB
 
 function validateFile(
   file: IFileUpload | null | undefined,
@@ -91,17 +95,6 @@ const formSchema = type({
   name: "string",
   instructions: "string",
 });
-
-const convertBlobUrlToDataUrl = async (url: string): Promise<string> => {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
 
 export function ImageSettingModal({
   kind,
@@ -148,7 +141,6 @@ export function ImageSettingModal({
               }
               return {
                 mimeType: getMimeTypeFromFileName(fileName),
-                size: 0,
                 name: fileName,
                 url: uri,
               };
@@ -182,7 +174,7 @@ export function ImageSettingModal({
         filesToUpload.push(
           file.url.startsWith("blob:")
             ? {
-                mimeType: file.mimeType,
+                mimeType: getMimeTypeFromFileName(file.name),
                 size: file.size,
                 name: file.name,
                 url: await convertBlobUrlToDataUrl(file.url),
@@ -246,7 +238,7 @@ export function ImageSettingModal({
                 <FormItem>
                   <FormLabel>File</FormLabel>
                   <FormControl>
-                    <IFileUpload
+                    <FileUpload
                       accept="image/jpeg,image/png,image/gif,image/webp"
                       disabled={field.disabled}
                       files={field.value}
