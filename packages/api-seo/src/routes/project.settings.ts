@@ -160,7 +160,9 @@ export const upsertAuthors = withOrganizationIdBase
     type({
       id: "string",
       organizationIdentifier: "string",
-      authors: schema.seoProjectAuthorInsertSchema.array(),
+      authors: schema.seoProjectAuthorInsertSchema
+        .merge(type({ id: "string.uuid" }))
+        .array(),
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
@@ -173,7 +175,7 @@ export const upsertAuthors = withOrganizationIdBase
     );
     if (!result.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: result.error.message,
+        message: "Something went wrong while updating authors",
         cause: result.error,
       });
     }
@@ -186,7 +188,7 @@ export const upsertAuthors = withOrganizationIdBase
 
     if (!deletedResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: deletedResult.error.message,
+        message: "Something went wrong while deleting authors",
         cause: deletedResult.error,
       });
     }
@@ -202,8 +204,6 @@ export const uploadProjectImage = withOrganizationIdBase
       organizationIdentifier: "string",
       kind: ProjectImageKindSchema,
       files: type({
-        mimeType: "string",
-        size: "number",
         name: "string",
         url: "string.url",
       }).array(),
@@ -228,19 +228,19 @@ export const uploadProjectImage = withOrganizationIdBase
     const maxSize =
       kind === "author-avatar"
         ? 500_000 // 500KB
-        : 5_000_000; // 5MB
+        : 3_000_000; // 3MB
 
     const privateStore: { key: string; value: Blob }[] = [];
     const publicStore: { key: string; value: Blob }[] = [];
     for (const file of files) {
-      if (
-        !allowedTypes.includes(file.mimeType as (typeof allowedTypes)[number])
-      ) {
+      const blob = await fetch(file.url).then((res) => res.blob());
+
+      if (!allowedTypes.includes(blob.type as (typeof allowedTypes)[number])) {
         throw new ORPCError("BAD_REQUEST", {
           message: "Unsupported image type. Use jpeg, png, gif, or webp.",
         });
       }
-      if (file.size > maxSize) {
+      if (blob.size > maxSize) {
         throw new ORPCError("BAD_REQUEST", {
           message:
             kind === "author-avatar"
@@ -248,7 +248,7 @@ export const uploadProjectImage = withOrganizationIdBase
               : "Image must be at most 5MB.",
         });
       }
-      const blob = await fetch(file.url).then((res) => res.blob());
+
       if (kind === "author-avatar" || kind === "content-image") {
         publicStore.push({
           key: getPublicImageUri({
@@ -271,7 +271,6 @@ export const uploadProjectImage = withOrganizationIdBase
         });
       }
     }
-
     await Promise.all([
       ...publicStore.map(({ key, value }) =>
         context.publicImagesBucket.storeImage(key, value),

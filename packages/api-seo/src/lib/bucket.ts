@@ -29,7 +29,7 @@ export function createWorkspaceBucket() {
 
 export function createPublicImagesBucket() {
   // biome-ignore lint/suspicious/noExplicitAny: We don't pass in the actual value right now so don't have the correct typing
-  const binding = (cloudflareEnv as any).SEO_WORKSPACE_BUCKET as R2Bucket;
+  const binding = (cloudflareEnv as any).SEO_PUBLIC_IMAGES_BUCKET as R2Bucket;
 
   return {
     storeImage: async (key: string, value: Blob, options?: R2PutOptions) => {

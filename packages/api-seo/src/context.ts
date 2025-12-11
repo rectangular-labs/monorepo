@@ -36,9 +36,9 @@ export const createApiContext = (
     }) as Auth,
     db,
     workspaceBucket: createWorkspaceBucket(),
-    projectImagesBucket: createPublicImagesBucket(),
+    publicImagesBucket: createPublicImagesBucket(),
     ...args,
-  };
+  } satisfies InitialContext;
 };
 
 /**
