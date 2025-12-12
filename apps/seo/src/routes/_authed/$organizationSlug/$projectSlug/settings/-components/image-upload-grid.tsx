@@ -38,7 +38,7 @@ function ImageItemCard({
   onClick: () => void;
 }) {
   const displayName = item.name;
-  console.log("item.uris", item.uris);
+
   return (
     <div className="relative flex flex-col justify-between rounded-md border bg-muted/40 text-xs">
       <button

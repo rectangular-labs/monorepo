@@ -199,7 +199,6 @@ export const upsertAuthors = withOrganizationIdBase
         cause: deletedResult.error,
       });
     }
-    console.log("deletedResult.value", deletedResult.value);
     return result.value;
   });
 
@@ -240,7 +239,36 @@ export const uploadProjectImage = withOrganizationIdBase
     const privateStore: { key: string; value: Blob }[] = [];
     const publicStore: { key: string; value: Blob }[] = [];
     for (const file of files) {
-      const blob = await fetch(file.url).then((res) => res.blob());
+      // TODO (uploads): use presigned urls and upload directly from the frontend
+      if (!file.url.startsWith("data:")) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "File URL must be a data URL (starting with 'data:').",
+        });
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10_000);
+
+      let blob: Blob;
+      try {
+        blob = await fetch(file.url, {
+          signal: controller.signal,
+        }).then((res) => res.blob());
+        clearTimeout(timeoutId);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        z;
+        if (error instanceof Error && error.name === "AbortError") {
+          throw new ORPCError("BAD_REQUEST", {
+            message: "Request timed out after 10 seconds.",
+          });
+        }
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Failed to fetch file.",
+          cause: error,
+        });
+      }
+      // end todo
 
       if (!allowedTypes.includes(blob.type as (typeof allowedTypes)[number])) {
         throw new ORPCError("BAD_REQUEST", {
