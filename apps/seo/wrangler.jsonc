@@ -51,8 +51,14 @@
   // https://developers.cloudflare.com/workers/development-testing/#bindings-during-local-development
   "r2_buckets": [
     {
-      "bucket_name": "seo-content-workspaces-preview",
-      "binding": "SEO_WORKSPACE_BUCKET"
+      "bucket_name": "seo-organization-storage-preview",
+      "binding": "SEO_WORKSPACE_BUCKET",
+      "remote": true
+    },
+    {
+      "bucket_name": "seo-public-images-preview",
+      "binding": "SEO_PUBLIC_IMAGES_BUCKET",
+      "remote": true
     }
   ],
   "env": {
@@ -90,8 +96,12 @@
       ],
       "r2_buckets": [
         {
-          "bucket_name": "seo-content-workspaces-production",
+          "bucket_name": "seo-organization-storage-production",
           "binding": "SEO_WORKSPACE_BUCKET"
+        },
+        {
+          "bucket_name": "seo-public-images-production",
+          "binding": "SEO_PUBLIC_IMAGES_BUCKET"
         }
       ],
       "routes": [
@@ -136,8 +146,12 @@
       ],
       "r2_buckets": [
         {
-          "bucket_name": "seo-content-workspaces-preview",
+          "bucket_name": "seo-organization-storage-preview",
           "binding": "SEO_WORKSPACE_BUCKET"
+        },
+        {
+          "bucket_name": "seo-public-images-preview",
+          "binding": "SEO_PUBLIC_IMAGES_BUCKET"
         }
       ],
       "routes": [

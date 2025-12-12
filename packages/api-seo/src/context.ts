@@ -8,11 +8,14 @@ import { loggerMiddleware } from "@rectangular-labs/api-core/lib/logger";
 import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
 import { createDb } from "@rectangular-labs/db";
 import { apiEnv } from "./env";
-import { createWorkspaceBucket } from "./lib/bucket";
+import { createPublicImagesBucket, createWorkspaceBucket } from "./lib/bucket";
 import type { InitialContext, WebSocketContext } from "./types";
 
 export const createApiContext = (
-  args: Omit<InitialContext, "db" | "auth" | "workspaceBucket">,
+  args: Omit<
+    InitialContext,
+    "db" | "auth" | "workspaceBucket" | "publicImagesBucket"
+  >,
 ) => {
   const db = createDb();
   const env = apiEnv();
@@ -33,8 +36,9 @@ export const createApiContext = (
     }) as Auth,
     db,
     workspaceBucket: createWorkspaceBucket(),
+    publicImagesBucket: createPublicImagesBucket(),
     ...args,
-  };
+  } satisfies InitialContext;
 };
 
 /**

@@ -47,7 +47,9 @@ Operating principles:
 Project context:
 - Website: ${project.websiteUrl}
 - Website info: ${
-    project.websiteInfo ? JSON.stringify(project.websiteInfo) : "(none)"
+    project.businessBackground
+      ? JSON.stringify(project.businessBackground)
+      : "(none)"
   }
 - Ask concise clarifying questions or double check crucial data before proceeding.
   

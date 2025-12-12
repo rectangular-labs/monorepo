@@ -25,7 +25,9 @@ import {
   GridIcon,
   HandIcon,
   HistoryIcon,
+  ImageIcon,
   InfoIcon,
+  LinkIcon,
   ListFilterIcon,
   ListIcon,
   ListTreeIcon,
@@ -42,6 +44,7 @@ import {
   PanelLeftCloseIcon,
   PanelLeftIcon,
   PartyPopperIcon,
+  PencilIcon,
   PhoneCallIcon,
   PlusIcon,
   RefreshCcwIcon,
@@ -56,6 +59,7 @@ import {
   TargetIcon,
   TerminalIcon,
   TimerIcon,
+  TrashIcon,
   TrendingUpIcon,
   TriangleAlertIcon,
   UserIcon,
@@ -95,7 +99,9 @@ export const Globe = GlobeIcon;
 export const Grid = GridIcon;
 export const Hand = HandIcon;
 export const History = HistoryIcon;
+export const Image = ImageIcon;
 export const Info = InfoIcon;
+export const Link = LinkIcon;
 export const List = ListIcon;
 export const ListTree = ListTreeIcon;
 export const LogOut = LogOutIcon;
@@ -108,6 +114,7 @@ export const MoveUpRight = MoveUpRightIcon;
 export const PanelLeft = PanelLeftIcon;
 export const PanelLeftClose = PanelLeftCloseIcon;
 export const PartyPopper = PartyPopperIcon;
+export const Pencil = PencilIcon;
 export const PhoneCall = PhoneCallIcon;
 export const Plus = PlusIcon;
 export const RefreshCcw = RefreshCcwIcon;
@@ -123,6 +130,7 @@ export const Sun = SunIcon;
 export const Target = TargetIcon;
 export const Terminal = TerminalIcon;
 export const Timer = TimerIcon;
+export const Trash = TrashIcon;
 export const TrendingUp = TrendingUpIcon;
 export const User = UserIcon;
 export const Users = UsersIcon;

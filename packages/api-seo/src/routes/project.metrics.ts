@@ -96,6 +96,9 @@ export const metrics = withOrganizationIdBase
       context.db,
       input.identifier,
       context.organization.id,
+      {
+        businessBackground: true,
+      },
     );
 
     if (!projectResult.ok) {

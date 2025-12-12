@@ -538,6 +538,7 @@ export function ChatPanel({
           </PromptInputAttachments>
           <PromptInputTextarea
             onChange={(e) => setInput(e.target.value)}
+            status={status}
             value={input}
           />
         </PromptInputBody>
@@ -571,7 +572,7 @@ export function ChatPanel({
             </PromptInputModelSelect>
           </PromptInputTools>
           <PromptInputSubmit
-            disabled={!input && !status}
+            disabled={!input}
             onClick={() => {
               if (status === "streaming") {
                 stop?.();

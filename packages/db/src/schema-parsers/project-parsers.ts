@@ -27,7 +27,7 @@ export const COUNTRY_CODE_MAP: Record<string, string> = {
   ZA: "South Africa",
 };
 
-export const seoWebsiteInfoSchema = type({
+export const businessBackgroundSchema = type({
   version: "'v1'",
   businessOverview: type("string")
     .atLeastLength(1)
@@ -37,21 +37,30 @@ export const seoWebsiteInfoSchema = type({
     .configure({
       message: () => "Business Overview is required",
     }),
-  idealCustomer: type("string")
+  targetAudience: type("string")
     .atLeastLength(1)
     .describe(
       "Format: B2B - Roles/Titles; Industries; Company size; Geo. B2C - Personas; Demographics/Age; Needs/Use cases; Geo. If both, include both separated by ' | '. Examples — B2B: 'Ops leaders; SaaS; 50-500 FTE; US/UK' | 'HR Directors; Healthcare; 200-1000 FTE; US/CA'. B2C: 'Parents of toddlers; Age 25-40; Childcare savings; US' | 'College students; Age 18-24; Budget laptops; UK'.",
     )
     .configure({
-      message: () => "Ideal Customer is required",
+      message: () => "Target Audience is required",
     }),
-  writingStyle: type("string")
+  caseStudies: type({
+    title: "string",
+    description: "string",
+  })
+    .array()
+    .describe("Case studies that demonstrate results or credibility."),
+  competitorsWebsites: type({ url: "string.url" })
+    .array()
+    .describe("List of URLs of direct competitors. Leave blank if none."),
+  industry: type("string")
     .atLeastLength(1)
     .describe(
-      "Capture brand voice comprehensively: Tone (e.g., professional, casual, witty, authoritative, empathetic); Style (e.g., concise, storytelling, data-driven, conversational); Persona (e.g., expert advisor, friendly guide, industry leader, innovator); Voice attributes (e.g., formal/informal, technical/accessible, serious/playful). Include linguistic patterns if distinctive (e.g., 'uses contractions', 'avoids jargon', 'data-heavy with examples'). Examples — 'Professional yet approachable; concise data-driven style; expert advisor persona; uses contractions and accessible language; balances technical depth with clarity' | 'Witty and irreverent; storytelling style with pop culture refs; challenger brand persona; playful informal voice; avoids corporate speak'.",
+      "Broad top-level category, e.g. 'Software', 'Healthcare', 'E-commerce'.",
     )
     .configure({
-      message: () => "Writing Style is required",
+      message: () => "Industry is required",
     }),
   serviceRegion: type("string")
     .atLeastLength(1)
@@ -75,18 +84,64 @@ export const seoWebsiteInfoSchema = type({
   targetCity: type("string").describe(
     "City name that would contain the majority of the target audience . Default 'San Francisco' if not specified.",
   ),
-  industry: type("string")
-    .atLeastLength(1)
-    .describe(
-      "Broad top-level category, e.g. 'Software', 'Healthcare', 'E-commerce'.",
-    )
-    .configure({
-      message: () => "Industry is required",
-    }),
   languageCode: type("string").describe(
     "2-letter language code that would encompass the language of the majority of the target audience. Default 'en' if not specified.",
   ),
-  competitorsWebsites: type({ url: "string.url" })
+});
+
+export const imageSettingsSchema = type({
+  version: "'v1'",
+  styleReferences: type({
+    uris: "string[]",
+    "instructions?": "string",
+  })
     .array()
-    .describe("List of URLs of direct competitors. Leave blank if none."),
+    .describe(
+      "Visual references that describe the desired style, composition, or mood.",
+    ),
+  brandLogos: type({
+    uris: "string[]",
+    "name?": "string",
+    "instructions?": "string",
+  })
+    .array()
+    .describe("Brand logos that should be used for the project."),
+  imageInstructions: type("string").describe(
+    "Additional guidance for how generated images should look (e.g., do/don'ts, brand rules).",
+  ),
+});
+
+export const writingSettingsSchema = type({
+  version: "'v1'",
+  brandVoice: type("string")
+    .atLeastLength(1)
+    .describe(
+      "Capture brand voice comprehensively: Tone (e.g., professional, casual, witty, authoritative, empathetic); Style (e.g., concise, storytelling, data-driven, conversational); Persona (e.g., expert advisor, friendly guide, industry leader, innovator); Voice attributes (e.g., formal/informal, technical/accessible, serious/playful). Include linguistic patterns if distinctive (e.g., 'uses contractions', 'avoids jargon', 'data-heavy with examples').",
+    )
+    .configure({
+      message: () => "Brand Voice is required",
+    }),
+  customInstructions: type("string").describe(
+    "Extra instructions to steer generated articles (e.g., formatting, calls to action, do/don'ts).",
+  ),
+  metadata: type({
+    name: "string",
+    description: "string",
+  })
+    .array()
+    .describe("Named metadata presets used for content generation."),
+});
+
+export const authorSettingsSchema = type({
+  name: type("string").describe("The name of the author."),
+  title: type("string").describe("The title of the author."),
+  bio: type("string").describe("The bio of the author."),
+  avatarUri: type("string").describe("The avatar URI of the author."),
+  socialLinks: type({
+    platform: "string",
+    url: "string.url",
+  })
+    .array()
+    .or(type.null)
+    .describe("The social links of the author."),
 });

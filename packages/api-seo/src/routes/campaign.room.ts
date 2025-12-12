@@ -3,6 +3,7 @@ import { ORPCError, type } from "@orpc/server";
 import { uuidv7 } from "@rectangular-labs/db";
 import {
   createContentCampaignMessage,
+  getSeoProjectByIdentifierAndOrgId,
   updateContentCampaign,
 } from "@rectangular-labs/db/operations";
 import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/db/parsers";
@@ -17,7 +18,6 @@ import { CrdtType } from "loro-protocol";
 import { websocketBase } from "../context";
 import { createSeoAgent } from "../lib/ai/seo-agent";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
-import { getProjectByIdentifier } from "../lib/database/project";
 import {
   getRoomKey,
   getWorkspaceBlobUri,
@@ -38,11 +38,18 @@ const room = websocketBase
     }>(),
   )
   .handler(async ({ context, input }) => {
-    const projectResult = await getProjectByIdentifier(
+    const projectResult = await getSeoProjectByIdentifierAndOrgId(
+      context.db,
       context.projectId,
       context.organizationId,
+      {
+        businessBackground: true,
+        imageSettings: true,
+        articleSettings: true,
+        serpSnapshot: true,
+      },
     );
-    if (!projectResult.ok) {
+    if (!projectResult.ok || !projectResult.value) {
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
     }
     const project = projectResult.value;

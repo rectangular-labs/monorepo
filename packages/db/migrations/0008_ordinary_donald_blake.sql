@@ -1,0 +1,2 @@
+ALTER TABLE "seo_project_author" DROP CONSTRAINT "seo_project_author_project_name_unique";--> statement-breakpoint
+ALTER TABLE "seo_project_author" ADD CONSTRAINT "seo_project_author_project_id_name_unique" UNIQUE("project_id","name");

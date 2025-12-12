@@ -1,0 +1,1 @@
+ALTER TABLE "seo_project" RENAME COLUMN "article_settings" TO "writing_settings";

@@ -30,7 +30,7 @@ export type DrawerDialogProps = {
   trigger?: React.ReactNode;
 };
 
-export default function DialogDrawer({
+export function DialogDrawer({
   isLoading = false,
   open: controlledOpen,
   className,

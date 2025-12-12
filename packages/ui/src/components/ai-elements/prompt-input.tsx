@@ -792,11 +792,14 @@ export const PromptInputBody = ({
 
 export type PromptInputTextareaProps = ComponentProps<
   typeof InputGroupTextarea
->;
+> & {
+  status?: ChatStatus;
+};
 
 export const PromptInputTextarea = ({
   onChange,
   className,
+  status,
   placeholder = "What would you like to know?",
   ...props
 }: PromptInputTextareaProps) => {
@@ -809,7 +812,7 @@ export const PromptInputTextarea = ({
       if (isComposing || e.nativeEvent.isComposing) {
         return;
       }
-      if (e.shiftKey) {
+      if (e.shiftKey || status !== "ready") {
         return;
       }
       e.preventDefault();

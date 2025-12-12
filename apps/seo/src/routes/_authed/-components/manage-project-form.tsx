@@ -1,6 +1,6 @@
 import {
+  businessBackgroundSchema,
   COUNTRY_CODE_MAP,
-  seoWebsiteInfoSchema,
 } from "@rectangular-labs/db/parsers";
 import { safe } from "@rectangular-labs/result";
 import { AutoHeight } from "@rectangular-labs/ui/animation/auto-height";
@@ -19,6 +19,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  type UseFormReturn,
   useFieldArray,
   useForm,
 } from "@rectangular-labs/ui/components/ui/form";
@@ -33,7 +34,7 @@ import {
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { type } from "arktype";
-import type { ReactNode } from "react";
+import { type ReactNode, useCallback, useEffect } from "react";
 
 const formSchema = type({
   name: type("string")
@@ -46,8 +47,14 @@ const formSchema = type({
     .configure({
       message: () => "Must be a valid URL",
     }),
-}).merge(seoWebsiteInfoSchema.omit("version"));
+}).merge(businessBackgroundSchema.omit("version"));
 export type ManageProjectFormValues = typeof formSchema.infer;
+
+export interface ManageProjectFormRef {
+  form: UseFormReturn<ManageProjectFormValues>;
+  isDirty: boolean;
+  resetForm: () => void;
+}
 
 export function ManageProjectForm({
   defaultValues,
@@ -66,16 +73,37 @@ export function ManageProjectForm({
       name: defaultValues?.name || "",
       websiteUrl: defaultValues?.websiteUrl || "",
       businessOverview: defaultValues?.businessOverview || "",
-      idealCustomer: defaultValues?.idealCustomer || "",
+      targetAudience: defaultValues?.targetAudience || "",
       serviceRegion: defaultValues?.serviceRegion || "",
       targetCountryCode: defaultValues?.targetCountryCode || "",
       targetCity: defaultValues?.targetCity || "",
       industry: defaultValues?.industry || "",
       languageCode: defaultValues?.languageCode || "",
       competitorsWebsites: defaultValues?.competitorsWebsites || [],
-      writingStyle: defaultValues?.writingStyle || "",
     },
   });
+
+  const resetForm = useCallback(() => {
+    if (!defaultValues) return;
+    form.reset({
+      name: defaultValues.name || "",
+      websiteUrl: defaultValues.websiteUrl || "",
+      businessOverview: defaultValues.businessOverview || "",
+      targetAudience: defaultValues.targetAudience || "",
+      serviceRegion: defaultValues.serviceRegion || "",
+      targetCountryCode: defaultValues.targetCountryCode || "",
+      targetCity: defaultValues.targetCity || "",
+      industry: defaultValues.industry || "",
+      languageCode: defaultValues.languageCode || "",
+      competitorsWebsites: defaultValues.competitorsWebsites || [],
+    });
+  }, [defaultValues, form]);
+
+  useEffect(() => {
+    if (defaultValues) {
+      resetForm();
+    }
+  }, [defaultValues, resetForm]);
 
   const {
     fields: competitorFields,
@@ -86,7 +114,6 @@ export function ManageProjectForm({
     name: "competitorsWebsites",
     keyName: "url",
   });
-  console.log("competitorFields", competitorFields);
 
   const submitForm = async (values: ManageProjectFormValues) => {
     const result = await safe(() => Promise.resolve(onSubmit(values)));
@@ -306,10 +333,10 @@ export function ManageProjectForm({
 
             <FormField
               control={form.control}
-              name="idealCustomer"
+              name="targetAudience"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ideal Customer</FormLabel>
+                  <FormLabel>Target Audience</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
@@ -322,29 +349,11 @@ export function ManageProjectForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="writingStyle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Writing Style</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="How do you want to write? The more detail, the better."
-                      rows={5}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {form.formState.errors.root && (
               <FormMessage>{form.formState.errors.root.message}</FormMessage>
             )}
           </CardContent>
-          <CardFooter className="px-0">{children}</CardFooter>
+          {children && <CardFooter className="px-0">{children}</CardFooter>}
         </form>
       </Form>
     </AutoHeight>
