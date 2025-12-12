@@ -257,7 +257,6 @@ export const uploadProjectImage = withOrganizationIdBase
         clearTimeout(timeoutId);
       } catch (error) {
         clearTimeout(timeoutId);
-        z;
         if (error instanceof Error && error.name === "AbortError") {
           throw new ORPCError("BAD_REQUEST", {
             message: "Request timed out after 10 seconds.",
