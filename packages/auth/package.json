@@ -26,27 +26,27 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@tanstack/react-query": "^5.90.10",
-    "@types/node": "^24.10.1",
-    "@types/react": "^19.2.6",
+    "@tanstack/react-query": "^5.90.12",
+    "@types/node": "^24.10.3",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "class-variance-authority": "^0.7.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "@tanstack/react-query": "^5.90.10",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "@tanstack/react-query": "^5.90.12",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "dependencies": {
-    "@better-auth/expo": "1.4.0-beta.27",
+    "@better-auth/expo": "1.4.6",
     "@rectangular-labs/emails": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "arktype": "^2.1.27",
-    "better-auth": "1.3.34",
-    "lucide-react": "^0.556.0"
+    "arktype": "^2.1.29",
+    "better-auth": "1.4.6",
+    "lucide-react": "^0.561.0"
   }
 }

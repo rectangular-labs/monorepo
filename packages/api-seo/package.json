@@ -38,19 +38,19 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251121.0",
+    "@cloudflare/workers-types": "^4.20251213.0",
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.3",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^2.0.45",
-    "@ai-sdk/google": "^2.0.40",
-    "@ai-sdk/openai": "^2.0.71",
-    "@orpc/client": "^1.11.3",
-    "@orpc/contract": "^1.11.3",
-    "@orpc/server": "^1.11.3",
-    "@orpc/tanstack-query": "^1.11.3",
+    "@ai-sdk/anthropic": "^2.0.56",
+    "@ai-sdk/google": "^2.0.46",
+    "@ai-sdk/openai": "^2.0.86",
+    "@orpc/client": "^1.12.3",
+    "@orpc/contract": "^1.12.3",
+    "@orpc/server": "^1.12.3",
+    "@orpc/tanstack-query": "^1.12.3",
     "@rectangular-labs/api-core": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/dataforseo": "workspace:*",
@@ -60,11 +60,11 @@
     "@rectangular-labs/result": "workspace:*",
     "@rectangular-labs/task": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "ai": "^5.0.98",
-    "arktype": "^2.1.27",
+    "ai": "^5.0.113",
+    "arktype": "^2.1.29",
     "aws4fetch": "^1.0.20",
-    "loro-adaptors": "0.4.0",
-    "loro-crdt": "^1.10.0",
-    "loro-protocol": "^0.2.0"
+    "loro-adaptors": "0.6.0",
+    "loro-crdt": "^1.10.3",
+    "loro-protocol": "^0.3.0"
   }
 }
