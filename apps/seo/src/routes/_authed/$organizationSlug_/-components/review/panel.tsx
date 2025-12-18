@@ -184,7 +184,7 @@ export function ReviewPanel({
                   size="sm"
                 >
                   Ready for review
-                  <Icons.ArrowRight className="ml-2 size-4" />
+                  <Icons.ArrowRight aria-hidden="true" />
                 </Button>
               </div>
             </Alert>
