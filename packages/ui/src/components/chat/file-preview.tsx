@@ -54,7 +54,7 @@ const ImageFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
         {onRemove ? (
           <button
             aria-label="Remove attachment"
-            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
+            className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full border bg-background"
             onClick={onRemove}
             type="button"
           >
@@ -103,7 +103,7 @@ const TextFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
         {onRemove ? (
           <button
             aria-label="Remove attachment"
-            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
+            className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full border bg-background"
             onClick={onRemove}
             type="button"
           >
@@ -139,7 +139,7 @@ const GenericFilePreview = React.forwardRef<HTMLDivElement, FilePreviewProps>(
         {onRemove ? (
           <button
             aria-label="Remove attachment"
-            className="-right-2 -top-2 absolute flex h-4 w-4 items-center justify-center rounded-full border bg-background"
+            className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full border bg-background"
             onClick={onRemove}
             type="button"
           >

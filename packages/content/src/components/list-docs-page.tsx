@@ -73,7 +73,7 @@ export function ListDocsPage({
               const description = getFolderDescription(folder);
               return (
                 <a className="group block no-underline" href={href} key={href}>
-                  <Card className="hover:-translate-y-0.5 h-full overflow-hidden border-border/60 bg-card/80 shadow-sm ring-1 ring-border/40 transition-all duration-200 hover:border-border hover:shadow-md">
+                  <Card className="h-full overflow-hidden border-border/60 bg-card/80 shadow-sm ring-1 ring-border/40 transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-md">
                     <CardHeader className="flex items-start gap-3">
                       {icon ? (
                         <div className="rounded-md border bg-muted/40 p-2 text-muted-foreground shadow-sm transition-colors group-hover:bg-muted">

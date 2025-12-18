@@ -177,7 +177,7 @@ export default function Pricing() {
                 )}
               >
                 {plan.popular && (
-                  <div className="-top-3 absolute right-0 left-0 mx-auto w-fit">
+                  <div className="absolute -top-3 right-0 left-0 mx-auto w-fit">
                     <Badge className="rounded-full bg-primary px-4 py-1 text-primary-foreground shadow-sm">
                       <Sparkles className="mr-1 h-3.5 w-3.5" />
                       Popular

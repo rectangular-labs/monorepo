@@ -6,13 +6,13 @@ export function SearchInput() {
   const { setOpenSearch } = useSearchContext();
   return (
     <div className="relative">
-      <Search className="-translate-y-1/2 absolute top-1/2 left-2 size-4 text-muted-foreground" />
+      <Search className="absolute top-1/2 left-2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         className="relative w-full pl-8"
         onClick={() => setOpenSearch(true)}
         placeholder="Search"
       />
-      <kbd className="-translate-y-1/2 absolute top-1/2 right-2 flex gap-1 text-muted-foreground">
+      <kbd className="absolute top-1/2 right-2 flex -translate-y-1/2 gap-1 text-muted-foreground">
         <kbd>⌘</kbd>
         <kbd>K</kbd>
       </kbd>

@@ -25,7 +25,7 @@ export function FloatingToolbar({
       {isVisible && (
         <motion.div
           animate={{ opacity: 1, y: 0 }}
-          className={`-translate-x-1/2 fixed bottom-6 left-1/2 z-50 space-y-2 rounded-lg border bg-background px-2 py-2 shadow-lg`}
+          className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 space-y-2 rounded-lg border bg-background px-2 py-2 shadow-lg`}
           exit={{ opacity: 0, y: 10 }}
           initial={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.1, ease: [0, 0, 0.28, 1] }}

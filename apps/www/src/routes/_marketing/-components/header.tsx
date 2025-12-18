@@ -64,12 +64,12 @@ export function Header() {
 
             <button
               aria-label={menuState === true ? "Close Menu" : "Open Menu"}
-              className="-m-2.5 -mr-4 relative block cursor-pointer p-2.5 lg:hidden"
+              className="relative -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden"
               onClick={() => setMenuState(!menuState)}
               type="button"
             >
               <Menu className="m-auto size-6 in-data-[state=active]:rotate-180 in-data-[state=active]:scale-0 in-data-[state=active]:opacity-0 duration-200" />
-              <X className="-rotate-180 absolute inset-0 m-auto size-6 in-data-[state=active]:rotate-0 in-data-[state=active]:scale-100 scale-0 in-data-[state=active]:opacity-100 opacity-0 duration-200" />
+              <X className="absolute inset-0 m-auto size-6 -rotate-180 in-data-[state=active]:rotate-0 in-data-[state=active]:scale-100 scale-0 in-data-[state=active]:opacity-100 opacity-0 duration-200" />
             </button>
           </div>
           <AnimatePresence>

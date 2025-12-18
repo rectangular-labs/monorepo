@@ -278,7 +278,7 @@ export function EventCalendar({
               className="peer sm:-ms-1.5 size-7 text-muted-foreground/80 transition-opacity duration-200 ease-in-out hover:bg-transparent! hover:text-foreground/80 lg:data-[state=invisible]:pointer-events-none lg:data-[state=invisible]:opacity-0"
               data-state={open ? "invisible" : "visible"}
             /> */}
-            <h2 className="lg:peer-data-[state=invisible]:-translate-x-7.5 font-semibold text-xl transition-transform duration-300 ease-in-out">
+            <h2 className="font-semibold text-xl transition-transform duration-300 ease-in-out lg:peer-data-[state=invisible]:-translate-x-7.5">
               {viewTitle}
             </h2>
           </div>
