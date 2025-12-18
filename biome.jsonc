@@ -112,6 +112,7 @@
       "!**/.cache",
       "!**/dist",
       "!**/docs",
+      "!**/.wrangler",
       "!**/.output",
       "!**/.tanstack",
       "!**/.turbo",
