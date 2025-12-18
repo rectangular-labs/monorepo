@@ -119,7 +119,7 @@ function PageComponent() {
         <div className="flex flex-1 items-center gap-4">
           <div className="max-w-sm flex-1">
             <div className="relative">
-              <Icons.Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+              <Icons.Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
                 onChange={(e) => setSearchQuery(e.target.value)}

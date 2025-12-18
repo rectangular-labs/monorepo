@@ -78,7 +78,7 @@ function BreadcrumbSeparator({
       {...props}
     >
       {children ?? (
-        <SlashIcon className="-rotate-[30deg] h-5 w-5 text-muted-foreground" />
+        <SlashIcon className="h-5 w-5 -rotate-[30deg] text-muted-foreground" />
       )}
     </li>
   );

@@ -76,7 +76,7 @@ export function CampaignsSidebar({
     <div className="flex h-full flex-col rounded-md bg-background">
       <div className="flex flex-col items-center gap-2 border-b p-3">
         <div className="relative w-full">
-          <Icons.Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
+          <Icons.Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             className="pl-8"
             onChange={(e) => {

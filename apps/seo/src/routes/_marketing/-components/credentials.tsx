@@ -24,7 +24,7 @@ export function Credentials() {
         />
         <img
           alt="Illustration of a person"
-          className="-scale-x-100 h-auto w-56"
+          className="h-auto w-56 -scale-x-100"
           src="/peep-47.svg"
         />
       </div>

@@ -1,15 +1,12 @@
 "use client";
 
 import * as Icons from "@rectangular-labs/ui/components/icon";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@rectangular-labs/ui/components/ui/empty";
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -124,41 +121,6 @@ export function ReviewPanel({
     }
   }, [selectedItemId]);
 
-  if (data?.campaign.status === "draft") {
-    return (
-      <div className="flex h-full items-center">
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Icons.FileText className="size-6" />
-            </EmptyMedia>
-            <EmptyTitle>Campaign is in draft</EmptyTitle>
-            <EmptyDescription>
-              Mark it ready for review when you're ready to have your changes
-              reviewed.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button
-              isLoading={isUpdatingCampaign}
-              onClick={() => {
-                updateCampaign({
-                  id: campaignId,
-                  projectId,
-                  organizationId,
-                  status: "review-requested",
-                });
-              }}
-            >
-              Ready for review
-              <Icons.ArrowRight />
-            </Button>
-          </EmptyContent>
-        </Empty>
-      </div>
-    );
-  }
-
   return (
     <SidebarProvider className="h-full min-h-[calc(100vh-73px)] p-2">
       <Sidebar className="h-full rounded-md" collapsible="none">
@@ -197,6 +159,38 @@ export function ReviewPanel({
 
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-y-auto">
+        {data?.campaign.status === "draft" && (
+          <div className="p-4 pb-0">
+            <Alert>
+              <Icons.Info className="size-4" />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <AlertTitle>Campaign is in draft</AlertTitle>
+                  <AlertDescription>
+                    Mark it ready for review when you're ready to have your
+                    changes reviewed.
+                  </AlertDescription>
+                </div>
+                <Button
+                  isLoading={isUpdatingCampaign}
+                  onClick={() => {
+                    updateCampaign({
+                      id: campaignId,
+                      projectId,
+                      organizationId,
+                      status: "review-requested",
+                    });
+                  }}
+                  size="sm"
+                >
+                  Ready for review
+                  <Icons.ArrowRight aria-hidden="true" />
+                </Button>
+              </div>
+            </Alert>
+          </div>
+        )}
+
         {/* Header with view mode toggle */}
         <div className="border-b p-4">
           <h2 className="font-semibold text-lg">Review Changes</h2>

@@ -50,7 +50,7 @@ export function Showcase({
       <div ref={containerRef} style={{ minHeight: `${pinHeightVh}vh` }}>
         <div className="sticky top-[35vh]">
           <div className="relative mx-auto h-[40vh]">
-            <div className="-translate-y-1/2 absolute inset-x-0 top-1/2">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2">
               <div className="mx-auto max-w-6xl">
                 <div
                   className="flex items-center gap-6"
