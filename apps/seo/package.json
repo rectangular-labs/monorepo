@@ -38,7 +38,7 @@
     "@tanstack/react-router-devtools": "^1.139.1",
     "@tanstack/react-router-ssr-query": "^1.139.1",
     "@tanstack/react-start": "^1.139.2",
-    "ai": "^5.0.98",
+    "ai": "^5.0.112",
     "arktype": "^2.1.27",
     "idb-keyval": "^6.2.2",
     "loro-crdt": "^1.10.0",
