@@ -14,6 +14,7 @@ export const apiEnv = () =>
       CLOUDFLARE_R2_ACCESS_KEY_ID: type("string"),
       CLOUDFLARE_R2_SECRET_ACCESS_KEY: type("string"),
       CLOUDFLARE_R2_ORG_STORAGE_BUCKET_NAME: type("string"),
+      CLOUDFLARE_BROWSER_RENDERING_API_TOKEN: type("string"),
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
