@@ -93,33 +93,44 @@ function BusinessBackgroundForm() {
   const form = useForm({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
-      name: activeProject?.name || "",
-      websiteUrl: activeProject?.websiteUrl || "",
+      name: "",
+      websiteUrl: "",
       version: "v1" as const,
-      businessOverview:
-        activeProject?.businessBackground?.businessOverview || "",
-      targetAudience: activeProject?.businessBackground?.targetAudience || "",
-      caseStudies: activeProject?.businessBackground?.caseStudies || [],
-      industry: activeProject?.businessBackground?.industry || "",
-      serviceRegion: activeProject?.businessBackground?.serviceRegion || "",
-      targetCountryCode:
-        activeProject?.businessBackground?.targetCountryCode || "",
-      targetCity: activeProject?.businessBackground?.targetCity || "",
-      languageCode: activeProject?.businessBackground?.languageCode || "",
-      competitorsWebsites:
-        activeProject?.businessBackground?.competitorsWebsites || [],
+      businessOverview: "",
+      targetAudience: "",
+      caseStudies: [],
+      industry: "",
+      serviceRegion: "",
+      targetCountryCode: "",
+      targetCity: "",
+      languageCode: "",
+      competitorsWebsites: [],
     },
   });
   const resetForm = useCallback(() => {
     if (!activeProject) return;
-    form.reset();
+    form.reset({
+      name: activeProject.name || "",
+      websiteUrl: activeProject.websiteUrl || "",
+      version: "v1" as const,
+      businessOverview:
+        activeProject.businessBackground?.businessOverview || "",
+      targetAudience: activeProject.businessBackground?.targetAudience || "",
+      caseStudies: activeProject.businessBackground?.caseStudies || [],
+      industry: activeProject.businessBackground?.industry || "",
+      serviceRegion: activeProject.businessBackground?.serviceRegion || "",
+      targetCountryCode:
+        activeProject.businessBackground?.targetCountryCode || "",
+      targetCity: activeProject.businessBackground?.targetCity || "",
+      languageCode: activeProject.businessBackground?.languageCode || "",
+      competitorsWebsites:
+        activeProject.businessBackground?.competitorsWebsites || [],
+    });
   }, [activeProject, form]);
 
   useEffect(() => {
-    if (activeProject) {
-      resetForm();
-    }
-  }, [activeProject, resetForm]);
+    resetForm();
+  }, [resetForm]);
 
   const {
     fields: competitorFields,

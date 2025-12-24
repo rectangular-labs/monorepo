@@ -5,7 +5,6 @@ import type {
   SeoChatMessage,
   WebSocketMessages,
 } from "@rectangular-labs/api-seo/types";
-import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
 import { safeSync } from "@rectangular-labs/result";
 import {
   Action,
@@ -67,12 +66,57 @@ import { readUIMessageStream, type UIMessageChunk } from "ai";
 import { useWebSocket } from "partysocket/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
-import { GscConnectionCard } from "./gsc-connection-card";
 
 const models = [
   { name: "Claude", value: "anthropic/claude-haiku-4-5" },
   { name: "Open AI", value: "openai/gpt-5-mini" },
 ];
+
+type ChatMessagePart = SeoChatMessage["parts"][number];
+type ChatToolPart = Extract<ChatMessagePart, { type: `tool-${string}` }>;
+
+function isChatToolPart(part: ChatMessagePart): part is ChatToolPart {
+  return part.type.startsWith("tool-");
+}
+
+const TOOL_UI: Record<
+  string,
+  {
+    title: string;
+    defaultOpen?: boolean;
+  }
+> = {
+  // Planner agent (actual tools passed to streamText)
+  read_skills: { title: "Read skills" },
+  use_skills: { title: "Use skill" },
+  ask_questions: { title: "Ask questions", defaultOpen: true },
+  create_plan: { title: "Create plan", defaultOpen: true },
+  get_historical_messages: { title: "Get historical messages" },
+  get_message_detail: { title: "Get message detail" },
+  manage_todo: { title: "Manage todos" },
+
+  // Skills (historical / compatibility)
+  manage_settings: { title: "Manage settings" },
+  manage_integrations: { title: "Manage integrations" },
+  web_fetch: { title: "Web fetch" },
+  web_search: { title: "Web search" },
+  google_search_console_query: { title: "Google Search Console query" },
+  content_writer: { title: "Content writer" },
+
+  // Virtual filesystem skills
+  ls: { title: "List files" },
+  cat: { title: "Read file" },
+  rm: { title: "Delete file" },
+  mv: { title: "Move/rename" },
+  write_file: { title: "Write file" },
+
+  // DataForSEO skills
+  get_serp_for_keyword: { title: "Get SERP for keyword" },
+  get_keywords_overview: { title: "Get keywords overview" },
+  get_keyword_suggestions: { title: "Get keyword suggestions" },
+  get_ranked_pages_for_site: { title: "Get ranked pages for site" },
+  get_ranked_keywords_for_site: { title: "Get ranked keywords for site" },
+};
 
 export function ChatPanel({
   campaignId,
@@ -366,7 +410,7 @@ export function ChatPanel({
     );
     setInput("");
   };
-
+  console.log("message", messages);
   return (
     <div className="flex h-full flex-col rounded-b-md bg-background pb-3 pl-3">
       <Conversation className="h-full">
@@ -461,67 +505,38 @@ export function ChatPanel({
                       </TaskItemFile>
                     );
                   }
-                  case "tool-google_search_console_query": {
-                    if (
-                      !part.output?.success &&
-                      part.output?.next_step === NO_SEARCH_CONSOLE_ERROR_MESSAGE
-                    ) {
+                  default: {
+                    if (!isChatToolPart(part)) {
                       return null;
                     }
+                    // Render all tools in a curated display (no hidden tools).
+                    // Tool parts are of form `tool-${toolName}`.
+                    const toolName = part.type.slice("tool-".length);
+                    const ui = TOOL_UI[toolName];
+                    const title = ui?.title;
+                    const defaultOpen =
+                      part.state === "output-error" || ui?.defaultOpen === true;
+
                     return (
-                      <Tool defaultOpen={false}>
-                        <ToolHeader state={part.state} type={part.type} />
+                      <Tool
+                        defaultOpen={defaultOpen}
+                        key={`${message.id}-${i}`}
+                      >
+                        <ToolHeader
+                          state={part.state}
+                          title={title}
+                          type={part.type}
+                        />
                         <ToolContent>
                           <ToolInput input={part.input} />
                           <ToolOutput
                             errorText={part.errorText}
-                            output={JSON.stringify(
-                              part.output as object,
-                              null,
-                              2,
-                            )}
+                            output={part.output}
                           />
                         </ToolContent>
                       </Tool>
                     );
                   }
-                  case "tool-manage_google_search_property": {
-                    return (
-                      <Message from={message.role}>
-                        <MessageContent>
-                          <GscConnectionCard
-                            organizationId={organizationId}
-                            projectId={projectId}
-                          />
-                        </MessageContent>
-                      </Message>
-                    );
-                  }
-                  case "tool-ls":
-                  case "tool-cat":
-                  case "tool-rm":
-                  case "tool-mv":
-                  case "tool-write_file":
-                  case "tool-get_serp_for_keyword":
-                  case "tool-get_keywords_overview":
-                  case "tool-get_keyword_suggestions":
-                  case "tool-get_ranked_pages_for_site":
-                  case "tool-get_ranked_keywords_for_site": {
-                    return (
-                      <Tool defaultOpen={false}>
-                        <ToolHeader state={part.state} type={part.type} />
-                        <ToolContent>
-                          <ToolInput input={part.input} />
-                          <ToolOutput
-                            errorText={part.errorText}
-                            output={JSON.stringify(part.output, null, 2)}
-                          />
-                        </ToolContent>
-                      </Tool>
-                    );
-                  }
-                  default:
-                    return null;
                 }
               })}
             </div>
@@ -572,7 +587,7 @@ export function ChatPanel({
             </PromptInputModelSelect>
           </PromptInputTools>
           <PromptInputSubmit
-            disabled={!input}
+            disabled={!input && status === "ready"}
             onClick={() => {
               if (status === "streaming") {
                 stop?.();
