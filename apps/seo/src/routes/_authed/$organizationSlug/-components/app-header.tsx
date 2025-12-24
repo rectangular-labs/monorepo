@@ -2,19 +2,27 @@ import { OrganizationSwitcher } from "@rectangular-labs/auth/components/organiza
 import type { Organization } from "@rectangular-labs/auth/server";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { BreadcrumbSeparator } from "@rectangular-labs/ui/components/ui/breadcrumb";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
 import { authClient } from "~/lib/auth";
+import { NavLink } from "../../-components/nav-link";
+import { useBetaUi } from "../../-components/beta-ui-provider";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserDropdown } from "./user-dropdown";
 
 export function AppHeader() {
   const navigate = useNavigate();
   const matcher = useMatchRoute();
+  const betaUi = useBetaUi();
   const projectParams = matcher({
     to: "/$organizationSlug/$projectSlug",
+    fuzzy: true,
+  });
+  const betaParams = matcher({
+    to: "/$organizationSlug/$projectSlug/beta",
     fuzzy: true,
   });
 
@@ -86,7 +94,8 @@ export function AppHeader() {
         <Icons.Logo className="size-6" />
       </Link>
       <nav className="flex flex-1 items-center justify-between">
-        <ol className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <ol className="flex min-w-0 items-center gap-3">
           <BreadcrumbSeparator className="hidden md:block" />
           {activeOrganization && organizations && (
             <li>
@@ -146,8 +155,60 @@ export function AppHeader() {
               </li>
             </>
           )}
-        </ol>
-        {activeOrganization && <UserDropdown user={session?.user} />}
+          </ol>
+
+          {betaUi.isBetaRoute && betaParams && (
+            <ul className="ml-6 hidden items-center gap-6 text-muted-foreground text-sm md:flex">
+              <NavLink
+                activeOptions={{ exact: false }}
+                params={{
+                  organizationSlug: betaParams.organizationSlug,
+                  projectSlug: betaParams.projectSlug,
+                }}
+                to="/$organizationSlug/$projectSlug/beta/insights"
+              >
+                Insights
+              </NavLink>
+              <NavLink
+                params={{
+                  organizationSlug: betaParams.organizationSlug,
+                  projectSlug: betaParams.projectSlug,
+                }}
+                to="/$organizationSlug/$projectSlug/beta/clusters"
+              >
+                Clusters
+              </NavLink>
+              <NavLink
+                params={{
+                  organizationSlug: betaParams.organizationSlug,
+                  projectSlug: betaParams.projectSlug,
+                }}
+                to="/$organizationSlug/$projectSlug/beta/settings"
+              >
+                Project settings
+              </NavLink>
+            </ul>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {betaUi.isBetaRoute && projectParams && (
+            <Button
+              aria-label={betaUi.chatOpen ? "Close chat panel" : "Open chat panel"}
+              className="h-8 w-8"
+              onClick={betaUi.toggleChat}
+              size="icon"
+              variant="ghost"
+            >
+              {betaUi.chatOpen ? (
+                <Icons.PanelLeftClose className="size-4 -scale-x-100" />
+              ) : (
+                <Icons.PanelLeft className="size-4 -scale-x-100" />
+              )}
+            </Button>
+          )}
+          {activeOrganization && <UserDropdown user={session?.user} />}
+        </div>
       </nav>
     </header>
   );
