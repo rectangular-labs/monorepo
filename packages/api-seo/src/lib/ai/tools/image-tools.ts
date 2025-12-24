@@ -1,10 +1,10 @@
-import { google } from "@ai-sdk/google";
+import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { uuidv7 } from "@rectangular-labs/db";
 import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { Jimp } from "jimp";
 import { getWebsocketContext } from "../../../context";
 import { apiEnv } from "../../../env";
+import { captureScreenshot } from "../../cloudflare/capture-screenshot";
 import { getProjectInWebsocketChat } from "../../database/project";
 import { getPublicImageUri } from "../../project/get-project-image-uri";
 import type { AgentToolDefinition } from "./utils";
@@ -13,8 +13,12 @@ const imageAgentInputSchema = type({
   prompt: "string",
 });
 
-export function createImageToolWithMetadata() {
-  const createImage = tool({
+const screenshotInputSchema = type({
+  url: "string",
+});
+
+export function createImageToolsWithMetadata() {
+  const generateImage = tool({
     description: "Generate an image for a project",
     inputSchema: jsonSchema<typeof imageAgentInputSchema.infer>(
       imageAgentInputSchema.toJsonSchema() as JSONSchema7,
@@ -36,7 +40,15 @@ export function createImageToolWithMetadata() {
       const { imageSettings } = imageSettingsResult.value;
 
       const result = await generateText({
-        model: google("gemini-3-pro-image"),
+        model: google("gemini-3-pro-image-preview"),
+        providerOptions: {
+          google: {
+            imageConfig: {
+              aspectRatio: "3:2",
+              imageSize: "1K",
+            },
+          } satisfies GoogleGenerativeAIProviderOptions,
+        },
         system: `You are an image agent for a project. You are given a prompt and you need to generate an image for the project. The image settings are ${JSON.stringify(imageSettings)}.`,
         messages: [
           {
@@ -59,13 +71,9 @@ export function createImageToolWithMetadata() {
         };
       });
 
-      console.log("result.files", result.files);
       const context = getWebsocketContext();
       const fileNames: string[] = [];
       for (const file of result.files) {
-        console.log("file.mediaType", file.mediaType);
-        const image = await Jimp.read(file.base64);
-        const buffer = await image.getBuffer("image/jpeg");
         const fileName = getPublicImageUri({
           orgId: context.organizationId,
           projectId: context.projectId,
@@ -74,7 +82,7 @@ export function createImageToolWithMetadata() {
         });
         await context.publicImagesBucket.storeImage(
           fileName,
-          new Blob([new Uint8Array(buffer)]),
+          new Blob([new Uint8Array(file.uint8Array)]),
         );
         fileNames.push(fileName);
       }
@@ -88,15 +96,75 @@ export function createImageToolWithMetadata() {
     },
   });
 
-  const tools = { create_image: createImage } as const;
+  const captureScreenshotTool = tool({
+    description:
+      "Capture a rendered screenshot of a given website URL. Uses OpenAI GPTBot user agent and 1300x1300 viewport by default. Optionally crop pixels from the bottom.",
+    inputSchema: jsonSchema<typeof screenshotInputSchema.infer>(
+      screenshotInputSchema.toJsonSchema() as JSONSchema7,
+    ),
+    async execute({ url }) {
+      if (!url) {
+        return {
+          success: false,
+          message: "Provide a URL to capture.",
+        };
+      }
+
+      const result = await captureScreenshot({
+        url,
+        viewport: {
+          width: 1200,
+          height: 1200,
+          deviceScaleFactor: 1,
+        },
+        // to remove cookie banners
+        cropBottom: 400,
+      });
+
+      if (!result.ok) {
+        return {
+          success: false,
+          error: result.error.message,
+        };
+      }
+      const context = getWebsocketContext();
+      const fileName = getPublicImageUri({
+        orgId: context.organizationId,
+        projectId: context.projectId,
+        kind: "content-image",
+        fileName: `${uuidv7()}.jpeg`,
+      });
+      await context.publicImagesBucket.storeImage(
+        fileName,
+        new Blob([new Uint8Array(result.value.buffer)]),
+      );
+
+      return {
+        success: true,
+        screenshot: `${apiEnv().SEO_PUBLIC_BUCKET_URL}/${fileName}`,
+      };
+    },
+  });
+
+  const tools = {
+    generate_image: generateImage,
+    capture_screenshot: captureScreenshotTool,
+  } as const;
   const toolDefinitions: AgentToolDefinition[] = [
     {
-      toolName: "create_image",
+      toolName: "generate_image",
       toolDescription:
         "Generate a project image based on the project's image settings and a prompt.",
       toolInstruction:
         "Provide `prompt` describing the desired image. Use when the user asks for image generation. If image settings are missing, instruct the user to configure image settings first.",
-      tool: createImage,
+      tool: generateImage,
+    },
+    {
+      toolName: "capture_screenshot",
+      toolDescription: "Capture a rendered screenshot of a given website URL.",
+      toolInstruction:
+        "Provide a URL to capture a screenshot of. Optionally specify cropBottom to remove pixels from the bottom of the image.",
+      tool: captureScreenshotTool,
     },
   ];
 
