@@ -101,7 +101,10 @@ export function usePendingReviews() {
   const [, setVersion] = useState(0);
 
   useEffect(() => {
-    return subscribePendingReviews(() => setVersion((v) => v + 1));
+    const unsubscribe = subscribePendingReviews(() => setVersion((v) => v + 1));
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return getPendingReviews();

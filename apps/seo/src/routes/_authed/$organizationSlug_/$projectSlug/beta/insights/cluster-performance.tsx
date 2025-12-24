@@ -164,7 +164,10 @@ function ClusterPerformancePage() {
           {mockClusters.map((c) => {
             const { current, previous } = c.metrics[range];
             const clicksDelta = pctChange(current.clicks, previous.clicks);
-            const imprDelta = pctChange(current.impressions, previous.impressions);
+            const imprDelta = pctChange(
+              current.impressions,
+              previous.impressions,
+            );
             const ctrDelta = pctChange(current.ctr, previous.ctr);
             const posDelta = pctChange(previous.position, current.position);
             return (
@@ -214,7 +217,9 @@ function ClusterPerformancePage() {
                   </span>
                   <Badge variant="secondary">
                     Pos{" "}
-                    <span className="ml-1 tabular-nums">{current.position}</span>
+                    <span className="ml-1 tabular-nums">
+                      {current.position}
+                    </span>
                   </Badge>
                   <span
                     className={`rounded-full px-2 py-1 tabular-nums ${deltaColorClass(posDelta)}`}
@@ -223,7 +228,11 @@ function ClusterPerformancePage() {
                   </span>
                   <Button asChild size="sm" variant="outline">
                     <Link
-                      params={{ organizationSlug, projectSlug, clusterId: c.id }}
+                      params={{
+                        organizationSlug,
+                        projectSlug,
+                        clusterId: c.id,
+                      }}
                       to="/$organizationSlug/$projectSlug/beta/clusters/cluster/$clusterId"
                     >
                       Open
@@ -275,5 +284,3 @@ function ClusterPerfRow({
     </div>
   );
 }
-
-

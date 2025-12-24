@@ -101,7 +101,8 @@ const TOOL_UI: Record<
   web_fetch: { title: "Web fetch" },
   web_search: { title: "Web search" },
   google_search_console_query: { title: "Google Search Console query" },
-  content_writer: { title: "Content writer" },
+  do_research: { title: "Do research" },
+  write_content: { title: "Write content" },
 
   // Virtual filesystem skills
   ls: { title: "List files" },

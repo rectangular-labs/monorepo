@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { AUTO_ROUTE_ORG } from "~/lib/constants";
+import { BetaUiProvider } from "../-components/beta-ui-provider";
 import { AppHeader } from "./-components/app-header";
 
 export const Route = createFileRoute("/_authed/$organizationSlug")({
@@ -96,11 +97,11 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
 
 function RouteComponent() {
   return (
-    <>
+    <BetaUiProvider>
       <AppHeader />
       <main className="flex w-full flex-1 flex-col bg-background">
         <Outlet />
       </main>
-    </>
+    </BetaUiProvider>
   );
 }
