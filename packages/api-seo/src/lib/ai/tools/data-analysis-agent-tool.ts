@@ -3,9 +3,9 @@ import type { schema } from "@rectangular-labs/db";
 import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
 import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { createDataforseoTool } from "./dataforseo-tool";
-import { createGscTool } from "./google-search-console-tool";
-import type { AgentToolDefinition } from "./tool-definition";
+import { createDataforseoToolWithMetadata } from "./dataforseo-tool";
+import { createGscToolWithMetadata } from "./google-search-console-tool";
+import type { AgentToolDefinition } from "./utils";
 
 const dataAnalysisAgentInputSchema = type({
   question: "string",
@@ -115,12 +115,12 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
           },
         ],
         tools: {
-          ...createGscTool({
+          ...createGscToolWithMetadata({
             accessToken: gscProperty?.accessToken ?? null,
             siteUrl: gscProperty?.domain ?? null,
             siteType: gscProperty?.type ?? null,
-          }),
-          ...createDataforseoTool(project),
+          }).tools,
+          ...createDataforseoToolWithMetadata(project).tools,
           web_search: openai.tools.webSearch({
             externalWebAccess: true,
             searchContextSize: "medium",

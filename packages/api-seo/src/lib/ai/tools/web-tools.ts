@@ -45,6 +45,8 @@ export function createWebToolsWithMetadata() {
       return {
         success: true,
         markdown: result.value.markdown,
+        wordCount: result.value.markdown.split(/\s+/).filter((word) => !!word)
+          .length,
         url: result.value.url,
       };
     },

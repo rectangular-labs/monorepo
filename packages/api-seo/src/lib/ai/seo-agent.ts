@@ -8,7 +8,7 @@ import { createGscToolWithMetadata } from "./tools/google-search-console-tool";
 import { createSettingsToolsWithMetadata } from "./tools/settings-tools";
 import { createTodoTool } from "./tools/todo-tool";
 import { createWebToolsWithMetadata } from "./tools/web-tools";
-import { createWritingTool } from "./tools/writing-tool";
+import { createWritingToolWithMetadata } from "./tools/writing-tool";
 
 /**
  * We want to try both code/tool models.
@@ -38,7 +38,7 @@ export function createSeoAgent({
   messages: UIMessage[];
   gscProperty:
     | (typeof schema.seoGscProperty.$inferSelect & {
-        accessToken?: string | null;
+        accessToken?: string;
       })
     | null;
   project: typeof schema.seoProject.$inferSelect;
@@ -99,7 +99,7 @@ Output requirements:
 - If proposing edits to existing content, describe them clearly;`;
 
   return {
-    model: openai("gpt-5.1"),
+    model: openai("gpt-5.2"),
     system: systemPrompt,
     messages: convertToModelMessages(messages),
     tools: {
@@ -114,7 +114,7 @@ Output requirements:
         siteType: gscProperty?.type ?? null,
       }).tools,
       ...createDataforseoToolWithMetadata(project).tools,
-      ...createWritingTool().tools,
+      ...createWritingToolWithMetadata({ project }).tools,
       ...createTodoTool(),
       ...createDataAnalysisAgentTool({ project, gscProperty }),
     },

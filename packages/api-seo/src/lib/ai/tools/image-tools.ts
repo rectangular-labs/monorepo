@@ -33,6 +33,7 @@ export function createImageToolsWithMetadata() {
         !imageSettingsResult.value.imageSettings
       ) {
         return {
+          success: false as const,
           message:
             "No image settings found for project. Please ask the user to set up image settings.",
         };
@@ -65,8 +66,6 @@ export function createImageToolsWithMetadata() {
       }).catch((error) => {
         console.error("Error in image tool", error);
         return {
-          message: "Failed to generate image.",
-          error: error.message,
           files: [],
         };
       });
@@ -88,12 +87,29 @@ export function createImageToolsWithMetadata() {
       }
 
       return {
+        success: true as const,
         message: `Generated ${fileNames.length} images for the project.`,
         imageUris: fileNames.map(
           (fileName) => `${apiEnv().SEO_PUBLIC_BUCKET_URL}/${fileName}`,
         ),
       };
     },
+    // toModelOutput(result) {
+    //   return {
+    //     type: "content",
+    //     value: [
+    //       {
+    //         type: "text" as const,
+    //         text: result.success ? result.imageUris.join(", ") : result.message,
+    //       },
+    //       ...(result.imageUris?.map((uri) => ({
+    //         type: "media" as const,
+    //         data: uri,
+    //         mediaType: "image/jpeg",
+    //       })) ?? []),
+    //     ],
+    //   };
+    // },
   });
 
   const captureScreenshotTool = tool({
@@ -105,7 +121,7 @@ export function createImageToolsWithMetadata() {
     async execute({ url }) {
       if (!url) {
         return {
-          success: false,
+          success: false as const,
           message: "Provide a URL to capture.",
         };
       }
@@ -123,8 +139,8 @@ export function createImageToolsWithMetadata() {
 
       if (!result.ok) {
         return {
-          success: false,
-          error: result.error.message,
+          success: false as const,
+          message: result.error.message,
         };
       }
       const context = getWebsocketContext();
@@ -140,10 +156,30 @@ export function createImageToolsWithMetadata() {
       );
 
       return {
-        success: true,
+        success: true as const,
         screenshot: `${apiEnv().SEO_PUBLIC_BUCKET_URL}/${fileName}`,
       };
     },
+    // toModelOutput(result) {
+    //   return {
+    //     type: "content",
+    //     value: [
+    //       {
+    //         type: "text" as const,
+    //         text: result.success ? result.screenshot : result.message,
+    //       },
+    //       ...(result.screenshot
+    //         ? [
+    //             {
+    //               type: "media" as const,
+    //               data: result.screenshot,
+    //               mediaType: "image/jpeg",
+    //             },
+    //           ]
+    //         : []),
+    //     ],
+    //   };
+    // },
   });
 
   const tools = {
