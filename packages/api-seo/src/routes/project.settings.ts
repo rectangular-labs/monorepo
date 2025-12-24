@@ -123,8 +123,8 @@ export const getImageSettings = withOrganizationIdBase
     };
   });
 
-export const getArticleSettings = withOrganizationIdBase
-  .route({ method: "GET", path: "/{identifier}/article-settings" })
+export const getWritingSettings = withOrganizationIdBase
+  .route({ method: "GET", path: "/{identifier}/writing-settings" })
   .input(type({ identifier: "string", organizationIdentifier: "string" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(

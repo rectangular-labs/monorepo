@@ -7,19 +7,17 @@ import {
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { LoroDoc, VersionVector } from "loro-crdt";
+import { getWorkspaceBlobUri } from "../client";
 import { withOrganizationIdBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import {
-  forkAndUpdateWorkspaceBlob,
-  getWorkspaceBlobUri,
-} from "../lib/workspace";
+import { forkAndUpdateWorkspaceBlob } from "../lib/workspace/fork-workspace-blob";
 import { metrics } from "./project.metrics";
 import {
-  getArticleSettings,
   getBusinessBackground,
   getImageSettings,
+  getWritingSettings,
   uploadProjectImage,
   upsertAuthors,
 } from "./project.settings";
@@ -311,7 +309,7 @@ export default withOrganizationIdBase
     get,
     getBusinessBackground,
     getImageSettings,
-    getArticleSettings,
+    getWritingSettings,
     setUpWorkspace,
     metrics,
     syncDocument,
