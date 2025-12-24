@@ -5,15 +5,16 @@ import type {
   UnlaziedRouter,
 } from "@orpc/server";
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
-import type { DB } from "@rectangular-labs/db";
+import type { DB, schema } from "@rectangular-labs/db";
 import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/db/parsers";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
 import type { LoroText, LoroTree } from "loro-crdt";
 import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
-import type { createDataforseoTool } from "./lib/ai/dataforseo-tool";
-import type { createFileTools } from "./lib/ai/file-tool";
-import type { createGscTool } from "./lib/ai/google-search-console-tool";
+import type { createMessagesToolsWithMetadata } from "./lib/ai/tools/message-tools";
+import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
+import type { createSkillTools } from "./lib/ai/tools/skill-tools";
+import type { createTodoToolWithMetadata } from "./lib/ai/tools/todo-tool";
 import type {
   createPublicImagesBucket,
   createWorkspaceBucket,
@@ -29,9 +30,10 @@ export type WebsocketRouter = UnlaziedRouter<typeof websocketRouter>;
 export type WebsocketRouterClient = ORPCRouterClient<WebsocketRouter>;
 
 type AiTools = InferUITools<
-  ReturnType<typeof createDataforseoTool> &
-    ReturnType<typeof createGscTool> &
-    ReturnType<typeof createFileTools>
+  ReturnType<typeof createSkillTools> &
+    ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
+    ReturnType<typeof createMessagesToolsWithMetadata>["tools"] &
+    ReturnType<typeof createTodoToolWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
   typeof contentCampaignMessageMetadataSchema.infer,
@@ -75,6 +77,15 @@ export interface WebSocketContext extends InitialContext {
   organizationId: string;
   roomDocumentMap: Map<string, RoomDocument>;
   userFragments: Map<HexString, UserFragment>;
+  cache: {
+    messages?: Record<string, SeoChatMessage>;
+    project?: typeof schema.seoProject.$inferSelect & {
+      authors?: (typeof schema.seoProjectAuthor.$inferSelect)[];
+    };
+    gscProperty?: typeof schema.seoGscProperty.$inferSelect & {
+      accessToken?: string;
+    };
+  };
 }
 
 /**
