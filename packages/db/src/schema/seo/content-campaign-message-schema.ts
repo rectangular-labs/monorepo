@@ -31,7 +31,7 @@ export const seoContentCampaignMessage = pgSeoTable(
         onUpdate: "cascade",
       }),
     source: text({
-      enum: ["user", "assistant"],
+      enum: ["user", "assistant", "system"],
     }).notNull(),
     userId: text().references(() => user.id, {
       onDelete: "set null",

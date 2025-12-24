@@ -16,9 +16,7 @@ import type {
 
 export async function updateSeoProject(
   db: DB,
-  values: typeof seoProjectUpdateSchema.infer & {
-    articleSettings?: typeof writingSettingsSchema.infer;
-  },
+  values: typeof seoProjectUpdateSchema.infer,
 ) {
   const result = await safe(() =>
     db
@@ -83,7 +81,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
   includeSettings?: {
     businessBackground?: B;
     imageSettings?: I;
-    articleSettings?: A;
+    writingSettings?: A;
     serpSnapshot?: S;
   },
 ): Promise<
@@ -92,7 +90,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
         typeof seoProjectSelectSchema.infer,
         | "businessBackground"
         | "imageSettings"
-        | "articleSettings"
+        | "writingSettings"
         | "serpSnapshot"
       > &
         (B extends true
@@ -102,7 +100,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
           ? { imageSettings: typeof imageSettingsSchema.infer | null }
           : Record<string, never>) &
         (A extends true
-          ? { articleSettings: typeof writingSettingsSchema.infer | null }
+          ? { writingSettings: typeof writingSettingsSchema.infer | null }
           : Record<string, never>) &
         (S extends true
           ? { serpSnapshot: typeof serpTrafficSchema.infer | null }
@@ -151,9 +149,12 @@ export async function getSeoProjectByIdentifierAndOrgId<
 
 export async function getSeoProjectWithWritingSettingAndAuthors(
   db: DB,
-  projectSlug: string,
+  projectIdentifier: string,
   organizationId: string,
 ) {
+  const isSlug =
+    type("string.uuid")(projectIdentifier) instanceof type.errors === true;
+
   const result = await safe(() =>
     db.query.seoProject.findFirst({
       columns: {
@@ -162,7 +163,9 @@ export async function getSeoProjectWithWritingSettingAndAuthors(
       },
       where: (table, { eq }) =>
         and(
-          eq(table.slug, projectSlug),
+          isSlug
+            ? eq(table.slug, projectIdentifier)
+            : eq(table.id, projectIdentifier),
           eq(table.organizationId, organizationId),
         ),
       with: {
