@@ -9,7 +9,7 @@ import {
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { withLoroTree } from "../../workspace/with-loro-tree";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 const lsInputSchema = type({
   path: "string",

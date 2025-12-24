@@ -5,7 +5,7 @@ import {
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { getWebsocketContext } from "../../../context";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 function extractTextFromMessageParts(parts: unknown): string {
   if (!Array.isArray(parts)) {
@@ -45,13 +45,13 @@ function includesAskQuestionToolCall(parts: unknown): boolean {
       continue;
     }
 
-    if ("toolName" in part && part.toolName === "ask_question") {
+    if ("toolName" in part && part.toolName === "ask_questions") {
       return true;
     }
-    if ("tool" in part && part.tool === "ask_question") {
+    if ("tool" in part && part.tool === "ask_questions") {
       return true;
     }
-    if ("name" in part && part.name === "ask_question") {
+    if ("name" in part && part.name === "ask_questions") {
       return true;
     }
   }

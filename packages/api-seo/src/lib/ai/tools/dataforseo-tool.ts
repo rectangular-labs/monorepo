@@ -12,7 +12,7 @@ import {
   configureDataForSeoClient,
   getLocationAndLanguage,
 } from "../../dataforseo/utils";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 const hostnameSchema = type("string").describe(
   "The domain name of the target website. The domain should be specified without 'https://' and 'www.'. Example: 'example.xyz', 'fluidposts.ai', 'google.com'",
@@ -420,10 +420,4 @@ export function createDataforseoToolWithMetadata(
   ];
 
   return { toolDefinitions, tools };
-}
-
-export function createDataforseoTool(
-  project: typeof schema.seoProject.$inferSelect,
-): ReturnType<typeof createDataforseoToolWithMetadata>["tools"] {
-  return createDataforseoToolWithMetadata(project).tools;
 }

@@ -11,7 +11,7 @@ import {
 import { generateObject, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { getWebsocketContext } from "../../../context";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 export function createSettingsToolsWithMetadata() {
   const manageSettingsInputSchema = type({

@@ -7,7 +7,7 @@ import { CrdtType } from "loro-protocol";
 import type { LoroDocMapping } from "../../../types";
 import { getOrCreateRoomDocument } from "../../chat/get-or-create-room-document";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../../workspace/constants";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 export const TASK_FILE_PATH = "/memories/task.md";
 

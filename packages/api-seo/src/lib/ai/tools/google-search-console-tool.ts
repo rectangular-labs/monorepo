@@ -5,7 +5,7 @@ import {
 } from "@rectangular-labs/db/parsers";
 import { getSearchAnalytics } from "@rectangular-labs/google-apis/google-search-console";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 const gscQueryInputSchema = getSearchAnalyticsArgsSchema.omit(
   "siteType",
@@ -69,12 +69,4 @@ export function createGscToolWithMetadata({
   ];
 
   return { toolDefinitions, tools };
-}
-
-export function createGscTool(args: {
-  accessToken: string | null;
-  siteUrl: string | null;
-  siteType: typeof seoGscPropertyTypeSchema.infer | null;
-}): ReturnType<typeof createGscToolWithMetadata>["tools"] {
-  return createGscToolWithMetadata(args).tools;
 }

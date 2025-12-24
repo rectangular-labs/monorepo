@@ -1,6 +1,6 @@
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 const askQuestionInputSchema = type({
   questions: type({
@@ -38,9 +38,10 @@ export function createPlannerToolsWithMetadata() {
     inputSchema: jsonSchema<typeof askQuestionInputSchema.infer>(
       askQuestionInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute() {
+    async execute({ questions }) {
       return await Promise.resolve({
         success: true,
+        questions,
         message: "Questions posted. Pending user response.",
       });
     },

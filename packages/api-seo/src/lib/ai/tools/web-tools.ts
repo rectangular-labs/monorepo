@@ -8,7 +8,7 @@ import {
 } from "ai";
 import { type } from "arktype";
 import { fetchPageContent } from "../../cloudflare/fetch-page-content";
-import type { AgentToolDefinition } from "./tool-definition";
+import type { AgentToolDefinition } from "./utils";
 
 const webFetchInputSchema = type({
   url: type("string").describe("The URL to fetch."),
