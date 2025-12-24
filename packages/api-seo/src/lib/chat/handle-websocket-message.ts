@@ -7,8 +7,10 @@ import { broadcastMessageToRoom } from "./broadcast-to-room";
 export async function handleWebsocketMessage({
   message,
   broadcast = false,
+  userId,
 }: {
   message: SeoChatMessage;
+  userId: string | null;
   broadcast?: boolean;
 }) {
   const context = getWebsocketContext();
@@ -16,10 +18,11 @@ export async function handleWebsocketMessage({
   const messageResult = await createContentCampaignMessage({
     db: context.db,
     value: {
+      ...(message.id ? { id: message.id } : {}),
       organizationId: context.organizationId,
       projectId: context.projectId,
       campaignId: context.campaignId,
-      userId: context.userId,
+      userId,
       message: message.parts,
       source: message.role,
     },

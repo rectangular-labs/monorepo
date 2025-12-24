@@ -1,30 +1,18 @@
-import { anthropic } from "@ai-sdk/anthropic";
 import { ORPCError, type } from "@orpc/server";
 import { uuidv7 } from "@rectangular-labs/db";
-import {
-  createContentCampaignMessage,
-  getSeoProjectByIdentifierAndOrgId,
-  updateContentCampaign,
-} from "@rectangular-labs/db/operations";
 import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/db/parsers";
-import {
-  convertToModelMessages,
-  generateText,
-  hasToolCall,
-  stepCountIs,
-  streamText,
-} from "ai";
+import { hasToolCall, streamText } from "ai";
 import { CrdtType } from "loro-protocol";
+import { getWorkspaceBlobUri } from "../client";
 import { websocketBase } from "../context";
-import { createSeoAgent } from "../lib/ai/seo-agent";
-import { getGSCPropertyById } from "../lib/database/gsc-property";
-import {
-  getRoomKey,
-  getWorkspaceBlobUri,
-  WORKSPACE_CONTENT_ROOM_ID,
-} from "../lib/workspace";
-import { broadcastMessageToRoom } from "../lib/workspace/broadcast-to-room";
-import { sendWebsocketMessage } from "../lib/workspace/send-websocket-message";
+import { createPlannerAgent } from "../lib/ai/planner-agent";
+import { broadcastMessageToRoom } from "../lib/chat/broadcast-to-room";
+import { getRoomKey } from "../lib/chat/get-room-key";
+import { handleTitleGeneration } from "../lib/chat/handle-title-generation";
+import { handleWebsocketMessage } from "../lib/chat/handle-websocket-message";
+import { getGSCPropertyInWebsocketChat } from "../lib/database/gsc-property";
+import { getProjectInWebsocketChat } from "../lib/database/project";
+import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
 import type { SeoChatMessage } from "../types";
 
 // TODO: broadcasting to clients when messages are done
@@ -38,107 +26,48 @@ const room = websocketBase
     }>(),
   )
   .handler(async ({ context, input }) => {
-    const projectResult = await getSeoProjectByIdentifierAndOrgId(
-      context.db,
-      context.projectId,
-      context.organizationId,
-      {
-        businessBackground: true,
-        imageSettings: true,
-        articleSettings: true,
-        serpSnapshot: true,
-      },
-    );
+    const projectResult = await getProjectInWebsocketChat();
     if (!projectResult.ok || !projectResult.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Project not found" });
+      throw new ORPCError("NOT_FOUND", {
+        message: "Project not found",
+        cause: "error" in projectResult ? projectResult.error : undefined,
+      });
     }
     const project = projectResult.value;
-    const gscProperty = await (async () => {
-      if (!project.gscPropertyId) {
-        return null;
-      }
-      const property = await getGSCPropertyById(project.gscPropertyId);
-      if (!property.ok) {
-        throw new ORPCError("NOT_FOUND", {
-          message: `Google Search Console property not found: ${project.gscPropertyId}`,
-          cause: property.error,
+
+    const gscPropertyResult = await getGSCPropertyInWebsocketChat();
+    if (!gscPropertyResult.ok || !gscPropertyResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "Google Search Console property not found",
+        cause:
+          "error" in gscPropertyResult ? gscPropertyResult.error : undefined,
+      });
+    }
+    const gscProperty = gscPropertyResult.value;
+
+    const latestMessage = input.messages.at(-1);
+    if (latestMessage?.role === "user") {
+      const userMessageResult = await handleWebsocketMessage({
+        // we let the db generate the id for the user message
+        message: { ...latestMessage, id: "" },
+        userId: context.userId,
+        broadcast: true,
+      });
+      if (!userMessageResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to handle user message",
+          cause: userMessageResult.error,
         });
       }
-      return property.value;
-    })();
-
-    const latestUserMessage = input.messages.at(-1);
-    if (latestUserMessage && latestUserMessage.role === "user") {
-      const messageResult = await createContentCampaignMessage({
-        db: context.db,
-        value: {
-          organizationId: context.organizationId,
-          projectId: context.projectId,
-          campaignId: context.campaignId,
-          userId: context.userId,
-          message: latestUserMessage.parts,
-          source: "user",
-        },
-      });
-      if (!messageResult.ok) {
-        throw messageResult.error;
-      }
-      broadcastMessageToRoom(
-        {
-          type: "new-msg",
-          message: {
-            id: messageResult.value.id,
-            role: "user",
-            parts: latestUserMessage.parts,
-            metadata: {
-              sentAt: messageResult.value.createdAt.toISOString(),
-              userId: messageResult.value.userId,
-            },
-          },
-        },
-        true,
-      );
     }
 
-    if (context.campaignTitle === CAMPAIGN_DEFAULT_TITLE && latestUserMessage) {
+    if (context.campaignTitle === CAMPAIGN_DEFAULT_TITLE && latestMessage) {
       console.log("Generating title for campaign", context.campaignId);
-      const updatedTitle = await generateText({
-        model: anthropic("claude-haiku-4-5"),
-        system:
-          "Based on the user's message extract out the main topic and generate a concise and succinct title for this campaign. JUST RETURN WITH A TITLE AND NOTHING ELSE. The title should be no more than 10 words.",
-        messages: convertToModelMessages([
-          latestUserMessage,
-          {
-            role: "user",
-            parts: [
-              {
-                type: "text",
-                text: `The above is my initial question/task for my site ${project.name}. Use that to generate a title for this campaign`,
-              },
-            ],
-          },
-        ]),
-      });
-      const finalTitle = updatedTitle.text.split(" ").slice(0, 10).join(" ");
-      await updateContentCampaign({
-        db: context.db,
-        values: {
-          id: context.campaignId,
-          projectId: context.projectId,
-          organizationId: context.organizationId,
-          title: finalTitle,
-        },
-      });
-      context.updateCampaignTitle(finalTitle);
-      const senderAttachment = context.senderWebSocket.deserializeAttachment();
-      context.senderWebSocket.serializeAttachment({
-        ...senderAttachment,
-        campaignTitle: finalTitle,
-      });
+      await handleTitleGeneration(latestMessage);
     }
 
-    const result = streamText({
-      ...createSeoAgent({
+    const planResult = streamText({
+      ...createPlannerAgent({
         messages: input.messages,
         gscProperty,
         project,
@@ -149,36 +78,41 @@ const room = websocketBase
       onError: (error) => {
         console.error("campaign.write error", error);
       },
-      stopWhen: [stepCountIs(10), hasToolCall("manage_google_search_property")],
+      stopWhen: [
+        hasToolCall("ask_questions"),
+        hasToolCall("create_plan"),
+        hasToolCall("manage_integrations"),
+      ],
     });
 
+    const assistantMessageId = uuidv7();
     // Handle streaming text chunks using UIMessageStream
-    for await (const chunk of result.toUIMessageStream({
+    for await (const chunk of planResult.toUIMessageStream<SeoChatMessage>({
       sendSources: true,
       sendReasoning: true,
       messageMetadata: ({ part }) => {
         if (part.type === "start") {
           return {
             sentAt: new Date().toISOString(),
+            userId: null,
           };
         }
         return;
       },
-      generateMessageId: uuidv7,
+      generateMessageId: () => assistantMessageId,
       onFinish: async ({ responseMessage }) => {
-        await createContentCampaignMessage({
-          db: context.db,
-          value: {
-            id: responseMessage.id,
-            organizationId: context.organizationId,
-            projectId: context.projectId,
-            campaignId: context.campaignId,
-            userId: null,
-            message: responseMessage.parts,
-            source: "assistant",
-          },
+        const result = await handleWebsocketMessage({
+          message: responseMessage,
+          userId: null,
+          broadcast: false,
         });
-        console.log("campaign.room ai message", responseMessage);
+        if (!result.ok) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to handle assistant message",
+            cause: result.error,
+          });
+        }
+        console.log("campaign.room planner message", responseMessage);
 
         const roomDoc = context.roomDocumentMap.get(
           getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro),
@@ -196,16 +130,14 @@ const room = websocketBase
         }
       },
     })) {
-      for (const ws of context.allWebSockets) {
-        sendWebsocketMessage(
-          ws,
-          JSON.stringify({
-            type: "msg-chunk",
-            clientMessageId: input.clientMessageId,
-            chunk,
-          }),
-        );
-      }
+      broadcastMessageToRoom(
+        {
+          type: "msg-chunk",
+          clientMessageId: input.clientMessageId,
+          chunk,
+        },
+        false,
+      );
     }
   });
 
