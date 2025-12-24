@@ -5,18 +5,14 @@ import {
 } from "@rectangular-labs/db/parsers";
 import { getSearchAnalytics } from "@rectangular-labs/google-apis/google-search-console";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
-import { type } from "arktype";
+import type { AgentToolDefinition } from "./tool-definition";
 
 const gscQueryInputSchema = getSearchAnalyticsArgsSchema.omit(
   "siteType",
   "siteUrl",
 );
 
-const manageGscPropertyInputSchema = type({
-  type: "'manage'",
-});
-
-export function createGscTool({
+export function createGscToolWithMetadata({
   accessToken,
   siteUrl,
   siteType,
@@ -57,20 +53,28 @@ export function createGscTool({
     },
   });
 
-  const manageGscPropertyTool = tool({
-    description:
-      "Manage the project's Google Search Console property. This tool allows you to connect, disconnect, and manage the property.",
-    inputSchema: jsonSchema<typeof manageGscPropertyInputSchema.infer>(
-      manageGscPropertyInputSchema.toJsonSchema() as JSONSchema7,
-    ),
-    async execute() {
-      await Promise.resolve();
-      return { status: "Pending User Action" as const };
-    },
-  });
-
-  return {
+  const tools = {
     google_search_console_query: gscTool,
-    manage_google_search_property: manageGscPropertyTool,
   } as const;
+
+  const toolDefinitions: AgentToolDefinition[] = [
+    {
+      toolName: "google_search_console_query",
+      toolDescription:
+        "Query Google Search Console searchAnalytics for the project site.",
+      toolInstruction:
+        "Use for performance/CTR/decay analysis. Provide date range, dimensions (e.g. ['query','page']), rowLimit, and filters. If it returns success:false with next_step, switch to helping connect GSC.",
+      tool: gscTool,
+    },
+  ];
+
+  return { toolDefinitions, tools };
+}
+
+export function createGscTool(args: {
+  accessToken: string | null;
+  siteUrl: string | null;
+  siteType: typeof seoGscPropertyTypeSchema.infer | null;
+}): ReturnType<typeof createGscToolWithMetadata>["tools"] {
+  return createGscToolWithMetadata(args).tools;
 }
