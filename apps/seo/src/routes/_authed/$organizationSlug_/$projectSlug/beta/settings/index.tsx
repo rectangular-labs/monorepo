@@ -83,7 +83,9 @@ function BetaProjectSettings() {
   return (
     <div className="w-full space-y-6">
       <div className="space-y-2">
-        <h1 className="font-semibold text-3xl tracking-tight">Project settings</h1>
+        <h1 className="font-semibold text-3xl tracking-tight">
+          Project settings
+        </h1>
         <p className="text-muted-foreground">
           Mocked settings (saved to localStorage). No backend calls.
         </p>
@@ -162,7 +164,10 @@ function BetaProjectSettings() {
               <FormItem>
                 <FormLabel>Industry</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g., SaaS, Healthcare, Retail" />
+                  <Input
+                    {...field}
+                    placeholder="e.g., SaaS, Healthcare, Retail"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -176,8 +181,8 @@ function BetaProjectSettings() {
               <FormItem>
                 <FormLabel>Service region</FormLabel>
                 <FormDescription>
-                  Where you serve customers (e.g., Global; EU; US; City, ST; list
-                  of countries).
+                  Where you serve customers (e.g., Global; EU; US; City, ST;
+                  list of countries).
                 </FormDescription>
                 <FormControl>
                   <Input {...field} placeholder="e.g., Global, US-only, EU" />
@@ -196,7 +201,10 @@ function BetaProjectSettings() {
                 <FormDescription>
                   The country where most of your audience is located.
                 </FormDescription>
-                <Select defaultValue={field.value} onValueChange={field.onChange}>
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a country" />
@@ -235,7 +243,9 @@ function BetaProjectSettings() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Language code</FormLabel>
-                <FormDescription>Two-letter ISO 639-1 language code.</FormDescription>
+                <FormDescription>
+                  Two-letter ISO 639-1 language code.
+                </FormDescription>
                 <FormControl>
                   <Input {...field} placeholder="en" />
                 </FormControl>
@@ -295,7 +305,11 @@ function BetaProjectSettings() {
           </FormItem>
 
           <div className="flex items-center justify-end gap-2">
-            <Button onClick={() => form.reset(saved)} type="button" variant="outline">
+            <Button
+              onClick={() => form.reset(saved)}
+              type="button"
+              variant="outline"
+            >
               Reset
             </Button>
             <Button type="submit">Save</Button>
@@ -305,5 +319,3 @@ function BetaProjectSettings() {
     </div>
   );
 }
-
-

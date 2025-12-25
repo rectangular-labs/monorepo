@@ -9,7 +9,10 @@ export const Route = createFileRoute(
 });
 
 const navItems = [
-  { label: "Overview", to: "/$organizationSlug/$projectSlug/beta/insights" as const },
+  {
+    label: "Overview",
+    to: "/$organizationSlug/$projectSlug/beta/insights" as const,
+  },
   {
     label: "Contextual performance",
     to: "/$organizationSlug/$projectSlug/beta/insights/contextual-performance" as const,
@@ -43,7 +46,10 @@ function InsightsLayout() {
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => (
             <Link
-              activeOptions={{ exact: item.to === "/$organizationSlug/$projectSlug/beta/insights" }}
+              activeOptions={{
+                exact:
+                  item.to === "/$organizationSlug/$projectSlug/beta/insights",
+              }}
               activeProps={{
                 className:
                   "bg-muted text-foreground hover:bg-muted font-medium",
@@ -69,5 +75,3 @@ function InsightsLayout() {
     </div>
   );
 }
-
-

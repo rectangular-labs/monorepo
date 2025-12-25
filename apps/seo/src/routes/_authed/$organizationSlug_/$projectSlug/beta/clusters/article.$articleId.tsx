@@ -146,7 +146,7 @@ function ClusterArticlePage() {
                   intendedPublishDate: article.intendedPublishDate,
                 });
 
-                navigate({
+                void navigate({
                   to: "/$organizationSlug/$projectSlug/beta/clusters/review/$reviewId",
                   params: { organizationSlug, projectSlug, reviewId },
                 });

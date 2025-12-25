@@ -104,8 +104,17 @@ function ContextualPerformancePage() {
             <ReChartContainer className="h-[260px] w-full" config={chartConfig}>
               <AreaChart data={mockVisibilityTimeseries}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis axisLine={false} dataKey="date" tick={{ fontSize: 11 }} tickLine={false} />
-                <YAxis axisLine={false} tick={{ fontSize: 11 }} tickLine={false} />
+                <XAxis
+                  axisLine={false}
+                  dataKey="date"
+                  tick={{ fontSize: 11 }}
+                  tickLine={false}
+                />
+                <YAxis
+                  axisLine={false}
+                  tick={{ fontSize: 11 }}
+                  tickLine={false}
+                />
                 <Tooltip
                   content={
                     <ReChartTooltipContent
@@ -151,9 +160,7 @@ function ContextualPerformancePage() {
                     {idx + 1}
                   </span>
                   <div className="min-w-0">
-                    <div className="truncate font-medium text-sm">
-                      {r.name}
-                    </div>
+                    <div className="truncate font-medium text-sm">{r.name}</div>
                     {r.isYou && (
                       <div className="text-muted-foreground text-xs">You</div>
                     )}
@@ -177,5 +184,3 @@ function ContextualPerformancePage() {
     </div>
   );
 }
-
-
