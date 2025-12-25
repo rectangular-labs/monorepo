@@ -16,6 +16,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/sidebar";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { strToU8, zipSync } from "fflate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import {
@@ -69,6 +70,7 @@ export function ReviewPanel({
   const [selectedItemId, setSelectedItemId] = useState<
     TreeFile["treeId"] | null
   >(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Transform tree to review items
   const changedFiles = useMemo(() => {
@@ -107,6 +109,55 @@ export function ReviewPanel({
       );
     });
   }, [changedFiles, statusFilter, searchQuery]);
+
+  const downloadAllChangedContent = () => {
+    if (changedFiles.length === 0) {
+      toast.error("No changed files to download.");
+      return;
+    }
+
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+    try {
+      const entries: Record<string, Uint8Array> = {};
+
+      for (const file of changedFiles) {
+        const rawPath = file.path.startsWith("/")
+          ? file.path.slice(1)
+          : file.path;
+        const normalizedPath = rawPath.length > 0 ? rawPath : file.name;
+        const zipPath =
+          file.changes?.action === "deleted"
+            ? `_deleted/${normalizedPath}`
+            : normalizedPath;
+
+        entries[zipPath] = strToU8(file.content.toString());
+      }
+
+      const zipped = zipSync(entries, { level: 6 });
+      const blob = new Blob([new Uint8Array(zipped)], {
+        type: "application/zip",
+      });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `campaign-${campaignId}-changes.zip`;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      // Give the browser a moment to start the download before revoking.
+      setTimeout(() => URL.revokeObjectURL(url), 1_000);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate download.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   // Refs for scrolling to selected file
   const fileRefs = useRef<Map<TreeFile["treeId"], HTMLDivElement>>(new Map());
@@ -193,11 +244,25 @@ export function ReviewPanel({
 
         {/* Header with view mode toggle */}
         <div className="border-b p-4">
-          <h2 className="font-semibold text-lg">Review Changes</h2>
-          <p className="text-muted-foreground text-sm">
-            {summary.total} items changed: {summary.updated} updated,{" "}
-            {summary.created} created, {summary.deleted} deleted
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-semibold text-lg">Review Changes</h2>
+              <p className="text-muted-foreground text-sm">
+                {summary.total} items changed: {summary.updated} updated,{" "}
+                {summary.created} created, {summary.deleted} deleted
+              </p>
+            </div>
+            <Button
+              disabled={changedFiles.length === 0}
+              isLoading={isDownloading}
+              onClick={downloadAllChangedContent}
+              size="sm"
+              variant="outline"
+            >
+              Download all
+              <Icons.Save aria-hidden="true" />
+            </Button>
+          </div>
         </div>
 
         {/* All files diff view */}

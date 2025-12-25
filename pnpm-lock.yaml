@@ -107,6 +107,9 @@ importers:
       arktype:
         specifier: ^2.1.27
         version: 2.1.27
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       idb-keyval:
         specifier: ^6.2.2
         version: 6.2.2
