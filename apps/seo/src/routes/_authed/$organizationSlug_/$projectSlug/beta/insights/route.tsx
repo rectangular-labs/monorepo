@@ -1,6 +1,6 @@
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { cn } from "@rectangular-labs/ui/utils/cn";
-import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug_/$projectSlug/beta/insights",
