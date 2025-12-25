@@ -5,7 +5,7 @@ import { hasToolCall, streamText } from "ai";
 import { CrdtType } from "loro-protocol";
 import { getWorkspaceBlobUri } from "../client";
 import { websocketBase } from "../context";
-import { createPlannerAgent } from "../lib/ai/planner-agent";
+import { createStrategistAgent } from "../lib/ai/strategist-agent";
 import { broadcastMessageToRoom } from "../lib/chat/broadcast-to-room";
 import { getRoomKey } from "../lib/chat/get-room-key";
 import { handleTitleGeneration } from "../lib/chat/handle-title-generation";
@@ -15,7 +15,6 @@ import { getProjectInWebsocketChat } from "../lib/database/project";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
 import type { SeoChatMessage } from "../types";
 
-// TODO: broadcasting to clients when messages are done
 const room = websocketBase
   .route({ method: "GET", path: "/{id}/room" })
   .input(
@@ -67,7 +66,7 @@ const room = websocketBase
     }
 
     const planResult = streamText({
-      ...createPlannerAgent({
+      ...createStrategistAgent({
         messages: input.messages,
         gscProperty,
         project,

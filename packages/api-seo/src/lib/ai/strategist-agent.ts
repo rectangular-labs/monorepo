@@ -2,8 +2,9 @@ import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import { convertToModelMessages, type streamText, type UIMessage } from "ai";
 import type { WebSocketContext } from "../../types";
 import { formatBusinessBackground } from "./format-business-background";
+import { createArticleResearchToolWithMetadata } from "./tools/article-research-tool";
+import { createArticleWritingToolWithMetadata } from "./tools/article-writing-tool";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
-import { createDoResearchTool } from "./tools/do-research-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
 import { createGscToolWithMetadata } from "./tools/google-search-console-tool";
 import { createMessagesToolsWithMetadata } from "./tools/message-tools";
@@ -20,9 +21,29 @@ import {
   formatToolSkillsSection,
 } from "./tools/utils";
 import { createWebToolsWithMetadata } from "./tools/web-tools";
-import { createWritingToolWithMetadata } from "./tools/writing-tool";
 
-export function createPlannerAgent({
+/**
+What to deliver:
+- Improving existing content:
+  - Use google_search_console_query across time ranges to identify decaying pages/queries; propose specific refresh actions, target queries, and expected impact.
+  - Find pages with weak CTR vs position; propose improved titles/meta, angle changes, and SERP feature optimizations (rich results, FAQs, etc.).
+- Creating new content:
+  - Build a data-driven keyword universe with get_keyword_suggestions and get_keywords_overview; group by intent and funnel stage; output a prioritized content plan with working titles, target queries, angle, format, and internal links.
+  - Map the end-to-end user journey; recommend content to cover each step. Ask for missing journey details if needed.
+  - Perform competitor analysis using get_ranked_keywords_for_site and get_ranked_pages_for_site on competitor hostnames to uncover opportunities and quick wins.
+  - Create Q&A style content to answer common user questions; list FAQs and provide brief outlines.
+- Highlighting opportunities:
+  - Suggest guerrilla marketing and distribution tactics (e.g., targeted Reddit threads, X posts, community forums, PR/backlinks, features) with concrete next steps and candidate targets.
+  - Recommend internal linking, schema, and technical quick wins where relevant.
+
+Output requirements:
+- Be concise but actionable; use bullet points and short sections.
+- When more data is needed, ask clearly for what you need.
+- Prefer specific, measurable recommendations with expected impact.
+- If proposing edits to existing content, describe them clearly
+ */
+
+export function createStrategistAgent({
   messages,
   gscProperty,
   project,
@@ -57,11 +78,10 @@ export function createPlannerAgent({
     siteType: gscProperty?.type ?? null,
   });
   const dataforseoTools = createDataforseoToolWithMetadata(project);
-  const researchTools = createDoResearchTool({
+  const researchTools = createArticleResearchToolWithMetadata({
     project,
-    gscProperty,
   });
-  const writingTools = createWritingToolWithMetadata({
+  const writingTools = createArticleWritingToolWithMetadata({
     project,
   });
 
@@ -90,8 +110,8 @@ IMPORTANT CONTEXT LIMITATION:
 1. Understand: Dig into the user's ask and make sure to fully understand it. Restate the user's ask in 1-2 sentences; list assumptions.
 2. Clarify: Ask targeted questions to clarify the intended behavior as needed before making any plans or executing any tasks.
 3. Plan: propose a plan aligned to goals/constraints. Focus primarily on synthesizing which skills to use and what instructions to pass each of them. Make sure to read the skill FULL instructions before selecting it. ALWAYS create todos that are ordered by execution order to make sure that we can stay on track. For larger body of work, use \`create_plan\` to create a plan artifact and get the user's confirmation before proceeding.
-4. Execute: Execute approved plans and to-dos step-by-step by calling \`use_skills\` for the relevant skills (e.g. \`do_research\` then \`write_content\`). Make sure that skills are used where relevant even if you already know the answer implicitly. Keep the user informed of progress by updating todos as tasks are completed or as new tasks are added.
-5. Skill clarification loops: Some skills may return clarifying questions (e.g. do_research may return needsClarification with an ask_questions payload). If that happens, "respond" to those questions by either asking the user (via ask_questions) or by using already-known facts. Then re-run the same skill with the SAME REQUEST again, adding the missing information.
+4. Execute: Execute approved plans and to-dos step-by-step by calling \`use_skills\` for the relevant skills (e.g. \`seo_article_research\` then \`write_content\`). Make sure that skills are used where relevant even if you already know the answer implicitly. Keep the user informed of progress by updating todos as tasks are completed or as new tasks are added.
+5. Skill clarification loops: Some skills may return clarifying questions (e.g. seo_article_research may return needsClarification with an ask_questions payload). If that happens, "respond" to those questions by either asking the user (via ask_questions) or by using already-known facts. Then re-run the same skill with the SAME REQUEST again, adding the missing information.
 6. Track work: Use \`manage_todo\` tool to add tasks, mark tasks done, and keep the todo list current.
 </core-behavior>
 

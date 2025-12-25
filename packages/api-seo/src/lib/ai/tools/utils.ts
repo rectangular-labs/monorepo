@@ -5,6 +5,7 @@ export interface AgentToolDefinition {
   toolName: string;
   toolDescription: string;
   toolInstruction: string;
+  callDirect?: boolean;
   tool: AnyTool;
 }
 

@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { uuidv7 } from "@rectangular-labs/db";
 import {
   generateText,
   type JSONSchema7,
@@ -73,8 +74,6 @@ export function createSkillTools({
         usageInstructions: [
           `## Skill: ${skillDefinition.toolName}`,
           "",
-          skillDefinition.toolDescription,
-          "",
           "### How to use it",
           skillDefinition.toolInstruction,
         ].join("\n"),
@@ -93,10 +92,23 @@ export function createSkillTools({
       if (!skillDefinition) {
         return generateMissingSkillResponse({ skill, toolDefinitions });
       }
+
       console.log({
-        skillDefinition,
-        instructions,
+        skillName: skillDefinition.toolName,
+        skillInstruction: instructions,
       });
+
+      if (skillDefinition.callDirect === true) {
+        const result = await skillDefinition.tool.execute?.(
+          { instructions },
+          {
+            toolCallId: uuidv7(),
+            messages: [],
+          },
+        );
+        return result;
+      }
+
       const { text } = await generateText({
         model: openai("gpt-5.2"),
         prompt: `Use the ${skillDefinition.toolName} tool to perform the task:
