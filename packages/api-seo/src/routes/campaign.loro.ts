@@ -11,12 +11,10 @@ import {
   UpdateErrorCode,
 } from "loro-protocol";
 import { getWebsocketContext } from "../context";
-import {
-  broadcastLoroToRoom,
-  getOrCreateRoomDocument,
-  replyToSender,
-  WORKSPACE_CONTENT_ROOM_ID,
-} from "../lib/workspace";
+import { broadcastLoroToRoom } from "../lib/chat/broadcast-to-room";
+import { getOrCreateRoomDocument } from "../lib/chat/get-or-create-room-document";
+import { replyToSender } from "../lib/chat/reply-to-sender";
+import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
 
 export async function handleLoroMessage({
   message,

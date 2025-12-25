@@ -14,9 +14,9 @@ import {
 } from "@rectangular-labs/db/parsers";
 import { validateUIMessages } from "ai";
 import { type } from "arktype";
+import { getWorkspaceBlobUri } from "../client";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import { getWorkspaceBlobUri } from "../lib/workspace";
 import type { SeoChatMessage } from "../types";
 
 const list = withOrganizationIdBase

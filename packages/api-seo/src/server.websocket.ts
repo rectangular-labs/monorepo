@@ -28,10 +28,12 @@ export class WebSocketServer extends DurableObject {
   // When the DO hibernates, gets reconstructed in the constructor
   sessions: Map<WebSocket, SessionAttachment>;
   // Keep track of the loro document for the workspace.
-  // currently this is the chat document and the content document.
+  // currently this is the content document.
   roomDocuments: Map<string, RoomDocument>;
   // keeps track of the fragments for the user when sending large updates.
   userFragments: Map<WebSocket, Map<HexString, UserFragment>>;
+
+  cache: WebSocketContext["cache"];
 
   constructor(ctx: DurableObjectState, env: ReturnType<typeof apiEnv>) {
     super(ctx, env);
@@ -55,6 +57,7 @@ export class WebSocketServer extends DurableObject {
 
     this.roomDocuments = new Map();
     this.userFragments = new Map();
+    this.cache = {};
 
     // Sets an application level auto response that does not wake hibernated WebSockets.
     this.ctx.setWebSocketAutoResponse(
@@ -183,6 +186,7 @@ export class WebSocketServer extends DurableObject {
       updateCampaignTitle: (title: string) => {
         session.campaignTitle = title;
       },
+      cache: this.cache,
       ...context,
     };
     if (typeof message === "string") {

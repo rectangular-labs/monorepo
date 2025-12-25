@@ -4,16 +4,10 @@ import { LoroServerAdaptor } from "loro-adaptors/loro";
 import { CrdtType } from "loro-protocol";
 import { getWebsocketContext } from "../../context";
 import type { RoomDocument } from "../../types";
-import { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
-import { forkAndUpdateWorkspaceBlob } from "./fork-workspace-blob";
-import { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
-
-export function getRoomKey(
-  roomId: typeof WORKSPACE_CONTENT_ROOM_ID,
-  crdtType: CrdtType,
-): string {
-  return `${roomId}:${crdtType}`;
-}
+import { WORKSPACE_CONTENT_ROOM_ID } from "../workspace/constants";
+import { forkAndUpdateWorkspaceBlob } from "../workspace/fork-workspace-blob";
+import { getWorkspaceBlobUri } from "../workspace/get-workspace-blob-uri";
+import { getRoomKey } from "./get-room-key";
 
 /**
  * This function gets or creates the room document for the given room ID and CRDT type.
@@ -100,11 +94,3 @@ export async function getOrCreateRoomDocument(
     }
   }
 }
-export {
-  broadcastLoroToRoom,
-  broadcastMessageToRoom,
-} from "./broadcast-to-room";
-export { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
-export { forkAndUpdateWorkspaceBlob } from "./fork-workspace-blob";
-export { getWorkspaceBlobUri } from "./get-workspace-blob-uri";
-export { replyToSender } from "./reply-to-sender";

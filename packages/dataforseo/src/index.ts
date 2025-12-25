@@ -464,6 +464,7 @@ export async function fetchSerp(args: {
   depth?: number;
   device?: "desktop" | "mobile";
   os?: "windows" | "macos" | "android" | "ios";
+  targetUrl?: string;
 }): Promise<
   Result<
     {
@@ -490,6 +491,7 @@ export async function fetchSerp(args: {
           ((args.device ?? "desktop") === "desktop" ? "macos" : "ios"),
         group_organic_results: true,
         load_async_ai_overview: false,
+        target: args.targetUrl ?? null,
       },
     ],
   });

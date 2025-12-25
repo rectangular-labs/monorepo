@@ -1,6 +1,10 @@
 import { type DBTransaction, schema } from "@rectangular-labs/db";
+import {
+  getSeoProjectAuthorsByProjectId,
+  getSeoProjectByIdentifierAndOrgId,
+} from "@rectangular-labs/db/operations";
 import { err, ok, safe } from "@rectangular-labs/result";
-import { getContext } from "../../context";
+import { getContext, getWebsocketContext } from "../../context";
 
 export async function upsertProject(
   values: typeof schema.seoProjectInsertSchema.infer & {
@@ -42,4 +46,53 @@ export async function upsertProject(
     return err(new Error("Failed to create project"));
   }
   return ok(existingProject);
+}
+
+export async function getProjectInWebsocketChat(args?: {
+  includeAuthors?: boolean;
+}) {
+  const websocketContext = getWebsocketContext();
+  if (websocketContext.cache.project) {
+    if (args?.includeAuthors && !websocketContext.cache.project?.authors) {
+      const authorsResult = await getSeoProjectAuthorsByProjectId(
+        websocketContext.db,
+        websocketContext.projectId,
+      );
+      if (!authorsResult.ok) {
+        return authorsResult;
+      }
+      websocketContext.cache.project.authors = authorsResult.value;
+    }
+    return ok(websocketContext.cache.project);
+  }
+  const projectResult = await getSeoProjectByIdentifierAndOrgId(
+    websocketContext.db,
+    websocketContext.projectId,
+    websocketContext.organizationId,
+    {
+      businessBackground: true,
+      imageSettings: true,
+      writingSettings: true,
+      serpSnapshot: true,
+    },
+  );
+  if (!projectResult.ok) {
+    return projectResult;
+  }
+  if (!projectResult.value) {
+    return ok(null);
+  }
+
+  websocketContext.cache.project = projectResult.value;
+  if (args?.includeAuthors && !websocketContext.cache.project?.authors) {
+    const authorsResult = await getSeoProjectAuthorsByProjectId(
+      websocketContext.db,
+      websocketContext.projectId,
+    );
+    if (!authorsResult.ok) {
+      return authorsResult;
+    }
+    websocketContext.cache.project.authors = authorsResult.value;
+  }
+  return ok(websocketContext.cache.project);
 }

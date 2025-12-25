@@ -11,7 +11,8 @@ import { type } from "arktype";
 import {
   configureDataForSeoClient,
   getLocationAndLanguage,
-} from "../dataforseo/utils";
+} from "../../dataforseo/utils";
+import type { AgentToolDefinition } from "./utils";
 
 const hostnameSchema = type("string").describe(
   "The domain name of the target website. The domain should be specified without 'https://' and 'www.'. Example: 'example.xyz', 'fluidposts.ai', 'google.com'",
@@ -102,7 +103,7 @@ const serpInputSchema = type({
     .default("macos"),
 });
 
-export function createDataforseoTool(
+export function createDataforseoToolWithMetadata(
   project: typeof schema.seoProject.$inferSelect,
 ) {
   configureDataForSeoClient();
@@ -371,11 +372,52 @@ export function createDataforseoTool(
     },
   });
 
-  return {
+  const tools = {
     get_ranked_keywords_for_site: getRankedKeywordsForSite,
     get_ranked_pages_for_site: getRankedPagesForSite,
     get_keyword_suggestions: getKeywordSuggestions,
     get_keywords_overview: getKeywordOverview,
     get_serp_for_keyword: getSerpForKeyword,
   } as const;
+
+  const toolDefinitions: AgentToolDefinition[] = [
+    {
+      toolName: "get_ranked_keywords_for_site",
+      toolDescription:
+        "Fetch keywords a site currently ranks for (DataForSEO).",
+      toolInstruction:
+        "Provide hostname without protocol. Use for profiling your site or competitors, and to discover ranking keyword clusters. Tune positionFrom/positionTo and limit/offset.",
+      tool: getRankedKeywordsForSite,
+    },
+    {
+      toolName: "get_ranked_pages_for_site",
+      toolDescription: "Fetch ranked pages for a site (DataForSEO).",
+      toolInstruction:
+        "Provide hostname without protocol. Use to find top pages and infer content strategy and templates.",
+      tool: getRankedPagesForSite,
+    },
+    {
+      toolName: "get_keyword_suggestions",
+      toolDescription: "Generate keyword suggestions from a seed keyword.",
+      toolInstruction:
+        "Provide seedKeyword. Use to expand a topic cluster; then follow with get_keywords_overview for prioritization.",
+      tool: getKeywordSuggestions,
+    },
+    {
+      toolName: "get_keywords_overview",
+      toolDescription: "Fetch overview metrics for a list of keywords.",
+      toolInstruction:
+        "Provide keywords[]. Use to compare search volume, difficulty, and intent across a short shortlist.",
+      tool: getKeywordOverview,
+    },
+    {
+      toolName: "get_serp_for_keyword",
+      toolDescription: "Inspect live SERP results for a keyword.",
+      toolInstruction:
+        "Provide keyword and optional device/os/depth. Use to understand intent, SERP features, and top-ranking page patterns.",
+      tool: getSerpForKeyword,
+    },
+  ];
+
+  return { toolDefinitions, tools };
 }

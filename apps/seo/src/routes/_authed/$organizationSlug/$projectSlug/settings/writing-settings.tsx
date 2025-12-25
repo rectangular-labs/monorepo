@@ -19,9 +19,13 @@ import {
 } from "@rectangular-labs/ui/components/ui/form";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, useBlocker } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { convertBlobUrlToDataUrl } from "~/lib/url";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -41,12 +45,8 @@ export const Route = createFileRoute(
 function WritingSettingsPage() {
   const { organizationSlug, projectSlug } = Route.useParams();
   const queryClient = useQueryClient();
-  const {
-    data: activeProject,
-    isLoading,
-    error,
-  } = useQuery(
-    getApiClientRq().project.getArticleSettings.queryOptions({
+  const { data: activeProject, error } = useSuspenseQuery(
+    getApiClientRq().project.getWritingSettings.queryOptions({
       input: {
         organizationIdentifier: organizationSlug,
         identifier: projectSlug,
@@ -58,6 +58,16 @@ function WritingSettingsPage() {
     isPending: isUpdatingWritingSettings,
   } = useMutation(
     getApiClientRq().project.update.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: getApiClientRq().project.getWritingSettings.queryKey({
+            input: {
+              organizationIdentifier: organizationSlug,
+              identifier: projectSlug,
+            },
+          }),
+        });
+      },
       onError: (error) => {
         form.setError("root", { message: error.message });
       },
@@ -87,10 +97,17 @@ function WritingSettingsPage() {
     resolver: arktypeResolver(WritingSettingFormSchema),
     defaultValues: {
       version: "v1",
-      brandVoice: "",
-      customInstructions: "",
-      metadata: [],
-      authors: [],
+      brandVoice: activeProject?.writingSettings?.brandVoice ?? "",
+      customInstructions:
+        activeProject?.writingSettings?.customInstructions ?? "",
+      metadata: activeProject?.writingSettings?.metadata ?? [],
+      authors:
+        activeProject?.authors.map((author) => ({
+          ...author,
+          title: author.title ?? "",
+          bio: author.bio ?? "",
+          avatarUri: author.avatarUri ?? "",
+        })) ?? [],
     },
   });
   const {
@@ -174,10 +191,6 @@ function WritingSettingsPage() {
     });
   }, [activeProject, form]);
 
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
-
   async function handleSave(values: WritingSettingFormSchema) {
     if (!activeProject) return;
 
@@ -239,7 +252,7 @@ function WritingSettingsPage() {
 
     toast.success("Article settings saved");
     await queryClient.invalidateQueries({
-      queryKey: getApiClientRq().project.getArticleSettings.queryKey({
+      queryKey: getApiClientRq().project.getWritingSettings.queryKey({
         input: {
           organizationIdentifier: organizationSlug,
           identifier: projectSlug,
@@ -248,13 +261,13 @@ function WritingSettingsPage() {
     });
   }
 
-  if (!activeProject || isLoading || error) {
+  if (!activeProject || error) {
     return (
       <LoadingError
         error={error}
         errorDescription="There was an error loading the project details. Please try again."
         errorTitle="Error loading project"
-        isLoading={isLoading}
+        isLoading={false}
       />
     );
   }

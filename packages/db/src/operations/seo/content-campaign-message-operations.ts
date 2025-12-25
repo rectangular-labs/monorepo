@@ -22,6 +22,36 @@ export async function createContentCampaignMessage({
   return ok(row);
 }
 
+export async function getContentCampaignMessageById({
+  db,
+  organizationId,
+  projectId,
+  campaignId,
+  id,
+}: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  campaignId: string;
+  id: string;
+}) {
+  const result = await safe(() =>
+    db.query.seoContentCampaignMessage.findFirst({
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.organizationId, organizationId),
+          eq(table.projectId, projectId),
+          eq(table.campaignId, campaignId),
+          eq(table.id, id),
+        ),
+    }),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  return ok(result.value ?? null);
+}
+
 export async function listContentCampaignMessages({
   db,
   organizationId,
