@@ -107,6 +107,8 @@ jobs:
           env_path: ${{ steps.resolve.outputs.env_path }}
 
       - name: Build
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
         run: pnpm run build:${{ steps.resolve.outputs.stage }} -- --mode ${{ steps.resolve.outputs.ENVIRONMENT }}
 
       - name: Migrate Database
