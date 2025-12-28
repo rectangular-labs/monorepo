@@ -8,20 +8,11 @@ import {
   AlertTitle,
 } from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-} from "@rectangular-labs/ui/components/ui/sidebar";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { type } from "arktype";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import {
   buildTree,
@@ -32,6 +23,10 @@ import { createSyncDocumentQueryOptions } from "~/lib/campaign/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-table";
 import { ArticlesTree } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-tree";
+import {
+  TreeListDropDrawer,
+  useTreeListMode,
+} from "~/routes/_authed/$organizationSlug_/-components/tree-list-drop-drawer";
 import { FilterStatus } from "./-components/filter-status";
 
 export const Route = createFileRoute(
@@ -61,13 +56,30 @@ export const Route = createFileRoute(
 
 function PageComponent() {
   const { organizationSlug, projectSlug } = Route.useParams();
-  const { tab = "live", view = "tree" } = Route.useSearch();
+  const { tab = "live", view } = Route.useSearch();
   const { projectId, organizationId } = Route.useLoaderData();
+  const navigate = Route.useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [liveStatusFilter, setLiveStatusFilter] = useState<
     "all" | Extract<SeoFileStatus, "scheduled" | "published">
   >("all");
+
+  const [layoutMode, setLayoutMode] = useTreeListMode();
+  const activeView = view ?? layoutMode;
+
+  useEffect(() => {
+    if (view && view !== layoutMode) {
+      setLayoutMode(view);
+    }
+  }, [layoutMode, setLayoutMode, view]);
+
+  const setViewMode = (next: "tree" | "list") => {
+    setLayoutMode(next);
+    navigate({
+      search: (prev) => ({ ...prev, view: next }),
+    });
+  };
 
   const {
     data: activeProject,
@@ -221,34 +233,38 @@ function PageComponent() {
   }, [plannerFiles, normalizedSearch]);
 
   return (
-    <SidebarProvider className="h-full min-h-[calc(100vh-73px)] p-2">
-      <Sidebar className="h-full rounded-md" collapsible="none">
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Content</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={tab === "live"}>
-                  <Link search={{ tab: "live" as const }} to=".">
-                    <Icons.FileText />
-                    Scheduled & Published
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={tab === "planner"}>
-                  <Link search={{ tab: "planner" as const }} to=".">
-                    <Icons.Timer />
-                    Planner
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
+    <div className="flex h-full min-h-[calc(100vh-73px)]">
+      <aside className="shrink-0 px-4 pt-6 md:sticky md:top-0 md:h-fit md:min-h-screen md:w-64 md:border-r">
+        <div className="mb-4">
+          <h2 className="font-semibold text-lg">Content</h2>
+        </div>
+        <nav className="flex flex-col gap-6 text-muted-foreground text-sm">
+          <Link
+            className={cn(
+              "relative transition-colors hover:text-foreground",
+              tab === "live" &&
+                "text-foreground after:absolute after:bottom-[-8px] after:left-0 after:h-[2px] after:w-full after:bg-current after:content-['']",
+            )}
+            search={(prev) => ({ ...prev, tab: "live" as const })}
+            to="."
+          >
+            Scheduled & Published
+          </Link>
+          <Link
+            className={cn(
+              "relative transition-colors hover:text-foreground",
+              tab === "planner" &&
+                "text-foreground after:absolute after:bottom-[-8px] after:left-0 after:h-[2px] after:w-full after:bg-current after:content-['']",
+            )}
+            search={(prev) => ({ ...prev, tab: "planner" as const })}
+            to="."
+          >
+            Planner
+          </Link>
+        </nav>
+      </aside>
 
-      <div className="flex flex-1 flex-col overflow-y-auto">
+      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <div className="border-b p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -258,17 +274,6 @@ function PageComponent() {
               <p className="text-muted-foreground text-sm">
                 {activeProject?.name ?? projectSlug}
               </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button asChild size="sm" variant="outline">
-                <Link
-                  params={{ organizationSlug, projectSlug }}
-                  to="/$organizationSlug/$projectSlug/settings"
-                >
-                  <Icons.Settings className="size-4" />
-                  Project settings
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -370,31 +375,13 @@ function PageComponent() {
                   <p className="text-muted-foreground text-sm">
                     {liveRows.length} articles
                   </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      asChild
-                      size="sm"
-                      variant={view === "tree" ? "default" : "outline"}
-                    >
-                      <Link search={{ view: "tree" as const }} to=".">
-                        <Icons.ListTree className="size-4" />
-                        Tree
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      size="sm"
-                      variant={view === "list" ? "default" : "outline"}
-                    >
-                      <Link search={{ view: "list" as const }} to=".">
-                        <Icons.List className="size-4" />
-                        List
-                      </Link>
-                    </Button>
-                  </div>
+                  <TreeListDropDrawer
+                    onChange={setViewMode}
+                    value={activeView}
+                  />
                 </div>
 
-                {view === "tree" && (
+                {activeView === "tree" && (
                   <div className="rounded-md border p-3">
                     <ArticlesTree
                       includeFile={(file, filter) => {
@@ -420,7 +407,7 @@ function PageComponent() {
                   </div>
                 )}
 
-                {view === "list" && (
+                {activeView === "list" && (
                   <div className="rounded-md border">
                     <ArticlesTable
                       onRowClick={() => {
@@ -446,6 +433,6 @@ function PageComponent() {
           </div>
         )}
       </div>
-    </SidebarProvider>
+    </div>
   );
 }

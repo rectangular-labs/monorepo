@@ -1,6 +1,7 @@
 "use client";
 
 import type { SeoFileStatus } from "@rectangular-labs/api-seo/types";
+import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import {
   Table,
@@ -10,6 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@rectangular-labs/ui/components/ui/table";
+import { cn } from "@rectangular-labs/ui/utils/cn";
+import {
+  type SortingState,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type ColumnDef,
+  type SortingFn,
+} from "@tanstack/react-table";
+import { useMemo, useState } from "react";
 
 export type ArticleTableRow = {
   id: string;
@@ -53,6 +65,33 @@ function formatIsoDate(value?: string) {
   }).format(date);
 }
 
+function compareMaybeString(a?: string, b?: string) {
+  const aValue = (a ?? "").trim().toLowerCase();
+  const bValue = (b ?? "").trim().toLowerCase();
+  if (!aValue && !bValue) return 0;
+  if (!aValue) return 1;
+  if (!bValue) return -1;
+  return aValue.localeCompare(bValue);
+}
+
+const isoDateSortingFn: SortingFn<ArticleTableRow> = (rowA, rowB, columnId) => {
+  const aRaw = rowA.getValue<string | undefined>(columnId);
+  const bRaw = rowB.getValue<string | undefined>(columnId);
+  const a = aRaw ? new Date(aRaw).getTime() : Number.POSITIVE_INFINITY;
+  const b = bRaw ? new Date(bRaw).getTime() : Number.POSITIVE_INFINITY;
+  return a - b;
+};
+
+function SortIndicator({ state }: { state: false | "asc" | "desc" }) {
+  if (state === "asc") {
+    return <Icons.FilterAscending aria-hidden="true" className="size-4" />;
+  }
+  if (state === "desc") {
+    return <Icons.FilterDescending aria-hidden="true" className="size-4" />;
+  }
+  return <Icons.ChevronsUpDown aria-hidden="true" className="size-4" />;
+}
+
 export function ArticlesTable({
   rows,
   onRowClick,
@@ -60,44 +99,157 @@ export function ArticlesTable({
   rows: ArticleTableRow[];
   onRowClick?: (row: ArticleTableRow) => void;
 }) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const columns = useMemo<ColumnDef<ArticleTableRow>[]>(() => {
+    return [
+      {
+        accessorKey: "author",
+        header: "Author",
+        cell: ({ getValue }) => {
+          const value = getValue<string>();
+          return value || "—";
+        },
+        sortingFn: (rowA, rowB, columnId) => {
+          return compareMaybeString(
+            rowA.getValue<string | undefined>(columnId),
+            rowB.getValue<string | undefined>(columnId),
+          );
+        },
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Date created",
+        cell: ({ getValue }) => formatIsoDate(getValue<string | undefined>()),
+        sortingFn: isoDateSortingFn,
+      },
+      {
+        accessorKey: "scheduledFor",
+        header: "Date published",
+        cell: ({ getValue }) => formatIsoDate(getValue<string | undefined>()),
+        sortingFn: isoDateSortingFn,
+      },
+      {
+        accessorKey: "primaryKeyword",
+        header: "Target keyword",
+        cell: ({ getValue }) => {
+          const value = getValue<string>();
+          return value || "—";
+        },
+        sortingFn: (rowA, rowB, columnId) => {
+          return compareMaybeString(
+            rowA.getValue<string | undefined>(columnId),
+            rowB.getValue<string | undefined>(columnId),
+          );
+        },
+      },
+      {
+        accessorKey: "title",
+        header: "Title",
+        cell: ({ getValue }) => getValue<string>(),
+        sortingFn: (rowA, rowB, columnId) => {
+          return compareMaybeString(
+            rowA.getValue<string | undefined>(columnId),
+            rowB.getValue<string | undefined>(columnId),
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ getValue }) => (
+          <Badge variant="secondary">
+            {statusLabel(getValue<SeoFileStatus>())}
+          </Badge>
+        ),
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue<SeoFileStatus>(columnId);
+          const b = rowB.getValue<SeoFileStatus>(columnId);
+          return statusLabel(a).localeCompare(statusLabel(b));
+        },
+      },
+    ];
+  }, []);
+
+  const table = useReactTable({
+    columns,
+    data: rows,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
+  const clickable = typeof onRowClick === "function";
+
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead>Author</TableHead>
-          <TableHead>Date created</TableHead>
-          <TableHead>Date published</TableHead>
-          <TableHead>Target keyword</TableHead>
-          <TableHead>Title</TableHead>
-          <TableHead>Status</TableHead>
-        </TableRow>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => {
+              if (header.isPlaceholder) {
+                return <TableHead key={header.id} />;
+              }
+
+              const canSort = header.column.getCanSort();
+              const sortState = header.column.getIsSorted();
+
+              return (
+                <TableHead key={header.id}>
+                  <button
+                    className={cn(
+                      "inline-flex items-center gap-1.5 font-medium",
+                      canSort && "cursor-pointer select-none",
+                      !canSort && "cursor-default",
+                    )}
+                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    type="button"
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                    {canSort && (
+                      <SortIndicator
+                        state={sortState === false ? false : sortState}
+                      />
+                    )}
+                  </button>
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        ))}
       </TableHeader>
       <TableBody>
-        {rows.map((row) => {
-          const clickable = typeof onRowClick === "function";
-          return (
-            <TableRow
-              className={clickable ? "cursor-pointer" : undefined}
-              key={row.id}
-              onClick={() => onRowClick?.(row)}
-            >
-              <TableCell className="max-w-[240px] truncate">
-                {row.author || "—"}
-              </TableCell>
-              <TableCell>{formatIsoDate(row.createdAt)}</TableCell>
-              <TableCell>{formatIsoDate(row.scheduledFor)}</TableCell>
-              <TableCell className="max-w-[320px] truncate">
-                {row.primaryKeyword || "—"}
-              </TableCell>
-              <TableCell className="max-w-[520px] truncate">
-                {row.title}
-              </TableCell>
-              <TableCell>
-                <Badge variant="secondary">{statusLabel(row.status)}</Badge>
-              </TableCell>
-            </TableRow>
-          );
-        })}
+        {table.getRowModel().rows.map((row) => (
+          <TableRow
+            className={clickable ? "cursor-pointer" : undefined}
+            key={row.id}
+            onClick={() => onRowClick?.(row.original)}
+          >
+            {row.getVisibleCells().map((cell) => {
+              const columnId = cell.column.id;
+              const className =
+                columnId === "author"
+                  ? "max-w-[240px] truncate"
+                  : columnId === "primaryKeyword"
+                    ? "max-w-[320px] truncate"
+                    : columnId === "title"
+                      ? "max-w-[520px] truncate"
+                      : undefined;
+
+              return (
+                <TableCell className={className} key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );
