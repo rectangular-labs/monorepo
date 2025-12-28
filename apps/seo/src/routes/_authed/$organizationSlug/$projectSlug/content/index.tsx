@@ -34,7 +34,7 @@ import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { OverviewCards } from "~/routes/_authed/$organizationSlug/$projectSlug/-components/overview-cards";
 
 export const Route = createFileRoute(
-  "/_authed/$organizationSlug/$projectSlug/campaign/",
+  "/_authed/$organizationSlug/$projectSlug/content/",
 )({
   loader: async ({ context, params }) => {
     await context.queryClient.ensureQueryData(
@@ -285,7 +285,7 @@ function CampaignSkeletons() {
     <div className="space-y-4">
       {Array.from({ length: 6 }, (_, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
-        <Card key={i}>
+        (<Card key={i}>
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-sm bg-muted" />
@@ -298,10 +298,10 @@ function CampaignSkeletons() {
               <div className="h-4 w-24 rounded bg-muted" />
             </div>
           </CardContent>
-        </Card>
+        </Card>)
       ))}
     </div>
-  );
+  )
 }
 
 function EmptyState() {

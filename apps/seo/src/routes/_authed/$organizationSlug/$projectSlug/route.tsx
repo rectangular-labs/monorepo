@@ -63,15 +63,9 @@ function RouteComponent() {
         </NavLink>
         <NavLink
           params={{ organizationSlug, projectSlug }}
-          to="/$organizationSlug/$projectSlug/calendar"
+          to="/$organizationSlug/$projectSlug/content"
         >
-          Calendar
-        </NavLink>
-        <NavLink
-          params={{ organizationSlug, projectSlug }}
-          to="/$organizationSlug/$projectSlug/campaign"
-        >
-          Campaigns
+          Content
         </NavLink>
 
         <NavLink
