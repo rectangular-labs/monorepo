@@ -2,8 +2,6 @@ import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import { convertToModelMessages, type streamText, type UIMessage } from "ai";
 import type { WebSocketContext } from "../../types";
 import { formatBusinessBackground } from "./format-business-background";
-import { createArticleResearchToolWithMetadata } from "./tools/article-research-tool";
-import { createArticleWritingToolWithMetadata } from "./tools/article-writing-tool";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
 import { createGscToolWithMetadata } from "./tools/google-search-console-tool";
@@ -78,12 +76,6 @@ export function createStrategistAgent({
     siteType: gscProperty?.type ?? null,
   });
   const dataforseoTools = createDataforseoToolWithMetadata(project);
-  const researchTools = createArticleResearchToolWithMetadata({
-    project,
-  });
-  const writingTools = createArticleWritingToolWithMetadata({
-    project,
-  });
 
   const skillDefinitions: AgentToolDefinition[] = [
     ...settingsTools.toolDefinitions,
@@ -91,15 +83,15 @@ export function createStrategistAgent({
     ...webTools.toolDefinitions,
     ...gscTools.toolDefinitions,
     ...dataforseoTools.toolDefinitions,
-    ...researchTools.toolDefinitions,
-    ...writingTools.toolDefinitions,
   ];
   const skillsSection = formatToolSkillsSection(skillDefinitions);
 
   const systemPrompt = `<role>
-You are an expert AI agent that helps users with Search Engine Optimization (SEO) and Generative Engine Optimization (GEO).
+You are an expert SEO/GEO strategist and planner.
 
-You have two power tools \`read_skills\` and \`use_skills\`. These are the go to tools that you should use to perform your job as an SEO/GEO strategist and operator. They allow you to improve existing content, write new content, and find opportunities to optimize the site.
+Your job is to help the user create a coherent, prioritized content map with clear topical structure and ontology.
+
+You have two power tools \`read_skills\` and \`use_skills\`. Prefer using them instead of guessing.
 
 IMPORTANT CONTEXT LIMITATION:
 - You only receive a snippet of the user's latest message. Assume the last user message may be truncated/in response to a previous message.
@@ -109,8 +101,8 @@ IMPORTANT CONTEXT LIMITATION:
 <core-behavior>
 1. Understand: Dig into the user's ask and make sure to fully understand it. Restate the user's ask in 1-2 sentences; list assumptions.
 2. Clarify: Ask targeted questions to clarify the intended behavior as needed before making any plans or executing any tasks.
-3. Plan: propose a plan aligned to goals/constraints. Focus primarily on synthesizing which skills to use and what instructions to pass each of them. Make sure to read the skill FULL instructions before selecting it. ALWAYS create todos that are ordered by execution order to make sure that we can stay on track. For larger body of work, use \`create_plan\` to create a plan artifact and get the user's confirmation before proceeding.
-4. Execute: Execute approved plans and to-dos step-by-step by calling \`use_skills\` for the relevant skills (e.g. \`seo_article_research\` then \`write_content\`). Make sure that skills are used where relevant even if you already know the answer implicitly. Keep the user informed of progress by updating todos as tasks are completed or as new tasks are added.
+3. Plan: propose a plan aligned to goals/constraints. Use clear topical clustering, parent/child relationships, and intent mapping.
+4. Execute: Use tools to gather evidence (GSC, SERP data, web) and produce a concrete content plan.
 5. Skill clarification loops: Some skills may return clarifying questions (e.g. seo_article_research may return needsClarification with an ask_questions payload). If that happens, "respond" to those questions by either asking the user (via ask_questions) or by using already-known facts. Then re-run the same skill with the SAME REQUEST again, adding the missing information.
 6. Track work: Use \`manage_todo\` tool to add tasks, mark tasks done, and keep the todo list current.
 </core-behavior>

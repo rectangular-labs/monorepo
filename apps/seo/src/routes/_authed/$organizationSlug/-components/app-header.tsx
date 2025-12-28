@@ -2,16 +2,19 @@ import { OrganizationSwitcher } from "@rectangular-labs/auth/components/organiza
 import type { Organization } from "@rectangular-labs/auth/server";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { BreadcrumbSeparator } from "@rectangular-labs/ui/components/ui/breadcrumb";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
 import { authClient } from "~/lib/auth";
 import { ProjectSwitcher } from "./project-switcher";
+import { useProjectChat } from "./project-chat-provider";
 import { UserDropdown } from "./user-dropdown";
 
 export function AppHeader() {
   const navigate = useNavigate();
+  const projectChat = useProjectChat();
   const matcher = useMatchRoute();
   const projectParams = matcher({
     to: "/$organizationSlug/$projectSlug",
@@ -149,6 +152,15 @@ export function AppHeader() {
         </ol>
 
         <div className="flex items-center gap-2">
+          <Button
+            aria-label="Open assistant"
+            disabled={!projectChat.organizationIdentifier || !projectChat.projectId}
+            onClick={() => projectChat.toggle()}
+            size="icon"
+            variant="ghost"
+          >
+            <Icons.Sparkles className="size-4" />
+          </Button>
           {activeOrganization && <UserDropdown user={session?.user} />}
         </div>
       </nav>

@@ -21,6 +21,7 @@ import {
   uploadProjectImage,
   upsertAuthors,
 } from "./project.settings";
+import { chat } from "./project.chat";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -313,5 +314,6 @@ export default withOrganizationIdBase
     setUpWorkspace,
     metrics,
     syncDocument,
+    chat,
     uploadProjectImage,
   });
