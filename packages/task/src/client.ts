@@ -1,4 +1,4 @@
-import type { taskInputSchema } from "@rectangular-labs/db/parsers";
+import type { taskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { type RetrieveRunResult, runs, tasks } from "@trigger.dev/sdk";
 import type { type } from "arktype";
 import type { understandSiteLlmTask } from "./trigger/understand-site-llm";

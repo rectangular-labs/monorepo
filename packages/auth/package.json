@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@better-auth/expo": "1.4.0-beta.27",
+    "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/emails": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",

@@ -1,5 +1,5 @@
+import { COUNTRY_CODE_MAP } from "@rectangular-labs/core/schemas/project-parsers";
 import { fetchSerp } from "@rectangular-labs/dataforseo";
-import { COUNTRY_CODE_MAP } from "@rectangular-labs/db/parsers";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { configureDataForSeoClient } from "../../dataforseo/utils";

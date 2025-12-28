@@ -1,3 +1,9 @@
+import type { serpTrafficSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
+import type {
+  businessBackgroundSchema,
+  imageSettingsSchema,
+  writingSettingsSchema,
+} from "@rectangular-labs/core/schemas/project-parsers";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import { type } from "arktype";
 import { and, eq, notInArray } from "drizzle-orm";
@@ -7,12 +13,6 @@ import type {
   seoProjectSelectSchema,
   seoProjectUpdateSchema,
 } from "../../schema/seo";
-import type {
-  businessBackgroundSchema,
-  imageSettingsSchema,
-  serpTrafficSchema,
-  writingSettingsSchema,
-} from "../../schema-parsers";
 
 export async function updateSeoProject(
   db: DB,

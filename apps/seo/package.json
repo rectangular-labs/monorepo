@@ -26,6 +26,7 @@
     "@rectangular-labs/api-user-vm": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/content": "workspace:*",
+    "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/loro-file-system": "workspace:^",
     "@rectangular-labs/result": "workspace:*",

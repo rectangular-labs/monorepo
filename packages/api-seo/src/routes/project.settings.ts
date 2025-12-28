@@ -1,4 +1,9 @@
 import { ORPCError } from "@orpc/client";
+import {
+  businessBackgroundSchema,
+  imageSettingsSchema,
+  writingSettingsSchema,
+} from "@rectangular-labs/core/schemas/project-parsers";
 import { schema } from "@rectangular-labs/db";
 import {
   deleteRemainingSeoProjectAuthors,
@@ -6,11 +11,6 @@ import {
   getSeoProjectWithWritingSettingAndAuthors,
   upsertSeoProjectAuthors,
 } from "@rectangular-labs/db/operations";
-import {
-  businessBackgroundSchema,
-  imageSettingsSchema,
-  writingSettingsSchema,
-} from "@rectangular-labs/db/parsers";
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { apiEnv } from "../env";

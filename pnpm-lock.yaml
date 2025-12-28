@@ -65,6 +65,9 @@ importers:
       '@rectangular-labs/content':
         specifier: workspace:*
         version: link:../../packages/content
+      '@rectangular-labs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@rectangular-labs/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -383,6 +386,9 @@ importers:
       '@rectangular-labs/auth':
         specifier: workspace:*
         version: link:../auth
+      '@rectangular-labs/core':
+        specifier: workspace:*
+        version: link:../core
       '@rectangular-labs/dataforseo':
         specifier: workspace:*
         version: link:../dataforseo
@@ -502,6 +508,9 @@ importers:
       '@better-auth/expo':
         specifier: 1.4.0-beta.27
         version: 1.4.0-beta.27(@better-auth/core@1.4.0-beta.25(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.18)(better-call@1.0.19)(jose@6.1.0)(kysely@0.28.5)(nanostores@1.0.1))(expo-constants@18.0.9(expo@54.0.8(@babel/core@7.28.5)(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.6)(react@19.2.0))(react@19.2.0))(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.6)(react@19.2.0)))(expo-linking@8.0.8(expo@54.0.8(@babel/core@7.28.5)(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.6)(react@19.2.0))(react@19.2.0))(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.6)(react@19.2.0))(react@19.2.0))(expo-web-browser@15.0.7(expo@54.0.8(@babel/core@7.28.5)(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.6)(react@19.2.0))(react@19.2.0))(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.6)(react@19.2.0)))
+      '@rectangular-labs/core':
+        specifier: workspace:*
+        version: link:../core
       '@rectangular-labs/emails':
         specifier: workspace:*
         version: link:../emails
@@ -619,11 +628,27 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/core:
+    dependencies:
+      arktype:
+        specifier: ^2.1.27
+        version: 2.1.27
+    devDependencies:
+      '@rectangular-labs/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/dataforseo:
     dependencies:
       '@hey-api/openapi-ts':
         specifier: ^0.88.0
         version: 0.88.0(magicast@0.3.5)(typescript@5.9.3)
+      '@rectangular-labs/core':
+        specifier: workspace:*
+        version: link:../core
       '@rectangular-labs/result':
         specifier: workspace:*
         version: link:../result
@@ -652,6 +677,9 @@ importers:
       '@neondatabase/serverless':
         specifier: ^1.0.2
         version: 1.0.2
+      '@rectangular-labs/core':
+        specifier: workspace:*
+        version: link:../core
       '@rectangular-labs/result':
         specifier: workspace:*
         version: link:../result
@@ -749,6 +777,9 @@ importers:
 
   packages/google-apis:
     dependencies:
+      '@rectangular-labs/core':
+        specifier: workspace:*
+        version: link:../core
       '@rectangular-labs/db':
         specifier: workspace:*
         version: link:../db
@@ -810,6 +841,9 @@ importers:
       '@orama/orama':
         specifier: ^3.1.16
         version: 3.1.16
+      '@rectangular-labs/core':
+        specifier: workspace:*
+        version: link:../core
       '@rectangular-labs/dataforseo':
         specifier: workspace:*
         version: link:../dataforseo

@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
+import { contentTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type { schema } from "@rectangular-labs/db";
-import { contentTypeSchema } from "@rectangular-labs/db/parsers";
 import { ok, type Result, safe } from "@rectangular-labs/result";
 import { generateObject, type JSONSchema7, jsonSchema } from "ai";
 import { type } from "arktype";

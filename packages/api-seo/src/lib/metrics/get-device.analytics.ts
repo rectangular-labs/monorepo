@@ -1,4 +1,4 @@
-import type { getSearchAnalyticsArgsSchema } from "@rectangular-labs/db/parsers";
+import type { getSearchAnalyticsArgsSchema } from "@rectangular-labs/core/schemas/gsc-property-parsers";
 import { getSearchAnalytics } from "@rectangular-labs/google-apis/google-search-console";
 import { ok } from "@rectangular-labs/result";
 

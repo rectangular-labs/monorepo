@@ -1,7 +1,7 @@
 import {
   businessBackgroundSchema,
   COUNTRY_CODE_MAP,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/project-parsers";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,

@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import { getInitials } from "@rectangular-labs/core/format/initials";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   ThemeToggle,
@@ -19,7 +20,6 @@ import {
   DropDrawerSeparator,
   DropDrawerTrigger,
 } from "@rectangular-labs/ui/components/ui/dropdrawer";
-import { getInitials } from "@rectangular-labs/ui/utils/format/initials";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";

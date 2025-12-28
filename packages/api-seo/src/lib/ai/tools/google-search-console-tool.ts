@@ -2,7 +2,7 @@ import {
   getSearchAnalyticsArgsSchema,
   NO_SEARCH_CONSOLE_ERROR_MESSAGE,
   type seoGscPropertyTypeSchema,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/gsc-property-parsers";
 import { getSearchAnalytics } from "@rectangular-labs/google-apis/google-search-console";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import type { AgentToolDefinition } from "./utils";

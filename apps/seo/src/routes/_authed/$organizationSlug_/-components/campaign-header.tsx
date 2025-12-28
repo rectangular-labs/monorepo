@@ -1,5 +1,6 @@
 "use client";
 
+import { getInitials } from "@rectangular-labs/core/format/initials";
 import {
   Avatar,
   AvatarFallback,
@@ -7,7 +8,6 @@ import {
 } from "@rectangular-labs/ui/components/ui/avatar";
 import { InlineEdit } from "@rectangular-labs/ui/components/ui/inline-edit";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
-import { getInitials } from "@rectangular-labs/ui/utils/format/initials";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

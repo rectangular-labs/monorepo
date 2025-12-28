@@ -1,7 +1,7 @@
 import {
   businessBackgroundSchema,
   COUNTRY_CODE_MAP,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/project-parsers";
 import { safe } from "@rectangular-labs/result";
 import { AutoHeight } from "@rectangular-labs/ui/animation/auto-height";
 import { X } from "@rectangular-labs/ui/components/icon";

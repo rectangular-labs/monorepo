@@ -5,8 +5,8 @@ import type {
   UnlaziedRouter,
 } from "@orpc/server";
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
+import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/core/schemas/content-campaign-message-parser";
 import type { DB, schema } from "@rectangular-labs/db";
-import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/db/parsers";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
 import type { LoroText, LoroTree } from "loro-crdt";

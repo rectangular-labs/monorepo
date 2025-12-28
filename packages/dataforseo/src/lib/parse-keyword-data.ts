@@ -1,7 +1,7 @@
 import type {
   contentKeywordSchema,
   keywordIntentSchema,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/keyword-parsers";
 import type { KeywordDataInfo } from "../types.gen";
 
 export function parseKeywordData(

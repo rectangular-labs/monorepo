@@ -1,4 +1,9 @@
 import { ORPCError, type as orpcType } from "@orpc/server";
+import { contentCampaignMessageMetadataSchema } from "@rectangular-labs/core/schemas/content-campaign-message-parser";
+import {
+  CAMPAIGN_DEFAULT_TITLE,
+  contentCampaignStatusSchema,
+} from "@rectangular-labs/core/schemas/content-campaign-parser";
 import { schema, sql } from "@rectangular-labs/db";
 import {
   createContentCampaign,
@@ -7,11 +12,6 @@ import {
   listContentCampaignMessages,
   updateContentCampaign,
 } from "@rectangular-labs/db/operations";
-import {
-  CAMPAIGN_DEFAULT_TITLE,
-  contentCampaignMessageMetadataSchema,
-  contentCampaignStatusSchema,
-} from "@rectangular-labs/db/parsers";
 import { validateUIMessages } from "ai";
 import { type } from "arktype";
 import { getWorkspaceBlobUri } from "../client";

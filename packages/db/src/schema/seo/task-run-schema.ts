@@ -1,3 +1,4 @@
+import type { taskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -12,7 +13,6 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { taskInputSchema } from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { user } from "../auth-schema";

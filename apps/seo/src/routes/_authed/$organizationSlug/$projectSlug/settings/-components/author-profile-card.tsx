@@ -1,5 +1,6 @@
 "use client";
 
+import { getInitials } from "@rectangular-labs/core/format/initials";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   Avatar,
@@ -13,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
-import { getInitials } from "@rectangular-labs/ui/utils/format/initials";
 import type { WritingSettingFormSchema } from "../-lib/writing-settings";
 
 export function AuthorProfileCard({

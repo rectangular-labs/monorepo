@@ -1,6 +1,6 @@
 import { ORPCError } from "@orpc/server";
+import type { taskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { schema } from "@rectangular-labs/db";
-import type { taskInputSchema } from "@rectangular-labs/db/parsers";
 import { err, ok, safe } from "@rectangular-labs/result";
 import { triggerTask } from "@rectangular-labs/task/client";
 import type { type } from "arktype";

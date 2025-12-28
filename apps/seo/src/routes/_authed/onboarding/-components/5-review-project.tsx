@@ -1,3 +1,4 @@
+import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
-import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";

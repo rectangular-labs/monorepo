@@ -1,12 +1,16 @@
 {
-  "name": "@rectangular-labs/google-apis",
+  "name": "@rectangular-labs/core",
   "private": true,
   "version": "0.0.1",
   "type": "module",
   "exports": {
-    "./google-search-console": {
-      "types": "./dist/src/google-search-console.d.ts",
-      "default": "./src/google-search-console.ts"
+    "./format/*": {
+      "types": "./dist/format/*.d.ts",
+      "default": "./src/format/*.ts"
+    },
+    "./schemas/*": {
+      "types": "./dist/schemas/*.d.ts",
+      "default": "./src/schemas/*.ts"
     }
   },
   "scripts": {
@@ -19,14 +23,9 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@rectangular-labs/core": "workspace:*",
-    "@rectangular-labs/db": "workspace:*",
-    "@rectangular-labs/result": "workspace:*",
-    "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.27"
   }
 }
