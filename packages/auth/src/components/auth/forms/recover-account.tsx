@@ -3,14 +3,13 @@
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { type } from "arktype";
 import { Loader2 } from "lucide-react";
@@ -43,33 +42,33 @@ export function RecoverAccountForm() {
   }
 
   return (
-    <Form {...form}>
-      <form
-        className="grid w-full gap-6"
-        onSubmit={form.handleSubmit(recovery)}
-      >
-        <FormField
+    <form className="grid w-full gap-6" onSubmit={form.handleSubmit(recovery)}>
+      <FieldGroup>
+        <Controller
           control={form.control}
           name="code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Recovery Code</FormLabel>
-              <FormControl>
-                <Input
-                  autoComplete="one-time-code"
-                  placeholder="000000"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="auth-recover-account-code">
+                Recovery Code
+              </FieldLabel>
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                autoComplete="one-time-code"
+                id="auth-recover-account-code"
+                placeholder="000000"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
-        <Button className={"w-full"} disabled={isSubmitting} type="submit">
-          {isSubmitting && <Loader2 className="animate-spin" />}
-          Recover Account
-        </Button>
-      </form>
-    </Form>
+      </FieldGroup>
+
+      <Button className={"w-full"} disabled={isSubmitting} type="submit">
+        {isSubmitting && <Loader2 className="animate-spin" />}
+        Recover Account
+      </Button>
+    </form>
   );
 }

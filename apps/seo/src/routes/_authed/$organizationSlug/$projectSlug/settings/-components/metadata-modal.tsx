@@ -12,17 +12,16 @@ import type {
   UseFieldArrayRemove,
   UseFieldArrayUpdate,
   UseFormReturn,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { type } from "arktype";
@@ -62,65 +61,71 @@ function MetadataEdit({
   }
 
   return (
-    <Form {...metadataForm}>
-      <form
-        className="space-y-4"
-        onSubmit={metadataForm.handleSubmit(handleSubmit)}
-      >
-        <FormField
+    <form
+      className="space-y-4"
+      onSubmit={metadataForm.handleSubmit(handleSubmit)}
+    >
+      <FieldGroup>
+        <Controller
           control={metadataForm.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Preset name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`metadata-modal-${index}-name`}>
+                Name
+              </FieldLabel>
+              <Input
+                placeholder="Preset name"
+                {...field}
+                aria-invalid={fieldState.invalid}
+                id={`metadata-modal-${index}-name`}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
-        <FormField
+        <Controller
           control={metadataForm.control}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Short description, facts, or guidance for when to use this preset."
-                  rows={4}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`metadata-modal-${index}-description`}>
+                Description
+              </FieldLabel>
+              <Textarea
+                placeholder="Short description, facts, or guidance for when to use this preset."
+                rows={4}
+                {...field}
+                aria-invalid={fieldState.invalid}
+                id={`metadata-modal-${index}-description`}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
-        {metadataForm.formState.errors.root && (
-          <FormMessage className="text-destructive">
-            {metadataForm.formState.errors.root.message}
-          </FormMessage>
-        )}
+      </FieldGroup>
 
-        <DialogDrawerFooter className="justify-between sm:justify-between">
-          {isUpdate && (
-            <Button
-              onClick={() => remove(index)}
-              size="sm"
-              type="button"
-              variant="destructive"
-            >
-              <Icons.Trash className="h-4 w-4" />
-              Delete
-            </Button>
-          )}
-          <Button className="ml-auto" size="sm" type="submit">
-            Save
+      {metadataForm.formState.errors.root && (
+        <FieldError errors={[metadataForm.formState.errors.root]} />
+      )}
+
+      <DialogDrawerFooter className="justify-between sm:justify-between">
+        {isUpdate && (
+          <Button
+            onClick={() => remove(index)}
+            size="sm"
+            type="button"
+            variant="destructive"
+          >
+            <Icons.Trash className="h-4 w-4" />
+            Delete
           </Button>
-        </DialogDrawerFooter>
-      </form>
-    </Form>
+        )}
+        <Button className="ml-auto" size="sm" type="submit">
+          Save
+        </Button>
+      </DialogDrawerFooter>
+    </form>
   );
 }
 

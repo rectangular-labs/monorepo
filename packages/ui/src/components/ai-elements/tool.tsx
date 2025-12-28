@@ -4,7 +4,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@radix-ui/react-collapsible";
+} from "@rectangular-labs/ui/components/ui/collapsible";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import type { ToolUIPart } from "ai";
 import {

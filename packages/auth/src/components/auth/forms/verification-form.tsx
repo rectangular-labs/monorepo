@@ -3,14 +3,13 @@
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { InputOTP } from "@rectangular-labs/ui/components/ui/input-otp";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { type } from "arktype";
@@ -240,46 +239,47 @@ export function VerificationForm({
   return (
     <div className="grid w-full">
       {needsCode && (
-        <Form {...form}>
-          <form
-            className={"grid w-full gap-6"}
-            onSubmit={form.handleSubmit(handleComplete)}
-          >
-            <FormField
+        <form
+          className={"grid w-full gap-6"}
+          onSubmit={form.handleSubmit(handleComplete)}
+        >
+          <FieldGroup>
+            <Controller
               control={form.control}
               name="code"
-              render={({ field: { value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>One-time code</FormLabel>
-                  <FormControl>
-                    <InputOTP
-                      disabled={isSubmitting || isDisabled}
-                      maxLength={6}
-                      onComplete={form.handleSubmit(handleComplete)}
-                      {...field}
-                      {...(value ? { value } : {})}
-                    >
-                      <OTPInputGroup otpSeparators={1} />
-                    </InputOTP>
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
+              render={({ field: { value, ...field }, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="auth-verification-code">
+                    One-time code
+                  </FieldLabel>
+                  <InputOTP
+                    aria-invalid={fieldState.invalid}
+                    disabled={isSubmitting || isDisabled}
+                    id="auth-verification-code"
+                    maxLength={6}
+                    onComplete={form.handleSubmit(handleComplete)}
+                    {...field}
+                    {...(value ? { value } : {})}
+                  >
+                    <OTPInputGroup otpSeparators={1} />
+                  </InputOTP>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
+          </FieldGroup>
 
-            {form.formState.errors.root && (
-              <FormMessage className="text-destructive">
-                {form.formState.errors.root.message}
-              </FormMessage>
-            )}
+          {form.formState.errors.root && (
+            <FieldError errors={[form.formState.errors.root]} />
+          )}
 
-            <Button disabled={isSubmitting || isDisabled} type="submit">
-              {isSubmitting && <Loader2 className="animate-spin" />}
-              Verify code
-            </Button>
-          </form>
-        </Form>
+          <Button disabled={isSubmitting || isDisabled} type="submit">
+            {isSubmitting && <Loader2 className="animate-spin" />}
+            Verify code
+          </Button>
+        </form>
       )}
       {isEmail && !needsCode && (
         <Button

@@ -4,14 +4,13 @@ import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { type } from "arktype";
 import { Loader2 } from "lucide-react";
@@ -137,45 +136,43 @@ export function SignInForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        className={"grid w-full gap-6"}
-        onSubmit={form.handleSubmit(signIn)}
-      >
-        <FormField
+    <form className={"grid w-full gap-6"} onSubmit={form.handleSubmit(signIn)}>
+      <FieldGroup>
+        <Controller
           control={form.control}
           name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{usernameEnabled ? "Username" : "Email"}</FormLabel>
-
-              <FormControl>
-                <Input
-                  autoComplete={
-                    usernameEnabled ? "username webauthn" : "email webauthn"
-                  }
-                  disabled={isSubmitting || shouldDisable}
-                  placeholder={
-                    usernameEnabled ? "Enter your username" : "Enter your email"
-                  }
-                  type={usernameEnabled ? "text" : "email"}
-                  {...field}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="auth-sign-in-email">
+                {usernameEnabled ? "Username" : "Email"}
+              </FieldLabel>
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                autoComplete={
+                  usernameEnabled ? "username webauthn" : "email webauthn"
+                }
+                disabled={isSubmitting || shouldDisable}
+                id="auth-sign-in-email"
+                placeholder={
+                  usernameEnabled ? "Enter your username" : "Enter your email"
+                }
+                type={usernameEnabled ? "text" : "email"}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="password"
-          render={({ field }) => (
-            <FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
               <div className="flex items-center justify-between">
-                <FormLabel>Password</FormLabel>
-
+                <FieldLabel htmlFor="auth-sign-in-password">
+                  Password
+                </FieldLabel>
                 {credentials?.enableForgotPassword && (
                   <Button
                     className="px-0"
@@ -187,55 +184,60 @@ export function SignInForm({
                   </Button>
                 )}
               </div>
-
-              <FormControl>
-                <PasswordInput
-                  autoComplete="current-password webauthn"
-                  disabled={isSubmitting || shouldDisable}
-                  enableToggle
-                  placeholder="Your password"
-                  {...field}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
+              <PasswordInput
+                {...field}
+                aria-invalid={fieldState.invalid}
+                autoComplete="current-password webauthn"
+                disabled={isSubmitting || shouldDisable}
+                id="auth-sign-in-password"
+                enableToggle
+                placeholder="Your password"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
         {rememberMeEnabled && (
-          <FormField
+          <Controller
             control={form.control}
             name="rememberMe"
-            render={({ field }) => (
-              <FormItem className="flex">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    disabled={isSubmitting || shouldDisable}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-
-                <FormLabel>Remember me</FormLabel>
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field
+                className="items-center"
+                data-invalid={fieldState.invalid}
+                orientation="horizontal"
+              >
+                <Checkbox
+                  checked={field.value}
+                  disabled={isSubmitting || shouldDisable}
+                  id="auth-sign-in-rememberMe"
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor="auth-sign-in-rememberMe">
+                  Remember me
+                </FieldLabel>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         )}
-        {form.formState.errors.root && (
-          <FormMessage className="text-destructive">
-            {form.formState.errors.root.message}
-          </FormMessage>
-        )}
-        <Button
-          className={"w-full"}
-          disabled={isSubmitting || shouldDisable}
-          type="submit"
-        >
-          {isSubmitting && <Loader2 className="animate-spin" />}
-          Sign in
-        </Button>
-      </form>
-    </Form>
+      </FieldGroup>
+
+      {form.formState.errors.root && (
+        <FieldError errors={[form.formState.errors.root]} />
+      )}
+
+      <Button
+        className={"w-full"}
+        disabled={isSubmitting || shouldDisable}
+        type="submit"
+      >
+        {isSubmitting && <Loader2 className="animate-spin" />}
+        Sign in
+      </Button>
+    </form>
   );
 }

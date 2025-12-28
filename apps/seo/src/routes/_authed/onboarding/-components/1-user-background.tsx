@@ -9,14 +9,13 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import {
   Select,
@@ -125,133 +124,146 @@ export function OnboardingUserBackground({
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <Form {...form}>
-          <form
-            className="grid gap-6"
-            onSubmit={form.handleSubmit(handleSubmit)}
-          >
-            <CardContent className="grid gap-6">
-              <FormField
-                control={form.control}
+        <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
+          <CardContent className="grid gap-6">
+            <FieldGroup>
+              <Controller
                 name="source"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Where did you first hear about us?</FormLabel>
-                    <FormControl>
-                      <Select
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="onboarding-user-background-source">
+                      Where did you first hear about us?
+                    </FieldLabel>
+                    <Select
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        className="w-full"
+                        aria-invalid={fieldState.invalid}
+                        id="onboarding-user-background-source"
                       >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sourceOptions.map((k) => (
-                            <SelectItem key={k.value} value={k.value}>
-                              {k.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
+                        <SelectValue placeholder="Source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sourceOptions.map((k) => (
+                          <SelectItem key={k.value} value={k.value}>
+                            {k.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
               {isOtherSource && (
-                <FormField
-                  control={form.control}
+                <Controller
                   name="otherSource"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Other Source</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Times Magazine"
-                          type="text"
-                        />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="onboarding-user-background-otherSource">
+                        Other Source
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="onboarding-user-background-otherSource"
+                        placeholder="Times Magazine"
+                        type="text"
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
                 />
               )}
 
-              <FormField
-                control={form.control}
+              <Controller
                 name="goal"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="onboarding-user-background-goal">
                       Where would you want Fluid Posts to help with the most?
-                    </FormLabel>
-                    <FormControl>
-                      <Select
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
+                    </FieldLabel>
+                    <Select
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        className="w-full"
+                        aria-invalid={fieldState.invalid}
+                        id="onboarding-user-background-goal"
                       >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="goals" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {goalOptions.map((k) => (
-                            <SelectItem key={k.value} value={k.value}>
-                              {k.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                        <SelectValue placeholder="goals" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {goalOptions.map((k) => (
+                          <SelectItem key={k.value} value={k.value}>
+                            {k.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
               {isOtherGoal && (
-                <FormField
-                  control={form.control}
+                <Controller
                   name="otherGoal"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Other Goal</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Finding Satoshi's private key"
-                          type="text"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="onboarding-user-background-otherGoal">
+                        Other Goal
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="onboarding-user-background-otherGoal"
+                        placeholder="Finding Satoshi's private key"
+                        type="text"
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
                 />
               )}
+            </FieldGroup>
 
-              {form.formState.errors.root && (
-                <FormMessage>{form.formState.errors.root.message}</FormMessage>
-              )}
-            </CardContent>
-            <CardFooter>
-              <div className="flex w-full justify-between">
-                <Button
-                  disabled={isPending}
-                  onClick={() => matcher.prev()}
-                  type="button"
-                  variant="ghost"
-                >
-                  Back
-                </Button>
-                <Button className={"w-fit"} isLoading={isPending} type="submit">
-                  Next
-                </Button>
-              </div>
-            </CardFooter>
-          </form>
-        </Form>
+            {form.formState.errors.root && (
+              <FieldError errors={[form.formState.errors.root]} />
+            )}
+          </CardContent>
+          <CardFooter>
+            <div className="flex w-full justify-between">
+              <Button
+                disabled={isPending}
+                onClick={() => matcher.prev()}
+                type="button"
+                variant="ghost"
+              >
+                Back
+              </Button>
+              <Button className={"w-fit"} isLoading={isPending} type="submit">
+                Next
+              </Button>
+            </div>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );

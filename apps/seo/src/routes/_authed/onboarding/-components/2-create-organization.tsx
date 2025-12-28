@@ -10,15 +10,14 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { type } from "arktype";
 import { useState } from "react";
@@ -92,50 +91,53 @@ export function OnboardingCreateOrganization() {
             Your organization will let you manage team members and projects.
           </CardDescription>
         </CardHeader>
-        <Form {...form}>
-          <form
-            className="grid gap-6"
-            onSubmit={form.handleSubmit(handleSubmit)}
-          >
-            <CardContent>
-              <FormField
-                control={form.control}
+        <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
+          <CardContent>
+            <FieldGroup>
+              <Controller
                 name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Organization Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Xerox" />
-                    </FormControl>
-                    <FormMessage>
-                      <FormDescription>
-                        You will be able to change this at anytime later on
-                      </FormDescription>
-                    </FormMessage>
-                  </FormItem>
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="onboarding-create-organization-name">
+                      Organization Name
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="onboarding-create-organization-name"
+                      placeholder="Xerox"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldDescription>
+                      You will be able to change this at anytime later on
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
+            </FieldGroup>
 
-              {form.formState.errors.root && (
-                <FormMessage>{form.formState.errors.root.message}</FormMessage>
-              )}
-            </CardContent>
-            <CardFooter>
-              <div className="flex w-full justify-between">
-                <Button
-                  onClick={() => matcher.prev()}
-                  type="button"
-                  variant="ghost"
-                >
-                  Back
-                </Button>
-                <Button className={"w-fit"} isLoading={isLoading} type="submit">
-                  Continue
-                </Button>
-              </div>
-            </CardFooter>
-          </form>
-        </Form>
+            {form.formState.errors.root && (
+              <FieldError errors={[form.formState.errors.root]} />
+            )}
+          </CardContent>
+          <CardFooter>
+            <div className="flex w-full justify-between">
+              <Button
+                onClick={() => matcher.prev()}
+                type="button"
+                variant="ghost"
+              >
+                Back
+              </Button>
+              <Button className={"w-fit"} isLoading={isLoading} type="submit">
+                Continue
+              </Button>
+            </div>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );

@@ -16,19 +16,18 @@ import {
   DialogDrawerTitle,
 } from "@rectangular-labs/ui/components/ui/dialog-drawer";
 import {
+  arktypeResolver,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  useForm,
+} from "@rectangular-labs/ui/components/ui/field";
+import {
   FileUpload,
   type IFileUpload,
 } from "@rectangular-labs/ui/components/ui/file-upload";
-import {
-  arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  useForm,
-} from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation } from "@tanstack/react-query";
@@ -228,119 +227,128 @@ export function ImageSettingModal({
         </DialogDrawerTitle>
       </DialogDrawerHeader>
 
-      <Form {...form}>
-        <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-          <FormField
+      <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+        <FieldGroup>
+          <Controller
             control={form.control}
             name="files"
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormLabel>File</FormLabel>
-                  <FormControl>
-                    <FileUpload
-                      accept="image/jpeg,image/png,image/gif,image/webp"
-                      disabled={field.disabled}
-                      files={field.value}
-                      maxSizeMB={MAX_SIZE / 1_000_000}
-                      multiple
-                      name={field.name}
-                      onChange={(event) => {
-                        field.onChange([
-                          ...field.value,
-                          ...Array.from(event.target.files ?? []).map(
-                            (file) => ({
-                              mimeType: file.type,
-                              size: file.size,
-                              name: file.name,
-                              url: URL.createObjectURL(file),
-                            }),
-                          ),
-                        ]);
-                      }}
-                      onDropFiles={(event) => {
-                        field.onChange([
-                          ...field.value,
-                          ...Array.from(event.dataTransfer.files ?? []).map(
-                            (file) => ({
-                              mimeType: file.type,
-                              size: file.size,
-                              name: file.name,
-                              url: URL.createObjectURL(file),
-                            }),
-                          ),
-                        ]);
-                      }}
-                      ref={field.ref}
-                      setFiles={(items) => {
-                        field.onChange(items);
-                      }}
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`image-setting-modal-${kind}-files`}>
+                  File
+                </FieldLabel>
+                <FileUpload
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  disabled={field.disabled}
+                  files={field.value}
+                  id={`image-setting-modal-${kind}-files`}
+                  maxSizeMB={MAX_SIZE / 1_000_000}
+                  multiple
+                  name={field.name}
+                  onChange={(event) => {
+                    field.onChange([
+                      ...field.value,
+                      ...Array.from(event.target.files ?? []).map((file) => ({
+                        mimeType: file.type,
+                        size: file.size,
+                        name: file.name,
+                        url: URL.createObjectURL(file),
+                      })),
+                    ]);
+                  }}
+                  onDropFiles={(event) => {
+                    field.onChange([
+                      ...field.value,
+                      ...Array.from(event.dataTransfer.files ?? []).map(
+                        (file) => ({
+                          mimeType: file.type,
+                          size: file.size,
+                          name: file.name,
+                          url: URL.createObjectURL(file),
+                        }),
+                      ),
+                    ]);
+                  }}
+                  ref={field.ref}
+                  setFiles={(items) => {
+                    field.onChange(items);
+                  }}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
           />
 
           {showNameField && (
-            <FormField
+            <Controller
               control={form.control}
               name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Logo name (optional)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`image-setting-modal-${kind}-name`}>
+                    Name
+                  </FieldLabel>
+                  <Input
+                    placeholder="Logo name (optional)"
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id={`image-setting-modal-${kind}-name`}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
           )}
 
-          <FormField
+          <Controller
             control={form.control}
             name="instructions"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Instructions</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="How should this image be used? Composition, style, brand rules, etc."
-                    rows={4}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={`image-setting-modal-${kind}-instructions`}
+                >
+                  Instructions
+                </FieldLabel>
+                <Textarea
+                  id={`image-setting-modal-${kind}-instructions`}
+                  placeholder="How should this image be used? Composition, style, brand rules, etc."
+                  rows={4}
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
+        </FieldGroup>
 
-          {form.formState.errors.root && (
-            <FormMessage className="text-destructive">
-              {form.formState.errors.root.message}
-            </FormMessage>
-          )}
+        {form.formState.errors.root && (
+          <FieldError errors={[form.formState.errors.root]} />
+        )}
 
-          <div className="flex justify-between gap-2">
-            {initial && (
-              <Button onClick={handleRemove} size="sm" variant="destructive">
-                Remove
-              </Button>
-            )}
-            <Button
-              className="ml-auto"
-              isLoading={isPending}
-              size="sm"
-              type="submit"
-            >
-              Save
+        <div className="flex justify-between gap-2">
+          {initial && (
+            <Button onClick={handleRemove} size="sm" variant="destructive">
+              Remove
             </Button>
-          </div>
-        </form>
-      </Form>
+          )}
+          <Button
+            className="ml-auto"
+            isLoading={isPending}
+            size="sm"
+            type="submit"
+          >
+            Save
+          </Button>
+        </div>
+      </form>
     </DialogDrawer>
   );
 }

@@ -5,14 +5,13 @@ import { AutoHeight } from "@rectangular-labs/ui/animation/auto-height";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { type } from "arktype";
@@ -78,52 +77,73 @@ export function ManageOrganizationForm({
 
   return (
     <AutoHeight contentId={`organization-form-${organization?.id}`}>
-      <Form {...form}>
-        <form
-          className={cn("grid gap-6", className)}
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <FormField
+      <form
+        className={cn("grid gap-6", className)}
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        <FieldGroup>
+          <Controller
             control={form.control}
             name="logo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Logo URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://..." type="url" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={`manage-organization-${organization?.id ?? "new"}-logo`}
+                >
+                  Logo URL
+                </FieldLabel>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  id={`manage-organization-${organization?.id ?? "new"}-logo`}
+                  placeholder="https://..."
+                  type="url"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
-          <FormField
+          <Controller
             control={form.control}
             name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Acme Inc" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={`manage-organization-${organization?.id ?? "new"}-name`}
+                >
+                  Name
+                </FieldLabel>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  id={`manage-organization-${organization?.id ?? "new"}-name`}
+                  placeholder="Acme Inc"
+                  type="text"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
-          {form.formState.errors.root && (
-            <FormMessage>{form.formState.errors.root.message}</FormMessage>
-          )}
-          <div className="flex w-full justify-between">
-            {cancelButton}
-            <Button
-              className="ml-auto"
-              isLoading={form.formState.isSubmitting || isSaving}
-              type="submit"
-            >
-              {submitText}
-            </Button>
-          </div>
-        </form>
-      </Form>
+        </FieldGroup>
+
+        {form.formState.errors.root && (
+          <FieldError errors={[form.formState.errors.root]} />
+        )}
+        <div className="flex w-full justify-between">
+          {cancelButton}
+          <Button
+            className="ml-auto"
+            isLoading={form.formState.isSubmitting || isSaving}
+            type="submit"
+          >
+            {submitText}
+          </Button>
+        </div>
+      </form>
     </AutoHeight>
   );
 }

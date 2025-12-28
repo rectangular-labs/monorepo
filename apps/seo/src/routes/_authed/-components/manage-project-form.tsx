@@ -12,17 +12,18 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
   type UseFormReturn,
   useFieldArray,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import {
   Select,
@@ -112,7 +113,6 @@ export function ManageProjectForm({
   } = useFieldArray({
     control: form.control,
     name: "competitorsWebsites",
-    keyName: "url",
   });
 
   const submitForm = async (values: ManageProjectFormValues) => {
@@ -126,92 +126,121 @@ export function ManageProjectForm({
 
   return (
     <AutoHeight contentId={`manage-project-form`}>
-      <Form {...form}>
-        <form className="grid gap-6" onSubmit={form.handleSubmit(submitForm)}>
-          <CardContent className={cn("grid gap-6 px-0", className)}>
-            <FormField
+      <form className="grid gap-6" onSubmit={form.handleSubmit(submitForm)}>
+        <CardContent className={cn("grid gap-6 px-0", className)}>
+          <FieldGroup>
+            <Controller
               control={form.control}
               name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="My First Project" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-name">
+                    Name
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-name"
+                    placeholder="My First Project"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="websiteUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="https://42.com" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-websiteUrl">
+                    Website URL
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-websiteUrl"
+                    placeholder="https://42.com"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="industry"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Industry</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="e.g., SaaS, Healthcare, Retail"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-industry">
+                    Industry
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-industry"
+                    placeholder="e.g., SaaS, Healthcare, Retail"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="serviceRegion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Service Region</FormLabel>
-                  <FormDescription>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-serviceRegion">
+                    Service Region
+                  </FieldLabel>
+                  <FieldDescription>
                     Where you serve customers. This is your overall footprint
                     (e.g., Global; EU; US; City, ST; list of countries). For the
                     primary country used for defaults like search locale, use
                     Target Country Code below.
-                  </FormDescription>
-                  <FormControl>
-                    <Input {...field} placeholder="e.g., Global, US-only, EU" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  </FieldDescription>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-serviceRegion"
+                    placeholder="e.g., Global, US-only, EU"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="targetCountryCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target Country</FormLabel>
-                  <FormDescription>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-targetCountryCode">
+                    Target Country
+                  </FieldLabel>
+                  <FieldDescription>
                     The country where most of your audience is located.
-                  </FormDescription>
+                  </FieldDescription>
                   <Select
                     defaultValue={field.value}
                     onValueChange={field.onChange}
                   >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a country" />
-                      </SelectTrigger>
-                    </FormControl>
+                    <SelectTrigger
+                      aria-invalid={fieldState.invalid}
+                      className="w-full"
+                      id="manage-project-form-targetCountryCode"
+                    >
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
                     <SelectContent>
                       {Object.keys(COUNTRY_CODE_MAP).map((code) => (
                         <SelectItem key={code} value={code}>
@@ -220,142 +249,174 @@ export function ManageProjectForm({
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="targetCity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Primary City (optional)</FormLabel>
-                  <FormDescription>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-targetCity">
+                    Primary City (optional)
+                  </FieldLabel>
+                  <FieldDescription>
                     If most of your audience is concentrated in a specific
                     city/metro. Leave blank if not applicable.
-                  </FormDescription>
-                  <FormControl>
-                    <Input {...field} placeholder="San Francisco" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  </FieldDescription>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-targetCity"
+                    placeholder="San Francisco"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="languageCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Language Code</FormLabel>
-                  <FormDescription>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-languageCode">
+                    Language Code
+                  </FieldLabel>
+                  <FieldDescription>
                     Two-letter ISO 639-1 language code for your audience.
                     Examples: en, es, de.
-                  </FormDescription>
-                  <FormControl>
-                    <Input {...field} placeholder="en" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  </FieldDescription>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-languageCode"
+                    placeholder="en"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
+          </FieldGroup>
 
-            <FormItem>
-              <FormLabel>Competitors Websites</FormLabel>
-              <FormDescription>
-                List URLs of direct competitors. Add as many as you like.
-              </FormDescription>
-              <div className="grid gap-3">
-                {competitorFields.map((item, index) => (
-                  <FormField
-                    control={form.control}
-                    key={item.url}
-                    name={`competitorsWebsites.${index}`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-start gap-2">
-                          <FormControl>
-                            <Input
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange({ url: e.target.value });
-                              }}
-                              placeholder="https://competitor.com"
-                              value={field.value.url}
-                            />
-                          </FormControl>
-                          <Button
-                            aria-label="Remove competitor website"
-                            onClick={() => remove(index)}
-                            size="icon"
-                            type="button"
-                            variant="ghost"
-                          >
-                            <X />
-                          </Button>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => append({ url: "" })}
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    Add competitor website
-                  </Button>
-                </div>
+          <FieldSet className="gap-3">
+            <FieldLegend variant="label">Competitors Websites</FieldLegend>
+            <FieldDescription>
+              List URLs of direct competitors. Add as many as you like.
+            </FieldDescription>
+            <FieldGroup className="gap-3">
+              {competitorFields.map((item, index) => (
+                <Controller
+                  control={form.control}
+                  key={item.id}
+                  name={`competitorsWebsites.${index}.url`}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      className="items-start"
+                      data-invalid={fieldState.invalid}
+                      orientation="horizontal"
+                    >
+                      <FieldLabel
+                        className="sr-only"
+                        htmlFor={`manage-project-form-competitorsWebsites-${index}`}
+                      >
+                        Competitor website {index + 1}
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        id={`manage-project-form-competitorsWebsites-${index}`}
+                        placeholder="https://competitor.com"
+                      />
+                      <Button
+                        aria-label="Remove competitor website"
+                        onClick={() => remove(index)}
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <X />
+                      </Button>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              ))}
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => append({ url: "" })}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  Add competitor website
+                </Button>
               </div>
-            </FormItem>
+            </FieldGroup>
+          </FieldSet>
 
-            <FormField
+          <FieldGroup>
+            <Controller
               control={form.control}
               name="businessOverview"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Overview</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="What does your business do? The more detail, the better."
-                      rows={5}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-businessOverview">
+                    Business Overview
+                  </FieldLabel>
+                  <Textarea
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-businessOverview"
+                    placeholder="What does your business do? The more detail, the better."
+                    rows={5}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="targetAudience"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target Audience</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Who are you serving? Like business overview, the more detail here, the better!"
-                      rows={5}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="manage-project-form-targetAudience">
+                    Target Audience
+                  </FieldLabel>
+                  <Textarea
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="manage-project-form-targetAudience"
+                    placeholder="Who are you serving? Like business overview, the more detail here, the better!"
+                    rows={5}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
+          </FieldGroup>
 
-            {form.formState.errors.root && (
-              <FormMessage>{form.formState.errors.root.message}</FormMessage>
-            )}
-          </CardContent>
-          {children && <CardFooter className="px-0">{children}</CardFooter>}
-        </form>
-      </Form>
+          {form.formState.errors.root && (
+            <FieldError errors={[form.formState.errors.root]} />
+          )}
+        </CardContent>
+        {children && <CardFooter className="px-0">{children}</CardFooter>}
+      </form>
     </AutoHeight>
   );
 }
