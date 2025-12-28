@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
+import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/core/schemas/gsc-property-parsers";
 import type { schema } from "@rectangular-labs/db";
-import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/db/parsers";
 import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { createDataforseoToolWithMetadata } from "./dataforseo-tool";

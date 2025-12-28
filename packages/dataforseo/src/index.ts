@@ -4,7 +4,7 @@ import type {
   serpPositionSchema,
   serpResultSchema,
   serpTrafficSchema,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/keyword-parsers";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import { getNextEarliestUpdate } from "./lib/get-next-earliest-update";
 import { parseKeywordData } from "./lib/parse-keyword-data";

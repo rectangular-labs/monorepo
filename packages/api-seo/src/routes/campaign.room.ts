@@ -1,6 +1,6 @@
 import { ORPCError, type } from "@orpc/server";
+import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/core/schemas/content-campaign-parser";
 import { uuidv7 } from "@rectangular-labs/db";
-import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/db/parsers";
 import { hasToolCall, streamText } from "ai";
 import { CrdtType } from "loro-protocol";
 import { getWorkspaceBlobUri } from "../client";

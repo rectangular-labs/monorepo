@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import {
   understandSiteTaskInputSchema,
   understandSiteTaskOutputSchema,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/task-parsers";
 import { schemaTask } from "@trigger.dev/sdk";
 import { generateText } from "ai";
 import { llmParseJson } from "../lib/ai-tools/llm-parse-json.js";

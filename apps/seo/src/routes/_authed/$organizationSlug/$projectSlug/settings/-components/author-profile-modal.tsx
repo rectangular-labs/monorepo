@@ -1,6 +1,7 @@
 "use client";
 
-import { authorSettingsSchema } from "@rectangular-labs/db/parsers";
+import { getInitials } from "@rectangular-labs/core/format/initials";
+import { authorSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   Avatar,
@@ -32,7 +33,6 @@ import {
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
-import { getInitials } from "@rectangular-labs/ui/utils/format/initials";
 import { useRef } from "react";
 import type { WritingSettingFormSchema } from "../-lib/writing-settings";
 

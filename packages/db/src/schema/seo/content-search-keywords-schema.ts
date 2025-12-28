@@ -1,3 +1,4 @@
+import type { serpPositionSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -6,7 +7,6 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, jsonb, primaryKey, text, uuid } from "drizzle-orm/pg-core";
-import type { serpPositionSchema } from "../../schema-parsers";
 import { timestamps } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { seoContent } from "./content-schema";

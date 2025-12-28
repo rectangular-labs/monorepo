@@ -12,10 +12,6 @@
       "types": "./dist/env.d.ts",
       "default": "./src/env.ts"
     },
-    "./parsers": {
-      "types": "./dist/schema-parsers/index.d.ts",
-      "default": "./src/schema-parsers/index.ts"
-    },
     "./operations": {
       "types": "./dist/operations/index.d.ts",
       "default": "./src/operations/index.ts"
@@ -41,6 +37,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
+    "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.112",

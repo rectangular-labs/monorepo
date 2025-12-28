@@ -1,3 +1,8 @@
+import {
+  CAMPAIGN_DEFAULT_STATUS,
+  CAMPAIGN_DEFAULT_TITLE,
+  type contentCampaignStatusSchema,
+} from "@rectangular-labs/core/schemas/content-campaign-parser";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -6,11 +11,6 @@ import {
 } from "drizzle-arktype";
 import { relations, sql } from "drizzle-orm";
 import { index, text, uuid } from "drizzle-orm/pg-core";
-import {
-  CAMPAIGN_DEFAULT_STATUS,
-  CAMPAIGN_DEFAULT_TITLE,
-  type contentCampaignStatusSchema,
-} from "../../schema-parsers/content-campaign-parser";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";

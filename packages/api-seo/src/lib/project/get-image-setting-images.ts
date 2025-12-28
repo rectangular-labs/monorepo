@@ -1,4 +1,4 @@
-import type { imageSettingsSchema } from "@rectangular-labs/db/parsers";
+import type { imageSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import { ok, safe } from "@rectangular-labs/result";
 import { apiEnv } from "../../env";
 import { createS3Client } from "../bucket";

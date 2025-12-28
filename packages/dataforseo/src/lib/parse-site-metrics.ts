@@ -1,4 +1,4 @@
-import type { serpTrafficSchema } from "@rectangular-labs/db/parsers";
+import type { serpTrafficSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import type { DataforseoLabsMetricsInfo } from "../types.gen";
 
 export function parseSiteMetrics(

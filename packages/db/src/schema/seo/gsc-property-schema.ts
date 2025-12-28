@@ -1,3 +1,7 @@
+import type {
+  seoGscPermissionLevelSchema,
+  seoGscPropertyTypeSchema,
+} from "@rectangular-labs/core/schemas/gsc-property-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -6,10 +10,6 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, text, unique, uuid } from "drizzle-orm/pg-core";
-import type {
-  seoGscPermissionLevelSchema,
-  seoGscPropertyTypeSchema,
-} from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { account } from "../auth-schema";

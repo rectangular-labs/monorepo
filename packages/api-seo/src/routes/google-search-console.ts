@@ -1,13 +1,13 @@
 import { ORPCError } from "@orpc/server";
 import {
+  seoGscPermissionLevelSchema,
+  seoGscPropertyTypeSchema,
+} from "@rectangular-labs/core/schemas/gsc-property-parsers";
+import {
   connectGscPropertyToProject,
   disconnectGscPropertyFromProject,
   upsertGscProperty,
 } from "@rectangular-labs/db/operations";
-import {
-  seoGscPermissionLevelSchema,
-  seoGscPropertyTypeSchema,
-} from "@rectangular-labs/db/parsers";
 import {
   type GscProperty,
   listProperties as listGscProperties,

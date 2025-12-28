@@ -1,3 +1,8 @@
+import type {
+  backlinkInfoSchema,
+  keywordIntentSchema,
+  serpResultSchema,
+} from "@rectangular-labs/core/schemas/keyword-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -13,11 +18,6 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import type {
-  backlinkInfoSchema,
-  keywordIntentSchema,
-  serpResultSchema,
-} from "../../schema-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { seoContentSearchKeyword } from "./content-search-keywords-schema";

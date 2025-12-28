@@ -27,6 +27,7 @@ type CarouselContextProps = {
   scrollNext: () => void;
   canScrollPrev: boolean;
   canScrollNext: boolean;
+  slidesInView: number[];
 } & CarouselProps;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
@@ -59,6 +60,7 @@ function Carousel({
   );
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
+  const [slidesInView, setSlidesInView] = React.useState<number[]>([]);
 
   const onSelect = React.useCallback((api: CarouselApi) => {
     if (!api) return;
@@ -103,6 +105,27 @@ function Carousel({
     };
   }, [api, onSelect]);
 
+  const updateSlidesInView = React.useCallback((emblaApi: CarouselApi) => {
+    setSlidesInView((slidesInView) => {
+      if (slidesInView.length === emblaApi?.slideNodes().length) {
+        emblaApi.off("slidesInView", updateSlidesInView);
+      }
+      const inView =
+        emblaApi
+          ?.slidesInView()
+          .filter((index) => !slidesInView.includes(index)) || [];
+      return slidesInView.concat(inView);
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    updateSlidesInView(api);
+    api.on("slidesInView", updateSlidesInView);
+    api.on("reInit", updateSlidesInView);
+  }, [api, updateSlidesInView]);
+
   return (
     <CarouselContext.Provider
       value={{
@@ -115,6 +138,7 @@ function Carousel({
         scrollNext,
         canScrollPrev,
         canScrollNext,
+        slidesInView,
       }}
     >
       {/** biome-ignore lint/a11y/useSemanticElements: from shadCN */}

@@ -1,4 +1,4 @@
-import type { businessBackgroundSchema } from "@rectangular-labs/db/parsers";
+import type { businessBackgroundSchema } from "@rectangular-labs/core/schemas/project-parsers";
 
 export function formatBusinessBackground(
   background: typeof businessBackgroundSchema.infer | null,

@@ -1,9 +1,9 @@
-import { err, ok, safe } from "@rectangular-labs/result";
-import { and, type DB, eq, schema } from "../../client";
 import {
   CAMPAIGN_DEFAULT_STATUS,
   CAMPAIGN_DEFAULT_TITLE,
-} from "../../schema-parsers/content-campaign-parser";
+} from "@rectangular-labs/core/schemas/content-campaign-parser";
+import { err, ok, safe } from "@rectangular-labs/result";
+import { and, type DB, eq, schema } from "../../client";
 
 export async function createContentCampaign(
   db: DB,

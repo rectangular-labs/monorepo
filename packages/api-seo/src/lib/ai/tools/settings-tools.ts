@@ -1,13 +1,13 @@
 import { openai } from "@ai-sdk/openai";
 import {
-  getSeoProjectByIdentifierAndOrgId,
-  updateSeoProject,
-} from "@rectangular-labs/db/operations";
-import {
   businessBackgroundSchema,
   imageSettingsSchema,
   writingSettingsSchema,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/project-parsers";
+import {
+  getSeoProjectByIdentifierAndOrgId,
+  updateSeoProject,
+} from "@rectangular-labs/db/operations";
 import { generateObject, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { getWebsocketContext } from "../../../context";

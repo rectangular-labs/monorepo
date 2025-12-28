@@ -1,4 +1,7 @@
-import { type searchItemSchema, serpTypes } from "@rectangular-labs/db/parsers";
+import {
+  type searchItemSchema,
+  serpTypes,
+} from "@rectangular-labs/core/schemas/keyword-parsers";
 import { type } from "arktype";
 import type { SerpGoogleOrganicLiveAdvancedResultInfo } from "../types.gen";
 

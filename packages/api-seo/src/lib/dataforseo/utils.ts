@@ -1,8 +1,8 @@
-import { client } from "@rectangular-labs/dataforseo/client";
 import {
   type businessBackgroundSchema,
   COUNTRY_CODE_MAP,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/project-parsers";
+import { client } from "@rectangular-labs/dataforseo/client";
 import { apiEnv } from "../../env";
 
 export function getLocationAndLanguage(project: {

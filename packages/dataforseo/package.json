@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@hey-api/openapi-ts": "^0.88.0",
+    "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.27"

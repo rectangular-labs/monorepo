@@ -1,5 +1,6 @@
 "use client";
 
+import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import { AutoHeight } from "@rectangular-labs/ui/animation/auto-height";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -14,7 +15,6 @@ import {
 } from "@rectangular-labs/ui/components/ui/form";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { cn } from "@rectangular-labs/ui/utils/cn";
-import { toSlug } from "@rectangular-labs/ui/utils/format/to-slug";
 import { type } from "arktype";
 import type { Organization } from "better-auth/plugins";
 import { useEffect } from "react";

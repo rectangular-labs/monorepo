@@ -3,7 +3,7 @@ import { ORPCError } from "@orpc/server";
 import {
   taskInputSchema,
   taskOutputSchema,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/task-parsers";
 import { getTask } from "@rectangular-labs/task/client";
 import { type } from "arktype";
 import { protectedBase, withOrganizationIdBase } from "../context";

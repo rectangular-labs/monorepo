@@ -1,7 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
+import { COUNTRY_CODE_MAP } from "@rectangular-labs/core/schemas/project-parsers";
 import { fetchSerp } from "@rectangular-labs/dataforseo";
-import { COUNTRY_CODE_MAP } from "@rectangular-labs/db/parsers";
 import {
   generateObject,
   generateText,

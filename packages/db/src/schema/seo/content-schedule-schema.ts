@@ -1,3 +1,4 @@
+import type { contentScheduleStatusSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -6,7 +7,6 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import { index, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import type { contentScheduleStatusSchema } from "../../schema-parsers/content-parsers";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";

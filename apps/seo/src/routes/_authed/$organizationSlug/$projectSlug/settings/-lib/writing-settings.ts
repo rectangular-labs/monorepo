@@ -1,7 +1,7 @@
 import {
   authorSettingsSchema,
   writingSettingsSchema,
-} from "@rectangular-labs/db/parsers";
+} from "@rectangular-labs/core/schemas/project-parsers";
 import { type } from "arktype";
 
 export const WritingSettingFormSchema = writingSettingsSchema.merge(
