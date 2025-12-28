@@ -1,6 +1,6 @@
 "use client";
 
-import { useControllableState } from "radix-ui";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import {
   Dialog,

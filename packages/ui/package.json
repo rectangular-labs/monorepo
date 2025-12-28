@@ -41,6 +41,7 @@
     "@headless-tree/core": "^1.5.1",
     "@headless-tree/react": "^1.5.1",
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-use-controllable-state": "^1.2.2",
     "ai": "^5.0.112",
     "arktype": "^2.1.27",
     "class-variance-authority": "^0.7.1",
