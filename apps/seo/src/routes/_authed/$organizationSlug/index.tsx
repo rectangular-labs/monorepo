@@ -57,7 +57,7 @@ function RouteComponent() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 p-6">
+    <main className="mx-auto w-full max-w-7xl space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -127,7 +127,7 @@ function RouteComponent() {
           </Button>
         </div>
       )}
-    </div>
+    </main>
   );
 }
 
