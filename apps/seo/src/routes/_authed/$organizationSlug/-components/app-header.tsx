@@ -2,27 +2,19 @@ import { OrganizationSwitcher } from "@rectangular-labs/auth/components/organiza
 import type { Organization } from "@rectangular-labs/auth/server";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { BreadcrumbSeparator } from "@rectangular-labs/ui/components/ui/breadcrumb";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
 import { authClient } from "~/lib/auth";
-import { useBetaUi } from "../../-components/beta-ui-provider";
-import { NavLink } from "../../-components/nav-link";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserDropdown } from "./user-dropdown";
 
 export function AppHeader() {
   const navigate = useNavigate();
   const matcher = useMatchRoute();
-  const betaUi = useBetaUi();
   const projectParams = matcher({
     to: "/$organizationSlug/$projectSlug",
-    fuzzy: true,
-  });
-  const betaParams = matcher({
-    to: "/$organizationSlug/$projectSlug/beta",
     fuzzy: true,
   });
 
@@ -94,123 +86,69 @@ export function AppHeader() {
         <Icons.Logo className="size-6" />
       </Link>
       <nav className="flex flex-1 items-center justify-between">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          <ol className="flex min-w-0 items-center gap-3">
-            <BreadcrumbSeparator className="hidden md:block" />
-            {activeOrganization && organizations && (
+        <ol className="flex min-w-0 flex-1 items-center gap-3">
+          <BreadcrumbSeparator className="hidden md:block" />
+          {activeOrganization && organizations && (
+            <li>
+              <OrganizationSwitcher
+                activeOrganizationId={activeOrganization.id}
+                anchorComponent={Link}
+                createHref={(orgSlug) => `/${orgSlug}`}
+                isCreatingOrganization={isCreatingOrganization}
+                isLoadingOrganizations={isLoadingOrganizations}
+                onCreateOrganization={onCreateOrganization}
+                onSelect={async (orgSlug) => {
+                  void navigate({
+                    to: "/$organizationSlug",
+                    params: {
+                      organizationSlug: orgSlug,
+                    },
+                  });
+                  await refetchActiveOrganization();
+                }}
+                organizations={organizations}
+                showCreateButton
+              />
+            </li>
+          )}
+          {projects && activeProject && (
+            <>
+              <BreadcrumbSeparator />
               <li>
-                <OrganizationSwitcher
-                  activeOrganizationId={activeOrganization.id}
+                <ProjectSwitcher
+                  activeProjectId={activeProject?.id}
                   anchorComponent={Link}
-                  createHref={(orgSlug) => `/${orgSlug}`}
-                  isCreatingOrganization={isCreatingOrganization}
-                  isLoadingOrganizations={isLoadingOrganizations}
-                  onCreateOrganization={onCreateOrganization}
-                  onSelect={async (orgSlug) => {
+                  createHref={(projectSlug) =>
+                    `/${activeOrganization?.slug}/${projectSlug}`
+                  }
+                  isLoadingProjects={isLoadingProjects}
+                  onCreateProject={() => {
                     void navigate({
-                      to: "/$organizationSlug",
-                      params: {
-                        organizationSlug: orgSlug,
+                      to: "/onboarding",
+                      search: {
+                        type: "new-project",
                       },
                     });
-                    await refetchActiveOrganization();
                   }}
-                  organizations={organizations}
-                  showCreateButton
+                  onSelect={(projectSlug) => {
+                    if (!activeOrganization?.slug) return;
+                    void navigate({
+                      to: "/$organizationSlug/$projectSlug",
+                      params: {
+                        organizationSlug: activeOrganization.slug,
+                        projectSlug: projectSlug,
+                      },
+                    });
+                  }}
+                  projects={projects?.pages.flatMap((page) => page.data) ?? []}
+                  showCreateButton={true}
                 />
               </li>
-            )}
-            {projects && activeProject && (
-              <>
-                <BreadcrumbSeparator />
-                <li>
-                  <ProjectSwitcher
-                    activeProjectId={activeProject?.id}
-                    anchorComponent={Link}
-                    createHref={(projectSlug) =>
-                      `/${activeOrganization?.slug}/${projectSlug}`
-                    }
-                    isLoadingProjects={isLoadingProjects}
-                    onCreateProject={() => {
-                      void navigate({
-                        to: "/onboarding",
-                        search: {
-                          type: "new-project",
-                        },
-                      });
-                    }}
-                    onSelect={(projectSlug) => {
-                      if (!activeOrganization?.slug) return;
-                      void navigate({
-                        to: "/$organizationSlug/$projectSlug",
-                        params: {
-                          organizationSlug: activeOrganization.slug,
-                          projectSlug: projectSlug,
-                        },
-                      });
-                    }}
-                    projects={
-                      projects?.pages.flatMap((page) => page.data) ?? []
-                    }
-                    showCreateButton={true}
-                  />
-                </li>
-              </>
-            )}
-          </ol>
-
-          {betaUi.isBetaRoute && betaParams && (
-            <ul className="ml-6 hidden items-center gap-6 text-muted-foreground text-sm md:flex">
-              <NavLink
-                activeOptions={{ exact: false }}
-                params={{
-                  organizationSlug: betaParams.organizationSlug,
-                  projectSlug: betaParams.projectSlug,
-                }}
-                to="/$organizationSlug/$projectSlug/beta/insights"
-              >
-                Insights
-              </NavLink>
-              <NavLink
-                params={{
-                  organizationSlug: betaParams.organizationSlug,
-                  projectSlug: betaParams.projectSlug,
-                }}
-                to="/$organizationSlug/$projectSlug/beta/clusters"
-              >
-                Clusters
-              </NavLink>
-              <NavLink
-                params={{
-                  organizationSlug: betaParams.organizationSlug,
-                  projectSlug: betaParams.projectSlug,
-                }}
-                to="/$organizationSlug/$projectSlug/beta/settings"
-              >
-                Project settings
-              </NavLink>
-            </ul>
+            </>
           )}
-        </div>
+        </ol>
 
         <div className="flex items-center gap-2">
-          {betaUi.isBetaRoute && projectParams && (
-            <Button
-              aria-label={
-                betaUi.chatOpen ? "Close chat panel" : "Open chat panel"
-              }
-              className="h-8 w-8"
-              onClick={betaUi.toggleChat}
-              size="icon"
-              variant="ghost"
-            >
-              {betaUi.chatOpen ? (
-                <Icons.PanelLeftClose className="size-4 -scale-x-100" />
-              ) : (
-                <Icons.PanelLeft className="size-4 -scale-x-100" />
-              )}
-            </Button>
-          )}
           {activeOrganization && <UserDropdown user={session?.user} />}
         </div>
       </nav>
