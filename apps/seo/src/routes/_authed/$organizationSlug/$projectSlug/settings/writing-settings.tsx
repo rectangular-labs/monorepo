@@ -10,13 +10,13 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
+  Controller,
+  Field,
+  FieldError,
+  FieldLabel,
   useFieldArray,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import {
@@ -273,7 +273,7 @@ function WritingSettingsPage() {
   }
 
   return (
-    <Form {...form}>
+    <>
       <form
         className="relative w-full space-y-6"
         onSubmit={form.handleSubmit(handleSave)}
@@ -298,19 +298,28 @@ function WritingSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <FormField
+              <Controller
                 control={form.control}
                 name="brandVoice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Write in third person, use active voice, and keep it concise."
-                        rows={6}
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      className="sr-only"
+                      htmlFor="writing-settings-brandVoice"
+                    >
+                      Brand voice
+                    </FieldLabel>
+                    <Textarea
+                      id="writing-settings-brandVoice"
+                      placeholder="Write in third person, use active voice, and keep it concise."
+                      rows={6}
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
             </CardContent>
@@ -325,19 +334,28 @@ function WritingSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <FormField
+              <Controller
                 control={form.control}
                 name="customInstructions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Format all content with clear headers, use bold for key points, and include a call to action at the end."
-                        rows={6}
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      className="sr-only"
+                      htmlFor="writing-settings-customInstructions"
+                    >
+                      Custom instructions
+                    </FieldLabel>
+                    <Textarea
+                      id="writing-settings-customInstructions"
+                      placeholder="Format all content with clear headers, use bold for key points, and include a call to action at the end."
+                      rows={6}
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
             </CardContent>
@@ -456,6 +474,6 @@ function WritingSettingsPage() {
         setOpen={setIsMetadataModalOpen}
         updateMetadata={updateMetadata}
       />
-    </Form>
+    </>
   );
 }

@@ -1,6 +1,6 @@
-import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
+import { Slot as SlotPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "../../utils/cn";
 
@@ -52,7 +52,7 @@ function Button({
   children,
   ...props
 }: ButtonProps) {
-  const Comp = asChild ? Slot : "button";
+  const Comp = asChild ? SlotPrimitive.Slot : "button";
 
   const finalChildren = isLoading ? (
     <div className="flex w-full items-center justify-center gap-2">

@@ -1,7 +1,7 @@
 "use client";
 
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import { Avatar as AvatarPrimitive } from "radix-ui";
 import type * as React from "react";
 
 function Avatar({

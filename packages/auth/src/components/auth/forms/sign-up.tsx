@@ -4,14 +4,13 @@ import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
@@ -175,111 +174,118 @@ export function SignUpForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        className={"grid w-full gap-6"}
-        onSubmit={form.handleSubmit(signUp)}
-      >
+    <form className={"grid w-full gap-6"} onSubmit={form.handleSubmit(signUp)}>
+      <FieldGroup>
         {Object.keys(additionalFields).includes("name") && (
-          <FormField
+          <Controller
             control={form.control}
             name={"name" as keyof typeof baseSchema.infer}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input
-                    disabled={isSubmitting || shouldDisable}
-                    placeholder="Your name"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="auth-sign-up-name">Name</FieldLabel>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  disabled={isSubmitting || shouldDisable}
+                  id="auth-sign-up-name"
+                  placeholder="Your name"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         )}
 
         {usernameEnabled && (
-          <FormField
+          <Controller
             control={form.control}
             name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input
-                    autoComplete="username"
-                    disabled={isSubmitting || shouldDisable}
-                    placeholder="Choose a username"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="auth-sign-up-username">
+                  Username
+                </FieldLabel>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="username"
+                  disabled={isSubmitting || shouldDisable}
+                  id="auth-sign-up-username"
+                  placeholder="Choose a username"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         )}
 
-        <FormField
+        <Controller
           control={form.control}
           name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  autoComplete="email"
-                  disabled={isSubmitting || shouldDisable}
-                  placeholder="you@example.com"
-                  type="email"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="auth-sign-up-email">Email</FieldLabel>
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                autoComplete="email"
+                disabled={isSubmitting || shouldDisable}
+                id="auth-sign-up-email"
+                placeholder="you@example.com"
+                type="email"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <PasswordInput
-                  autoComplete="new-password"
-                  disabled={isSubmitting || shouldDisable}
-                  enableToggle
-                  placeholder="Password"
-                  type="password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="auth-sign-up-password">Password</FieldLabel>
+              <PasswordInput
+                {...field}
+                aria-invalid={fieldState.invalid}
+                autoComplete="new-password"
+                disabled={isSubmitting || shouldDisable}
+                enableToggle
+                id="auth-sign-up-password"
+                placeholder="Password"
+                type="password"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
         {credentials?.enableConfirmPassword && (
-          <FormField
+          <Controller
             control={form.control}
             name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm password</FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    autoComplete="new-password"
-                    disabled={isSubmitting || shouldDisable}
-                    enableToggle
-                    placeholder="Confirm Password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="auth-sign-up-confirmPassword">
+                  Confirm password
+                </FieldLabel>
+                <PasswordInput
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="new-password"
+                  disabled={isSubmitting || shouldDisable}
+                  enableToggle
+                  id="auth-sign-up-confirmPassword"
+                  placeholder="Confirm Password"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         )}
@@ -297,76 +303,84 @@ export function SignUpForm({
 
             if (cfg.type === "boolean") {
               return (
-                <FormField
+                <Controller
                   control={form.control}
                   key={castKey}
                   name={castKey}
-                  render={({ field: formField }) => {
-                    console.log("formField.value", formField.value);
-                    return (
-                      <FormItem className="flex">
-                        <FormControl>
-                          <Checkbox
-                            checked={Boolean(formField.value)}
-                            disabled={isSubmitting || shouldDisable}
-                            onCheckedChange={formField.onChange}
-                          />
-                        </FormControl>
-
-                        <FormLabel>{cfg.label ?? castKey}</FormLabel>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field: formField, fieldState }) => (
+                    <Field
+                      className="items-center"
+                      data-invalid={fieldState.invalid}
+                      orientation="horizontal"
+                    >
+                      <Checkbox
+                        checked={Boolean(formField.value)}
+                        disabled={isSubmitting || shouldDisable}
+                        id={`auth-sign-up-${String(castKey)}`}
+                        onCheckedChange={formField.onChange}
+                      />
+                      <FieldLabel htmlFor={`auth-sign-up-${String(castKey)}`}>
+                        {cfg.label ?? castKey}
+                      </FieldLabel>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
                 />
               );
             }
+
             return (
-              <FormField
+              <Controller
                 control={form.control}
                 key={castKey}
                 name={castKey}
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{cfg.label ?? castKey}</FormLabel>
-                    <FormControl>
-                      {cfg.multiline ? (
-                        <Textarea
-                          disabled={isSubmitting || shouldDisable}
-                          placeholder={cfg.placeholder}
-                          {...formField}
-                        />
-                      ) : (
-                        <Input
-                          disabled={isSubmitting || shouldDisable}
-                          placeholder={cfg.placeholder}
-                          type={cfg.type === "number" ? "number" : "text"}
-                          {...form.register(castKey)}
-                        />
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                render={({ field: formField, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={`auth-sign-up-${String(castKey)}`}>
+                      {cfg.label ?? castKey}
+                    </FieldLabel>
+                    {cfg.multiline ? (
+                      <Textarea
+                        {...formField}
+                        aria-invalid={fieldState.invalid}
+                        disabled={isSubmitting || shouldDisable}
+                        id={`auth-sign-up-${String(castKey)}`}
+                        placeholder={cfg.placeholder}
+                      />
+                    ) : (
+                      <Input
+                        {...formField}
+                        aria-invalid={fieldState.invalid}
+                        disabled={isSubmitting || shouldDisable}
+                        id={`auth-sign-up-${String(castKey)}`}
+                        placeholder={cfg.placeholder}
+                        type={cfg.type === "number" ? "number" : "text"}
+                      />
+                    )}
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
             );
           })}
+      </FieldGroup>
 
-        {form.formState.errors.root && (
-          <FormMessage className="text-destructive">
-            {form.formState.errors.root.message}
-          </FormMessage>
-        )}
+      {form.formState.errors.root && (
+        <FieldError errors={[form.formState.errors.root]} />
+      )}
 
-        <Button
-          className={cn("w-full")}
-          disabled={isSubmitting || shouldDisable}
-          type="submit"
-        >
-          {isSubmitting && <Loader2 className="animate-spin" />}
-          Sign Up
-        </Button>
-      </form>
-    </Form>
+      <Button
+        className={cn("w-full")}
+        disabled={isSubmitting || shouldDisable}
+        type="submit"
+      >
+        {isSubmitting && <Loader2 className="animate-spin" />}
+        Sign Up
+      </Button>
+    </form>
   );
 }

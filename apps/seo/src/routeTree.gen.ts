@@ -25,31 +25,14 @@ import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog
 import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/route'
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
 import { Route as AuthedOrganizationSlugProjectSlugCalendarRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/calendar'
-import { Route as AuthedOrganizationSlugProjectSlugBetaRouteRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/route'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/route'
-import { Route as AuthedOrganizationSlugProjectSlugBetaIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/index'
 import { Route as AuthedOrganizationSlugProjectSlugCampaignIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/campaign/index'
 import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsImageSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/image-settings'
-import { Route as AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/insights/route'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/route'
 import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId.index'
-import { Route as AuthedOrganizationSlugProjectSlugBetaSettingsIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/settings/index'
-import { Route as AuthedOrganizationSlugProjectSlugBetaInsightsIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/insights/index'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/index'
 import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId.review'
-import { Route as AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/insights/site-performance'
-import { Route as AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/insights/contextual-performance'
-import { Route as AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/insights/cluster-performance'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/site-recommendations'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersScheduleRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/schedule'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersReviewsRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/reviews'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersClustersRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/clusters'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/review.$reviewId'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/cluster.$clusterId'
-import { Route as AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/beta/clusters/article.$articleId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -134,23 +117,11 @@ const AuthedOrganizationSlugProjectSlugCalendarRoute =
     path: '/calendar',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugBetaRouteRoute =
-  AuthedOrganizationSlugProjectSlugBetaRouteRouteImport.update({
-    id: '/$organizationSlug_/$projectSlug/beta',
-    path: '/$organizationSlug/$projectSlug/beta',
-    getParentRoute: () => AuthedRouteRoute,
-  } as any)
 const AuthedOrganizationSlugProjectSlugSettingsRouteRoute =
   AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport.update({
     id: '/settings',
     path: '/settings',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaIndexRoute =
-  AuthedOrganizationSlugProjectSlugBetaIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugBetaRouteRoute,
   } as any)
 const AuthedOrganizationSlugProjectSlugSettingsIndexRoute =
   AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport.update({
@@ -182,44 +153,12 @@ const AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute =
     path: '/image-settings',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugSettingsRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute =
-  AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteImport.update({
-    id: '/insights',
-    path: '/insights',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugBetaRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteImport.update({
-    id: '/clusters',
-    path: '/clusters',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugBetaRouteRoute,
-  } as any)
 const AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute =
   AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () =>
       AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute =
-  AuthedOrganizationSlugProjectSlugBetaSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugBetaRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute =
-  AuthedOrganizationSlugProjectSlugBetaInsightsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
   } as any)
 const AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute =
   AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport.update({
@@ -228,90 +167,6 @@ const AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute =
     getParentRoute: () =>
       AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute =
-  AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRouteImport.update(
-    {
-      id: '/site-performance',
-      path: '/site-performance',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute,
-    } as any,
-  )
-const AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute =
-  AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRouteImport.update(
-    {
-      id: '/contextual-performance',
-      path: '/contextual-performance',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute,
-    } as any,
-  )
-const AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute =
-  AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRouteImport.update(
-    {
-      id: '/cluster-performance',
-      path: '/cluster-performance',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute,
-    } as any,
-  )
-const AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRouteImport.update(
-    {
-      id: '/site-recommendations',
-      path: '/site-recommendations',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
-    } as any,
-  )
-const AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersScheduleRouteImport.update({
-    id: '/schedule',
-    path: '/schedule',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersReviewsRouteImport.update({
-    id: '/reviews',
-    path: '/reviews',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersClustersRouteImport.update({
-    id: '/clusters',
-    path: '/clusters',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRouteImport.update(
-    {
-      id: '/review/$reviewId',
-      path: '/review/$reviewId',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
-    } as any,
-  )
-const AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRouteImport.update(
-    {
-      id: '/cluster/$clusterId',
-      path: '/cluster/$clusterId',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
-    } as any,
-  )
-const AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute =
-  AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRouteImport.update(
-    {
-      id: '/article/$articleId',
-      path: '/article/$articleId',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute,
-    } as any,
-  )
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -327,32 +182,15 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog/': typeof MarketingBlogIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
-  '/$organizationSlug/$projectSlug/beta': typeof AuthedOrganizationSlugProjectSlugBetaRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/$organizationSlug/$projectSlug/beta/clusters': typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteWithChildren
-  '/$organizationSlug/$projectSlug/beta/insights': typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
   '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
   '/$organizationSlug/$projectSlug/campaign': typeof AuthedOrganizationSlugProjectSlugCampaignIndexRoute
   '/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
-  '/$organizationSlug/$projectSlug/beta/': typeof AuthedOrganizationSlugProjectSlugBetaIndexRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/clusters': typeof AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/reviews': typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/schedule': typeof AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/site-recommendations': typeof AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute
-  '/$organizationSlug/$projectSlug/beta/insights/cluster-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute
-  '/$organizationSlug/$projectSlug/beta/insights/contextual-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute
-  '/$organizationSlug/$projectSlug/beta/insights/site-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute
   '/$organizationSlug/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/': typeof AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute
-  '/$organizationSlug/$projectSlug/beta/insights/': typeof AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute
-  '/$organizationSlug/$projectSlug/beta/settings': typeof AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute
   '/$organizationSlug/$projectSlug/campaign/$campaignId/': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/article/$articleId': typeof AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/cluster/$clusterId': typeof AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/review/$reviewId': typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -370,22 +208,8 @@ export interface FileRoutesByTo {
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
   '/$organizationSlug/$projectSlug/campaign': typeof AuthedOrganizationSlugProjectSlugCampaignIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
-  '/$organizationSlug/$projectSlug/beta': typeof AuthedOrganizationSlugProjectSlugBetaIndexRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/clusters': typeof AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/reviews': typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/schedule': typeof AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/site-recommendations': typeof AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute
-  '/$organizationSlug/$projectSlug/beta/insights/cluster-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute
-  '/$organizationSlug/$projectSlug/beta/insights/contextual-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute
-  '/$organizationSlug/$projectSlug/beta/insights/site-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute
   '/$organizationSlug/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
-  '/$organizationSlug/$projectSlug/beta/clusters': typeof AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute
-  '/$organizationSlug/$projectSlug/beta/insights': typeof AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute
-  '/$organizationSlug/$projectSlug/beta/settings': typeof AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute
   '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/article/$articleId': typeof AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/cluster/$clusterId': typeof AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute
-  '/$organizationSlug/$projectSlug/beta/clusters/review/$reviewId': typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -404,32 +228,15 @@ export interface FileRoutesById {
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
   '/_marketing/blog/': typeof MarketingBlogIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
-  '/_authed/$organizationSlug_/$projectSlug/beta': typeof AuthedOrganizationSlugProjectSlugBetaRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/calendar': typeof AuthedOrganizationSlugProjectSlugCalendarRoute
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters': typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteWithChildren
-  '/_authed/$organizationSlug_/$projectSlug/beta/insights': typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
   '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/campaign/': typeof AuthedOrganizationSlugProjectSlugCampaignIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/': typeof AuthedOrganizationSlugProjectSlugBetaIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/clusters': typeof AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/reviews': typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/schedule': typeof AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/site-recommendations': typeof AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/insights/cluster-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/insights/contextual-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/insights/site-performance': typeof AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute
   '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/': typeof AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/insights/': typeof AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/settings/': typeof AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute
   '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/article/$articleId': typeof AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/cluster/$clusterId': typeof AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute
-  '/_authed/$organizationSlug_/$projectSlug/beta/clusters/review/$reviewId': typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -447,32 +254,15 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/blog/'
     | '/$organizationSlug/$projectSlug/settings'
-    | '/$organizationSlug/$projectSlug/beta'
     | '/$organizationSlug/$projectSlug/calendar'
     | '/$organizationSlug/$projectSlug/'
-    | '/$organizationSlug/$projectSlug/beta/clusters'
-    | '/$organizationSlug/$projectSlug/beta/insights'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
     | '/$organizationSlug/$projectSlug/campaign/$campaignId'
     | '/$organizationSlug/$projectSlug/campaign'
     | '/$organizationSlug/$projectSlug/settings/'
-    | '/$organizationSlug/$projectSlug/beta/'
-    | '/$organizationSlug/$projectSlug/beta/clusters/clusters'
-    | '/$organizationSlug/$projectSlug/beta/clusters/reviews'
-    | '/$organizationSlug/$projectSlug/beta/clusters/schedule'
-    | '/$organizationSlug/$projectSlug/beta/clusters/site-recommendations'
-    | '/$organizationSlug/$projectSlug/beta/insights/cluster-performance'
-    | '/$organizationSlug/$projectSlug/beta/insights/contextual-performance'
-    | '/$organizationSlug/$projectSlug/beta/insights/site-performance'
     | '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
-    | '/$organizationSlug/$projectSlug/beta/clusters/'
-    | '/$organizationSlug/$projectSlug/beta/insights/'
-    | '/$organizationSlug/$projectSlug/beta/settings'
     | '/$organizationSlug/$projectSlug/campaign/$campaignId/'
-    | '/$organizationSlug/$projectSlug/beta/clusters/article/$articleId'
-    | '/$organizationSlug/$projectSlug/beta/clusters/cluster/$clusterId'
-    | '/$organizationSlug/$projectSlug/beta/clusters/review/$reviewId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -490,22 +280,8 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
     | '/$organizationSlug/$projectSlug/campaign'
     | '/$organizationSlug/$projectSlug/settings'
-    | '/$organizationSlug/$projectSlug/beta'
-    | '/$organizationSlug/$projectSlug/beta/clusters/clusters'
-    | '/$organizationSlug/$projectSlug/beta/clusters/reviews'
-    | '/$organizationSlug/$projectSlug/beta/clusters/schedule'
-    | '/$organizationSlug/$projectSlug/beta/clusters/site-recommendations'
-    | '/$organizationSlug/$projectSlug/beta/insights/cluster-performance'
-    | '/$organizationSlug/$projectSlug/beta/insights/contextual-performance'
-    | '/$organizationSlug/$projectSlug/beta/insights/site-performance'
     | '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
-    | '/$organizationSlug/$projectSlug/beta/clusters'
-    | '/$organizationSlug/$projectSlug/beta/insights'
-    | '/$organizationSlug/$projectSlug/beta/settings'
     | '/$organizationSlug/$projectSlug/campaign/$campaignId'
-    | '/$organizationSlug/$projectSlug/beta/clusters/article/$articleId'
-    | '/$organizationSlug/$projectSlug/beta/clusters/cluster/$clusterId'
-    | '/$organizationSlug/$projectSlug/beta/clusters/review/$reviewId'
   id:
     | '__root__'
     | '/_authed'
@@ -523,32 +299,15 @@ export interface FileRouteTypes {
     | '/_authed/onboarding/'
     | '/_marketing/blog/'
     | '/_authed/$organizationSlug/$projectSlug/settings'
-    | '/_authed/$organizationSlug_/$projectSlug/beta'
     | '/_authed/$organizationSlug/$projectSlug/calendar'
     | '/_authed/$organizationSlug/$projectSlug/'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/insights'
     | '/_authed/$organizationSlug/$projectSlug/settings/image-settings'
     | '/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
     | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId'
     | '/_authed/$organizationSlug/$projectSlug/campaign/'
     | '/_authed/$organizationSlug/$projectSlug/settings/'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/clusters'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/reviews'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/schedule'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/site-recommendations'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/insights/cluster-performance'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/insights/contextual-performance'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/insights/site-performance'
     | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/insights/'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/settings/'
     | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/article/$articleId'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/cluster/$clusterId'
-    | '/_authed/$organizationSlug_/$projectSlug/beta/clusters/review/$reviewId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -673,26 +432,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCalendarRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
     }
-    '/_authed/$organizationSlug_/$projectSlug/beta': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta'
-      path: '/$organizationSlug/$projectSlug/beta'
-      fullPath: '/$organizationSlug/$projectSlug/beta'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaRouteRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
     '/_authed/$organizationSlug/$projectSlug/settings': {
       id: '/_authed/$organizationSlug/$projectSlug/settings'
       path: '/settings'
       fullPath: '/$organizationSlug/$projectSlug/settings'
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/'
-      path: '/'
-      fullPath: '/$organizationSlug/$projectSlug/beta/'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaRouteRoute
     }
     '/_authed/$organizationSlug/$projectSlug/settings/': {
       id: '/_authed/$organizationSlug/$projectSlug/settings/'
@@ -729,20 +474,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRoute
     }
-    '/_authed/$organizationSlug_/$projectSlug/beta/insights': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/insights'
-      path: '/insights'
-      fullPath: '/$organizationSlug/$projectSlug/beta/insights'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters'
-      path: '/clusters'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaRouteRoute
-    }
     '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/': {
       id: '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/'
       path: '/'
@@ -750,103 +481,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
     }
-    '/_authed/$organizationSlug_/$projectSlug/beta/settings/': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/settings/'
-      path: '/settings'
-      fullPath: '/$organizationSlug/$projectSlug/beta/settings'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaSettingsIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/insights/': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/insights/'
-      path: '/'
-      fullPath: '/$organizationSlug/$projectSlug/beta/insights/'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/'
-      path: '/'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
-    }
     '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review': {
       id: '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review'
       path: '/review'
       fullPath: '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/insights/site-performance': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/insights/site-performance'
-      path: '/site-performance'
-      fullPath: '/$organizationSlug/$projectSlug/beta/insights/site-performance'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/insights/contextual-performance': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/insights/contextual-performance'
-      path: '/contextual-performance'
-      fullPath: '/$organizationSlug/$projectSlug/beta/insights/contextual-performance'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/insights/cluster-performance': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/insights/cluster-performance'
-      path: '/cluster-performance'
-      fullPath: '/$organizationSlug/$projectSlug/beta/insights/cluster-performance'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/site-recommendations': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/site-recommendations'
-      path: '/site-recommendations'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/site-recommendations'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/schedule': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/schedule'
-      path: '/schedule'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/schedule'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersScheduleRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/reviews': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/reviews'
-      path: '/reviews'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/reviews'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewsRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/clusters': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/clusters'
-      path: '/clusters'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/clusters'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersClustersRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/review/$reviewId': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/review/$reviewId'
-      path: '/review/$reviewId'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/review/$reviewId'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/cluster/$clusterId': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/cluster/$clusterId'
-      path: '/cluster/$clusterId'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/cluster/$clusterId'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
-    }
-    '/_authed/$organizationSlug_/$projectSlug/beta/clusters/article/$articleId': {
-      id: '/_authed/$organizationSlug_/$projectSlug/beta/clusters/article/$articleId'
-      path: '/article/$articleId'
-      fullPath: '/$organizationSlug/$projectSlug/beta/clusters/article/$articleId'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute
     }
   }
 }
@@ -913,90 +553,6 @@ const AuthedOrganizationSlugRouteRouteWithChildren =
     AuthedOrganizationSlugRouteRouteChildren,
   )
 
-interface AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteChildren {
-  AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute
-  AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute
-  AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute
-  AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute
-  AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute
-  AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute
-  AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute
-  AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute
-}
-
-const AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteChildren: AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteChildren =
-  {
-    AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersClustersRoute,
-    AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersReviewsRoute,
-    AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersScheduleRoute,
-    AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersSiteRecommendationsRoute,
-    AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersIndexRoute,
-    AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersArticleArticleIdRoute,
-    AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersClusterClusterIdRoute,
-    AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersReviewReviewIdRoute,
-  }
-
-const AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteWithChildren =
-  AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute._addFileChildren(
-    AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteChildren,
-  )
-
-interface AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteChildren {
-  AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute
-  AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute
-  AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute
-  AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute
-}
-
-const AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteChildren: AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteChildren =
-  {
-    AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute:
-      AuthedOrganizationSlugProjectSlugBetaInsightsClusterPerformanceRoute,
-    AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute:
-      AuthedOrganizationSlugProjectSlugBetaInsightsContextualPerformanceRoute,
-    AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute:
-      AuthedOrganizationSlugProjectSlugBetaInsightsSitePerformanceRoute,
-    AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute:
-      AuthedOrganizationSlugProjectSlugBetaInsightsIndexRoute,
-  }
-
-const AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteWithChildren =
-  AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute._addFileChildren(
-    AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteChildren,
-  )
-
-interface AuthedOrganizationSlugProjectSlugBetaRouteRouteChildren {
-  AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute: typeof AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteWithChildren
-  AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute: typeof AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteWithChildren
-  AuthedOrganizationSlugProjectSlugBetaIndexRoute: typeof AuthedOrganizationSlugProjectSlugBetaIndexRoute
-  AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute: typeof AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute
-}
-
-const AuthedOrganizationSlugProjectSlugBetaRouteRouteChildren: AuthedOrganizationSlugProjectSlugBetaRouteRouteChildren =
-  {
-    AuthedOrganizationSlugProjectSlugBetaClustersRouteRoute:
-      AuthedOrganizationSlugProjectSlugBetaClustersRouteRouteWithChildren,
-    AuthedOrganizationSlugProjectSlugBetaInsightsRouteRoute:
-      AuthedOrganizationSlugProjectSlugBetaInsightsRouteRouteWithChildren,
-    AuthedOrganizationSlugProjectSlugBetaIndexRoute:
-      AuthedOrganizationSlugProjectSlugBetaIndexRoute,
-    AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute:
-      AuthedOrganizationSlugProjectSlugBetaSettingsIndexRoute,
-  }
-
-const AuthedOrganizationSlugProjectSlugBetaRouteRouteWithChildren =
-  AuthedOrganizationSlugProjectSlugBetaRouteRoute._addFileChildren(
-    AuthedOrganizationSlugProjectSlugBetaRouteRouteChildren,
-  )
-
 interface AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren {
   AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
   AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
@@ -1018,7 +574,6 @@ const AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren =
 interface AuthedRouteRouteChildren {
   AuthedOrganizationSlugRouteRoute: typeof AuthedOrganizationSlugRouteRouteWithChildren
   AuthedOnboardingIndexRoute: typeof AuthedOnboardingIndexRoute
-  AuthedOrganizationSlugProjectSlugBetaRouteRoute: typeof AuthedOrganizationSlugProjectSlugBetaRouteRouteWithChildren
   AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
 }
 
@@ -1026,8 +581,6 @@ const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedOrganizationSlugRouteRoute:
     AuthedOrganizationSlugRouteRouteWithChildren,
   AuthedOnboardingIndexRoute: AuthedOnboardingIndexRoute,
-  AuthedOrganizationSlugProjectSlugBetaRouteRoute:
-    AuthedOrganizationSlugProjectSlugBetaRouteRouteWithChildren,
   AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute:
     AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren,
 }

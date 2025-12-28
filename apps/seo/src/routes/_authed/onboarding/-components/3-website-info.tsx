@@ -9,14 +9,13 @@ import {
 } from "@rectangular-labs/ui/components/ui/card";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
@@ -98,58 +97,58 @@ export function OnboardingWebsiteInfo({
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <Form {...form}>
-          <form
-            className="grid gap-6"
-            onSubmit={form.handleSubmit(handleSubmit)}
-          >
-            <CardContent>
-              <FormField
+        <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
+          <CardContent>
+            <FieldGroup>
+              <Controller
                 control={form.control}
                 name="url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Website</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        autoComplete="url"
-                        placeholder="https://42.com"
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="onboarding-website-info-url">
+                      Website
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="url"
+                      id="onboarding-website-info-url"
+                      placeholder="https://42.com"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
+            </FieldGroup>
 
-              {form.formState.errors.root && (
-                <FormMessage>{form.formState.errors.root.message}</FormMessage>
-              )}
-            </CardContent>
-            <CardFooter>
-              <div className="flex w-full justify-between">
-                {type === "new-user" && (
-                  <Button
-                    disabled={isPending}
-                    onClick={() => matcher.prev()}
-                    type="button"
-                    variant="ghost"
-                  >
-                    Back
-                  </Button>
-                )}
+            {form.formState.errors.root && (
+              <FieldError errors={[form.formState.errors.root]} />
+            )}
+          </CardContent>
+          <CardFooter>
+            <div className="flex w-full justify-between">
+              {type === "new-user" && (
                 <Button
-                  className={"ml-auto w-fit"}
-                  isLoading={isPending}
-                  type="submit"
+                  disabled={isPending}
+                  onClick={() => matcher.prev()}
+                  type="button"
+                  variant="ghost"
                 >
-                  Next
+                  Back
                 </Button>
-              </div>
-            </CardFooter>
-          </form>
-        </Form>
+              )}
+              <Button
+                className={"ml-auto w-fit"}
+                isLoading={isPending}
+                type="submit"
+              >
+                Next
+              </Button>
+            </div>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );

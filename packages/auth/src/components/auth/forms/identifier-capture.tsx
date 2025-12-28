@@ -3,14 +3,13 @@
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { PhoneInput } from "@rectangular-labs/ui/components/ui/phone-input";
 import { type } from "arktype";
@@ -194,47 +193,47 @@ function EmailForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        className={"grid w-full gap-6"}
-        onSubmit={form.handleSubmit(handleSubmit)}
-      >
-        <FormField
+    <form
+      className={"grid w-full gap-6"}
+      onSubmit={form.handleSubmit(handleSubmit)}
+    >
+      <FieldGroup>
+        <Controller
           control={form.control}
           name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  autoComplete="email webauthn"
-                  placeholder="you@example.com"
-                  type="email"
-                  {...field}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="auth-identifier-capture-email">
+                Email
+              </FieldLabel>
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                autoComplete="email webauthn"
+                id="auth-identifier-capture-email"
+                placeholder="you@example.com"
+                type="email"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
-        {form.formState.errors.root && (
-          <FormMessage className="text-destructive">
-            {form.formState.errors.root.message}
-          </FormMessage>
-        )}
-        {children ?? (
-          <Button
-            className={"w-full"}
-            disabled={isSubmitting || shouldDisable}
-            type="submit"
-          >
-            {isSubmitting && <Loader2 className="animate-spin" />}
-            {submitText}
-          </Button>
-        )}
-      </form>
-    </Form>
+      </FieldGroup>
+
+      {form.formState.errors.root && (
+        <FieldError errors={[form.formState.errors.root]} />
+      )}
+      {children ?? (
+        <Button
+          className={"w-full"}
+          disabled={isSubmitting || shouldDisable}
+          type="submit"
+        >
+          {isSubmitting && <Loader2 className="animate-spin" />}
+          {submitText}
+        </Button>
+      )}
+    </form>
   );
 }
 
@@ -329,44 +328,45 @@ function PhoneForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        className={"grid w-full gap-6"}
-        onSubmit={form.handleSubmit(handleSubmit)}
-      >
-        <FormField
+    <form
+      className={"grid w-full gap-6"}
+      onSubmit={form.handleSubmit(handleSubmit)}
+    >
+      <FieldGroup>
+        <Controller
           control={form.control}
           name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone number</FormLabel>
-              <FormControl>
-                <PhoneInput
-                  defaultCountry="US"
-                  placeholder="(555) 123-4567"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="auth-identifier-capture-phone">
+                Phone number
+              </FieldLabel>
+              <PhoneInput
+                {...field}
+                aria-invalid={fieldState.invalid}
+                defaultCountry="US"
+                id="auth-identifier-capture-phone"
+                placeholder="(555) 123-4567"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
-        {form.formState.errors.root && (
-          <FormMessage className="text-destructive">
-            {form.formState.errors.root.message}
-          </FormMessage>
-        )}
-        {children ?? (
-          <Button
-            className={"w-full"}
-            disabled={isSubmitting || shouldDisable}
-            type="submit"
-          >
-            {isSubmitting && <Loader2 className="animate-spin" />}
-            {submitText}
-          </Button>
-        )}
-      </form>
-    </Form>
+      </FieldGroup>
+
+      {form.formState.errors.root && (
+        <FieldError errors={[form.formState.errors.root]} />
+      )}
+      {children ?? (
+        <Button
+          className={"w-full"}
+          disabled={isSubmitting || shouldDisable}
+          type="submit"
+        >
+          {isSubmitting && <Loader2 className="animate-spin" />}
+          {submitText}
+        </Button>
+      )}
+    </form>
   );
 }

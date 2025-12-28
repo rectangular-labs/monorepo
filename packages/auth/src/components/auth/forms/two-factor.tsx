@@ -4,14 +4,13 @@ import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { InputOTP } from "@rectangular-labs/ui/components/ui/input-otp";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { type } from "arktype";
@@ -131,81 +130,89 @@ export function TwoFactorForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        className={"grid w-full gap-6"}
-        onSubmit={form.handleSubmit(verifyCode)}
-      >
-        <div className="flex items-center justify-between">
-          <FormLabel>One-time password</FormLabel>
-          <Button
-            className="px-0"
-            onClick={() => setView(viewPaths.RECOVER_ACCOUNT)}
-            type="button"
-            variant="link"
-          >
-            Forgot authenticator?
-          </Button>
-        </div>
+    <form
+      className={"grid w-full gap-6"}
+      onSubmit={form.handleSubmit(verifyCode)}
+    >
+      <div className="flex items-center justify-between">
+        <FieldLabel htmlFor="auth-two-factor-code">
+          One-time password
+        </FieldLabel>
+        <Button
+          className="px-0"
+          onClick={() => setView(viewPaths.RECOVER_ACCOUNT)}
+          type="button"
+          variant="link"
+        >
+          Forgot authenticator?
+        </Button>
+      </div>
 
-        <FormField
+      <FieldGroup>
+        <Controller
           control={form.control}
           name="code"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <InputOTP
-                  {...field}
-                  disabled={isSubmitting}
-                  maxLength={6}
-                  onChange={(value) => {
-                    field.onChange(value);
-                    if (value.length === 6) {
-                      void form.handleSubmit(verifyCode)();
-                    }
-                  }}
-                >
-                  <OTPInputGroup otpSeparators={2} />
-                </InputOTP>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <InputOTP
+                {...field}
+                aria-invalid={fieldState.invalid}
+                disabled={isSubmitting}
+                id="auth-two-factor-code"
+                maxLength={6}
+                onChange={(value) => {
+                  field.onChange(value);
+                  if (value.length === 6) {
+                    void form.handleSubmit(verifyCode)();
+                  }
+                }}
+              >
+                <OTPInputGroup otpSeparators={2} />
+              </InputOTP>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="trustDevice"
-          render={({ field }) => (
-            <FormItem className="flex">
-              <FormControl>
-                <Checkbox
-                  checked={field.value ?? false}
-                  disabled={isSubmitting}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormLabel>Trust this device</FormLabel>
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field
+              className="items-center"
+              data-invalid={fieldState.invalid}
+              orientation="horizontal"
+            >
+              <Checkbox
+                checked={field.value ?? false}
+                disabled={isSubmitting}
+                id="auth-two-factor-trustDevice"
+                onCheckedChange={field.onChange}
+              />
+              <FieldLabel htmlFor="auth-two-factor-trustDevice">
+                Trust this device
+              </FieldLabel>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
+      </FieldGroup>
 
-        <div className="grid gap-4">
-          <Button isLoading={isSubmitting} type="submit">
-            Verify
-          </Button>
+      <div className="grid gap-4">
+        <Button isLoading={isSubmitting} type="submit">
+          Verify
+        </Button>
 
-          <Button
-            disabled={coolDownSeconds > 0 || isSendingOtp || isSubmitting}
-            onClick={sendOtp}
-            type="button"
-            variant="outline"
-          >
-            {isSendingOtp ? <Loader2 className="animate-spin" /> : <SendIcon />}
-            Resend code{coolDownSeconds > 0 && ` (${coolDownSeconds})`}
-          </Button>
-        </div>
-      </form>
-    </Form>
+        <Button
+          disabled={coolDownSeconds > 0 || isSendingOtp || isSubmitting}
+          onClick={sendOtp}
+          type="button"
+          variant="outline"
+        >
+          {isSendingOtp ? <Loader2 className="animate-spin" /> : <SendIcon />}
+          Resend code{coolDownSeconds > 0 && ` (${coolDownSeconds})`}
+        </Button>
+      </div>
+    </form>
   );
 }

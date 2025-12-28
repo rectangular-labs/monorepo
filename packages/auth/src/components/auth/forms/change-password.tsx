@@ -4,14 +4,13 @@ import { Spinner } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Controller,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   useForm,
-} from "@rectangular-labs/ui/components/ui/form";
+} from "@rectangular-labs/ui/components/ui/field";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { type } from "arktype";
 import { useState } from "react";
@@ -107,90 +106,94 @@ export function ChangePasswordForm(props: ChangePasswordProps) {
   }
 
   return (
-    <Form {...form}>
-      <form
-        className={"grid w-full gap-6"}
-        onSubmit={form.handleSubmit(handleSubmit)}
-      >
+    <form
+      className={"grid w-full gap-6"}
+      onSubmit={form.handleSubmit(handleSubmit)}
+    >
+      <FieldGroup>
         {props.mode === "update" && (
-          <FormField
+          <Controller
             control={form.control}
             name="oldPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Current password</FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    autoComplete="current-password"
-                    disabled={isSubmitting}
-                    enableToggle
-                    placeholder="Your current password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="auth-change-password-oldPassword">
+                  Current password
+                </FieldLabel>
+                <PasswordInput
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="current-password"
+                  disabled={isSubmitting}
+                  enableToggle
+                  id="auth-change-password-oldPassword"
+                  placeholder="Your current password"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         )}
 
-        <FormField
+        <Controller
           control={form.control}
           name="newPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>New password</FormLabel>
-
-              <FormControl>
-                <PasswordInput
-                  autoComplete="new-password"
-                  disabled={isSubmitting}
-                  enableToggle
-                  placeholder="At least 8 characters"
-                  {...field}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="auth-change-password-newPassword">
+                New password
+              </FieldLabel>
+              <PasswordInput
+                {...field}
+                aria-invalid={fieldState.invalid}
+                autoComplete="new-password"
+                disabled={isSubmitting}
+                enableToggle
+                id="auth-change-password-newPassword"
+                placeholder="At least 8 characters"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
         {confirmPasswordEnabled && (
-          <FormField
+          <Controller
             control={form.control}
             name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm password</FormLabel>
-
-                <FormControl>
-                  <PasswordInput
-                    autoComplete="new-password"
-                    disabled={isSubmitting}
-                    enableToggle
-                    placeholder="Repeat new password"
-                    {...field}
-                  />
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="auth-change-password-confirmPassword">
+                  Confirm password
+                </FieldLabel>
+                <PasswordInput
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="new-password"
+                  disabled={isSubmitting}
+                  enableToggle
+                  id="auth-change-password-confirmPassword"
+                  placeholder="Repeat new password"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         )}
+      </FieldGroup>
 
-        {form.formState.errors.root && (
-          <FormMessage className="text-destructive">
-            {form.formState.errors.root.message}
-          </FormMessage>
-        )}
+      {form.formState.errors.root && (
+        <FieldError errors={[form.formState.errors.root]} />
+      )}
 
-        <Button className={"w-full"} disabled={isSubmitting} type="submit">
-          {isSubmitting && <Spinner className="animate-spin" />}
-          {props.mode === "update" ? "Update password" : "Reset password"}
-        </Button>
-      </form>
-    </Form>
+      <Button className={"w-full"} disabled={isSubmitting} type="submit">
+        {isSubmitting && <Spinner className="animate-spin" />}
+        {props.mode === "update" ? "Update password" : "Reset password"}
+      </Button>
+    </form>
   );
 }
