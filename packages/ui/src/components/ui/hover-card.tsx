@@ -1,6 +1,6 @@
 "use client";
 
-import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
+import { HoverCard as HoverCardPrimitive } from "radix-ui";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import type * as React from "react";
 

@@ -1,4 +1,4 @@
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import { useControllableState } from "radix-ui";
 import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import type React from "react";

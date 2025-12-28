@@ -1,7 +1,7 @@
 "use client";
 
-import { Root } from "@radix-ui/react-portal";
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import { Root, useControllableState } from "radix-ui";
+
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import type {
   ButtonHTMLAttributes,
