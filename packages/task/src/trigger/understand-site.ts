@@ -1,10 +1,10 @@
 import { google } from "@ai-sdk/google";
 import { create, insertMultiple } from "@orama/orama";
+import { businessBackgroundSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import {
   understandSiteTaskInputSchema,
   type understandSiteTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
-import { businessBackgroundSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import { schemaTask } from "@trigger.dev/sdk";
 import { generateText, stepCountIs } from "ai";
 import { type } from "arktype";
