@@ -62,14 +62,6 @@ export const businessBackgroundSchema = type({
     .configure({
       message: () => "Industry is required",
     }),
-  serviceRegion: type("string")
-    .atLeastLength(1)
-    .describe(
-      "Canonical regions. Prefer 'Global', regions like 'EU', 'Asia', 'Africa', or country list separated by ';'. For local, use 'City, ST' or 'Metro, ST'.",
-    )
-    .configure({
-      message: () => "Service Region is required",
-    }),
   targetCountryCode: type(
     `'${Object.keys(COUNTRY_CODE_MAP)
       .map((key) => key)
