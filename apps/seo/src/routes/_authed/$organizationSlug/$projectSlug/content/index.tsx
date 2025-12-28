@@ -8,7 +8,6 @@ import {
   AlertTitle,
 } from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
-import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { type } from "arktype";
@@ -33,7 +32,6 @@ export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/content/",
 )({
   validateSearch: type({
-    "tab?": "'live'|'planner'",
     "view?": "'tree'|'list'",
   }),
   loader: async ({ context, params }) => {
@@ -56,7 +54,7 @@ export const Route = createFileRoute(
 
 function PageComponent() {
   const { organizationSlug, projectSlug } = Route.useParams();
-  const { tab = "live", view } = Route.useSearch();
+  const { view } = Route.useSearch();
   const { projectId, organizationId } = Route.useLoaderData();
   const navigate = Route.useNavigate();
 
@@ -129,17 +127,6 @@ function PageComponent() {
       ),
     [allFiles],
   );
-  const plannerFiles = useMemo(
-    () =>
-      allFiles.filter(
-        (f) =>
-          f.status === "planned" ||
-          f.status === "suggested" ||
-          f.status === "generating" ||
-          f.status === "pending-review",
-      ),
-    [allFiles],
-  );
 
   const hasPlannerBacklog = useMemo(() => {
     return allFiles.some(
@@ -191,248 +178,151 @@ function PageComponent() {
     }));
   }, [liveFiles, liveStatusFilter, normalizedSearch]);
 
-  const plannerRows = useMemo(() => {
-    const statusOrder: Record<SeoFileStatus, number> = {
-      suggested: 0,
-      planned: 1,
-      generating: 2,
-      "pending-review": 3,
-      scheduled: 4,
-      published: 5,
-      "suggestion-rejected": 6,
-      "review-denied": 7,
-    };
-    const filteredBySearch = normalizedSearch
-      ? plannerFiles.filter((f) => {
-          const title = f.name.toLowerCase();
-          const keyword = f.primaryKeyword.toLowerCase();
-          return (
-            title.includes(normalizedSearch) ||
-            keyword.includes(normalizedSearch)
-          );
-        })
-      : plannerFiles;
-
-    const sorted = [...filteredBySearch].sort((a, b) => {
-      const byStatus = statusOrder[a.status] - statusOrder[b.status];
-      if (byStatus !== 0) return byStatus;
-      const aTime = a.scheduledFor ? new Date(a.scheduledFor).getTime() : 0;
-      const bTime = b.scheduledFor ? new Date(b.scheduledFor).getTime() : 0;
-      return aTime - bTime;
-    });
-
-    return sorted.map((f) => ({
-      id: f.treeId,
-      title: f.name.replace(/\.md$/, ""),
-      author: f.userId,
-      createdAt: f.createdAt,
-      scheduledFor: f.scheduledFor,
-      primaryKeyword: f.primaryKeyword,
-      status: f.status,
-    }));
-  }, [plannerFiles, normalizedSearch]);
-
   return (
-    <div className="flex h-full min-h-[calc(100vh-73px)]">
-      <aside className="shrink-0 px-4 pt-6 md:sticky md:top-0 md:h-fit md:min-h-screen md:w-64 md:border-r">
-        <div className="mb-4">
-          <h2 className="font-semibold text-lg">Content</h2>
-        </div>
-        <nav className="flex flex-col gap-6 text-muted-foreground text-sm">
-          <Link
-            className={cn(
-              "relative transition-colors hover:text-foreground",
-              tab === "live" &&
-                "text-foreground after:absolute after:bottom-[-8px] after:left-0 after:h-[2px] after:w-full after:bg-current after:content-['']",
-            )}
-            search={(prev) => ({ ...prev, tab: "live" as const })}
-            to="."
-          >
-            Scheduled & Published
-          </Link>
-          <Link
-            className={cn(
-              "relative transition-colors hover:text-foreground",
-              tab === "planner" &&
-                "text-foreground after:absolute after:bottom-[-8px] after:left-0 after:h-[2px] after:w-full after:bg-current after:content-['']",
-            )}
-            search={(prev) => ({ ...prev, tab: "planner" as const })}
-            to="."
-          >
-            Planner
-          </Link>
-        </nav>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <div className="border-b p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="font-semibold text-lg">
-                {tab === "planner" ? "Planner" : "Scheduled & Published"}
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                {activeProject?.name ?? projectSlug}
-              </p>
-            </div>
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+      <div className="border-b p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="font-semibold text-lg">Scheduled & Published</h1>
+            <p className="text-muted-foreground text-sm">
+              {activeProject?.name ?? projectSlug}
+            </p>
           </div>
         </div>
+      </div>
 
+      <LoadingError
+        className="p-6"
+        error={loroDocError || projectError}
+        errorDescription="Something went wrong while loading content. Please try again."
+        errorTitle="Error loading content"
+        isLoading={isLoadingLoroDoc || isLoadingProject}
+        onRetry={refetchLoroDoc}
+      />
+
+      {!isLoadingLoroDoc && !loroDocError && treeResult && !treeResult.ok && (
         <LoadingError
           className="p-6"
-          error={loroDocError || projectError}
-          errorDescription="Something went wrong while loading content. Please try again."
-          errorTitle="Error loading content"
-          isLoading={isLoadingLoroDoc || isLoadingProject}
-          onRetry={refetchLoroDoc}
+          error={treeResult.error}
+          errorTitle="Error loading workspace"
+          isLoading={false}
         />
+      )}
 
-        {!isLoadingLoroDoc && !loroDocError && treeResult && !treeResult.ok && (
-          <LoadingError
-            className="p-6"
-            error={treeResult.error}
-            errorTitle="Error loading workspace"
-            isLoading={false}
-          />
+      {!isLoadingLoroDoc &&
+        !loroDocError &&
+        treeResult?.ok &&
+        hasPlannerBacklog && (
+          <div className="p-6 pb-0">
+            <Alert>
+              <Icons.Info className="size-4" />
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <AlertTitle>
+                    There are items waiting in your planner
+                  </AlertTitle>
+                  <AlertDescription>
+                    You have planned/suggested items or items pending review.
+                    Visit the planner to triage and schedule.
+                  </AlertDescription>
+                </div>
+                <Button asChild size="sm">
+                  <Link
+                    params={{ organizationSlug, projectSlug }}
+                    to="/$organizationSlug/$projectSlug/content/planner"
+                  >
+                    Go to planner
+                    <Icons.ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+              </div>
+            </Alert>
+          </div>
         )}
 
-        {!isLoadingLoroDoc &&
-          !loroDocError &&
-          treeResult?.ok &&
-          tab === "live" &&
-          hasPlannerBacklog && (
-            <div className="p-6 pb-0">
-              <Alert>
-                <Icons.Info className="size-4" />
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-0.5">
-                    <AlertTitle>
-                      There are items waiting in your planner
-                    </AlertTitle>
-                    <AlertDescription>
-                      You have planned/suggested items or items pending review.
-                      Visit the planner to triage and schedule.
-                    </AlertDescription>
-                  </div>
-                  <Button asChild size="sm">
-                    <Link search={{ tab: "planner" as const }} to=".">
-                      Go to planner
-                      <Icons.ArrowRight aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </Alert>
+      {treeResult?.ok && (
+        <div className="flex-1 space-y-4 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="relative min-w-[260px] flex-1">
+              <Icons.Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                className="h-10 w-full rounded-md border bg-background pr-3 pl-9 text-sm outline-none"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search published and scheduled articles..."
+                value={searchQuery}
+              />
+            </div>
+
+            <FilterStatus<Extract<SeoFileStatus, "scheduled" | "published">>
+              label="Status"
+              onChange={(value) => setLiveStatusFilter(value)}
+              options={[
+                { value: "all", label: "All", count: liveCounts.total },
+                {
+                  value: "scheduled",
+                  label: "Scheduled",
+                  count: liveCounts.scheduled,
+                },
+                {
+                  value: "published",
+                  label: "Published",
+                  count: liveCounts.published,
+                },
+              ]}
+              value={liveStatusFilter}
+            >
+              <Button size="sm" variant="outline">
+                <Icons.Filter className="size-4" />
+                Filter
+              </Button>
+            </FilterStatus>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground text-sm">
+              {liveRows.length} articles
+            </p>
+            <TreeListDropDrawer onChange={setViewMode} value={activeView} />
+          </div>
+
+          {activeView === "tree" && (
+            <div className="rounded-md border p-3">
+              <ArticlesTree
+                includeFile={(file, filter) => {
+                  if (
+                    file.status !== "scheduled" &&
+                    file.status !== "published"
+                  ) {
+                    return false;
+                  }
+                  if (filter === "all") return true;
+                  return file.status === filter;
+                }}
+                onFileSelect={() => {
+                  // stage 3: open editor takeover
+                }}
+                statusFilter={
+                  liveStatusFilter === "all"
+                    ? "all"
+                    : (liveStatusFilter as SeoFileStatus)
+                }
+                tree={treeResult.value}
+              />
             </div>
           )}
 
-        {treeResult?.ok && (
-          <div className="flex-1 space-y-4 p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="relative min-w-[260px] flex-1">
-                <Icons.Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  className="h-10 w-full rounded-md border bg-background pr-3 pl-9 text-sm outline-none"
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={
-                    tab === "planner"
-                      ? "Search planner items..."
-                      : "Search published and scheduled articles..."
-                  }
-                  value={searchQuery}
-                />
-              </div>
-
-              {tab === "live" && (
-                <FilterStatus<Extract<SeoFileStatus, "scheduled" | "published">>
-                  label="Status"
-                  onChange={(value) => setLiveStatusFilter(value)}
-                  options={[
-                    { value: "all", label: "All", count: liveCounts.total },
-                    {
-                      value: "scheduled",
-                      label: "Scheduled",
-                      count: liveCounts.scheduled,
-                    },
-                    {
-                      value: "published",
-                      label: "Published",
-                      count: liveCounts.published,
-                    },
-                  ]}
-                  value={liveStatusFilter}
-                >
-                  <Button size="sm" variant="outline">
-                    <Icons.Filter className="size-4" />
-                    Filter
-                  </Button>
-                </FilterStatus>
-              )}
+          {activeView === "list" && (
+            <div className="rounded-md border">
+              <ArticlesTable
+                onRowClick={() => {
+                  // stage 3: open editor takeover
+                }}
+                rows={liveRows}
+              />
             </div>
-
-            {tab === "live" && (
-              <>
-                <div className="flex items-center justify-between">
-                  <p className="text-muted-foreground text-sm">
-                    {liveRows.length} articles
-                  </p>
-                  <TreeListDropDrawer
-                    onChange={setViewMode}
-                    value={activeView}
-                  />
-                </div>
-
-                {activeView === "tree" && (
-                  <div className="rounded-md border p-3">
-                    <ArticlesTree
-                      includeFile={(file, filter) => {
-                        if (
-                          file.status !== "scheduled" &&
-                          file.status !== "published"
-                        ) {
-                          return false;
-                        }
-                        if (filter === "all") return true;
-                        return file.status === filter;
-                      }}
-                      onFileSelect={() => {
-                        // stage 3: open editor takeover
-                      }}
-                      statusFilter={
-                        liveStatusFilter === "all"
-                          ? "all"
-                          : (liveStatusFilter as SeoFileStatus)
-                      }
-                      tree={treeResult.value}
-                    />
-                  </div>
-                )}
-
-                {activeView === "list" && (
-                  <div className="rounded-md border">
-                    <ArticlesTable
-                      onRowClick={() => {
-                        // stage 3: open editor takeover
-                      }}
-                      rows={liveRows}
-                    />
-                  </div>
-                )}
-              </>
-            )}
-
-            {tab === "planner" && (
-              <div className="rounded-md border">
-                <ArticlesTable
-                  onRowClick={() => {
-                    // stage 6: open dialog-drawer / editor depending on status
-                  }}
-                  rows={plannerRows}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

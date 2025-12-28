@@ -1,6 +1,7 @@
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { NavLink } from "../../-components/nav-link";
+import { ProjectChatLayout } from "../-components/project-chat-layout";
 
 export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
   {
@@ -76,9 +77,11 @@ function RouteComponent() {
         </NavLink>
       </ul>
 
-      <div className="mx-auto max-w-7xl">
-        <Outlet />
-      </div>
+      <ProjectChatLayout>
+        <div className="mx-auto w-full max-w-7xl">
+          <Outlet />
+        </div>
+      </ProjectChatLayout>
     </div>
   );
 }

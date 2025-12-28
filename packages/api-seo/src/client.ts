@@ -7,6 +7,7 @@ import {
 import contract from "./_open-api/orpc-contract.json";
 import type { Router, RouterClient, WebsocketRouterClient } from "./types";
 
+export { eventIteratorToUnproxiedDataStream } from "@orpc/client";
 export { createTanstackQueryUtils } from "@orpc/tanstack-query";
 export { getExtensionFromMimeType } from "./lib/project/get-extension-from-mimetype";
 export { getImageFileNameFromUri } from "./lib/project/get-image-file-name-from-uri";

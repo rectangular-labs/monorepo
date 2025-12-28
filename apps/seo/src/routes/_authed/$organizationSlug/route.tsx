@@ -2,7 +2,6 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { AUTO_ROUTE_ORG } from "~/lib/constants";
 import { AppHeader } from "./-components/app-header";
-import { ProjectChatLayout } from "./-components/project-chat-layout";
 import { ProjectChatProvider } from "./-components/project-chat-provider";
 
 export const Route = createFileRoute("/_authed/$organizationSlug")({
@@ -101,9 +100,7 @@ function RouteComponent() {
     <ProjectChatProvider>
       <AppHeader />
       <div className="flex w-full flex-1 flex-col bg-background">
-        <ProjectChatLayout>
-          <Outlet />
-        </ProjectChatLayout>
+        <Outlet />
       </div>
     </ProjectChatProvider>
   );

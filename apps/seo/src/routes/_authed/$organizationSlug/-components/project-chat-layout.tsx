@@ -21,9 +21,16 @@ export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
 
   if (isDesktop) {
     return (
-      <ResizablePanelGroup className="min-h-0 flex-1" direction="horizontal">
-        <ResizablePanel defaultSize={70} minSize={45}>
-          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+      <ResizablePanelGroup
+        className="h-full max-h-[calc(100vh-100px)] min-h-0 flex-1"
+        direction="horizontal"
+      >
+        <ResizablePanel
+          className="overflow-y-auto"
+          defaultSize={70}
+          minSize={45}
+        >
+          {children}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30} maxSize={45} minSize={20}>

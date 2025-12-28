@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { eventIteratorToUnproxiedDataStream } from "@rectangular-labs/api-seo/client";
 import type { SeoChatMessage } from "@rectangular-labs/api-seo/types";
 import {
   Action,
@@ -51,9 +52,13 @@ import {
   ToolInput,
   ToolOutput,
 } from "@rectangular-labs/ui/components/ai-elements/tool";
+import {
+  Copy,
+  File,
+  RefreshCcw,
+  X,
+} from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
-import { Copy, File, RefreshCcw, X } from "@rectangular-labs/ui/components/icon";
-import { eventIteratorToUnproxiedDataStream } from "@orpc/client";
 import { Fragment, useMemo, useState } from "react";
 import { getApiClient } from "~/lib/api";
 import { useProjectChat } from "./project-chat-provider";
@@ -149,7 +154,10 @@ export function ProjectChatPanel() {
                   message.parts.some((p) => p.type === "source-url") && (
                     <Sources>
                       <SourcesTrigger
-                        count={message.parts.filter((p) => p.type === "source-url").length}
+                        count={
+                          message.parts.filter((p) => p.type === "source-url")
+                            .length
+                        }
                       />
                       {message.parts
                         .filter((p) => p.type === "source-url")
@@ -175,7 +183,10 @@ export function ProjectChatPanel() {
                             message.id === messages.at(-1)?.id &&
                             i === message.parts.length - 1 && (
                               <Actions className="mt-2">
-                                <Action label="Retry" onClick={() => regenerate()}>
+                                <Action
+                                  label="Retry"
+                                  onClick={() => regenerate()}
+                                >
                                   <RefreshCcw className="size-3" />
                                 </Action>
                                 <Action
@@ -218,10 +229,14 @@ export function ProjectChatPanel() {
                       const ui = TOOL_UI[toolName];
                       const title = ui?.title;
                       const defaultOpen =
-                        part.state === "output-error" || ui?.defaultOpen === true;
+                        part.state === "output-error" ||
+                        ui?.defaultOpen === true;
 
                       return (
-                        <Tool defaultOpen={defaultOpen} key={`${message.id}-${i}`}>
+                        <Tool
+                          defaultOpen={defaultOpen}
+                          key={`${message.id}-${i}`}
+                        >
                           <ToolHeader
                             state={part.state}
                             title={title}
@@ -285,5 +300,3 @@ export function ProjectChatPanel() {
     </div>
   );
 }
-
-
