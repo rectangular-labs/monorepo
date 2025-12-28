@@ -1,7 +1,7 @@
 "use client";
 
-import { HoverCard as HoverCardPrimitive } from "radix-ui";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import { HoverCard as HoverCardPrimitive } from "radix-ui";
 import type * as React from "react";
 
 function HoverCard({

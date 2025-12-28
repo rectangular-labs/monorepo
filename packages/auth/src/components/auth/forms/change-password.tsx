@@ -125,8 +125,8 @@ export function ChangePasswordForm(props: ChangePasswordProps) {
                   aria-invalid={fieldState.invalid}
                   autoComplete="current-password"
                   disabled={isSubmitting}
-                  id="auth-change-password-oldPassword"
                   enableToggle
+                  id="auth-change-password-oldPassword"
                   placeholder="Your current password"
                 />
                 {fieldState.invalid && (
@@ -150,8 +150,8 @@ export function ChangePasswordForm(props: ChangePasswordProps) {
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 disabled={isSubmitting}
-                id="auth-change-password-newPassword"
                 enableToggle
+                id="auth-change-password-newPassword"
                 placeholder="At least 8 characters"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -173,8 +173,8 @@ export function ChangePasswordForm(props: ChangePasswordProps) {
                   aria-invalid={fieldState.invalid}
                   autoComplete="new-password"
                   disabled={isSubmitting}
-                  id="auth-change-password-confirmPassword"
                   enableToggle
+                  id="auth-change-password-confirmPassword"
                   placeholder="Repeat new password"
                 />
                 {fieldState.invalid && (

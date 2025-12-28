@@ -189,8 +189,8 @@ export function SignInForm({
                 aria-invalid={fieldState.invalid}
                 autoComplete="current-password webauthn"
                 disabled={isSubmitting || shouldDisable}
-                id="auth-sign-in-password"
                 enableToggle
+                id="auth-sign-in-password"
                 placeholder="Your password"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

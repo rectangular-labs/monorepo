@@ -1,7 +1,7 @@
 "use client";
 
-import { Progress as ProgressPrimitive } from "radix-ui";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import { Progress as ProgressPrimitive } from "radix-ui";
 import type * as React from "react";
 
 function Progress({

@@ -156,10 +156,10 @@ export function TwoFactorForm({
             <Field data-invalid={fieldState.invalid}>
               <InputOTP
                 {...field}
+                aria-invalid={fieldState.invalid}
                 disabled={isSubmitting}
                 id="auth-two-factor-code"
                 maxLength={6}
-                aria-invalid={fieldState.invalid}
                 onChange={(value) => {
                   field.onChange(value);
                   if (value.length === 6) {
@@ -180,8 +180,8 @@ export function TwoFactorForm({
           render={({ field, fieldState }) => (
             <Field
               className="items-center"
-              orientation="horizontal"
               data-invalid={fieldState.invalid}
+              orientation="horizontal"
             >
               <Checkbox
                 checked={field.value ?? false}

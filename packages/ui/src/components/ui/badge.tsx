@@ -1,6 +1,6 @@
-import { Slot as SlotPrimitive } from "radix-ui";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Slot as SlotPrimitive } from "radix-ui";
 import type * as React from "react";
 
 const badgeVariants = cva(

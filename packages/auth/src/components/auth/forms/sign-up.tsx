@@ -185,10 +185,10 @@ export function SignUpForm({
                 <FieldLabel htmlFor="auth-sign-up-name">Name</FieldLabel>
                 <Input
                   {...field}
+                  aria-invalid={fieldState.invalid}
                   disabled={isSubmitting || shouldDisable}
                   id="auth-sign-up-name"
                   placeholder="Your name"
-                  aria-invalid={fieldState.invalid}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -209,11 +209,11 @@ export function SignUpForm({
                 </FieldLabel>
                 <Input
                   {...field}
+                  aria-invalid={fieldState.invalid}
                   autoComplete="username"
                   disabled={isSubmitting || shouldDisable}
                   id="auth-sign-up-username"
                   placeholder="Choose a username"
-                  aria-invalid={fieldState.invalid}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -231,12 +231,12 @@ export function SignUpForm({
               <FieldLabel htmlFor="auth-sign-up-email">Email</FieldLabel>
               <Input
                 {...field}
+                aria-invalid={fieldState.invalid}
                 autoComplete="email"
                 disabled={isSubmitting || shouldDisable}
                 id="auth-sign-up-email"
                 placeholder="you@example.com"
                 type="email"
-                aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -251,13 +251,13 @@ export function SignUpForm({
               <FieldLabel htmlFor="auth-sign-up-password">Password</FieldLabel>
               <PasswordInput
                 {...field}
+                aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 disabled={isSubmitting || shouldDisable}
-                id="auth-sign-up-password"
                 enableToggle
+                id="auth-sign-up-password"
                 placeholder="Password"
                 type="password"
-                aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -275,12 +275,12 @@ export function SignUpForm({
                 </FieldLabel>
                 <PasswordInput
                   {...field}
+                  aria-invalid={fieldState.invalid}
                   autoComplete="new-password"
                   disabled={isSubmitting || shouldDisable}
-                  id="auth-sign-up-confirmPassword"
                   enableToggle
+                  id="auth-sign-up-confirmPassword"
                   placeholder="Confirm Password"
-                  aria-invalid={fieldState.invalid}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -310,8 +310,8 @@ export function SignUpForm({
                   render={({ field: formField, fieldState }) => (
                     <Field
                       className="items-center"
-                      orientation="horizontal"
                       data-invalid={fieldState.invalid}
+                      orientation="horizontal"
                     >
                       <Checkbox
                         checked={Boolean(formField.value)}
@@ -344,19 +344,19 @@ export function SignUpForm({
                     {cfg.multiline ? (
                       <Textarea
                         {...formField}
+                        aria-invalid={fieldState.invalid}
                         disabled={isSubmitting || shouldDisable}
                         id={`auth-sign-up-${String(castKey)}`}
                         placeholder={cfg.placeholder}
-                        aria-invalid={fieldState.invalid}
                       />
                     ) : (
                       <Input
                         {...formField}
+                        aria-invalid={fieldState.invalid}
                         disabled={isSubmitting || shouldDisable}
                         id={`auth-sign-up-${String(castKey)}`}
                         placeholder={cfg.placeholder}
                         type={cfg.type === "number" ? "number" : "text"}
-                        aria-invalid={fieldState.invalid}
                       />
                     )}
                     {fieldState.invalid && (

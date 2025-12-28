@@ -128,8 +128,8 @@ export function OnboardingUserBackground({
           <CardContent className="grid gap-6">
             <FieldGroup>
               <Controller
-                name="source"
                 control={form.control}
+                name="source"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="onboarding-user-background-source">
@@ -140,8 +140,8 @@ export function OnboardingUserBackground({
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger
-                        className="w-full"
                         aria-invalid={fieldState.invalid}
+                        className="w-full"
                         id="onboarding-user-background-source"
                       >
                         <SelectValue placeholder="Source" />
@@ -163,8 +163,8 @@ export function OnboardingUserBackground({
 
               {isOtherSource && (
                 <Controller
-                  name="otherSource"
                   control={form.control}
+                  name="otherSource"
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="onboarding-user-background-otherSource">
@@ -172,10 +172,10 @@ export function OnboardingUserBackground({
                       </FieldLabel>
                       <Input
                         {...field}
+                        aria-invalid={fieldState.invalid}
                         id="onboarding-user-background-otherSource"
                         placeholder="Times Magazine"
                         type="text"
-                        aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -186,8 +186,8 @@ export function OnboardingUserBackground({
               )}
 
               <Controller
-                name="goal"
                 control={form.control}
+                name="goal"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="onboarding-user-background-goal">
@@ -198,8 +198,8 @@ export function OnboardingUserBackground({
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger
-                        className="w-full"
                         aria-invalid={fieldState.invalid}
+                        className="w-full"
                         id="onboarding-user-background-goal"
                       >
                         <SelectValue placeholder="goals" />
@@ -221,8 +221,8 @@ export function OnboardingUserBackground({
 
               {isOtherGoal && (
                 <Controller
-                  name="otherGoal"
                   control={form.control}
+                  name="otherGoal"
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="onboarding-user-background-otherGoal">
@@ -230,10 +230,10 @@ export function OnboardingUserBackground({
                       </FieldLabel>
                       <Input
                         {...field}
+                        aria-invalid={fieldState.invalid}
                         id="onboarding-user-background-otherGoal"
                         placeholder="Finding Satoshi's private key"
                         type="text"
-                        aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />

@@ -95,8 +95,8 @@ export function OnboardingCreateOrganization() {
           <CardContent>
             <FieldGroup>
               <Controller
-                name="name"
                 control={form.control}
+                name="name"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="onboarding-create-organization-name">
@@ -104,9 +104,9 @@ export function OnboardingCreateOrganization() {
                     </FieldLabel>
                     <Input
                       {...field}
+                      aria-invalid={fieldState.invalid}
                       id="onboarding-create-organization-name"
                       placeholder="Xerox"
-                      aria-invalid={fieldState.invalid}
                     />
                     <FieldDescription>
                       You will be able to change this at anytime later on
