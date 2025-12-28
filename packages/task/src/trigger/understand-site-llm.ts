@@ -55,7 +55,6 @@ export const understandSiteLlmTask: ReturnType<
   "name": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("name").description}
   "businessOverview": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("businessOverview").description}
   "targetAudience": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("targetAudience").description}
-  "serviceRegion": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("serviceRegion").description}
   "industry": "string" // ${understandSiteTaskOutputSchema.get("websiteInfo").get("industry").description}
   "languageCode": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("languageCode").description}
   "targetCountryCode": "string", // ${understandSiteTaskOutputSchema.get("websiteInfo").get("targetCountryCode").description}

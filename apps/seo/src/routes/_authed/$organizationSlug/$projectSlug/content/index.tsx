@@ -1,43 +1,48 @@
-import type {
-  RouterInputs,
-  RouterOutputs,
-} from "@rectangular-labs/api-seo/types";
+"use client";
+
+import type { SeoFileStatus } from "@rectangular-labs/api-seo/types";
 import * as Icons from "@rectangular-labs/ui/components/icon";
-import { Badge } from "@rectangular-labs/ui/components/ui/badge";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@rectangular-labs/ui/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@rectangular-labs/ui/components/ui/dropdown-menu";
-import { Input } from "@rectangular-labs/ui/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rectangular-labs/ui/components/ui/select";
-import { toast } from "@rectangular-labs/ui/components/ui/sonner";
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@rectangular-labs/ui/components/ui/sidebar";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { type } from "arktype";
 import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
+import {
+  buildTree,
+  type TreeFile,
+  traverseTree,
+} from "~/lib/campaign/build-tree";
+import { createSyncDocumentQueryOptions } from "~/lib/campaign/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
-import { OverviewCards } from "~/routes/_authed/$organizationSlug/$projectSlug/-components/overview-cards";
+import { ArticlesTable } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-table";
+import { ArticlesTree } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-tree";
+import { FilterStatus } from "./-components/filter-status";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/content/",
 )({
+  validateSearch: type({
+    "tab?": "'live'|'planner'",
+    "view?": "'tree'|'list'",
+  }),
   loader: async ({ context, params }) => {
-    await context.queryClient.ensureQueryData(
+    const activeProject = await context.queryClient.ensureQueryData(
       getApiClientRq().project.get.queryOptions({
         input: {
           organizationIdentifier: params.organizationSlug,
@@ -46,17 +51,24 @@ export const Route = createFileRoute(
       }),
     );
 
-    return null;
+    return {
+      projectId: activeProject.id,
+      organizationId: activeProject.organizationId,
+    };
   },
   component: PageComponent,
 });
 
 function PageComponent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | RouterInputs["campaigns"]["list"]["status"]
-  >("all");
   const { organizationSlug, projectSlug } = Route.useParams();
+  const { tab = "live", view = "tree" } = Route.useSearch();
+  const { projectId, organizationId } = Route.useLoaderData();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [liveStatusFilter, setLiveStatusFilter] = useState<
+    "all" | Extract<SeoFileStatus, "scheduled" | "published">
+  >("all");
+
   const {
     data: activeProject,
     isLoading: isLoadingProject,
@@ -71,290 +83,369 @@ function PageComponent() {
   );
 
   const {
-    data,
-    isLoading,
-    error,
-    refetch,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery(
-    getApiClientRq().campaigns.list.infiniteOptions({
-      input: (pageParam) => ({
-        organizationId: activeProject?.organizationId ?? "",
-        projectId: activeProject?.id ?? "",
-        limit: 10,
-        cursor: pageParam,
-        status: statusFilter === "all" ? undefined : statusFilter,
-      }),
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) => lastPage.nextPageCursor ?? undefined,
-      enabled: !!activeProject?.id && !isLoadingProject && !projectError,
+    data: loroDoc,
+    error: loroDocError,
+    isLoading: isLoadingLoroDoc,
+    refetch: refetchLoroDoc,
+  } = useQuery(
+    createSyncDocumentQueryOptions({
+      organizationId,
+      projectId,
+      campaignId: null,
     }),
   );
 
-  const allCampaigns: Campaign[] = useMemo(
-    () => data?.pages.flatMap((p) => p.data) ?? [],
-    [data],
+  const treeResult = useMemo(() => {
+    if (!loroDoc) return;
+    return buildTree(loroDoc);
+  }, [loroDoc]);
+
+  const allFiles = useMemo(() => {
+    if (!treeResult?.ok) return [];
+    const files: TreeFile[] = [];
+    traverseTree(treeResult.value, (node) => {
+      if (node.type === "file") files.push(node);
+      return { shouldContinue: true };
+    });
+    return files;
+  }, [treeResult]);
+
+  const liveFiles = useMemo(
+    () =>
+      allFiles.filter(
+        (f) => f.status === "scheduled" || f.status === "published",
+      ),
+    [allFiles],
+  );
+  const plannerFiles = useMemo(
+    () =>
+      allFiles.filter(
+        (f) =>
+          f.status === "planned" ||
+          f.status === "suggested" ||
+          f.status === "generating" ||
+          f.status === "pending-review",
+      ),
+    [allFiles],
   );
 
-  const filtered = allCampaigns.filter((c) =>
-    (c.id ?? "").toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const hasPlannerBacklog = useMemo(() => {
+    return allFiles.some(
+      (f) =>
+        f.status === "planned" ||
+        f.status === "suggested" ||
+        f.status === "pending-review",
+    );
+  }, [allFiles]);
 
-  return (
-    <div className="w-full space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-bold text-3xl tracking-tight">Campaigns</h1>
-          <p className="text-muted-foreground">
-            Manage and monitor your content sessions
-          </p>
-        </div>
-      </div>
-
-      <OverviewCards projectId={activeProject?.id ?? ""} />
-
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-4">
-          <div className="max-w-sm flex-1">
-            <div className="relative">
-              <Icons.Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search campaigns..."
-                value={searchQuery}
-              />
-            </div>
-          </div>
-          <Select
-            onValueChange={(v) =>
-              setStatusFilter(v as RouterInputs["campaigns"]["list"]["status"])
-            }
-            value={statusFilter}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="review-requested">Review Requested</SelectItem>
-              <SelectItem value="review-approved">Review Approved</SelectItem>
-              <SelectItem value="review-denied">Review Denied</SelectItem>
-              <SelectItem value="review-change-requested">
-                Review Change Requested
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <NewCampaignButton
-          organizationId={activeProject?.organizationId ?? ""}
-          projectId={activeProject?.id ?? ""}
-        />
-      </div>
-
-      <LoadingError
-        error={error || projectError}
-        errorDescription="Something went wrong while loading campaigns. Please try again."
-        errorTitle="Error loading campaigns"
-        isLoading={isLoading || isLoadingProject}
-        loadingComponent={<CampaignSkeletons />}
-        onRetry={refetch}
-      />
-
-      {!isLoading && !error && filtered.length === 0 && <EmptyState />}
-
-      {!isLoading && !error && filtered.length > 0 && (
-        <div className="space-y-4">
-          {filtered.map((campaign) => (
-            <CampaignRow campaign={campaign} key={campaign.id} />
-          ))}
-        </div>
-      )}
-
-      {!error && !isLoading && hasNextPage && (
-        <div className="flex justify-center pt-6">
-          <Button
-            disabled={isFetchingNextPage}
-            onClick={() => fetchNextPage()}
-            variant="outline"
-          >
-            {isFetchingNextPage ? "Loading..." : "Load More"}
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-type Campaign = RouterOutputs["campaigns"]["list"]["data"][0];
-function StatusBadge({ status }: { status: Campaign["status"] }) {
-  const variants: Record<
-    Campaign["status"],
-    "default" | "secondary" | "outline" | "destructive"
-  > = {
-    draft: "outline",
-    "review-requested": "secondary",
-    "review-approved": "default",
-    "review-denied": "destructive",
-    "review-change-requested": "secondary",
-  };
-  const labels: Record<Campaign["status"], string> = {
-    draft: "Draft",
-    "review-requested": "Review Requested",
-    "review-approved": "Approved",
-    "review-denied": "Denied",
-    "review-change-requested": "Change Requested",
-  };
-  return <Badge variant={variants[status]}>{labels[status]}</Badge>;
-}
-
-function CampaignRow({ campaign }: { campaign: Campaign }) {
-  const { organizationSlug, projectSlug } = Route.useParams();
-  const updated = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(campaign.updatedAt));
-  const hrefParams = {
-    organizationSlug,
-    projectSlug,
-    campaignId: campaign.id,
-  } as const;
-
-  return (
-    <Card className="relative transition-all duration-200 hover:bg-muted/50 hover:shadow-md">
-      <Link
-        className="absolute inset-0"
-        params={hrefParams}
-        to="/$organizationSlug/$projectSlug/campaign/$campaignId"
-      >
-        <span className="sr-only">Open campaign {campaign.title}</span>
-      </Link>
-      <CardContent>
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <CardTitle className="truncate font-semibold text-lg">
-              {campaign.title}
-            </CardTitle>
-            <div className="mt-1 flex items-center gap-2 text-muted-foreground text-sm">
-              <StatusBadge status={campaign.status} />
-              <span>Created by you</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 text-muted-foreground text-sm">
-            <span>Last Mod {updated}</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="z-10"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <Icons.MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => {
-                    const sessionPath = `${window.location.origin}/${organizationSlug}/${projectSlug}/campaign/${campaign.id}`;
-                    void navigator.clipboard.writeText(sessionPath);
-                  }}
-                >
-                  Copy Session link
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled>Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function CampaignSkeletons() {
-  return (
-    <div className="space-y-4">
-      {Array.from({ length: 6 }, (_, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: skeleton
-        (<Card key={i}>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-sm bg-muted" />
-              <div className="h-6 w-32 rounded bg-muted" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="h-4 w-48 rounded bg-muted" />
-              <div className="h-4 w-24 rounded bg-muted" />
-            </div>
-          </CardContent>
-        </Card>)
-      ))}
-    </div>
-  )
-}
-
-function EmptyState() {
-  return (
-    <div className="py-12 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-        <Icons.Search className="h-6 w-6 text-muted-foreground" />
-      </div>
-      <h3 className="mb-2 font-semibold text-lg">No campaigns found</h3>
-      <p className="mx-auto mb-6 max-w-sm text-muted-foreground">
-        Try adjusting your search or status filter.
-      </p>
-    </div>
-  );
-}
-
-function NewCampaignButton({
-  organizationId,
-  projectId,
-}: {
-  organizationId: string;
-  projectId: string;
-}) {
-  const navigate = useNavigate();
-  const { mutate: createCampaign, isPending } = useMutation(
-    getApiClientRq().campaigns.create.mutationOptions({
-      onSuccess: (data) => {
-        toast.success("Campaign created");
-        void navigate({
-          from: "/$organizationSlug/$projectSlug/campaign",
-          to: "/$organizationSlug/$projectSlug/campaign/$campaignId",
-          params: {
-            campaignId: data.id,
-          },
-        });
+  const liveCounts = useMemo(() => {
+    return liveFiles.reduce(
+      (acc, file) => {
+        acc.total += 1;
+        if (file.status === "scheduled") acc.scheduled += 1;
+        if (file.status === "published") acc.published += 1;
+        return acc;
       },
-      onError: (error) => {
-        toast.error(error.message);
-      },
-    }),
-  );
-  return (
-    <Button
-      isLoading={isPending}
-      onClick={() =>
-        createCampaign({
-          organizationId: organizationId,
-          projectId: projectId,
+      { total: 0, scheduled: 0, published: 0 },
+    );
+  }, [liveFiles]);
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+
+  const liveRows = useMemo(() => {
+    const filteredByStatus = liveFiles.filter((f) => {
+      if (liveStatusFilter === "all") return true;
+      return f.status === liveStatusFilter;
+    });
+    const filteredBySearch = normalizedSearch
+      ? filteredByStatus.filter((f) => {
+          const title = f.name.toLowerCase();
+          const keyword = f.primaryKeyword.toLowerCase();
+          return (
+            title.includes(normalizedSearch) ||
+            keyword.includes(normalizedSearch)
+          );
         })
-      }
-    >
-      <Icons.Plus className="size-4" />
-      New Campaign
-    </Button>
+      : filteredByStatus;
+
+    return filteredBySearch.map((f) => ({
+      id: f.treeId,
+      title: f.name.replace(/\.md$/, ""),
+      author: f.userId,
+      createdAt: f.createdAt,
+      scheduledFor: f.scheduledFor,
+      primaryKeyword: f.primaryKeyword,
+      status: f.status,
+    }));
+  }, [liveFiles, liveStatusFilter, normalizedSearch]);
+
+  const plannerRows = useMemo(() => {
+    const statusOrder: Record<SeoFileStatus, number> = {
+      suggested: 0,
+      planned: 1,
+      generating: 2,
+      "pending-review": 3,
+      scheduled: 4,
+      published: 5,
+      "suggestion-rejected": 6,
+      "review-denied": 7,
+    };
+    const filteredBySearch = normalizedSearch
+      ? plannerFiles.filter((f) => {
+          const title = f.name.toLowerCase();
+          const keyword = f.primaryKeyword.toLowerCase();
+          return (
+            title.includes(normalizedSearch) ||
+            keyword.includes(normalizedSearch)
+          );
+        })
+      : plannerFiles;
+
+    const sorted = [...filteredBySearch].sort((a, b) => {
+      const byStatus = statusOrder[a.status] - statusOrder[b.status];
+      if (byStatus !== 0) return byStatus;
+      const aTime = a.scheduledFor ? new Date(a.scheduledFor).getTime() : 0;
+      const bTime = b.scheduledFor ? new Date(b.scheduledFor).getTime() : 0;
+      return aTime - bTime;
+    });
+
+    return sorted.map((f) => ({
+      id: f.treeId,
+      title: f.name.replace(/\.md$/, ""),
+      author: f.userId,
+      createdAt: f.createdAt,
+      scheduledFor: f.scheduledFor,
+      primaryKeyword: f.primaryKeyword,
+      status: f.status,
+    }));
+  }, [plannerFiles, normalizedSearch]);
+
+  return (
+    <SidebarProvider className="h-full min-h-[calc(100vh-73px)] p-2">
+      <Sidebar className="h-full rounded-md" collapsible="none">
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Content</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={tab === "live"}>
+                  <Link search={{ tab: "live" as const }} to=".">
+                    <Icons.FileText />
+                    Scheduled & Published
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={tab === "planner"}>
+                  <Link search={{ tab: "planner" as const }} to=".">
+                    <Icons.Timer />
+                    Planner
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+
+      <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="border-b p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="font-semibold text-lg">
+                {tab === "planner" ? "Planner" : "Scheduled & Published"}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                {activeProject?.name ?? projectSlug}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button asChild size="sm" variant="outline">
+                <Link
+                  params={{ organizationSlug, projectSlug }}
+                  to="/$organizationSlug/$projectSlug/settings"
+                >
+                  <Icons.Settings className="size-4" />
+                  Project settings
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <LoadingError
+          className="p-6"
+          error={loroDocError || projectError}
+          errorDescription="Something went wrong while loading content. Please try again."
+          errorTitle="Error loading content"
+          isLoading={isLoadingLoroDoc || isLoadingProject}
+          onRetry={refetchLoroDoc}
+        />
+
+        {!isLoadingLoroDoc && !loroDocError && treeResult && !treeResult.ok && (
+          <LoadingError
+            className="p-6"
+            error={treeResult.error}
+            errorTitle="Error loading workspace"
+            isLoading={false}
+          />
+        )}
+
+        {!isLoadingLoroDoc &&
+          !loroDocError &&
+          treeResult?.ok &&
+          tab === "live" &&
+          hasPlannerBacklog && (
+            <div className="p-6 pb-0">
+              <Alert>
+                <Icons.Info className="size-4" />
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <AlertTitle>
+                      There are items waiting in your planner
+                    </AlertTitle>
+                    <AlertDescription>
+                      You have planned/suggested items or items pending review.
+                      Visit the planner to triage and schedule.
+                    </AlertDescription>
+                  </div>
+                  <Button asChild size="sm">
+                    <Link search={{ tab: "planner" as const }} to=".">
+                      Go to planner
+                      <Icons.ArrowRight aria-hidden="true" />
+                    </Link>
+                  </Button>
+                </div>
+              </Alert>
+            </div>
+          )}
+
+        {treeResult?.ok && (
+          <div className="flex-1 space-y-4 p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="relative min-w-[260px] flex-1">
+                <Icons.Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  className="h-10 w-full rounded-md border bg-background pr-3 pl-9 text-sm outline-none"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={
+                    tab === "planner"
+                      ? "Search planner items..."
+                      : "Search published and scheduled articles..."
+                  }
+                  value={searchQuery}
+                />
+              </div>
+
+              {tab === "live" && (
+                <FilterStatus<Extract<SeoFileStatus, "scheduled" | "published">>
+                  label="Status"
+                  onChange={(value) => setLiveStatusFilter(value)}
+                  options={[
+                    { value: "all", label: "All", count: liveCounts.total },
+                    {
+                      value: "scheduled",
+                      label: "Scheduled",
+                      count: liveCounts.scheduled,
+                    },
+                    {
+                      value: "published",
+                      label: "Published",
+                      count: liveCounts.published,
+                    },
+                  ]}
+                  value={liveStatusFilter}
+                >
+                  <Button size="sm" variant="outline">
+                    <Icons.Filter className="size-4" />
+                    Filter
+                  </Button>
+                </FilterStatus>
+              )}
+            </div>
+
+            {tab === "live" && (
+              <>
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground text-sm">
+                    {liveRows.length} articles
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant={view === "tree" ? "default" : "outline"}
+                    >
+                      <Link search={{ view: "tree" as const }} to=".">
+                        <Icons.ListTree className="size-4" />
+                        Tree
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      size="sm"
+                      variant={view === "list" ? "default" : "outline"}
+                    >
+                      <Link search={{ view: "list" as const }} to=".">
+                        <Icons.List className="size-4" />
+                        List
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+
+                {view === "tree" && (
+                  <div className="rounded-md border p-3">
+                    <ArticlesTree
+                      includeFile={(file, filter) => {
+                        if (
+                          file.status !== "scheduled" &&
+                          file.status !== "published"
+                        ) {
+                          return false;
+                        }
+                        if (filter === "all") return true;
+                        return file.status === filter;
+                      }}
+                      onFileSelect={() => {
+                        // stage 3: open editor takeover
+                      }}
+                      statusFilter={
+                        liveStatusFilter === "all"
+                          ? "all"
+                          : (liveStatusFilter as SeoFileStatus)
+                      }
+                      tree={treeResult.value}
+                    />
+                  </div>
+                )}
+
+                {view === "list" && (
+                  <div className="rounded-md border">
+                    <ArticlesTable
+                      onRowClick={() => {
+                        // stage 3: open editor takeover
+                      }}
+                      rows={liveRows}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+            {tab === "planner" && (
+              <div className="rounded-md border">
+                <ArticlesTable
+                  onRowClick={() => {
+                    // stage 6: open dialog-drawer / editor depending on status
+                  }}
+                  rows={plannerRows}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </SidebarProvider>
   );
 }

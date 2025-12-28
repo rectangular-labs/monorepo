@@ -101,7 +101,6 @@ function BusinessBackgroundForm() {
       targetAudience: "",
       caseStudies: [],
       industry: "",
-      serviceRegion: "",
       targetCountryCode: "",
       targetCity: "",
       languageCode: "",
@@ -119,7 +118,6 @@ function BusinessBackgroundForm() {
       targetAudience: activeProject.businessBackground?.targetAudience || "",
       caseStudies: activeProject.businessBackground?.caseStudies || [],
       industry: activeProject.businessBackground?.industry || "",
-      serviceRegion: activeProject.businessBackground?.serviceRegion || "",
       targetCountryCode:
         activeProject.businessBackground?.targetCountryCode || "",
       targetCity: activeProject.businessBackground?.targetCity || "",
@@ -157,7 +155,6 @@ function BusinessBackgroundForm() {
         competitorsWebsites: values.competitorsWebsites,
         industry: values.industry,
         languageCode: values.languageCode,
-        serviceRegion: values.serviceRegion,
         targetCountryCode: values.targetCountryCode,
         targetCity: values.targetCity,
       },
@@ -307,35 +304,6 @@ function BusinessBackgroundForm() {
                     aria-invalid={fieldState.invalid}
                     id={`business-background-${organizationSlug}-${projectSlug}-industry`}
                     placeholder="e.g., SaaS, Healthcare, Retail"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={form.control}
-              name="serviceRegion"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel
-                    htmlFor={`business-background-${organizationSlug}-${projectSlug}-serviceRegion`}
-                  >
-                    Service Region
-                  </FieldLabel>
-                  <FieldDescription>
-                    Where you serve customers. This is your overall footprint
-                    (e.g., Global; EU; US; City, ST; list of countries). For the
-                    primary country used for defaults like search locale, use
-                    Target Country Code below.
-                  </FieldDescription>
-                  <Input
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    id={`business-background-${organizationSlug}-${projectSlug}-serviceRegion`}
-                    placeholder="e.g., Global, US-only, EU"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

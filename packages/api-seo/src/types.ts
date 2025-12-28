@@ -108,15 +108,48 @@ export interface UserFragment {
   header: DocUpdateFragmentHeader;
 }
 
+export type SeoFileStatus =
+  | "suggested"
+  | "planned"
+  | "generating"
+  | "pending-review"
+  | "scheduled"
+  | "published"
+  | "suggestion-rejected"
+  | "review-denied";
+
 export type FsNodePayload =
   | {
       type: "dir";
       name: string;
+      /**
+       * ISO date string
+       */
+      createdAt: string;
       content?: LoroText;
     }
   | {
       type: "file";
       name: string;
+      /**
+       * ISO date string
+       */
+      createdAt: string;
+      status: SeoFileStatus;
+      /**
+       * ISO date string
+       */
+      scheduledFor?: string;
+      notes?: string;
+      userId: string;
+      /**
+       * Primary keyword the content targets.
+       */
+      primaryKeyword: string;
+      /**
+       * workflow identifier for when the content is being generated.
+       */
+      workflowId?: string;
       content: LoroText;
     };
 export type LoroDocMapping = {

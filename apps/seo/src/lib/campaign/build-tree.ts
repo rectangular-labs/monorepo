@@ -131,6 +131,9 @@ function buildTreeForNode(
   }
 
   if (node.data.get("type") === "dir") {
+    const dirNode = node as LoroTreeNode<
+      Extract<FsNodePayload, { type: "dir" }>
+    >;
     const deletion = deletionMap.get(node.id);
 
     const childrenResult =
@@ -162,18 +165,29 @@ function buildTreeForNode(
       type: "dir",
       treeId: node.id,
       parentTreeId,
-      name: node.data.get("name"),
+      name: dirNode.data.get("name"),
+      createdAt: node.data.get("createdAt"),
       path: newPath,
       children,
       changes: changes as TreeDirectory["changes"],
     });
   }
   if (node.data.get("type") === "file") {
+    const fileNode = node as LoroTreeNode<
+      Extract<FsNodePayload, { type: "file" }>
+    >;
     return ok({
       type: "file",
       treeId: node.id,
       parentTreeId,
-      name: node.data.get("name"),
+      name: fileNode.data.get("name"),
+      createdAt: node.data.get("createdAt"),
+      status: fileNode.data.get("status"),
+      scheduledFor: fileNode.data.get("scheduledFor"),
+      notes: fileNode.data.get("notes"),
+      userId: fileNode.data.get("userId"),
+      primaryKeyword: fileNode.data.get("primaryKeyword"),
+      workflowId: fileNode.data.get("workflowId"),
       path: newPath,
       content: node.data.get("content") as LoroText,
       changes: changes as TreeFile["changes"],

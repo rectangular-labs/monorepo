@@ -75,7 +75,6 @@ export function ManageProjectForm({
       websiteUrl: defaultValues?.websiteUrl || "",
       businessOverview: defaultValues?.businessOverview || "",
       targetAudience: defaultValues?.targetAudience || "",
-      serviceRegion: defaultValues?.serviceRegion || "",
       targetCountryCode: defaultValues?.targetCountryCode || "",
       targetCity: defaultValues?.targetCity || "",
       industry: defaultValues?.industry || "",
@@ -91,7 +90,6 @@ export function ManageProjectForm({
       websiteUrl: defaultValues.websiteUrl || "",
       businessOverview: defaultValues.businessOverview || "",
       targetAudience: defaultValues.targetAudience || "",
-      serviceRegion: defaultValues.serviceRegion || "",
       targetCountryCode: defaultValues.targetCountryCode || "",
       targetCity: defaultValues.targetCity || "",
       industry: defaultValues.industry || "",
@@ -184,33 +182,6 @@ export function ManageProjectForm({
                     aria-invalid={fieldState.invalid}
                     id="manage-project-form-industry"
                     placeholder="e.g., SaaS, Healthcare, Retail"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={form.control}
-              name="serviceRegion"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="manage-project-form-serviceRegion">
-                    Service Region
-                  </FieldLabel>
-                  <FieldDescription>
-                    Where you serve customers. This is your overall footprint
-                    (e.g., Global; EU; US; City, ST; list of countries). For the
-                    primary country used for defaults like search locale, use
-                    Target Country Code below.
-                  </FieldDescription>
-                  <Input
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    id="manage-project-form-serviceRegion"
-                    placeholder="e.g., Global, US-only, EU"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
