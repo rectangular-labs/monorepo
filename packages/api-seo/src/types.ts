@@ -61,22 +61,13 @@ export interface InitialContext extends BaseContextWithAuth {
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
   publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
 }
-/**
- * This provides all the necessary context for the websocket server.
- * Today this handles all the chat messages between the user and the assistant.
- */
-export interface WebSocketContext extends InitialContext {
-  senderWebSocket: WebSocket;
-  allWebSockets: WebSocket[];
+
+export interface ChatContext extends InitialContext {
   userId: string;
   sessionId: string;
   projectId: string;
-  campaignId: string;
-  campaignTitle: string;
-  updateCampaignTitle: (title: string) => void;
   organizationId: string;
   roomDocumentMap: Map<string, RoomDocument>;
-  userFragments: Map<HexString, UserFragment>;
   cache: {
     messages?: Record<string, SeoChatMessage>;
     project?: typeof schema.seoProject.$inferSelect & {
@@ -86,6 +77,19 @@ export interface WebSocketContext extends InitialContext {
       accessToken?: string;
     };
   };
+}
+
+/**
+ * This provides all the necessary context for the websocket server.
+ * Today this handles all the chat messages between the user and the assistant.
+ */
+export interface WebSocketContext extends ChatContext {
+  senderWebSocket: WebSocket;
+  allWebSockets: WebSocket[];
+  campaignId: string;
+  campaignTitle: string;
+  updateCampaignTitle: (title: string) => void;
+  userFragments: Map<HexString, UserFragment>;
 }
 
 /**

@@ -1,16 +1,45 @@
-import { ORPCError, streamToEventIterator, type } from "@orpc/server";
-import { uuidv7 } from "@rectangular-labs/db";
+import { ORPCError, os, streamToEventIterator, type } from "@orpc/server";
+import { asyncStorageMiddleware } from "@rectangular-labs/api-core/lib/context-storage";
+import type { Session } from "@rectangular-labs/auth";
+import { type schema, uuidv7 } from "@rectangular-labs/db";
 import { hasToolCall, streamText } from "ai";
+import { type as arkType } from "arktype";
 import { withOrganizationIdBase } from "../context";
-import { getGSCPropertyById } from "../lib/database/gsc-property";
-import { createWriterAgent } from "../lib/ai/writer-agent";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
+import { createWriterAgent } from "../lib/ai/writer-agent";
+import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import type { SeoChatMessage, WebSocketContext } from "../types";
+import type {
+  InitialContext,
+  SeoChatMessage,
+  WebSocketContext,
+} from "../types";
 
-const currentPageSchema = type(
+const currentPageSchema = arkType(
   "'content-planner'|'content-list'|'stats'|'settings'|'article-editor'",
 );
+
+const chatContextMiddleware = os
+  .$context<
+    InitialContext &
+      Session & { organization: typeof schema.organization.$inferSelect }
+  >()
+  .middleware(async ({ next, context }, projectId: string) => {
+    return await next({
+      context: {
+        projectId,
+        organizationId: context.organization.id,
+        userId: context.user.id,
+        sessionId: context.session.id,
+        roomDocumentMap: new Map(),
+        cache: {
+          messages: undefined,
+          project: undefined,
+          gscProperty: undefined,
+        },
+      },
+    });
+  });
 
 export const chat = withOrganizationIdBase
   .route({ method: "POST", path: "/{projectId}/chat" })
@@ -24,18 +53,21 @@ export const chat = withOrganizationIdBase
     }>(),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .use(chatContextMiddleware, (input) => input.projectId)
+  // TODO: clean up this hack to reinitialize the context for the chat items. rn  it runs in a double closure
+  .use(asyncStorageMiddleware<InitialContext>())
   .handler(async ({ context, input }) => {
-    const project: NonNullable<WebSocketContext["cache"]["project"]> | null =
+    const project: WebSocketContext["cache"]["project"] =
       await context.db.query.seoProject.findFirst({
-      where: (table, { and, eq }) =>
-        and(
-          eq(table.id, input.projectId),
-          eq(table.organizationId, context.organization.id),
-        ),
-      with: {
-        authors: true,
-      },
-    });
+        where: (table, { and, eq }) =>
+          and(
+            eq(table.id, input.projectId),
+            eq(table.organizationId, context.organization.id),
+          ),
+        with: {
+          authors: true,
+        },
+      });
     if (!project) {
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
     }
@@ -61,7 +93,7 @@ export const chat = withOrganizationIdBase
       }
       return createStrategistAgent({
         messages: input.messages,
-        gscProperty,
+        gscProperty: gscProperty ?? undefined,
         project,
       });
     })();
@@ -96,5 +128,3 @@ export const chat = withOrganizationIdBase
       }),
     );
   });
-
-

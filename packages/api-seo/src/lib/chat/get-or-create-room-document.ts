@@ -41,19 +41,37 @@ export async function getOrCreateRoomDocument(
       adaptor: new LoroServerAdaptor(),
     },
   };
-  const campaignResult = await getContentCampaignById({
-    db: context.db,
-    id: context.campaignId,
-    projectId: context.projectId,
-    organizationId: context.organizationId,
-  });
+
+  const campaignResult = await (async () => {
+    if (!context.campaignId) {
+      return ok({
+        workspaceBlobUri: getWorkspaceBlobUri({
+          orgId: context.organizationId,
+          projectId: context.projectId,
+          campaignId: undefined,
+        }),
+      });
+    }
+
+    const campaignResult = await getContentCampaignById({
+      db: context.db,
+      id: context.campaignId,
+      projectId: context.projectId,
+      organizationId: context.organizationId,
+    });
+    if (!campaignResult.ok) {
+      return campaignResult;
+    }
+    const campaign = campaignResult.value;
+    if (!campaign) {
+      return err(new Error(`Campaign (${context.campaignId}) not found`));
+    }
+    return ok(campaign);
+  })();
   if (!campaignResult.ok) {
     return campaignResult;
   }
   const campaign = campaignResult.value;
-  if (!campaign) {
-    return err(new Error(`Campaign (${context.campaignId}) not found`));
-  }
 
   switch (roomKey) {
     case getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro): {
