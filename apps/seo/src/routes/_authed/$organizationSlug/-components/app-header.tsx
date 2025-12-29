@@ -188,9 +188,10 @@ export function AppHeader() {
             </TooltipTrigger>
             <TooltipContent side="bottom">
               <KbdGroup>
+                <span>Shortcut:</span>
                 <Kbd>{modKeyLabel}</Kbd>
                 <span>+</span>
-                <Kbd>A</Kbd>
+                <Kbd>e</Kbd>
               </KbdGroup>
             </TooltipContent>
           </Tooltip>

@@ -20,23 +20,11 @@ export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
 
-      const target = event.target as HTMLElement | null;
-      const tagName = target?.tagName?.toLowerCase();
-      const isTypingContext =
-        target?.isContentEditable === true ||
-        tagName === "input" ||
-        tagName === "textarea" ||
-        tagName === "select";
-
-      // Don't steal common shortcuts while the user is typing/selecting in an editor field.
-      if (isTypingContext) return;
-
       const isMod = event.metaKey || event.ctrlKey;
       if (!isMod) return;
       if (event.altKey || event.shiftKey) return;
-      if (event.key.toLowerCase() !== "a") return;
+      if (event.key.toLowerCase() !== "e") return;
 
-      // We are intentionally taking over "Select All" on non-typing surfaces.
       event.preventDefault();
 
       // Toggle the assistant panel.
