@@ -11,6 +11,18 @@ export function SettingsSidebar(params: {
       </div>
       <nav className="flex flex-col gap-6 text-muted-foreground text-sm">
         <NavLink
+          params={params}
+          to="/$organizationSlug/$projectSlug/settings/project"
+        >
+          Project
+        </NavLink>
+        <NavLink
+          params={params}
+          to="/$organizationSlug/$projectSlug/settings/publishing-settings"
+        >
+          Publishing
+        </NavLink>
+        <NavLink
           activeOptions={{
             exact: true,
           }}

@@ -30,7 +30,6 @@ import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useBlocker } from "@tanstack/react-router";
-import { type } from "arktype";
 import { useCallback, useEffect } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -42,19 +41,8 @@ export const Route = createFileRoute(
   component: BusinessBackgroundForm,
 });
 
-const formSchema = type({
-  name: type("string")
-    .atLeastLength(1)
-    .configure({
-      message: () => "Name is required",
-    }),
-  websiteUrl: type("string.url")
-    .atLeastLength(1)
-    .configure({
-      message: () => "Must be a valid URL",
-    }),
-}).merge(businessBackgroundSchema);
-type ManageProjectFormValues = typeof formSchema.infer;
+const formSchema = businessBackgroundSchema;
+type BusinessBackgroundFormValues = typeof formSchema.infer;
 
 function BusinessBackgroundForm() {
   const { organizationSlug, projectSlug } = Route.useParams();
@@ -94,8 +82,6 @@ function BusinessBackgroundForm() {
   const form = useForm({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
-      name: "",
-      websiteUrl: "",
       version: "v1" as const,
       businessOverview: "",
       targetAudience: "",
@@ -110,8 +96,6 @@ function BusinessBackgroundForm() {
   const resetForm = useCallback(() => {
     if (!activeProject) return;
     form.reset({
-      name: activeProject.name || "",
-      websiteUrl: activeProject.websiteUrl || "",
       version: "v1" as const,
       businessOverview:
         activeProject.businessBackground?.businessOverview || "",
@@ -140,7 +124,7 @@ function BusinessBackgroundForm() {
     name: "competitorsWebsites",
   });
 
-  const submitForm = (values: ManageProjectFormValues) => {
+  const submitForm = (values: BusinessBackgroundFormValues) => {
     if (!activeProject) {
       return;
     }
@@ -158,8 +142,6 @@ function BusinessBackgroundForm() {
         targetCountryCode: values.targetCountryCode,
         targetCity: values.targetCity,
       },
-      websiteUrl: values.websiteUrl,
-      name: values.name,
     });
   };
 
@@ -195,52 +177,6 @@ function BusinessBackgroundForm() {
       <AutoHeight contentId={`manage-project-form`}>
         <form className="grid gap-6" onSubmit={form.handleSubmit(submitForm)}>
           <FieldGroup>
-            <Controller
-              control={form.control}
-              name="name"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel
-                    htmlFor={`business-background-${organizationSlug}-${projectSlug}-name`}
-                  >
-                    Name
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    id={`business-background-${organizationSlug}-${projectSlug}-name`}
-                    placeholder="My First Project"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              control={form.control}
-              name="websiteUrl"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel
-                    htmlFor={`business-background-${organizationSlug}-${projectSlug}-websiteUrl`}
-                  >
-                    Website URL
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    id={`business-background-${organizationSlug}-${projectSlug}-websiteUrl`}
-                    placeholder="https://42.com"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
             <Controller
               control={form.control}
               name="businessOverview"

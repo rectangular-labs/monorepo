@@ -124,6 +124,23 @@ export const writingSettingsSchema = type({
     .describe("Named metadata presets used for content generation."),
 });
 
+export const publishingSettingsSchema = type({
+  version: "'v1'",
+  cadence: type({
+    // "daily" => frequency is articles/day
+    // "weekly" => frequency is articles/week
+    // "monthly" => frequency is articles/month
+    period: "'daily' | 'weekly' | 'monthly'",
+    frequency: "number.integer >= 1",
+    // Days that are eligible for publishing. Deselecting a day means we won't publish on that day.
+    allowedDays: type(
+      "'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'",
+    ).array(),
+  }),
+  requireContentReview: "boolean",
+  requireSuggestionReview: "boolean",
+});
+
 export const authorSettingsSchema = type({
   name: type("string").describe("The name of the author."),
   title: type("string").describe("The title of the author."),

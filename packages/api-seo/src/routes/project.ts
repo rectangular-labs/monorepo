@@ -18,6 +18,7 @@ import { metrics } from "./project.metrics";
 import {
   getBusinessBackground,
   getImageSettings,
+  getPublishingSettings,
   getWritingSettings,
   uploadProjectImage,
   upsertAuthors,
@@ -85,6 +86,7 @@ const get = withOrganizationIdBase
       "imageSettings",
       "writingSettings",
       "serpSnapshot",
+      "publishingSettings",
     ),
   )
   .handler(async ({ context, input }) => {
@@ -407,6 +409,7 @@ export default withOrganizationIdBase
     get,
     getBusinessBackground,
     getImageSettings,
+    getPublishingSettings,
     getWritingSettings,
     setUpWorkspace,
     metrics,

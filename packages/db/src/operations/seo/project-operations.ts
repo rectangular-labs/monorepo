@@ -2,6 +2,7 @@ import type { serpTrafficSchema } from "@rectangular-labs/core/schemas/keyword-p
 import type {
   businessBackgroundSchema,
   imageSettingsSchema,
+  publishingSettingsSchema,
   writingSettingsSchema,
 } from "@rectangular-labs/core/schemas/project-parsers";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
@@ -74,6 +75,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
   I extends boolean = false,
   A extends boolean = false,
   S extends boolean = false,
+  P extends boolean = false,
 >(
   db: DB,
   identifier: string,
@@ -83,6 +85,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
     imageSettings?: I;
     writingSettings?: A;
     serpSnapshot?: S;
+    publishingSettings?: P;
   },
 ): Promise<
   Result<
@@ -92,6 +95,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
         | "imageSettings"
         | "writingSettings"
         | "serpSnapshot"
+        | "publishingSettings"
       > &
         (B extends true
           ? { businessBackground: typeof businessBackgroundSchema.infer | null }
@@ -104,6 +108,11 @@ export async function getSeoProjectByIdentifierAndOrgId<
           : Record<string, never>) &
         (S extends true
           ? { serpSnapshot: typeof serpTrafficSchema.infer | null }
+          : Record<string, never>) &
+        (P extends true
+          ? {
+              publishingSettings: typeof publishingSettingsSchema.infer | null;
+            }
           : Record<string, never>))
     | null,
     Error
