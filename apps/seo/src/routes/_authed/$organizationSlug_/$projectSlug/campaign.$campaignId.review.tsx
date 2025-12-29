@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Pending } from "~/components/pending";
 import { getApiClientRq } from "~/lib/api";
 import { buildTree } from "~/lib/campaign/build-tree";
-import { createSyncDocumentQueryOptions } from "~/lib/campaign/sync";
+import { createPullDocumentQueryOptions } from "~/lib/campaign/sync";
 import { LoadingError } from "../../-components/loading-error";
 import { ReviewPanel } from "../-components/review/panel";
 
@@ -33,6 +33,7 @@ export const Route = createFileRoute(
 
 function PageComponent() {
   const { projectId, organizationId, campaignId } = Route.useLoaderData();
+  const queryClient = Route.useRouteContext({ select: (s) => s.queryClient });
 
   const {
     data: campaignLoroDoc,
@@ -40,7 +41,12 @@ function PageComponent() {
     isLoading: isLoadingCampaignLoroDoc,
     refetch: refetchCampaignLoroDoc,
   } = useQuery(
-    createSyncDocumentQueryOptions({ organizationId, projectId, campaignId }),
+    createPullDocumentQueryOptions({
+      organizationId,
+      projectId,
+      campaignId,
+      queryClient,
+    }),
   );
   const {
     data: mainLoroDoc,
@@ -48,10 +54,11 @@ function PageComponent() {
     isLoading: isLoadingMainLoroDoc,
     refetch: refetchMainLoroDoc,
   } = useQuery(
-    createSyncDocumentQueryOptions({
+    createPullDocumentQueryOptions({
       organizationId,
       projectId,
       campaignId: null,
+      queryClient,
     }),
   );
 

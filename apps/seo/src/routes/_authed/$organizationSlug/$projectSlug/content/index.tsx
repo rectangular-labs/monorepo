@@ -18,7 +18,7 @@ import {
   type TreeFile,
   traverseTree,
 } from "~/lib/campaign/build-tree";
-import { createSyncDocumentQueryOptions } from "~/lib/campaign/sync";
+import { createPullDocumentQueryOptions } from "~/lib/campaign/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-table";
 import { ArticlesTree } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-tree";
@@ -57,6 +57,7 @@ function PageComponent() {
   const { view } = Route.useSearch();
   const { projectId, organizationId } = Route.useLoaderData();
   const navigate = Route.useNavigate();
+  const queryClient = Route.useRouteContext({ select: (s) => s.queryClient });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [liveStatusFilter, setLiveStatusFilter] = useState<
@@ -98,10 +99,11 @@ function PageComponent() {
     isLoading: isLoadingLoroDoc,
     refetch: refetchLoroDoc,
   } = useQuery(
-    createSyncDocumentQueryOptions({
+    createPullDocumentQueryOptions({
       organizationId,
       projectId,
       campaignId: null,
+      queryClient,
     }),
   );
 
@@ -298,8 +300,12 @@ function PageComponent() {
                   if (filter === "all") return true;
                   return file.status === filter;
                 }}
-                onFileSelect={() => {
-                  // stage 3: open editor takeover
+                onFileSelect={(fileTreeId) => {
+                  const file = liveFiles.find((f) => f.treeId === fileTreeId);
+                  if (!file) return;
+                  navigate({
+                    search: (prev) => ({ ...prev, file: file.path }),
+                  });
                 }}
                 statusFilter={
                   liveStatusFilter === "all"
@@ -314,8 +320,12 @@ function PageComponent() {
           {activeView === "list" && (
             <div className="rounded-md border">
               <ArticlesTable
-                onRowClick={() => {
-                  // stage 3: open editor takeover
+                onRowClick={(row) => {
+                  const file = liveFiles.find((f) => f.treeId === row.id);
+                  if (!file) return;
+                  navigate({
+                    search: (prev) => ({ ...prev, file: file.path }),
+                  });
                 }}
                 rows={liveRows}
               />

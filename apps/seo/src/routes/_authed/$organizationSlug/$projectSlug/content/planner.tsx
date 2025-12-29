@@ -8,10 +8,10 @@ import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import {
   buildTree,
-  traverseTree,
   type TreeFile,
+  traverseTree,
 } from "~/lib/campaign/build-tree";
-import { createSyncDocumentQueryOptions } from "~/lib/campaign/sync";
+import { createPullDocumentQueryOptions } from "~/lib/campaign/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "./-components/articles-table";
 
@@ -39,6 +39,8 @@ export const Route = createFileRoute(
 function PlannerPage() {
   const { organizationSlug, projectSlug } = Route.useParams();
   const { projectId, organizationId } = Route.useLoaderData();
+  const queryClient = Route.useRouteContext({ select: (s) => s.queryClient });
+  const navigate = Route.useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -61,10 +63,11 @@ function PlannerPage() {
     isLoading: isLoadingLoroDoc,
     refetch: refetchLoroDoc,
   } = useQuery(
-    createSyncDocumentQueryOptions({
+    createPullDocumentQueryOptions({
       organizationId,
       projectId,
       campaignId: null,
+      queryClient,
     }),
   );
 
@@ -186,8 +189,12 @@ function PlannerPage() {
 
           <div className="rounded-md border">
             <ArticlesTable
-              onRowClick={() => {
-                // stage 6: open dialog-drawer / editor depending on status
+              onRowClick={(row) => {
+                const file = plannerFiles.find((f) => f.treeId === row.id);
+                if (!file) return;
+                navigate({
+                  search: (prev) => ({ ...prev, file: file.path }),
+                });
               }}
               rows={plannerRows}
             />
@@ -197,5 +204,3 @@ function PlannerPage() {
     </div>
   );
 }
-
-

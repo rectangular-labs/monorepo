@@ -1,14 +1,51 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { type } from "arktype";
+import { getApiClientRq } from "~/lib/api";
 import { NavLink } from "~/routes/_authed/-components/nav-link";
+import { ArticleEditorTakeover } from "./-components/article-editor-takeover";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/content",
 )({
+  validateSearch: type({
+    "file?": "string",
+  }),
+  loader: async ({ context, params }) => {
+    const activeProject = await context.queryClient.ensureQueryData(
+      getApiClientRq().project.get.queryOptions({
+        input: {
+          organizationIdentifier: params.organizationSlug,
+          identifier: params.projectSlug,
+        },
+      }),
+    );
+
+    return {
+      projectId: activeProject.id,
+      organizationId: activeProject.organizationId,
+    };
+  },
   component: ContentLayout,
 });
 
 function ContentLayout() {
   const { organizationSlug, projectSlug } = Route.useParams();
+  const { file } = Route.useSearch();
+  const { projectId, organizationId } = Route.useLoaderData();
+
+  if (file) {
+    return (
+      <div className="h-full w-full">
+        <ArticleEditorTakeover
+          file={file}
+          organizationId={organizationId}
+          organizationSlug={organizationSlug}
+          projectId={projectId}
+          projectSlug={projectSlug}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full flex-col md:flex-row">
