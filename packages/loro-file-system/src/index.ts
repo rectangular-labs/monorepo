@@ -1,4 +1,9 @@
-import { LoroText, type LoroTree, type LoroTreeNode } from "loro-crdt";
+import {
+  type Container,
+  LoroText,
+  type LoroTree,
+  type LoroTreeNode,
+} from "loro-crdt";
 import { createNodesForPath } from "./utils/create-nodes-for-path";
 import { resolvePath } from "./utils/resolve-path";
 import { traverseNode } from "./utils/traverse-node";
@@ -225,12 +230,14 @@ export function writeToFile<
   content,
   createIfMissing = false,
   contentMapKey = "content",
+  metadata,
 }: {
   tree: LoroTree<T>;
   path: string;
   content: string;
   createIfMissing?: boolean;
   contentMapKey?: string;
+  metadata?: { key: string; value: string }[] | undefined;
 }): { success: true } | { success: false; message: string } {
   const node = resolvePath({ tree, path });
   if (!node) {
@@ -243,6 +250,7 @@ export function writeToFile<
         content,
         createIfMissing: false,
         contentMapKey,
+        metadata,
       });
     }
     return { success: false, message: `Path ${path} not found` };
@@ -260,6 +268,15 @@ export function writeToFile<
       message: `Content at ${contentMapKey} was not found`,
     };
   }
+
+  if (metadata && metadata.length > 0) {
+    for (const item of metadata) {
+      const key = item.key?.trim();
+      if (!key) continue;
+      node.data.set(key, item.value as Exclude<T[string], Container>);
+    }
+  }
+
   textContainer.updateByLine(content);
   return { success: true };
 }

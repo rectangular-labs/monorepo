@@ -33,6 +33,10 @@ const writeFileInputSchema = type({
   path: "string",
   content: "string",
   "createIfMissing?": "boolean",
+  "metadata?": type({
+    key: "string",
+    value: "string",
+  }).array(),
 });
 
 export function createFileToolsWithMetadata() {
@@ -104,10 +108,10 @@ export function createFileToolsWithMetadata() {
     inputSchema: jsonSchema<typeof writeFileInputSchema.infer>(
       writeFileInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute({ path, content, createIfMissing }) {
+    async execute({ path, content, createIfMissing, metadata }) {
       return await withLoroTree({
         handler: ({ tree }) =>
-          writeToFile({ tree, path, content, createIfMissing }),
+          writeToFile({ tree, path, content, createIfMissing, metadata }),
         shouldPersist: (result) => result.success === true,
       });
     },
