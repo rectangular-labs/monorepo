@@ -228,6 +228,7 @@ const remove = withOrganizationIdBase
     return { success: true } as const;
   });
 
+// TODO (sync): consolidate handling of campaigns and forking
 const pullDocument = withOrganizationIdBase
   .route({ method: "GET", path: "/{projectId}/pull-document" })
   .input(
@@ -371,10 +372,6 @@ const pushDocument = withOrganizationIdBase
       });
     }
 
-    const baseVersion = new VersionVector(
-      new Uint8Array(await input.opLogVersion.arrayBuffer()),
-    );
-
     const doc = new LoroDoc();
     doc.import(requestedBlob);
     doc.import(new Uint8Array(await input.blobUpdate.arrayBuffer()));
@@ -385,10 +382,12 @@ const pushDocument = withOrganizationIdBase
       doc.export({ mode: "snapshot" }),
     );
 
-    // Return server updates since the client's base version (includes the client's update).
+    // Return server updates since the client's version.
     const mergedUpdates = doc.export({
       mode: "update",
-      from: baseVersion,
+      from: new VersionVector(
+        new Uint8Array(await input.opLogVersion.arrayBuffer()),
+      ),
     });
 
     return {
@@ -408,8 +407,8 @@ export default withOrganizationIdBase
     checkName,
     get,
     getBusinessBackground,
-    getImageSettings,
     getPublishingSettings,
+    getImageSettings,
     getWritingSettings,
     setUpWorkspace,
     metrics,

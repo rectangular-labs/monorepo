@@ -1,7 +1,6 @@
 import { getWorkspaceBlobUri } from "@rectangular-labs/api-seo/client";
 import type { LoroDocMapping } from "@rectangular-labs/api-seo/types";
-import { safe, safeSync } from "@rectangular-labs/result";
-import type { QueryClient } from "@tanstack/react-query";
+import { safeSync } from "@rectangular-labs/result";
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { del as idbDel, get as idbGet, set as idbSet } from "idb-keyval";
 import { LoroDoc, VersionVector } from "loro-crdt";
@@ -15,101 +14,98 @@ type WorkspaceSyncState = {
   /**
    * Encoded VersionVector bytes.
    */
-  serverOplogVersion: Uint8Array;
+  syncedOplogVersion: Uint8Array;
   /**
    * ISO date string
    */
   lastSyncedAt: string;
+  /**
+   * The snapshot of the document.
+   */
+  snapshot: Uint8Array;
 };
+
+async function consolidateAndStoreServerUpdate({
+  doc,
+  serverUpdateBlob,
+  idbKey,
+}: {
+  doc: LoroDoc<LoroDocMapping>;
+  serverUpdateBlob: Blob;
+  idbKey: string;
+}) {
+  const docUpdates = new Uint8Array(await serverUpdateBlob.arrayBuffer());
+  if (docUpdates.byteLength > 0) {
+    const importResult = safeSync(() => doc.import(docUpdates));
+    if (!importResult.ok) {
+      // error importing blob, delete it from idb and resync from server.
+      // This would throw, and we would resync when the query is retried.
+      await idbDel(idbKey);
+      throw importResult.error;
+    }
+  }
+  const syncState: WorkspaceSyncState = {
+    syncedOplogVersion: doc.oplogVersion().encode(),
+    lastSyncedAt: new Date().toISOString(),
+    snapshot: doc.export({ mode: "snapshot" }),
+  };
+  await idbSet(idbKey, syncState);
+}
 
 export function createPullDocumentQueryOptions({
   organizationId,
   projectId,
   campaignId,
-  queryClient,
 }: {
   organizationId: string;
   projectId: string;
   campaignId: string | null;
-  queryClient?: QueryClient;
 }) {
+  const queryKey = ["pullDocument", organizationId, projectId, campaignId];
   return queryOptions({
-    queryKey: ["pullDocument", organizationId, projectId, campaignId],
-    queryFn: async () => {
-      const idbKey = getWorkspaceBlobUri({
-        orgId: organizationId,
-        projectId,
-        campaignId,
-      });
-      const campaignBlob = await idbGet<Uint8Array>(idbKey);
+    queryKey,
+    queryFn: async ({ client }) => {
+      const idbKey = getWorkspaceSyncKey(
+        getWorkspaceBlobUri({
+          orgId: organizationId,
+          projectId,
+          campaignId,
+        }),
+      );
+      const syncState = await idbGet<WorkspaceSyncState>(idbKey);
       const doc = new LoroDoc<LoroDocMapping>();
-      if (campaignBlob) {
-        const importResult = safeSync(() => doc.import(campaignBlob));
+      if (syncState) {
+        const importResult = safeSync(() => doc.import(syncState.snapshot));
         if (!importResult.ok) {
           await idbDel(idbKey);
           throw importResult.error;
         }
       }
 
-      const initialDoc = doc;
-
-      const floatingSync = (async () => {
-        const pullResult = await getApiClient().project.pullDocument({
+      const floatingSync = getApiClient()
+        .project.pullDocument({
           projectId,
           campaignId,
           organizationIdentifier: organizationId,
-          opLogVersion: new Blob([
-            new Uint8Array(initialDoc.oplogVersion().encode()),
-          ]),
+          opLogVersion: new Blob([new Uint8Array(doc.oplogVersion().encode())]),
+        })
+        .then(async (pullResult) => {
+          await consolidateAndStoreServerUpdate({
+            doc,
+            serverUpdateBlob: pullResult.blob,
+            idbKey,
+          });
+          client.setQueryData(queryKey, doc);
+          return doc;
         });
 
-        const docUpdates = new Uint8Array(await pullResult.blob.arrayBuffer());
-        const updatedDoc = new LoroDoc<LoroDocMapping>();
-        updatedDoc.import(initialDoc.export({ mode: "snapshot" }));
-
-        if (docUpdates.byteLength > 0) {
-          const importResult = await safe(async () =>
-            updatedDoc.import(docUpdates),
-          );
-          if (!importResult.ok) {
-            // error importing blob, delete it from idb and resync from server.
-            await idbDel(idbKey);
-            throw importResult.error;
-          }
-        }
-
-        await idbSet(idbKey, updatedDoc.export({ mode: "snapshot" }));
-        const syncState: WorkspaceSyncState = {
-          serverOplogVersion: new Uint8Array(
-            await pullResult.opLogVersion.arrayBuffer(),
-          ),
-          lastSyncedAt: new Date().toISOString(),
-        };
-        await idbSet(getWorkspaceSyncKey(idbKey), syncState);
-
-        if (queryClient) {
-          queryClient.setQueryData(
-            ["pullDocument", organizationId, projectId, campaignId],
-            updatedDoc,
-          );
-        }
-      })();
-
       // If we have cached data, return immediately and let the network run in the background.
-      if (campaignBlob) {
+      if (syncState) {
         void floatingSync;
-        return initialDoc;
+        return doc;
       }
-
       // No cached data — block on the network for first load.
-      await floatingSync;
-      const latest = queryClient?.getQueryData<LoroDoc<LoroDocMapping>>([
-        "pullDocument",
-        organizationId,
-        projectId,
-        campaignId,
-      ]);
-      return latest ?? initialDoc;
+      return await floatingSync;
     },
     enabled: !!organizationId && !!projectId,
     staleTime: 1000 * 30, // 30 seconds
@@ -126,73 +122,149 @@ export function createPushDocumentQueryOptions({
   projectId: string;
   campaignId: string | null;
 }) {
+  type PushOperation =
+    | {
+        type: "writeToFile";
+        /**
+         * Absolute workspace path, e.g. `/seo-guides/how-to.md`
+         */
+        path: string;
+        content?: string;
+        createIfMissing?: boolean;
+        metadata?: { key: string; value: string }[] | undefined;
+      }
+    | {
+        type: "setMetadata";
+        /**
+         * Absolute workspace path, e.g. `/seo-guides/how-to.md`
+         */
+        path: string;
+        metadata: { key: string; value: string }[];
+      };
   return mutationOptions({
     mutationKey: ["pushDocument", organizationId, projectId, campaignId],
-    mutationFn: async ({
-      doc,
-      workspaceFilePath,
-      nextMarkdown,
-    }: {
-      doc: LoroDoc<LoroDocMapping>;
-      /**
-       * Absolute workspace path, e.g. `/seo-guides/how-to.md`
-       */
-      workspaceFilePath: string;
-      nextMarkdown: string;
-    }) => {
-      const idbKey = getWorkspaceBlobUri({
-        orgId: organizationId,
-        projectId,
-        campaignId,
-      });
-      const syncState =
-        (await idbGet<WorkspaceSyncState>(getWorkspaceSyncKey(idbKey))) ??
-        ({
-          serverOplogVersion: new Uint8Array(doc.oplogVersion().encode()),
-          lastSyncedAt: new Date(0).toISOString(),
-        } satisfies WorkspaceSyncState);
-
-      // Update local document & persist immediately for offline safety.
-      const { writeToFile } = await import(
-        "@rectangular-labs/loro-file-system"
+    mutationFn: async (
+      {
+        doc,
+        operations,
+      }: {
+        doc: LoroDoc<LoroDocMapping>;
+        operations: PushOperation[];
+      },
+      { client },
+    ) => {
+      const idbKey = getWorkspaceSyncKey(
+        getWorkspaceBlobUri({
+          orgId: organizationId,
+          projectId,
+          campaignId,
+        }),
       );
-      writeToFile({
-        tree: doc.getTree("fs"),
-        path: workspaceFilePath,
-        content: nextMarkdown,
-      });
-      await idbSet(idbKey, doc.export({ mode: "snapshot" }));
-
-      const base = new VersionVector(syncState.serverOplogVersion);
-      const blobUpdate = doc.export({ mode: "update", from: base });
-
-      const pushResult = await getApiClient().project.pushDocument({
-        projectId,
-        campaignId,
-        organizationIdentifier: organizationId,
-        opLogVersion: new Blob([new Uint8Array(syncState.serverOplogVersion)]),
-        blobUpdate: new Blob([new Uint8Array(blobUpdate)]),
-      });
-
-      const serverUpdates = new Uint8Array(await pushResult.blob.arrayBuffer());
-      if (serverUpdates.byteLength > 0) {
-        const importResult = await safe(async () => doc.import(serverUpdates));
-        if (!importResult.ok) {
-          await idbDel(idbKey);
-          throw importResult.error;
-        }
-        await idbSet(idbKey, doc.export({ mode: "snapshot" }));
+      let syncState = await idbGet<WorkspaceSyncState>(idbKey);
+      if (!syncState) {
+        // this should be super unlikely (i.e. user somehow manually cleared their cache). In case it happens, we just pull the document from the server.
+        await client.fetchQuery(
+          createPullDocumentQueryOptions({
+            organizationId,
+            projectId,
+            campaignId,
+          }),
+        );
+        syncState = await idbGet<WorkspaceSyncState>(
+          getWorkspaceSyncKey(idbKey),
+        );
+      }
+      if (!syncState) {
+        throw new Error("Failed to find existing document");
       }
 
-      const nextSyncState: WorkspaceSyncState = {
-        serverOplogVersion: new Uint8Array(
-          await pushResult.opLogVersion.arrayBuffer(),
-        ),
-        lastSyncedAt: new Date().toISOString(),
-      };
-      await idbSet(getWorkspaceSyncKey(idbKey), nextSyncState);
+      // Update local document & persist immediately for offline safety.
+      const { resolvePath, writeToFile } = await import(
+        "@rectangular-labs/loro-file-system"
+      );
+      const tree = doc.getTree("fs");
+      for (const operation of operations) {
+        switch (operation.type) {
+          case "writeToFile": {
+            const result = writeToFile({
+              tree,
+              path: operation.path,
+              content: operation.content,
+              createIfMissing: operation.createIfMissing ?? false,
+              metadata: operation.metadata,
+            });
+            if (!result.success) {
+              throw new Error(result.message);
+            }
+            break;
+          }
+          case "setMetadata": {
+            const node = resolvePath({ tree, path: operation.path });
+            if (!node) {
+              throw new Error(`Path ${operation.path} not found`);
+            }
+            if (node.data.get("type") !== "file") {
+              throw new Error(
+                `Cannot set metadata on ${operation.path} because it is not a file`,
+              );
+            }
+            const result = writeToFile({
+              tree,
+              path: operation.path,
+              // no-op content write; just apply metadata
+              content: undefined,
+              createIfMissing: false,
+              metadata: operation.metadata,
+            });
+            if (!result.success) {
+              throw new Error(result.message);
+            }
+            break;
+          }
+          default: {
+            const _never: never = operation;
+            throw new Error(`Unsupported operation`);
+          }
+        }
+      }
+      await idbSet(idbKey, {
+        ...syncState,
+        snapshot: doc.export({ mode: "snapshot" }),
+      });
 
-      return { lastSyncedAt: nextSyncState.lastSyncedAt } as const;
+      const base = new VersionVector(syncState.syncedOplogVersion);
+      void getApiClient()
+        .project.pushDocument({
+          projectId,
+          campaignId,
+          organizationIdentifier: organizationId,
+          opLogVersion: new Blob([new Uint8Array(doc.oplogVersion().encode())]),
+          blobUpdate: new Blob([
+            new Uint8Array(doc.export({ mode: "update", from: base })),
+          ]),
+        })
+        .then(async (pushResult) => {
+          await consolidateAndStoreServerUpdate({
+            doc,
+            serverUpdateBlob: pushResult.blob,
+            idbKey,
+          });
+          return pushResult;
+        })
+        .catch((error) => {
+          console.log("error", error);
+          const message =
+            error instanceof Error ? error.message.toLowerCase() : "";
+          const isNetworkError =
+            error instanceof TypeError ||
+            message.includes("network") ||
+            message.includes("fetch");
+          if (!isNetworkError) {
+            throw error;
+          }
+        });
+
+      return { success: true, lastSyncedAt: new Date().toISOString() } as const;
     },
   });
 }

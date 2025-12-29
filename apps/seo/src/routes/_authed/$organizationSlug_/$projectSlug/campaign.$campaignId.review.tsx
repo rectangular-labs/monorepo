@@ -33,7 +33,6 @@ export const Route = createFileRoute(
 
 function PageComponent() {
   const { projectId, organizationId, campaignId } = Route.useLoaderData();
-  const queryClient = Route.useRouteContext({ select: (s) => s.queryClient });
 
   const {
     data: campaignLoroDoc,
@@ -45,7 +44,6 @@ function PageComponent() {
       organizationId,
       projectId,
       campaignId,
-      queryClient,
     }),
   );
   const {
@@ -58,7 +56,6 @@ function PageComponent() {
       organizationId,
       projectId,
       campaignId: null,
-      queryClient,
     }),
   );
 

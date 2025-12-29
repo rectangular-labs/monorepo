@@ -57,7 +57,6 @@ function PageComponent() {
   const { view } = Route.useSearch();
   const { projectId, organizationId } = Route.useLoaderData();
   const navigate = Route.useNavigate();
-  const queryClient = Route.useRouteContext({ select: (s) => s.queryClient });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [liveStatusFilter, setLiveStatusFilter] = useState<
@@ -103,7 +102,6 @@ function PageComponent() {
       organizationId,
       projectId,
       campaignId: null,
-      queryClient,
     }),
   );
 
