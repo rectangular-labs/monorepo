@@ -78,7 +78,8 @@ function RouteComponent() {
       </ul>
 
       <ProjectChatLayout>
-        <div className="mx-auto w-full max-w-7xl">
+        {/* 100px to account for the header */}
+        <div className="flex max-h-[calc(100vh-100px)] w-full justify-center overflow-y-auto">
           <Outlet />
         </div>
       </ProjectChatLayout>

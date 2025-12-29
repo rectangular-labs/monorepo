@@ -58,11 +58,7 @@ export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
         className="h-full max-h-[calc(100vh-100px)] min-h-0 flex-1"
         direction="horizontal"
       >
-        <ResizablePanel
-          className="overflow-y-auto"
-          defaultSize={70}
-          minSize={45}
-        >
+        <ResizablePanel defaultSize={70} minSize={45}>
           {children}
         </ResizablePanel>
         <ResizableHandle withHandle />

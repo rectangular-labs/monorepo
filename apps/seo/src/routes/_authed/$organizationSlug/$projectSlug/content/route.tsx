@@ -48,7 +48,7 @@ function ContentLayout() {
   }
 
   return (
-    <div className="flex h-full w-full flex-col md:flex-row">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col md:flex-row">
       {/* 100px to account for the header */}
       <aside className="shrink-0 px-4 pt-6 md:sticky md:top-0 md:h-fit md:min-h-[calc(100vh-100px)] md:w-64 md:border-r">
         <div className="mb-4">
