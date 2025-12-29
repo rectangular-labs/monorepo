@@ -1,5 +1,8 @@
-import type { ManageProjectFormValues } from "../../-components/manage-project-form";
+import type { understandSiteTaskOutputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { type OnboardingStep, OnboardingSteps } from "./steps";
+
+type UnderstandSiteWebsiteInfo =
+  (typeof understandSiteTaskOutputSchema.infer)["websiteInfo"];
 
 /**
  * Type-safe metadata for each onboarding step
@@ -23,7 +26,7 @@ export interface OnboardingMetadata {
     organizationId: string;
   };
   "understanding-site": Partial<
-    ManageProjectFormValues & {
+    UnderstandSiteWebsiteInfo & {
       projectId: string;
       organizationId: string;
       websiteUrl: string;
