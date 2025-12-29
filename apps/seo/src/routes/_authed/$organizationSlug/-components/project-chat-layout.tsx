@@ -9,11 +9,56 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@rectangular-labs/ui/components/ui/resizable";
+import { useEffect } from "react";
 import { ProjectChatPanel } from "./project-chat-panel";
 import { useProjectChat } from "./project-chat-provider";
 
 export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
   const { isOpen, isDesktop, close, open } = useProjectChat();
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isTypingContext =
+        target?.isContentEditable === true ||
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select";
+
+      // Don't steal common shortcuts while the user is typing/selecting in an editor field.
+      if (isTypingContext) return;
+
+      const isMod = event.metaKey || event.ctrlKey;
+      if (!isMod) return;
+      if (event.altKey || event.shiftKey) return;
+      if (event.key.toLowerCase() !== "a") return;
+
+      // We are intentionally taking over "Select All" on non-typing surfaces.
+      event.preventDefault();
+
+      // Toggle the assistant panel.
+      if (isOpen) {
+        close();
+        return;
+      }
+
+      open();
+
+      // Try to focus the chat textarea once it mounts (best-effort).
+      requestAnimationFrame(() => {
+        const textarea = document.querySelector<HTMLTextAreaElement>(
+          'textarea[name="message"]',
+        );
+        textarea?.focus();
+      });
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [close, isOpen, open]);
 
   if (!isOpen) {
     return <>{children}</>;

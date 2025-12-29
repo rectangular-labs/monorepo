@@ -46,9 +46,8 @@ function useMediaQuery(query: string) {
 
 function inferCurrentPage(pathname: string): ProjectChatCurrentPage {
   if (pathname.includes("/content")) return "content-list";
-  if (pathname.includes("/stats")) return "stats";
   if (pathname.includes("/settings")) return "settings";
-  return "settings";
+  return "stats";
 }
 
 export function ProjectChatProvider({
