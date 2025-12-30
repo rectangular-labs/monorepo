@@ -9,8 +9,8 @@ import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/cor
 import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
-import type { LoroText, LoroTree } from "loro-crdt";
 import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
+import type { createMakeSuggestionsToolWithMetadata } from "./lib/ai/tools/make-suggestions-tool";
 import type { createMessagesToolsWithMetadata } from "./lib/ai/tools/message-tools";
 import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
 import type { createSkillTools } from "./lib/ai/tools/skill-tools";
@@ -33,7 +33,8 @@ type AiTools = InferUITools<
   ReturnType<typeof createSkillTools> &
     ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
     ReturnType<typeof createMessagesToolsWithMetadata>["tools"] &
-    ReturnType<typeof createTodoToolWithMetadata>["tools"]
+    ReturnType<typeof createTodoToolWithMetadata>["tools"] &
+    ReturnType<typeof createMakeSuggestionsToolWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
   typeof contentCampaignMessageMetadataSchema.infer,
@@ -111,51 +112,3 @@ export interface UserFragment {
   received: number;
   header: DocUpdateFragmentHeader;
 }
-
-export type SeoFileStatus =
-  | "suggested"
-  | "planned"
-  | "generating"
-  | "pending-review"
-  | "scheduled"
-  | "published"
-  | "suggestion-rejected"
-  | "review-denied";
-
-export type FsNodePayload =
-  | {
-      type: "dir";
-      name: string;
-      /**
-       * ISO date string
-       */
-      createdAt: string;
-      content?: LoroText;
-    }
-  | {
-      type: "file";
-      name: string;
-      /**
-       * ISO date string
-       */
-      createdAt: string;
-      status: SeoFileStatus;
-      /**
-       * ISO date string
-       */
-      scheduledFor?: string;
-      notes?: string;
-      userId: string;
-      /**
-       * Primary keyword the content targets.
-       */
-      primaryKeyword: string;
-      /**
-       * workflow identifier for when the content is being generated.
-       */
-      workflowId?: string;
-      content: LoroText;
-    };
-export type LoroDocMapping = {
-  fs: LoroTree<FsNodePayload>;
-};

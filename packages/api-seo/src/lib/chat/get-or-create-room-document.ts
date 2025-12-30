@@ -1,3 +1,4 @@
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { getContentCampaignById } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import { LoroServerAdaptor } from "loro-adaptors/loro";
@@ -6,7 +7,6 @@ import { getWebsocketContext } from "../../context";
 import type { RoomDocument } from "../../types";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../workspace/constants";
 import { forkAndUpdateWorkspaceBlob } from "../workspace/fork-workspace-blob";
-import { getWorkspaceBlobUri } from "../workspace/get-workspace-blob-uri";
 import { getRoomKey } from "./get-room-key";
 
 /**

@@ -11,6 +11,18 @@
     "./schemas/*": {
       "types": "./dist/schemas/*.d.ts",
       "default": "./src/schemas/*.ts"
+    },
+    "./project/*": {
+      "types": "./dist/lib/project/*.d.ts",
+      "default": "./src/lib/project/*.ts"
+    },
+    "./workspace/*": {
+      "types": "./dist/lib/workspace/*.d.ts",
+      "default": "./src/lib/workspace/*.ts"
+    },
+    "./loro-file-system": {
+      "types": "./dist/lib/loro-file-system/index.d.ts",
+      "default": "./src/lib/loro-file-system/index.ts"
     }
   },
   "scripts": {
@@ -26,6 +38,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@rectangular-labs/loro-file-system": "workspace:*",
+    "loro-crdt": "^1.10.0",
     "arktype": "^2.1.27"
   }
 }

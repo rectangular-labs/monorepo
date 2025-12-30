@@ -5,7 +5,7 @@ export function SettingsSidebar(params: {
   projectSlug: string;
 }) {
   return (
-    <aside className="shrink-0 px-4 pt-6 md:sticky md:top-0 md:h-fit md:min-h-screen md:w-64 md:border-r">
+    <aside className="shrink-0 px-4 pt-6 md:sticky md:top-0 md:h-fit md:min-h-[calc(100vh-100px)] md:w-64 md:border-r">
       <div className="mb-4">
         <h2 className="font-semibold text-lg">Settings</h2>
       </div>

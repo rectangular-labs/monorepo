@@ -1,13 +1,11 @@
 "use client";
 
-import {
-  getImageFileNameFromUri,
-  getMimeTypeFromFileName,
-} from "@rectangular-labs/api-seo/client";
 import type {
   RouterInputs,
   RouterOutputs,
 } from "@rectangular-labs/api-seo/types";
+import { getImageFileNameFromUri } from "@rectangular-labs/core/project/get-image-file-name-from-uri";
+import { getMimeTypeFromFileName } from "@rectangular-labs/core/project/get-mimetype-from-filename";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {

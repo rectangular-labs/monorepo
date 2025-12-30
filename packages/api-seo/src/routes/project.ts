@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import {
   deleteSeoProject,
@@ -7,7 +8,6 @@ import {
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { LoroDoc, VersionVector } from "loro-crdt";
-import { getWorkspaceBlobUri } from "../client";
 import { withOrganizationIdBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";

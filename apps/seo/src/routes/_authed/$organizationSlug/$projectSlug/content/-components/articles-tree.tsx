@@ -1,6 +1,6 @@
 "use client";
 
-import type { SeoFileStatus } from "@rectangular-labs/api-seo/types";
+import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   AssistiveTreeDescription,

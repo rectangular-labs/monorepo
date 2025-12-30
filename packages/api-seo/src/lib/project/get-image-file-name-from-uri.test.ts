@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getImageFileNameFromUri } from "./get-image-file-name-from-uri";
+import { getImageFileNameFromUri } from "@rectangular-labs/core/project/get-image-file-name-from-uri";
 
 describe("getImageFileNameFromUri", () => {
   it("should return the file name from a uri", () => {

@@ -1,7 +1,7 @@
 import type {
   FsNodePayload,
   LoroDocMapping,
-} from "@rectangular-labs/api-seo/types";
+} from "@rectangular-labs/core/loro-file-system";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import type {
   ContainerID,

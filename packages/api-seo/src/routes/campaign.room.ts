@@ -1,9 +1,9 @@
 import { ORPCError, type } from "@orpc/server";
 import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/core/schemas/content-campaign-parser";
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { uuidv7 } from "@rectangular-labs/db";
 import { hasToolCall, streamText } from "ai";
 import { CrdtType } from "loro-protocol";
-import { getWorkspaceBlobUri } from "../client";
 import { websocketBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
 import { broadcastMessageToRoom } from "../lib/chat/broadcast-to-room";
@@ -70,6 +70,7 @@ const room = websocketBase
         messages: input.messages,
         gscProperty,
         project,
+        userId: context.userId,
       }),
       onStepFinish: (step) => {
         console.log("campaign.write step", step);

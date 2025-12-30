@@ -59,7 +59,21 @@ import {
   X,
 } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
-import { Fragment, useMemo, useState } from "react";
+import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
+import {
+  DialogDrawer,
+  DialogDrawerFooter,
+  DialogDrawerHeader,
+  DialogDrawerTitle,
+} from "@rectangular-labs/ui/components/ui/dialog-drawer";
+import { Label } from "@rectangular-labs/ui/components/ui/label";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@rectangular-labs/ui/components/ui/radio-group";
+import { cn } from "@rectangular-labs/ui/utils/cn";
+import { useQueryClient } from "@tanstack/react-query";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { getApiClient } from "~/lib/api";
 import { useProjectChat } from "./project-chat-provider";
 
@@ -78,12 +92,280 @@ const TOOL_UI: Record<string, { title: string; defaultOpen?: boolean }> = {
   get_historical_messages: { title: "Get historical messages" },
   get_message_detail: { title: "Get message detail" },
   manage_todo: { title: "Manage todos" },
+  make_suggestions: { title: "Make suggestions", defaultOpen: true },
 };
+
+type AskQuestionsOutput = {
+  success?: boolean;
+  questions?: {
+    id: string;
+    prompt: string;
+    options: { id: string; label: string }[];
+    allow_multiple?: boolean;
+  }[];
+};
+
+function focusChatTextarea() {
+  requestAnimationFrame(() => {
+    const textarea = document.querySelector<HTMLTextAreaElement>(
+      'textarea[name="message"]',
+    );
+    textarea?.focus();
+  });
+}
+
+function AskQuestionsToolPart({
+  part,
+  onSubmitAnswers,
+}: {
+  part: ChatToolPart;
+  onSubmitAnswers: (text: string) => void;
+}) {
+  const output = part.output as AskQuestionsOutput | undefined;
+  const questions = output?.questions ?? [];
+
+  const [answers, setAnswers] = useState<
+    Record<string, { selected: string[] }>
+  >(() => {
+    const initial: Record<string, { selected: string[] }> = {};
+    for (const q of questions) {
+      initial[q.id] = { selected: [] };
+    }
+    return initial;
+  });
+
+  const canSubmit =
+    questions.length > 0 &&
+    questions.every((q) => (answers[q.id]?.selected?.length ?? 0) > 0);
+
+  const submit = () => {
+    const lines: string[] = [];
+    lines.push("Answers to ask_questions:");
+    for (const q of questions) {
+      const selected = answers[q.id]?.selected ?? [];
+      lines.push(`- ${q.id}: ${selected.join(", ")}`);
+    }
+    onSubmitAnswers(lines.join("\n"));
+  };
+
+  return (
+    <div className="mb-4 w-full rounded-md border bg-background p-4">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="font-medium text-sm">Please answer these questions</div>
+        <div className="text-muted-foreground text-xs">
+          {questions.length} question{questions.length === 1 ? "" : "s"}
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {questions.map((q) => {
+          const selected = answers[q.id]?.selected ?? [];
+          const allowMultiple = q.allow_multiple === true;
+
+          return (
+            <div className="space-y-2" key={q.id}>
+              <div className="font-medium text-sm">{q.prompt}</div>
+
+              {allowMultiple ? (
+                <div className="space-y-2">
+                  {q.options.map((opt) => {
+                    const checked = selected.includes(opt.id);
+                    const checkboxId = `${q.id}:${opt.id}`;
+                    return (
+                      <div className="flex items-center gap-2" key={opt.id}>
+                        <Checkbox
+                          checked={checked}
+                          id={checkboxId}
+                          onCheckedChange={(next) => {
+                            const isChecked = next === true;
+                            setAnswers((prev) => {
+                              const current = prev[q.id]?.selected ?? [];
+                              const nextSelected = isChecked
+                                ? Array.from(new Set([...current, opt.id]))
+                                : current.filter((id) => id !== opt.id);
+                              return {
+                                ...prev,
+                                [q.id]: { selected: nextSelected },
+                              };
+                            });
+                          }}
+                        />
+                        <Label className="cursor-pointer" htmlFor={checkboxId}>
+                          {opt.label}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <RadioGroup
+                  onValueChange={(value) => {
+                    setAnswers((prev) => ({
+                      ...prev,
+                      [q.id]: { selected: value ? [value] : [] },
+                    }));
+                  }}
+                  value={selected[0] ?? ""}
+                >
+                  {q.options.map((opt) => (
+                    <div className="flex items-center gap-2" key={opt.id}>
+                      <RadioGroupItem id={`${q.id}:${opt.id}`} value={opt.id} />
+                      <Label
+                        className="cursor-pointer"
+                        htmlFor={`${q.id}:${opt.id}`}
+                      >
+                        {opt.label}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 flex justify-end gap-2">
+        <Button
+          disabled={!canSubmit || part.state !== "output-available"}
+          onClick={submit}
+          size="sm"
+          type="button"
+        >
+          Submit answers
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+type CreatePlanOutput = {
+  success?: boolean;
+  plan?: {
+    name?: string | null;
+    overview?: string | null;
+    plan: string;
+    todos?: { id: string; content: string; dependencies?: string[] }[];
+  };
+};
+
+function CreatePlanToolPart({
+  part,
+  onApprove,
+  onReject,
+}: {
+  part: ChatToolPart;
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  const output = part.output as CreatePlanOutput | undefined;
+  const plan = output?.plan;
+  const title = plan?.name?.trim() || "Proposed plan";
+  const overview = plan?.overview?.trim();
+  const markdown = plan?.plan ?? "";
+
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mb-4 w-full rounded-md border bg-background p-4">
+      <DialogDrawer
+        onOpenChange={setOpen}
+        open={open}
+        trigger={
+          <button
+            className={cn(
+              "w-full text-left",
+              "rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+            type="button"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="truncate font-medium text-sm">{title}</div>
+                {overview ? (
+                  <div className="mt-1 line-clamp-2 text-muted-foreground text-xs">
+                    {overview}
+                  </div>
+                ) : (
+                  <div className="mt-1 text-muted-foreground text-xs">
+                    Click to view details
+                  </div>
+                )}
+              </div>
+              <div className="shrink-0 text-muted-foreground text-xs">
+                {part.state === "output-available" ? "Ready" : "Running"}
+              </div>
+            </div>
+          </button>
+        }
+      >
+        <DialogDrawerHeader className="space-y-1">
+          <DialogDrawerTitle>{title}</DialogDrawerTitle>
+          {overview ? (
+            <div className="text-muted-foreground text-sm">{overview}</div>
+          ) : null}
+        </DialogDrawerHeader>
+
+        <div className="max-h-[60vh] overflow-auto px-4 pb-4">
+          <Response>{markdown}</Response>
+        </div>
+
+        <DialogDrawerFooter className="gap-2">
+          <Button
+            disabled={part.state !== "output-available"}
+            onClick={() => {
+              setOpen(false);
+              onReject();
+            }}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Reject
+          </Button>
+          <Button
+            disabled={part.state !== "output-available"}
+            onClick={() => {
+              setOpen(false);
+              onApprove();
+            }}
+            size="sm"
+            type="button"
+          >
+            Approve
+          </Button>
+        </DialogDrawerFooter>
+      </DialogDrawer>
+
+      <div className="mt-3 flex justify-end gap-2">
+        <Button
+          disabled={part.state !== "output-available"}
+          onClick={onReject}
+          size="sm"
+          type="button"
+          variant="outline"
+        >
+          Reject
+        </Button>
+        <Button
+          disabled={part.state !== "output-available"}
+          onClick={onApprove}
+          size="sm"
+          type="button"
+        >
+          Approve
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export function ProjectChatPanel() {
   const { close, currentPage, organizationIdentifier, projectId } =
     useProjectChat();
   const [input, setInput] = useState("");
+  const queryClient = useQueryClient();
+  const lastSuggestionCompletionRef = useRef<string | null>(null);
 
   const api = useMemo(() => getApiClient(), []);
 
@@ -113,6 +395,32 @@ export function ProjectChatPanel() {
       },
       id: projectId ?? "project",
     });
+
+  useEffect(() => {
+    for (const message of messages) {
+      for (let i = 0; i < message.parts.length; i++) {
+        const part = message.parts[i];
+        if (!part || !isChatToolPart(part)) continue;
+        const toolName = part.type.slice("tool-".length);
+        if (toolName !== "make_suggestions") continue;
+        if (part.state !== "output-available") continue;
+        const key = `${message.id}:${i}`;
+        if (lastSuggestionCompletionRef.current === key) continue;
+        lastSuggestionCompletionRef.current = key;
+        void queryClient.invalidateQueries({ queryKey: ["pullDocument"] });
+      }
+    }
+  }, [messages, queryClient]);
+
+  const sendText = (text: string) => {
+    sendMessage({ text }, { body: {} });
+    setInput("");
+  };
+
+  const rejectPlanPrefill = () => {
+    setInput("Let's change the following:\n1. ");
+    focusChatTextarea();
+  };
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -231,6 +539,33 @@ export function ProjectChatPanel() {
                       const defaultOpen =
                         part.state === "output-error" ||
                         ui?.defaultOpen === true;
+
+                      if (toolName === "ask_questions") {
+                        if (part.state === "output-available") {
+                          return (
+                            <AskQuestionsToolPart
+                              key={`${message.id}-${i}`}
+                              onSubmitAnswers={(text) => sendText(text)}
+                              part={part}
+                            />
+                          );
+                        }
+                      }
+
+                      if (toolName === "create_plan") {
+                        if (part.state === "output-available") {
+                          return (
+                            <CreatePlanToolPart
+                              key={`${message.id}-${i}`}
+                              onApprove={() =>
+                                sendText("plan looks good, let's start.")
+                              }
+                              onReject={() => rejectPlanPrefill()}
+                              part={part}
+                            />
+                          );
+                        }
+                      }
 
                       return (
                         <Tool
