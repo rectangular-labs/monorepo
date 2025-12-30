@@ -1,4 +1,4 @@
-import type { Container, LoroTree, LoroTreeNode } from "loro-crdt";
+import type { LoroTree, LoroTreeNode } from "loro-crdt";
 import type { BaseFileSystem } from "../index";
 import { resolvePath } from "./resolve-path";
 import { splitPath } from "./split-path";
@@ -10,17 +10,23 @@ import { splitPath } from "./split-path";
  * @param args.finalNodeType - The type of the final node
  * @returns {LoroTreeNode<T>} The final node
  */
-export function createNodesForPath<
+export async function createNodesForPath<
   T extends Record<string, unknown> & BaseFileSystem,
 >({
   tree,
   path,
   finalNodeType,
+  onCreateNode,
 }: {
   tree: LoroTree<T>;
   path: string;
   finalNodeType: BaseFileSystem["type"];
-}): LoroTreeNode<T> {
+  onCreateNode?:
+    | ((
+        currentNode: LoroTreeNode<T>,
+      ) => LoroTreeNode<T> | Promise<LoroTreeNode<T>>)
+    | undefined;
+}): Promise<LoroTreeNode<T>> {
   const segments = splitPath(path);
   const rootNode = resolvePath({ tree, path: "/" });
   if (!rootNode) {
@@ -28,19 +34,27 @@ export function createNodesForPath<
   }
   let currentNode = rootNode;
   let currentPath = "";
-  for (const segment of segments) {
+  const lastSegmentIdx = segments.length - 1;
+
+  for (const [idx, segment] of segments.entries()) {
     currentPath += `/${segment}`;
     const existingNode = resolvePath({ tree, path: currentPath });
     if (!existingNode) {
       currentNode = currentNode.createNode();
       currentNode.data.set("name", segment);
-      currentNode.data.set("type", "dir" as Exclude<T["type"], Container>);
+      const nodeType: BaseFileSystem["type"] = (() => {
+        if (idx === lastSegmentIdx && finalNodeType === "file") {
+          return "file";
+        }
+        return "dir";
+      })();
+      currentNode.data.set("type", nodeType);
+      if (onCreateNode) {
+        currentNode = await Promise.resolve(onCreateNode(currentNode));
+      }
     } else {
       currentNode = existingNode;
     }
-  }
-  if (finalNodeType === "file") {
-    currentNode.data.set("type", "file" as Exclude<T["type"], Container>);
   }
 
   return currentNode;

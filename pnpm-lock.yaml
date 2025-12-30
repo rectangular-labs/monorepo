@@ -645,9 +645,15 @@ importers:
 
   packages/core:
     dependencies:
+      '@rectangular-labs/loro-file-system':
+        specifier: workspace:*
+        version: link:../loro-file-system
       arktype:
         specifier: ^2.1.27
         version: 2.1.27
+      loro-crdt:
+        specifier: ^1.10.0
+        version: 1.10.0
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*

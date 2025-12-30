@@ -1,19 +1,19 @@
 import { ORPCError, os, streamToEventIterator, type } from "@orpc/server";
 import { asyncStorageMiddleware } from "@rectangular-labs/api-core/lib/context-storage";
 import type { Session } from "@rectangular-labs/auth";
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { type schema, uuidv7 } from "@rectangular-labs/db";
 import { hasToolCall, streamText } from "ai";
 import { type as arkType } from "arktype";
+import { CrdtType } from "loro-protocol";
 import { withOrganizationIdBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
 import { createWriterAgent } from "../lib/ai/writer-agent";
+import { getRoomKey } from "../lib/chat/get-room-key";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import type {
-  InitialContext,
-  SeoChatMessage,
-  WebSocketContext,
-} from "../types";
+import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
+import type { ChatContext, InitialContext, SeoChatMessage } from "../types";
 
 const currentPageSchema = arkType(
   "'content-planner'|'content-list'|'stats'|'settings'|'article-editor'",
@@ -41,6 +41,23 @@ const chatContextMiddleware = os
     });
   });
 
+async function persistDirtyWorkspaceSnapshot(context: ChatContext) {
+  const roomDoc = context.roomDocumentMap.get(
+    getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro),
+  );
+  if (!roomDoc?.dirty || !roomDoc.descriptor.shouldPersist) return;
+
+  await context.workspaceBucket.setSnapshot(
+    getWorkspaceBlobUri({
+      orgId: context.organizationId,
+      projectId: context.projectId,
+      campaignId: undefined,
+    }),
+    roomDoc.data,
+  );
+  roomDoc.dirty = false;
+}
+
 export const chat = withOrganizationIdBase
   .route({ method: "POST", path: "/{projectId}/chat" })
   .input(
@@ -57,17 +74,16 @@ export const chat = withOrganizationIdBase
   // TODO: clean up this hack to reinitialize the context for the chat items. rn  it runs in a double closure
   .use(asyncStorageMiddleware<InitialContext>())
   .handler(async ({ context, input }) => {
-    const project: WebSocketContext["cache"]["project"] =
-      await context.db.query.seoProject.findFirst({
-        where: (table, { and, eq }) =>
-          and(
-            eq(table.id, input.projectId),
-            eq(table.organizationId, context.organization.id),
-          ),
-        with: {
-          authors: true,
-        },
-      });
+    const project = await context.db.query.seoProject.findFirst({
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.id, input.projectId),
+          eq(table.organizationId, context.organization.id),
+        ),
+      with: {
+        authors: true,
+      },
+    });
     if (!project) {
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
     }
@@ -95,6 +111,7 @@ export const chat = withOrganizationIdBase
         messages: input.messages,
         gscProperty: gscProperty ?? undefined,
         project,
+        userId: context.user.id,
       });
     })();
 
@@ -124,6 +141,16 @@ export const chat = withOrganizationIdBase
             };
           }
           return;
+        },
+        onFinish: async () => {
+          try {
+            await persistDirtyWorkspaceSnapshot(context);
+          } catch (error) {
+            console.error(
+              "project.chat workspace snapshot persist error",
+              error,
+            );
+          }
         },
       }),
     );

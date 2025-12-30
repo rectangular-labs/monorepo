@@ -1,13 +1,14 @@
+import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import {
   catOutput,
   defaultNodeFormatter,
   lsOutput,
   moveNode,
   removeNodeAtPath,
-  writeToFile,
 } from "@rectangular-labs/loro-file-system";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
+import { loroWriter } from "../../workspace/loro-writer";
 import { withLoroTree } from "../../workspace/with-loro-tree";
 import type { AgentToolDefinition } from "./utils";
 
@@ -39,7 +40,10 @@ const writeFileInputSchema = type({
   }).array(),
 });
 
-export function createFileToolsWithMetadata() {
+export function createFileToolsWithMetadata(args?: {
+  publishingSettings: typeof publishingSettingsSchema.infer | null;
+}) {
+  const publishingSettings = args?.publishingSettings || null;
   const ls = tool({
     description:
       "List files and directories in the virtual workspace filesystem, similar to `ls`.",
@@ -110,8 +114,15 @@ export function createFileToolsWithMetadata() {
     ),
     async execute({ path, content, createIfMissing, metadata }) {
       return await withLoroTree({
-        handler: ({ tree }) =>
-          writeToFile({ tree, path, content, createIfMissing, metadata }),
+        handler: async ({ tree }) =>
+          await loroWriter.writeToFile({
+            tree,
+            path,
+            content,
+            createIfMissing,
+            metadata,
+            context: { publishingSettings },
+          }),
         shouldPersist: (result) => result.success === true,
       });
     },
