@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Benefits } from "./-components/benefits";
-import { Credentials } from "./-components/credentials";
-import { CTA } from "./-components/cta";
-import { FAQ } from "./-components/faq";
 import { Hero } from "./-components/hero";
-import { Stats } from "./-components/stats";
+import { Features } from "./-components/features";
+import { Control } from "./-components/control";
+import { Data } from "./-components/data";
+import { Proof } from "./-components/proof";
 
 export const Route = createFileRoute("/_marketing/")({
   component: App,
@@ -31,11 +30,10 @@ function App() {
   return (
     <div className="bg-background">
       <Hero />
-      <Benefits />
-      <Credentials />
-      <Stats />
-      <CTA />
-      <FAQ />
+      <Features />
+      <Control />
+      <Data />
+      <Proof />
     </div>
   );
 }

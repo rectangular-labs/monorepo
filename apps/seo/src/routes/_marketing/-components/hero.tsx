@@ -11,77 +11,94 @@ const CrowdCanvas = lazy(() =>
   })),
 );
 
+const mockChips = ["Audience: in-house teams", "Stance: decisive", "Goal: demand capture"];
+
 export const Hero = () => {
-  const [titleNumber, setTitleNumber] = useState(0);
+  const [titleIndex, setTitleIndex] = useState(0);
   const titles = useMemo(() => ["traffic", "leads", "sales"], []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (titleNumber === titles.length - 1) {
-        setTitleNumber(0);
-      } else {
-        setTitleNumber(titleNumber + 1);
-      }
+      setTitleIndex((prev) => (prev + 1) % titles.length);
     }, 4000);
     return () => clearTimeout(timeoutId);
-  }, [titleNumber, titles]);
+  }, [titles.length]);
 
   return (
     <div className="relative min-h-screen w-full lg:min-h-[calc(100vh-70px)]">
-      <Section>
-        <div className="flex flex-col items-center gap-8">
-          {/* <div>
-            <Button className="gap-4" size="sm" variant="secondary">
-              Read our launch article <MoveRight className="h-4 w-4" />
-            </Button>
-          </div> */}
-          <div className="flex flex-col gap-4 pt-10 lg:pt-20">
-            <h1 className="z-10 max-w-2xl text-center font-regular text-3xl tracking-tighter md:text-6xl">
-              <span>Get more </span>
+      <Section className="relative z-10">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[7fr,5fr]">
+          <div className="space-y-6">
+            <h1 className="font-regular text-4xl tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              <span>Turn your marketing strategy into ranked pages — </span>
               <span className="inline-flex overflow-hidden align-bottom">
                 <AnimatePresence mode="wait">
                   <motion.span
+                    key={titles[titleIndex]}
+                    initial={{ opacity: 0, y: 32 }}
                     animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -32 }}
+                    transition={{ type: "spring", stiffness: 60, damping: 12 }}
                     className="inline-block font-semibold"
-                    exit={{ opacity: 0, y: -50 }}
-                    initial={{ opacity: 0, y: 50 }}
-                    key={titles[titleNumber]}
-                    transition={{
-                      type: "spring",
-                      stiffness: 50,
-                      damping: 8,
-                      duration: 0.1,
-                    }}
                   >
-                    {titles[titleNumber]}
+                    {titles[titleIndex]}
                   </motion.span>
                 </AnimatePresence>
               </span>
-              <span> with our autonomous growth agent</span>
+              <span> fast.</span>
             </h1>
-
-            <p className="z-10 max-w-2xl text-center text-lg text-muted-foreground leading-relaxed tracking-tight md:text-xl">
-              Just enter your site and we&apos;ll analyze keywords, create
-              content, and track results.
+            <p className="text-lg text-muted-foreground sm:text-xl">
+              Connect your data, explain your strategy, and watch it turn into published,
+              ranked content.
             </p>
-          </div>
-          <div className="flex flex-row gap-3">
             <a
               className={buttonVariants({
-                className: "z-10 gap-4",
+                className: "gap-3",
                 size: "lg",
               })}
               href={ONBOARD_LINK}
               rel="noopener"
               target="_blank"
             >
-              Onboard with us now <MoveRight className="h-4 w-4" />
+              Sign up today <MoveRight className="h-4 w-4" />
             </a>
+          </div>
+          <div className="relative w-full">
+            <div className="space-y-4 rounded-3xl border border-border bg-background/70 p-6 shadow-xl backdrop-blur">
+              <div className="flex items-center justify-between text-sm uppercase tracking-[0.3em] text-muted-foreground">
+                <span>Chat connected to Google Search Console</span>
+                <span className="text-primary">Live</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {mockChips.map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide text-foreground/80"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-end justify-between gap-3">
+                <div className="flex-1 space-y-2">
+                  <p className="text-sm font-medium text-foreground/80">Performance chart</p>
+                  <div className="h-28 w-full rounded-2xl bg-gradient-to-r from-primary/30 to-transparent" />
+                </div>
+                <div className="rounded-2xl border border-border bg-muted p-4 text-sm text-foreground shadow-sm">
+                  <p className="font-semibold text-foreground">Next article recommended</p>
+                  <p className="text-muted-foreground">Topic: Data-personified blogs</p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-border/40 bg-muted/50 p-4 text-sm">
+                <p className="font-semibold text-foreground">Chat</p>
+                <p className="text-muted-foreground">“We noticed rising intent around {titles[titleIndex]} — want to approve a draft?”</p>
+              </div>
+            </div>
           </div>
         </div>
       </Section>
       <Suspense fallback={null}>
-        <CrowdCanvas className="z-0" cols={7} rows={15} src="/peeps.png" />
+        <CrowdCanvas className="absolute inset-0 -z-10 opacity-60" cols={7} rows={15} src="/peeps.png" />
       </Suspense>
     </div>
   );
