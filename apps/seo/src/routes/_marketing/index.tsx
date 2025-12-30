@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Hero } from "./-components/hero";
-import { Features } from "./-components/features";
 import { Control } from "./-components/control";
 import { Data } from "./-components/data";
+import { Features } from "./-components/features";
+import { Hero } from "./-components/hero";
 import { Proof } from "./-components/proof";
 
 export const Route = createFileRoute("/_marketing/")({
