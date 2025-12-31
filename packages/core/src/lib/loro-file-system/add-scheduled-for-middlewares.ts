@@ -170,5 +170,3 @@ export function addScheduledForWhenPlannedMiddleware(): WriteToFileMiddleware<
     return await next();
   };
 }
-
-
