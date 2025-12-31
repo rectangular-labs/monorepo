@@ -1,5 +1,6 @@
 "use client";
 
+import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
@@ -25,6 +26,7 @@ import {
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useEffect, useMemo, useState } from "react";
+import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
 import type { TreeFile } from "~/lib/workspace/build-tree";
 
 export function PlannerDialogDrawer({
@@ -54,9 +56,13 @@ export function PlannerDialogDrawer({
     if (!activeDialogFile) return;
     setNotesDraft(activeDialogFile.notes ?? "");
     if (activeDialogFile.scheduledFor) {
-      setCustomScheduleDraft(activeDialogFile.scheduledFor);
+      setUseNextEarliest(false);
+      setCustomScheduleDraft(
+        isoToDatetimeLocalValue(activeDialogFile.scheduledFor),
+      );
     } else {
       setUseNextEarliest(true);
+      setCustomScheduleDraft("");
     }
   }, [activeDialogFile]);
 
@@ -112,21 +118,29 @@ export function PlannerDialogDrawer({
         </Field>
 
         <Field>
-          <FieldLabel>Schedule</FieldLabel>
+          <FieldLabel>Schedule For</FieldLabel>
           <FieldContent className="gap-2">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={useNextEarliest}
-                id="planner-schedule-next-earliest"
-                onCheckedChange={(next) => setUseNextEarliest(next === true)}
-              />
-              <FieldLabel
-                className="cursor-pointer font-normal"
-                htmlFor="planner-schedule-next-earliest"
-              >
-                Schedule automatically
-              </FieldLabel>
-            </div>
+            {activeDialogFile?.status === "suggested" && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={useNextEarliest}
+                  id="planner-schedule-next-earliest"
+                  onCheckedChange={(next) => {
+                    const shouldAuto = next === true;
+                    setUseNextEarliest(shouldAuto);
+                    if (shouldAuto) {
+                      setCustomScheduleDraft("");
+                    }
+                  }}
+                />
+                <FieldLabel
+                  className="cursor-pointer font-normal"
+                  htmlFor="planner-schedule-next-earliest"
+                >
+                  Next earliest slot
+                </FieldLabel>
+              </div>
+            )}
 
             {useNextEarliest ? (
               <FieldDescription>
@@ -162,24 +176,6 @@ export function PlannerDialogDrawer({
                   applyMetadataUpdate(
                     activeDialogFile,
                     [
-                      { key: "status", value: "planned" },
-                      ...(notesDraft.trim()
-                        ? [{ key: "notes", value: notesDraft.trim() }]
-                        : []),
-                    ],
-                    { closeDialog: true },
-                  );
-                }}
-              >
-                Accept suggestion
-              </Button>
-              <Button
-                disabled={isSaving}
-                onClick={() => {
-                  if (!activeDialogFile) return;
-                  applyMetadataUpdate(
-                    activeDialogFile,
-                    [
                       { key: "status", value: "suggestion-rejected" },
                       ...(notesDraft.trim()
                         ? [{ key: "notes", value: notesDraft.trim() }]
@@ -192,28 +188,85 @@ export function PlannerDialogDrawer({
               >
                 Reject
               </Button>
+              <Button
+                disabled={isSaving}
+                onClick={() => {
+                  if (!activeDialogFile) return;
+                  applyMetadataUpdate(
+                    activeDialogFile,
+                    [
+                      { key: "status", value: "planned" },
+                      ...(notesDraft.trim()
+                        ? [{ key: "notes", value: notesDraft.trim() }]
+                        : []),
+                      ...(customScheduleDraft.trim()
+                        ? [
+                            {
+                              key: "scheduledFor",
+                              value: new Date(
+                                customScheduleDraft,
+                              ).toISOString(),
+                            },
+                          ]
+                        : []),
+                    ],
+                    { closeDialog: true },
+                  );
+                }}
+              >
+                Accept suggestion
+              </Button>
             </>
           ) : (
-            <Button
-              disabled={isSaving}
-              onClick={() => {
-                if (!activeDialogFile) return;
-                applyMetadataUpdate(
-                  activeDialogFile,
-                  [
-                    ...(notesDraft.trim()
-                      ? [{ key: "notes", value: notesDraft.trim() }]
-                      : []),
-                    { key: "scheduledFor", value: customScheduleDraft },
-                  ],
-                  {
-                    closeDialog: true,
-                  },
-                );
-              }}
-            >
-              Save
-            </Button>
+            <>
+              <Button
+                disabled={isSaving}
+                onClick={() => {
+                  if (!activeDialogFile) return;
+                  applyMetadataUpdate(
+                    activeDialogFile,
+                    [
+                      {
+                        key: "status",
+                        value: "suggestion-rejected" satisfies SeoFileStatus,
+                      },
+                      ...(notesDraft.trim()
+                        ? [{ key: "notes", value: notesDraft.trim() }]
+                        : []),
+                    ],
+                    {
+                      closeDialog: true,
+                    },
+                  );
+                }}
+                variant="outline"
+              >
+                Remove from schedule
+              </Button>
+              <Button
+                disabled={isSaving}
+                onClick={() => {
+                  if (!activeDialogFile) return;
+                  applyMetadataUpdate(
+                    activeDialogFile,
+                    [
+                      ...(notesDraft.trim()
+                        ? [{ key: "notes", value: notesDraft.trim() }]
+                        : []),
+                      {
+                        key: "scheduledFor",
+                        value: new Date(customScheduleDraft).toISOString(),
+                      },
+                    ],
+                    {
+                      closeDialog: true,
+                    },
+                  );
+                }}
+              >
+                Save
+              </Button>
+            </>
           )}
         </DialogDrawerFooter>
       </div>

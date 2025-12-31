@@ -23,12 +23,11 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 
-export type ArticleTableRow = {
+type ArticleTableRow = {
   id: string;
   title: string;
   primaryKeyword: string;
   author: string;
-  createdAt: string;
   scheduledFor?: string;
   status: SeoFileStatus;
 };
@@ -119,15 +118,10 @@ export function ArticlesTable({
           );
         },
       },
-      {
-        accessorKey: "createdAt",
-        header: "Date created",
-        cell: ({ getValue }) => formatIsoDate(getValue<string | undefined>()),
-        sortingFn: isoDateSortingFn,
-      },
+
       {
         accessorKey: "scheduledFor",
-        header: "Date published",
+        header: "Scheduled for",
         cell: ({ getValue }) => formatIsoDate(getValue<string | undefined>()),
         sortingFn: isoDateSortingFn,
       },
@@ -254,11 +248,11 @@ export function ArticlesTable({
               const columnId = cell.column.id;
               const className =
                 columnId === "author"
-                  ? "max-w-[240px] truncate"
+                  ? "max-w-[200px] truncate"
                   : columnId === "primaryKeyword"
-                    ? "max-w-[320px] truncate"
+                    ? "max-w-[280px] truncate"
                     : columnId === "title"
-                      ? "max-w-[520px] truncate"
+                      ? "max-w-[480px] truncate"
                       : undefined;
 
               return (

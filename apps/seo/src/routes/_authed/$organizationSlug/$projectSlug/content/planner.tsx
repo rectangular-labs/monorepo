@@ -321,7 +321,7 @@ function PlannerPage() {
                       </div>
                     );
                   }
-                  return null;
+                  return <span>-</span>;
                 }}
                 onRowClick={(row) => {
                   const file = plannerFiles.find((f) => f.treeId === row.id);
