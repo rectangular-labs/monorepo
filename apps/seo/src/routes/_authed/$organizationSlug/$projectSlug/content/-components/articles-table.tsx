@@ -1,6 +1,6 @@
 "use client";
 
-import type { SeoFileStatus } from "@rectangular-labs/api-seo/types";
+import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import {
@@ -13,13 +13,13 @@ import {
 } from "@rectangular-labs/ui/components/ui/table";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import {
-  type SortingState,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
   type SortingFn,
+  type SortingState,
+  useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 
@@ -95,14 +95,16 @@ function SortIndicator({ state }: { state: false | "asc" | "desc" }) {
 export function ArticlesTable({
   rows,
   onRowClick,
+  getRowActions,
 }: {
   rows: ArticleTableRow[];
   onRowClick?: (row: ArticleTableRow) => void;
+  getRowActions?: (row: ArticleTableRow) => React.ReactNode;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const columns = useMemo<ColumnDef<ArticleTableRow>[]>(() => {
-    return [
+    const base: ColumnDef<ArticleTableRow>[] = [
       {
         accessorKey: "author",
         header: "Author",
@@ -169,7 +171,20 @@ export function ArticlesTable({
         },
       },
     ];
-  }, []);
+    if (getRowActions) {
+      base.push({
+        id: "actions",
+        header: "Action",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const actions = getRowActions(row.original);
+          if (!actions) return null;
+          return <div className="flex justify-end">{actions}</div>;
+        },
+      });
+    }
+    return base;
+  }, [getRowActions]);
 
   const table = useReactTable({
     columns,
@@ -205,7 +220,11 @@ export function ArticlesTable({
                       canSort && "cursor-pointer select-none",
                       !canSort && "cursor-default",
                     )}
-                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    onClick={
+                      canSort
+                        ? header.column.getToggleSortingHandler()
+                        : undefined
+                    }
                     type="button"
                   >
                     {flexRender(
