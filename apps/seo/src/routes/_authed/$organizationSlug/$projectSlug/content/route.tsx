@@ -35,7 +35,7 @@ function ContentLayout() {
 
   if (file) {
     return (
-      <div className="h-full w-full">
+      <div className="min-h-[calc(100vh-100px)] w-full">
         <ArticleEditorTakeover
           file={file}
           organizationId={organizationId}
