@@ -3,8 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Pending } from "~/components/pending";
 import { getApiClientRq } from "~/lib/api";
-import { buildTree } from "~/lib/campaign/build-tree";
-import { createPullDocumentQueryOptions } from "~/lib/campaign/sync";
+import { buildTree } from "~/lib/workspace/build-tree";
+import { createPullDocumentQueryOptions } from "~/lib/workspace/sync";
 import { LoadingError } from "../../-components/loading-error";
 import { ReviewPanel } from "../-components/review/panel";
 

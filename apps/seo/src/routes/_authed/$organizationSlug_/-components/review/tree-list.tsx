@@ -27,7 +27,7 @@ import {
   type TreeFile,
   type Tree as TreeType,
   traverseTree,
-} from "~/lib/campaign/build-tree";
+} from "~/lib/workspace/build-tree";
 import { FilterStatus } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/filter-status";
 
 function buildTreeData(tree: TreeType, statusFilter: "all" | TreeChangeStatus) {

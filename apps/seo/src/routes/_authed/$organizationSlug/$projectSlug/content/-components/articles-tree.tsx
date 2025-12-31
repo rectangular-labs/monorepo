@@ -19,8 +19,8 @@ import type {
   TreeDirectory,
   TreeFile,
   Tree as TreeType,
-} from "~/lib/campaign/build-tree";
-import { traverseTree } from "~/lib/campaign/build-tree";
+} from "~/lib/workspace/build-tree";
+import { traverseTree } from "~/lib/workspace/build-tree";
 
 function buildTreeData({
   tree,

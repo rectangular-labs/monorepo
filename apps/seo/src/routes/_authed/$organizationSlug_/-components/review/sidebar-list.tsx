@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@rectangular-labs/ui/components/ui/sidebar";
-import type { TreeChangeStatus, TreeFile } from "~/lib/campaign/build-tree";
+import type { TreeChangeStatus, TreeFile } from "~/lib/workspace/build-tree";
 import { FilterStatus } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/filter-status";
 
 export function ReviewSidebarList({

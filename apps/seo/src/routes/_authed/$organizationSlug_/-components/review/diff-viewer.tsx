@@ -10,8 +10,8 @@ import {
 } from "@rectangular-labs/ui/components/ui/accordion";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { useMemo } from "react";
-import type { TreeChangeStatus, TreeFile } from "~/lib/campaign/build-tree";
-import { generateDiffMarkdown } from "~/lib/campaign/generate-diff-markdown";
+import type { TreeChangeStatus, TreeFile } from "~/lib/workspace/build-tree";
+import { generateDiffMarkdown } from "~/lib/workspace/generate-diff-markdown";
 
 type ViewMode = "track-changes" | "side-by-side";
 

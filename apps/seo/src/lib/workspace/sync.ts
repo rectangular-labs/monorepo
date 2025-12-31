@@ -1,5 +1,15 @@
-import { getWorkspaceBlobUri } from "@rectangular-labs/api-seo/client";
-import type { LoroDocMapping } from "@rectangular-labs/api-seo/types";
+import {
+  addCreatedAtOnCreateMiddleware,
+  addScheduledForWhenPlannedMiddleware,
+  type FsNodePayload,
+  type LoroDocMapping,
+  type WriteToFilePublishingContext,
+} from "@rectangular-labs/core/loro-file-system";
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
+import {
+  createWriteToFile,
+  type WriteToFileArgs,
+} from "@rectangular-labs/loro-file-system";
 import { safeSync } from "@rectangular-labs/result";
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { del as idbDel, get as idbGet, set as idbSet } from "idb-keyval";
@@ -9,6 +19,16 @@ import { getApiClient } from "../api";
 function getWorkspaceSyncKey(workspaceBlobUri: string) {
   return `${workspaceBlobUri}::sync`;
 }
+
+const loroWriter = createWriteToFile<
+  FsNodePayload,
+  WriteToFilePublishingContext
+>({
+  middleware: [
+    addCreatedAtOnCreateMiddleware(),
+    addScheduledForWhenPlannedMiddleware(),
+  ],
+});
 
 type WorkspaceSyncState = {
   /**
@@ -24,6 +44,18 @@ type WorkspaceSyncState = {
    */
   snapshot: Uint8Array;
 };
+
+function getPullDocumentQueryKey({
+  organizationId,
+  projectId,
+  campaignId,
+}: {
+  organizationId: string;
+  projectId: string;
+  campaignId: string | null;
+}) {
+  return ["pullDocument", organizationId, projectId, campaignId] as const;
+}
 
 async function consolidateAndStoreServerUpdate({
   doc,
@@ -61,7 +93,11 @@ export function createPullDocumentQueryOptions({
   projectId: string;
   campaignId: string | null;
 }) {
-  const queryKey = ["pullDocument", organizationId, projectId, campaignId];
+  const queryKey = getPullDocumentQueryKey({
+    organizationId,
+    projectId,
+    campaignId,
+  });
   return queryOptions({
     queryKey,
     queryFn: async ({ client }) => {
@@ -122,34 +158,22 @@ export function createPushDocumentQueryOptions({
   projectId: string;
   campaignId: string | null;
 }) {
-  type PushOperation =
-    | {
-        type: "writeToFile";
-        /**
-         * Absolute workspace path, e.g. `/seo-guides/how-to.md`
-         */
-        path: string;
-        content?: string;
-        createIfMissing?: boolean;
-        metadata?: { key: string; value: string }[] | undefined;
-      }
-    | {
-        type: "setMetadata";
-        /**
-         * Absolute workspace path, e.g. `/seo-guides/how-to.md`
-         */
-        path: string;
-        metadata: { key: string; value: string }[];
-      };
+  const pullDocumentQueryKey = createPullDocumentQueryOptions({
+    organizationId,
+    projectId,
+    campaignId,
+  }).queryKey;
   return mutationOptions({
     mutationKey: ["pushDocument", organizationId, projectId, campaignId],
     mutationFn: async (
       {
         doc,
+        context,
         operations,
       }: {
         doc: LoroDoc<LoroDocMapping>;
-        operations: PushOperation[];
+        context: WriteToFilePublishingContext;
+        operations: Omit<WriteToFileArgs<FsNodePayload>, "tree">[];
       },
       { client },
     ) => {
@@ -170,67 +194,28 @@ export function createPushDocumentQueryOptions({
             campaignId,
           }),
         );
-        syncState = await idbGet<WorkspaceSyncState>(
-          getWorkspaceSyncKey(idbKey),
-        );
+        syncState = await idbGet<WorkspaceSyncState>(idbKey);
       }
       if (!syncState) {
         throw new Error("Failed to find existing document");
       }
 
-      // Update local document & persist immediately for offline safety.
-      const { resolvePath, writeToFile } = await import(
-        "@rectangular-labs/loro-file-system"
+      await Promise.all(
+        operations.map(async (operation) => {
+          await loroWriter.writeToFile({
+            ...operation,
+            tree: doc.getTree("fs"),
+            context,
+          });
+        }),
       );
-      const tree = doc.getTree("fs");
-      for (const operation of operations) {
-        switch (operation.type) {
-          case "writeToFile": {
-            const result = writeToFile({
-              tree,
-              path: operation.path,
-              content: operation.content,
-              createIfMissing: operation.createIfMissing ?? false,
-              metadata: operation.metadata,
-            });
-            if (!result.success) {
-              throw new Error(result.message);
-            }
-            break;
-          }
-          case "setMetadata": {
-            const node = resolvePath({ tree, path: operation.path });
-            if (!node) {
-              throw new Error(`Path ${operation.path} not found`);
-            }
-            if (node.data.get("type") !== "file") {
-              throw new Error(
-                `Cannot set metadata on ${operation.path} because it is not a file`,
-              );
-            }
-            const result = writeToFile({
-              tree,
-              path: operation.path,
-              // no-op content write; just apply metadata
-              content: undefined,
-              createIfMissing: false,
-              metadata: operation.metadata,
-            });
-            if (!result.success) {
-              throw new Error(result.message);
-            }
-            break;
-          }
-          default: {
-            const _never: never = operation;
-            throw new Error(`Unsupported operation`);
-          }
-        }
-      }
+
       await idbSet(idbKey, {
         ...syncState,
         snapshot: doc.export({ mode: "snapshot" }),
       });
+      client.setQueryData(pullDocumentQueryKey, doc);
+      client.invalidateQueries({ queryKey: pullDocumentQueryKey });
 
       const base = new VersionVector(syncState.syncedOplogVersion);
       void getApiClient()
@@ -249,6 +234,8 @@ export function createPushDocumentQueryOptions({
             serverUpdateBlob: pushResult.blob,
             idbKey,
           });
+          client.setQueryData(pullDocumentQueryKey, doc);
+          client.invalidateQueries({ queryKey: pullDocumentQueryKey });
           return pushResult;
         })
         .catch((error) => {
@@ -264,7 +251,7 @@ export function createPushDocumentQueryOptions({
           }
         });
 
-      return { success: true, lastSyncedAt: new Date().toISOString() } as const;
+      return { success: true } as const;
     },
   });
 }

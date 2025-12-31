@@ -17,8 +17,8 @@ import {
   buildTree,
   type TreeFile,
   traverseTree,
-} from "~/lib/campaign/build-tree";
-import { createPullDocumentQueryOptions } from "~/lib/campaign/sync";
+} from "~/lib/workspace/build-tree";
+import { createPullDocumentQueryOptions } from "~/lib/workspace/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-table";
 import { ArticlesTree } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/articles-tree";
