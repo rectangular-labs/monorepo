@@ -1,10 +1,10 @@
 import { ORPCError, os, streamToEventIterator, type } from "@orpc/server";
 import { asyncStorageMiddleware } from "@rectangular-labs/api-core/lib/context-storage";
 import type { Session } from "@rectangular-labs/auth";
+import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { type schema, uuidv7 } from "@rectangular-labs/db";
 import { hasToolCall, streamText } from "ai";
-import { type as arkType } from "arktype";
 import { CrdtType } from "loro-protocol";
 import { withOrganizationIdBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
@@ -14,10 +14,6 @@ import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
 import type { ChatContext, InitialContext, SeoChatMessage } from "../types";
-
-const currentPageSchema = arkType(
-  "'content-planner'|'content-list'|'stats'|'settings'|'article-editor'",
-);
 
 const chatContextMiddleware = os
   .$context<
@@ -64,7 +60,7 @@ export const chat = withOrganizationIdBase
     type<{
       organizationIdentifier: string;
       projectId: string;
-      currentPage: typeof currentPageSchema.infer;
+      currentPage: ProjectChatCurrentPage;
       messages: SeoChatMessage[];
       model?: string;
     }>(),
@@ -112,6 +108,7 @@ export const chat = withOrganizationIdBase
         gscProperty: gscProperty ?? undefined,
         project,
         userId: context.user.id,
+        currentPage: input.currentPage,
       });
     })();
 

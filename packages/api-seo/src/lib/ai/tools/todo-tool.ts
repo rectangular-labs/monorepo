@@ -1,151 +1,36 @@
 import { uuidv7 } from "@rectangular-labs/db";
-import { catOutput, writeToFile } from "@rectangular-labs/loro-file-system";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { LoroDoc } from "loro-crdt";
-import { CrdtType } from "loro-protocol";
-import type { LoroDocMapping } from "../../../types";
-import { getOrCreateRoomDocument } from "../../chat/get-or-create-room-document";
-import { WORKSPACE_CONTENT_ROOM_ID } from "../../workspace/constants";
+import type { SeoChatMessage } from "../../../types";
 import type { AgentToolDefinition } from "./utils";
-
-export const TASK_FILE_PATH = "/memories/task.md";
-
-async function withLoroTree<TResult>({
-  handler,
-  shouldPersist,
-}: {
-  handler: (args: { tree: LoroDocMapping["fs"] }) => TResult | Promise<TResult>;
-  shouldPersist: boolean | ((result: TResult) => boolean);
-}): Promise<TResult> {
-  const roomResult = await getOrCreateRoomDocument(
-    WORKSPACE_CONTENT_ROOM_ID,
-    CrdtType.Loro,
-  );
-  if (!roomResult.ok) {
-    throw roomResult.error;
-  }
-  const roomDoc = roomResult.value;
-  const loroDoc = loadDocFromRoom(roomDoc.data);
-  const tree = getFsRoot(loroDoc);
-
-  const result = await handler({ tree });
-
-  const persist =
-    typeof shouldPersist === "boolean" ? shouldPersist : shouldPersist(result);
-
-  if (persist) {
-    roomDoc.data = loroDoc.export({ mode: "snapshot" });
-    roomDoc.dirty = true;
-  }
-
-  return result;
-}
-
-function loadDocFromRoom(data: Uint8Array): LoroDoc<LoroDocMapping> {
-  const doc = new LoroDoc<LoroDocMapping>();
-  if (data.byteLength > 0) {
-    doc.import(data);
-  }
-  return doc;
-}
-
-function getFsRoot(doc: LoroDoc<LoroDocMapping>) {
-  const tree = doc.getTree("fs");
-  return tree;
-}
 
 export interface TodoItem {
   id: string;
   title: string;
   status: "open" | "done";
   notes?: string;
+  dependencies: string[];
 }
 
-export function parseTodos(content: string): TodoItem[] {
-  const todos: TodoItem[] = [];
-  const lines = content.split("\n");
-  let currentTodo: Partial<TodoItem> | null = null;
+function extractManageTodoSnapshotsFromMessages(
+  messages: SeoChatMessage[],
+): TodoItem[] {
+  const snapshots: TodoItem[][] = [];
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  for (const message of messages) {
+    const parts = message.parts;
+    for (const part of parts) {
+      if (part.type !== "tool-manage_todo") continue;
+      const result = part.output?.todos;
 
-    // Match todo block format: - [ ] or - [x] followed by title
-    const checkboxMatch = trimmed.match(/^-\s+\[([ x])\]\s+(.+)$/);
-    if (checkboxMatch) {
-      // Save previous todo if exists
-      if (currentTodo?.id && currentTodo?.title) {
-        todos.push(currentTodo as TodoItem);
+      if (result?.length) {
+        snapshots.push(result);
       }
-
-      const checked = checkboxMatch[1] === "x";
-      const title = checkboxMatch[2];
-      currentTodo = {
-        id: "",
-        title,
-        status: checked ? "done" : "open",
-      };
-      continue;
-    }
-
-    // Match id line: id: <uuid>
-    const idMatch = trimmed.match(/^id:\s*(.+)$/);
-    if (idMatch && currentTodo) {
-      currentTodo.id = idMatch[1]?.trim() ?? "";
-      continue;
-    }
-
-    // Match notes line: notes: <text>
-    const notesMatch = trimmed.match(/^notes:\s*(.+)$/);
-    if (notesMatch && currentTodo) {
-      currentTodo.notes = notesMatch[1]?.trim();
     }
   }
 
-  // Save last todo if exists
-  if (currentTodo?.id && currentTodo?.title) {
-    todos.push(currentTodo as TodoItem);
-  }
-
-  return todos;
-}
-
-export function formatTodos(todos: TodoItem[]): string {
-  if (todos.length === 0) {
-    return "# Tasks\n\nNo tasks yet.\n";
-  }
-
-  let content = "# Tasks\n\n";
-  for (const todo of todos) {
-    const checkbox = todo.status === "done" ? "[x]" : "[ ]";
-    content += `- ${checkbox} ${todo.title}\n`;
-    content += `  id: ${todo.id}\n`;
-    if (todo.notes) {
-      content += `  notes: ${todo.notes}\n`;
-    }
-    content += "\n";
-  }
-
-  return content;
-}
-
-function readTodoFileContent(tree: LoroDocMapping["fs"]): string {
-  const readResult = catOutput({
-    tree,
-    path: TASK_FILE_PATH,
-    readContent: (node) => node.data.get("content")?.toString() ?? "",
-  });
-  return readResult.success ? readResult.data : "";
-}
-
-export async function getTodosSnapshot(): Promise<TodoItem[]> {
-  return await withLoroTree({
-    handler: ({ tree }) => {
-      const existingContent = readTodoFileContent(tree);
-      return parseTodos(existingContent);
-    },
-    shouldPersist: false,
-  });
+  const last = snapshots.at(-1);
+  return last ?? [];
 }
 
 export function formatTodoFocusReminder({
@@ -186,130 +71,90 @@ const manageTodoInputSchema = type({
     title: "string",
     "status?": "'open'|'done'",
     "notes?": "string",
+    "dependencies?": "string[]",
   }),
 });
 
-export function createTodoToolWithMetadata() {
+export function createTodoToolWithMetadata(args: {
+  messages: SeoChatMessage[];
+}) {
+  let todos = extractManageTodoSnapshotsFromMessages(args.messages);
+
   const manageTodo = tool({
     description:
-      "Manage todos for the SEO campaign. Create new todos, list existing todos, or update existing ones by id. Todos are persisted to /memories/task.md in the workspace.",
+      "Manage todos for the SEO campaign. Todos are stored in chat history via tool results (not in the workspace filesystem).",
     inputSchema: jsonSchema<typeof manageTodoInputSchema.infer>(
       manageTodoInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ action, todo }) {
-      return await withLoroTree({
-        handler: ({ tree }) => {
-          const existingContent = readTodoFileContent(tree);
-          const todos = parseTodos(existingContent);
+      await Promise.resolve();
+      if (action === "list") {
+        return {
+          success: true,
+          todos,
+        };
+      }
 
-          if (action === "list") {
-            return {
-              success: true,
-              todos,
-            };
-          }
+      if (action === "create") {
+        if (!todo?.title) {
+          return { success: false, message: "Todo title is required" };
+        }
+        const newTodo: TodoItem = {
+          id: todo.id ?? uuidv7(),
+          title: todo.title,
+          status: todo.status ?? "open",
+          notes: todo.notes,
+          dependencies: todo.dependencies ?? [],
+        };
 
-          if (action === "create") {
-            if (!todo?.title) {
-              return { success: false, message: "Todo title is required" };
-            }
-            const newId = todo.id ?? uuidv7();
-            const newTodo: TodoItem = {
-              id: newId,
-              title: todo.title,
-              status: todo.status ?? "open",
-              notes: todo.notes,
-            };
-            todos.push(newTodo);
+        todos = [...todos, newTodo];
 
-            const newContent = formatTodos(todos);
-            const writeResult = writeToFile({
-              tree,
-              path: TASK_FILE_PATH,
-              content: newContent,
-              createIfMissing: true,
-            });
+        return {
+          success: true,
+          message: `Created todo: ${newTodo.title}`,
+          todos,
+        };
+      }
 
-            if (!writeResult.success) {
-              return {
-                success: false,
-                message: `Failed to write todo: ${writeResult.message}`,
-              };
-            }
-
-            return {
-              success: true,
-              message: `Created todo: ${newTodo.title}`,
-              todo: newTodo,
-            };
-          }
-
-          if (action === "update") {
-            if (!todo?.id) {
-              return {
-                success: false,
-                message: "Todo id is required for update action",
-              };
-            }
-            const index = todos.findIndex((t) => t.id === todo.id);
-            if (index === -1) {
-              return {
-                success: false,
-                message: `Todo with id ${todo.id} not found`,
-              };
-            }
-
-            const existingTodo = todos[index];
-            if (!existingTodo) {
-              return {
-                success: false,
-                message: `Todo with id ${todo.id} not found`,
-              };
-            }
-            if (!todo.title) {
-              return {
-                success: false,
-                message: "Todo title is required for update action",
-              };
-            }
-
-            const updatedTodo: TodoItem = {
-              ...existingTodo,
-              title: todo.title,
-              status: todo.status ?? existingTodo.status,
-              notes: todo.notes !== undefined ? todo.notes : existingTodo.notes,
-            };
-            todos[index] = updatedTodo;
-
-            const newContent = formatTodos(todos);
-            const writeResult = writeToFile({
-              tree,
-              path: TASK_FILE_PATH,
-              content: newContent,
-              createIfMissing: true,
-            });
-
-            if (!writeResult.success) {
-              return {
-                success: false,
-                message: `Failed to update todo: ${writeResult.message}`,
-              };
-            }
-
-            return {
-              success: true,
-              message: `Updated todo: ${updatedTodo.title}`,
-              todo: updatedTodo,
-            };
-          }
-
+      if (action === "update") {
+        if (!todo?.id) {
           return {
             success: false,
-            message: `Unknown action: ${action}`,
+            message: "Todo id is required for update action",
           };
-        },
-        shouldPersist: action !== "list",
-      });
+        }
+
+        const index = todos.findIndex((t) => t.id === todo.id);
+        if (index === -1) {
+          return {
+            success: false,
+            message: `Todo with id ${todo.id} not found`,
+          };
+        }
+        const existingTodo = todos[index];
+        if (!existingTodo) {
+          throw new Error(`BAD STATE: Todo with id ${todo.id} not found`);
+        }
+        const title = todo.title ?? existingTodo.title;
+        todos[index] = {
+          ...existingTodo,
+          title,
+          status: todo.status ?? existingTodo.status,
+          notes: todo.notes !== undefined ? todo.notes : existingTodo.notes,
+          dependencies: todo.dependencies ?? existingTodo.dependencies,
+        };
+
+        return {
+          success: true,
+          message: `Updated todo: ${title}`,
+          todos,
+        };
+      }
+
+      return {
+        success: false,
+        message: `Unknown action: ${action}`,
+      };
     },
   });
 
@@ -317,19 +162,16 @@ export function createTodoToolWithMetadata() {
   const toolDefinitions: AgentToolDefinition[] = [
     {
       toolName: "manage_todo",
-      toolDescription:
-        "Create, list, and update campaign todos stored at /memories/task.md.",
+      toolDescription: "Create, list, and update campaign todos.",
       toolInstruction:
-        "Use action='list' to see current tasks. Use action='create' with todo.title (and optional notes/status). Use action='update' with todo.id and updated fields; mark done by setting status='done'. Keep todos atomic and execution-oriented.",
+        "Use action='list' to see current tasks. Use action='create' with todo.title (and optional notes/status/dependencies). Use action='update' with todo.id and updated fields; mark done by setting status='done'. Provide dependencies as a list of todo ids that must be completed before this todo can be started to help keep organize of what order things should be done in. Otherwise simply give them in order of execution. Keep todos atomic and execution-oriented.",
       tool: manageTodo,
     },
   ];
 
-  return { toolDefinitions, tools };
-}
-
-export function createTodoTool(): ReturnType<
-  typeof createTodoToolWithMetadata
->["tools"] {
-  return createTodoToolWithMetadata().tools;
+  return {
+    toolDefinitions,
+    tools,
+    getSnapshot: () => todos,
+  };
 }

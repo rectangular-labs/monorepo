@@ -166,11 +166,12 @@ function PlannerPage() {
       suggested: 0,
       planned: 1,
       generating: 2,
-      "pending-review": 3,
-      scheduled: 4,
-      published: 5,
-      "suggestion-rejected": 6,
-      "review-denied": 7,
+      "generation-failed": 3,
+      "pending-review": 4,
+      scheduled: 5,
+      published: 6,
+      "suggestion-rejected": 7,
+      "review-denied": 8,
     };
 
     const filteredBySearch = normalizedSearch

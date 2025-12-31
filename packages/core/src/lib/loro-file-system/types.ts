@@ -4,6 +4,7 @@ export type SeoFileStatus =
   | "suggested"
   | "planned"
   | "generating"
+  | "generation-failed"
   | "pending-review"
   | "scheduled"
   | "published"
@@ -25,6 +26,7 @@ export type FsNodePayload =
       userId?: undefined;
       primaryKeyword?: undefined;
       workflowId?: undefined;
+      outline?: undefined;
       content?: undefined;
     }
   | {
@@ -49,6 +51,7 @@ export type FsNodePayload =
        * workflow identifier for when the content is being generated.
        */
       workflowId?: string;
+      outline?: string;
       content: LoroText;
     };
 

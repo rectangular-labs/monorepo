@@ -319,7 +319,9 @@ type WriteToFileMiddlewareContext<
    * created by this write operation (directories + file).
    */
   addOnCreateNode: (
-    fn: (currentNode: LoroTreeNode<T>) => LoroTreeNode<T>,
+    fn: (
+      currentNode: LoroTreeNode<T>,
+    ) => LoroTreeNode<T> | Promise<LoroTreeNode<T>>,
   ) => void;
   /**
    * Reads the current node at path (if any).

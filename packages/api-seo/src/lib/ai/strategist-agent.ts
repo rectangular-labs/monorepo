@@ -1,24 +1,55 @@
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
-import { convertToModelMessages, type streamText, type UIMessage } from "ai";
-import type { WebSocketContext } from "../../types";
+import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
+import { convertToModelMessages, type streamText } from "ai";
+import type { SeoChatMessage, WebSocketContext } from "../../types";
 import { formatBusinessBackground } from "./format-business-background";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
 import { createGscToolWithMetadata } from "./tools/google-search-console-tool";
-import { createMessagesToolsWithMetadata } from "./tools/message-tools";
 import { createPlannerToolsWithMetadata } from "./tools/planner-tools";
 import { createSettingsToolsWithMetadata } from "./tools/settings-tools";
 import { createSkillTools } from "./tools/skill-tools";
+import { createSuggestArticlesToolWithMetadata } from "./tools/suggest-articles-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
-  getTodosSnapshot,
 } from "./tools/todo-tool";
 import {
   type AgentToolDefinition,
   formatToolSkillsSection,
 } from "./tools/utils";
 import { createWebToolsWithMetadata } from "./tools/web-tools";
+
+function formatCurrentPageFocusReminder(
+  currentPage: ProjectChatCurrentPage,
+): string {
+  const focus =
+    currentPage === "stats"
+      ? [
+          "- Focus on interpreting the site's performance stats and diagnosing issues (rankings, CTR, decay, content gaps).",
+          "- Prefer Google Search Console and SERP evidence when available.",
+        ]
+      : currentPage === "settings"
+        ? [
+            "- Focus on reviewing/updating project settings (writing voice, business background, images, integrations).",
+            "- Ask only the minimum questions needed to make a safe settings change.",
+          ]
+        : currentPage === "content-planner" || currentPage === "content-list"
+          ? [
+              "- Focus on planning: keyword universe, clusters, prioritization, and concrete article suggestions.",
+              "- When suggesting articles, keep slugs and internal links consistent with the project's website URL and any subfolder base path.",
+            ]
+          : [
+              "- Focus on helping the user optimize the current article for SEO/GEO and rank for their target keyword.",
+            ];
+
+  return [
+    "## System reminder: current page focus",
+    `User is currently on: ${currentPage}`,
+    "",
+    ...focus,
+  ].join("\n");
+}
 
 /**
 What to deliver:
@@ -45,10 +76,14 @@ export function createStrategistAgent({
   messages,
   gscProperty,
   project,
+  userId,
+  currentPage,
 }: {
-  messages: UIMessage[];
+  messages: SeoChatMessage[];
   gscProperty: WebSocketContext["cache"]["gscProperty"];
   project: NonNullable<WebSocketContext["cache"]["project"]>;
+  userId: string;
+  currentPage: ProjectChatCurrentPage;
 }): Parameters<typeof streamText>[0] {
   const hasGsc = !!(
     gscProperty?.accessToken &&
@@ -64,8 +99,7 @@ export function createStrategistAgent({
   }).format(new Date());
 
   const plannerTools = createPlannerToolsWithMetadata();
-  const messageTools = createMessagesToolsWithMetadata();
-  const todoTools = createTodoToolWithMetadata();
+  const todoTools = createTodoToolWithMetadata({ messages });
 
   const settingsTools = createSettingsToolsWithMetadata();
   const fileTools = createFileToolsWithMetadata();
@@ -76,35 +110,45 @@ export function createStrategistAgent({
     siteType: gscProperty?.type ?? null,
   });
   const dataforseoTools = createDataforseoToolWithMetadata(project);
+  const makeArticleSuggestionsTool = createSuggestArticlesToolWithMetadata({
+    userId,
+    project,
+  });
+
+  const readOnlyFileToolDefinitions = fileTools.toolDefinitions.filter(
+    (tool) => tool.toolName === "ls" || tool.toolName === "cat",
+  );
 
   const skillDefinitions: AgentToolDefinition[] = [
     ...settingsTools.toolDefinitions,
-    ...fileTools.toolDefinitions,
     ...webTools.toolDefinitions,
     ...gscTools.toolDefinitions,
     ...dataforseoTools.toolDefinitions,
+    ...makeArticleSuggestionsTool.toolDefinitions,
+    ...readOnlyFileToolDefinitions,
   ];
   const skillsSection = formatToolSkillsSection(skillDefinitions);
 
   const systemPrompt = `<role>
 You are an expert SEO/GEO strategist and planner.
 
-Your job is to help the user create a coherent, prioritized content map with clear topical structure and ontology.
+Your job is to help the user create a coherent, prioritized content map with clear 
+topical structure and ontology. You do this by helping the user understand their site's stats, manage project settings to optimize their site for SEO, and build a concrete content plan with high-quality article suggestions based on SERP, site, and keyword data.
 
-You have two power tools \`read_skills\` and \`use_skills\`. Prefer using them instead of guessing.
+You have two power tools \`read_skills\` and \`use_skills\`. Prefer using them instead of guessing. You make sure to use the \`read_skills\` tool before using the \`use_skills\` tool to understand how to use the skill properly and take note of any specific instructions that the skill requires.
 
-IMPORTANT CONTEXT LIMITATION:
-- You only receive a snippet of the user's latest message. Assume the last user message may be truncated/in response to a previous message.
-- To recover full context, proactively use tools like \`get_historical_messages\` and \`get_message_detail\`, and ask clarifying questions when needed.
+Ontology SEO constraint:
+- When suggesting new articles, make sure that it is nested in appropriate ontological  subfolders in a way groups related topics together so that we can build relevant topical authority appropriately.
 </role>
 
 <core-behavior>
-1. Understand: Dig into the user's ask and make sure to fully understand it. Restate the user's ask in 1-2 sentences; list assumptions.
-2. Clarify: Ask targeted questions to clarify the intended behavior as needed before making any plans or executing any tasks.
-3. Plan: propose a plan aligned to goals/constraints. Use clear topical clustering, parent/child relationships, and intent mapping.
-4. Execute: Use tools to gather evidence (GSC, SERP data, web) and produce a concrete content plan.
-5. Skill clarification loops: Some skills may return clarifying questions (e.g. seo_article_research may return needsClarification with an ask_questions payload). If that happens, "respond" to those questions by either asking the user (via ask_questions) or by using already-known facts. Then re-run the same skill with the SAME REQUEST again, adding the missing information.
-6. Track work: Use \`manage_todo\` tool to add tasks, mark tasks done, and keep the todo list current.
+1. Understand: Restate the user's ask in 1-2 sentences; list assumptions that might change the answer.
+2. Clarify: Ask targeted questions to clarify the intended behavior as needed before 
+making any plans or executing any tasks. Dig deep and make sure you understand before beginning analysis. If things pop up mid way through analysis, STOP your analysis and clarify.
+3. Diagnose: When discussing performance, focus on what the stats imply (position vs CTR vs impressions vs clicks), what's likely causing it, and what to test next.
+4. Plan: Propose a prioritized plan (clusters, parent/child pages, intent mapping), then produce concrete article suggestions (primary keyword + slug). Use as many tools as required to come up with a clear scope of plan. You can formalize your plans at any time using the \`create_plan\` tool if it's big and you want to user to make sure it's correct before executing on it.
+5. Execute: Use tools (GSC, SERP/keyword data, web) to ground recommendations. Link claims to source URLs when using web_search/web_fetch.
+6. Track work: Use \`manage_todo\` to create/update tasks; keep them atomic and execution-oriented. Make sure that the list reflects the current state of things at all times.
 </core-behavior>
 
 <skills>
@@ -120,7 +164,7 @@ ${skillsSection}
   }
 - Guidance:
   - If GSC is not connected and the user asks for performance/decay/CTR, prioritize connecting via manage_integrations.
-  - When using web_search/web_fetch, link claims to source URLs.
+  - When using web_search/web_fetch, use claims as the anchor text to the source URLs.
 </project-context>`;
 
   return {
@@ -135,18 +179,20 @@ ${skillsSection}
     tools: {
       ...createSkillTools({ toolDefinitions: skillDefinitions }),
       ...plannerTools.tools,
-      ...messageTools.tools,
       ...todoTools.tools,
     },
-    prepareStep: async ({ messages }) => {
-      const todos = await getTodosSnapshot();
+    prepareStep: ({ messages }) => {
       return {
         messages: [
           ...messages,
           {
             role: "system",
+            content: formatCurrentPageFocusReminder(currentPage),
+          },
+          {
+            role: "system",
             content: formatTodoFocusReminder({
-              todos,
+              todos: todoTools.getSnapshot(),
               maxOpen: 5,
             }),
           },

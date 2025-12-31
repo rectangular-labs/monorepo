@@ -19,4 +19,8 @@ export default {
 };
 
 export { WebSocketServer } from "@rectangular-labs/api-seo/websocket-server";
+export {
+  SeoPlannerWorkflow,
+  SeoWriterWorkflow,
+} from "@rectangular-labs/api-seo/workflows";
 export { UserVMContainer } from "@rectangular-labs/api-user-vm/container";

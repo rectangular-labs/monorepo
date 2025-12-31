@@ -71,6 +71,7 @@ const room = websocketBase
         gscProperty,
         project,
         userId: context.userId,
+        currentPage: "content-list",
       }),
       onStepFinish: (step) => {
         console.log("campaign.write step", step);

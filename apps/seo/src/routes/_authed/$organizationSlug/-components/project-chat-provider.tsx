@@ -1,16 +1,10 @@
 "use client";
 
+import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useRouterState } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
-
-export type ProjectChatCurrentPage =
-  | "content-planner"
-  | "content-list"
-  | "stats"
-  | "settings"
-  | "article-editor";
 
 type ProjectChatContextValue = {
   isOpen: boolean;

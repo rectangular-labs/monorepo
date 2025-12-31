@@ -10,10 +10,9 @@ import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
 import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
-import type { createMakeSuggestionsToolWithMetadata } from "./lib/ai/tools/make-suggestions-tool";
-import type { createMessagesToolsWithMetadata } from "./lib/ai/tools/message-tools";
 import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
 import type { createSkillTools } from "./lib/ai/tools/skill-tools";
+import type { createSuggestArticlesToolWithMetadata } from "./lib/ai/tools/suggest-articles-tool";
 import type { createTodoToolWithMetadata } from "./lib/ai/tools/todo-tool";
 import type {
   createPublicImagesBucket,
@@ -32,9 +31,8 @@ export type WebsocketRouterClient = ORPCRouterClient<WebsocketRouter>;
 type AiTools = InferUITools<
   ReturnType<typeof createSkillTools> &
     ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
-    ReturnType<typeof createMessagesToolsWithMetadata>["tools"] &
     ReturnType<typeof createTodoToolWithMetadata>["tools"] &
-    ReturnType<typeof createMakeSuggestionsToolWithMetadata>["tools"]
+    ReturnType<typeof createSuggestArticlesToolWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
   typeof contentCampaignMessageMetadataSchema.infer,

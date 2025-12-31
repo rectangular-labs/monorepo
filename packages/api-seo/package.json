@@ -27,6 +27,10 @@
     "./types": {
       "types": "./dist/types.d.ts",
       "default": "./src/types.ts"
+    },
+    "./workflows": {
+      "types": "./dist/workflows/index.d.ts",
+      "default": "./src/workflows/index.ts"
     }
   },
   "scripts": {

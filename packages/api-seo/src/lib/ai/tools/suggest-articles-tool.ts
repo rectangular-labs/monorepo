@@ -14,7 +14,7 @@ function normalizeWorkspaceFilePath(file: string) {
     : `${withLeadingSlash}.md`;
 }
 
-const makeSuggestionsInputSchema = type({
+const suggestArticlesInputSchema = type({
   suggestions: type({
     primaryKeyword: type("string").describe(
       "Primary keyword the article targets",
@@ -25,18 +25,18 @@ const makeSuggestionsInputSchema = type({
   }).array(),
 });
 
-export function createMakeSuggestionsToolWithMetadata({
+export function createSuggestArticlesToolWithMetadata({
   userId,
   project,
 }: {
   userId: string;
   project: NonNullable<ChatContext["cache"]["project"]>;
 }) {
-  const makeSuggestions = tool({
+  const suggestArticles = tool({
     description:
-      "Create suggested article files in the campaign workspace and set their metadata (status, primaryKeyword, createdAt, userId).",
-    inputSchema: jsonSchema<typeof makeSuggestionsInputSchema.infer>(
-      makeSuggestionsInputSchema.toJsonSchema() as JSONSchema7,
+      "Create suggested article files in the campaign workspace and set their metadata (status, primaryKeyword, createdAt, userId). Use subfolders as needed to create a clear topical structure.",
+    inputSchema: jsonSchema<typeof suggestArticlesInputSchema.infer>(
+      suggestArticlesInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ suggestions }) {
       const now = new Date().toISOString();
@@ -114,15 +114,15 @@ export function createMakeSuggestionsToolWithMetadata({
     },
   });
 
-  const tools = { make_suggestions: makeSuggestions } as const;
+  const tools = { suggest_articles: suggestArticles } as const;
   const toolDefinitions: AgentToolDefinition[] = [
     {
-      toolName: "make_suggestions",
+      toolName: "suggest_articles",
       toolDescription:
-        "Create suggestion files (slug-based paths) in the workspace and mark them as suggested with metadata.",
+        "Create suggested article files for publication on the user's website. Use subfolders in the slug needed to create a clear topical structure.",
       toolInstruction:
-        "Provide suggestions[] with { primaryKeyword, slug }. Slug can include folders (e.g. `business/how-to-start-a-business`). This will create `/.../.md` files and set status='suggested' so they appear in the planner.",
-      tool: makeSuggestions,
+        "Provide article suggestions in the form of { primaryKeyword, slug }. The primary keyword will be used to target the article for SEO/GEO optimization. The slug will be where the article will reside on the site. Slug can and should include folders (e.g. `business/how-to-start-a-business`) to create a clear topical structure so that we can build relevant topical authority appropriately. This tool will put the article up as suggested in the planner so that the user can review and publish them as needed.",
+      tool: suggestArticles,
     },
   ];
 

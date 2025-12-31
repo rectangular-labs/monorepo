@@ -40,6 +40,8 @@ function statusLabel(status: SeoFileStatus) {
       return "Planned";
     case "generating":
       return "Generating";
+    case "generation-failed":
+      return "Generation failed";
     case "pending-review":
       return "Pending review";
     case "scheduled":
