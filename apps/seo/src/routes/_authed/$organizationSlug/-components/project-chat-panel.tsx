@@ -33,11 +33,24 @@ import {
   PromptInputTools,
 } from "@rectangular-labs/ui/components/ai-elements/prompt-input";
 import {
+  Queue,
+  QueueItem,
+  QueueItemContent,
+  QueueItemDescription,
+  QueueItemIndicator,
+  QueueList,
+  QueueSection,
+  QueueSectionContent,
+  QueueSectionLabel,
+  QueueSectionTrigger,
+} from "@rectangular-labs/ui/components/ai-elements/queue";
+import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/reasoning";
 import { Response } from "@rectangular-labs/ui/components/ai-elements/response";
+import { Shimmer } from "@rectangular-labs/ui/components/ai-elements/shimmer";
 import {
   Source,
   Sources,
@@ -91,18 +104,8 @@ const TOOL_UI: Record<string, { title: string; defaultOpen?: boolean }> = {
   create_plan: { title: "Create plan", defaultOpen: true },
   get_historical_messages: { title: "Get historical messages" },
   get_message_detail: { title: "Get message detail" },
-  manage_todo: { title: "Manage todos" },
+  manage_todo: { title: "Manage Task list" },
   make_suggestions: { title: "Make suggestions", defaultOpen: true },
-};
-
-type AskQuestionsOutput = {
-  success?: boolean;
-  questions?: {
-    id: string;
-    prompt: string;
-    options: { id: string; label: string }[];
-    allow_multiple?: boolean;
-  }[];
 };
 
 function focusChatTextarea() {
@@ -121,18 +124,27 @@ function AskQuestionsToolPart({
   part: ChatToolPart;
   onSubmitAnswers: (text: string) => void;
 }) {
-  const output = part.output as AskQuestionsOutput | undefined;
-  const questions = output?.questions ?? [];
-
   const [answers, setAnswers] = useState<
     Record<string, { selected: string[] }>
   >(() => {
     const initial: Record<string, { selected: string[] }> = {};
+    const questions =
+      part.input && "questions" in part.input
+        ? (part.input.questions ?? [])
+        : [];
     for (const q of questions) {
+      if (!q?.id) continue;
       initial[q.id] = { selected: [] };
     }
     return initial;
   });
+  if (
+    part.type !== "tool-ask_questions" ||
+    part.state === "input-streaming" ||
+    part.state === "output-error"
+  )
+    return null;
+  const { questions } = part.input;
 
   const canSubmit =
     questions.length > 0 &&
@@ -239,16 +251,6 @@ function AskQuestionsToolPart({
   );
 }
 
-type CreatePlanOutput = {
-  success?: boolean;
-  plan?: {
-    name?: string | null;
-    overview?: string | null;
-    plan: string;
-    todos?: { id: string; content: string; dependencies?: string[] }[];
-  };
-};
-
 function CreatePlanToolPart({
   part,
   onApprove,
@@ -258,13 +260,17 @@ function CreatePlanToolPart({
   onApprove: () => void;
   onReject: () => void;
 }) {
-  const output = part.output as CreatePlanOutput | undefined;
-  const plan = output?.plan;
-  const title = plan?.name?.trim() || "Proposed plan";
-  const overview = plan?.overview?.trim();
-  const markdown = plan?.plan ?? "";
-
   const [open, setOpen] = useState(false);
+  if (
+    part.type !== "tool-create_plan" ||
+    part.state === "input-streaming" ||
+    part.state === "output-error"
+  )
+    return null;
+  const plan = part.input;
+  const title = plan.name?.trim() || "Proposed plan";
+  const overview = plan.overview?.trim();
+  const markdown = plan.plan ?? "";
 
   return (
     <div className="mb-4 w-full rounded-md border bg-background p-4">
@@ -360,12 +366,149 @@ function CreatePlanToolPart({
   );
 }
 
+function ManageTodoToolPart({ part }: { part: ChatToolPart }) {
+  if (
+    part.type !== "tool-manage_todo" ||
+    part.state === "input-streaming" ||
+    part.state === "output-error"
+  )
+    return null;
+
+  const input = part.input as {
+    action: "create" | "update" | "list";
+    todo?: {
+      id?: string;
+      title: string;
+      status?: "open" | "done";
+      notes?: string;
+      dependencies?: string[];
+    };
+  };
+
+  const output = part.output as
+    | {
+        success: boolean;
+        message?: string;
+        todos?: Array<{
+          id: string;
+          title: string;
+          status: "open" | "done";
+          notes?: string;
+          dependencies: string[];
+        }>;
+      }
+    | undefined;
+
+  const actionLabel =
+    input.action === "create"
+      ? "Creating"
+      : input.action === "update"
+        ? "Updating"
+        : "Listing";
+
+  return (
+    <div className="space-y-3 p-4">
+      <div className="space-y-2">
+        <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+          Action: {actionLabel}
+        </h4>
+        {input.todo && (
+          <div className="space-y-2 rounded-md bg-muted/50 p-3">
+            {input.action === "update" && input.todo.id && (
+              <div className="text-xs">
+                <span className="font-medium">Todo ID:</span> {input.todo.id}
+              </div>
+            )}
+            {input.todo.title && (
+              <div className="text-xs">
+                <span className="font-medium">Title:</span> {input.todo.title}
+              </div>
+            )}
+            {input.todo.status !== undefined && (
+              <div className="text-xs">
+                <span className="font-medium">Status:</span> {input.todo.status}
+              </div>
+            )}
+            {input.todo.notes && (
+              <div className="text-xs">
+                <span className="font-medium">Notes:</span> {input.todo.notes}
+              </div>
+            )}
+            {input.todo.dependencies && input.todo.dependencies.length > 0 && (
+              <div className="text-xs">
+                <span className="font-medium">Dependencies:</span>{" "}
+                {input.todo.dependencies.join(", ")}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {output && (
+        <div className="space-y-2">
+          <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+            Result
+          </h4>
+          <div
+            className={cn(
+              "rounded-md p-3 text-xs",
+              output.success
+                ? "bg-muted/50 text-foreground"
+                : "bg-destructive/10 text-destructive",
+            )}
+          >
+            {output.message && (
+              <div className="mb-2 font-medium">{output.message}</div>
+            )}
+            {output.todos && output.todos.length > 0 && (
+              <div className="mt-2 space-y-1">
+                <div className="font-medium">Current todos:</div>
+                <ul className="ml-4 list-disc space-y-1">
+                  {output.todos.map((todo) => (
+                    <li key={todo.id}>
+                      <span
+                        className={cn(
+                          todo.status === "done" && "line-through opacity-60",
+                        )}
+                      >
+                        {todo.title}
+                      </span>
+                      {todo.status === "open" && (
+                        <span className="ml-2 text-muted-foreground">
+                          (open)
+                        </span>
+                      )}
+                      {todo.status === "done" && (
+                        <span className="ml-2 text-muted-foreground">
+                          (done)
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type TodoSnapshot = Extract<
+  Extract<ChatMessagePart, { type: `tool-manage_todo` }>,
+  { state: `output-available` }
+>["output"]["todos"];
 export function ProjectChatPanel() {
   const { close, currentPage, organizationIdentifier, projectId } =
     useProjectChat();
   const [input, setInput] = useState("");
   const queryClient = useQueryClient();
   const lastSuggestionCompletionRef = useRef<string | null>(null);
+  const lastTodoSnapshotRef = useRef<string | null>(null);
+  const [todoSnapshot, setTodoSnapshot] = useState<NonNullable<TodoSnapshot>>(
+    [],
+  );
 
   const api = useMemo(() => getApiClient(), []);
 
@@ -390,6 +533,7 @@ export function ProjectChatPanel() {
           return eventIteratorToUnproxiedDataStream(eventIterator);
         },
       },
+
       onError: (error) => {
         console.error("project chat error", error);
       },
@@ -402,12 +546,25 @@ export function ProjectChatPanel() {
         const part = message.parts[i];
         if (!part || !isChatToolPart(part)) continue;
         const toolName = part.type.slice("tool-".length);
-        if (toolName !== "make_suggestions") continue;
-        if (part.state !== "output-available") continue;
-        const key = `${message.id}:${i}`;
-        if (lastSuggestionCompletionRef.current === key) continue;
-        lastSuggestionCompletionRef.current = key;
-        void queryClient.invalidateQueries({ queryKey: ["pullDocument"] });
+
+        if (toolName === "make_suggestions") {
+          if (part.state !== "output-available") continue;
+          const key = `${message.id}:${i}`;
+          if (lastSuggestionCompletionRef.current === key) continue;
+          lastSuggestionCompletionRef.current = key;
+          void queryClient.invalidateQueries({ queryKey: ["pullDocument"] });
+        }
+
+        if (toolName === "manage_todo") {
+          if (part.state !== "output-available") continue;
+          const key = `${message.id}:${i}`;
+          if (lastTodoSnapshotRef.current === key) continue;
+          lastTodoSnapshotRef.current = key;
+          const output = part.output as { todos?: TodoSnapshot } | undefined;
+          if (output?.todos) {
+            setTodoSnapshot(output.todos);
+          }
+        }
       }
     }
   }, [messages, queryClient]);
@@ -433,6 +590,14 @@ export function ProjectChatPanel() {
     );
     setInput("");
   };
+
+  const openTodos = useMemo(() => {
+    return todoSnapshot.filter((t) => t.status === "open");
+  }, [todoSnapshot]);
+
+  const doneTodos = useMemo(() => {
+    return todoSnapshot.filter((t) => t.status === "done");
+  }, [todoSnapshot]);
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
@@ -531,6 +696,39 @@ export function ProjectChatPanel() {
                           <span>{part.filename}</span>
                         </TaskItemFile>
                       );
+                    case "tool-ask_questions": {
+                      if (part.state === "output-available") {
+                        return (
+                          <AskQuestionsToolPart
+                            key={`${message.id}-${part.toolCallId}`}
+                            onSubmitAnswers={(text) => sendText(text)}
+                            part={part}
+                          />
+                        );
+                      }
+                      return <Shimmer>Drilling into the details</Shimmer>;
+                    }
+                    case "tool-create_plan": {
+                      if (part.state === "output-available") {
+                        return (
+                          <CreatePlanToolPart
+                            key={`${message.id}-${part.toolCallId}`}
+                            onApprove={() =>
+                              sendText("plan looks good, let's start.")
+                            }
+                            onReject={() => rejectPlanPrefill()}
+                            part={part}
+                          />
+                        );
+                      }
+                      return <Shimmer>Creating plan</Shimmer>;
+                    }
+                    case "tool-manage_todo": {
+                      if (part.state !== "output-available") {
+                        return <Shimmer>Managing todos</Shimmer>;
+                      }
+                      return <ManageTodoToolPart part={part} />;
+                    }
                     default: {
                       if (!isChatToolPart(part)) return null;
                       const toolName = part.type.slice("tool-".length);
@@ -539,33 +737,6 @@ export function ProjectChatPanel() {
                       const defaultOpen =
                         part.state === "output-error" ||
                         ui?.defaultOpen === true;
-
-                      if (toolName === "ask_questions") {
-                        if (part.state === "output-available") {
-                          return (
-                            <AskQuestionsToolPart
-                              key={`${message.id}-${i}`}
-                              onSubmitAnswers={(text) => sendText(text)}
-                              part={part}
-                            />
-                          );
-                        }
-                      }
-
-                      if (toolName === "create_plan") {
-                        if (part.state === "output-available") {
-                          return (
-                            <CreatePlanToolPart
-                              key={`${message.id}-${i}`}
-                              onApprove={() =>
-                                sendText("plan looks good, let's start.")
-                              }
-                              onReject={() => rejectPlanPrefill()}
-                              part={part}
-                            />
-                          );
-                        }
-                      }
 
                       return (
                         <Tool
@@ -597,40 +768,99 @@ export function ProjectChatPanel() {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
-          className="border-t px-3 py-2"
-          globalDrop
-          multiple
-          onSubmit={handleSubmit}
-        >
-          <PromptInputBody>
-            <PromptInputAttachments>
-              {(attachment) => <PromptInputAttachment data={attachment} />}
-            </PromptInputAttachments>
-            <PromptInputTextarea
-              onChange={(e) => setInput(e.target.value)}
-              status={status}
-              value={input}
-            />
-          </PromptInputBody>
-          <PromptInputFooter>
-            <PromptInputTools>
-              <PromptInputActionMenu>
-                <PromptInputActionMenuTrigger />
-                <PromptInputActionMenuContent>
-                  <PromptInputActionAddAttachments />
-                </PromptInputActionMenuContent>
-              </PromptInputActionMenu>
-            </PromptInputTools>
-            <PromptInputSubmit
-              disabled={!input && status === "ready"}
-              onClick={() => {
-                if (status === "streaming") stop?.();
-              }}
-              status={status}
-            />
-          </PromptInputFooter>
-        </PromptInput>
+        <div className="border-t">
+          {(openTodos.length > 0 || doneTodos.length > 0) && (
+            <div className="px-3 pt-2">
+              <Queue>
+                <QueueSection defaultOpen={openTodos.length > 0}>
+                  <QueueSectionTrigger>
+                    <QueueSectionLabel count={openTodos.length} label="Open" />
+                  </QueueSectionTrigger>
+                  <QueueSectionContent>
+                    <QueueList>
+                      {openTodos.map((t) => (
+                        <QueueItem key={t.id}>
+                          <div className="flex items-start gap-2">
+                            <QueueItemIndicator completed={false} />
+                            <QueueItemContent>{t.title}</QueueItemContent>
+                          </div>
+                          {t.notes ? (
+                            <QueueItemDescription>
+                              {t.notes}
+                            </QueueItemDescription>
+                          ) : null}
+                        </QueueItem>
+                      ))}
+                    </QueueList>
+                  </QueueSectionContent>
+                </QueueSection>
+
+                <QueueSection defaultOpen={false}>
+                  <QueueSectionTrigger>
+                    <QueueSectionLabel
+                      count={doneTodos.length}
+                      label="Completed"
+                    />
+                  </QueueSectionTrigger>
+                  <QueueSectionContent>
+                    <QueueList>
+                      {doneTodos.map((t) => (
+                        <QueueItem key={t.id}>
+                          <div className="flex items-start gap-2">
+                            <QueueItemIndicator completed />
+                            <QueueItemContent completed>
+                              {t.title}
+                            </QueueItemContent>
+                          </div>
+                          {t.notes ? (
+                            <QueueItemDescription completed>
+                              {t.notes}
+                            </QueueItemDescription>
+                          ) : null}
+                        </QueueItem>
+                      ))}
+                    </QueueList>
+                  </QueueSectionContent>
+                </QueueSection>
+              </Queue>
+            </div>
+          )}
+
+          <PromptInput
+            className="px-3 py-2"
+            globalDrop
+            multiple
+            onSubmit={handleSubmit}
+          >
+            <PromptInputBody>
+              <PromptInputAttachments>
+                {(attachment) => <PromptInputAttachment data={attachment} />}
+              </PromptInputAttachments>
+              <PromptInputTextarea
+                onChange={(e) => setInput(e.target.value)}
+                status={status}
+                value={input}
+              />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <PromptInputTools>
+                <PromptInputActionMenu>
+                  <PromptInputActionMenuTrigger />
+                  <PromptInputActionMenuContent>
+                    <PromptInputActionAddAttachments />
+                  </PromptInputActionMenuContent>
+                </PromptInputActionMenu>
+              </PromptInputTools>
+              <PromptInputSubmit
+                disabled={!input && status === "ready"}
+                onClick={() => {
+                  if (status === "streaming") stop?.();
+                }}
+                status={status}
+              />
+            </PromptInputFooter>
+          </PromptInput>
+        </div>
       </div>
     </div>
   );
