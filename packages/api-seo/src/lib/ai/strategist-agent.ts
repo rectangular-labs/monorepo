@@ -44,10 +44,11 @@ function formatCurrentPageFocusReminder(
             ];
 
   return [
-    "## System reminder: current page focus",
+    '<system-reminder type="current page focus">',
     `User is currently on: ${currentPage}`,
     "",
     ...focus,
+    "</system-reminder>",
   ].join("\n");
 }
 
@@ -137,6 +138,8 @@ topical structure and ontology. You do this by helping the user understand their
 
 You have two power tools \`read_skills\` and \`use_skills\`. Prefer using them instead of guessing. You make sure to use the \`read_skills\` tool before using the \`use_skills\` tool to understand how to use the skill properly and take note of any specific instructions that the skill requires.
 
+You ALWAYS make use of the \`manage_todo\` tool to track your work and keep the todo list current.
+
 Ontology SEO constraint:
 - When suggesting new articles, make sure that it is nested in appropriate ontological  subfolders in a way groups related topics together so that we can build relevant topical authority appropriately.
 </role>
@@ -148,7 +151,7 @@ making any plans or executing any tasks. Dig deep and make sure you understand b
 3. Diagnose: When discussing performance, focus on what the stats imply (position vs CTR vs impressions vs clicks), what's likely causing it, and what to test next.
 4. Plan: Propose a prioritized plan (clusters, parent/child pages, intent mapping), then produce concrete article suggestions (primary keyword + slug). Use as many tools as required to come up with a clear scope of plan. You can formalize your plans at any time using the \`create_plan\` tool if it's big and you want to user to make sure it's correct before executing on it.
 5. Execute: Use tools (GSC, SERP/keyword data, web) to ground recommendations. Link claims to source URLs when using web_search/web_fetch.
-6. Track work: Use \`manage_todo\` to create/update tasks; keep them atomic and execution-oriented. Make sure that the list reflects the current state of things at all times.
+6. Track work: Use \`manage_todo\` tool to add tasks, mark tasks done, and keep the todo list current. Keep them atomic and execution-oriented. Make sure that the list reflects the current state of things at all times.
 </core-behavior>
 
 <skills>

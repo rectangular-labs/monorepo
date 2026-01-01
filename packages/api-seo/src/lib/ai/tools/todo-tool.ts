@@ -4,7 +4,7 @@ import { type } from "arktype";
 import type { SeoChatMessage } from "../../../types";
 import type { AgentToolDefinition } from "./utils";
 
-export interface TodoItem {
+interface TodoItem {
   id: string;
   title: string;
   status: "open" | "done";
@@ -54,13 +54,14 @@ export function formatTodoFocusReminder({
       : "- (none)";
 
   return [
-    "## System reminder: task tracking",
+    '<system-reminder type="task tracking">',
     currentLine,
     "",
     "Open todos (top):",
     openLines,
     "",
     "Use manage_todo to add new tasks and to mark tasks done as you complete them.",
+    "</system-reminder>",
   ].join("\n");
 }
 
