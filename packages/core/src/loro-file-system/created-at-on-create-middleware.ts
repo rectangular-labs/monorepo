@@ -14,5 +14,3 @@ export function addCreatedAtOnCreateMiddleware(): WriteToFileMiddleware<FsNodePa
     return await next();
   };
 }
-
-

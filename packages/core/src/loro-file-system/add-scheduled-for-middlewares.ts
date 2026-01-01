@@ -3,7 +3,7 @@ import {
   type WriteToFileMiddleware,
 } from "@rectangular-labs/loro-file-system";
 import type { LoroTree, LoroTreeNode } from "loro-crdt";
-import type { publishingSettingsSchema } from "../../schemas/project-parsers";
+import type { publishingSettingsSchema } from "../schemas/project-parsers";
 import type { FsNodePayload, SeoFileStatus } from "./types";
 
 export type WriteToFilePublishingContext = {
