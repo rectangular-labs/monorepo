@@ -366,135 +366,6 @@ function CreatePlanToolPart({
   );
 }
 
-function ManageTodoToolPart({ part }: { part: ChatToolPart }) {
-  if (
-    part.type !== "tool-manage_todo" ||
-    part.state === "input-streaming" ||
-    part.state === "output-error"
-  )
-    return null;
-
-  const input = part.input as {
-    action: "create" | "update" | "list";
-    todo?: {
-      id?: string;
-      title: string;
-      status?: "open" | "done";
-      notes?: string;
-      dependencies?: string[];
-    };
-  };
-
-  const output = part.output as
-    | {
-        success: boolean;
-        message?: string;
-        todos?: Array<{
-          id: string;
-          title: string;
-          status: "open" | "done";
-          notes?: string;
-          dependencies: string[];
-        }>;
-      }
-    | undefined;
-
-  const actionLabel =
-    input.action === "create"
-      ? "Creating"
-      : input.action === "update"
-        ? "Updating"
-        : "Listing";
-
-  return (
-    <div className="space-y-3 p-4">
-      <div className="space-y-2">
-        <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-          Action: {actionLabel}
-        </h4>
-        {input.todo && (
-          <div className="space-y-2 rounded-md bg-muted/50 p-3">
-            {input.action === "update" && input.todo.id && (
-              <div className="text-xs">
-                <span className="font-medium">Todo ID:</span> {input.todo.id}
-              </div>
-            )}
-            {input.todo.title && (
-              <div className="text-xs">
-                <span className="font-medium">Title:</span> {input.todo.title}
-              </div>
-            )}
-            {input.todo.status !== undefined && (
-              <div className="text-xs">
-                <span className="font-medium">Status:</span> {input.todo.status}
-              </div>
-            )}
-            {input.todo.notes && (
-              <div className="text-xs">
-                <span className="font-medium">Notes:</span> {input.todo.notes}
-              </div>
-            )}
-            {input.todo.dependencies && input.todo.dependencies.length > 0 && (
-              <div className="text-xs">
-                <span className="font-medium">Dependencies:</span>{" "}
-                {input.todo.dependencies.join(", ")}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {output && (
-        <div className="space-y-2">
-          <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-            Result
-          </h4>
-          <div
-            className={cn(
-              "rounded-md p-3 text-xs",
-              output.success
-                ? "bg-muted/50 text-foreground"
-                : "bg-destructive/10 text-destructive",
-            )}
-          >
-            {output.message && (
-              <div className="mb-2 font-medium">{output.message}</div>
-            )}
-            {output.todos && output.todos.length > 0 && (
-              <div className="mt-2 space-y-1">
-                <div className="font-medium">Current todos:</div>
-                <ul className="ml-4 list-disc space-y-1">
-                  {output.todos.map((todo) => (
-                    <li key={todo.id}>
-                      <span
-                        className={cn(
-                          todo.status === "done" && "line-through opacity-60",
-                        )}
-                      >
-                        {todo.title}
-                      </span>
-                      {todo.status === "open" && (
-                        <span className="ml-2 text-muted-foreground">
-                          (open)
-                        </span>
-                      )}
-                      {todo.status === "done" && (
-                        <span className="ml-2 text-muted-foreground">
-                          (done)
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 type TodoSnapshot = Extract<
   Extract<ChatMessagePart, { type: `tool-manage_todo` }>,
   { state: `output-available` }
@@ -725,9 +596,9 @@ export function ProjectChatPanel() {
                     }
                     case "tool-manage_todo": {
                       if (part.state !== "output-available") {
-                        return <Shimmer>Managing todos</Shimmer>;
+                        return <Shimmer>Managing tasks</Shimmer>;
                       }
-                      return <ManageTodoToolPart part={part} />;
+                      return null;
                     }
                     default: {
                       if (!isChatToolPart(part)) return null;
