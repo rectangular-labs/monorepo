@@ -35,6 +35,22 @@ function weekdayFromDate(date: Date): PublishingCadence["allowedDays"][number] {
   }
 }
 
+function weekKeyUtc(date: Date): string {
+  const d = new Date(date);
+  d.setUTCHours(0, 0, 0, 0);
+  const utcDay = d.getUTCDay(); // 0 (Sun) .. 6 (Sat)
+  const offsetToMonday = (utcDay + 6) % 7; // Mon -> 0, Tue -> 1, ..., Sun -> 6
+  d.setUTCDate(d.getUTCDate() - offsetToMonday);
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD (Monday)
+}
+
+function periodKeyUtc(date: Date, period: PublishingCadence["period"]): string {
+  if (period === "daily") return date.toISOString().slice(0, 10); // YYYY-MM-DD
+  if (period === "weekly") return weekKeyUtc(date); // YYYY-MM-DD (week start)
+  if (period === "monthly") return date.toISOString().slice(0, 7); // YYYY-MM
+  throw new Error(`Invalid period: ${period}`);
+}
+
 function computeNextAvailableScheduleIso({
   tree,
   cadence,
@@ -55,6 +71,7 @@ function computeNextAvailableScheduleIso({
   })();
 
   const usedByDay = new Map<string, number>();
+  const usedByPeriod = new Map<string, number>();
 
   const root = tree.roots()[0] as LoroTreeNode<FsNodePayload> | undefined;
   if (!root) return undefined;
@@ -63,6 +80,7 @@ function computeNextAvailableScheduleIso({
     "generating",
     "pending-review",
     "scheduled",
+    "published",
   ] satisfies SeoFileStatus[]);
   traverseNode({
     node: root,
@@ -70,12 +88,14 @@ function computeNextAvailableScheduleIso({
       if (node.data.get("type") === "file") {
         const status = node.data.get("status");
         const scheduledFor = node.data.get("scheduledFor");
-        if (typeof status === "string" && countableStatuses.has(status)) {
-          if (typeof scheduledFor === "string" && scheduledFor.trim() !== "") {
+        if (status && countableStatuses.has(status)) {
+          if (scheduledFor && scheduledFor.trim() !== "") {
             const d = new Date(scheduledFor);
             if (!Number.isNaN(d.getTime())) {
               const dayKey = d.toISOString().slice(0, 10); // YYYY-MM-DD
               usedByDay.set(dayKey, (usedByDay.get(dayKey) ?? 0) + 1);
+              const pKey = periodKeyUtc(d, period);
+              usedByPeriod.set(pKey, (usedByPeriod.get(pKey) ?? 0) + 1);
             }
           }
         }
@@ -94,7 +114,7 @@ function computeNextAvailableScheduleIso({
       0,
     ),
   );
-  // if 9am is in the pass, start from tomorrow
+  // if 9am is in the past, start from tomorrow
   if (cursor.getTime() < now.getTime()) {
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
@@ -103,6 +123,12 @@ function computeNextAvailableScheduleIso({
   for (let i = 0; i < 365; ++i) {
     const weekday = weekdayFromDate(cursor);
     if (!allowedDays.includes(weekday)) {
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+      continue;
+    }
+    const pKey = periodKeyUtc(cursor, period);
+    const periodCount = usedByPeriod.get(pKey) ?? 0;
+    if (periodCount >= frequency) {
       cursor.setUTCDate(cursor.getUTCDate() + 1);
       continue;
     }
