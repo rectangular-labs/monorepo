@@ -69,22 +69,22 @@ The goal is to create a plan that a writer can follow to:
 <critical-requirements>
 - The final artifact MUST be a cohesive plan that a writer can follow end-to-end.
 - The plan MUST include a concrete title and a H2/H3 outline with section-by-section notes (what to say, what to cite, and any unique angle to add).
-- Prefer tool-grounded claims. When you cite stats or claims, have the claims be in the anchor text of the source URL itself.
-  <example>
+- Prefer tool-grounded claims. When you cite stats or claims, have the claims be in the anchor text and the link be the source URL itself in markdown link syntax.
+<example>
   According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
-  </example>
-  <example>
+</example>
+<example>
   Up to [20% of companies](url_link) will be disrupted by AI in the next 5 years.
-  </example>
-- Use internal_links to propose 5-10 highly relevant internal links to include (and suggested anchor text).
-  <example>
+</example>
+- Use internal_links to propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
+<example>
   When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
-  </example>
+</example>
 </critical-requirements>
 
 <workflow>
 1) Analyze intent and SERP features (AI overview, PAA, related searches) for the keyword (provided in live-serp-data).
-2) Analyze competitor pages: what they cover well, gaps, structure patterns, and differentiators (also provided in live-serp-data).
+2) Analyze competitor pages: take the Headings (H1, H2, H3) of the top 10 serps, and determine why the headings are considered to have fulfilled search intent. Distil your findings for each article into a thesis, and craft the outline taking the best practices from your findings, which fulfilling the thesis while maintaining an organic flow to the article (also provided in live-serp-data).
 3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
 4) Synthesize into a brief article outline. Include a section on the POV of the article and a section covering any relevant assets that would be useful to include (tables/diagrams/site screenshots/flow charts/etc.).
     - The plan should follow closely the structure of competitor pages ${serp.find((s) => s.type === "ai_overview") ? "and the AI Overview" : ""} while also adding unique insights and angles. Note that if none of the competitors page fulfill/matches the target keyword well, you are free to ignore the competitors page structure.
@@ -93,6 +93,93 @@ The goal is to create a plan that a writer can follow to:
     - Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
     - Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
 5) Output the file in markdown format, do not include any other formatting or commentary.
+6) If any of these article types are being written, follow these instructions. These instructions should override any contradicting instructions elsewhere. If the type of article being written is not listed here, ignore this list.
+
+## Best of lists 
+1. always include screenshots or products of the products/websites/service pages/country/food/item that you are listing. 
+2. word light – each listicle item should be a maximum of 50 words
+3. maximum of 20 total items
+
+## Comparisons (comparing two or more products or services or items)
+1. always include comparison tables at the top of the article that summarises the key points
+2. include screenshots or pictures of each item being compared
+
+
+## How to (guide)
+1. include screenshots, diagrams, pictures for each step
+2. Checklist should be included after the introduction to signpost the article 
+
+## Listicle (generically)
+1. include screenshots, diagrams, for every listed item 
+2. maximum of 20 total items 
+3. word light - each listicle item should be a maximum of 50 words
+
+## Long form - opinions
+1. clear opinion that should be reached at the end 
+2. must take a side and an opinion - strong POV
+
+## FAQs (?)
+1. headings should be the questions
+2. short word counts
+
+## News 
+1. structure should cover: i) what happened, ii) why it matters, iii) key details, iv) what's next (if applicable)
+
+## Whitepapers
+1. diagrams, charts, and frameworks should be produced into images 
+2. long word count
+3. include an executive summary, data analysis, explain methodology, describe the issue
+
+## Infographic
+1. Visual output should incorporate all important elements - there should be a clear heading, with visuals which accompany and describe each heading, and corresponding words in bullet point
+2. Visual should have a flow and not be overly complicated. 
+3. text should be readable
+4. no need to use SERP data
+
+## Case studies
+1. visuals of any data
+2. emphasize the experience of the user and emphasize how they were aided
+3. identify the person by name and position and state the company in the title
+4. no need to use SERP data
+
+## Press releases (news about the company)
+1. short word count
+2. state details of the press release
+3. quotes from key personnel
+4. no need to use SERP data
+
+## Interviews
+1. picture of the person being interviewed 
+2. structured around the interview and the quotes received in the interview
+3. introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
+4. no need to use SERP data
+
+## product update
+1. Word light 
+2. introduce the product and what it is 
+3. explain why this update is exciting and what it intends to fulfill
+4. no need to use SERP data
+
+## Contest/giveaway
+1. visual of a giveaway - describe what needs to be done to qualify for the giveaway, how many people will win it, when it will close,how much it's worth and the product needs to be in the picture. Picture should be vibrant and exciting
+2. very word light 
+3. no need to use SERP data
+
+## Research summary
+1. charts, frameworks, diagrams describing the data is mandatory
+2. Describe what was studied, key findings, and implications, if any. 
+3. any original opinions have to be clearly labelled as such
+
+## Event recap
+1. Picture of the event (prompt user for it)
+2. describe event highlights and takeaways
+3. no need to use SERP data
+
+## best practices
+1. checklist at the end of the article summarizing all the best practices
+2. state dos and don'ts 
+
+Output the file in markdown format, do not include any other formatting or commentary.
 </workflow>
 
 <project context>
@@ -104,7 +191,7 @@ The goal is to create a plan that a writer can follow to:
 
 
 <live-serp-data>
-${JSON.stringify(serp, null, 2)}
+serp
 </live-serp-data>`;
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
