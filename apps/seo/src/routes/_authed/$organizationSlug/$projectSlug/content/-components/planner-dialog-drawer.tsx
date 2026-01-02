@@ -2,8 +2,14 @@
 
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
-import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
 import * as Icons from "@rectangular-labs/ui/components/icon";
+import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@rectangular-labs/ui/components/ui/accordion";
 import {
   Alert,
   AlertDescription,
@@ -11,12 +17,6 @@ import {
 } from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@rectangular-labs/ui/components/ui/accordion";
 import {
   DialogDrawer,
   DialogDrawerDescription,
@@ -116,8 +116,10 @@ export function PlannerDialogDrawer({
       const metadata: { key: string; value: string }[] = [];
       if (status) metadata.push({ key: "status", value: status });
       if (shouldUpdateName) metadata.push({ key: "name", value: nextName });
-      if (notesDraft.trim()) metadata.push({ key: "notes", value: notesDraft.trim() });
-      if (scheduleIso) metadata.push({ key: "scheduledFor", value: scheduleIso });
+      if (notesDraft.trim())
+        metadata.push({ key: "notes", value: notesDraft.trim() });
+      if (scheduleIso)
+        metadata.push({ key: "scheduledFor", value: scheduleIso });
       return metadata;
     };
   }, [
@@ -297,13 +299,9 @@ export function PlannerDialogDrawer({
                 disabled={isSaving}
                 onClick={() => {
                   if (!activeDialogFile) return;
-                  applyMetadataUpdate(
-                    activeDialogFile,
-                    buildMetadataUpdate(),
-                    {
-                      closeDialog: true,
-                    },
-                  );
+                  applyMetadataUpdate(activeDialogFile, buildMetadataUpdate(), {
+                    closeDialog: true,
+                  });
                 }}
               >
                 Save

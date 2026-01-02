@@ -59,14 +59,13 @@ export function MarkdownEditor({
   onUploadImage?: (file: File) => Promise<string>;
 }) {
   return (
-      <MilkdownProvider>
-        <MarkdownEditorInner
-          markdown={markdown}
-          onMarkdownChange={onMarkdownChange}
-          onUploadImage={onUploadImage}
-          readOnly={readOnly}
-        />
-      </MilkdownProvider>
+    <MilkdownProvider>
+      <MarkdownEditorInner
+        markdown={markdown}
+        onMarkdownChange={onMarkdownChange}
+        onUploadImage={onUploadImage}
+        readOnly={readOnly}
+      />
+    </MilkdownProvider>
   );
 }
-
