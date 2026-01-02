@@ -1,7 +1,7 @@
 import type {
   FsNodePayload,
   LoroDocMapping,
-} from "@rectangular-labs/api-seo/types";
+} from "@rectangular-labs/core/loro-file-system";
 import {
   moveNode,
   removeNodeAtPath,
@@ -54,18 +54,18 @@ describe("buildTree: basic tree building", () => {
     }
   });
 
-  it("should build tree with no nesting (flat structure)", () => {
+  it("should build tree with no nesting (flat structure)", async () => {
     const doc = createLoroDoc();
     const root = getRootNode(doc);
 
     const tree = doc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/file1.txt",
       content: "content1",
       createIfMissing: true,
     });
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/file2.js",
       content: "content2",
@@ -119,16 +119,16 @@ describe("buildTree: basic tree building", () => {
     }
   });
 
-  it("should build tree with 1 layer of nesting", () => {
+  it("should build tree with 1 layer of nesting", async () => {
     const doc = createLoroDoc();
     const tree = doc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/dir1/file1.txt",
       content: "content1",
       createIfMissing: true,
     });
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/dir1/file2.js",
       content: "content2",
@@ -170,33 +170,33 @@ describe("buildTree: basic tree building", () => {
     }
   });
 
-  it("should build tree with arbitrary nesting levels", () => {
+  it("should build tree with arbitrary nesting levels", async () => {
     const doc = createLoroDoc();
     const tree = doc.getTree("fs");
 
     // Create: /dir1/root-file.txt
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/dir1/root-file.txt",
       content: "root content",
       createIfMissing: true,
     });
     // Create: /dir1/dir2/level2-file.js
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/dir1/dir2/level2-file.js",
       content: "level2 content",
       createIfMissing: true,
     });
     // Create: /dir1/dir2/dir3/deep-file.md
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/dir1/dir2/dir3/deep-file.md",
       content: "deep content",
       createIfMissing: true,
     });
     // Create: /dir4/sibling-file.json
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/dir4/sibling-file.json",
       content: "{}",
@@ -461,16 +461,16 @@ describe("buildTree: folder diff operations", () => {
     }
   });
 
-  it("should detect deleted folder", () => {
+  it("should detect deleted folder", async () => {
     const baseDoc = createLoroDoc();
     const tree = baseDoc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/something/toDelete/file.txt",
       content: "content",
       createIfMissing: true,
     });
-    writeToFile({
+    await writeToFile({
       tree,
       path: "/test/file2.txt",
       content: "content2",
@@ -614,10 +614,10 @@ describe("buildTree: folder diff operations", () => {
 });
 
 describe("buildTree: file diff operations", () => {
-  it("should detect file name change", () => {
+  it("should detect file name change", async () => {
     const baseDoc = createLoroDoc();
     const baseTree = baseDoc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree: baseTree,
       path: "/oldName.txt",
       content: "content",
@@ -661,12 +661,12 @@ describe("buildTree: file diff operations", () => {
     }
   });
 
-  it("should detect new empty file", () => {
+  it("should detect new empty file", async () => {
     const baseDoc = createLoroDoc();
 
     const newDoc = baseDoc.fork() as LoroDoc<LoroDocMapping>;
     const newTree = newDoc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree: newTree,
       path: "/newFile.txt",
       content: "",
@@ -701,10 +701,10 @@ describe("buildTree: file diff operations", () => {
     }
   });
 
-  it("should detect file content change", () => {
+  it("should detect file content change", async () => {
     const baseDoc = createLoroDoc();
     const baseTree = baseDoc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree: baseTree,
       path: "/file.txt",
       content: "original content is great",
@@ -774,10 +774,10 @@ cool stuff here.`,
     }
   });
 
-  it("should detect file moved from one folder to another", () => {
+  it("should detect file moved from one folder to another", async () => {
     const baseDoc = createLoroDoc();
     const baseTree = baseDoc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree: baseTree,
       path: "/source/moveable.txt",
       content: "content",
@@ -838,10 +838,10 @@ cool stuff here.`,
     }
   });
 
-  it("should detect deleted file", () => {
+  it("should detect deleted file", async () => {
     const baseDoc = createLoroDoc();
     const baseTree = baseDoc.getTree("fs");
-    writeToFile({
+    await writeToFile({
       tree: baseTree,
       path: "/toDelete/file.txt",
       content: "content",

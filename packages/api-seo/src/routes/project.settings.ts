@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/client";
 import {
   businessBackgroundSchema,
   imageSettingsSchema,
+  publishingSettingsSchema,
   writingSettingsSchema,
 } from "@rectangular-labs/core/schemas/project-parsers";
 import { schema } from "@rectangular-labs/db";
@@ -158,6 +159,45 @@ export const getWritingSettings = withOrganizationIdBase
     return {
       ...projectWithAuthors,
       organizationId: context.organization.id,
+    };
+  });
+
+export const getPublishingSettings = withOrganizationIdBase
+  .route({ method: "GET", path: "/{identifier}/publishing-settings" })
+  .input(type({ identifier: "string", organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      id: "string",
+      organizationId: "string",
+      publishingSettings: publishingSettingsSchema.or(type.null),
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const projectResult = await getSeoProjectByIdentifierAndOrgId(
+      context.db,
+      input.identifier,
+      context.organization.id,
+      {
+        publishingSettings: true,
+      },
+    );
+    if (!projectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: projectResult.error.message,
+        cause: projectResult.error,
+      });
+    }
+    if (!projectResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No project found with identifier.",
+      });
+    }
+
+    return {
+      id: projectResult.value.id,
+      organizationId: context.organization.id,
+      publishingSettings: projectResult.value.publishingSettings,
     };
   });
 

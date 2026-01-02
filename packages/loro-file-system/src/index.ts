@@ -1,4 +1,9 @@
-import { LoroText, type LoroTree, type LoroTreeNode } from "loro-crdt";
+import {
+  type Container,
+  LoroText,
+  type LoroTree,
+  type LoroTreeNode,
+} from "loro-crdt";
 import { createNodesForPath } from "./utils/create-nodes-for-path";
 import { resolvePath } from "./utils/resolve-path";
 import { traverseNode } from "./utils/traverse-node";
@@ -217,7 +222,31 @@ export function moveNode<T extends Record<string, unknown> & BaseFileSystem>({
   return { success: true };
 }
 
-export function writeToFile<
+export interface WriteToFileArgs<
+  T extends Record<string, unknown> & BaseFileSystem,
+> {
+  tree: LoroTree<T>;
+  path: string;
+  content?: string | undefined;
+  createIfMissing?: boolean | undefined;
+  contentMapKey?: string | undefined;
+  metadata?: { key: string; value: string }[] | undefined;
+  onCreateNode?:
+    | ((
+        currentNode: LoroTreeNode<T>,
+      ) => LoroTreeNode<T> | Promise<LoroTreeNode<T>>)
+    | undefined;
+}
+
+type WriteToFileResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+export async function writeToFile<
   T extends Record<string, unknown> & BaseFileSystem,
 >({
   tree,
@@ -225,24 +254,27 @@ export function writeToFile<
   content,
   createIfMissing = false,
   contentMapKey = "content",
-}: {
-  tree: LoroTree<T>;
-  path: string;
-  content: string;
-  createIfMissing?: boolean;
-  contentMapKey?: string;
-}): { success: true } | { success: false; message: string } {
+  metadata,
+  onCreateNode,
+}: WriteToFileArgs<T>): Promise<WriteToFileResult> {
   const node = resolvePath({ tree, path });
   if (!node) {
     if (createIfMissing) {
-      const newNode = createNodesForPath({ tree, path, finalNodeType: "file" });
+      const newNode = await createNodesForPath({
+        tree,
+        path,
+        finalNodeType: "file",
+        onCreateNode,
+      });
       newNode.data.setContainer(contentMapKey, new LoroText());
-      return writeToFile({
+      return await writeToFile({
         tree,
         path,
         content,
         createIfMissing: false,
         contentMapKey,
+        metadata,
+        onCreateNode,
       });
     }
     return { success: false, message: `Path ${path} not found` };
@@ -260,8 +292,154 @@ export function writeToFile<
       message: `Content at ${contentMapKey} was not found`,
     };
   }
-  textContainer.updateByLine(content);
+
+  if (metadata && metadata.length > 0) {
+    for (const item of metadata) {
+      const key = item.key?.trim();
+      if (!key) continue;
+      node.data.set(key, item.value as Exclude<T[string], Container>);
+    }
+  }
+  if (content) {
+    textContainer.updateByLine(content);
+  }
   return { success: true };
 }
+
+type WriteToFileMiddlewareContext<
+  T extends Record<string, unknown> & BaseFileSystem,
+  TContext,
+> = Omit<WriteToFileArgs<T>, "metadata"> & {
+  /**
+   * Arbitrary middleware context, injected by the caller.
+   */
+  context: TContext;
+  /**
+   * Adds an onCreateNode hook that will be applied to every newly created node
+   * created by this write operation (directories + file).
+   */
+  addOnCreateNode: (
+    fn: (
+      currentNode: LoroTreeNode<T>,
+    ) => LoroTreeNode<T> | Promise<LoroTreeNode<T>>,
+  ) => void;
+  /**
+   * Reads the current node at path (if any).
+   */
+  getExistingNode: () => LoroTreeNode<T> | null;
+  /**
+   * Get pending metadata value (last write wins) by key.
+   */
+  getMetadata: (key: string) => string | undefined;
+  /**
+   * Set pending metadata value (last write wins) by key.
+   */
+  setMetadata: (key: string, value: string) => void;
+  /**
+   * Returns pending metadata as an array (order not guaranteed).
+   */
+  toMetadataArray: () => { key: string; value: string }[];
+};
+export type WriteToFileMiddleware<
+  T extends Record<string, unknown> & BaseFileSystem,
+  TContext = unknown,
+> = (args: {
+  ctx: WriteToFileMiddlewareContext<T, TContext>;
+  next: () => Promise<WriteToFileResult>;
+}) => Promise<WriteToFileResult>;
+
+function composeWriteToFileMiddleware<
+  T extends Record<string, unknown> & BaseFileSystem,
+  TContext,
+>(
+  middleware: WriteToFileMiddleware<T, TContext>[],
+  handler: () => Promise<WriteToFileResult>,
+  ctx: WriteToFileMiddlewareContext<T, TContext>,
+): Promise<WriteToFileResult> {
+  let idx = -1;
+  const dispatch = async (i: number): Promise<WriteToFileResult> => {
+    if (i <= idx) {
+      return {
+        success: false,
+        message: "writeToFile middleware called next() multiple times",
+      };
+    }
+    idx = i;
+    const fn = middleware[i];
+    if (!fn) return await handler();
+    return await fn({ ctx, next: () => dispatch(i + 1) });
+  };
+  return dispatch(0);
+}
+
+export function createWriteToFile<
+  T extends Record<string, unknown> & BaseFileSystem,
+  TContext,
+>(options?: { middleware?: WriteToFileMiddleware<T, TContext>[] }) {
+  const middleware = options?.middleware ?? [];
+  return {
+    use(mw: WriteToFileMiddleware<T, TContext>) {
+      middleware.push(mw);
+      return this;
+    },
+    async writeToFile(
+      args: WriteToFileArgs<T> & { context: TContext },
+    ): Promise<WriteToFileResult> {
+      const metadataMap = new Map(
+        args.metadata
+          ? args.metadata.map(({ key, value }) => [key, value])
+          : [],
+      );
+      const onCreateNodeHooks: ((
+        currentNode: LoroTreeNode<T>,
+      ) => LoroTreeNode<T> | Promise<LoroTreeNode<T>>)[] = [];
+
+      const ctx: WriteToFileMiddlewareContext<T, TContext> = {
+        ...args,
+        context: args.context,
+        addOnCreateNode: (fn) => {
+          onCreateNodeHooks.push(fn);
+        },
+        getExistingNode: () =>
+          resolvePath({ tree: args.tree, path: args.path }),
+        getMetadata: (key) => metadataMap.get(key),
+        setMetadata: (key, value) => {
+          const normalized = key.trim();
+          if (!normalized) return;
+          metadataMap.set(normalized, value);
+        },
+        toMetadataArray: () =>
+          Array.from(metadataMap.entries()).map(([key, value]) => ({
+            key,
+            value,
+          })),
+      };
+
+      const handler = async (): Promise<WriteToFileResult> => {
+        const result: WriteToFileResult = await writeToFile({
+          tree: args.tree,
+          path: args.path,
+          content: args.content,
+          createIfMissing: args.createIfMissing,
+          contentMapKey: args.contentMapKey,
+          metadata: ctx.toMetadataArray(),
+          onCreateNode: async (node) => {
+            let current = node;
+            for (const hook of onCreateNodeHooks) {
+              current = await Promise.resolve(hook(current));
+            }
+            return current;
+          },
+        });
+        return result;
+      };
+
+      return await composeWriteToFileMiddleware(middleware, handler, ctx);
+    },
+  };
+}
+
+export { getNodePath } from "./utils/get-node-path";
+export { normalizePath } from "./utils/normalize-path";
 export { resolvePath } from "./utils/resolve-path";
 export { traverseNode } from "./utils/traverse-node";

@@ -395,7 +395,7 @@ describe("moveNode", () => {
 });
 
 describe("writeToFile", () => {
-  it("should write content to an existing file", () => {
+  it("should write content to an existing file", async () => {
     const tree = new LoroTree<TestFileSystem>();
     const rootNode = resolvePath({ tree, path: "/" });
     if (!rootNode) throw new Error("Missing rootNode");
@@ -405,7 +405,7 @@ describe("writeToFile", () => {
     fileNode.data.set("type", "file");
     fileNode.data.setContainer("content", new LoroText());
 
-    const result = writeToFile({
+    const result = await writeToFile({
       tree,
       path: "/test.txt",
       content: "Hello, World!",
@@ -414,7 +414,7 @@ describe("writeToFile", () => {
     const textContainer = fileNode.data.get("content");
     expect(textContainer?.toString()).toBe("Hello, World!");
 
-    const result2 = writeToFile({
+    const result2 = await writeToFile({
       tree,
       path: "/test.txt",
       content: "Hello, World!",
@@ -425,12 +425,12 @@ describe("writeToFile", () => {
     expect(textContainer2?.toString()).toBe("Hello, World!");
   });
 
-  it("should create file and intermediate directories if createIfMissing is true", () => {
+  it("should create file and intermediate directories if createIfMissing is true", async () => {
     const tree = new LoroTree<TestFileSystem>();
     const rootNode = resolvePath({ tree, path: "/" });
     if (!rootNode) throw new Error("Missing rootNode");
 
-    const result = writeToFile({
+    const result = await writeToFile({
       tree,
       path: "/newfile.txt",
       content: "New content",
@@ -445,7 +445,7 @@ describe("writeToFile", () => {
       "New content",
     );
 
-    const resultWithDirectories = writeToFile({
+    const resultWithDirectories = await writeToFile({
       tree,
       path: "/dir1/dir2/newfile.txt",
       content: "New content",
@@ -473,12 +473,12 @@ describe("writeToFile", () => {
     ).toBe("New content");
   });
 
-  it("should return error when path does not exist and createIfMissing is false", () => {
+  it("should return error when path does not exist and createIfMissing is false", async () => {
     const tree = new LoroTree<BaseFileSystem>();
     const rootNode = resolvePath({ tree, path: "/" });
     if (!rootNode) throw new Error("Missing rootNode");
 
-    const result = writeToFile({
+    const result = await writeToFile({
       tree,
       path: "/nonexistent.txt",
       content: "Content",
@@ -490,7 +490,7 @@ describe("writeToFile", () => {
     });
   });
 
-  it("should return error when path is a directory", () => {
+  it("should return error when path is a directory", async () => {
     const tree = new LoroTree<BaseFileSystem>();
     const rootNode = resolvePath({ tree, path: "/" });
     if (!rootNode) throw new Error("Missing rootNode");
@@ -499,7 +499,7 @@ describe("writeToFile", () => {
     dirNode.data.set("name", "subdir");
     dirNode.data.set("type", "dir");
 
-    const result = writeToFile({
+    const result = await writeToFile({
       tree,
       path: "/subdir",
       content: "Content",
@@ -510,7 +510,7 @@ describe("writeToFile", () => {
     });
   });
 
-  it("should use custom contentMapKey", () => {
+  it("should use custom contentMapKey", async () => {
     const tree = new LoroTree<TestFileSystem & { customContent: LoroText }>();
     const rootNode = resolvePath({ tree, path: "/" });
     if (!rootNode) throw new Error("Missing rootNode");
@@ -521,7 +521,7 @@ describe("writeToFile", () => {
     const content = new LoroText();
     fileNode.data.setContainer("customContent", content);
 
-    const result = writeToFile({
+    const result = await writeToFile({
       tree: tree,
       path: "/test.txt",
       content: "Custom content",

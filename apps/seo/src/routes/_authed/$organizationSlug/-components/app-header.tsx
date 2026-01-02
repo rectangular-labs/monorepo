@@ -2,16 +2,35 @@ import { OrganizationSwitcher } from "@rectangular-labs/auth/components/organiza
 import type { Organization } from "@rectangular-labs/auth/server";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { BreadcrumbSeparator } from "@rectangular-labs/ui/components/ui/breadcrumb";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Kbd, KbdGroup } from "@rectangular-labs/ui/components/ui/kbd";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@rectangular-labs/ui/components/ui/tooltip";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useMatchRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { authClient } from "~/lib/auth";
+import { useProjectChat } from "./project-chat-provider";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserDropdown } from "./user-dropdown";
 
+function isApplePlatform() {
+  if (typeof navigator === "undefined") return false;
+  const platform =
+    // @ts-expect-error - userAgentData is not shipped a property in typescript
+    navigator.userAgentData?.platform ?? navigator.platform ?? "";
+  return /mac|iphone|ipad|ipod/i.test(platform);
+}
+
 export function AppHeader() {
   const navigate = useNavigate();
+  const projectChat = useProjectChat();
+  const [modKeyLabel, setModKeyLabel] = useState<"⌘" | "Ctrl">("Ctrl");
   const matcher = useMatchRoute();
   const projectParams = matcher({
     to: "/$organizationSlug/$projectSlug",
@@ -77,6 +96,10 @@ export function AppHeader() {
   const onCreateOrganization = async (newOrg: Partial<Organization>) => {
     await createOrganization(newOrg);
   };
+
+  useEffect(() => {
+    setModKeyLabel(isApplePlatform() ? "⌘" : "Ctrl");
+  }, []);
 
   return (
     <header
@@ -149,6 +172,29 @@ export function AppHeader() {
         </ol>
 
         <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                aria-label="Open assistant"
+                disabled={
+                  !projectChat.organizationIdentifier || !projectChat.projectId
+                }
+                onClick={() => projectChat.toggle()}
+                size="icon"
+                variant="ghost"
+              >
+                <Icons.Sparkles className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <KbdGroup>
+                <span>Shortcut:</span>
+                <Kbd>{modKeyLabel}</Kbd>
+                <span>+</span>
+                <Kbd>e</Kbd>
+              </KbdGroup>
+            </TooltipContent>
+          </Tooltip>
           {activeOrganization && <UserDropdown user={session?.user} />}
         </div>
       </nav>

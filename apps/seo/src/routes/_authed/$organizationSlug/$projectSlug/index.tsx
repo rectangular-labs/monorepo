@@ -47,7 +47,7 @@ function PageComponent() {
   );
 
   return (
-    <div className="w-full space-y-6 p-6">
+    <main className="mx-auto w-full max-w-7xl space-y-6 p-6">
       <div className="flex w-full items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="font-bold text-3xl tracking-tight">
@@ -73,6 +73,6 @@ function PageComponent() {
         organizationId={activeProject.organizationId}
         projectId={activeProject.id}
       />
-    </div>
+    </main>
   );
 }

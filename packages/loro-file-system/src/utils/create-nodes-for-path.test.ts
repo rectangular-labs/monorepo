@@ -4,10 +4,10 @@ import type { BaseFileSystem } from "../index";
 import { createNodesForPath } from "./create-nodes-for-path";
 
 describe("createNodesForPath", () => {
-  it("should create nodes along a path for a directory", () => {
+  it("should create nodes along a path for a directory", async () => {
     const tree = new LoroTree<BaseFileSystem>();
 
-    const result = createNodesForPath({
+    const result = await createNodesForPath({
       tree,
       path: "/dir1/dir2",
       finalNodeType: "dir",
@@ -28,10 +28,10 @@ describe("createNodesForPath", () => {
     expect(grandparentNode?.data.get("type")).toBe("dir");
   });
 
-  it("should create nodes along a path for a file", () => {
+  it("should create nodes along a path for a file", async () => {
     const tree = new LoroTree<BaseFileSystem>();
 
-    const result = createNodesForPath({
+    const result = await createNodesForPath({
       tree,
       path: "/dir1/dir2/file.txt",
       finalNodeType: "file",
@@ -57,7 +57,7 @@ describe("createNodesForPath", () => {
     expect(greatGrandparentNode?.data.get("type")).toBe("dir");
   });
 
-  it("should reuse existing nodes when creating path", () => {
+  it("should reuse existing nodes when creating path", async () => {
     const tree = new LoroTree<BaseFileSystem>();
     const rootNode = tree.createNode();
     rootNode.data.set("name", "__root__");
@@ -67,7 +67,7 @@ describe("createNodesForPath", () => {
     existingDir.data.set("name", "existing");
     existingDir.data.set("type", "dir");
 
-    const result = createNodesForPath({
+    const result = await createNodesForPath({
       tree,
       path: "/existing/newdir",
       finalNodeType: "dir",
@@ -92,10 +92,10 @@ describe("createNodesForPath", () => {
     );
   });
 
-  it("should handle single segment path", () => {
+  it("should handle single segment path", async () => {
     const tree = new LoroTree<BaseFileSystem>();
 
-    const result = createNodesForPath({
+    const result = await createNodesForPath({
       tree,
       path: "/single",
       finalNodeType: "file",
@@ -111,10 +111,10 @@ describe("createNodesForPath", () => {
     expect(parentNode?.data.get("type")).toBe("dir");
   });
 
-  it("should handle empty path by returning root", () => {
+  it("should handle empty path by returning root", async () => {
     const tree = new LoroTree<BaseFileSystem>();
 
-    const result = createNodesForPath({
+    const result = await createNodesForPath({
       tree,
       path: "/",
       finalNodeType: "dir",
@@ -123,5 +123,25 @@ describe("createNodesForPath", () => {
     expect(result).toBeDefined();
     expect(result.data.get("name")).toBe("__root__");
     expect(result.data.get("type")).toBe("dir");
+  });
+
+  it("should create nodes with onCreateNode", async () => {
+    const tree = new LoroTree<BaseFileSystem & { extension: string }>();
+
+    const result = await createNodesForPath({
+      tree,
+      path: "/test",
+      finalNodeType: "dir",
+      onCreateNode: (node) => {
+        node.data.set("name", "onCreateNode");
+        node.data.set("extension", "txt");
+        return node;
+      },
+    });
+
+    expect(result).toBeDefined();
+    expect(result.data.get("name")).toBe("onCreateNode");
+    expect(result.data.get("type")).toBe("dir");
+    expect(result.data.get("extension")).toBe("txt");
   });
 });

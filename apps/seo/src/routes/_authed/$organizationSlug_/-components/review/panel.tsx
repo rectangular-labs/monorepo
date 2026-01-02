@@ -24,7 +24,7 @@ import {
   type TreeChangeStatus,
   type TreeFile,
   traverseTree,
-} from "~/lib/campaign/build-tree";
+} from "~/lib/workspace/build-tree";
 import { TreeListDropDrawer, useTreeListMode } from "../tree-list-drop-drawer";
 import { ReviewDiffView } from "./diff-viewer";
 import { ReviewSidebarList } from "./sidebar-list";

@@ -4,6 +4,7 @@ import {
   CAMPAIGN_DEFAULT_TITLE,
   contentCampaignStatusSchema,
 } from "@rectangular-labs/core/schemas/content-campaign-parser";
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { schema, sql } from "@rectangular-labs/db";
 import {
   createContentCampaign,
@@ -14,7 +15,6 @@ import {
 } from "@rectangular-labs/db/operations";
 import { validateUIMessages } from "ai";
 import { type } from "arktype";
-import { getWorkspaceBlobUri } from "../client";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import type { SeoChatMessage } from "../types";

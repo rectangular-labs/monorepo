@@ -38,10 +38,9 @@ export function createPlannerToolsWithMetadata() {
     inputSchema: jsonSchema<typeof askQuestionInputSchema.infer>(
       askQuestionInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute({ questions }) {
+    async execute() {
       return await Promise.resolve({
         success: true,
-        questions,
         message: "Questions posted. Pending user response.",
       });
     },
@@ -53,18 +52,10 @@ export function createPlannerToolsWithMetadata() {
     inputSchema: jsonSchema<typeof createPlanInputSchema.infer>(
       createPlanInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute({ name, overview, plan, todos, old_str, new_str }) {
+    async execute() {
       return await Promise.resolve({
         success: true,
-        message: "ok",
-        plan: {
-          name: name ?? null,
-          overview: overview ?? null,
-          todos: todos ?? [],
-          plan,
-          old_str: old_str ?? null,
-          new_str: new_str ?? null,
-        },
+        message: "Plan created/updated",
       });
     },
   });

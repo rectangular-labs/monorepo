@@ -28,11 +28,11 @@
     "@rectangular-labs/typescript": "workspace:*",
     "@tanstack/react-query": "^5.90.10",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "class-variance-authority": "^0.7.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {

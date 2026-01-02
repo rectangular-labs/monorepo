@@ -9,7 +9,7 @@ import {
   tool,
 } from "ai";
 import { type } from "arktype";
-import type { WebSocketContext } from "../../../types";
+import type { InitialContext, WebSocketContext } from "../../../types";
 import { withLoroTree } from "../../workspace/with-loro-tree";
 import { createFileToolsWithMetadata } from "./file-tool";
 import { createImageToolsWithMetadata } from "./image-tools";
@@ -53,8 +53,10 @@ function readWorkspaceFile(
 
 export function createArticleWritingToolWithMetadata({
   project,
+  publicImagesBucket,
 }: {
   project: NonNullable<WebSocketContext["cache"]["project"]>;
+  publicImagesBucket: InitialContext["publicImagesBucket"];
 }) {
   const writeArticleContent = tool({
     description:
@@ -153,9 +155,17 @@ ${writingSettings?.metadata?.length ? writingSettings.metadata.map((m) => `- ${m
   - Make the content genuinely useful, not just SEO-stuffed
 </reminders>`;
 
-      const fileTools = createFileToolsWithMetadata();
+      const fileTools = createFileToolsWithMetadata({
+        userId: undefined,
+        publishingSettings: project.publishingSettings,
+      });
       const webTools = createWebToolsWithMetadata();
-      const imageTools = createImageToolsWithMetadata();
+      const imageTools = createImageToolsWithMetadata({
+        organizationId: project.organizationId,
+        projectId: project.id,
+        imageSettings: project.imageSettings,
+        publicImagesBucket,
+      });
       const internalLinksTools =
         createInternalLinksToolWithMetadata(websiteUrl);
 

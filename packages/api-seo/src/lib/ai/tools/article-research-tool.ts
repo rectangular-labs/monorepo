@@ -33,10 +33,12 @@ const seoArticleResearchInputSchema = type({
     ),
 });
 
-async function fetchSerpBundle(args: {
+export async function fetchSerpBundle(args: {
   keyword: string;
   locationName: string;
   languageCode: string;
+  maxCompetitors?: number;
+  maxMarkdownChars?: number;
 }): Promise<{
   organic: {
     url: string | null;
@@ -123,18 +125,21 @@ async function fetchSerpBundle(args: {
     }
   }
 
-  // Fetch competitor content from top URLs (best-effort)
+  // Fetch competitor content from top URLs (best-effort), bounded for workflow/token efficiency.
+  const maxCompetitors = Math.max(0, args.maxCompetitors ?? 5);
+  const maxMarkdownChars = Math.max(1_000, args.maxMarkdownChars ?? 25_000);
+  const targets = organic.slice(0, maxCompetitors);
   const fetched = await Promise.allSettled(
-    organic.map(async ({ url }) => {
+    targets.map(async ({ url }) => {
       if (!url) return { url, ok: false as const };
       const r = await fetchPageContent({ url });
       if (!r.ok) return { url, ok: false as const };
+      const markdown = r.value.markdown.slice(0, maxMarkdownChars);
       return {
         url,
         ok: true as const,
-        markdown: r.value.markdown,
-        wordCount: r.value.markdown.split(/\s+/).filter((word) => !!word)
-          .length,
+        markdown,
+        wordCount: markdown.split(/\s+/).filter((word) => !!word).length,
       };
     }),
   );
@@ -143,7 +148,7 @@ async function fetchSerpBundle(args: {
     const fetchedItem = fetched[i];
     if (!fetchedItem) continue;
     if (fetchedItem.status === "fulfilled" && fetchedItem.value.ok) {
-      const organicItem = organic[i];
+      const organicItem = targets[i];
       if (!organicItem) continue;
       organicItem.markdownContent = fetchedItem.value.markdown;
       organicItem.wordCount = fetchedItem.value.wordCount;
@@ -165,7 +170,10 @@ export function createArticleResearchToolWithMetadata({
       seoArticleResearchInputSchema.toJsonSchema() as JSONSchema7,
     ),
     execute: async (input) => {
-      const fileTools = createFileToolsWithMetadata();
+      const fileTools = createFileToolsWithMetadata({
+        publishingSettings: project.publishingSettings,
+        userId: undefined,
+      });
       const webTools = createWebToolsWithMetadata();
       const dataforseoTools = createDataforseoToolWithMetadata(project);
       const internalLinksTools = createInternalLinksToolWithMetadata(
@@ -199,11 +207,9 @@ export function createArticleResearchToolWithMetadata({
         keyword: extracted.primaryKeyword,
         locationName,
         languageCode: extracted.languageCode,
+        maxCompetitors: 5,
+        maxMarkdownChars: 25_000,
       });
-      console.log(
-        "Word counts",
-        serpData.organic.map((item) => item.wordCount),
-      );
 
       const systemPrompt = `<role>
 You are an expert SEO article researcher and strategist. Your job is to produce a writer-ready plan and outline for the BEST possible article for the target keyword. You MUST synthesize findings from the, competitor pages, and PAA/related searches/AI overview 
@@ -327,13 +333,9 @@ ${input.instructions}`,
           ask_questions: askQuestions,
         },
         onStepFinish: (step) => {
-          console.log(`[perform_article_research] Step completed:`, {
-            text: step.text,
-            toolResults: JSON.stringify(step.toolResults, null, 2),
-            usage: step.usage,
-          });
+          console.log(`[perform_article_research] Step usage:`, step.usage);
         },
-        stopWhen: [stepCountIs(35), hasToolCall("ask_questions")],
+        stopWhen: [stepCountIs(25), hasToolCall("ask_questions")],
       });
 
       const maybeAskArgs = toolCalls.some(

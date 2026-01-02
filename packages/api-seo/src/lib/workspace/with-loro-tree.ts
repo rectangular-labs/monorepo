@@ -1,6 +1,6 @@
+import type { LoroDocMapping } from "@rectangular-labs/core/loro-file-system";
 import { LoroDoc } from "loro-crdt";
 import { CrdtType } from "loro-protocol";
-import type { LoroDocMapping } from "../../types";
 import { getOrCreateRoomDocument } from "../chat/get-or-create-room-document";
 import { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
 

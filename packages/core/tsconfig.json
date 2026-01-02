@@ -3,6 +3,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "baseUrl": ".",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "paths": {
       "@rectangular-labs/core/*": ["./src/*"]
     }

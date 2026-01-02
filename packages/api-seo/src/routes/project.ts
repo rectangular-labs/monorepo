@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { and, desc, eq, lt, schema } from "@rectangular-labs/db";
 import {
   deleteSeoProject,
@@ -7,16 +8,17 @@ import {
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { LoroDoc, VersionVector } from "loro-crdt";
-import { getWorkspaceBlobUri } from "../client";
 import { withOrganizationIdBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { createTask } from "../lib/task";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import { forkAndUpdateWorkspaceBlob } from "../lib/workspace/fork-workspace-blob";
+import { chat } from "./project.chat";
 import { metrics } from "./project.metrics";
 import {
   getBusinessBackground,
   getImageSettings,
+  getPublishingSettings,
   getWritingSettings,
   uploadProjectImage,
   upsertAuthors,
@@ -84,6 +86,7 @@ const get = withOrganizationIdBase
       "imageSettings",
       "writingSettings",
       "serpSnapshot",
+      "publishingSettings",
     ),
   )
   .handler(async ({ context, input }) => {
@@ -164,10 +167,11 @@ const create = withOrganizationIdBase
       throw upsertProjectResult.error;
     }
     const createTaskResult = await createTask({
-      projectId: upsertProjectResult.value.id,
+      db: context.db,
       userId: context.user.id,
       input: {
         type: "understand-site",
+        projectId: upsertProjectResult.value.id,
         websiteUrl: input.websiteUrl,
       },
     });
@@ -225,8 +229,9 @@ const remove = withOrganizationIdBase
     return { success: true } as const;
   });
 
-const syncDocument = withOrganizationIdBase
-  .route({ method: "GET", path: "/{projectId}/sync-document" })
+// TODO (sync): consolidate handling of campaigns and forking
+const pullDocument = withOrganizationIdBase
+  .route({ method: "GET", path: "/{projectId}/pull-document" })
   .input(
     type({
       projectId: "string",
@@ -236,7 +241,9 @@ const syncDocument = withOrganizationIdBase
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(type({ blob: type.instanceOf(Blob) }))
+  .output(
+    type({ blob: type.instanceOf(Blob), opLogVersion: type.instanceOf(Blob) }),
+  )
   .handler(async ({ context, input }) => {
     const workspaceBlobUri = getWorkspaceBlobUri({
       orgId: context.organization.id,
@@ -294,7 +301,100 @@ const syncDocument = withOrganizationIdBase
         new Uint8Array(await input.opLogVersion.arrayBuffer()),
       ),
     });
-    return { blob: new Blob([new Uint8Array(updates)]) };
+    return {
+      blob: new Blob([new Uint8Array(updates)]),
+      opLogVersion: new Blob([new Uint8Array(doc.oplogVersion().encode())]),
+    };
+  });
+
+const pushDocument = withOrganizationIdBase
+  .route({ method: "POST", path: "/{projectId}/push-document" })
+  .input(
+    type({
+      projectId: "string",
+      campaignId: "string|null",
+      organizationIdentifier: "string",
+      opLogVersion: type.instanceOf(Blob),
+      blobUpdate: type.instanceOf(Blob),
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({ blob: type.instanceOf(Blob), opLogVersion: type.instanceOf(Blob) }),
+  )
+  .handler(async ({ context, input }) => {
+    const workspaceBlobUri = getWorkspaceBlobUri({
+      orgId: context.organization.id,
+      projectId: input.projectId,
+      campaignId: input.campaignId,
+    });
+    const mainBlobUri = getWorkspaceBlobUri({
+      orgId: context.organization.id,
+      projectId: input.projectId,
+      campaignId: undefined,
+    });
+
+    const requestedBlob = await (async () => {
+      const workspaceBlob =
+        await context.workspaceBucket.getSnapshot(workspaceBlobUri);
+      if (workspaceBlob) {
+        return workspaceBlob;
+      }
+      // no blob found for workspaceBlobUri, we try falling back to main blob if it exists.
+      // Note that campaignId has to exists in order for the workspaceBlobUri to be different
+      if (workspaceBlobUri !== mainBlobUri && input.campaignId) {
+        const mainBlob = await context.workspaceBucket.getSnapshot(mainBlobUri);
+        if (!mainBlob) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: `Main workspace blob not found for ${input.projectId}`,
+          });
+        }
+        // fork and update the workspace blob uri
+        const forkedBuffer = await forkAndUpdateWorkspaceBlob({
+          blob: mainBlob,
+          newWorkspaceBlobUri: workspaceBlobUri,
+          projectId: input.projectId,
+          campaignId: input.campaignId,
+          organizationId: context.organization.id,
+          db: context.db,
+          workspaceBucket: context.workspaceBucket,
+        });
+        return forkedBuffer;
+      }
+      return null;
+    })();
+
+    if (!requestedBlob) {
+      throw new ORPCError("NOT_FOUND", {
+        message: `Workspace blob not found.`,
+        cause: new Error(
+          `Workspace blob not found for ${input.campaignId ? `campaign ${input.campaignId}` : `project ${input.projectId}`}`,
+        ),
+      });
+    }
+
+    const doc = new LoroDoc();
+    doc.import(requestedBlob);
+    doc.import(new Uint8Array(await input.blobUpdate.arrayBuffer()));
+
+    // Persist merged snapshot back to the workspace bucket.
+    await context.workspaceBucket.setSnapshot(
+      workspaceBlobUri,
+      doc.export({ mode: "snapshot" }),
+    );
+
+    // Return server updates since the client's version.
+    const mergedUpdates = doc.export({
+      mode: "update",
+      from: new VersionVector(
+        new Uint8Array(await input.opLogVersion.arrayBuffer()),
+      ),
+    });
+
+    return {
+      blob: new Blob([new Uint8Array(mergedUpdates)]),
+      opLogVersion: new Blob([new Uint8Array(doc.oplogVersion().encode())]),
+    };
   });
 
 export default withOrganizationIdBase
@@ -308,10 +408,13 @@ export default withOrganizationIdBase
     checkName,
     get,
     getBusinessBackground,
+    getPublishingSettings,
     getImageSettings,
     getWritingSettings,
     setUpWorkspace,
     metrics,
-    syncDocument,
+    pullDocument,
+    pushDocument,
+    chat,
     uploadProjectImage,
   });

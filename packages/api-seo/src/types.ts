@@ -6,14 +6,17 @@ import type {
 } from "@orpc/server";
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/core/schemas/content-campaign-message-parser";
+import type {
+  seoPlanKeywordTaskInputSchema,
+  seoWriteArticleTaskInputSchema,
+} from "@rectangular-labs/core/schemas/task-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
-import type { LoroText, LoroTree } from "loro-crdt";
 import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
-import type { createMessagesToolsWithMetadata } from "./lib/ai/tools/message-tools";
 import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
 import type { createSkillTools } from "./lib/ai/tools/skill-tools";
+import type { createSuggestArticlesToolWithMetadata } from "./lib/ai/tools/suggest-articles-tool";
 import type { createTodoToolWithMetadata } from "./lib/ai/tools/todo-tool";
 import type {
   createPublicImagesBucket,
@@ -32,8 +35,8 @@ export type WebsocketRouterClient = ORPCRouterClient<WebsocketRouter>;
 type AiTools = InferUITools<
   ReturnType<typeof createSkillTools> &
     ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
-    ReturnType<typeof createMessagesToolsWithMetadata>["tools"] &
-    ReturnType<typeof createTodoToolWithMetadata>["tools"]
+    ReturnType<typeof createTodoToolWithMetadata>["tools"] &
+    ReturnType<typeof createSuggestArticlesToolWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
   typeof contentCampaignMessageMetadataSchema.infer,
@@ -60,23 +63,17 @@ export interface InitialContext extends BaseContextWithAuth {
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
   publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
+  seoPlannerWorkflow: Workflow<typeof seoPlanKeywordTaskInputSchema.infer>;
+  seoWriterWorkflow: Workflow<typeof seoWriteArticleTaskInputSchema.infer>;
+  cacheKV: KVNamespace;
 }
-/**
- * This provides all the necessary context for the websocket server.
- * Today this handles all the chat messages between the user and the assistant.
- */
-export interface WebSocketContext extends InitialContext {
-  senderWebSocket: WebSocket;
-  allWebSockets: WebSocket[];
+
+export interface ChatContext extends InitialContext {
   userId: string;
   sessionId: string;
   projectId: string;
-  campaignId: string;
-  campaignTitle: string;
-  updateCampaignTitle: (title: string) => void;
   organizationId: string;
   roomDocumentMap: Map<string, RoomDocument>;
-  userFragments: Map<HexString, UserFragment>;
   cache: {
     messages?: Record<string, SeoChatMessage>;
     project?: typeof schema.seoProject.$inferSelect & {
@@ -86,6 +83,19 @@ export interface WebSocketContext extends InitialContext {
       accessToken?: string;
     };
   };
+}
+
+/**
+ * This provides all the necessary context for the websocket server.
+ * Today this handles all the chat messages between the user and the assistant.
+ */
+export interface WebSocketContext extends ChatContext {
+  senderWebSocket: WebSocket;
+  allWebSockets: WebSocket[];
+  campaignId: string;
+  campaignTitle: string;
+  updateCampaignTitle: (title: string) => void;
+  userFragments: Map<HexString, UserFragment>;
 }
 
 /**
@@ -107,18 +117,3 @@ export interface UserFragment {
   received: number;
   header: DocUpdateFragmentHeader;
 }
-
-export type FsNodePayload =
-  | {
-      type: "dir";
-      name: string;
-      content?: LoroText;
-    }
-  | {
-      type: "file";
-      name: string;
-      content: LoroText;
-    };
-export type LoroDocMapping = {
-  fs: LoroTree<FsNodePayload>;
-};

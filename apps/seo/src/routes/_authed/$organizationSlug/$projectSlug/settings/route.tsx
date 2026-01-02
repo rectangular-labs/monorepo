@@ -11,14 +11,14 @@ function SettingsLayout() {
   const { organizationSlug, projectSlug } = Route.useParams();
 
   return (
-    <div className="flex h-full w-full flex-col md:flex-row">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col md:flex-row">
       <SettingsSidebar
         organizationSlug={organizationSlug}
         projectSlug={projectSlug}
       />
-      <div className="mx-auto h-full max-w-4xl flex-1 px-6 py-4">
+      <main className="mx-auto h-full max-w-4xl flex-1 px-6 py-4">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 }

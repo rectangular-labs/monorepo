@@ -27,8 +27,8 @@ import {
   type TreeFile,
   type Tree as TreeType,
   traverseTree,
-} from "~/lib/campaign/build-tree";
-import { FilterStatus } from "./filter-status";
+} from "~/lib/workspace/build-tree";
+import { FilterStatus } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/filter-status";
 
 function buildTreeData(tree: TreeType, statusFilter: "all" | TreeChangeStatus) {
   const map = new Map<string, TreeFile | TreeDirectory>();
@@ -37,6 +37,7 @@ function buildTreeData(tree: TreeType, statusFilter: "all" | TreeChangeStatus) {
   const rootLevelDir: TreeDirectory = {
     type: "dir",
     name: "root",
+    createdAt: new Date().toISOString(),
     children: [],
     treeId: ROOT_KEY,
     parentTreeId: undefined,
@@ -215,9 +216,16 @@ export function ReviewTreeList({
         )}
         <InputGroupAddon align="inline-end">
           <FilterStatus
-            onStatusFilterChange={onChangeStatusFilter}
-            statusFilter={statusFilter}
-            summary={summary}
+            label="Filter by change"
+            onChange={onChangeStatusFilter}
+            options={[
+              { value: "all", label: "All", count: summary.total },
+              { value: "created", label: "Created", count: summary.created },
+              { value: "updated", label: "Updated", count: summary.updated },
+              { value: "moved", label: "Moved", count: summary.moved },
+              { value: "deleted", label: "Deleted", count: summary.deleted },
+            ]}
+            value={statusFilter}
           >
             <InputGroupButton size="icon-xs">
               <Icons.Filter />

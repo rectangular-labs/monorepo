@@ -62,14 +62,6 @@ export const businessBackgroundSchema = type({
     .configure({
       message: () => "Industry is required",
     }),
-  serviceRegion: type("string")
-    .atLeastLength(1)
-    .describe(
-      "Canonical regions. Prefer 'Global', regions like 'EU', 'Asia', 'Africa', or country list separated by ';'. For local, use 'City, ST' or 'Metro, ST'.",
-    )
-    .configure({
-      message: () => "Service Region is required",
-    }),
   targetCountryCode: type(
     `'${Object.keys(COUNTRY_CODE_MAP)
       .map((key) => key)
@@ -130,6 +122,23 @@ export const writingSettingsSchema = type({
   })
     .array()
     .describe("Named metadata presets used for content generation."),
+});
+
+export const publishingSettingsSchema = type({
+  version: "'v1'",
+  cadence: type({
+    // "daily" => frequency is articles/day
+    // "weekly" => frequency is articles/week
+    // "monthly" => frequency is articles/month
+    period: "'daily' | 'weekly' | 'monthly'",
+    frequency: "number.integer >= 1",
+    // Days that are eligible for publishing. Deselecting a day means we won't publish on that day.
+    allowedDays: type(
+      "'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'",
+    ).array(),
+  }),
+  requireContentReview: "boolean",
+  requireSuggestionReview: "boolean",
 });
 
 export const authorSettingsSchema = type({

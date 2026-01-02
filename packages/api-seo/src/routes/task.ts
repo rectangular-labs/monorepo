@@ -21,7 +21,7 @@ const create = withOrganizationIdBase
   )
   .handler(async ({ context, input: taskInput }) => {
     const createTaskResult = await createTask({
-      projectId: taskInput.projectId,
+      db: context.db,
       userId: context.user.id,
       input: taskInput,
     });
@@ -59,45 +59,102 @@ const status = protectedBase
         message: "Task run not found",
       });
     }
-    const task = await getTask(taskRun.taskId);
-    if (!task) {
-      throw new ORPCError("NOT_FOUND", {
-        message: "Task not found",
-      });
+
+    let status: (typeof outputSchema.infer)["status"] = "pending";
+    let progress = 0;
+    let statusMessage = "We are setting things up...";
+
+    if (taskRun.provider === "trigger.dev") {
+      const task = await getTask(taskRun.taskId);
+      if (!task) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "Task not found",
+        });
+      }
+
+      if (task.isQueued) status = "queued";
+      if (task.isExecuting) status = "running";
+      if (task.isSuccess) status = "completed";
+      if (task.isCancelled) status = "cancelled";
+      if (task.isFailed) status = "failed";
+
+      if (task.metadata?.progress) {
+        progress = task.metadata.progress;
+      }
+      if (task.metadata?.statusMessage) {
+        statusMessage = task.metadata.statusMessage;
+      }
+
+      return {
+        progress,
+        status,
+        statusMessage,
+        output: task.output,
+      };
     }
 
-    console.log("task", task);
-    let status: (typeof outputSchema.infer)["status"] = "pending";
-    if (task.isQueued) {
-      status = "queued";
+    if (taskRun.provider === "cloudflare") {
+      const instance = await (() => {
+        if (taskRun.inputData.type === "seo-plan-keyword") {
+          return context.seoPlannerWorkflow.get(taskRun.taskId);
+        }
+        if (taskRun.inputData.type === "seo-write-article") {
+          return context.seoWriterWorkflow.get(taskRun.taskId);
+        }
+        return null;
+      })();
+
+      if (!instance) {
+        throw new ORPCError("NOT_FOUND", { message: "Workflow not found" });
+      }
+
+      const details = await instance.status();
+      switch (details.status) {
+        case "queued": {
+          status = "queued";
+          break;
+        }
+        case "running":
+        case "waiting":
+        case "waitingForPause":
+        case "paused": {
+          status = "running";
+          break;
+        }
+        case "complete": {
+          status = "completed";
+          break;
+        }
+        case "terminated": {
+          status = "cancelled";
+          break;
+        }
+        case "errored": {
+          status = "failed";
+          statusMessage = details.error ?? "Workflow errored";
+          break;
+        }
+        case "unknown": {
+          status = "pending";
+          break;
+        }
+        default: {
+          const never: never = details.status;
+          throw new Error(`Unknown workflow status: ${never}`);
+        }
+      }
+
+      const output = taskOutputSchema(details.output);
+
+      return {
+        progress,
+        status,
+        statusMessage,
+        output: output instanceof type.errors ? undefined : output,
+      };
     }
-    if (task.isExecuting) {
-      status = "running";
-    }
-    if (task.isSuccess) {
-      status = "completed";
-    }
-    if (task.isCancelled) {
-      status = "cancelled";
-    }
-    if (task.isFailed) {
-      status = "failed";
-    }
-    let progress = 0;
-    if (task.metadata?.progress) {
-      progress = task.metadata.progress;
-    }
-    let statusMessage = "We are setting things up...";
-    if (task.metadata?.statusMessage) {
-      statusMessage = task.metadata.statusMessage;
-    }
-    console.log("task.output", task.output);
-    return {
-      progress,
-      status,
-      statusMessage,
-      output: task.output,
-    };
+
+    return { progress, status, statusMessage };
   });
 
 export default protectedBase

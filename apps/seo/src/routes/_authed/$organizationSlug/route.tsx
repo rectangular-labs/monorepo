@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { AUTO_ROUTE_ORG } from "~/lib/constants";
 import { AppHeader } from "./-components/app-header";
+import { ProjectChatProvider } from "./-components/project-chat-provider";
 
 export const Route = createFileRoute("/_authed/$organizationSlug")({
   beforeLoad: async ({ params, context, preload }) => {
@@ -96,11 +97,11 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
 
 function RouteComponent() {
   return (
-    <>
+    <ProjectChatProvider>
       <AppHeader />
-      <main className="flex w-full flex-1 flex-col bg-background">
+      <div className="flex w-full flex-1 flex-col bg-background">
         <Outlet />
-      </main>
-    </>
+      </div>
+    </ProjectChatProvider>
   );
 }

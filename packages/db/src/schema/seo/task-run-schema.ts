@@ -28,14 +28,12 @@ export const seoTaskRun = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    requestedBy: text()
-      .notNull()
-      .references(() => user.id, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
-      }),
+    requestedBy: text().references(() => user.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
     taskId: text().notNull(),
-    provider: text({ enum: ["trigger.dev"] })
+    provider: text({ enum: ["trigger.dev", "cloudflare"] })
       .notNull()
       .default("trigger.dev"),
     inputData: jsonb().notNull().$type<typeof taskInputSchema.infer>(),

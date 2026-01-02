@@ -74,6 +74,7 @@ export async function getProjectInWebsocketChat(args?: {
       imageSettings: true,
       writingSettings: true,
       serpSnapshot: true,
+      publishingSettings: true,
     },
   );
   if (!projectResult.ok) {

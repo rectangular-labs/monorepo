@@ -1,11 +1,11 @@
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
+import type { imageSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import { uuidv7 } from "@rectangular-labs/db";
 import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { getWebsocketContext } from "../../../context";
 import { apiEnv } from "../../../env";
+import type { InitialContext } from "../../../types";
 import { captureScreenshot } from "../../cloudflare/capture-screenshot";
-import { getProjectInWebsocketChat } from "../../database/project";
 import { getPublicImageUri } from "../../project/get-project-image-uri";
 import type { AgentToolDefinition } from "./utils";
 
@@ -17,28 +17,26 @@ const screenshotInputSchema = type({
   url: "string",
 });
 
-export function createImageToolsWithMetadata() {
+export function createImageToolsWithMetadata(args: {
+  organizationId: string;
+  projectId: string;
+  imageSettings: typeof imageSettingsSchema.infer | null;
+  publicImagesBucket: InitialContext["publicImagesBucket"];
+}) {
   const generateImage = tool({
     description: "Generate an image for a project",
     inputSchema: jsonSchema<typeof imageAgentInputSchema.infer>(
       imageAgentInputSchema.toJsonSchema() as JSONSchema7,
     ),
     execute: async ({ prompt }) => {
-      const imageSettingsResult = await getProjectInWebsocketChat();
-      if (!imageSettingsResult.ok) {
-        throw imageSettingsResult.error;
-      }
-      if (
-        !imageSettingsResult.value ||
-        !imageSettingsResult.value.imageSettings
-      ) {
+      const { imageSettings } = args;
+      if (!imageSettings) {
         return {
           success: false as const,
           message:
             "No image settings found for project. Please ask the user to set up image settings.",
         };
       }
-      const { imageSettings } = imageSettingsResult.value;
 
       const result = await generateText({
         model: google("gemini-3-pro-image-preview"),
@@ -70,16 +68,16 @@ export function createImageToolsWithMetadata() {
         };
       });
 
-      const context = getWebsocketContext();
+      const { organizationId, projectId, publicImagesBucket } = args;
       const fileNames: string[] = [];
       for (const file of result.files) {
         const fileName = getPublicImageUri({
-          orgId: context.organizationId,
-          projectId: context.projectId,
+          orgId: organizationId,
+          projectId,
           kind: "content-image",
           fileName: `${uuidv7()}.jpeg`,
         });
-        await context.publicImagesBucket.storeImage(
+        await publicImagesBucket.storeImage(
           fileName,
           new Blob([new Uint8Array(file.uint8Array)]),
         );
@@ -143,14 +141,14 @@ export function createImageToolsWithMetadata() {
           message: result.error.message,
         };
       }
-      const context = getWebsocketContext();
+      const { organizationId, projectId, publicImagesBucket } = args;
       const fileName = getPublicImageUri({
-        orgId: context.organizationId,
-        projectId: context.projectId,
+        orgId: organizationId,
+        projectId,
         kind: "content-image",
         fileName: `${uuidv7()}.jpeg`,
       });
-      await context.publicImagesBucket.storeImage(
+      await publicImagesBucket.storeImage(
         fileName,
         new Blob([new Uint8Array(result.value.buffer)]),
       );

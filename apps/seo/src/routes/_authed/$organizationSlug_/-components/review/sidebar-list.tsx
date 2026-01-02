@@ -13,8 +13,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@rectangular-labs/ui/components/ui/sidebar";
-import type { TreeChangeStatus, TreeFile } from "~/lib/campaign/build-tree";
-import { FilterStatus } from "./filter-status";
+import type { TreeChangeStatus, TreeFile } from "~/lib/workspace/build-tree";
+import { FilterStatus } from "~/routes/_authed/$organizationSlug/$projectSlug/content/-components/filter-status";
 
 export function ReviewSidebarList({
   summary,
@@ -52,9 +52,28 @@ export function ReviewSidebarList({
             />
             <InputGroupAddon align="inline-end">
               <FilterStatus
-                onStatusFilterChange={onStatusFilterChange}
-                statusFilter={statusFilter}
-                summary={summary}
+                label="Filter by change"
+                onChange={onStatusFilterChange}
+                options={[
+                  { value: "all", label: "All", count: summary.total },
+                  {
+                    value: "created",
+                    label: "Created",
+                    count: summary.created,
+                  },
+                  {
+                    value: "updated",
+                    label: "Updated",
+                    count: summary.updated,
+                  },
+                  { value: "moved", label: "Moved", count: summary.moved },
+                  {
+                    value: "deleted",
+                    label: "Deleted",
+                    count: summary.deleted,
+                  },
+                ]}
+                value={statusFilter}
               >
                 <InputGroupButton size="icon-xs">
                   <Icons.Filter />

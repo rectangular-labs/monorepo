@@ -2,6 +2,7 @@ import type { serpTrafficSchema } from "@rectangular-labs/core/schemas/keyword-p
 import type {
   businessBackgroundSchema,
   imageSettingsSchema,
+  publishingSettingsSchema,
   writingSettingsSchema,
 } from "@rectangular-labs/core/schemas/project-parsers";
 import { type } from "arktype";
@@ -36,6 +37,7 @@ export const seoProject = pgSeoTable(
     businessBackground: jsonb().$type<typeof businessBackgroundSchema.infer>(),
     imageSettings: jsonb().$type<typeof imageSettingsSchema.infer>(),
     writingSettings: jsonb().$type<typeof writingSettingsSchema.infer>(),
+    publishingSettings: jsonb().$type<typeof publishingSettingsSchema.infer>(),
     serpSnapshot: jsonb().$type<typeof serpTrafficSchema.infer>(),
     gscPropertyId: uuid().references(() => seoGscProperty.id, {
       onDelete: "set null",

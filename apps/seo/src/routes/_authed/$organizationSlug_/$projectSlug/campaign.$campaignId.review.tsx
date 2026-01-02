@@ -3,8 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Pending } from "~/components/pending";
 import { getApiClientRq } from "~/lib/api";
-import { buildTree } from "~/lib/campaign/build-tree";
-import { createSyncDocumentQueryOptions } from "~/lib/campaign/sync";
+import { buildTree } from "~/lib/workspace/build-tree";
+import { createPullDocumentQueryOptions } from "~/lib/workspace/sync";
 import { LoadingError } from "../../-components/loading-error";
 import { ReviewPanel } from "../-components/review/panel";
 
@@ -40,7 +40,11 @@ function PageComponent() {
     isLoading: isLoadingCampaignLoroDoc,
     refetch: refetchCampaignLoroDoc,
   } = useQuery(
-    createSyncDocumentQueryOptions({ organizationId, projectId, campaignId }),
+    createPullDocumentQueryOptions({
+      organizationId,
+      projectId,
+      campaignId,
+    }),
   );
   const {
     data: mainLoroDoc,
@@ -48,7 +52,7 @@ function PageComponent() {
     isLoading: isLoadingMainLoroDoc,
     refetch: refetchMainLoroDoc,
   } = useQuery(
-    createSyncDocumentQueryOptions({
+    createPullDocumentQueryOptions({
       organizationId,
       projectId,
       campaignId: null,

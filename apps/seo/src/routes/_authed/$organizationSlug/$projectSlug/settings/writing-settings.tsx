@@ -1,4 +1,4 @@
-import { getExtensionFromMimeType } from "@rectangular-labs/api-seo/client";
+import { getExtensionFromMimeType } from "@rectangular-labs/core/project/get-extension-from-mimetype";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
