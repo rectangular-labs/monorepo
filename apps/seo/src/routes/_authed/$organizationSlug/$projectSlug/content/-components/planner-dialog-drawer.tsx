@@ -59,6 +59,7 @@ export function PlannerDialogDrawer({
   const [notesDraft, setNotesDraft] = useState("");
   const [useNextEarliest, setUseNextEarliest] = useState(true);
   const [customScheduleDraft, setCustomScheduleDraft] = useState("");
+  const [outlineDraft, setOutlineDraft] = useState("");
 
   useEffect(() => {
     if (!activeDialogFile) return;
@@ -120,12 +121,15 @@ export function PlannerDialogDrawer({
         metadata.push({ key: "notes", value: notesDraft.trim() });
       if (scheduleIso)
         metadata.push({ key: "scheduledFor", value: scheduleIso });
+      if (outlineDraft.trim())
+        metadata.push({ key: "outline", value: outlineDraft.trim() });
       return metadata;
     };
   }, [
     activeDialogFile,
     customScheduleDraft,
     notesDraft,
+    outlineDraft,
     titleDraft,
     useNextEarliest,
   ]);
@@ -173,11 +177,11 @@ export function PlannerDialogDrawer({
           <Accordion collapsible type="single">
             <AccordionItem value="outline">
               <AccordionTrigger>Outline</AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="max-h-[50vh] overflow-auto">
                 <MarkdownEditor
                   key={activeDialogFile?.treeId ?? "outline"}
                   markdown={outline}
-                  readOnly
+                  onMarkdownChange={(markdown) => setOutlineDraft(markdown)}
                 />
               </AccordionContent>
             </AccordionItem>

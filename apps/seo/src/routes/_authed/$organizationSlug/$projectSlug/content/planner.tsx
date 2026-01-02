@@ -33,6 +33,14 @@ export const Route = createFileRoute(
       }),
     );
 
+    void context.queryClient.ensureQueryData(
+      getApiClientRq().auth.organization.members.queryOptions({
+        input: {
+          organizationIdentifier: activeProject.organizationId,
+        },
+      }),
+    );
+
     return {
       projectId: activeProject.id,
       organizationId: activeProject.organizationId,
@@ -88,6 +96,15 @@ function PlannerPage() {
       organizationId,
       projectId,
       campaignId: null,
+    }),
+  );
+
+  const { data: organizationMembers } = useQuery(
+    getApiClientRq().auth.organization.members.queryOptions({
+      input: {
+        organizationIdentifier: organizationId,
+      },
+      enabled: !!organizationId,
     }),
   );
 
@@ -326,6 +343,7 @@ function PlannerPage() {
 
                   return <span>-</span>;
                 }}
+                members={organizationMembers?.members ?? []}
                 onRowClick={(row) => {
                   const file = plannerFiles.find((f) => f.treeId === row.id);
                   if (!file) return;
