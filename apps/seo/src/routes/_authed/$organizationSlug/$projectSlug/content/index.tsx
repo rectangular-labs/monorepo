@@ -44,6 +44,14 @@ export const Route = createFileRoute(
       }),
     );
 
+    context.queryClient.ensureQueryData(
+      getApiClientRq().auth.organization.members.queryOptions({
+        input: {
+          organizationIdentifier: activeProject.organizationId,
+        },
+      }),
+    );
+
     return {
       projectId: activeProject.id,
       organizationId: activeProject.organizationId,
@@ -89,6 +97,15 @@ function PageComponent() {
         organizationIdentifier: organizationSlug,
         identifier: projectSlug,
       },
+    }),
+  );
+
+  const { data: organizationMembers } = useQuery(
+    getApiClientRq().auth.organization.members.queryOptions({
+      input: {
+        organizationIdentifier: organizationId,
+      },
+      enabled: !!organizationId,
     }),
   );
 
@@ -318,6 +335,7 @@ function PageComponent() {
           {activeView === "list" && (
             <div className="rounded-md border">
               <ArticlesTable
+                members={organizationMembers?.members ?? []}
                 onRowClick={(row) => {
                   const file = liveFiles.find((f) => f.treeId === row.id);
                   if (!file) return;

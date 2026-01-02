@@ -1,5 +1,6 @@
 "use client";
 
+import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
@@ -21,7 +22,7 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type ArticleTableRow = {
   id: string;
@@ -95,18 +96,39 @@ function SortIndicator({ state }: { state: false | "asc" | "desc" }) {
   return <Icons.ChevronsUpDown aria-hidden="true" className="size-4" />;
 }
 
+type OrganizationMember =
+  RouterOutputs["auth"]["organization"]["members"]["members"][number];
 export function ArticlesTable({
   rows,
   onRowClick,
   getRowActions,
+  members,
 }: {
   rows: ArticleTableRow[];
   onRowClick?: (row: ArticleTableRow) => void;
   getRowActions?: (row: ArticleTableRow) => React.ReactNode;
+  members: OrganizationMember[];
 }) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "scheduledFor", desc: true },
   ]);
+
+  const memberByUserId = useMemo(() => {
+    const map = new Map<string, OrganizationMember>();
+    for (const member of members) {
+      map.set(member.user.id, member);
+    }
+    return map;
+  }, [members]);
+
+  const resolveAuthorLabel = useCallback(
+    (userId?: string) => {
+      if (!userId) return "Assistant";
+      const member = memberByUserId.get(userId);
+      return member?.user.name || member?.user.email || userId;
+    },
+    [memberByUserId],
+  );
 
   const columns = useMemo<ColumnDef<ArticleTableRow>[]>(() => {
     const base: ColumnDef<ArticleTableRow>[] = [
@@ -114,13 +136,12 @@ export function ArticlesTable({
         accessorKey: "author",
         header: "Author",
         cell: ({ getValue }) => {
-          const value = getValue<string>();
-          return value || "—";
+          return resolveAuthorLabel(getValue<string | undefined>());
         },
         sortingFn: (rowA, rowB, columnId) => {
           return compareMaybeString(
-            rowA.getValue<string | undefined>(columnId),
-            rowB.getValue<string | undefined>(columnId),
+            resolveAuthorLabel(rowA.getValue<string | undefined>(columnId)),
+            resolveAuthorLabel(rowB.getValue<string | undefined>(columnId)),
           );
         },
       },
@@ -184,7 +205,7 @@ export function ArticlesTable({
       });
     }
     return base;
-  }, [getRowActions]);
+  }, [getRowActions, resolveAuthorLabel]);
 
   const table = useReactTable({
     columns,

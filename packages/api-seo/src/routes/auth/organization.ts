@@ -1,6 +1,9 @@
+import { ORPCError } from "@orpc/client";
 import { schema } from "@rectangular-labs/db";
+import { getMembersByOrganizationId } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { protectedBase } from "../../context";
+import { validateOrganizationMiddleware } from "../../lib/validate-organization";
 
 const active = protectedBase
   .route({ method: "GET", path: "/active" })
@@ -74,6 +77,47 @@ const list = protectedBase
     }));
   });
 
+const members = protectedBase
+  .route({ method: "GET", path: "/members" })
+  .input(type({ organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      members: schema.memberSelectSchema
+        .merge(
+          type({
+            user: schema.userSelectSchema.pick("id", "name", "email", "image"),
+          }),
+        )
+        .array(),
+    }),
+  )
+  .handler(async ({ context }) => {
+    const rowsResult = await getMembersByOrganizationId(
+      context.db,
+      context.organization.id,
+    );
+
+    if (!rowsResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: rowsResult.error.message,
+        cause: rowsResult.error,
+      });
+    }
+    const rows = rowsResult.value;
+    return {
+      members: rows.map((member) => ({
+        ...member,
+        user: {
+          id: member.user.id,
+          name: member.user.name,
+          email: member.user.email,
+          image: member.user.image ?? null,
+        },
+      })),
+    };
+  });
+
 export default protectedBase
   .prefix("/organization")
-  .router({ active, setActive, list });
+  .router({ active, setActive, list, members });
