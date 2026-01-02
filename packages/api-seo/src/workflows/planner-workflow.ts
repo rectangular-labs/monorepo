@@ -193,6 +193,9 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         fn: () =>
           fetchSerp({ keyword: primaryKeyword, locationName, languageCode }),
         cacheKV: this.env.CACHE,
+        options: {
+          ttlSeconds: 60 * 60 * 24 * 7, // 7 days
+        },
       });
       if (!serpResult.ok) throw serpResult.error;
       return {

@@ -51,7 +51,6 @@ export async function fetchWithCache<T>({
   cacheKV: KVNamespace;
   options?: {
     ttlSeconds?: number;
-    waitUntil?: (promise: Promise<void>) => void;
   };
 }): Promise<Result<T, Error>> {
   const cachedResults = await safe(() => {
