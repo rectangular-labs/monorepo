@@ -11,7 +11,7 @@ import { createTask } from "../lib/task";
 
 const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
-  .input(taskInputSchema.merge(type({ projectId: "string" })))
+  .input(taskInputSchema)
   .output(
     type({
       projectId: "string",

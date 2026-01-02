@@ -98,7 +98,7 @@ export function ArticleEditorTakeover({
     scheduledFor: string;
   }>({
     slug: "",
-    status: "planned",
+    status: "queued",
     primaryKeyword: "",
     notes: "",
     scheduledFor: "",
@@ -166,7 +166,7 @@ export function ArticleEditorTakeover({
 
   const seoStatuses = [
     "suggested",
-    "planned",
+    "queued",
     "generating",
     "generation-failed",
     "pending-review",

@@ -129,7 +129,7 @@ function PlannerPage() {
     traverseTree(treeResult.value, (node) => {
       if (
         node.type === "file" &&
-        (node.status === "planned" ||
+        (node.status === "queued" ||
           node.status === "suggested" ||
           node.status === "generating" ||
           node.status === "pending-review")
@@ -182,7 +182,7 @@ function PlannerPage() {
   const plannerRows = useMemo(() => {
     const statusOrder: Record<SeoFileStatus, number> = {
       suggested: 0,
-      planned: 1,
+      queued: 1,
       generating: 2,
       "generation-failed": 3,
       "pending-review": 4,
@@ -274,6 +274,7 @@ function PlannerPage() {
                 getRowActions={(row) => {
                   const file = plannerFiles.find((f) => f.treeId === row.id);
                   if (!file) return null;
+                  console.log("file", file);
                   if (file.status === "suggested") {
                     return (
                       <div className="flex items-center gap-2">
@@ -285,7 +286,7 @@ function PlannerPage() {
                               return;
                             }
                             applyMetadataUpdate(file, [
-                              { key: "status", value: "planned" },
+                              { key: "status", value: "queued" },
                             ]);
                           }}
                           size="sm"
@@ -347,10 +348,7 @@ function PlannerPage() {
                 onRowClick={(row) => {
                   const file = plannerFiles.find((f) => f.treeId === row.id);
                   if (!file) return;
-                  if (
-                    file.status === "suggested" ||
-                    file.status === "planned"
-                  ) {
+                  if (file.status === "suggested" || file.status === "queued") {
                     setActiveDialogTreeId(file.treeId);
                     return;
                   }

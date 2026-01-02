@@ -148,7 +148,7 @@ function PageComponent() {
   const hasPlannerBacklog = useMemo(() => {
     return allFiles.some(
       (f) =>
-        f.status === "planned" ||
+        f.status === "queued" ||
         f.status === "suggested" ||
         f.status === "pending-review",
     );
@@ -239,7 +239,7 @@ function PageComponent() {
                     There are items waiting in your planner
                   </AlertTitle>
                   <AlertDescription>
-                    You have planned/suggested items or items pending review.
+                    You have queued/suggested items or items pending review.
                     Visit the planner to triage and schedule.
                   </AlertDescription>
                 </div>

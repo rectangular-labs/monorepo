@@ -1,6 +1,6 @@
 import {
   addCreatedAtOnCreateMiddleware,
-  addScheduledForWhenPlannedMiddleware,
+  addScheduledForWhenQueuedMiddleware,
   type FsNodePayload,
   type WriteToFilePublishingContext,
 } from "@rectangular-labs/core/loro-file-system";
@@ -35,6 +35,7 @@ function addStartResearchWorkflowOnSuggestedCreate(): WriteToFileMiddleware<
         const result = await createTask({
           db: ws.db,
           userId: ctx.context.userId,
+          workflowInstanceId: `plan_${crypto.randomUUID()}`,
           input: {
             type: "seo-plan-keyword",
             userId: ctx.context.userId,
@@ -55,22 +56,22 @@ function addStartResearchWorkflowOnSuggestedCreate(): WriteToFileMiddleware<
   };
 }
 
-function addStartWritingWorkflowWhenPlanned(): WriteToFileMiddleware<
+function addStartWritingWorkflowWhenQueued(): WriteToFileMiddleware<
   FsNodePayload,
   WriteToFilePublishingContext
 > {
   return async ({ ctx, next }) => {
     const status = ctx.getMetadata("status");
-    if (status !== "planned") return await next();
+    if (status !== "queued") return await next();
 
     const existingNode = ctx.getExistingNode();
     const existingWorkflowId = existingNode?.data.get("workflowId");
-    if (typeof existingWorkflowId === "string" && existingWorkflowId.trim()) {
+    if (existingWorkflowId?.trim()) {
       return await next();
     }
 
     // Set workflowId immediately so subsequent edits don't retrigger while the Workflow starts.
-    const workflowId = crypto.randomUUID();
+    const workflowId = `write_${crypto.randomUUID()}`;
     ctx.setMetadata("workflowId", workflowId);
 
     const start = async (path: string) => {
@@ -116,8 +117,8 @@ export const loroWriter = createWriteToFile<
 >({
   middleware: [
     addCreatedAtOnCreateMiddleware(),
-    addScheduledForWhenPlannedMiddleware(),
+    addScheduledForWhenQueuedMiddleware(),
     addStartResearchWorkflowOnSuggestedCreate(),
-    addStartWritingWorkflowWhenPlanned(),
+    addStartWritingWorkflowWhenQueued(),
   ],
 });

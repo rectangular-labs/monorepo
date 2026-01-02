@@ -319,6 +319,34 @@ function PublishingSettingsPage() {
       <FieldGroup>
         <Controller
           control={form.control}
+          name="requireSuggestionReview"
+          render={({ field }) => {
+            const id = "publishing-settings-requireSuggestionReview";
+            return (
+              <Field>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    checked={field.value}
+                    id={id}
+                    onCheckedChange={(next) => field.onChange(next === true)}
+                  />
+                  <div className="space-y-1">
+                    <Label className="cursor-pointer" htmlFor={id}>
+                      Require suggestion review
+                    </Label>
+                    <p className="text-muted-foreground text-sm">
+                      Suggestions must be explicitly accepted before becoming
+                      queued.
+                    </p>
+                  </div>
+                </div>
+              </Field>
+            );
+          }}
+        />
+
+        <Controller
+          control={form.control}
           name="requireContentReview"
           render={({ field }) => {
             const id = "publishing-settings-requireContentReview";
@@ -337,34 +365,6 @@ function PublishingSettingsPage() {
                     <p className="text-muted-foreground text-sm">
                       Generated articles must be approved before they can be
                       scheduled.
-                    </p>
-                  </div>
-                </div>
-              </Field>
-            );
-          }}
-        />
-
-        <Controller
-          control={form.control}
-          name="requireSuggestionReview"
-          render={({ field }) => {
-            const id = "publishing-settings-requireSuggestionReview";
-            return (
-              <Field>
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    checked={field.value}
-                    id={id}
-                    onCheckedChange={(next) => field.onChange(next === true)}
-                  />
-                  <div className="space-y-1">
-                    <Label className="cursor-pointer" htmlFor={id}>
-                      Require suggestion review
-                    </Label>
-                    <p className="text-muted-foreground text-sm">
-                      Suggestions must be explicitly accepted before becoming
-                      planned.
                     </p>
                   </div>
                 </div>

@@ -37,8 +37,8 @@ function statusLabel(status: SeoFileStatus) {
   switch (status) {
     case "suggested":
       return "Suggested";
-    case "planned":
-      return "Planned";
+    case "queued":
+      return "Queued";
     case "generating":
       return "Generating";
     case "generation-failed":

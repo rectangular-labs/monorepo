@@ -1,6 +1,6 @@
 import {
   addCreatedAtOnCreateMiddleware,
-  addScheduledForWhenPlannedMiddleware,
+  addScheduledForWhenQueuedMiddleware,
   type FsNodePayload,
   type LoroDocMapping,
   type WriteToFilePublishingContext,
@@ -9,6 +9,7 @@ import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-worksp
 import {
   createWriteToFile,
   type WriteToFileArgs,
+  type WriteToFileMiddleware,
 } from "@rectangular-labs/loro-file-system";
 import { safeSync } from "@rectangular-labs/result";
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
@@ -20,15 +21,65 @@ function getWorkspaceSyncKey(workspaceBlobUri: string) {
   return `${workspaceBlobUri}::sync`;
 }
 
-const loroWriter = createWriteToFile<
-  FsNodePayload,
-  WriteToFilePublishingContext
->({
-  middleware: [
-    addCreatedAtOnCreateMiddleware(),
-    addScheduledForWhenPlannedMiddleware(),
-  ],
-});
+function addStartWriterWorkflowOnSuggestionAcceptMiddleware({
+  organizationId,
+  projectId,
+  campaignId,
+}: {
+  organizationId: string;
+  projectId: string;
+  campaignId: string | null;
+}): WriteToFileMiddleware<FsNodePayload, WriteToFilePublishingContext> {
+  return async ({ ctx, next }) => {
+    const nextStatus = ctx.getMetadata("status");
+    if (nextStatus !== "queued") return await next();
+
+    const existingNode = ctx.getExistingNode();
+    if (!existingNode) return await next();
+
+    const existingStatus = existingNode.data.get("status");
+    if (existingStatus !== "suggested") return await next();
+
+    const existingWorkflowId = existingNode.data.get("workflowId");
+    if (existingWorkflowId?.trim()) {
+      return await next();
+    }
+
+    const { taskId } = await getApiClient().task.create({
+      projectId,
+      campaignId,
+      organizationId,
+      path: ctx.path,
+      type: "seo-write-article",
+      userId: ctx.context.userId,
+    });
+    ctx.setMetadata("workflowId", taskId);
+
+    return await next();
+  };
+}
+
+function createLoroWriter({
+  organizationId,
+  projectId,
+  campaignId,
+}: {
+  organizationId: string;
+  projectId: string;
+  campaignId: string | null;
+}) {
+  return createWriteToFile<FsNodePayload, WriteToFilePublishingContext>({
+    middleware: [
+      addCreatedAtOnCreateMiddleware(),
+      addScheduledForWhenQueuedMiddleware(),
+      addStartWriterWorkflowOnSuggestionAcceptMiddleware({
+        organizationId,
+        projectId,
+        campaignId,
+      }),
+    ],
+  });
+}
 
 type WorkspaceSyncState = {
   /**
@@ -202,6 +253,11 @@ export function createPushDocumentQueryOptions({
         throw new Error("Failed to find existing document");
       }
 
+      const loroWriter = createLoroWriter({
+        organizationId,
+        projectId,
+        campaignId,
+      });
       await Promise.all(
         operations.map(async (operation) => {
           await loroWriter.writeToFile({

@@ -77,7 +77,7 @@ function computeNextAvailableScheduleIso({
   const root = tree.roots()[0] as LoroTreeNode<FsNodePayload> | undefined;
   if (!root) return undefined;
   const countableStatuses = new Set<string>([
-    "planned",
+    "queued",
     "generating",
     "pending-review",
     "scheduled",
@@ -145,13 +145,13 @@ function computeNextAvailableScheduleIso({
   return undefined;
 }
 
-export function addScheduledForWhenPlannedMiddleware(): WriteToFileMiddleware<
+export function addScheduledForWhenQueuedMiddleware(): WriteToFileMiddleware<
   FsNodePayload,
   WriteToFilePublishingContext
 > {
   return async ({ ctx, next }) => {
     const status = ctx.getMetadata("status");
-    if (status !== ("planned" satisfies SeoFileStatus)) {
+    if (status !== ("queued" satisfies SeoFileStatus)) {
       return await next();
     }
 
