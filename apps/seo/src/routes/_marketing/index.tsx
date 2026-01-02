@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Benefits } from "./-components/benefits";
-import { Credentials } from "./-components/credentials";
-import { CTA } from "./-components/cta";
-import { FAQ } from "./-components/faq";
 import { Hero } from "./-components/hero";
-import { Stats } from "./-components/stats";
+import { Expertise } from "./-components/expertise";
+import { Reporting } from "./-components/reporting";
+import { Strategy } from "./-components/strategy";
+import { Writer } from "./-components/writer";
+import { CTA } from "./-components/cta";
+import { Footer } from "./-components/footer";
+import { Header } from "./-components/header";
 
 export const Route = createFileRoute("/_marketing/")({
   component: App,
@@ -29,13 +31,17 @@ export const Route = createFileRoute("/_marketing/")({
 
 function App() {
   return (
-    <div className="bg-background">
-      <Hero />
-      <Benefits />
-      <Credentials />
-      <Stats />
-      <CTA />
-      <FAQ />
+    <div className="flex min-h-screen flex-col bg-background">
+      <Header />
+      <main className="flex-1">
+        <Hero />
+        <Expertise />
+        <Reporting />
+        <Strategy />
+        <Writer />
+        <CTA />
+      </main>
+      <Footer />
     </div>
   );
 }
