@@ -11,7 +11,6 @@ type Context = Parameters<
 
 describe("addCreatedAtOnCreateMiddleware", () => {
   it("sets createdAt on newly created nodes when missing", async () => {
-    vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-02T12:34:56.789Z"));
 
     let onCreate: Parameters<Context["addOnCreateNode"]>[0] | undefined;
@@ -48,7 +47,6 @@ describe("addCreatedAtOnCreateMiddleware", () => {
   });
 
   it("does not overwrite an existing createdAt", async () => {
-    vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-02T12:34:56.789Z"));
 
     let onCreate: Parameters<Context["addOnCreateNode"]>[0] | undefined;
