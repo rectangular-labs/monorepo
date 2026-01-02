@@ -375,8 +375,8 @@ export function ProjectChatPanel() {
     useProjectChat();
   const [input, setInput] = useState("");
   const queryClient = useQueryClient();
-  const lastSuggestionCompletionRef = useRef<string | null>(null);
-  const lastTodoSnapshotRef = useRef<string | null>(null);
+  const suggestionCompletionSetRef = useRef<Set<string>>(new Set());
+  const todoSnapshotSetRef = useRef<Set<string>>(new Set());
   const [todoSnapshot, setTodoSnapshot] = useState<NonNullable<TodoSnapshot>>(
     [],
   );
@@ -416,10 +416,10 @@ export function ProjectChatPanel() {
         if (
           part.type === "tool-use_skills" &&
           part.state === "output-available" &&
-          part.input.skill === "suggest_articles"
+          part.input.skill === "suggest_articles" &&
+          !suggestionCompletionSetRef.current.has(part.toolCallId)
         ) {
-          if (lastSuggestionCompletionRef.current === part.toolCallId) continue;
-          lastSuggestionCompletionRef.current = part.toolCallId;
+          suggestionCompletionSetRef.current.add(part.toolCallId);
           void queryClient.invalidateQueries({
             queryKey: ["pullDocument"],
           });
@@ -427,10 +427,10 @@ export function ProjectChatPanel() {
 
         if (
           part.type === "tool-manage_todo" &&
-          part.state === "output-available"
+          part.state === "output-available" &&
+          !todoSnapshotSetRef.current.has(part.toolCallId)
         ) {
-          if (lastTodoSnapshotRef.current === part.toolCallId) continue;
-          lastTodoSnapshotRef.current = part.toolCallId;
+          todoSnapshotSetRef.current.add(part.toolCallId);
           const output = part.output as { todos?: TodoSnapshot } | undefined;
           if (output?.todos) {
             setTodoSnapshot(output.todos);

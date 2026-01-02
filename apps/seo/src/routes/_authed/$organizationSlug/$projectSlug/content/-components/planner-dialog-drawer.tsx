@@ -5,12 +5,6 @@ import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/pr
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@rectangular-labs/ui/components/ui/accordion";
-import {
   Alert,
   AlertDescription,
   AlertTitle,
@@ -174,18 +168,23 @@ export function PlannerDialogDrawer({
         </Field>
 
         {outline && (
-          <Accordion collapsible type="single">
-            <AccordionItem value="outline">
-              <AccordionTrigger>Outline</AccordionTrigger>
-              <AccordionContent className="max-h-[50vh] overflow-auto">
-                <MarkdownEditor
-                  key={activeDialogFile?.treeId ?? "outline"}
-                  markdown={outline}
-                  onMarkdownChange={(markdown) => setOutlineDraft(markdown)}
-                />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <Field>
+            <FieldLabel>Outline</FieldLabel>
+            <FieldContent className="max-h-[40vh] overflow-auto p-0">
+              <style>
+                {`
+                  .milkdown .ProseMirror {
+                    padding: 8px 8px 8px 90px;
+                  }
+                `}
+              </style>
+              <MarkdownEditor
+                key={activeDialogFile?.treeId ?? "outline"}
+                markdown={outline}
+                onMarkdownChange={(markdown) => setOutlineDraft(markdown)}
+              />
+            </FieldContent>
+          </Field>
         )}
 
         <Field>
