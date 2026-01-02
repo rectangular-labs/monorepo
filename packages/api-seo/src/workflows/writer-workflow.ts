@@ -3,6 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep,
 } from "cloudflare:workers";
+import type { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import type {
@@ -22,6 +23,7 @@ import {
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { buildWriterSystemPrompt } from "../lib/ai/writer-agent";
 import { createPublicImagesBucket } from "../lib/bucket";
+import { configureDataForSeoClient } from "../lib/dataforseo/utils";
 import { createTask } from "../lib/task";
 import {
   loadWorkspaceForWorkflow,
@@ -55,6 +57,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       campaignId: input.campaignId,
       userId: input.userId,
     });
+    configureDataForSeoClient();
 
     const isOutlinePresent = await step.do(
       "Ensure outline is present",
@@ -220,6 +223,18 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               openai: {
                 reasoningEffort: "medium",
               } satisfies OpenAIResponsesProviderOptions,
+              google: {
+                thinkingConfig: {
+                  includeThoughts: true,
+                  thinkingLevel: "medium",
+                },
+              } satisfies GoogleGenerativeAIProviderOptions,
+            },
+            tools: {
+              ...webTools.tools,
+              ...internalLinksTools.tools,
+              ...imageTools.tools,
+              ...todoTool.tools,
             },
             system: systemPrompt,
             messages: [
@@ -228,12 +243,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
                 content: "Write the full article now.",
               },
             ],
-            tools: {
-              ...webTools.tools,
-              ...internalLinksTools.tools,
-              ...imageTools.tools,
-              ...todoTool.tools,
-            },
             onStepFinish: (step) => {
               logInfo(`[generateArticle] Step completed:`, {
                 text: step.text,
@@ -246,7 +255,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
                 messages: [
                   ...messages,
                   {
-                    role: "system",
+                    role: "assistant",
                     content: formatTodoFocusReminder({
                       todos: todoTool.getSnapshot(),
                       maxOpen: 5,
