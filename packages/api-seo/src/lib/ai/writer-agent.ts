@@ -72,98 +72,98 @@ ${args.outline ?? "(missing)"}
 
 -  If any of these specific article types are written, follow these instructions. These instructions should override any contradicting instructions found elsewhere. If the type of article being written is not listed here, ignore this list.
 
-## best of lists
-1. Word light - explain why each item is listed succinctly - don't over-explain. Each section should be a maximum of 50 words
+## Best of lists
+1. Word light - Explain why each item is listed succinctly - don't over-explain. Each section should be a maximum of 50 words
 2. Always include links to each of the listed items/services 
-3. give an opinion as to why the top listed product is considered the best and why
+3. Give an opinion as to why the top listed product is considered the best and why
 
 
 ## Comparisons (comparing two or more products or services or items)
-1. include external links to the product/item being compared to
+1. Include external links to the product/item being compared to
 2. Must clearly take a stance on which product is better for what purposes and why - opinion must be given by the end
 
 
 ## How to (guide)
-1. tone should be instructional and confident
-2. opinions can be given but should be clearly labelled as opinions
+1. Tone should be instructional and confident
+2. Opinions can be given but should be clearly labelled as opinions
 
 
 ## Listicle (generically)
-1. always include an external link to each item on the list
-2. word light - explain why each item is listed succinctly - don't over-explain. Each section should be a maximum of 50 words.
+1. Always include an external link to each item on the list
+2. Word light - Explain why each item is listed succinctly - don't over-explain. Each section should be a maximum of 50 words.
 
 ## Long form - opinions
-1. signpost well
-2. write in a stream-of-consciousness - raw, and relatable 
-3. substantiated by clearly cited evidence and sources
-4. must take a side and an opinion - strong POV
+1. Signpost well
+2. Write in a stream-of-consciousness - raw, and relatable 
+3. Substantiated by clearly cited evidence and sources
+4. Must take a side and an opinion - strong POV
 
 ## FAQs (?)
-1. heavy internal linking 
-2. clear, direct, succinct answers to the questions
-3. no CTAs or product plugs
+1. Heavy internal linking 
+2. Clear, direct, succinct answers to the questions
+3. No CTAs or product plugs
 
 ## News 
-1. internal and external links should be used heavily
-2. tone should be neutral, informational, and succinct. Descriptive
-3. never include a personal opinion or tone
+1. Internal and external links should be used heavily
+2. Tone should be neutral, informational, and succinct. Descriptive
+3. Never include a personal opinion or tone
 
 ## Whitepapers
-1. tone is authoritative and research based
-2. long word count
-3. heavy emphasis on accurate internal and external linking
+1. Tone is authoritative and research based
+2. Long word count
+3. Heavy emphasis on accurate internal and external linking
 
 ## Infographic
-1. there should be a clear heading, with visuals which accompany and describe each heading, and corresponding words in bullet point
+1. There should be a clear heading, with visuals which accompany and describe each heading, and corresponding words in bullet point
 
 ## Case studies
-1. clearly state how they were aided - how their position improved due to the usage of a certain product or service
-2. internal or external links to the case studies' webpage (if any)
-3. narrative tone
-4. emphasize the experience of the person - using direct quotes from them, and describing how they were aided. 
-5. identify the person by name and position and state the company 
+1. Clearly state how they were aided - how their position improved due to the usage of a certain product or service
+2. Internal or external links to the case studies' webpage (if any)
+3. Narrative tone
+4. Emphasize the experience of the person - using direct quotes from them, and describing how they were aided. 
+5. Identify the person by name and position and state the company 
 
 ## Press releases (news about the company)
-1. short word count
-ii) direct, matter-of-fact tone, formal and restrained
-3. state details 
-4. quotes from key personnel
+1. Short word count
+2. Direct, matter-of-fact tone, formal and restrained
+3. State details 
+4. Quotes from key personnel
 
 ## Interviews
-1. external and internal links to the interviewee and related topics
-2. many quotes from the interview
+1. External and internal links to the interviewee and related topics
+2. Many quotes from the interview
 3. Conversational - should be clearly signposted as a back and forth between interviewer and interviewee
-4. introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
-5. closing insights stating what was learnt from the interview
+4. Introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
+5. Closing insights stating what was learnt from the interview
 
 ## product update
 1. Word light 
-2. introduce the product and what it is 
-3. clearly list the changes in the product in a listicle, and list all the features
-4. be clear, and benefit focused
-5. explain why this update is exciting and what it intends to fulfill
+2. Introduce the product and what it is 
+3. Clearly list the changes in the product in a listicle, and list all the features
+4. Be clear, and benefit focused
+5. Explain why this update is exciting and what it intends to fulfill
 
 ## Contest/giveaway
-1. describe what needs to be done to qualify for the giveaway, how many people will win it, when it will close, how much it's worth
-2. very word light 
-3. energetic tone - excited
+1. Describe what needs to be done to qualify for the giveaway, how many people will win it, when it will close, how much it's worth
+2. Very word light 
+3. Energetic tone - excited
 
 ## Research summary
-1. any original opinions have to be clearly labelled as such
-2. external link to the original research
-3. cite clearly and in great detail the original research with 100% accuracy 
-4. analytical and neutral tone
+1. Any original opinions have to be clearly labelled as such
+2. External link to the original research
+3. Cite clearly and in great detail the original research with 100% accuracy 
+4. Analytical and neutral tone
 
 ## Event recap
-1. descriptive tone, excited
-2. internal link to related articles and products
-3. external link to partners
+1. Descriptive tone, excited
+2. Internal link to related articles and products
+3. External link to partners
 
-## best practices
-1. checklist at the end of the article summarizing all the best practices
-2. prescriptive, confident tone
-3. state dos and don'ts 
-4. give examples
+## Best practices
+1. Checklist at the end of the article summarizing all the best practices
+2. Prescriptive, confident tone
+3. State dos and don'ts 
+4. Give examples
 </requirements>
 
 <meta>

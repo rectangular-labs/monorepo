@@ -84,7 +84,7 @@ The goal is to create a plan that a writer can follow to:
 
 <workflow>
 1) Analyze intent and SERP features (AI overview, PAA, related searches) for the keyword (provided in live-serp-data).
-2) Analyze competitor pages: take the Headings (H1, H2, H3) of the top 10 serps, and determine why the headings are considered to have fulfilled search intent. Distil your findings for each article into a thesis, and craft the outline taking the best practices from your findings, which fulfilling the thesis while maintaining an organic flow to the article (also provided in live-serp-data).
+2) Analyze competitor pages: take the Headings (H1, H2, H3) of the top 10 serps, and determine why the headings are considered to have fulfilled search intent. Distill your findings for each article into a thesis, and craft the outline taking the best practices from your findings, fulfilling the thesis while maintaining an organic flow to the article. Use the web_fetch to extract the required information for the outline.
 3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
 4) Synthesize into a brief article outline. Include a section on the POV of the article and a section covering any relevant assets that would be useful to include (tables/diagrams/site screenshots/flow charts/etc.).
     - The plan should follow closely the structure of competitor pages ${serp.find((s) => s.type === "ai_overview") ? "and the AI Overview" : ""} while also adding unique insights and angles. Note that if none of the competitors page fulfill/matches the target keyword well, you are free to ignore the competitors page structure.
@@ -96,90 +96,88 @@ The goal is to create a plan that a writer can follow to:
 6) If any of these article types are being written, follow these instructions. These instructions should override any contradicting instructions elsewhere. If the type of article being written is not listed here, ignore this list.
 
 ## Best of lists 
-1. always include screenshots or products of the products/websites/service pages/country/food/item that you are listing. 
-2. word light – each listicle item should be a maximum of 50 words
-3. maximum of 20 total items
+1. Always include screenshots or products of the products/websites/service pages/country/food/item that you are listing. 
+2. Word light - each listicle item should be a maximum of 50 words
+3. Maximum of 20 total items
 
 ## Comparisons (comparing two or more products or services or items)
-1. always include comparison tables at the top of the article that summarises the key points
-2. include screenshots or pictures of each item being compared
+1. Always include comparison tables at the top of the article that summarizes the key points
+2. Include screenshots or pictures of each item being compared
 
 
 ## How to (guide)
-1. include screenshots, diagrams, pictures for each step
+1. Include screenshots, diagrams, pictures for each step
 2. Checklist should be included after the introduction to signpost the article 
 
 ## Listicle (generically)
-1. include screenshots, diagrams, for every listed item 
-2. maximum of 20 total items 
-3. word light - each listicle item should be a maximum of 50 words
+1. Include screenshots, diagrams, for every listed item 
+2. Maximum of 20 total items 
+3. Word light - each listicle item should be a maximum of 50 words
 
 ## Long form - opinions
-1. clear opinion that should be reached at the end 
-2. must take a side and an opinion - strong POV
+1. Clear opinion that should be reached at the end 
+2. Must take a side and an opinion - strong POV
 
 ## FAQs (?)
-1. headings should be the questions
-2. short word counts
+1. Headings should be the questions
+2. Short word counts
 
 ## News 
-1. structure should cover: i) what happened, ii) why it matters, iii) key details, iv) what's next (if applicable)
+1. Structure should cover: i) what happened, ii) why it matters, iii) key details, iv) what's next (if applicable)
 
 ## Whitepapers
-1. diagrams, charts, and frameworks should be produced into images 
-2. long word count
-3. include an executive summary, data analysis, explain methodology, describe the issue
+1. Diagrams, charts, and frameworks should be produced into images 
+2. Long word count
+3. Include an executive summary, data analysis, explain methodology, describe the issue
 
 ## Infographic
 1. Visual output should incorporate all important elements - there should be a clear heading, with visuals which accompany and describe each heading, and corresponding words in bullet point
 2. Visual should have a flow and not be overly complicated. 
-3. text should be readable
-4. no need to use SERP data
+3. Text should be readable
+4. No need to use SERP data
 
 ## Case studies
-1. visuals of any data
-2. emphasize the experience of the user and emphasize how they were aided
-3. identify the person by name and position and state the company in the title
-4. no need to use SERP data
+1. Visuals of any data
+2. Emphasize the experience of the user and emphasize how they were aided
+3. Identify the person by name and position and state the company in the title
+4. No need to use SERP data
 
 ## Press releases (news about the company)
-1. short word count
-2. state details of the press release
-3. quotes from key personnel
-4. no need to use SERP data
+1. Short word count
+2. State details of the press release
+3. Quotes from key personnel
+4. No need to use SERP data
 
 ## Interviews
-1. picture of the person being interviewed 
-2. structured around the interview and the quotes received in the interview
-3. introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
-4. no need to use SERP data
+1. Picture of the person being interviewed 
+2. Structured around the interview and the quotes received in the interview
+3. Introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
+4. No need to use SERP data
 
 ## product update
 1. Word light 
-2. introduce the product and what it is 
-3. explain why this update is exciting and what it intends to fulfill
-4. no need to use SERP data
+2. Introduce the product and what it is 
+3. Explain why this update is exciting and what it intends to fulfill
+4. No need to use SERP data
 
 ## Contest/giveaway
-1. visual of a giveaway - describe what needs to be done to qualify for the giveaway, how many people will win it, when it will close,how much it's worth and the product needs to be in the picture. Picture should be vibrant and exciting
-2. very word light 
-3. no need to use SERP data
+1. Visual of a giveaway - describe what needs to be done to qualify for the giveaway, how many people will win it, when it will close,how much it's worth and the product needs to be in the picture. Picture should be vibrant and exciting
+2. Very word light 
+3. No need to use SERP data
 
 ## Research summary
-1. charts, frameworks, diagrams describing the data is mandatory
+1. Charts, frameworks, diagrams describing the data is mandatory
 2. Describe what was studied, key findings, and implications, if any. 
-3. any original opinions have to be clearly labelled as such
+3. Any original opinions have to be clearly labelled as such
 
 ## Event recap
 1. Picture of the event (prompt user for it)
-2. describe event highlights and takeaways
-3. no need to use SERP data
+2. Describe event highlights and takeaways
+3. No need to use SERP data
 
-## best practices
-1. checklist at the end of the article summarizing all the best practices
-2. state dos and don'ts 
-
-Output the file in markdown format, do not include any other formatting or commentary.
+## Best practices
+1. Checklist at the end of the article summarizing all the best practices
+2. State dos and don'ts 
 </workflow>
 
 <project context>
@@ -191,7 +189,7 @@ Output the file in markdown format, do not include any other formatting or comme
 
 
 <live-serp-data>
-serp
+${JSON.stringify(serp)}
 </live-serp-data>`;
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
