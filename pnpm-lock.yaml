@@ -53,18 +53,6 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.98
         version: 2.0.98(react@19.2.3)(zod@4.1.12)
-      '@milkdown/crepe':
-        specifier: ^7.17.3
-        version: 7.17.3(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(typescript@5.9.3)
-      '@milkdown/kit':
-        specifier: ^7.17.3
-        version: 7.17.3(@codemirror/language@6.12.1)(@codemirror/state@6.5.3)(@codemirror/view@6.39.7)(typescript@5.9.3)
-      '@milkdown/react':
-        specifier: ^7.17.3
-        version: 7.17.3(@codemirror/language@6.12.1)(@codemirror/state@6.5.3)(@codemirror/view@6.39.7)(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
-      '@milkdown/theme-nord':
-        specifier: ^7.17.3
-        version: 7.17.3
       '@rectangular-labs/api-seo':
         specifier: workspace:*
         version: link:../../packages/api-seo
@@ -935,6 +923,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.66.1(react@19.2.3))
+      '@milkdown/crepe':
+        specifier: ^7.17.3
+        version: 7.17.3(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(typescript@5.9.3)
+      '@milkdown/react':
+        specifier: ^7.17.3
+        version: 7.17.3(@codemirror/language@6.12.1)(@codemirror/state@6.5.3)(@codemirror/view@6.39.7)(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       '@radix-ui/react-use-controllable-state':
         specifier: ^1.2.2
         version: 1.2.2(@types/react@19.2.7)(react@19.2.3)
@@ -4324,9 +4318,6 @@ packages:
     peerDependencies:
       react: '*'
       react-dom: '*'
-
-  '@milkdown/theme-nord@7.17.3':
-    resolution: {integrity: sha512-gdCLQQ6N0NB1BLasjFGzf4jxbokA5DuI2Nl33kinvtJmzQQMuTx2fZqhztollLQnlMf9odGqX6gu5rD6xWRjkg==}
 
   '@milkdown/transformer@7.17.3':
     resolution: {integrity: sha512-XIeMV/X6R9YhaYSTytZGOwVMsVCXBgXVaP9OpABMceXR9hYfbrZZlurXirTMJYayYZ3IVZZJHQ56/wQ4URD2pg==}
@@ -18551,15 +18542,6 @@ snapshots:
       - prosemirror-view
       - supports-color
       - typescript
-
-  '@milkdown/theme-nord@7.17.3':
-    dependencies:
-      '@milkdown/core': 7.17.3
-      '@milkdown/ctx': 7.17.3
-      '@milkdown/prose': 7.17.3
-      clsx: 2.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@milkdown/transformer@7.17.3':
     dependencies:
