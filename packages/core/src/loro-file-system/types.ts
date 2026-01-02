@@ -41,7 +41,7 @@ export type FsNodePayload =
        * ISO date string
        */
       scheduledFor?: string;
-      userId: string;
+      userId?: string;
       status: SeoFileStatus;
       /**
        * Primary keyword the content targets.

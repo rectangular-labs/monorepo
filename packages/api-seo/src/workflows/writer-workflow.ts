@@ -288,7 +288,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
         });
         if (!workspaceResult.ok) throw workspaceResult.error;
         const { loroDoc, workspaceBlobUri, project } = workspaceResult.value;
-        await writeToFile({
+        const writeResult = await writeToFile({
           tree: loroDoc.getTree("fs"),
           path: input.path,
           content: articleMarkdown,
@@ -301,7 +301,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             },
           ],
         });
-
+        if (!writeResult.success) throw new Error(writeResult.message);
         const persistResult = await persistWorkspaceSnapshot({
           workspaceBlobUri,
           loroDoc,
