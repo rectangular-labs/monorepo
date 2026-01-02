@@ -155,7 +155,10 @@ ${writingSettings?.metadata?.length ? writingSettings.metadata.map((m) => `- ${m
   - Make the content genuinely useful, not just SEO-stuffed
 </reminders>`;
 
-      const fileTools = createFileToolsWithMetadata();
+      const fileTools = createFileToolsWithMetadata({
+        userId: undefined,
+        publishingSettings: project.publishingSettings,
+      });
       const webTools = createWebToolsWithMetadata();
       const imageTools = createImageToolsWithMetadata({
         organizationId: project.organizationId,

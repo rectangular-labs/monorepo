@@ -172,6 +172,7 @@ export function createArticleResearchToolWithMetadata({
     execute: async (input) => {
       const fileTools = createFileToolsWithMetadata({
         publishingSettings: project.publishingSettings,
+        userId: undefined,
       });
       const webTools = createWebToolsWithMetadata();
       const dataforseoTools = createDataforseoToolWithMetadata(project);

@@ -21,6 +21,7 @@ const create = withOrganizationIdBase
   )
   .handler(async ({ context, input: taskInput }) => {
     const createTaskResult = await createTask({
+      db: context.db,
       userId: context.user.id,
       input: taskInput,
     });

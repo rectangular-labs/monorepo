@@ -1,36 +1,29 @@
 import { ORPCError } from "@orpc/server";
 import type { taskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
-import { schema } from "@rectangular-labs/db";
+import { type DB, schema } from "@rectangular-labs/db";
 import { err, ok, safe } from "@rectangular-labs/result";
 import { triggerTask } from "@rectangular-labs/task/client";
 import type { type } from "arktype";
-import { getContext } from "../context";
+import { createWorkflows } from "../workflows";
 
 type TaskInput = type.infer<typeof taskInputSchema>;
 
 export async function createTask({
+  db,
   userId,
   input,
   workflowInstanceId,
 }: {
-  userId: string;
+  db: DB;
   input: TaskInput;
+  userId: string | undefined;
   /**
    * Optional instance ID used when triggering a Cloudflare Workflow.
    * When provided, it will be used as the Workflow instance id.
    */
   workflowInstanceId?: string;
 }) {
-  const contextResult = await safe(() => getContext());
-  if (!contextResult.ok) {
-    return err(
-      new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Error getting context",
-        cause: contextResult.error,
-      }),
-    );
-  }
-  const context = contextResult.value;
+  const workflows = createWorkflows();
 
   const taskIdResult = await safe(async () => {
     switch (input.type) {
@@ -39,14 +32,14 @@ export async function createTask({
         return { provider: "trigger.dev" as const, taskId: id };
       }
       case "seo-plan-keyword": {
-        const instance = await context.seoPlannerWorkflow.create({
+        const instance = await workflows.seoPlannerWorkflow.create({
           id: workflowInstanceId,
           params: input,
         });
         return { provider: "cloudflare" as const, taskId: instance.id };
       }
       case "seo-write-article": {
-        const instance = await context.seoWriterWorkflow.create({
+        const instance = await workflows.seoWriterWorkflow.create({
           id: workflowInstanceId,
           params: input,
         });
@@ -68,7 +61,7 @@ export async function createTask({
   }
 
   const taskRunInsertResult = await safe(() =>
-    context.db
+    db
       .insert(schema.seoTaskRun)
       .values({
         projectId: input.projectId,
@@ -91,7 +84,7 @@ export async function createTask({
   if (!taskRun) {
     return err(
       new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Error creating task run",
+        message: "No Task run was created",
         cause: new Error("Task run insert returned no rows"),
       }),
     );

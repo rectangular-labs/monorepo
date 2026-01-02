@@ -42,6 +42,8 @@ const writeFileInputSchema = type({
 
 export function createFileToolsWithMetadata(args?: {
   publishingSettings: typeof publishingSettingsSchema.infer | null;
+  // TODO: make sure that we pass in userId to the loro writer context when we have it.
+  userId: string | undefined;
 }) {
   const publishingSettings = args?.publishingSettings || null;
   const ls = tool({
@@ -121,7 +123,7 @@ export function createFileToolsWithMetadata(args?: {
             content,
             createIfMissing,
             metadata,
-            context: { publishingSettings },
+            context: { publishingSettings, userId: args?.userId },
           }),
         shouldPersist: (result) => result.success === true,
       });

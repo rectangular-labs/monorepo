@@ -8,6 +8,7 @@ import type { FsNodePayload, SeoFileStatus } from "./types";
 
 export type WriteToFilePublishingContext = {
   publishingSettings: typeof publishingSettingsSchema.infer | null;
+  userId?: string | undefined;
 };
 
 type PublishingCadence = NonNullable<

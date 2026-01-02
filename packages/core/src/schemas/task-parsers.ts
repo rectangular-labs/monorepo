@@ -14,6 +14,7 @@ export const seoPlanKeywordTaskInputSchema = type({
   campaignId: "string|null",
   path: "string",
   "callbackInstanceId?": "string",
+  "userId?": "string",
 });
 
 export const seoWriteArticleTaskInputSchema = type({
@@ -22,6 +23,7 @@ export const seoWriteArticleTaskInputSchema = type({
   organizationId: "string",
   campaignId: "string|null",
   path: "string",
+  "userId?": "string",
 });
 
 export const taskInputSchema = type.or(

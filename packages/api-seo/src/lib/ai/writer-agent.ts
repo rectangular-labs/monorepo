@@ -122,7 +122,10 @@ export function createWriterAgent({
   const plannerTools = createPlannerToolsWithMetadata();
   const todoTools = createTodoToolWithMetadata({ messages });
 
-  const fileTools = createFileToolsWithMetadata();
+  const fileTools = createFileToolsWithMetadata({
+    userId: undefined,
+    publishingSettings: project.publishingSettings,
+  });
   const webTools = createWebToolsWithMetadata();
   const researchTools = createArticleResearchToolWithMetadata({ project });
   const writingTools = createArticleWritingToolWithMetadata({

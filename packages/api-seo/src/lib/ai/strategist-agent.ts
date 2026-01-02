@@ -103,7 +103,10 @@ export function createStrategistAgent({
   const todoTools = createTodoToolWithMetadata({ messages });
 
   const settingsTools = createSettingsToolsWithMetadata();
-  const fileTools = createFileToolsWithMetadata();
+  const fileTools = createFileToolsWithMetadata({
+    userId,
+    publishingSettings: project.publishingSettings,
+  });
   const webTools = createWebToolsWithMetadata();
   const gscTools = createGscToolWithMetadata({
     accessToken: gscProperty?.accessToken ?? null,

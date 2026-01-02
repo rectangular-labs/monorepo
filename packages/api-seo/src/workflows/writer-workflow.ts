@@ -9,19 +9,33 @@ import type {
   seoWriteArticleTaskInputSchema,
   seoWriteArticleTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
+import { createDb } from "@rectangular-labs/db";
 import { writeToFile } from "@rectangular-labs/loro-file-system";
 import { generateText, stepCountIs } from "ai";
 import type { type } from "arktype";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
 import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
+import {
+  createTodoToolWithMetadata,
+  formatTodoFocusReminder,
+} from "../lib/ai/tools/todo-tool";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { buildWriterSystemPrompt } from "../lib/ai/writer-agent";
 import { createPublicImagesBucket } from "../lib/bucket";
+import { createTask } from "../lib/task";
 import {
   loadWorkspaceForWorkflow,
   persistWorkspaceSnapshot,
 } from "../lib/workspace/workflow";
 import type { InitialContext } from "../types";
+
+function logInfo(message: string, data?: Record<string, unknown>) {
+  console.info(`[SeoWriterWorkflow] ${message}`, data ?? {});
+}
+
+function logError(message: string, data?: Record<string, unknown>) {
+  console.error(`[SeoWriterWorkflow] ${message}`, data ?? {});
+}
 
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
 export class SeoWriterWorkflow extends WorkflowEntrypoint<
@@ -33,6 +47,15 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
   async run(event: WorkflowEvent<WriterInput>, step: WorkflowStep) {
     const input = event.payload;
 
+    logInfo("start", {
+      instanceId: event.instanceId,
+      path: input.path,
+      organizationId: input.organizationId,
+      projectId: input.projectId,
+      campaignId: input.campaignId,
+      userId: input.userId,
+    });
+
     const isOutlinePresent = await step.do(
       "Ensure outline is present",
       async () => {
@@ -43,10 +66,45 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           path: input.path,
         });
         if (!workspaceResult.ok) throw workspaceResult.error;
-        return workspaceResult.value.node.data.get("outline") !== null;
+        const outline = workspaceResult.value.node.data.get("outline");
+        if (outline) {
+          return true;
+        }
+        const result = await createTask({
+          db: createDb(),
+          input: {
+            type: "seo-plan-keyword",
+            projectId: input.projectId,
+            organizationId: input.organizationId,
+            campaignId: input.campaignId,
+            path: input.path,
+            callbackInstanceId: event.instanceId,
+            userId: input.userId,
+          },
+          workflowInstanceId: `child-${event.instanceId}`,
+          userId: input.userId,
+        });
+        if (!result.ok) {
+          logError("failed to create planner task", {
+            instanceId: event.instanceId,
+            path: input.path,
+            error: result.error,
+          });
+          throw result.error;
+        }
+        return false;
       },
     );
+    logInfo("outline check", {
+      instanceId: event.instanceId,
+      path: input.path,
+      isOutlinePresent,
+    });
     if (!isOutlinePresent) {
+      logInfo("waiting for planner callback", {
+        instanceId: event.instanceId,
+        path: input.path,
+      });
       const plannerEvent = await step.waitForEvent<{ path: string }>(
         "wait for planner callback",
         {
@@ -54,7 +112,17 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           timeout: "1 hour",
         },
       );
+      logInfo("received planner callback", {
+        instanceId: event.instanceId,
+        expectedPath: input.path,
+        receivedPath: plannerEvent.payload.path,
+      });
       if (plannerEvent.payload.path !== input.path) {
+        logError("planner callback path mismatch", {
+          instanceId: event.instanceId,
+          expectedPath: input.path,
+          receivedPath: plannerEvent.payload.path,
+        });
         throw new Error(
           `Planner callback path mismatch: expected ${input.path}, got ${plannerEvent.payload.path}`,
         );
@@ -84,6 +152,10 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       });
       if (!persistResult.ok) throw persistResult.error;
     });
+    logInfo("status set to generating", {
+      instanceId: event.instanceId,
+      path: input.path,
+    });
     try {
       const articleMarkdown = await step.do(
         "generate article markdown",
@@ -110,6 +182,16 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             imageSettings: project.imageSettings ?? null,
             publicImagesBucket: createPublicImagesBucket(),
           });
+          const todoTool = createTodoToolWithMetadata({ messages: [] });
+
+          logInfo("writer tools ready", {
+            instanceId: event.instanceId,
+            path: input.path,
+            webToolCount: Object.keys(webTools.tools).length,
+            internalLinksToolCount: Object.keys(internalLinksTools.tools)
+              .length,
+            imageToolCount: Object.keys(imageTools.tools).length,
+          });
 
           const utcDate = new Intl.DateTimeFormat("en-US", {
             timeZone: "UTC",
@@ -125,6 +207,11 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             mode: "workflow",
             primaryKeyword: node.data.get("primaryKeyword"),
             outline: node.data.get("outline"),
+          });
+
+          logInfo("starting article generation", {
+            instanceId: event.instanceId,
+            path: input.path,
           });
 
           const result = await generateText({
@@ -145,12 +232,40 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               ...webTools.tools,
               ...internalLinksTools.tools,
               ...imageTools.tools,
+              ...todoTool.tools,
+            },
+            onStepFinish: (step) => {
+              logInfo(`[generateArticle] Step completed:`, {
+                text: step.text,
+                toolResults: JSON.stringify(step.toolResults, null, 2),
+                usage: step.usage,
+              });
+            },
+            prepareStep: ({ messages }) => {
+              return {
+                messages: [
+                  ...messages,
+                  {
+                    role: "system",
+                    content: formatTodoFocusReminder({
+                      todos: todoTool.getSnapshot(),
+                      maxOpen: 5,
+                    }),
+                  },
+                ],
+              };
             },
             stopWhen: [stepCountIs(40)],
           });
 
           const text = result.text.trim();
           if (!text) throw new Error("Empty article returned by model");
+          logInfo("article generated", {
+            instanceId: event.instanceId,
+            path: input.path,
+            articleChars: text.length,
+            usage: result.usage ?? null,
+          });
           return text;
         },
       );
@@ -184,6 +299,10 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
         });
         if (!persistResult.ok) throw persistResult.error;
       });
+      logInfo("article saved", {
+        instanceId: event.instanceId,
+        path: input.path,
+      });
       return {
         type: "seo-write-article",
         path: input.path,
@@ -191,6 +310,11 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       } satisfies typeof seoWriteArticleTaskOutputSchema.infer;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unknown error";
+      logError("generation failed", {
+        instanceId: event.instanceId,
+        path: input.path,
+        message,
+      });
       await step.do("mark generation failed", async () => {
         const workspaceResult = await loadWorkspaceForWorkflow({
           organizationId: input.organizationId,

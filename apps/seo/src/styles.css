@@ -2,6 +2,10 @@
 @import "@rectangular-labs/content/styles.css";
 @import "@milkdown/crepe/theme/common/style.css";
 @import "@milkdown/crepe/theme/frame.css";
+
+.dark{
+  @import "@milkdown/crepe/theme/frame-dark.css";
+}
 @source "./**/*.{ts,tsx}";
 
 :root {

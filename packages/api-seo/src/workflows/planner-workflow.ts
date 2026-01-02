@@ -32,6 +32,14 @@ import {
 } from "../lib/workspace/workflow";
 import type { InitialContext } from "../types";
 
+function logInfo(message: string, data?: Record<string, unknown>) {
+  console.info(`[SeoPlannerWorkflow] ${message}`, data ?? {});
+}
+
+function logError(message: string, data?: Record<string, unknown>) {
+  console.error(`[SeoPlannerWorkflow] ${message}`, data ?? {});
+}
+
 async function generateOutline({
   project,
   notes,
@@ -125,12 +133,19 @@ ${JSON.stringify(serp, null, 2)}
           content: `Generate the outline for the primary keyword: ${primaryKeyword}. The output must be only the markdown outline plan (no extra commentary). ${notes ? `Here are some notes about the article that I want you to consider: ${notes}` : ""}`,
         },
       ],
+      onStepFinish: (step) => {
+        logInfo(`[generateOutline] Step completed:`, {
+          text: step.text,
+          toolResults: JSON.stringify(step.toolResults, null, 2),
+          usage: step.usage,
+        });
+      },
       prepareStep: ({ messages }) => {
         return {
           messages: [
             ...messages,
             {
-              role: "system",
+              role: "assistant",
               content: formatTodoFocusReminder({
                 todos: todoTool.getSnapshot(),
                 maxOpen: 5,
@@ -156,130 +171,212 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
   },
   PlannerInput
 > {
+  fetchSerpWithCache = async (
+    keyword: string,
+    locationName: string,
+    languageCode: string,
+  ) => {
+    const serpKey = getSerpCacheKey(keyword, locationName, languageCode);
+    const serpResult = await fetchWithCache({
+      key: serpKey,
+      fn: async () => {
+        const result = await fetchSerp({
+          keyword,
+          locationName,
+          languageCode,
+        });
+        if (!result.ok) throw result.error;
+        return result.value;
+      },
+      cacheKV: this.env.CACHE,
+    });
+    return serpResult;
+  };
   async run(event: WorkflowEvent<PlannerInput>, step: WorkflowStep) {
     const input = event.payload;
 
-    const {
-      serpKey,
-      primaryKeyword,
-      locationName,
-      languageCode,
-      project,
-      notes,
-    } = await step.do("fetch SERP for keyword", async () => {
-      const workspaceResult = await loadWorkspaceForWorkflow({
-        organizationId: input.organizationId,
-        projectId: input.projectId,
-        campaignId: input.campaignId,
-        path: input.path,
-      });
-      if (!workspaceResult.ok) throw workspaceResult.error;
-      const { node, project } = workspaceResult.value;
+    logInfo("start", {
+      instanceId: event.instanceId,
+      path: input.path,
+      organizationId: input.organizationId,
+      projectId: input.projectId,
+      campaignId: input.campaignId,
+      hasCallbackInstanceId: Boolean(input.callbackInstanceId),
+    });
 
-      const { locationName, languageCode } = getLocationAndLanguage(project);
-      const primaryKeyword = node.data.get("primaryKeyword");
-      if (!primaryKeyword) {
-        throw new NonRetryableError(
-          `Primary keyword not found for ${input.path}`,
-        );
-      }
-      const serpKey = getSerpCacheKey(
-        primaryKeyword,
-        locationName,
-        languageCode,
-      );
-      const serpResult = await fetchWithCache({
-        key: serpKey,
-        fn: () =>
-          fetchSerp({ keyword: primaryKeyword, locationName, languageCode }),
-        cacheKV: this.env.CACHE,
-        options: {
-          ttlSeconds: 60 * 60 * 24 * 7, // 7 days
-        },
-      });
-      if (!serpResult.ok) throw serpResult.error;
-      return {
+    try {
+      const {
         serpKey,
         primaryKeyword,
         locationName,
         languageCode,
         project,
-        notes: node.data.get("notes"),
-      };
-    });
-
-    const outline = await step.do(
-      "generate outline",
-      {
-        timeout: "30 minutes",
-      },
-      async () => {
-        const serp = await fetchWithCache({
-          key: serpKey,
-          fn: async () => {
-            const result = await fetchSerp({
-              keyword: primaryKeyword,
-              locationName,
-              languageCode,
-            });
-            if (!result.ok) throw result.error;
-            return result.value;
-          },
-          cacheKV: this.env.CACHE,
+        notes,
+      } = await step.do("fetch SERP for keyword", async () => {
+        const workspaceResult = await loadWorkspaceForWorkflow({
+          organizationId: input.organizationId,
+          projectId: input.projectId,
+          campaignId: input.campaignId,
+          path: input.path,
         });
-        if (!serp.ok) throw serp.error;
-        const result = await generateOutline({
-          project,
-          notes,
+        if (!workspaceResult.ok) throw workspaceResult.error;
+        const { node, project } = workspaceResult.value;
+
+        const { locationName, languageCode } = getLocationAndLanguage(project);
+        const primaryKeyword = node.data.get("primaryKeyword");
+        if (!primaryKeyword) {
+          throw new NonRetryableError(
+            `Primary keyword not found for ${input.path}`,
+          );
+        }
+        const serpKey = getSerpCacheKey(
           primaryKeyword,
           locationName,
           languageCode,
-          serp: serp.value.searchResult,
-        });
-        if (!result.ok) throw result.error;
-        return result.value;
-      },
-    );
+        );
+        const serpResult = await this.fetchSerpWithCache(
+          primaryKeyword,
+          locationName,
+          languageCode,
+        );
+        if (!serpResult.ok) throw serpResult.error;
+        return {
+          serpKey,
+          primaryKeyword,
+          locationName,
+          languageCode,
+          project,
+          notes: node.data.get("notes"),
+        };
+      });
 
-    await step.do("store outline in node", async () => {
-      const workspaceResult = await loadWorkspaceForWorkflow({
-        organizationId: input.organizationId,
-        projectId: input.projectId,
-        campaignId: input.campaignId,
+      logInfo("inputs ready", {
+        instanceId: event.instanceId,
+        path: input.path,
+        serpKey,
+        primaryKeyword,
+        locationName,
+        languageCode,
+        hasNotes: Boolean(notes?.trim()),
+      });
+
+      const outline = await step.do(
+        "generate outline",
+        {
+          timeout: "30 minutes",
+        },
+        async () => {
+          logInfo("fetching SERP (cached) for outline", {
+            instanceId: event.instanceId,
+            serpKey,
+            primaryKeyword,
+            locationName,
+            languageCode,
+          });
+
+          const serp = await this.fetchSerpWithCache(
+            primaryKeyword,
+            locationName,
+            languageCode,
+          );
+          if (!serp.ok) {
+            throw serp.error;
+          }
+
+          logInfo("generating outline", {
+            instanceId: event.instanceId,
+            path: input.path,
+            primaryKeyword,
+            serpItems: serp.value,
+          });
+
+          const result = await generateOutline({
+            project,
+            notes,
+            primaryKeyword,
+            locationName,
+            languageCode,
+            serp: serp.value.searchResult,
+          });
+          if (!result.ok) throw result.error;
+          const outline = result.value;
+          logInfo("outline generated", {
+            instanceId: event.instanceId,
+            path: input.path,
+            outlineChars: outline.length,
+          });
+          return outline;
+        },
+      );
+
+      await step.do("store outline in node", async () => {
+        const workspaceResult = await loadWorkspaceForWorkflow({
+          organizationId: input.organizationId,
+          projectId: input.projectId,
+          campaignId: input.campaignId,
+          path: input.path,
+        });
+        if (!workspaceResult.ok) throw workspaceResult.error;
+        const { loroDoc, workspaceBlobUri } = workspaceResult.value;
+
+        const writeResult = await writeToFile({
+          tree: loroDoc.getTree("fs"),
+          path: input.path,
+          metadata: [{ key: "outline", value: outline }],
+        });
+        if (!writeResult.success) throw new Error(writeResult.message);
+        const persistResult = await persistWorkspaceSnapshot({
+          loroDoc,
+          workspaceBlobUri,
+        });
+        if (!persistResult.ok) throw persistResult.error;
+      });
+
+      logInfo("outline stored", {
+        instanceId: event.instanceId,
         path: input.path,
       });
-      if (!workspaceResult.ok) throw workspaceResult.error;
-      const { loroDoc, workspaceBlobUri } = workspaceResult.value;
 
-      const writeResult = await writeToFile({
-        tree: loroDoc.getTree("fs"),
-        path: input.path,
-        metadata: [{ key: "outline", value: outline }],
-      });
-      if (!writeResult.success) throw new Error(writeResult.message);
-      const persistResult = await persistWorkspaceSnapshot({
-        loroDoc,
-        workspaceBlobUri,
-      });
-      if (!persistResult.ok) throw persistResult.error;
-    });
-
-    const { callbackInstanceId } = input;
-    if (callbackInstanceId) {
-      await step.do("notify callback workflow", async () => {
-        const instance =
-          await this.env.SEO_WRITER_WORKFLOW.get(callbackInstanceId);
-        await instance.sendEvent({
-          type: "planner.complete",
-          payload: { path: input.path },
+      const { callbackInstanceId } = input;
+      if (callbackInstanceId) {
+        await step.do("notify callback workflow", async () => {
+          const instance =
+            await this.env.SEO_WRITER_WORKFLOW.get(callbackInstanceId);
+          await instance.sendEvent({
+            type: "planner.complete",
+            payload: { path: input.path },
+          });
         });
+        logInfo("callback notified", {
+          instanceId: event.instanceId,
+          path: input.path,
+          callbackInstanceId,
+        });
+      } else {
+        logInfo("no callbackInstanceId, skipping notify", {
+          instanceId: event.instanceId,
+          path: input.path,
+        });
+      }
+
+      logInfo("complete", {
+        instanceId: event.instanceId,
+        path: input.path,
       });
+
+      return {
+        type: "seo-plan-keyword",
+        path: input.path,
+        outline,
+      } satisfies typeof seoPlanKeywordTaskOutputSchema.infer;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logError("failed", {
+        instanceId: event.instanceId,
+        path: input.path,
+        message,
+      });
+      throw error;
     }
-
-    return {
-      type: "seo-plan-keyword",
-      path: input.path,
-      outline,
-    } satisfies typeof seoPlanKeywordTaskOutputSchema.infer;
   }
 }

@@ -148,6 +148,7 @@ function PlannerPage() {
         context: {
           publishingSettings:
             publishingSettingsProject?.publishingSettings ?? null,
+          // we don't need to set userId here because it'll get set on the backend
         },
       },
       {
@@ -322,6 +323,7 @@ function PlannerPage() {
                       </div>
                     );
                   }
+
                   return <span>-</span>;
                 }}
                 onRowClick={(row) => {

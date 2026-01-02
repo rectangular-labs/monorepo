@@ -167,6 +167,7 @@ const create = withOrganizationIdBase
       throw upsertProjectResult.error;
     }
     const createTaskResult = await createTask({
+      db: context.db,
       userId: context.user.id,
       input: {
         type: "understand-site",

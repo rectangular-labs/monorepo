@@ -92,6 +92,7 @@ export function createSuggestArticlesToolWithMetadata({
               ],
               context: {
                 publishingSettings: project.publishingSettings,
+                userId,
               },
             });
 

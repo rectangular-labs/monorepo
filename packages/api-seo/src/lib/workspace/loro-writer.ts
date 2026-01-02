@@ -12,6 +12,7 @@ import {
 import { getWebsocketContext } from "../../context";
 import { createTask } from "../task";
 
+// TODO: remove reliance on context
 function addStartResearchWorkflowOnSuggestedCreate(): WriteToFileMiddleware<
   FsNodePayload,
   WriteToFilePublishingContext
@@ -32,9 +33,11 @@ function addStartResearchWorkflowOnSuggestedCreate(): WriteToFileMiddleware<
         const ws = getWebsocketContext();
         const path = getNodePath(node);
         const result = await createTask({
-          userId: ws.userId,
+          db: ws.db,
+          userId: ctx.context.userId,
           input: {
             type: "seo-plan-keyword",
+            userId: ctx.context.userId,
             projectId: ws.projectId,
             organizationId: ws.organizationId,
             campaignId: ws.campaignId,
@@ -73,10 +76,12 @@ function addStartWritingWorkflowWhenPlanned(): WriteToFileMiddleware<
     const start = async (path: string) => {
       const ws = getWebsocketContext();
       const result = await createTask({
-        userId: ws.userId,
+        db: ws.db,
+        userId: ctx.context.userId,
         workflowInstanceId: workflowId,
         input: {
           type: "seo-write-article",
+          userId: ctx.context.userId,
           projectId: ws.projectId,
           organizationId: ws.organizationId,
           campaignId: ws.campaignId,

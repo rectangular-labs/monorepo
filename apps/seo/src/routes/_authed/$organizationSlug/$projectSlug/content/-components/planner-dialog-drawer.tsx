@@ -241,7 +241,7 @@ export function PlannerDialogDrawer({
                 }}
                 variant="outline"
               >
-                Remove from schedule
+                Remove planned article
               </Button>
               <Button
                 disabled={isSaving}
