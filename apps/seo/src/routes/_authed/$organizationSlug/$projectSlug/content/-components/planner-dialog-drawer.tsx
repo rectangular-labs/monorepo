@@ -2,6 +2,7 @@
 
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
+import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   Alert,
@@ -10,6 +11,12 @@ import {
 } from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@rectangular-labs/ui/components/ui/accordion";
 import {
   DialogDrawer,
   DialogDrawerDescription,
@@ -48,12 +55,14 @@ export function PlannerDialogDrawer({
     options?: { closeDialog?: boolean },
   ) => void;
 }) {
+  const [titleDraft, setTitleDraft] = useState("");
   const [notesDraft, setNotesDraft] = useState("");
   const [useNextEarliest, setUseNextEarliest] = useState(true);
   const [customScheduleDraft, setCustomScheduleDraft] = useState("");
 
   useEffect(() => {
     if (!activeDialogFile) return;
+    setTitleDraft(activeDialogFile.name.replace(/\.md$/i, ""));
     setNotesDraft(activeDialogFile.notes ?? "");
     if (activeDialogFile.scheduledFor) {
       setUseNextEarliest(false);
@@ -79,12 +88,54 @@ export function PlannerDialogDrawer({
     return undefined;
   }, [publishingSettings, customScheduleDraft]);
 
+  const outline = useMemo(() => {
+    return activeDialogFile?.outline?.trim() ?? "";
+  }, [activeDialogFile?.outline]);
+
+  const buildMetadataUpdate = useMemo(() => {
+    const baseName = activeDialogFile?.name ?? "";
+    const normalizedTitle = titleDraft.trim();
+    const nextName =
+      normalizedTitle.length > 0
+        ? normalizedTitle.toLowerCase().endsWith(".md")
+          ? normalizedTitle
+          : `${normalizedTitle}.md`
+        : "";
+    const shouldUpdateName =
+      !!activeDialogFile && nextName.length > 0 && nextName !== baseName;
+
+    const addSchedule =
+      !useNextEarliest && customScheduleDraft.trim().length > 0;
+    const scheduleDate = addSchedule ? new Date(customScheduleDraft) : null;
+    const scheduleIso =
+      scheduleDate && !Number.isNaN(scheduleDate.getTime())
+        ? scheduleDate.toISOString()
+        : null;
+
+    return (status?: SeoFileStatus) => {
+      const metadata: { key: string; value: string }[] = [];
+      if (status) metadata.push({ key: "status", value: status });
+      if (shouldUpdateName) metadata.push({ key: "name", value: nextName });
+      if (notesDraft.trim()) metadata.push({ key: "notes", value: notesDraft.trim() });
+      if (scheduleIso) metadata.push({ key: "scheduledFor", value: scheduleIso });
+      return metadata;
+    };
+  }, [
+    activeDialogFile,
+    customScheduleDraft,
+    notesDraft,
+    titleDraft,
+    useNextEarliest,
+  ]);
+
   return (
     <DialogDrawer isLoading={isSaving} onOpenChange={onOpenChange} open={open}>
       <div className="space-y-4">
         <DialogDrawerHeader>
           <DialogDrawerTitle>
-            {activeDialogFile?.name?.replace(/\.md$/, "") ?? "Planner item"}
+            {titleDraft.trim() ||
+              activeDialogFile?.name?.replace(/\.md$/i, "") ||
+              "Planner item"}
           </DialogDrawerTitle>
           <DialogDrawerDescription>
             {activeDialogFile?.primaryKeyword
@@ -102,6 +153,33 @@ export function PlannerDialogDrawer({
               scheduling.
             </AlertDescription>
           </Alert>
+        )}
+
+        <Field>
+          <FieldLabel htmlFor="planner-title">Title</FieldLabel>
+          <FieldContent>
+            <Input
+              id="planner-title"
+              onChange={(e) => setTitleDraft(e.target.value)}
+              placeholder="Article title"
+              value={titleDraft}
+            />
+          </FieldContent>
+        </Field>
+
+        {outline && (
+          <Accordion collapsible type="single">
+            <AccordionItem value="outline">
+              <AccordionTrigger>Outline</AccordionTrigger>
+              <AccordionContent>
+                <MarkdownEditor
+                  key={activeDialogFile?.treeId ?? "outline"}
+                  markdown={outline}
+                  readOnly
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         )}
 
         <Field>
@@ -175,12 +253,7 @@ export function PlannerDialogDrawer({
                   if (!activeDialogFile) return;
                   applyMetadataUpdate(
                     activeDialogFile,
-                    [
-                      { key: "status", value: "suggestion-rejected" },
-                      ...(notesDraft.trim()
-                        ? [{ key: "notes", value: notesDraft.trim() }]
-                        : []),
-                    ],
+                    buildMetadataUpdate("suggestion-rejected"),
                     { closeDialog: true },
                   );
                 }}
@@ -194,22 +267,7 @@ export function PlannerDialogDrawer({
                   if (!activeDialogFile) return;
                   applyMetadataUpdate(
                     activeDialogFile,
-                    [
-                      { key: "status", value: "planned" },
-                      ...(notesDraft.trim()
-                        ? [{ key: "notes", value: notesDraft.trim() }]
-                        : []),
-                      ...(customScheduleDraft.trim()
-                        ? [
-                            {
-                              key: "scheduledFor",
-                              value: new Date(
-                                customScheduleDraft,
-                              ).toISOString(),
-                            },
-                          ]
-                        : []),
-                    ],
+                    buildMetadataUpdate("planned"),
                     { closeDialog: true },
                   );
                 }}
@@ -225,15 +283,7 @@ export function PlannerDialogDrawer({
                   if (!activeDialogFile) return;
                   applyMetadataUpdate(
                     activeDialogFile,
-                    [
-                      {
-                        key: "status",
-                        value: "suggestion-rejected" satisfies SeoFileStatus,
-                      },
-                      ...(notesDraft.trim()
-                        ? [{ key: "notes", value: notesDraft.trim() }]
-                        : []),
-                    ],
+                    buildMetadataUpdate("suggestion-rejected"),
                     {
                       closeDialog: true,
                     },
@@ -249,15 +299,7 @@ export function PlannerDialogDrawer({
                   if (!activeDialogFile) return;
                   applyMetadataUpdate(
                     activeDialogFile,
-                    [
-                      ...(notesDraft.trim()
-                        ? [{ key: "notes", value: notesDraft.trim() }]
-                        : []),
-                      {
-                        key: "scheduledFor",
-                        value: new Date(customScheduleDraft).toISOString(),
-                      },
-                    ],
+                    buildMetadataUpdate(),
                     {
                       closeDialog: true,
                     },
