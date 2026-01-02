@@ -22,6 +22,7 @@ import {
   formatTodoFocusReminder,
 } from "../lib/ai/tools/todo-tool";
 import {
+  configureDataForSeoClient,
   fetchWithCache,
   getLocationAndLanguage,
   getSerpCacheKey,
@@ -203,6 +204,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
       campaignId: input.campaignId,
       hasCallbackInstanceId: Boolean(input.callbackInstanceId),
     });
+    configureDataForSeoClient();
 
     try {
       const {
