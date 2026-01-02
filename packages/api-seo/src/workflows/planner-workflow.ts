@@ -345,7 +345,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           const instance =
             await this.env.SEO_WRITER_WORKFLOW.get(callbackInstanceId);
           await instance.sendEvent({
-            type: "planner.complete",
+            type: "planner_complete",
             payload: { path: input.path },
           });
         });

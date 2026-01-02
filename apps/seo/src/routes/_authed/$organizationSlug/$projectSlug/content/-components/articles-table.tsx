@@ -27,7 +27,7 @@ type ArticleTableRow = {
   id: string;
   title: string;
   primaryKeyword: string;
-  author: string;
+  author?: string;
   scheduledFor?: string;
   status: SeoFileStatus;
 };
@@ -78,8 +78,10 @@ function compareMaybeString(a?: string, b?: string) {
 const isoDateSortingFn: SortingFn<ArticleTableRow> = (rowA, rowB, columnId) => {
   const aRaw = rowA.getValue<string | undefined>(columnId);
   const bRaw = rowB.getValue<string | undefined>(columnId);
-  const a = aRaw ? new Date(aRaw).getTime() : Number.POSITIVE_INFINITY;
-  const b = bRaw ? new Date(bRaw).getTime() : Number.POSITIVE_INFINITY;
+  const aTime = aRaw ? new Date(aRaw).getTime() : Number.NaN;
+  const bTime = bRaw ? new Date(bRaw).getTime() : Number.NaN;
+  const a = Number.isFinite(aTime) ? aTime : Number.NEGATIVE_INFINITY;
+  const b = Number.isFinite(bTime) ? bTime : Number.NEGATIVE_INFINITY;
   return a - b;
 };
 
@@ -102,7 +104,9 @@ export function ArticlesTable({
   onRowClick?: (row: ArticleTableRow) => void;
   getRowActions?: (row: ArticleTableRow) => React.ReactNode;
 }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "scheduledFor", desc: true },
+  ]);
 
   const columns = useMemo<ColumnDef<ArticleTableRow>[]>(() => {
     const base: ColumnDef<ArticleTableRow>[] = [

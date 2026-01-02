@@ -111,7 +111,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       const plannerEvent = await step.waitForEvent<{ path: string }>(
         "wait for planner callback",
         {
-          type: "planner.complete",
+          type: "planner_complete",
           timeout: "1 hour",
         },
       );
@@ -288,7 +288,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
         });
         if (!workspaceResult.ok) throw workspaceResult.error;
         const { loroDoc, workspaceBlobUri, project } = workspaceResult.value;
-        await writeToFile({
+        const writeResult = await writeToFile({
           tree: loroDoc.getTree("fs"),
           path: input.path,
           content: articleMarkdown,
@@ -301,7 +301,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             },
           ],
         });
-
+        if (!writeResult.success) throw new Error(writeResult.message);
         const persistResult = await persistWorkspaceSnapshot({
           workspaceBlobUri,
           loroDoc,

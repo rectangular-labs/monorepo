@@ -404,7 +404,6 @@ export function ProjectChatPanel() {
           return eventIteratorToUnproxiedDataStream(eventIterator);
         },
       },
-
       onError: (error) => {
         console.error("project chat error", error);
       },
@@ -413,24 +412,25 @@ export function ProjectChatPanel() {
 
   useEffect(() => {
     for (const message of messages) {
-      for (let i = 0; i < message.parts.length; i++) {
-        const part = message.parts[i];
-        if (!part || !isChatToolPart(part)) continue;
-        const toolName = part.type.slice("tool-".length);
-
-        if (toolName === "make_suggestions") {
-          if (part.state !== "output-available") continue;
-          const key = `${message.id}:${i}`;
-          if (lastSuggestionCompletionRef.current === key) continue;
-          lastSuggestionCompletionRef.current = key;
-          void queryClient.invalidateQueries({ queryKey: ["pullDocument"] });
+      for (const part of message.parts) {
+        if (
+          part.type === "tool-use_skills" &&
+          part.state === "output-available" &&
+          part.input.skill === "suggest_articles"
+        ) {
+          if (lastSuggestionCompletionRef.current === part.toolCallId) continue;
+          lastSuggestionCompletionRef.current = part.toolCallId;
+          void queryClient.invalidateQueries({
+            queryKey: ["pullDocument"],
+          });
         }
 
-        if (toolName === "manage_todo") {
-          if (part.state !== "output-available") continue;
-          const key = `${message.id}:${i}`;
-          if (lastTodoSnapshotRef.current === key) continue;
-          lastTodoSnapshotRef.current = key;
+        if (
+          part.type === "tool-manage_todo" &&
+          part.state === "output-available"
+        ) {
+          if (lastTodoSnapshotRef.current === part.toolCallId) continue;
+          lastTodoSnapshotRef.current = part.toolCallId;
           const output = part.output as { todos?: TodoSnapshot } | undefined;
           if (output?.todos) {
             setTodoSnapshot(output.todos);

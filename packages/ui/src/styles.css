@@ -2,6 +2,8 @@
 @source "../../**/*.{ts,tsx}";
 @source "../node_modules/streamdown/dist/index.js";
 @plugin "tailwindcss-animate";
+@import "@milkdown/crepe/theme/common/style.css";
+@import "@milkdown/crepe/theme/frame.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -57,6 +59,7 @@ code {
 }
 
 .dark {
+  @import "@milkdown/crepe/theme/frame-dark.css";
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

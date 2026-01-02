@@ -1,11 +1,9 @@
 "use client";
 
-import { Crepe } from "@milkdown/crepe";
-import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
 import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
-import { useTheme } from "@rectangular-labs/ui/components/theme-provider";
+import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Field,
@@ -55,41 +53,6 @@ function normalizeWorkspaceFilePath(file: string) {
     : `${withLeadingSlash}.md`;
 }
 
-function MilkdownEditor({
-  markdown,
-  readOnly,
-  onMarkdownChange,
-  onUploadImage,
-}: {
-  markdown: string;
-  readOnly: boolean;
-  onMarkdownChange: (markdown: string) => void;
-  onUploadImage: (file: File) => Promise<string>;
-}) {
-  useEditor((root) => {
-    const crepe = new Crepe({
-      root,
-      defaultValue: markdown,
-      featureConfigs: {
-        [Crepe.Feature.ImageBlock]: {
-          onUpload: onUploadImage,
-        },
-      },
-    });
-    crepe.setReadonly(readOnly);
-    crepe.on((api) => {
-      api.markdownUpdated((_ctx, nextMarkdown, prevMarkdown) => {
-        if (nextMarkdown !== prevMarkdown) {
-          onMarkdownChange(nextMarkdown);
-        }
-      });
-    });
-    return crepe;
-  });
-
-  return <Milkdown />;
-}
-
 type SaveIndicatorState =
   | { status: "idle" }
   | { status: "saving" }
@@ -120,7 +83,6 @@ export function ArticleEditorTakeover({
   projectId: string;
 }) {
   const navigate = Route.useNavigate();
-  const { resolvedTheme } = useTheme();
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
@@ -243,14 +205,6 @@ export function ArticleEditorTakeover({
     : undefined;
 
   const isReadOnly = status === "generating";
-
-  // Crepe docs (dark theme) assume a `data-theme` attribute exists somewhere upstream.
-  // Our app theme uses the `dark` class, so we mirror it into `data-theme`.
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const next = resolvedTheme === "dark" ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", next);
-  }, [resolvedTheme]);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -376,8 +330,6 @@ export function ArticleEditorTakeover({
           <Button
             onClick={() =>
               navigate({
-                to: ".",
-                params: { organizationSlug, projectSlug },
                 search: (prev) => ({ ...prev, file: undefined }),
               })
             }
@@ -458,14 +410,13 @@ export function ArticleEditorTakeover({
 
       {fileNode?.ok && (
         <div className="flex flex-1 flex-col overflow-y-auto p-6">
-          <MilkdownProvider key={`${workspaceFilePath}:${isReadOnly}`}>
-            <MilkdownEditor
-              markdown={fileNode.value.content.toString()}
-              onMarkdownChange={onMarkdownChange}
-              onUploadImage={onUploadImage}
-              readOnly={isReadOnly}
-            />
-          </MilkdownProvider>
+          <MarkdownEditor
+            key={`${workspaceFilePath}:${isReadOnly}`}
+            markdown={fileNode.value.content.toString()}
+            onMarkdownChange={onMarkdownChange}
+            onUploadImage={onUploadImage}
+            readOnly={isReadOnly}
+          />
         </div>
       )}
 

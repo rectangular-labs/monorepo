@@ -131,7 +131,9 @@ export function createPullDocumentQueryOptions({
             serverUpdateBlob: pullResult.blob,
             idbKey,
           });
-          client.setQueryData(queryKey, doc);
+          const updatedDoc = new LoroDoc<LoroDocMapping>();
+          updatedDoc.import(doc.export({ mode: "snapshot" }));
+          client.setQueryData(queryKey, updatedDoc);
           return doc;
         });
 
@@ -214,8 +216,9 @@ export function createPushDocumentQueryOptions({
         ...syncState,
         snapshot: doc.export({ mode: "snapshot" }),
       });
-      client.setQueryData(pullDocumentQueryKey, doc);
-      client.invalidateQueries({ queryKey: pullDocumentQueryKey });
+      const updatedDoc = new LoroDoc<LoroDocMapping>();
+      updatedDoc.import(doc.export({ mode: "snapshot" }));
+      client.setQueryData(pullDocumentQueryKey, updatedDoc);
 
       const base = new VersionVector(syncState.syncedOplogVersion);
       void getApiClient()
@@ -234,8 +237,9 @@ export function createPushDocumentQueryOptions({
             serverUpdateBlob: pushResult.blob,
             idbKey,
           });
-          client.setQueryData(pullDocumentQueryKey, doc);
-          client.invalidateQueries({ queryKey: pullDocumentQueryKey });
+          const updatedDoc = new LoroDoc<LoroDocMapping>();
+          updatedDoc.import(doc.export({ mode: "snapshot" }));
+          client.setQueryData(pullDocumentQueryKey, updatedDoc);
           return pushResult;
         })
         .catch((error) => {

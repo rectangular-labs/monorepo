@@ -180,17 +180,19 @@ function buildTreeForNode(
       type: "file",
       treeId: node.id,
       parentTreeId,
+      path: newPath,
+      changes: changes as TreeFile["changes"],
       name: fileNode.data.get("name"),
       createdAt: node.data.get("createdAt"),
-      status: fileNode.data.get("status"),
       scheduledFor: fileNode.data.get("scheduledFor"),
-      notes: fileNode.data.get("notes"),
       userId: fileNode.data.get("userId"),
+      status: fileNode.data.get("status"),
       primaryKeyword: fileNode.data.get("primaryKeyword"),
+      notes: fileNode.data.get("notes"),
+      outline: fileNode.data.get("outline"),
       workflowId: fileNode.data.get("workflowId"),
-      path: newPath,
+      error: fileNode.data.get("error"),
       content: node.data.get("content") as LoroText,
-      changes: changes as TreeFile["changes"],
     });
   }
   return err(new Error(`Invalid node type: ${node.data.get("type")}`));
