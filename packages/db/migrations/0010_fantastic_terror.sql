@@ -1,0 +1,1 @@
+ALTER TABLE "seo_task_run" ALTER COLUMN "requested_by" DROP NOT NULL;
