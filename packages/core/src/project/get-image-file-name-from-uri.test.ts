@@ -24,5 +24,3 @@ describe("getImageFileNameFromUri", () => {
     ).toBe("test.jpg");
   });
 });
-
-

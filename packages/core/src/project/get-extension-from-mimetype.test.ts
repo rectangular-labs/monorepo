@@ -14,5 +14,3 @@ describe("getExtensionFromMimeType", () => {
     expect(getExtensionFromMimeType("application/octet-stream")).toBe("jpg");
   });
 });
-
-
