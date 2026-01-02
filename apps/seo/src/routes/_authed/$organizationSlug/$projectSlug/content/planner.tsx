@@ -347,10 +347,7 @@ function PlannerPage() {
                 onRowClick={(row) => {
                   const file = plannerFiles.find((f) => f.treeId === row.id);
                   if (!file) return;
-                  if (
-                    file.status === "suggested" ||
-                    file.status === "queued"
-                  ) {
+                  if (file.status === "suggested" || file.status === "queued") {
                     setActiveDialogTreeId(file.treeId);
                     return;
                   }
