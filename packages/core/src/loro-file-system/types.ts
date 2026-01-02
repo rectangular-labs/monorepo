@@ -2,7 +2,7 @@ import type { LoroText, LoroTree } from "loro-crdt";
 
 export type SeoFileStatus =
   | "suggested"
-  | "planned"
+  | "queued"
   | "generating"
   | "generation-failed"
   | "pending-review"

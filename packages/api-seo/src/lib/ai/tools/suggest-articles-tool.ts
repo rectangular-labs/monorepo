@@ -89,7 +89,7 @@ export function createSuggestArticlesToolWithMetadata({
                   key: "status",
                   value: project.publishingSettings?.requireSuggestionReview
                     ? ("suggested" satisfies SeoFileStatus)
-                    : ("planned" satisfies SeoFileStatus),
+                    : ("queued" satisfies SeoFileStatus),
                 },
                 { key: "userId", value: userId },
                 { key: "primaryKeyword", value: primaryKeyword },

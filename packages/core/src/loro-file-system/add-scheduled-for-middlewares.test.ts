@@ -6,7 +6,7 @@ import {
 import { LoroTree } from "loro-crdt";
 import { describe, expect, it, vi } from "vitest";
 import {
-  addScheduledForWhenPlannedMiddleware,
+  addScheduledForWhenQueuedMiddleware,
   type WriteToFilePublishingContext,
 } from "./add-scheduled-for-middlewares";
 import type { FsNodePayload } from "./types";
@@ -83,8 +83,8 @@ function makeCtx({
   };
 }
 
-describe("addScheduledForWhenPlannedMiddleware", () => {
-  it("calls next() when status is not planned", async () => {
+describe("addScheduledForWhenQueuedMiddleware", () => {
+  it("calls next() when status is not queued", async () => {
     const ctx = makeCtx({
       metadata: { status: "draft" },
       publishingSettings: null,
@@ -92,7 +92,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
       path: "/",
     });
     const next = vi.fn(async () => ({ success: true as const }));
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -105,7 +105,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     await createFileNode(tree, "/post.md");
     const explicit = "2026-01-05T09:00:00.000Z";
     const ctx = makeCtx({
-      metadata: { status: "planned", scheduledFor: explicit },
+      metadata: { status: "queued", scheduledFor: explicit },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -115,7 +115,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -128,7 +128,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const existing = await createFileNode(tree, "/post.md");
     existing.data.set("scheduledFor", "2026-01-05T09:00:00.000Z");
     const ctx = makeCtx({
-      metadata: { status: "planned", scheduledFor: "not-a-date" },
+      metadata: { status: "queued", scheduledFor: "not-a-date" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -138,7 +138,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -150,14 +150,14 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const tree = new LoroTree<FsNodePayload>();
     await createFileNode(tree, "/post.md");
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: null,
       path: "/post.md",
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({
@@ -172,7 +172,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const tree = new LoroTree<FsNodePayload>();
     await createFileNode(tree, "/post.md");
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -182,7 +182,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({
@@ -199,7 +199,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const dayKey = "2026-01-05";
     const tree = new LoroTree<FsNodePayload>();
     const scheduled1 = await createFileNode(tree, "/scheduled-1.md");
-    scheduled1.data.set("status", "planned");
+    scheduled1.data.set("status", "queued");
     scheduled1.data.set("scheduledFor", `${dayKey}T09:00:00.000Z`);
     const scheduled2 = await createFileNode(tree, "/scheduled-2.md");
     scheduled2.data.set("status", "scheduled");
@@ -208,12 +208,12 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     notCounted1.data.set("status", "published");
     notCounted1.data.set("scheduledFor", `${dayKey}T13:00:00.000Z`);
     const notCounted2 = await createFileNode(tree, "/not-counted-2.md");
-    notCounted2.data.set("status", "planned");
+    notCounted2.data.set("status", "queued");
     notCounted2.data.set("scheduledFor", "not-a-date");
     await createFileNode(tree, "/new-post.md");
 
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -223,7 +223,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -241,7 +241,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const tree = new LoroTree<FsNodePayload>();
     await createFileNode(tree, "/new-post.md");
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -251,7 +251,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -269,13 +269,13 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const tree = new LoroTree<FsNodePayload>();
     const monday = "2026-01-05";
     const existing1 = await createFileNode(tree, "/existing-1.md");
-    existing1.data.set("status", "planned");
+    existing1.data.set("status", "queued");
     existing1.data.set("scheduledFor", `${monday}T09:00:00.000Z`);
 
     await createFileNode(tree, "/new-post.md");
 
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -289,7 +289,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -307,7 +307,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const tree = new LoroTree<FsNodePayload>();
     const monday = "2026-01-05";
     const existing1 = await createFileNode(tree, "/existing-1.md");
-    existing1.data.set("status", "planned");
+    existing1.data.set("status", "queued");
     existing1.data.set("scheduledFor", `${monday}T09:00:00.000Z`);
     const existing2 = await createFileNode(tree, "/existing-2.md");
     existing2.data.set("status", "scheduled");
@@ -315,7 +315,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     await createFileNode(tree, "/new-post.md");
 
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -329,7 +329,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -347,7 +347,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const monday = "2026-01-05";
     const wednesday = "2026-01-07";
     const existing1 = await createFileNode(tree, "/existing-1.md");
-    existing1.data.set("status", "planned");
+    existing1.data.set("status", "queued");
     existing1.data.set("scheduledFor", `${monday}T09:00:00.000Z`);
     const existing2 = await createFileNode(tree, "/existing-2.md");
     existing2.data.set("status", "scheduled");
@@ -358,7 +358,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     await createFileNode(tree, "/new-post.md");
 
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -372,7 +372,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -391,7 +391,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const tuesday = "2026-01-06";
     const thursday = "2026-01-08";
     const existing1 = await createFileNode(tree, "/existing-1.md");
-    existing1.data.set("status", "planned");
+    existing1.data.set("status", "queued");
     existing1.data.set("scheduledFor", `${tuesday}T09:00:00.000Z`);
     const existing2 = await createFileNode(tree, "/existing-2.md");
     existing2.data.set("status", "scheduled");
@@ -399,7 +399,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     await createFileNode(tree, "/new-post.md");
 
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -413,7 +413,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });
@@ -433,7 +433,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     const thursday = "2026-01-08";
     const followingTuesday = "2026-01-13";
     const existing1 = await createFileNode(tree, "/existing-1.md");
-    existing1.data.set("status", "planned");
+    existing1.data.set("status", "queued");
     existing1.data.set("scheduledFor", `${tuesday}T09:00:00.000Z`);
     const existing2 = await createFileNode(tree, "/existing-2.md");
     existing2.data.set("status", "scheduled");
@@ -444,7 +444,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     await createFileNode(tree, "/new-post.md");
 
     const ctx = makeCtx({
-      metadata: { status: "planned" },
+      metadata: { status: "queued" },
       tree,
       publishingSettings: {
         ...basePublishingSettings,
@@ -458,7 +458,7 @@ describe("addScheduledForWhenPlannedMiddleware", () => {
     });
     const next = vi.fn(async () => ({ success: true as const }));
 
-    const mw = addScheduledForWhenPlannedMiddleware();
+    const mw = addScheduledForWhenQueuedMiddleware();
     const result = await mw({ ctx, next });
 
     expect(result).toEqual({ success: true });

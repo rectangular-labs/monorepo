@@ -273,7 +273,7 @@ export function PlannerDialogDrawer({
                   if (!activeDialogFile) return;
                   applyMetadataUpdate(
                     activeDialogFile,
-                    buildMetadataUpdate("planned"),
+                    buildMetadataUpdate("queued"),
                     { closeDialog: true },
                   );
                 }}
@@ -297,7 +297,7 @@ export function PlannerDialogDrawer({
                 }}
                 variant="outline"
               >
-                Remove planned article
+                Remove queued article
               </Button>
               <Button
                 disabled={isSaving}

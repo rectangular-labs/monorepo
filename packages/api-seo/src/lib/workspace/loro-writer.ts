@@ -1,6 +1,6 @@
 import {
   addCreatedAtOnCreateMiddleware,
-  addScheduledForWhenPlannedMiddleware,
+  addScheduledForWhenQueuedMiddleware,
   type FsNodePayload,
   type WriteToFilePublishingContext,
 } from "@rectangular-labs/core/loro-file-system";
@@ -61,7 +61,7 @@ function addStartWritingWorkflowWhenPlanned(): WriteToFileMiddleware<
 > {
   return async ({ ctx, next }) => {
     const status = ctx.getMetadata("status");
-    if (status !== "planned") return await next();
+    if (status !== "queued" && status !== "planned") return await next();
 
     const existingNode = ctx.getExistingNode();
     const existingWorkflowId = existingNode?.data.get("workflowId");
@@ -116,7 +116,7 @@ export const loroWriter = createWriteToFile<
 >({
   middleware: [
     addCreatedAtOnCreateMiddleware(),
-    addScheduledForWhenPlannedMiddleware(),
+    addScheduledForWhenQueuedMiddleware(),
     addStartResearchWorkflowOnSuggestedCreate(),
     addStartWritingWorkflowWhenPlanned(),
   ],
