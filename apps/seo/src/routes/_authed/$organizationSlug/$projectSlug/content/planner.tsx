@@ -274,6 +274,7 @@ function PlannerPage() {
                 getRowActions={(row) => {
                   const file = plannerFiles.find((f) => f.treeId === row.id);
                   if (!file) return null;
+                  console.log("file", file);
                   if (file.status === "suggested") {
                     return (
                       <div className="flex items-center gap-2">

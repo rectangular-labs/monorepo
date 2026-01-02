@@ -35,6 +35,7 @@ function addStartResearchWorkflowOnSuggestedCreate(): WriteToFileMiddleware<
         const result = await createTask({
           db: ws.db,
           userId: ctx.context.userId,
+          workflowInstanceId: `plan_${crypto.randomUUID()}`,
           input: {
             type: "seo-plan-keyword",
             userId: ctx.context.userId,
@@ -70,7 +71,7 @@ function addStartWritingWorkflowWhenQueued(): WriteToFileMiddleware<
     }
 
     // Set workflowId immediately so subsequent edits don't retrigger while the Workflow starts.
-    const workflowId = crypto.randomUUID();
+    const workflowId = `write_${crypto.randomUUID()}`;
     ctx.setMetadata("workflowId", workflowId);
 
     const start = async (path: string) => {
