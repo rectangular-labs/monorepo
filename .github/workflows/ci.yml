@@ -59,4 +59,4 @@ jobs:
       - name: Test
         env:
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
-        run: bun test
+        run: pnpm test
