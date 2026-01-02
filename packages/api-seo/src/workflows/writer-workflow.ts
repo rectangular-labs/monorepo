@@ -111,7 +111,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       const plannerEvent = await step.waitForEvent<{ path: string }>(
         "wait for planner callback",
         {
-          type: "planner.complete",
+          type: "planner_complete",
           timeout: "1 hour",
         },
       );
