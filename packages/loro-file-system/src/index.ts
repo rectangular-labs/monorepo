@@ -439,6 +439,7 @@ export function createWriteToFile<
   };
 }
 
+export { getNodePath } from "./utils/get-node-path";
 export { normalizePath } from "./utils/normalize-path";
 export { resolvePath } from "./utils/resolve-path";
 export { traverseNode } from "./utils/traverse-node";

@@ -20,13 +20,14 @@ export type FsNodePayload =
        */
       createdAt: string;
       // doesn't exists on dir
-      status?: undefined;
       scheduledFor?: undefined;
-      notes?: undefined;
       userId?: undefined;
+      status?: undefined;
       primaryKeyword?: undefined;
-      workflowId?: undefined;
+      notes?: undefined;
       outline?: undefined;
+      workflowId?: undefined;
+      error?: undefined;
       content?: undefined;
     }
   | {
@@ -36,22 +37,23 @@ export type FsNodePayload =
        * ISO date string
        */
       createdAt: string;
-      status: SeoFileStatus;
       /**
        * ISO date string
        */
       scheduledFor?: string;
-      notes?: string;
       userId: string;
+      status: SeoFileStatus;
       /**
        * Primary keyword the content targets.
        */
       primaryKeyword: string;
+      notes?: string;
+      outline?: string;
       /**
        * workflow identifier for when the content is being generated.
        */
       workflowId?: string;
-      outline?: string;
+      error?: string;
       content: LoroText;
     };
 

@@ -9,7 +9,12 @@
     "directory": ".output/public"
   },
   "observability": {
-    "enabled": true
+    "traces": {
+      "enabled": true
+    },
+    "logs": {
+      "enabled": true
+    }
   },
   "placement": {
     "mode": "smart"
@@ -61,6 +66,12 @@
       "remote": true
     }
   ],
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "a79fc8c4aca24ed2af7d35b4f5ad7b63"
+    }
+  ],
   "workflows": [
     {
       "name": "seo-planner",
@@ -75,6 +86,14 @@
   ],
   "env": {
     "production": {
+      "observability": {
+        "traces": {
+          "enabled": true
+        },
+        "logs": {
+          "enabled": true
+        }
+      },
       // "containers": [
       //   {
       //     "class_name": "UserVMContainer",
@@ -114,6 +133,12 @@
         {
           "bucket_name": "seo-public-images-production",
           "binding": "SEO_PUBLIC_IMAGES_BUCKET"
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "CACHE",
+          "id": "f3b0ef2533504cde96618f56476adeba"
         }
       ],
       "workflows": [
@@ -176,6 +201,12 @@
         {
           "bucket_name": "seo-public-images-preview",
           "binding": "SEO_PUBLIC_IMAGES_BUCKET"
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "CACHE",
+          "id": "a79fc8c4aca24ed2af7d35b4f5ad7b63"
         }
       ],
       "workflows": [

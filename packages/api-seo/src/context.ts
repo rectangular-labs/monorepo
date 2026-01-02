@@ -9,12 +9,20 @@ import { type Auth, initAuthHandler } from "@rectangular-labs/auth";
 import { createDb } from "@rectangular-labs/db";
 import { apiEnv } from "./env";
 import { createPublicImagesBucket, createWorkspaceBucket } from "./lib/bucket";
+import { createKvStore } from "./lib/kv";
 import type { InitialContext, WebSocketContext } from "./types";
+import { createWorkflows } from "./workflows";
 
 export const createApiContext = (
   args: Omit<
     InitialContext,
-    "db" | "auth" | "workspaceBucket" | "publicImagesBucket"
+    | "db"
+    | "auth"
+    | "workspaceBucket"
+    | "publicImagesBucket"
+    | "seoPlannerWorkflow"
+    | "seoWriterWorkflow"
+    | "cacheKV"
   >,
 ) => {
   const db = createDb();
@@ -37,6 +45,8 @@ export const createApiContext = (
     db,
     workspaceBucket: createWorkspaceBucket(),
     publicImagesBucket: createPublicImagesBucket(),
+    ...createWorkflows(),
+    ...createKvStore(),
     ...args,
   } satisfies InitialContext;
 };

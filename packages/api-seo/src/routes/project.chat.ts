@@ -101,6 +101,7 @@ export const chat = withOrganizationIdBase
         return createWriterAgent({
           messages: input.messages,
           project,
+          publicImagesBucket: context.publicImagesBucket,
         });
       }
       return createStrategistAgent({

@@ -167,10 +167,10 @@ const create = withOrganizationIdBase
       throw upsertProjectResult.error;
     }
     const createTaskResult = await createTask({
-      projectId: upsertProjectResult.value.id,
       userId: context.user.id,
       input: {
         type: "understand-site",
+        projectId: upsertProjectResult.value.id,
         websiteUrl: input.websiteUrl,
       },
     });

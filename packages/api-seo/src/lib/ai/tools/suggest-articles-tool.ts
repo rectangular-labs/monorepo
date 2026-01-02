@@ -22,6 +22,9 @@ const suggestArticlesInputSchema = type({
     slug: type("string").describe(
       "Slug / path for the article. Example: business/how-to-start-a-business",
     ),
+    "notes?": type("string").describe(
+      "Notes about the article. It could be areas that we want to focus on, any particular insights that we want to include, statistics that we want to cite or cover, etc.",
+    ),
   }).array(),
 });
 
@@ -54,6 +57,7 @@ export function createSuggestArticlesToolWithMetadata({
           for (const suggestion of suggestions) {
             const primaryKeyword = suggestion.primaryKeyword.trim();
             const normalizedPath = normalizeWorkspaceFilePath(suggestion.slug);
+            const notes = suggestion.notes?.trim() || "";
             if (!primaryKeyword) {
               skipped.push({
                 slug: suggestion.slug,
@@ -84,6 +88,7 @@ export function createSuggestArticlesToolWithMetadata({
                 },
                 { key: "userId", value: userId },
                 { key: "primaryKeyword", value: primaryKeyword },
+                { key: "notes", value: notes },
               ],
               context: {
                 publishingSettings: project.publishingSettings,

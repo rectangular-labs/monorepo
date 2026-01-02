@@ -6,41 +6,75 @@ import { triggerTask } from "@rectangular-labs/task/client";
 import type { type } from "arktype";
 import { getContext } from "../context";
 
+type TaskInput = type.infer<typeof taskInputSchema>;
+
 export async function createTask({
-  projectId,
   userId,
   input,
+  workflowInstanceId,
 }: {
-  projectId: string;
   userId: string;
-  input: type.infer<typeof taskInputSchema>;
+  input: TaskInput;
+  /**
+   * Optional instance ID used when triggering a Cloudflare Workflow.
+   * When provided, it will be used as the Workflow instance id.
+   */
+  workflowInstanceId?: string;
 }) {
-  const context = await safe(() => getContext());
-  if (!context.ok) {
+  const contextResult = await safe(() => getContext());
+  if (!contextResult.ok) {
     return err(
       new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Error getting context",
+        cause: contextResult.error,
       }),
     );
   }
+  const context = contextResult.value;
 
-  const taskTriggerResult = await safe(() => triggerTask(input));
-  if (!taskTriggerResult.ok) {
+  const taskIdResult = await safe(async () => {
+    switch (input.type) {
+      case "understand-site": {
+        const { id } = await triggerTask(input);
+        return { provider: "trigger.dev" as const, taskId: id };
+      }
+      case "seo-plan-keyword": {
+        const instance = await context.seoPlannerWorkflow.create({
+          id: workflowInstanceId,
+          params: input,
+        });
+        return { provider: "cloudflare" as const, taskId: instance.id };
+      }
+      case "seo-write-article": {
+        const instance = await context.seoWriterWorkflow.create({
+          id: workflowInstanceId,
+          params: input,
+        });
+        return { provider: "cloudflare" as const, taskId: instance.id };
+      }
+      default: {
+        const never: never = input;
+        throw new Error(`Unknown task type: ${(never as TaskInput).type}`);
+      }
+    }
+  });
+  if (!taskIdResult.ok) {
     return err(
       new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Error creating task",
+        cause: taskIdResult.error,
       }),
     );
   }
 
   const taskRunInsertResult = await safe(() =>
-    context.value.db
+    context.db
       .insert(schema.seoTaskRun)
       .values({
-        projectId,
+        projectId: input.projectId,
         requestedBy: userId,
-        taskId: taskTriggerResult.value.id,
-        provider: "trigger.dev",
+        taskId: taskIdResult.value.taskId,
+        provider: taskIdResult.value.provider,
         inputData: input,
       })
       .returning(),
@@ -49,6 +83,7 @@ export async function createTask({
     return err(
       new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Error creating task run",
+        cause: taskRunInsertResult.error,
       }),
     );
   }
@@ -57,6 +92,7 @@ export async function createTask({
     return err(
       new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Error creating task run",
+        cause: new Error("Task run insert returned no rows"),
       }),
     );
   }

@@ -3,13 +3,52 @@ import { businessBackgroundSchema } from "./project-parsers";
 
 export const understandSiteTaskInputSchema = type({
   type: "'understand-site'",
+  projectId: "string",
   websiteUrl: "string",
 });
-export const taskInputSchema = type.or(understandSiteTaskInputSchema);
+
+export const seoPlanKeywordTaskInputSchema = type({
+  type: "'seo-plan-keyword'",
+  projectId: "string",
+  organizationId: "string",
+  campaignId: "string|null",
+  path: "string",
+  "callbackInstanceId?": "string",
+});
+
+export const seoWriteArticleTaskInputSchema = type({
+  type: "'seo-write-article'",
+  projectId: "string",
+  organizationId: "string",
+  campaignId: "string|null",
+  path: "string",
+});
+
+export const taskInputSchema = type.or(
+  understandSiteTaskInputSchema,
+  seoPlanKeywordTaskInputSchema,
+  seoWriteArticleTaskInputSchema,
+);
 
 export const understandSiteTaskOutputSchema = type({
   type: "'understand-site'",
   websiteInfo: businessBackgroundSchema.merge(type({ name: "string" })),
 });
 
-export const taskOutputSchema = type.or(understandSiteTaskOutputSchema);
+export const seoPlanKeywordTaskOutputSchema = type({
+  type: "'seo-plan-keyword'",
+  path: "string",
+  outline: "string",
+});
+
+export const seoWriteArticleTaskOutputSchema = type({
+  type: "'seo-write-article'",
+  path: "string",
+  content: "string",
+});
+
+export const taskOutputSchema = type.or(
+  understandSiteTaskOutputSchema,
+  seoPlanKeywordTaskOutputSchema,
+  seoWriteArticleTaskOutputSchema,
+);

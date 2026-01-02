@@ -6,6 +6,10 @@ import type {
 } from "@orpc/server";
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/core/schemas/content-campaign-message-parser";
+import type {
+  seoPlanKeywordTaskInputSchema,
+  seoWriteArticleTaskInputSchema,
+} from "@rectangular-labs/core/schemas/task-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { CrdtServerAdaptor } from "loro-adaptors";
@@ -59,6 +63,9 @@ export interface InitialContext extends BaseContextWithAuth {
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
   publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
+  seoPlannerWorkflow: Workflow<typeof seoPlanKeywordTaskInputSchema.infer>;
+  seoWriterWorkflow: Workflow<typeof seoWriteArticleTaskInputSchema.infer>;
+  cacheKV: KVNamespace;
 }
 
 export interface ChatContext extends InitialContext {
