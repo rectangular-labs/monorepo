@@ -55,17 +55,17 @@ function addStartResearchWorkflowOnSuggestedCreate(): WriteToFileMiddleware<
   };
 }
 
-function addStartWritingWorkflowWhenPlanned(): WriteToFileMiddleware<
+function addStartWritingWorkflowWhenQueued(): WriteToFileMiddleware<
   FsNodePayload,
   WriteToFilePublishingContext
 > {
   return async ({ ctx, next }) => {
     const status = ctx.getMetadata("status");
-    if (status !== "queued" && status !== "planned") return await next();
+    if (status !== "queued") return await next();
 
     const existingNode = ctx.getExistingNode();
     const existingWorkflowId = existingNode?.data.get("workflowId");
-    if (typeof existingWorkflowId === "string" && existingWorkflowId.trim()) {
+    if (existingWorkflowId?.trim()) {
       return await next();
     }
 
@@ -118,6 +118,6 @@ export const loroWriter = createWriteToFile<
     addCreatedAtOnCreateMiddleware(),
     addScheduledForWhenQueuedMiddleware(),
     addStartResearchWorkflowOnSuggestedCreate(),
-    addStartWritingWorkflowWhenPlanned(),
+    addStartWritingWorkflowWhenQueued(),
   ],
 });
