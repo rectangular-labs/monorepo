@@ -1,8 +1,13 @@
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { normalizePath } from "@rectangular-labs/loro-file-system";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
+import { CrdtType } from "loro-protocol";
+import { getWebsocketContext } from "../../../context";
 import type { ChatContext } from "../../../types";
+import { getRoomKey } from "../../chat/get-room-key";
+import { WORKSPACE_CONTENT_ROOM_ID } from "../../workspace/constants";
 import { loroWriter } from "../../workspace/loro-writer";
 import { withLoroTree } from "../../workspace/with-loro-tree";
 import type { AgentToolDefinition } from "./utils";
@@ -108,6 +113,22 @@ export function createSuggestArticlesToolWithMetadata({
           }
         },
       });
+
+      // TODO: make this less duplicative of what's in project.chat.ts
+      const context = await getWebsocketContext();
+      const roomDoc = context.roomDocumentMap.get(
+        getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro),
+      );
+      if (!roomDoc?.dirty || !roomDoc.descriptor.shouldPersist) return;
+      await context.workspaceBucket.setSnapshot(
+        getWorkspaceBlobUri({
+          orgId: context.organizationId,
+          projectId: context.projectId,
+          campaignId: undefined,
+        }),
+        roomDoc.data,
+      );
+      roomDoc.dirty = false;
 
       return {
         created,
