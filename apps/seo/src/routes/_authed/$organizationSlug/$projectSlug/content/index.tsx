@@ -44,7 +44,7 @@ export const Route = createFileRoute(
       }),
     );
 
-    context.queryClient.ensureQueryData(
+    void context.queryClient.ensureQueryData(
       getApiClientRq().auth.organization.members.queryOptions({
         input: {
           organizationIdentifier: activeProject.organizationId,
