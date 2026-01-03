@@ -84,7 +84,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             callbackInstanceId: event.instanceId,
             userId: input.userId,
           },
-          workflowInstanceId: `child-${event.instanceId}`,
+          workflowInstanceId: `child-${event.instanceId}_${crypto.randomUUID().slice(0, 5)}`,
           userId: input.userId,
         });
         if (!result.ok) {
