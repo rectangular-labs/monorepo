@@ -300,9 +300,7 @@ function PageComponent() {
           file.slug?.trim() || fm?.get("slug")?.trim() || toSlug(title).trim();
 
         const descriptionCandidate =
-          file.description?.trim() ||
-          fm?.get("description")?.trim() ||
-          "";
+          file.description?.trim() || fm?.get("description")?.trim() || "";
 
         const flatSlugCandidate =
           slugCandidateFull

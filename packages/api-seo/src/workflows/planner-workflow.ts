@@ -224,7 +224,12 @@ async function generateOutline({
   serp: SearchItem[];
 }): Promise<
   Result<
-    { outline: string; articleType: ArticleType; title: string; description: string },
+    {
+      outline: string;
+      articleType: ArticleType;
+      title: string;
+      description: string;
+    },
     Error
   >
 > {

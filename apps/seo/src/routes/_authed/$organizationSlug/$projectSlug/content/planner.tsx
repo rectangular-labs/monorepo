@@ -290,7 +290,8 @@ function PlannerPage() {
     if (scheduledForIso) {
       metadata.push({ key: "scheduledFor", value: scheduledForIso });
     }
-    if (outline.trim()) metadata.push({ key: "outline", value: outline.trim() });
+    if (outline.trim())
+      metadata.push({ key: "outline", value: outline.trim() });
 
     pushWorkspace(
       {

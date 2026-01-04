@@ -15,7 +15,9 @@ function isValidSlugSegment(segment: string) {
   return /^[A-Za-z0-9_-]+$/.test(segment);
 }
 
-export function slugToFilePath(slug: string): { ok: true; value: string } | { ok: false; error: Error } {
+export function slugToFilePath(
+  slug: string,
+): { ok: true; value: string } | { ok: false; error: Error } {
   const trimmed = slug.trim();
   if (!trimmed) {
     return { ok: false, error: new Error("Slug is required") };
@@ -84,7 +86,9 @@ function ensureDirectoryPath({
 }: {
   tree: LoroTree<FsNodePayload>;
   dirPath: string;
-}): { ok: true; value: LoroTreeNode<FsNodePayload> } | { ok: false; error: Error } {
+}):
+  | { ok: true; value: LoroTreeNode<FsNodePayload> }
+  | { ok: false; error: Error } {
   const normalized = normalizePath(dirPath);
   const rootNode = resolvePath({ tree, path: "/" });
   if (!rootNode) {
@@ -128,7 +132,9 @@ export function moveFileToSlug({
   tree: LoroTree<FsNodePayload>;
   fromFilePath: string;
   nextSlug: string;
-}): { ok: true; value: { nextFilePath: string } } | { ok: false; error: Error } {
+}):
+  | { ok: true; value: { nextFilePath: string } }
+  | { ok: false; error: Error } {
   const fromNode = resolvePath({ tree, path: fromFilePath });
   if (!fromNode) return { ok: false, error: new Error("File not found") };
   if (fromNode.data.get("type") !== "file") {
@@ -158,9 +164,7 @@ export function moveFileToSlug({
   const nextSegments = normalizedNext.split("/").filter(Boolean);
   const nextName = nextSegments.at(-1);
   if (!nextName) return { ok: false, error: new Error("Invalid slug") };
-  const nextDirPath = normalizePath(
-    `/${nextSegments.slice(0, -1).join("/")}`,
-  );
+  const nextDirPath = normalizePath(`/${nextSegments.slice(0, -1).join("/")}`);
 
   const ensureDirResult = ensureDirectoryPath({ tree, dirPath: nextDirPath });
   if (!ensureDirResult.ok) return ensureDirResult;
@@ -177,4 +181,3 @@ export function moveFileToSlug({
   fromNode.data.set("name", nextName);
   return { ok: true, value: { nextFilePath: normalizedNext } };
 }
-

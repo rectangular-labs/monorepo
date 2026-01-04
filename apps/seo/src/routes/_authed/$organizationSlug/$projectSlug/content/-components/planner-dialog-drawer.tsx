@@ -71,9 +71,13 @@ export function PlannerDialogDrawer({
 
   useEffect(() => {
     if (!activeDialogFile) return;
-    setTitleDraft(activeDialogFile.title ?? activeDialogFile.name.replace(/\.md$/i, ""));
+    setTitleDraft(
+      activeDialogFile.title ?? activeDialogFile.name.replace(/\.md$/i, ""),
+    );
     setDescriptionDraft(activeDialogFile.description ?? "");
-    setSlugDraft(activeDialogFile.slug ?? activeDialogFile.path.replace(/\.md$/i, ""));
+    setSlugDraft(
+      activeDialogFile.slug ?? activeDialogFile.path.replace(/\.md$/i, ""),
+    );
     setSlugError(null);
     setNotesDraft(activeDialogFile.notes ?? "");
     if (activeDialogFile.scheduledFor) {
