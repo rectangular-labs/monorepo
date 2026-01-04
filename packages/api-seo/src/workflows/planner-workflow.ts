@@ -39,7 +39,7 @@ import {
   loadWorkspaceForWorkflow,
   persistWorkspaceSnapshot,
 } from "../lib/workspace/workflow";
-import { ARTICLE_TYPE_TO_ADDITIONAL_RULES } from "../lib/workspace/workflow.constant";
+import { ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES } from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -226,7 +226,7 @@ async function generateOutline({
   const haveAiOverview = serp.some((s) => s.type === "ai_overview");
   const havePeopleAlsoAsk = serp.some((s) => s.type === "people_also_ask");
   const articleType = await inferArticleType({ primaryKeyword, notes, serp });
-  const additionalRules = ARTICLE_TYPE_TO_ADDITIONAL_RULES[articleType];
+  const additionalRules = ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES[articleType];
   const system = `<role>
 You are an expert SEO article researcher and strategist. Your job is to produce a writer-ready plan and outline for the BEST possible article for the target keyword. You MUST synthesize findings from competitor pages, people also ask questions, related searches, and AI overview should they exists. 
 
@@ -292,7 +292,6 @@ ${
   - Have the question mirror the People Also Ask question almost verbatim.`
     : "- Do not suggest FAQ sections."
 }
-
 - Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
 - Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
   <example>
