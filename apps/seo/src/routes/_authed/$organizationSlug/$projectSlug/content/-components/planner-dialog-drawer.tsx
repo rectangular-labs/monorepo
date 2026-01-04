@@ -181,7 +181,9 @@ export function PlannerDialogDrawer({
             <div className="flex items-center justify-between gap-2">
               <FieldLabel>Outline</FieldLabel>
               <Button
-                disabled={isSaving || isRegeneratingOutline || !activeDialogFile}
+                disabled={
+                  isSaving || isRegeneratingOutline || !activeDialogFile
+                }
                 isLoading={isRegeneratingOutline}
                 onClick={() => {
                   if (!activeDialogFile) return;

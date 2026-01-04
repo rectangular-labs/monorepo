@@ -1,6 +1,6 @@
 import { type } from "arktype";
-import { businessBackgroundSchema } from "./project-parsers";
 import { articleTypeSchema } from "./content-parsers";
+import { businessBackgroundSchema } from "./project-parsers";
 
 export const understandSiteTaskInputSchema = type({
   type: "'understand-site'",
