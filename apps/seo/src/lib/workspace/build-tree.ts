@@ -2,6 +2,7 @@ import type {
   FsNodePayload,
   LoroDocMapping,
 } from "@rectangular-labs/core/loro-file-system";
+import { getNodePath } from "@rectangular-labs/loro-file-system";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import type {
   ContainerID,
@@ -26,6 +27,7 @@ export type TreeFile = Extract<FsNodePayload, { type: "file" }> & {
   treeId: TreeID;
   parentTreeId: TreeID | undefined;
   path: string;
+  slug?: string;
   changes:
     | {
         action: TreeChangeStatus;
@@ -67,7 +69,6 @@ function buildTreeForNode(
   textContentMap: Map<ContainerID, LoroText>,
   pathOriginalMap: Map<string, string>,
   nameOriginalMap: Map<string, string>,
-  currentPath: string = "",
 ): Result<TreeDirectory | TreeFile, Error> {
   const treeChanges = treeChangeMap.get(node.id);
   const mapChanges = mapChangeMap.get(node.data.id);
@@ -78,7 +79,7 @@ function buildTreeForNode(
   const originalPath = pathOriginalMap.get(node.id);
   const originalName = nameOriginalMap.get(node.id);
 
-  const newPath = `${currentPath}/${node.data.get("name")}`;
+  const newPath = getNodePath(node);
 
   let changes: TreeDirectory["changes"] | TreeFile["changes"] | undefined;
   // build changes since something has changed at this particular node
@@ -106,7 +107,7 @@ function buildTreeForNode(
         treeChanges?.action === "move" || mapChanges?.name
           ? {
               old: originalPath,
-              new: `${currentPath}/${mapChanges?.name ?? node.data.get("name")}`,
+              new: newPath,
             }
           : undefined,
       name: mapChanges?.name
@@ -149,7 +150,6 @@ function buildTreeForNode(
             textContentMap,
             pathOriginalMap,
             nameOriginalMap,
-            newPath,
           ),
         ) ?? [];
 
@@ -176,14 +176,18 @@ function buildTreeForNode(
     const fileNode = node as LoroTreeNode<
       Extract<FsNodePayload, { type: "file" }>
     >;
+    const slug = newPath.replace(/\.md$/i, "");
     return ok({
       type: "file",
       treeId: node.id,
       parentTreeId,
       path: newPath,
+      slug,
       changes: changes as TreeFile["changes"],
       name: fileNode.data.get("name"),
       createdAt: node.data.get("createdAt"),
+      title: fileNode.data.get("title"),
+      description: fileNode.data.get("description"),
       scheduledFor: fileNode.data.get("scheduledFor"),
       userId: fileNode.data.get("userId"),
       status: fileNode.data.get("status"),

@@ -222,7 +222,17 @@ async function generateOutline({
   locationName: string;
   languageCode: string;
   serp: SearchItem[];
-}): Promise<Result<{ outline: string; articleType: ArticleType }, Error>> {
+}): Promise<
+  Result<
+    {
+      outline: string;
+      articleType: ArticleType;
+      title: string;
+      description: string;
+    },
+    Error
+  >
+> {
   const haveAiOverview = serp.some((s) => s.type === "ai_overview");
   const havePeopleAlsoAsk = serp.some((s) => s.type === "people_also_ask");
   const articleType = await inferArticleType({ primaryKeyword, notes, serp });
@@ -259,7 +269,7 @@ EVERYTHING in the article should be focused AND in service of the search intent.
   iii) description - summarize content succinctly and accurately while stating the keyword
 3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
 4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
-5) Output the file in markdown format, do not include any other formatting or commentary.
+5) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
 ${additionalRules ? `6) Follow the additional article rules as overriding constraints: ${additionalRules}` : ""}
 </workflow>
 
@@ -321,6 +331,19 @@ ${JSON.stringify(serp)}
 </live-serp-data>`;
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
+  const outputSchema = type({
+    title: type("string").describe(
+      "Meta title (max 60 characters): clear, enticing, includes the primary keyword once naturally, directly answers search intent.",
+    ),
+    description: type("string").describe(
+      "Meta description (max 160 characters): succinct, keyword-rich, clearly signals the article fulfills the main search intent.",
+    ),
+    outline: type("string").describe(
+      "Writer-ready markdown plan/outline with H2/H3 structure, section notes, sources to cite, internal links, and target word count.",
+    ),
+  }).describe(
+    "SEO plan output as JSON with title, description, and outline markdown.",
+  );
   const result = await safe(() =>
     generateText({
       model: google("gemini-3-flash-preview"),
@@ -344,7 +367,7 @@ ${JSON.stringify(serp)}
       messages: [
         {
           role: "user",
-          content: `Generate the outline for the primary keyword: ${primaryKeyword}. The output must be only the markdown outline plan (no extra commentary). ${notes ? `Here are some notes about the article that I want you to consider: ${notes}` : ""}`,
+          content: `Generate the plan for the primary keyword: ${primaryKeyword}. The output must be ONLY valid JSON matching the required schema (no extra commentary). ${notes ? `Here are some notes about the article that I want you to consider: ${notes}` : ""}`,
         },
       ],
       onStepFinish: (step) => {
@@ -369,12 +392,21 @@ ${JSON.stringify(serp)}
         };
       },
       stopWhen: [stepCountIs(25)],
+      experimental_output: Output.object({
+        schema: jsonSchema<type.infer<typeof outputSchema>>(
+          outputSchema.toJsonSchema() as JSONSchema7,
+        ),
+      }),
     }),
   );
   if (!result.ok) return err(result.error);
-  const outline = result.value.text.trim();
+  const output = result.value.experimental_output;
+  const outline = output.outline.trim();
+  const title = output.title.trim();
+  const description = output.description.trim();
   if (!outline) return err(new Error("Empty outline returned by model"));
-  return ok({ outline, articleType });
+  if (!title) return err(new Error("Empty title returned by model"));
+  return ok({ outline, articleType, title, description });
 }
 
 type PlannerInput = type.infer<typeof seoPlanKeywordTaskInputSchema>;
@@ -525,14 +557,16 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             serp: serpWithOutlines,
           });
           if (!result.ok) throw result.error;
-          const { outline, articleType } = result.value;
+          const { outline, articleType, title, description } = result.value;
           logInfo("outline generated", {
             instanceId: event.instanceId,
             path: input.path,
             outlineChars: outline.length,
             articleType,
+            titleChars: title.length,
+            descriptionChars: description.length,
           });
-          return { outline, articleType };
+          return { outline, articleType, title, description };
         },
       );
 
@@ -551,6 +585,8 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           path: input.path,
           metadata: [
             { key: "outline", value: outlineResult.outline },
+            { key: "title", value: outlineResult.title },
+            { key: "description", value: outlineResult.description },
             { key: "articleType", value: outlineResult.articleType },
           ],
         });

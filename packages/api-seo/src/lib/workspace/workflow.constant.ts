@@ -76,22 +76,22 @@ export const ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES: Partial<
 export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
   {
     "best-of-list": `## Best of lists
-1. Always include screenshots of ALL the products/websites/service pages/country/food/item that you are listing.
+1. Always include screenshots of ALL the products/websites/service pages/country/food/item that you are listing. The images should come right after the heading introducing the item on the list.
 2. Word light - Explain why each item is listed succinctly.
-3. Always include links to each of the listed items/services 
+3. Always include links to each of the listed items/services organically (for e.g. wrapping the link around the anchor text of the item/service being linked to).
 4. Give an opinion as to why the top listed product is considered the best and why`,
     comparison: `## Comparisons (comparing two or more products or services or items)
 1. Always include comparison tables at the top of the article that summarizes the key points
 2. Include screenshots or pictures of ALL the items being compared
-3. Include external links to the product/item being compared to
+3. Include external links to the product/item being compared to organically (for e.g. wrapping the link around the anchor text of the item/service being linked to).
 4. Must clearly take a stance on which product is better for what purposes and why - opinion must be given by the end`,
     "how-to": `## How to (guide)
 1. Include screenshots, diagrams, pictures for ALL the steps
 2. Tone should be instructional and confident
 3. Opinions can be given but should be clearly labelled as opinions`,
     listicle: `## Listicle (generically)
-1. Include screenshots, diagrams, for every listed item
-2. Always include an external link to each item on the list
+1. Include screenshots, diagrams, for every listed item. The images should come right after the heading introducing the item on the list.
+2. Always include an external link to each item on the list organically (for e.g. wrapping the link around the anchor text of the item/service being linked to).
 3. Word light - Explain why each item is listed succinctly - don't over-explain.`,
     "long-form-opinion": `## Long form - opinions
 1. Signpost well
@@ -99,11 +99,11 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
 3. Substantiated by clearly cited evidence and sources
 4. Must take a side and an opinion - strong POV`,
     faq: `## FAQs (?)
-1. Heavy internal linking 
+1. Heavy internal linking organically (for e.g. wrapping the link around the anchor text of the other question being referenced).
 2. Clear, direct, succinct answers to the questions
 3. No CTAs or product plugs`,
     news: `## News 
-1. Internal and external links should be used heavily
+1. Internal and external links should be used heavily organically (for e.g. wrapping the link around the anchor text of the other sourcesbeing cited).
 2. Tone should be neutral, informational, and succinct. Descriptive
 3. Never include a personal opinion or tone`,
     whitepaper: `## Whitepapers
@@ -114,7 +114,7 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
 1. There should be a clear heading, with visuals which accompany and describe each heading, and corresponding words in bullet point`,
     "case-study": `## Case studies
 1. Clearly state how they were aided - how their position improved due to the usage of a certain product or service
-2. Internal or external links to the case studies' webpage (if any)
+2. Internal or external links to the case studies' webpage (if any) organically (for e.g. wrapping the link around the anchor text of the case study being linked to).
 3. Narrative tone
 4. Emphasize the experience of the person - using direct quotes from them, and describing how they were aided. 
 5. Identify the person by name and position and state the company`,
@@ -125,7 +125,7 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
 4. Quotes from key personnel`,
     interview: `## Interviews
 1. Picture of the person being interviewed
-2. External and internal links to the interviewee and related topics
+2. External and internal links to the interviewee and related topics organically (for e.g. wrapping the link around the anchor text of the interviewee's name).
 3. Many quotes from the interview
 4. Conversational - should be clearly signposted as a back and forth between interviewer and interviewee
 5. Introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
@@ -144,14 +144,14 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
     "research-summary": `## Research summary
 1. Diagrams, charts, and frameworks should be produced into images
 2. Any original opinions have to be clearly labelled as such
-3. External link to the original research
+3. External link to the original research organically (for e.g. wrapping the link around the anchor text of the mention of the source being cited).
 4. Cite clearly and in great detail the original research with 100% accuracy 
 5. Analytical and neutral tone`,
     "event-recap": `## Event recap
 1. Use pictures of the event from the outline provided by the user.
 2. Descriptive tone, excited
-3. Internal link to related articles and products
-4. External link to partners`,
+3. Internal link to related articles and products organically (for e.g. wrapping the link around the anchor text of the related article or product being mentioned).
+4. External link to partners organically (for e.g. wrapping the link around the anchor text of the partner's name being mentioned).`,
     "best-practices": `## Best practices
 1. Checklist at the end of the article summarizing all the best practices
 2. Prescriptive, confident tone

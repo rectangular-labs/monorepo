@@ -13,6 +13,7 @@ import {
   type TreeFile,
   traverseTree,
 } from "~/lib/workspace/build-tree";
+import { moveFileToSlug, slugToFilePath } from "~/lib/workspace/slug";
 import {
   createPullDocumentQueryOptions,
   createPushDocumentQueryOptions,
@@ -147,6 +148,17 @@ function PlannerPage() {
     if (!loroDoc) return;
     return buildTree(loroDoc);
   }, [loroDoc]);
+
+  const allFiles = useMemo(() => {
+    if (!treeResult?.ok) return [];
+    const files: TreeFile[] = [];
+    traverseTree(treeResult.value, (node) => {
+      if (node.type === "file") files.push(node);
+      return { shouldContinue: true };
+    });
+    return files;
+  }, [treeResult]);
+
   const { plannerFiles } = useMemo(() => {
     const plannerFiles: TreeFile[] = [];
     if (!treeResult?.ok) return { plannerFiles };
@@ -213,6 +225,89 @@ function PlannerPage() {
             return "Status updated.";
           })();
           toast.success(displayMessage);
+        },
+      },
+    );
+  };
+
+  const handleSaveEdits = ({
+    file,
+    status,
+    title,
+    description,
+    slug,
+    notes,
+    scheduledForIso,
+    outline,
+    options,
+  }: {
+    file: TreeFile;
+    status?: SeoFileStatus;
+    title: string;
+    description: string;
+    slug: string;
+    notes: string;
+    scheduledForIso: string | null;
+    outline: string;
+    options?: { closeDialog?: boolean };
+  }) => {
+    if (!loroDoc) return;
+
+    const slugPathResult = slugToFilePath(slug);
+    if (!slugPathResult.ok) {
+      toast.error(slugPathResult.error.message);
+      return;
+    }
+
+    let nextFilePath = file.path;
+    if (slugPathResult.value !== file.path) {
+      const collision = allFiles.find(
+        (f) => f.path === slugPathResult.value && f.treeId !== file.treeId,
+      );
+      if (collision) {
+        toast.error("Slug already exists");
+        return;
+      }
+
+      const moveResult = moveFileToSlug({
+        tree: loroDoc.getTree("fs"),
+        fromFilePath: file.path,
+        nextSlug: slug,
+      });
+      if (!moveResult.ok) {
+        toast.error(moveResult.error.message);
+        return;
+      }
+      nextFilePath = moveResult.value.nextFilePath;
+    }
+
+    const metadata: { key: string; value: string }[] = [
+      { key: "title", value: title.trim() },
+      { key: "description", value: description.trim() },
+      { key: "notes", value: notes.trim() },
+    ];
+    if (status) metadata.push({ key: "status", value: status });
+    if (scheduledForIso) {
+      metadata.push({ key: "scheduledFor", value: scheduledForIso });
+    }
+    if (outline.trim())
+      metadata.push({ key: "outline", value: outline.trim() });
+
+    pushWorkspace(
+      {
+        doc: loroDoc,
+        operations: [{ path: nextFilePath, metadata, createIfMissing: true }],
+        context: {
+          publishingSettings:
+            publishingSettingsProject?.publishingSettings ?? null,
+        },
+      },
+      {
+        onSuccess: () => {
+          if (options?.closeDialog) {
+            setActiveDialogTreeId(null);
+          }
+          toast.success("Saved");
         },
       },
     );
@@ -304,7 +399,7 @@ function PlannerPage() {
 
     const filteredBySearch = normalizedSearch
       ? plannerFiles.filter((f) => {
-          const title = f.name.toLowerCase();
+          const title = (f.title ?? f.name.replace(/\.md$/, "")).toLowerCase();
           const keyword = f.primaryKeyword.toLowerCase();
           return (
             title.includes(normalizedSearch) ||
@@ -323,7 +418,7 @@ function PlannerPage() {
 
     return sorted.map((f) => ({
       id: f.treeId,
-      title: f.name.replace(/\.md$/, ""),
+      slug: f.slug ?? f.path.replace(/\.md$/, ""),
       author: f.userId,
       createdAt: f.createdAt,
       scheduledFor: f.scheduledFor,
@@ -502,13 +597,13 @@ function PlannerPage() {
 
       <PlannerDialogDrawer
         activeDialogFile={activeDialogFile}
-        applyMetadataUpdate={applyMetadataUpdate}
         isRegeneratingOutline={isRegeneratingOutlineForActiveFile}
         isSaving={isPushing}
         onOpenChange={(open) => {
           if (!open) setActiveDialogTreeId(null);
         }}
         onRegenerateOutline={handleRegenerateOutline}
+        onSaveEdits={handleSaveEdits}
         open={!!activeDialogTreeId}
         publishingSettings={
           publishingSettingsProject?.publishingSettings ?? null

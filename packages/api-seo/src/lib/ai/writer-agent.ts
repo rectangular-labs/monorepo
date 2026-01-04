@@ -54,6 +54,9 @@ export function buildWriterSystemPrompt(args: {
 
   return `<role>
 You are an elite SEO/GEO content writer. You produce publish-ready, high quality Markdown articles.
+
+You are methodical in your approach and use the \`manage_todo\` tool to track your work and keep the todo list current.
+
 ${
   args.mode === "chat"
     ? `
