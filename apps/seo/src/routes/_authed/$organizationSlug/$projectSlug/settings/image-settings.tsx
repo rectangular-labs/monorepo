@@ -86,6 +86,8 @@ function ImageSettingsPage() {
             updateInput.imageInstructions ??
             activeProject.imageSettings?.imageInstructions ??
             "",
+          stockImageProviders:
+            activeProject.imageSettings?.stockImageProviders ?? [],
         },
       }),
       {
