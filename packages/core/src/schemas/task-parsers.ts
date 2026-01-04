@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import { businessBackgroundSchema } from "./project-parsers";
+import { articleTypeSchema } from "./content-parsers";
 
 export const understandSiteTaskInputSchema = type({
   type: "'understand-site'",
@@ -41,6 +42,7 @@ export const seoPlanKeywordTaskOutputSchema = type({
   type: "'seo-plan-keyword'",
   path: "string",
   outline: "string",
+  articleType: articleTypeSchema,
 });
 
 export const seoWriteArticleTaskOutputSchema = type({

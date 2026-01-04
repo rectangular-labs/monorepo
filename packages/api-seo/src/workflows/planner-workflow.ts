@@ -6,6 +6,8 @@ import {
 import { NonRetryableError } from "cloudflare:workflows";
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
+import type { ArticleType } from "@rectangular-labs/core/loro-file-system";
+import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type { searchItemSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import type {
   seoPlanKeywordTaskInputSchema,
@@ -37,6 +39,7 @@ import {
   loadWorkspaceForWorkflow,
   persistWorkspaceSnapshot,
 } from "../lib/workspace/workflow";
+import { ARTICLE_TYPE_TO_ADDITIONAL_RULES } from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -123,6 +126,82 @@ ${serpValue}
   });
 }
 
+const inferArticleTypeSchema = type({
+  articleType: articleTypeSchema,
+}).describe("Chosen article type for the planned content");
+async function inferArticleType({
+  primaryKeyword,
+  notes,
+  serp,
+}: {
+  primaryKeyword: string;
+  notes?: string;
+  serp: SearchItem[];
+}): Promise<ArticleType> {
+  const prompt = `Choose the single best article type for the intended content.
+
+Return ONLY JSON matching: { "articleType": string }
+
+"articleType" must be one of:
+- "best-of-list"
+- "comparison"
+- "how-to"
+- "listicle"
+- "long-form-opinion"
+- "faq"
+- "news"
+- "whitepaper"
+- "infographic"
+- "case-study"
+- "press-release"
+- "interview"
+- "product-update"
+- "contest-giveaway"
+- "research-summary"
+- "event-recap"
+- "best-practices"
+- "other"
+
+Decision rules:
+- If notes clearly specify a format (e.g. "press release", "interview", "case study"), prioritize notes over SERP.
+- If SERP intent is obvious (e.g. the SERP is dominated by comparisons, best-of lists, or how-to guides), match it.
+- Use "best-of-list" only for explicit "best/top" ranking intent; otherwise use "listicle" for general lists.
+- Use "other" if none apply.
+
+<primary_keyword>
+${primaryKeyword}
+</primary_keyword>
+
+<notes>
+${notes ?? ""}
+</notes>
+
+<serp>
+${JSON.stringify(serp)}
+</serp>`;
+
+  const result = await safe(() =>
+    generateText({
+      model: google("gemini-3-flash-preview"),
+      experimental_output: Output.object({
+        schema: jsonSchema<typeof inferArticleTypeSchema.infer>(
+          inferArticleTypeSchema.toJsonSchema() as JSONSchema7,
+        ),
+      }),
+      prompt,
+    }),
+  );
+
+  if (!result.ok) {
+    logError("failed to infer article type; defaulting to other", {
+      error: result.error,
+    });
+    return "other";
+  }
+
+  return result.value.experimental_output.articleType;
+}
+
 async function generateOutline({
   project,
   notes,
@@ -137,8 +216,10 @@ async function generateOutline({
   locationName: string;
   languageCode: string;
   serp: SearchItem[];
-}): Promise<Result<string, Error>> {
+}): Promise<Result<{ outline: string; articleType: ArticleType }, Error>> {
   const haveAiOverview = serp.find((s) => s.type === "ai_overview");
+  const articleType = await inferArticleType({ primaryKeyword, notes, serp });
+  const additionalRules = ARTICLE_TYPE_TO_ADDITIONAL_RULES[articleType];
   const system = `<role>
 You are an expert SEO article researcher and strategist. Your job is to produce a writer-ready plan and outline for the BEST possible article for the target keyword. You MUST synthesize findings from competitor pages, people also ask questions, related searches, and AI overview should they exists. 
 
@@ -160,7 +241,6 @@ Once the search intent is identified, the article should be focused on answering
 EVERYTHING in the article should be focused AND in service of the search intent.
 </role>
 
-
 <workflow>
 1) Analyze search intent from the SERPs, your natural understanding of the primary keyword for the primary keyword ${primaryKeyword} (SERPs provided in live-serp-data). Use the SERP outline of competitors pages ${haveAiOverview ? "and the AI Overview" : ""} to find out 
   i) groups of information that is useful to the searcher
@@ -173,91 +253,7 @@ EVERYTHING in the article should be focused AND in service of the search intent.
 3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
 4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
 5) Output the file in markdown format, do not include any other formatting or commentary.
-6) If any of these article types are being written, follow these instructions. These instructions should override any contradicting instructions elsewhere. If the type of article being written is not listed here, ignore this list.
-
-## Best of lists 
-1. Always include screenshots or products of the products/websites/service pages/country/food/item that you are listing. 
-2. Word light
-3. Maximum of 20 total items
-
-## Comparisons (comparing two or more products or services or items)
-1. Always include comparison tables at the top of the article that summarizes the key points
-2. Include screenshots or pictures of each item being compared
-
-
-## How to (guide)
-1. Include screenshots, diagrams, pictures for each step
-2. Checklist should be included after the introduction to signpost the article 
-
-## Listicle (generically)
-1. Include screenshots, diagrams, for every listed item 
-2. Maximum of 20 total items 
-3. Word light - each listicle item should be a maximum of 50 words
-
-## Long form - opinions
-1. Clear opinion that should be reached at the end 
-2. Must take a side and an opinion - strong POV
-
-## FAQs (?)
-1. Headings should be the questions
-2. Short word counts
-
-## News 
-1. Structure should cover: i) what happened, ii) why it matters, iii) key details, iv) what's next (if applicable)
-
-## Whitepapers
-1. Diagrams, charts, and frameworks should be produced into images 
-2. Long word count
-3. Include an executive summary, data analysis, explain methodology, describe the issue
-
-## Infographic
-1. Visual output should incorporate all important elements - there should be a clear heading, with visuals which accompany and describe each heading, and corresponding words in bullet point
-2. Visual should have a flow and not be overly complicated. 
-3. Text should be readable
-4. No need to use SERP data
-
-## Case studies
-1. Visuals of any data
-2. Emphasize the experience of the user and emphasize how they were aided
-3. Identify the person by name and position and state the company in the title
-4. No need to use SERP data
-
-## Press releases (news about the company)
-1. Short word count
-2. State details of the press release
-3. Quotes from key personnel
-4. No need to use SERP data
-
-## Interviews
-1. Picture of the person being interviewed 
-2. Structured around the interview and the quotes received in the interview
-3. Introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
-4. No need to use SERP data
-
-## product update
-1. Word light 
-2. Introduce the product and what it is 
-3. Explain why this update is exciting and what it intends to fulfill
-4. No need to use SERP data
-
-## Contest/giveaway
-1. Visual of a giveaway - describe what needs to be done to qualify for the giveaway, how many people will win it, when it will close,how much it's worth and the product needs to be in the picture. Picture should be vibrant and exciting
-2. Very word light 
-3. No need to use SERP data
-
-## Research summary
-1. Charts, frameworks, diagrams describing the data is mandatory
-2. Describe what was studied, key findings, and implications, if any. 
-3. Any original opinions have to be clearly labelled as such
-
-## Event recap
-1. Picture of the event (prompt user for it)
-2. Describe event highlights and takeaways
-3. No need to use SERP data
-
-## Best practices
-1. Checklist at the end of the article summarizing all the best practices
-2. State dos and don'ts 
+${additionalRules ? `6) Follow the additional article rules as overriding constraints: ${additionalRules}` : ""}
 </workflow>
 
 <critical-plan-requirements>
@@ -305,6 +301,7 @@ EVERYTHING in the article should be focused AND in service of the search intent.
 - Primary keyword: ${primaryKeyword}
 - Target country: ${locationName}
 - Target language: ${languageCode}
+- Article type: ${articleType}
 </project context>
 
 
@@ -366,7 +363,7 @@ ${JSON.stringify(serp)}
   if (!result.ok) return err(result.error);
   const outline = result.value.text.trim();
   if (!outline) return err(new Error("Empty outline returned by model"));
-  return ok(outline);
+  return ok({ outline, articleType });
 }
 
 type PlannerInput = type.infer<typeof seoPlanKeywordTaskInputSchema>;
@@ -467,7 +464,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         hasNotes: Boolean(notes?.trim()),
       });
 
-      const outline = await step.do(
+      const outlineResult = await step.do(
         "generate outline",
         {
           timeout: "30 minutes",
@@ -517,13 +514,14 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             serp: serpWithOutlines,
           });
           if (!result.ok) throw result.error;
-          const outline = result.value;
+          const { outline, articleType } = result.value;
           logInfo("outline generated", {
             instanceId: event.instanceId,
             path: input.path,
             outlineChars: outline.length,
+            articleType,
           });
-          return outline;
+          return { outline, articleType };
         },
       );
 
@@ -540,7 +538,10 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         const writeResult = await writeToFile({
           tree: loroDoc.getTree("fs"),
           path: input.path,
-          metadata: [{ key: "outline", value: outline }],
+          metadata: [
+            { key: "outline", value: outlineResult.outline },
+            { key: "articleType", value: outlineResult.articleType },
+          ],
         });
         if (!writeResult.success) throw new Error(writeResult.message);
         const persistResult = await persistWorkspaceSnapshot({
@@ -585,7 +586,8 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
       return {
         type: "seo-plan-keyword",
         path: input.path,
-        outline,
+        outline: outlineResult.outline,
+        articleType: outlineResult.articleType,
       } satisfies typeof seoPlanKeywordTaskOutputSchema.infer;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
