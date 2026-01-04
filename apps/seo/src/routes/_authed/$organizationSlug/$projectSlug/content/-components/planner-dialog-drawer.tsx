@@ -37,12 +37,16 @@ export function PlannerDialogDrawer({
   onOpenChange,
   open,
   publishingSettings,
+  isRegeneratingOutline,
+  onRegenerateOutline,
 }: {
   isSaving: boolean;
   activeDialogFile: TreeFile | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   publishingSettings: typeof publishingSettingsSchema.infer | null;
+  isRegeneratingOutline: boolean;
+  onRegenerateOutline: (file: TreeFile) => void;
   applyMetadataUpdate: (
     file: TreeFile,
     metadata: { key: string; value: string }[],
@@ -174,7 +178,24 @@ export function PlannerDialogDrawer({
 
         {outline && (
           <Field>
-            <FieldLabel>Outline</FieldLabel>
+            <div className="flex items-center justify-between gap-2">
+              <FieldLabel>Outline</FieldLabel>
+              <Button
+                disabled={
+                  isSaving || isRegeneratingOutline || !activeDialogFile
+                }
+                isLoading={isRegeneratingOutline}
+                onClick={() => {
+                  if (!activeDialogFile) return;
+                  onRegenerateOutline(activeDialogFile);
+                }}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                Regenerate outline
+              </Button>
+            </div>
             <FieldContent className="max-h-[40vh] overflow-auto p-0">
               <style>
                 {`
@@ -196,6 +217,7 @@ export function PlannerDialogDrawer({
           <FieldLabel htmlFor="planner-notes">Notes</FieldLabel>
           <FieldContent>
             <Textarea
+              className="max-h-[15vh]"
               id="planner-notes"
               onChange={(e) => setNotesDraft(e.target.value)}
               placeholder="Add notes for this article (optional)"

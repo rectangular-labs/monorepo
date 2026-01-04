@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { contentTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
+import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type { schema } from "@rectangular-labs/db";
 import { ok, type Result, safe } from "@rectangular-labs/result";
 import { generateObject, type JSONSchema7, jsonSchema } from "ai";
@@ -7,7 +7,7 @@ import { type } from "arktype";
 import type { JinaSearchResult } from "../jina-ai";
 
 const outputSchema = type({
-  contentType: contentTypeSchema,
+  contentType: articleTypeSchema,
   reasoning: "string",
 });
 
@@ -20,7 +20,7 @@ export async function inferContentType(args: {
 }): Promise<Result<typeof outputSchema.infer, Error>> {
   if (args.serpResults.length === 0) {
     return ok({
-      contentType: "blog",
+      contentType: "how-to",
       reasoning: "No SERP results provided. Defaulting to blog.",
     });
   }
@@ -37,13 +37,22 @@ export async function inferContentType(args: {
 
 ## Content Type Options:
 
-- blog: Standard blog post format
 - listicle: Numbered or bulleted list article (e.g., "Top 10...", "Best 5...")
-- guide: Comprehensive tutorial or guide
+- best-of-list: "Best/Top" rankings listicle with strict selection framing
 - comparison: Comparison article (e.g., "X vs Y", "X or Y")
 - how-to: Step-by-step instructional content
-- checklist: Checklist format (e.g. "10 steps to X", "7 things you need to know about X")
 - case-study: Real-world example or case study
+- faq: FAQ-style article
+- news: News update / announcement
+- whitepaper: Long-form research / executive summary + methodology
+- infographic: Visual-first asset with concise supporting copy
+- press-release: Company press release format
+- interview: Interview format
+- product-update: Product update / release notes style
+- contest-giveaway: Giveaway / contest announcement
+- research-summary: Summary of research findings
+- event-recap: Recap of an event
+- best-practices: Best practices guide with checklist
 - other: None of the above
 
 ## Task:

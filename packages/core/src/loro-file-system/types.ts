@@ -1,4 +1,5 @@
 import type { LoroText, LoroTree } from "loro-crdt";
+import type { articleTypeSchema } from "../schemas/content-parsers";
 
 export type SeoFileStatus =
   | "suggested"
@@ -10,6 +11,8 @@ export type SeoFileStatus =
   | "published"
   | "suggestion-rejected"
   | "review-denied";
+
+export type ArticleType = typeof articleTypeSchema.infer;
 
 export type FsNodePayload =
   | {
@@ -26,6 +29,7 @@ export type FsNodePayload =
       primaryKeyword?: undefined;
       notes?: undefined;
       outline?: undefined;
+      articleType?: undefined;
       workflowId?: undefined;
       error?: undefined;
       content?: undefined;
@@ -49,6 +53,7 @@ export type FsNodePayload =
       primaryKeyword: string;
       notes?: string;
       outline?: string;
+      articleType?: ArticleType;
       /**
        * workflow identifier for when the content is being generated.
        */
