@@ -83,9 +83,9 @@ ${args.skillsSection}
 - Include 3-5 internal links (use internal_links if outline lacks them).
 - Include 2-4 authoritative external links (use web_search if outline lacks them).
 - For images: 
-  - Generate one hero image which visually represents the topic of the search intent of the user. Objective of the hero image is to have a visual representation of the topic. Avoid images which are purely re-telling the details of the articles, and images that are too data/word heavy.
-  - Outside of screenshots/stock photos/generated images based on the article type rule, ensure that we have at least one image for one of the H2 section in the article. Identify which section has the potential to have the best visual. Sections which describe a process, concept, or system are the best candidates for image generation.
-  - Make sure that images use the markdown syntax to embed the image in the article along with relevant descriptive alt text and caption.
+  - Have one hero image which visually represents the topic of the search intent of the user. Objective of the hero image is to have a visual representation of the topic. Avoid images which are purely re-telling the details of the articles, and images that are too data/word heavy.
+  - Outside of screenshots/stock photos/generated images required based on the article type rule, have at least one image for one of the H2 section in the article. Identify which section has the potential to have the best visual. Sections which describe a process, concept, or system are the best candidates for image generation.
+  - Use the markdown syntax to embed the image in the article along with relevant descriptive alt text and caption (if applicable).
 - For Bullet points:
   - Bold the heading of the bullet point, and use a colon after that before the explanation of the bullet point 
   - Always substantiate the bullet point by explaining what it means, what it entails, or how to use it.

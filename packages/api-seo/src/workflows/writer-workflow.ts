@@ -196,13 +196,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             imageToolCount: Object.keys(imageTools.tools).length,
           });
 
-          const utcDate = new Intl.DateTimeFormat("en-US", {
-            timeZone: "UTC",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }).format(new Date());
-
           const systemPrompt = buildWriterSystemPrompt({
             project,
             skillsSection: "",
