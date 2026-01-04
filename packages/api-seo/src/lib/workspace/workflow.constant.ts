@@ -6,7 +6,7 @@ export const ARTICLE_TYPE_TO_ADDITIONAL_RULES: Partial<
   Record<ArticleType, string>
 > = {
   "best-of-list": `## Best of lists
-1. Always include screenshots if ALL the products/websites/service pages/country/food/item that you are listing.
+1. Always include screenshots of ALL the products/websites/service pages/country/food/item that you are listing.
 2. Word light
 3. Maximum of 20 total items`,
   comparison: `## Comparisons (comparing two or more products or services or items)

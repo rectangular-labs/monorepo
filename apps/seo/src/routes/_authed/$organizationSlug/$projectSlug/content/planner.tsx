@@ -59,7 +59,9 @@ function PlannerPage() {
   const [activeDialogTreeId, setActiveDialogTreeId] = useState<string | null>(
     null,
   );
-  const [retryingTreeId, setRetryingTreeId] = useState<string | null>(null);
+  const [retryingTreeIds, setRetryingTreeIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [regeneratingOutlineTreeIds, setRegeneratingOutlineTreeIds] = useState<
     Set<string>
   >(() => new Set());
@@ -120,14 +122,13 @@ function PlannerPage() {
       campaignId: null,
     }),
   );
-  const { mutate: retryGeneration, isPending: isRetryingGeneration } =
-    useMutation(
-      getApiClientRq().task.create.mutationOptions({
-        onError: () => {
-          toast.error("Unable to retry article generation");
-        },
-      }),
-    );
+  const { mutate: retryGeneration } = useMutation(
+    getApiClientRq().task.create.mutationOptions({
+      onError: () => {
+        toast.error("Unable to retry article generation");
+      },
+    }),
+  );
   const { mutate: regenerateOutline } = useMutation(
     getApiClientRq().task.create.mutationOptions({
       onError: () => {
@@ -206,7 +207,7 @@ function PlannerPage() {
           const displayMessage = (() => {
             if (status === "queued") return "Article queued for generation";
             if (status === "suggestion-rejected")
-              return "Article suggestion ejected";
+              return "Article suggestion rejected";
             if (status === "review-denied") return "Article review denied";
             if (status === "scheduled") return "Article scheduled";
             return "Status updated.";
@@ -222,8 +223,12 @@ function PlannerPage() {
       toast.error("Unable to retry article generation");
       return;
     }
-    if (retryingTreeId) return;
-    setRetryingTreeId(file.treeId);
+    if (retryingTreeIds.has(file.treeId)) return;
+    setRetryingTreeIds((prev) => {
+      const next = new Set(prev);
+      next.add(file.treeId);
+      return next;
+    });
     retryGeneration(
       {
         type: "seo-write-article",
@@ -240,6 +245,13 @@ function PlannerPage() {
             { key: "error", value: "" },
             { key: "workflowId", value: result.taskId },
           ]);
+        },
+        onSettled: () => {
+          setRetryingTreeIds((prev) => {
+            const next = new Set(prev);
+            next.delete(file.treeId);
+            return next;
+          });
         },
       },
     );
@@ -449,7 +461,7 @@ function PlannerPage() {
                     return (
                       <div className="flex items-center gap-2">
                         <Button
-                          disabled={isRetryingGeneration}
+                          isLoading={retryingTreeIds.has(file.treeId)}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRetryGeneration(file);
