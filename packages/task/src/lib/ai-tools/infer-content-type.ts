@@ -20,7 +20,7 @@ export async function inferContentType(args: {
 }): Promise<Result<typeof outputSchema.infer, Error>> {
   if (args.serpResults.length === 0) {
     return ok({
-      contentType: "blog",
+      contentType: "how-to",
       reasoning: "No SERP results provided. Defaulting to blog.",
     });
   }
@@ -37,13 +37,10 @@ export async function inferContentType(args: {
 
 ## Content Type Options:
 
-- blog: Standard blog post format
 - listicle: Numbered or bulleted list article (e.g., "Top 10...", "Best 5...")
 - best-of-list: "Best/Top" rankings listicle with strict selection framing
-- guide: Comprehensive tutorial or guide
 - comparison: Comparison article (e.g., "X vs Y", "X or Y")
 - how-to: Step-by-step instructional content
-- checklist: Checklist format (e.g. "10 steps to X", "7 things you need to know about X")
 - case-study: Real-world example or case study
 - faq: FAQ-style article
 - news: News update / announcement
