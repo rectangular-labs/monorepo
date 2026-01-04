@@ -4,7 +4,10 @@ import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
+import {
+  Button,
+  buttonVariants,
+} from "@rectangular-labs/ui/components/ui/button";
 import {
   Field,
   FieldDescription,
@@ -29,6 +32,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/sheet";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
@@ -42,7 +46,6 @@ import {
   createPushDocumentQueryOptions,
 } from "~/lib/workspace/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
-import { Route } from "../route";
 
 function normalizeWorkspaceFilePath(file: string) {
   const trimmed = file.trim();
@@ -82,7 +85,6 @@ export function ArticleEditorTakeover({
   organizationId: string;
   projectId: string;
 }) {
-  const navigate = Route.useNavigate();
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
@@ -327,18 +329,17 @@ export function ArticleEditorTakeover({
     <div className="flex h-full w-full flex-col">
       <div className="flex items-center justify-between gap-3 border-b bg-background px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Button
-            onClick={() =>
-              navigate({
-                search: (prev) => ({ ...prev, file: undefined }),
-              })
-            }
-            size="sm"
-            variant="ghost"
+          <Link
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+            search={(prev) => ({
+              ...prev,
+              file: undefined,
+            })}
+            to="."
           >
             <Icons.X className="size-4" />
             Close
-          </Button>
+          </Link>
 
           <div className="min-w-0">
             <p className="truncate font-medium text-sm">{title}</p>
@@ -410,6 +411,15 @@ export function ArticleEditorTakeover({
 
       {fileNode?.ok && (
         <div className="flex flex-1 flex-col overflow-y-auto p-6">
+          <style>
+            {`
+              @media (max-width: 768px) {
+                .milkdown .ProseMirror {
+                  padding: 8px 8px 8px 90px;
+                }
+              }
+            `}
+          </style>
           <MarkdownEditor
             key={`${workspaceFilePath}:${isReadOnly}`}
             markdown={fileNode.value.content.toString()}

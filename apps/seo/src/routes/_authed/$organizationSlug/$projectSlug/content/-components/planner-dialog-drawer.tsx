@@ -129,7 +129,12 @@ export function PlannerDialogDrawer({
   ]);
 
   return (
-    <DialogDrawer isLoading={isSaving} onOpenChange={onOpenChange} open={open}>
+    <DialogDrawer
+      className={outline ? "sm:max-w-4xl" : undefined}
+      isLoading={isSaving}
+      onOpenChange={onOpenChange}
+      open={open}
+    >
       <div className="space-y-4">
         <DialogDrawerHeader>
           <DialogDrawerTitle>
