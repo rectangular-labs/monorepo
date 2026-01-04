@@ -223,7 +223,8 @@ async function generateOutline({
   languageCode: string;
   serp: SearchItem[];
 }): Promise<Result<{ outline: string; articleType: ArticleType }, Error>> {
-  const haveAiOverview = serp.find((s) => s.type === "ai_overview");
+  const haveAiOverview = serp.some((s) => s.type === "ai_overview");
+  const havePeopleAlsoAsk = serp.some((s) => s.type === "people_also_ask");
   const articleType = await inferArticleType({ primaryKeyword, notes, serp });
   const additionalRules = ARTICLE_TYPE_TO_ADDITIONAL_RULES[articleType];
   const system = `<role>
@@ -282,11 +283,16 @@ ${additionalRules ? `6) Follow the additional article rules as overriding constr
 - Add in a target word count to the plan so the writer knows how much to write.
   - Most articles should have a word count around 1,000 to 1,500 words. Long research pieces can have more, but 95% of articles should fall within 1,000 to 1,500 words. 
   - If there is a struggle to keep it below this word count, look to focus the article up, and talk about fewer ideas. 
-- ONLY suggest FAQ sections IF the People Also Ask data is available. Use the People Also Ask data to guide the FAQ sections and limit 5 questions maximum unless asked to write more. 
+${
+  havePeopleAlsoAsk
+    ? `- Suggest FAQ sections Based on the People Also Ask data. Use the People Also Ask data to guide the FAQ sections and limit 5 questions maximum unless asked to write more. 
   - short and to the point. No more than 2 sentences long.
   - answer the question directly, substantiated succinctly.
-  - plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed. 
-  - If there is NO SERP \`people_also_ask\` data, DO NOT include a FAQ section
+  - plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed.
+  - Have the question mirror the People Also Ask question almost verbatim.`
+    : "- Do not suggest FAQ sections."
+}
+
 - Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
 - Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
   <example>
