@@ -139,9 +139,12 @@ export async function searchPixabay(args: {
   url.searchParams.set("per_page", "5");
   url.searchParams.set("image_type", "photo");
   url.searchParams.set("safesearch", "true");
-  if (args.orientation === "portrait")
+  if (args.orientation === "portrait") {
     url.searchParams.set("orientation", "vertical");
-  else url.searchParams.set("orientation", "horizontal");
+  } else {
+    // pixabay doesn't support square orientation, so we use horizontal
+    url.searchParams.set("orientation", "horizontal");
+  }
 
   const response = await fetch(url);
   if (!response.ok) return [];

@@ -72,7 +72,7 @@ async function selectBestStockImageIndex(args: {
           {
             type: "text",
             text: `Query: ${args.query}
-Attached is ${args.candidates.length} images. Return {"index": N} where N is -1..${args.candidates.length - 1} inclusive. The index corresponds to the index of the best matching image in the list of candidates for the query. -1 should be returned if none match.`,
+Attached are ${args.candidates.length} images. Return {"index": N} where N is -1..${args.candidates.length - 1} inclusive. The index corresponds to the index of the best matching image in the list of candidates for the query. -1 should be returned if none match.`,
           },
         ],
       },
