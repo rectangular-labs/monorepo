@@ -109,7 +109,7 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
     whitepaper: `## Whitepapers
 1. Diagrams, charts, and frameworks should be produced into images
 2. Tone is authoritative and research based
-4. Heavy emphasis on accurate internal and external linking`,
+3. Heavy emphasis on accurate internal and external linking`,
     infographic: `## Infographic
 1. There should be a clear heading, with visuals which accompany and describe each heading, and corresponding words in bullet point`,
     "case-study": `## Case studies
@@ -130,7 +130,7 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
 4. Conversational - should be clearly signposted as a back and forth between interviewer and interviewee
 5. Introduction setting the scene of the interview - who is being interviewed and what their position and experience is, and when it took place, where. Who was interviewing. 
 6. Closing insights stating what was learnt from the interview`,
-    "product-update": `## product update
+    "product-update": `## Product update
 1. Word light 
 2. Introduce the product and what it is 
 3. Clearly list the changes in the product in a listicle, and list all the features
@@ -144,9 +144,9 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
     "research-summary": `## Research summary
 1. Diagrams, charts, and frameworks should be produced into images
 2. Any original opinions have to be clearly labelled as such
-2. External link to the original research
-3. Cite clearly and in great detail the original research with 100% accuracy 
-4. Analytical and neutral tone`,
+3. External link to the original research
+4. Cite clearly and in great detail the original research with 100% accuracy 
+5. Analytical and neutral tone`,
     "event-recap": `## Event recap
 1. Use pictures of the event from the outline provided by the user.
 2. Descriptive tone, excited
