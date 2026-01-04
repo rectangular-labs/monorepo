@@ -28,8 +28,8 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useEffect, useMemo, useState } from "react";
 import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
-import { slugToFilePath } from "~/lib/workspace/slug";
 import type { TreeFile } from "~/lib/workspace/build-tree";
+import { slugToFilePath } from "~/lib/workspace/slug";
 
 export function PlannerDialogDrawer({
   activeDialogFile,
