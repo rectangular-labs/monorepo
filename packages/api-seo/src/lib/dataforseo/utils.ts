@@ -10,9 +10,9 @@ export function getLocationAndLanguage(project: {
   businessBackground?: typeof businessBackgroundSchema.infer | null;
 }) {
   const locationName =
-    COUNTRY_CODE_MAP[project.businessBackground?.targetCountryCode ?? "US"] ??
+    COUNTRY_CODE_MAP[project.businessBackground?.targetCountryCode ?? "US"] ||
     "United States";
-  const languageCode = project.businessBackground?.languageCode ?? "en";
+  const languageCode = project.businessBackground?.languageCode || "en";
   return { locationName, languageCode };
 }
 

@@ -490,7 +490,7 @@ export async function fetchSerp(args: {
           args.os ??
           ((args.device ?? "desktop") === "desktop" ? "macos" : "ios"),
         group_organic_results: true,
-        load_async_ai_overview: false,
+        load_async_ai_overview: true,
         target: args.targetUrl ?? null,
       },
     ],
