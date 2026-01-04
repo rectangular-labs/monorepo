@@ -1,5 +1,6 @@
 "use client";
 
+import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
@@ -8,9 +9,11 @@ import {
   AlertTitle,
 } from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { type } from "arktype";
+import { strToU8, zipSync } from "fflate";
 import { useEffect, useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import {
@@ -60,6 +63,81 @@ export const Route = createFileRoute(
   component: PageComponent,
 });
 
+function stringifyYamlString(value: string | undefined) {
+  const normalized = value ?? "";
+  const escaped = normalized.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+  return `"${escaped}"`;
+}
+
+function upsertFrontmatter({
+  markdown,
+  fields,
+}: {
+  markdown: string;
+  fields: {
+    title: string;
+    description: string;
+    slug: string;
+    scheduledFor: string;
+    primaryKeyword: string;
+  };
+}) {
+  const frontmatterMatch = markdown.match(/^---\n([\s\S]*?)\n---\n?/);
+  const existingBody = frontmatterMatch
+    ? markdown.slice(frontmatterMatch[0].length)
+    : markdown;
+  const existingFrontmatterLines = frontmatterMatch
+    ? (frontmatterMatch[1]?.split("\n") ?? [])
+    : [];
+
+  const reservedKeys = new Set([
+    "title",
+    "description",
+    "slug",
+    "scheduledfor",
+    "primarykeyword",
+  ]);
+  const preservedLines = existingFrontmatterLines.filter((line) => {
+    const key = line.split(":")[0]?.trim().toLowerCase();
+    if (!key) return true;
+    return !reservedKeys.has(key);
+  });
+
+  const nextFrontmatter = [
+    `title: ${stringifyYamlString(fields.title)}`,
+    `description: ${stringifyYamlString(fields.description)}`,
+    `slug: ${stringifyYamlString(fields.slug)}`,
+    `scheduledFor: ${stringifyYamlString(fields.scheduledFor)}`,
+    `primaryKeyword: ${stringifyYamlString(fields.primaryKeyword)}`,
+    ...preservedLines,
+  ]
+    .filter((line) => line.trim().length > 0)
+    .join("\n");
+
+  return `---\n${nextFrontmatter}\n---\n\n${existingBody.replace(/^\n+/, "")}`;
+}
+
+function extractFrontmatter(markdown: string) {
+  const match = markdown.match(/^---\n([\s\S]*?)\n---\n?/);
+  if (!match) return null;
+  const raw = match[1] ?? "";
+  const map = new Map<string, string>();
+  for (const line of raw.split("\n")) {
+    const idx = line.indexOf(":");
+    if (idx <= 0) continue;
+    const key = line.slice(0, idx).trim();
+    let value = line.slice(idx + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    map.set(key, value);
+  }
+  return map;
+}
+
 function PageComponent() {
   const { organizationSlug, projectSlug } = Route.useParams();
   const { view } = Route.useSearch();
@@ -67,6 +145,7 @@ function PageComponent() {
   const navigate = Route.useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
   const [liveStatusFilter, setLiveStatusFilter] = useState<
     "all" | Extract<SeoFileStatus, "scheduled" | "published">
   >("all");
@@ -175,7 +254,7 @@ function PageComponent() {
     });
     const filteredBySearch = normalizedSearch
       ? filteredByStatus.filter((f) => {
-          const title = f.name.toLowerCase();
+          const title = (f.title ?? f.name.replace(/\.md$/, "")).toLowerCase();
           const keyword = f.primaryKeyword.toLowerCase();
           return (
             title.includes(normalizedSearch) ||
@@ -186,7 +265,7 @@ function PageComponent() {
 
     return filteredBySearch.map((f) => ({
       id: f.treeId,
-      title: f.name.replace(/\.md$/, ""),
+      slug: f.slug ?? f.path.replace(/\.md$/, ""),
       author: f.userId,
       createdAt: f.createdAt,
       scheduledFor: f.scheduledFor,
@@ -194,6 +273,87 @@ function PageComponent() {
       status: f.status,
     }));
   }, [liveFiles, liveStatusFilter, normalizedSearch]);
+
+  const downloadAllLiveArticles = () => {
+    if (liveFiles.length === 0) {
+      toast.error("No scheduled or published articles to download.");
+      return;
+    }
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+    try {
+      const entries: Record<string, Uint8Array> = {};
+      const usedFilenames = new Map<string, number>();
+      const date = new Date().toISOString().slice(0, 10);
+      const zipName = `${projectSlug}-scheduled-published-${date}.zip`;
+
+      for (const file of liveFiles) {
+        const fm = extractFrontmatter(file.content.toString());
+
+        const title =
+          file.title?.trim() ||
+          fm?.get("title")?.trim() ||
+          file.name.replace(/\.md$/, "");
+
+        const slugCandidateFull =
+          file.slug?.trim() || fm?.get("slug")?.trim() || toSlug(title).trim();
+
+        const descriptionCandidate =
+          file.description?.trim() ||
+          fm?.get("description")?.trim() ||
+          "";
+
+        const flatSlugCandidate =
+          slugCandidateFull
+            .replace(/^\//, "")
+            .split("/")
+            .filter(Boolean)
+            .at(-1) ?? "";
+
+        const baseFilename = flatSlugCandidate || toSlug(title) || "article";
+        const existing = usedFilenames.get(baseFilename) ?? 0;
+        usedFilenames.set(baseFilename, existing + 1);
+        const uniqueFilename =
+          existing === 0 ? baseFilename : `${baseFilename}-${existing + 1}`;
+
+        const markdown = upsertFrontmatter({
+          markdown: file.content.toString(),
+          fields: {
+            title,
+            description: descriptionCandidate,
+            slug: slugCandidateFull,
+            scheduledFor: file.scheduledFor ?? "",
+            primaryKeyword: file.primaryKeyword ?? "",
+          },
+        });
+
+        entries[`${uniqueFilename}.md`] = strToU8(markdown);
+      }
+
+      const zipped = zipSync(entries, { level: 6 });
+      const blob = new Blob([new Uint8Array(zipped)], {
+        type: "application/zip",
+      });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = zipName;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1_000);
+
+      toast.success("Download started");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate download.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
@@ -205,6 +365,16 @@ function PageComponent() {
               {activeProject?.name ?? projectSlug}
             </p>
           </div>
+          <Button
+            disabled={liveFiles.length === 0 || isLoadingLoroDoc}
+            isLoading={isDownloading}
+            onClick={downloadAllLiveArticles}
+            size="sm"
+            variant="outline"
+          >
+            Download all
+            <Icons.Save aria-hidden="true" />
+          </Button>
         </div>
       </div>
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
@@ -34,7 +33,7 @@ import {
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
@@ -43,6 +42,7 @@ import {
   type TreeFile,
   traverseTree,
 } from "~/lib/workspace/build-tree";
+import { moveFileToSlug, slugToFilePath } from "~/lib/workspace/slug";
 import {
   createPullDocumentQueryOptions,
   createPushDocumentQueryOptions,
@@ -87,6 +87,7 @@ export function ArticleEditorTakeover({
   organizationId: string;
   projectId: string;
 }) {
+  const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
@@ -95,12 +96,16 @@ export function ArticleEditorTakeover({
   });
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
   const [metadataDraft, setMetadataDraft] = useState<{
+    title: string;
+    description: string;
     slug: string;
     status: SeoFileStatus;
     primaryKeyword: string;
     notes: string;
     scheduledFor: string;
   }>({
+    title: "",
+    description: "",
     slug: "",
     status: "queued",
     primaryKeyword: "",
@@ -202,7 +207,7 @@ export function ArticleEditorTakeover({
   }, [loroDoc, workspaceFilePath]);
 
   const title = fileNode?.ok
-    ? fileNode.value.name.replace(/\.md$/, "")
+    ? fileNode.value.title?.trim() || fileNode.value.name.replace(/\.md$/, "")
     : "Editor";
   const status: SeoFileStatus | undefined = fileNode?.ok
     ? fileNode.value.status
@@ -212,6 +217,18 @@ export function ArticleEditorTakeover({
   const outlineText = fileNode?.ok
     ? (fileNode.value.outline?.trim() ?? "")
     : "";
+
+  const allFiles = useMemo(() => {
+    if (!loroDoc) return [];
+    const treeResult = buildTree(loroDoc);
+    if (!treeResult.ok) return [];
+    const files: TreeFile[] = [];
+    traverseTree(treeResult.value, (node) => {
+      if (node.type === "file") files.push(node);
+      return { shouldContinue: true };
+    });
+    return files;
+  }, [loroDoc]);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -245,9 +262,10 @@ export function ArticleEditorTakeover({
     if (!loroDoc) return;
     if (!fileNode?.ok) return;
 
-    const fallbackSlug = toSlug(fileNode.value.name.replace(/\.md$/, ""));
     setMetadataDraft({
-      slug: fallbackSlug,
+      title: fileNode.value.title ?? fileNode.value.name.replace(/\.md$/, ""),
+      description: fileNode.value.description ?? "",
+      slug: fileNode.value.slug ?? fileNode.value.path.replace(/\.md$/, ""),
       status: fileNode.value.status,
       primaryKeyword: fileNode.value.primaryKeyword,
       notes: fileNode.value.notes ?? "",
@@ -307,15 +325,54 @@ export function ArticleEditorTakeover({
       ? new Date(metadataDraft.scheduledFor).toISOString()
       : "";
 
+    const currentSlug =
+      fileNode.value.slug ?? fileNode.value.path.replace(/\.md$/, "");
+    const nextSlug = metadataDraft.slug.trim();
+    const slugPathResult = slugToFilePath(nextSlug);
+    if (!slugPathResult.ok) {
+      toast.error(slugPathResult.error.message);
+      return;
+    }
+
+    let nextFilePath = fileNode.value.path;
+    if (nextSlug !== currentSlug) {
+      const collision = allFiles.find(
+        (f) =>
+          f.path === slugPathResult.value && f.treeId !== fileNode.value.treeId,
+      );
+      if (collision) {
+        toast.error("Slug already exists");
+        return;
+      }
+
+      const moveResult = moveFileToSlug({
+        tree: loroDoc.getTree("fs"),
+        fromFilePath: fileNode.value.path,
+        nextSlug,
+      });
+      if (!moveResult.ok) {
+        toast.error(moveResult.error.message);
+        return;
+      }
+      nextFilePath = moveResult.value.nextFilePath;
+      void navigate({
+        to: "/$organizationSlug/$projectSlug/content",
+        params: { organizationSlug, projectSlug },
+        search: (prev) => ({
+          ...prev,
+          file: nextFilePath,
+        }),
+      });
+    }
+
     const metadata: { key: string; value: string }[] = [
       { key: "status", value: metadataDraft.status },
+      { key: "title", value: metadataDraft.title.trim() },
+      { key: "description", value: metadataDraft.description.trim() },
       { key: "primaryKeyword", value: metadataDraft.primaryKeyword.trim() },
       { key: "notes", value: metadataDraft.notes.trim() },
       ...(nextScheduledIso
         ? [{ key: "scheduledFor", value: nextScheduledIso }]
-        : []),
-      ...(metadataDraft.slug.trim()
-        ? [{ key: "slug", value: metadataDraft.slug.trim() }]
         : []),
     ];
 
@@ -324,9 +381,7 @@ export function ArticleEditorTakeover({
       context: {
         publishingSettings,
       },
-      operations: [
-        { path: fileNode.value.path, metadata, createIfMissing: true },
-      ],
+      operations: [{ path: nextFilePath, metadata, createIfMissing: true }],
     });
   };
 
@@ -564,6 +619,39 @@ export function ArticleEditorTakeover({
           <div className="overflow-auto p-4">
             <FieldGroup className="gap-4">
               <Field>
+                <FieldLabel htmlFor="article-title">Title</FieldLabel>
+                <Input
+                  id="article-title"
+                  onChange={(e) =>
+                    setMetadataDraft((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  placeholder="How to rank on Google"
+                  value={metadataDraft.title}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="article-description">
+                  Description
+                </FieldLabel>
+                <Textarea
+                  id="article-description"
+                  onChange={(e) =>
+                    setMetadataDraft((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                  placeholder="Meta description..."
+                  rows={3}
+                  value={metadataDraft.description}
+                />
+              </Field>
+
+              <Field>
                 <FieldLabel htmlFor="article-slug">Slug</FieldLabel>
                 <Input
                   id="article-slug"
@@ -573,12 +661,9 @@ export function ArticleEditorTakeover({
                       slug: e.target.value,
                     }))
                   }
-                  placeholder="how-to-rank-on-google"
+                  placeholder="/how-to-rank-on-google"
                   value={metadataDraft.slug}
                 />
-                <FieldDescription>
-                  Optional URL slug for this article.
-                </FieldDescription>
               </Field>
 
               <Field>

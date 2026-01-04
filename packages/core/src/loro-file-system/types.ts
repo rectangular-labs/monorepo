@@ -23,6 +23,8 @@ export type FsNodePayload =
        */
       createdAt: string;
       // doesn't exists on dir
+      title?: undefined;
+      description?: undefined;
       scheduledFor?: undefined;
       userId?: undefined;
       status?: undefined;
@@ -41,6 +43,8 @@ export type FsNodePayload =
        * ISO date string
        */
       createdAt: string;
+      title?: string;
+      description?: string;
       /**
        * ISO date string
        */

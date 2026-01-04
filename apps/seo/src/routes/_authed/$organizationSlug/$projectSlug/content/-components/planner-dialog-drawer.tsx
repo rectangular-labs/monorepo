@@ -28,17 +28,18 @@ import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useEffect, useMemo, useState } from "react";
 import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
+import { slugToFilePath } from "~/lib/workspace/slug";
 import type { TreeFile } from "~/lib/workspace/build-tree";
 
 export function PlannerDialogDrawer({
   activeDialogFile,
-  applyMetadataUpdate,
   isSaving,
   onOpenChange,
   open,
   publishingSettings,
   isRegeneratingOutline,
   onRegenerateOutline,
+  onSaveEdits,
 }: {
   isSaving: boolean;
   activeDialogFile: TreeFile | undefined;
@@ -47,13 +48,22 @@ export function PlannerDialogDrawer({
   publishingSettings: typeof publishingSettingsSchema.infer | null;
   isRegeneratingOutline: boolean;
   onRegenerateOutline: (file: TreeFile) => void;
-  applyMetadataUpdate: (
-    file: TreeFile,
-    metadata: { key: string; value: string }[],
-    options?: { closeDialog?: boolean },
-  ) => void;
+  onSaveEdits: (args: {
+    file: TreeFile;
+    status?: SeoFileStatus;
+    title: string;
+    description: string;
+    slug: string;
+    notes: string;
+    scheduledForIso: string | null;
+    outline: string;
+    options?: { closeDialog?: boolean };
+  }) => void;
 }) {
   const [titleDraft, setTitleDraft] = useState("");
+  const [descriptionDraft, setDescriptionDraft] = useState("");
+  const [slugDraft, setSlugDraft] = useState("");
+  const [slugError, setSlugError] = useState<string | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
   const [useNextEarliest, setUseNextEarliest] = useState(true);
   const [customScheduleDraft, setCustomScheduleDraft] = useState("");
@@ -61,7 +71,10 @@ export function PlannerDialogDrawer({
 
   useEffect(() => {
     if (!activeDialogFile) return;
-    setTitleDraft(activeDialogFile.name.replace(/\.md$/i, ""));
+    setTitleDraft(activeDialogFile.title ?? activeDialogFile.name.replace(/\.md$/i, ""));
+    setDescriptionDraft(activeDialogFile.description ?? "");
+    setSlugDraft(activeDialogFile.slug ?? activeDialogFile.path.replace(/\.md$/i, ""));
+    setSlugError(null);
     setNotesDraft(activeDialogFile.notes ?? "");
     if (activeDialogFile.scheduledFor) {
       setUseNextEarliest(false);
@@ -91,18 +104,7 @@ export function PlannerDialogDrawer({
     return activeDialogFile?.outline?.trim() ?? "";
   }, [activeDialogFile?.outline]);
 
-  const buildMetadataUpdate = useMemo(() => {
-    const baseName = activeDialogFile?.name ?? "";
-    const normalizedTitle = titleDraft.trim();
-    const nextName =
-      normalizedTitle.length > 0
-        ? normalizedTitle.toLowerCase().endsWith(".md")
-          ? normalizedTitle
-          : `${normalizedTitle}.md`
-        : "";
-    const shouldUpdateName =
-      !!activeDialogFile && nextName.length > 0 && nextName !== baseName;
-
+  const buildSavePayload = useMemo(() => {
     const addSchedule =
       !useNextEarliest && customScheduleDraft.trim().length > 0;
     const scheduleDate = addSchedule ? new Date(customScheduleDraft) : null;
@@ -111,26 +113,33 @@ export function PlannerDialogDrawer({
         ? scheduleDate.toISOString()
         : null;
 
-    return (status?: SeoFileStatus) => {
-      const metadata: { key: string; value: string }[] = [];
-      if (status) metadata.push({ key: "status", value: status });
-      if (shouldUpdateName) metadata.push({ key: "name", value: nextName });
-      if (notesDraft.trim())
-        metadata.push({ key: "notes", value: notesDraft.trim() });
-      if (scheduleIso)
-        metadata.push({ key: "scheduledFor", value: scheduleIso });
-      if (outlineDraft.trim())
-        metadata.push({ key: "outline", value: outlineDraft.trim() });
-      return metadata;
+    return {
+      title: titleDraft,
+      description: descriptionDraft,
+      slug: slugDraft,
+      notes: notesDraft,
+      scheduledForIso: scheduleIso,
+      outline: outlineDraft,
     };
   }, [
-    activeDialogFile,
     customScheduleDraft,
+    descriptionDraft,
     notesDraft,
     outlineDraft,
+    slugDraft,
     titleDraft,
     useNextEarliest,
   ]);
+
+  const validateSlug = () => {
+    const result = slugToFilePath(slugDraft);
+    if (!result.ok) {
+      setSlugError(result.error.message);
+      return false;
+    }
+    setSlugError(null);
+    return true;
+  };
 
   return (
     <DialogDrawer
@@ -174,6 +183,46 @@ export function PlannerDialogDrawer({
               value={titleDraft}
             />
           </FieldContent>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="planner-description">Description</FieldLabel>
+          <FieldContent>
+            <Textarea
+              className="max-h-[15vh]"
+              id="planner-description"
+              onChange={(e) => setDescriptionDraft(e.target.value)}
+              placeholder="Meta description"
+              rows={3}
+              value={descriptionDraft}
+            />
+          </FieldContent>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="planner-slug">Slug</FieldLabel>
+          <FieldContent>
+            <Input
+              id="planner-slug"
+              onBlur={validateSlug}
+              onChange={(e) => {
+                setSlugDraft(e.target.value);
+                setSlugError(null);
+              }}
+              placeholder="/business/finance-automation"
+              value={slugDraft}
+            />
+          </FieldContent>
+          {slugError ? (
+            <FieldDescription className="text-destructive">
+              {slugError}
+            </FieldDescription>
+          ) : (
+            <FieldDescription>
+              Path without the <code>.md</code> extension (e.g.{" "}
+              <code>/business/finance-automation</code>).
+            </FieldDescription>
+          )}
         </Field>
 
         {outline && (
@@ -283,11 +332,13 @@ export function PlannerDialogDrawer({
                 disabled={isSaving}
                 onClick={() => {
                   if (!activeDialogFile) return;
-                  applyMetadataUpdate(
-                    activeDialogFile,
-                    buildMetadataUpdate("suggestion-rejected"),
-                    { closeDialog: true },
-                  );
+                  if (!validateSlug()) return;
+                  onSaveEdits({
+                    file: activeDialogFile,
+                    status: "suggestion-rejected",
+                    ...buildSavePayload,
+                    options: { closeDialog: true },
+                  });
                 }}
                 variant="outline"
               >
@@ -297,11 +348,13 @@ export function PlannerDialogDrawer({
                 disabled={isSaving}
                 onClick={() => {
                   if (!activeDialogFile) return;
-                  applyMetadataUpdate(
-                    activeDialogFile,
-                    buildMetadataUpdate("queued"),
-                    { closeDialog: true },
-                  );
+                  if (!validateSlug()) return;
+                  onSaveEdits({
+                    file: activeDialogFile,
+                    status: "queued",
+                    ...buildSavePayload,
+                    options: { closeDialog: true },
+                  });
                 }}
               >
                 Accept suggestion
@@ -313,13 +366,13 @@ export function PlannerDialogDrawer({
                 disabled={isSaving}
                 onClick={() => {
                   if (!activeDialogFile) return;
-                  applyMetadataUpdate(
-                    activeDialogFile,
-                    buildMetadataUpdate("suggestion-rejected"),
-                    {
-                      closeDialog: true,
-                    },
-                  );
+                  if (!validateSlug()) return;
+                  onSaveEdits({
+                    file: activeDialogFile,
+                    status: "suggestion-rejected",
+                    ...buildSavePayload,
+                    options: { closeDialog: true },
+                  });
                 }}
                 variant="outline"
               >
@@ -329,8 +382,11 @@ export function PlannerDialogDrawer({
                 disabled={isSaving}
                 onClick={() => {
                   if (!activeDialogFile) return;
-                  applyMetadataUpdate(activeDialogFile, buildMetadataUpdate(), {
-                    closeDialog: true,
+                  if (!validateSlug()) return;
+                  onSaveEdits({
+                    file: activeDialogFile,
+                    ...buildSavePayload,
+                    options: { closeDialog: true },
                   });
                 }}
               >

@@ -26,7 +26,7 @@ import { useCallback, useMemo, useState } from "react";
 
 type ArticleTableRow = {
   id: string;
-  title: string;
+  slug: string;
   primaryKeyword: string;
   author?: string;
   scheduledFor?: string;
@@ -167,8 +167,8 @@ export function ArticlesTable({
         },
       },
       {
-        accessorKey: "title",
-        header: "Title",
+        accessorKey: "slug",
+        header: "Slug",
         cell: ({ getValue }) => getValue<string>(),
         sortingFn: (rowA, rowB, columnId) => {
           return compareMaybeString(
@@ -278,8 +278,8 @@ export function ArticlesTable({
                   ? "max-w-[200px] truncate"
                   : columnId === "primaryKeyword"
                     ? "max-w-[280px] truncate"
-                    : columnId === "title"
-                      ? "max-w-[480px] truncate"
+                    : columnId === "slug"
+                      ? "max-w-[440px] truncate"
                       : undefined;
 
               return (
