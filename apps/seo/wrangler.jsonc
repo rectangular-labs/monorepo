@@ -30,6 +30,9 @@
   //     "name": "user-vm-container"
   //   }
   // ],
+  "images": {
+    "binding": "IMAGES"
+  },
   "durable_objects": {
     "bindings": [
       // {
@@ -86,14 +89,6 @@
   ],
   "env": {
     "production": {
-      "observability": {
-        "traces": {
-          "enabled": true
-        },
-        "logs": {
-          "enabled": true
-        }
-      },
       // "containers": [
       //   {
       //     "class_name": "UserVMContainer",
@@ -103,6 +98,9 @@
       //     "instance_type": "basic"
       //   }
       // ],
+      "images": {
+        "binding": "IMAGES"
+      },
       "durable_objects": {
         "bindings": [
           // {
@@ -171,6 +169,9 @@
       //     "instance_type": "lite"
       //   }
       // ],
+      "images": {
+        "binding": "IMAGES"
+      },
       "durable_objects": {
         "bindings": [
           // {

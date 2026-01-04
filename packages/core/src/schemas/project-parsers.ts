@@ -101,6 +101,11 @@ export const imageSettingsSchema = type({
   imageInstructions: type("string").describe(
     "Additional guidance for how generated images should look (e.g., do/don'ts, brand rules).",
   ),
+  stockImageProviders: type("'unsplash'|'pexels'|'pixabay'")
+    .array()
+    .describe(
+      "Preferred stock image providers to search (in order) when looking up open-license images.",
+    ),
 });
 
 export const writingSettingsSchema = type({
