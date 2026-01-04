@@ -3,7 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep,
 } from "cloudflare:workers";
-import type { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
+import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import type {
@@ -12,8 +12,14 @@ import type {
 } from "@rectangular-labs/core/schemas/task-parsers";
 import { createDb } from "@rectangular-labs/db";
 import { writeToFile } from "@rectangular-labs/loro-file-system";
-import { generateText, stepCountIs } from "ai";
-import type { type } from "arktype";
+import {
+  generateText,
+  type JSONSchema7,
+  jsonSchema,
+  Output,
+  stepCountIs,
+} from "ai";
+import { type } from "arktype";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
 import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
 import {
@@ -26,9 +32,12 @@ import { createPublicImagesBucket } from "../lib/bucket";
 import { configureDataForSeoClient } from "../lib/dataforseo/utils";
 import { createTask } from "../lib/task";
 import {
+  analyzeArticleMarkdownForReview,
   loadWorkspaceForWorkflow,
   persistWorkspaceSnapshot,
+  repairPublicBucketImageLinks,
 } from "../lib/workspace/workflow";
+import { ARTICLE_TYPE_TO_WRITER_RULE } from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -38,6 +47,11 @@ function logInfo(message: string, data?: Record<string, unknown>) {
 function logError(message: string, data?: Record<string, unknown>) {
   console.error(`[SeoWriterWorkflow] ${message}`, data ?? {});
 }
+
+const reviewArticleOutputSchema = type({
+  approved: type("boolean").describe("Whether the article is approved."),
+  changes: type("string[]").describe("Changes to be made to the article."),
+});
 
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
 export class SeoWriterWorkflow extends WorkflowEntrypoint<
@@ -196,78 +210,213 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             imageToolCount: Object.keys(imageTools.tools).length,
           });
 
+          const outline = node.data.get("outline");
+          const articleType = node.data.get("articleType");
+          const primaryKeyword = node.data.get("primaryKeyword");
           const systemPrompt = buildWriterSystemPrompt({
             project,
             skillsSection: "",
             mode: "workflow",
-            articleType: node.data.get("articleType"),
-            primaryKeyword: node.data.get("primaryKeyword"),
-            outline: node.data.get("outline"),
+            articleType,
+            primaryKeyword,
+            outline,
           });
 
           logInfo("starting article generation", {
             instanceId: event.instanceId,
             path: input.path,
           });
-
-          const result = await generateText({
-            model: openai("gpt-5.2"),
-            providerOptions: {
-              openai: {
-                reasoningEffort: "medium",
-              } satisfies OpenAIResponsesProviderOptions,
-              google: {
-                thinkingConfig: {
-                  includeThoughts: true,
-                  thinkingLevel: "medium",
-                },
-              } satisfies GoogleGenerativeAIProviderOptions,
-            },
-            tools: {
-              ...webTools.tools,
-              ...internalLinksTools.tools,
-              ...imageTools.tools,
-              ...todoTool.tools,
-            },
-            system: systemPrompt,
-            messages: [
-              {
-                role: "user",
-                content: "Write the full article now.",
-              },
-            ],
-            onStepFinish: (step) => {
-              logInfo(`[generateArticle] Step completed:`, {
-                text: step.text,
-                toolResults: JSON.stringify(step.toolResults, null, 2),
-                usage: step.usage,
-              });
-            },
-            prepareStep: ({ messages }) => {
-              return {
-                messages: [
-                  ...messages,
-                  {
-                    role: "assistant",
-                    content: formatTodoFocusReminder({
-                      todos: todoTool.getSnapshot(),
-                      maxOpen: 5,
-                    }),
+          let approved = false;
+          let changes: string[] = [];
+          let attempts = 0;
+          let text = "";
+          while (!approved && attempts < 3) {
+            const result = await generateText({
+              model: openai("gpt-5.2"),
+              providerOptions: {
+                openai: {
+                  reasoningEffort: "medium",
+                } satisfies OpenAIResponsesProviderOptions,
+                google: {
+                  thinkingConfig: {
+                    includeThoughts: true,
+                    thinkingLevel: "medium",
                   },
-                ],
-              };
-            },
-            stopWhen: [stepCountIs(40)],
-          });
+                } satisfies GoogleGenerativeAIProviderOptions,
+              },
+              tools: {
+                ...webTools.tools,
+                ...internalLinksTools.tools,
+                ...imageTools.tools,
+                ...todoTool.tools,
+              },
+              system: systemPrompt,
+              messages: [
+                {
+                  role: "user",
+                  content: changes.length
+                    ? `The article has been written and reviewed. Please refer to the original article and apply the changes to the article and return the updated article.
+<original-article>
+${text}
+</original-article>
 
-          const text = result.text.trim();
-          if (!text) throw new Error("Empty article returned by model");
-          logInfo("article generated", {
-            instanceId: event.instanceId,
-            path: input.path,
-            articleChars: text.length,
-            usage: result.usage ?? null,
-          });
+<changes>
+${changes}
+</changes>`
+                    : "Write the full article now.",
+                },
+              ],
+              onStepFinish: (step) => {
+                logInfo(`[generateArticle] Step completed:`, {
+                  text: step.text,
+                  toolResults: JSON.stringify(step.toolResults, null, 2),
+                  usage: step.usage,
+                });
+              },
+              prepareStep: ({ messages }) => {
+                return {
+                  messages: [
+                    ...messages,
+                    {
+                      role: "assistant",
+                      content: formatTodoFocusReminder({
+                        todos: todoTool.getSnapshot(),
+                        maxOpen: 5,
+                      }),
+                    },
+                  ],
+                };
+              },
+              stopWhen: [stepCountIs(40)],
+            });
+
+            const repairedLinks = repairPublicBucketImageLinks({
+              markdown: result.text.trim(),
+              orgId: input.organizationId,
+              projectId: input.projectId,
+              kind: "content-image",
+            });
+            text = repairedLinks.markdown;
+            if (!text) throw new Error("Empty article returned by model");
+            logInfo("article generated. Going through review process.", {
+              instanceId: event.instanceId,
+              path: input.path,
+              articleChars: text.length,
+              usage: result.usage ?? null,
+              replacedCount: repairedLinks.replacedCount,
+            });
+
+            const articleTypeRule = articleType
+              ? ARTICLE_TYPE_TO_WRITER_RULE[articleType]
+              : undefined;
+
+            const analysis = analyzeArticleMarkdownForReview({
+              markdown: text,
+              websiteUrl: project.websiteUrl,
+              outline,
+            });
+
+            const { experimental_output: reviewResult } = await generateText({
+              model: google("gemini-3-flash-preview"),
+              providerOptions: {
+                google: {
+                  thinkingConfig: {
+                    includeThoughts: true,
+                    thinkingLevel: "medium",
+                  },
+                } satisfies GoogleGenerativeAIProviderOptions,
+              },
+              tools: {
+                ...webTools.tools,
+              },
+              system: `<role>
+You are a strict SEO content QA reviewer. Your job is to verify the writer followed ALL explicit rules and that the article is publish-ready.
+</role>
+
+<approval-policy>
+- Only set approved=true when ALL requirements are satisfied.
+- If ANY measurable requirement fails (counts, missing sections, forbidden characters), approved MUST be false.
+- In changes, focus on concrete edits: what to add/remove/move, and exactly where (section names/headings).
+</approval-policy>
+
+<hard-requirements>
+- Outline coverage: every outline heading (H2+) must exist in the article and be meaningfully covered.
+- Internal links: at least 3 internal links (relative URLs and URLs whose host matches the website host count as internal).
+- External links: at least 2 external links whose host is NOT the website host.
+- Images:
+  - Exactly 1 hero image.
+    - There should be no placeholder blockquote line that mentions "Hero image".
+    - If no marker exists, treat the only image before the first H2 as hero (if exactly one exists).
+    - Otherwise, treat the first image in the document as hero.
+  - At least 1 non-hero image inside an H2 section (an H2 section that contains an image other than the hero image).
+  - All images must have non-empty, descriptive alt text.
+- Formatting:
+  - No em dashes (—) anywhere.
+  - If bullet points are used, each bullet must start with a bold heading and a colon (e.g. "- **Heading**: ...").
+- Article-type rule (if present) must be enforced.
+</hard-requirements>
+
+<link-verification>
+- Use web_search and web_fetch to verify external links are accurate, relevant, and resolve to the intended content.
+- If a link is broken, non-authoritative, or mismatched to the claim, propose a replacement URL and specify where to swap it in.
+</link-verification>
+
+<output>
+Return JSON that matches the schema: { approved: boolean, changes: string[] }.
+If not approved, changes must be a prioritized, actionable edit list (include observed counts and missing items).
+</output>
+
+<project-context>
+- Website URL: ${project.websiteUrl}
+- Article type: ${articleType ?? "(missing)"}
+- Primary keyword: ${primaryKeyword ?? "(missing)"}
+- Brand voice (must be followed): ${project.writingSettings?.brandVoice ?? "(missing)"}
+- User instructions (must be followed): ${project.writingSettings?.customInstructions ?? "(missing)"}
+${articleTypeRule ? `- Article-type rule:\n${articleTypeRule}` : ""}
+</project-context>
+
+<programmatic-analysis>
+${JSON.stringify(analysis, null, 2)}
+</programmatic-analysis>
+
+<outline>
+${outline ?? "(missing)"}
+</outline>
+
+<article-markdown>
+${text}
+</article-markdown>`,
+              messages: [
+                {
+                  role: "user",
+                  content: `Review the article against the requirements and return (approved, changes).`,
+                },
+              ],
+              experimental_output: Output.object({
+                schema: jsonSchema<typeof reviewArticleOutputSchema.infer>(
+                  reviewArticleOutputSchema.toJsonSchema() as JSONSchema7,
+                ),
+              }),
+              onStepFinish: (step) => {
+                logInfo("review step completed", {
+                  instanceId: event.instanceId,
+                  path: input.path,
+                  text: step.text,
+                  toolResults: JSON.stringify(step.toolResults, null, 2),
+                  usage: step.usage,
+                });
+              },
+              stopWhen: [stepCountIs(20)],
+            });
+            ++attempts;
+            ({ approved, changes } = reviewResult);
+            logInfo("review result", {
+              instanceId: event.instanceId,
+              path: input.path,
+              approved,
+              changes,
+            });
+          }
           return text;
         },
       );
