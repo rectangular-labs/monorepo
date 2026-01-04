@@ -10,6 +10,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/button";
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldGroup,
   FieldLabel,
@@ -30,6 +31,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@rectangular-labs/ui/components/ui/sheet";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -207,6 +209,9 @@ export function ArticleEditorTakeover({
     : undefined;
 
   const isReadOnly = status === "generating";
+  const outlineText = fileNode?.ok
+    ? (fileNode.value.outline?.trim() ?? "")
+    : "";
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -325,6 +330,33 @@ export function ArticleEditorTakeover({
     });
   };
 
+  const { mutate: regenerateOutline, isPending: isRegeneratingOutline } =
+    useMutation(
+      getApiClientRq().task.create.mutationOptions({
+        onError: () => {
+          toast.error("Unable to regenerate outline");
+        },
+        onSuccess: () => {
+          toast.success("Outline regeneration queued");
+        },
+      }),
+    );
+
+  const handleRegenerateOutline = () => {
+    if (!projectId || !organizationId) {
+      toast.error("Unable to regenerate outline");
+      return;
+    }
+    if (!fileNode?.ok) return;
+    regenerateOutline({
+      type: "seo-plan-keyword",
+      projectId,
+      organizationId,
+      campaignId: null,
+      path: fileNode.value.path,
+    });
+  };
+
   return (
     <div className="flex h-full w-full flex-col">
       <div className="flex items-center justify-between gap-3 border-b bg-background px-4 py-3">
@@ -420,13 +452,45 @@ export function ArticleEditorTakeover({
               }
             `}
           </style>
-          <MarkdownEditor
-            key={`${workspaceFilePath}:${isReadOnly}`}
-            markdown={fileNode.value.content.toString()}
-            onMarkdownChange={onMarkdownChange}
-            onUploadImage={onUploadImage}
-            readOnly={isReadOnly}
-          />
+          <div className="flex flex-1 flex-col gap-4">
+            <Field>
+              <div className="flex items-center justify-between gap-2">
+                <FieldLabel>Outline</FieldLabel>
+                <Button
+                  isLoading={isRegeneratingOutline}
+                  onClick={handleRegenerateOutline}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  Regenerate outline
+                </Button>
+              </div>
+              {outlineText ? (
+                <FieldContent className="p-0">
+                  <Textarea
+                    className="max-h-[28vh] min-h-[120px] resize-none"
+                    readOnly
+                    rows={8}
+                    value={outlineText}
+                  />
+                </FieldContent>
+              ) : (
+                <FieldDescription className="text-muted-foreground text-sm">
+                  No outline detected. Regenerate to populate with a plan.
+                </FieldDescription>
+              )}
+            </Field>
+            <div className="min-h-0 flex-1">
+              <MarkdownEditor
+                key={`${workspaceFilePath}:${isReadOnly}`}
+                markdown={fileNode.value.content.toString()}
+                onMarkdownChange={onMarkdownChange}
+                onUploadImage={onUploadImage}
+                readOnly={isReadOnly}
+              />
+            </div>
+          </div>
         </div>
       )}
 

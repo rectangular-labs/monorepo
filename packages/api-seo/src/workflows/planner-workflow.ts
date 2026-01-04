@@ -15,8 +15,14 @@ import { fetchSerp } from "@rectangular-labs/dataforseo";
 import type { schema } from "@rectangular-labs/db";
 import { writeToFile } from "@rectangular-labs/loro-file-system";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
-import { generateText, stepCountIs } from "ai";
-import type { type } from "arktype";
+import {
+  generateText,
+  type JSONSchema7,
+  jsonSchema,
+  Output,
+  stepCountIs,
+} from "ai";
+import { type } from "arktype";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -41,6 +47,82 @@ function logError(message: string, data?: Record<string, unknown>) {
   console.error(`[SeoPlannerWorkflow] ${message}`, data ?? {});
 }
 
+type SearchItem = typeof searchItemSchema.infer;
+async function addOrganicOutlinesToSerp({ serp }: { serp: SearchItem[] }) {
+  const organicItems = serp.filter((item) => item.type === "organic");
+  const organicForPrompt = organicItems.map((item) => ({
+    title: item.title ?? "",
+    url: item.url,
+  }));
+  if (organicForPrompt.length === 0) return serp;
+
+  const serpValue = JSON.stringify(organicForPrompt);
+  const prompt = `For each of the organic serp items, extract out the H2 and H3 to gather the outline of the article and return a JSON form in the form of { title: string, outline: string }[] where the outline is a markdown format of all the H2 and H3 extracted from the urls
+
+Rules:
+- Use the url_context tool for each URL to extract headings.
+- Output must be ONLY valid JSON (no markdown, no commentary) matching exactly: { title: string, outline: string }[].
+- Preserve the input order exactly and return the same number of items as provided in <serp>.
+- If a URL is null or cannot be fetched, return an empty outline string for that item.
+- The outline must be markdown headings only: use \\"##\\" for H2 and \\"###\\" for H3, in the order they appear on the page.
+- Exclude navigation/footer/sidebar headings; include only main-article headings.
+
+<serp>
+${serpValue}
+</serp>`;
+
+  const schema = type({
+    outlines: type({
+      title: type("string").describe("The title of the SERP organic item"),
+      outline: type("string").describe("The outline of the SERP organic item"),
+    })
+      .array()
+      .describe(
+        "SERP organic outlines: { title: string, outline: string }[] where outline is markdown headings",
+      ),
+  });
+  const extraction = await safe(() =>
+    generateText({
+      model: google("gemini-3-flash-preview"),
+      tools: {
+        url_context: google.tools.urlContext({}),
+      },
+      prompt,
+      stopWhen: [stepCountIs(40)],
+      experimental_output: Output.object({
+        schema: jsonSchema<type.infer<typeof schema>>(
+          schema.toJsonSchema() as JSONSchema7,
+        ),
+      }),
+    }),
+  );
+
+  if (!extraction.ok) {
+    logError("failed to extract competitor outlines from SERP urls", {
+      error: extraction.error,
+    });
+    return serp;
+  }
+
+  const extracted = extraction.value.experimental_output.outlines;
+  logInfo("SERP outlines extracted", {
+    extracted,
+  });
+
+  let organicIdx = 0;
+  return serp.map((item) => {
+    if (item.type !== "organic") return item;
+
+    const next = extracted[organicIdx];
+    organicIdx += 1;
+
+    return {
+      ...item,
+      outline: next?.outline?.trim() ? next.outline.trim() : null,
+    };
+  });
+}
+
 async function generateOutline({
   project,
   notes,
@@ -54,50 +136,48 @@ async function generateOutline({
   primaryKeyword: string;
   locationName: string;
   languageCode: string;
-  serp: (typeof searchItemSchema.infer)[];
+  serp: SearchItem[];
 }): Promise<Result<string, Error>> {
+  const haveAiOverview = serp.find((s) => s.type === "ai_overview");
   const system = `<role>
-You are an expert SEO article researcher and strategist. Your job is to produce a writer-ready plan and outline for the BEST possible article for the target keyword. You MUST synthesize findings from the, competitor pages, and PAA/related searches/AI overview 
+You are an expert SEO article researcher and strategist. Your job is to produce a writer-ready plan and outline for the BEST possible article for the target keyword. You MUST synthesize findings from competitor pages, people also ask questions, related searches, and AI overview should they exists. 
 
 The goal is to create a plan that a writer can follow to:
 1. Outranks the current top 10 SERP results
 2. Gets featured in AI Overviews and answer boxes
 3. Drives organic traffic and conversions
 4. Establishes E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) for the site ${project.websiteUrl}.
+
+The way to do that is to focus on Search intent of the primary keyword: ${primaryKeyword}. The search intent what the user would expect to find when searching for this particular keyword. 
+
+We identify the search intent of the primary keyword from the SERPs, your natural understanding of the primary keyword. Focus on the following when identifying the search intent:
+1. what information the user is intending to extract from the query.
+2. what they already know or are aware of (eg. are they aware of the existence of a product or solution, or not yet).
+3. what they are not aware of.
+
+Once the search intent is identified, the article should be focused on answering precisely it without delay, substantiated with all the information, evidence, explanation and sourcing arising from it. 
+
+EVERYTHING in the article should be focused AND in service of the search intent.
 </role>
 
-<critical-requirements>
-- The final artifact MUST be a cohesive plan that a writer can follow end-to-end.
-- The plan MUST include a concrete title and a H2/H3 outline with section-by-section notes (what to say, what to cite, and any unique angle to add).
-- Prefer tool-grounded claims. When you cite stats or claims, have the claims be in the anchor text and the link be the source URL itself in markdown link syntax.
-<example>
-  According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
-</example>
-<example>
-  Up to [20% of companies](url_link) will be disrupted by AI in the next 5 years.
-</example>
-- Use internal_links to propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
-<example>
-  When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
-</example>
-</critical-requirements>
 
 <workflow>
-1) Analyze intent and SERP features (AI overview, PAA, related searches) for the keyword (provided in live-serp-data).
-2) Analyze competitor pages: take the Headings (H1, H2, H3) of the top 10 serps, and determine why the headings are considered to have fulfilled search intent. Distill your findings for each article into a thesis, and craft the outline taking the best practices from your findings, fulfilling the thesis while maintaining an organic flow to the article. Use the web_fetch to extract the required information for the outline.
+1) Analyze search intent from the SERPs, your natural understanding of the primary keyword for the primary keyword ${primaryKeyword} (SERPs provided in live-serp-data). Use the SERP outline of competitors pages ${haveAiOverview ? "and the AI Overview" : ""} to find out 
+  i) groups of information that is useful to the searcher
+  ii) questions the searcher would find useful to be answered
+  iii) how the article flows from one topic to another, and how it's segmented into sections
+2) Analyze the SERPs titles, description, and url slugs 
+  i) title - how to use the primary keyword in the title, phrase it to capture attention, and promise the searcher their search intent will be fulfilled
+  ii) slug - the most efficient way to include keywords in the url
+  iii) description - summarize content succinctly and accurately while stating the keyword
 3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
-4) Synthesize into a brief article outline. Include a section on the POV of the article and a section covering any relevant assets that would be useful to include (tables/diagrams/site screenshots/flow charts/etc.).
-    - The plan should follow closely the structure of competitor pages ${serp.find((s) => s.type === "ai_overview") ? "and the AI Overview" : ""} while also adding unique insights and angles. Note that if none of the competitors page fulfill/matches the target keyword well, you are free to ignore the competitors page structure.
-    - Add in a target word count to the plan so the writer knows how much to write. (In general, articles should be no more than 1.2k words unless asked to write more.)
-    - Only suggest FAQ sections if the People Also Ask data is available. Use the People Also Ask data to guide the FAQ sections and limit 5 questions maximum unless asked to write more. 
-    - Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
-    - Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
+4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
 5) Output the file in markdown format, do not include any other formatting or commentary.
 6) If any of these article types are being written, follow these instructions. These instructions should override any contradicting instructions elsewhere. If the type of article being written is not listed here, ignore this list.
 
 ## Best of lists 
 1. Always include screenshots or products of the products/websites/service pages/country/food/item that you are listing. 
-2. Word light - each listicle item should be a maximum of 50 words
+2. Word light
 3. Maximum of 20 total items
 
 ## Comparisons (comparing two or more products or services or items)
@@ -179,6 +259,46 @@ The goal is to create a plan that a writer can follow to:
 1. Checklist at the end of the article summarizing all the best practices
 2. State dos and don'ts 
 </workflow>
+
+<critical-plan-requirements>
+- The plan should be targeted at solving for the main search intent of the reader for the primary keyword ${primaryKeyword}. Use the distilled information from competitor pages ${haveAiOverview ? "and the AI Overview" : ""} while also adding unique insights and angles to structure the overall article. Note that if NONE of the competitors page fulfill/matches the search intent of the primary keyword, you SHOULD ignore the competitors page structure.
+- The final artifact MUST be a cohesive plan that a writer can follow end-to-end.
+- Prefer tool-grounded claims. When you cite stats or claims, have the claims be in the anchor text and the link be the source URL itself in markdown link syntax.
+- The plan MUST include a title and the description for the article, follow these rules:
+  - Meta description (max 160 characters): clear, succinct, keyword-rich summary that directly signals the article fulfills the user's main search intent (what they want to learn/answer)
+  - Title + meta title (max 60 characters): clear and enticing for the user to click on, includes the primary keyword once (natural/organic), and answers the search intent directly; do not append extra qualifiers (no "X, Y and Z" and no parentheses), just the title
+- The plan MUST also include the H2/H3 outline with section-by-section notes (what to say, what to cite, and any unique angle to add).
+  - Headings should always be clear, direct and succinct. Reader should be able to understand what the section is covering. 
+  - First H2 - incredibly focused and targeted toward answering the main intent of the searcher
+  - Most H2s should have the primary keyword ${primaryKeyword} naturally written into it
+  - H3 be related to the H2, and to the point
+- Introduction - maximum of two paragraph of 3 sentences long each. Should 
+  1. intrigue the reader - why this is important for the reader and include any interesting stats
+  2. contextualize the topic for the reader's search intent
+  3. contextualize how this has been recently important and what recent developments in the space are (if applicable - i.e. if the topic has significant recent updates)
+  4. summarize the topics that the article would cover 
+- Add in a target word count to the plan so the writer knows how much to write.
+  - Most articles should have a word count around 1,000 to 1,500 words. Long research pieces can have more, but 95% of articles should fall within 1,000 to 1,500 words. 
+  - If there is a struggle to keep it below this word count, look to focus the article up, and talk about fewer ideas. 
+- ONLY suggest FAQ sections IF the People Also Ask data is available. Use the People Also Ask data to guide the FAQ sections and limit 5 questions maximum unless asked to write more. 
+  - short and to the point. No more than 2 sentences long.
+  - answer the question directly, substantiated succinctly.
+  - plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed. 
+  - If there is NO SERP \`people_also_ask\` data, DO NOT include a FAQ section
+- Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
+- Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
+  <example>
+    According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
+  </example>
+  <example>
+    Up to [20% of companies](url_link) will be disrupted by AI in the next 5 years.
+  </example>
+  - Use internal_links to propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
+  <example>
+    When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
+  </example>
+</critical-plan-requirements>
+
 
 <project context>
 - Website: ${project.websiteUrl}
@@ -370,6 +490,17 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             throw serp.error;
           }
 
+          logInfo("Getting SERP outlines", {
+            instanceId: event.instanceId,
+            path: input.path,
+            primaryKeyword,
+            serpItems: serp.value,
+          });
+
+          const serpWithOutlines = await addOrganicOutlinesToSerp({
+            serp: serp.value.searchResult,
+          });
+
           logInfo("generating outline", {
             instanceId: event.instanceId,
             path: input.path,
@@ -383,7 +514,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             primaryKeyword,
             locationName,
             languageCode,
-            serp: serp.value.searchResult,
+            serp: serpWithOutlines,
           });
           if (!result.ok) throw result.error;
           const outline = result.value;

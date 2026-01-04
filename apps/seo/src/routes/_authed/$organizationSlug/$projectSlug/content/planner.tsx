@@ -60,6 +60,9 @@ function PlannerPage() {
     null,
   );
   const [retryingTreeId, setRetryingTreeId] = useState<string | null>(null);
+  const [regeneratingOutlineTreeIds, setRegeneratingOutlineTreeIds] = useState<
+    Set<string>
+  >(() => new Set());
 
   const {
     data: activeProject,
@@ -125,6 +128,16 @@ function PlannerPage() {
         },
       }),
     );
+  const { mutate: regenerateOutline } = useMutation(
+    getApiClientRq().task.create.mutationOptions({
+      onError: () => {
+        toast.error("Unable to regenerate outline");
+      },
+      onSuccess: () => {
+        toast.success("Outline regeneration queued");
+      },
+    }),
+  );
   const canAutoScheduleCadence =
     (publishingSettingsProject?.publishingSettings?.cadence?.allowedDays
       ?.length ?? 0) > 0;
@@ -232,6 +245,37 @@ function PlannerPage() {
     );
   };
 
+  const handleRegenerateOutline = (file: TreeFile) => {
+    if (!projectId || !organizationId) {
+      toast.error("Unable to regenerate outline");
+      return;
+    }
+    if (regeneratingOutlineTreeIds.has(file.treeId)) return;
+    setRegeneratingOutlineTreeIds((prev) => {
+      const next = new Set(prev);
+      next.add(file.treeId);
+      return next;
+    });
+    regenerateOutline(
+      {
+        type: "seo-plan-keyword",
+        projectId,
+        organizationId,
+        campaignId: null,
+        path: file.path,
+      },
+      {
+        onSettled: () => {
+          setRegeneratingOutlineTreeIds((prev) => {
+            const next = new Set(prev);
+            next.delete(file.treeId);
+            return next;
+          });
+        },
+      },
+    );
+  };
+
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const plannerRows = useMemo(() => {
     const statusOrder: Record<SeoFileStatus, number> = {
@@ -275,6 +319,9 @@ function PlannerPage() {
       status: f.status,
     }));
   }, [plannerFiles, normalizedSearch]);
+  const isRegeneratingOutlineForActiveFile = Boolean(
+    activeDialogTreeId && regeneratingOutlineTreeIds.has(activeDialogTreeId),
+  );
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
@@ -444,10 +491,12 @@ function PlannerPage() {
       <PlannerDialogDrawer
         activeDialogFile={activeDialogFile}
         applyMetadataUpdate={applyMetadataUpdate}
+        isRegeneratingOutline={isRegeneratingOutlineForActiveFile}
         isSaving={isPushing}
         onOpenChange={(open) => {
           if (!open) setActiveDialogTreeId(null);
         }}
+        onRegenerateOutline={handleRegenerateOutline}
         open={!!activeDialogTreeId}
         publishingSettings={
           publishingSettingsProject?.publishingSettings ?? null
