@@ -342,6 +342,37 @@ export function ArticleEditorTakeover({
       }),
     );
 
+  const { mutate: regenerateArticle, isPending: isRegeneratingArticle } =
+    useMutation(
+      getApiClientRq().task.create.mutationOptions({
+        onError: () => {
+          toast.error("Unable to regenerate article");
+        },
+        onSuccess: (result) => {
+          toast.success("Article regeneration queued");
+          if (!loroDoc) return;
+          if (!fileNode?.ok) return;
+          pushWorkspace({
+            doc: loroDoc,
+            context: {
+              publishingSettings,
+            },
+            operations: [
+              {
+                path: fileNode.value.path,
+                metadata: [
+                  { key: "status", value: "queued" },
+                  { key: "error", value: "" },
+                  { key: "workflowId", value: result.taskId },
+                ],
+                createIfMissing: true,
+              },
+            ],
+          });
+        },
+      }),
+    );
+
   const handleRegenerateOutline = () => {
     if (!projectId || !organizationId) {
       toast.error("Unable to regenerate outline");
@@ -350,6 +381,21 @@ export function ArticleEditorTakeover({
     if (!fileNode?.ok) return;
     regenerateOutline({
       type: "seo-plan-keyword",
+      projectId,
+      organizationId,
+      campaignId: null,
+      path: fileNode.value.path,
+    });
+  };
+
+  const handleRegenerateArticle = () => {
+    if (!projectId || !organizationId) {
+      toast.error("Unable to regenerate article");
+      return;
+    }
+    if (!fileNode?.ok) return;
+    regenerateArticle({
+      type: "seo-write-article",
       projectId,
       organizationId,
       campaignId: null,
@@ -456,15 +502,27 @@ export function ArticleEditorTakeover({
             <Field>
               <div className="flex items-center justify-between gap-2">
                 <FieldLabel>Outline</FieldLabel>
-                <Button
-                  isLoading={isRegeneratingOutline}
-                  onClick={handleRegenerateOutline}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  Regenerate outline
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    isLoading={isRegeneratingOutline}
+                    onClick={handleRegenerateOutline}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    Regenerate outline
+                  </Button>
+                  <Button
+                    disabled={isReadOnly}
+                    isLoading={isRegeneratingArticle}
+                    onClick={handleRegenerateArticle}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    Regenerate article
+                  </Button>
+                </div>
               </div>
               {outlineText ? (
                 <FieldContent className="p-0">
