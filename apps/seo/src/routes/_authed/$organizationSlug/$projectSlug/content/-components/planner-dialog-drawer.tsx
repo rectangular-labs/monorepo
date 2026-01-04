@@ -196,6 +196,7 @@ export function PlannerDialogDrawer({
           <FieldLabel htmlFor="planner-notes">Notes</FieldLabel>
           <FieldContent>
             <Textarea
+              className="max-h-[15vh]"
               id="planner-notes"
               onChange={(e) => setNotesDraft(e.target.value)}
               placeholder="Add notes for this article (optional)"
