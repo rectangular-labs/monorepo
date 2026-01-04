@@ -185,7 +185,13 @@ ${JSON.stringify(serp)}
       model: google("gemini-3-flash-preview"),
       experimental_output: Output.object({
         schema: jsonSchema<typeof inferArticleTypeSchema.infer>(
-          inferArticleTypeSchema.toJsonSchema() as JSONSchema7,
+          // Google api doesn't support const keyword in json schema for anyOf, only string.
+          JSON.parse(
+            JSON.stringify(inferArticleTypeSchema.toJsonSchema()).replaceAll(
+              "const",
+              "string",
+            ),
+          ) as JSONSchema7,
         ),
       }),
       prompt,
