@@ -205,9 +205,9 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
 
           const systemPrompt = buildWriterSystemPrompt({
             project,
-            utcDate,
             skillsSection: "",
             mode: "workflow",
+            articleType: node.data.get("articleType"),
             primaryKeyword: node.data.get("primaryKeyword"),
             outline: node.data.get("outline"),
           });
