@@ -46,7 +46,6 @@ import {
   createPushDocumentQueryOptions,
 } from "~/lib/workspace/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
-import { Route } from "../route";
 
 function normalizeWorkspaceFilePath(file: string) {
   const trimmed = file.trim();
@@ -86,7 +85,6 @@ export function ArticleEditorTakeover({
   organizationId: string;
   projectId: string;
 }) {
-  const navigate = Route.useNavigate();
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator === "undefined" ? true : navigator.onLine,
   );

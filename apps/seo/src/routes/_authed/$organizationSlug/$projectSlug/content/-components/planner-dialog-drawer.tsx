@@ -5,24 +5,24 @@ import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/pr
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
 import {
-    Alert,
-    AlertDescription,
-    AlertTitle,
+  Alert,
+  AlertDescription,
+  AlertTitle,
 } from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
-    DialogDrawer,
-    DialogDrawerDescription,
-    DialogDrawerFooter,
-    DialogDrawerHeader,
-    DialogDrawerTitle,
+  DialogDrawer,
+  DialogDrawerDescription,
+  DialogDrawerFooter,
+  DialogDrawerHeader,
+  DialogDrawerTitle,
 } from "@rectangular-labs/ui/components/ui/dialog-drawer";
 import {
-    Field,
-    FieldContent,
-    FieldDescription,
-    FieldLabel,
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
 } from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
