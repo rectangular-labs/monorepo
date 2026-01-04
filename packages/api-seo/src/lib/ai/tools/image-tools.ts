@@ -195,7 +195,7 @@ export function createImageToolsWithMetadata(args: {
 
   const findStockImage = tool({
     description:
-      "Find an royalty-free stock image based on a search query. Returns the best match with attribution details.",
+      "Find a royalty-free stock image based on a search query. Returns the best match with attribution details. You must put the attribution as the image caption.",
     inputSchema: jsonSchema<typeof stockImageInputSchema.infer>(
       stockImageInputSchema.toJsonSchema() as JSONSchema7,
     ),
@@ -378,7 +378,7 @@ export function createImageToolsWithMetadata(args: {
       toolDescription:
         "Find a royalty-free stock image based on a search query. Returns the best match with attribution details. Helpful for finding an image that is relevant to the project's content like of certain objects, places, etc.",
       toolInstruction:
-        "Provide `searchQuery` and optionally `orientation` (landscape/portrait/square). Use when you need a royalty-free stock image with source and photographer attribution.",
+        "Provide `searchQuery` and optionally `orientation` (landscape/portrait/square). Use when you need a royalty-free stock image with source and photographer attribution. You must put the attribution as the image caption.",
       tool: findStockImage,
     },
     {

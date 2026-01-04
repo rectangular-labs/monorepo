@@ -22,6 +22,7 @@ async function tryConvertToWebp(
           new ReadableStream({
             start(controller) {
               controller.enqueue(bytes);
+              controller.close();
             },
           }),
         )
