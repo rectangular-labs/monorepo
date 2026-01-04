@@ -3,6 +3,7 @@
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
@@ -58,6 +59,7 @@ function PlannerPage() {
   const [activeDialogTreeId, setActiveDialogTreeId] = useState<string | null>(
     null,
   );
+  const [retryingTreeId, setRetryingTreeId] = useState<string | null>(null);
 
   const {
     data: activeProject,
@@ -115,6 +117,14 @@ function PlannerPage() {
       campaignId: null,
     }),
   );
+  const { mutate: retryGeneration, isPending: isRetryingGeneration } =
+    useMutation(
+      getApiClientRq().task.create.mutationOptions({
+        onError: () => {
+          toast.error("Unable to retry article generation");
+        },
+      }),
+    );
   const canAutoScheduleCadence =
     (publishingSettingsProject?.publishingSettings?.cadence?.allowedDays
       ?.length ?? 0) > 0;
@@ -132,6 +142,7 @@ function PlannerPage() {
         (node.status === "queued" ||
           node.status === "suggested" ||
           node.status === "generating" ||
+          node.status === "generation-failed" ||
           node.status === "pending-review")
       ) {
         plannerFiles.push(node);
@@ -169,10 +180,53 @@ function PlannerPage() {
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (_result, variables) => {
           if (options?.closeDialog) {
             setActiveDialogTreeId(null);
           }
+          const statusMetadata = variables.operations.find((op) =>
+            op.metadata?.find((m) => m.key === "status"),
+          );
+          const status = statusMetadata?.metadata?.find(
+            (m) => m.key === "status",
+          )?.value;
+          const displayMessage = (() => {
+            if (status === "queued") return "Article queued for generation";
+            if (status === "suggestion-rejected")
+              return "Article suggestion ejected";
+            if (status === "review-denied") return "Article review denied";
+            if (status === "scheduled") return "Article scheduled";
+            return "Status updated.";
+          })();
+          toast.success(displayMessage);
+        },
+      },
+    );
+  };
+
+  const handleRetryGeneration = (file: TreeFile) => {
+    if (!projectId || !organizationId) {
+      toast.error("Unable to retry article generation");
+      return;
+    }
+    if (retryingTreeId) return;
+    setRetryingTreeId(file.treeId);
+    retryGeneration(
+      {
+        type: "seo-write-article",
+        projectId,
+        organizationId,
+        campaignId: null,
+        path: file.path,
+      },
+      {
+        onSuccess: (result) => {
+          toast.success("Retrying article generation");
+          applyMetadataUpdate(file, [
+            { key: "status", value: "queued" },
+            { key: "error", value: "" },
+            { key: "workflowId", value: result.taskId },
+          ]);
         },
       },
     );
@@ -274,11 +328,11 @@ function PlannerPage() {
                 getRowActions={(row) => {
                   const file = plannerFiles.find((f) => f.treeId === row.id);
                   if (!file) return null;
-                  console.log("file", file);
                   if (file.status === "suggested") {
                     return (
                       <div className="flex items-center gap-2">
                         <Button
+                          isLoading={isPushing}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!canAutoScheduleCadence) {
@@ -295,6 +349,7 @@ function PlannerPage() {
                           Accept
                         </Button>
                         <Button
+                          isLoading={isPushing}
                           onClick={(e) => {
                             e.stopPropagation();
                             applyMetadataUpdate(file, [
@@ -314,6 +369,7 @@ function PlannerPage() {
                     return (
                       <div className="flex items-center gap-2">
                         <Button
+                          isLoading={isPushing}
                           onClick={(e) => {
                             e.stopPropagation();
                             applyMetadataUpdate(file, [
@@ -326,6 +382,7 @@ function PlannerPage() {
                           Approve
                         </Button>
                         <Button
+                          isLoading={isPushing}
                           onClick={(e) => {
                             e.stopPropagation();
                             applyMetadataUpdate(file, [
@@ -337,6 +394,23 @@ function PlannerPage() {
                           variant="outline"
                         >
                           Deny
+                        </Button>
+                      </div>
+                    );
+                  }
+                  if (file.status === "generation-failed") {
+                    return (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          disabled={isRetryingGeneration}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRetryGeneration(file);
+                          }}
+                          size="sm"
+                          type="button"
+                        >
+                          Retry
                         </Button>
                       </div>
                     );
