@@ -28,7 +28,9 @@ const imageAgentInputSchema = type({
 });
 
 const screenshotInputSchema = type({
-  url: type("string.url").describe("The URL to capture a screenshot of."),
+  url: type("string").describe(
+    "The URL to capture a screenshot of. Must be a valid URL.",
+  ),
   viewportWidth: type("number.integer >= 480")
     .describe("The width of the viewport to capture a screenshot of.")
     .default(1280),
