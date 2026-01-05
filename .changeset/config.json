@@ -7,5 +7,23 @@
   "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  },
+  "ignore": [
+    "@rectangular-labs/api-core",
+    "@rectangular-labs/api-seo",
+    "@rectangular-labs/api-user-vm",
+    "@rectangular-labs/auth",
+    "@rectangular-labs/content",
+    "@rectangular-labs/core",
+    "@rectangular-labs/dataforseo",
+    "@rectangular-labs/db",
+    "@rectangular-labs/google-apis",
+    "@rectangular-labs/task",
+    "@rectangular-labs/ui",
+    "www", 
+    "seo"
+  ]
 }
