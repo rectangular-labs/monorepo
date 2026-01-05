@@ -261,7 +261,7 @@ ${text}
 </original-article>
 
 <changes>
-${changes}
+${changes.join("\n")}
 </changes>`
                     : "Write the full article now.",
                 },

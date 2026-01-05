@@ -9,6 +9,7 @@ import { resolvePath } from "@rectangular-labs/loro-file-system";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import { LoroDoc, type LoroTreeNode } from "loro-crdt";
 import { apiEnv } from "../../env";
+import { createWorkspaceBucket } from "../bucket";
 import { getPublicImageUri } from "../project/get-project-image-uri";
 
 type LoadedWorkspace = {
@@ -25,7 +26,6 @@ export async function loadWorkspaceForWorkflow(args: {
   path: string;
 }): Promise<Result<LoadedWorkspace, Error>> {
   const db = createDb();
-  const { createWorkspaceBucket } = await import("../bucket");
   const workspaceBucket = createWorkspaceBucket();
 
   const projectResult = await getSeoProjectByIdentifierAndOrgId(
@@ -250,11 +250,10 @@ function extractMarkdownLinks(markdown: string): MarkdownLink[] {
   const links: MarkdownLink[] = [];
   const regex = /\[(?<text>[^\]]+)\]\((?<url>[^)\s]+)(?:\s+"[^"]*")?\)/g;
   for (const match of markdown.matchAll(regex)) {
-    const index = match.index ?? -1;
-    if (index <= 0) continue;
-    if (markdown[index - 1] === "!") continue; // image
-    const text = match.groups?.text?.trim() ?? "";
-    const url = match.groups?.url?.trim() ?? "";
+    const index = match.index;
+    if (index > 0 && markdown[index - 1] === "!") continue; // image
+    const text = match.groups?.text?.trim();
+    const url = match.groups?.url?.trim();
     if (!text || !url) continue;
     links.push({ text, url, index });
   }
@@ -334,9 +333,7 @@ function analyzeBulletFormatting(markdown: string): {
 
   for (const line of markdown.split("\n")) {
     const trimmed = line.trim();
-    const isBullet =
-      // biome-ignore lint/complexity/noUselessTernary: AI slop
-      /^[-*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed) ? true : false;
+    const isBullet = /^[-*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed);
     if (!isBullet) continue;
     bulletLineCount++;
 
