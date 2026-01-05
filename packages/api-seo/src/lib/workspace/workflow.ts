@@ -9,7 +9,6 @@ import { resolvePath } from "@rectangular-labs/loro-file-system";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import { LoroDoc, type LoroTreeNode } from "loro-crdt";
 import { apiEnv } from "../../env";
-import { createWorkspaceBucket } from "../bucket";
 import { getPublicImageUri } from "../project/get-project-image-uri";
 
 type LoadedWorkspace = {
@@ -26,6 +25,7 @@ export async function loadWorkspaceForWorkflow(args: {
   path: string;
 }): Promise<Result<LoadedWorkspace, Error>> {
   const db = createDb();
+  const { createWorkspaceBucket } = await import("../bucket");
   const workspaceBucket = createWorkspaceBucket();
 
   const projectResult = await getSeoProjectByIdentifierAndOrgId(
