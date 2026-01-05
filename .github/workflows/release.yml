@@ -16,6 +16,7 @@ jobs:
       id-token: write
       issues: write
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v5
 
