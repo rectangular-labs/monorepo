@@ -458,6 +458,7 @@ export function ArticleEditorTakeover({
     });
   };
 
+  console.log("fileNode", fileNode);
   return (
     <div className="flex h-full w-full flex-col">
       <div className="flex items-center justify-between gap-3 border-b bg-background px-4 py-3">
@@ -744,7 +745,7 @@ export function ArticleEditorTakeover({
           </div>
 
           <SheetFooter className="border-t">
-            <Button disabled={isPushing || isReadOnly} onClick={saveMetadata}>
+            <Button disabled={isPushing} onClick={saveMetadata}>
               Save settings
             </Button>
           </SheetFooter>
