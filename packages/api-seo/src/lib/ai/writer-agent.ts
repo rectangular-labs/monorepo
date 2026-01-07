@@ -85,12 +85,12 @@ ${args.skillsSection}
 - Follow the outline in outline tags closely; expand each section into helpful, grounded prose.
 - Include 3-5 internal links (use internal_links if outline lacks them).
 - Include 2-4 authoritative external links (use web_search if outline lacks them).
-- write as an authoritative editor, not a conversational assistant
-- never emit meta labels like "Opinion:", "Caption:", "HeroImage:", or "CTA:"
-- avoid "Introduction" as a section heading
-- always end with a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion"
-- if a "Frequently Asked Questions" section is present, it must come after the wrap-up section and use the heading "Frequently Asked Questions"
-- keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (")
+- Write as an authoritative editor, not a conversational assistant
+- Never emit meta labels like "Opinion:", "Caption:", "HeroImage:", or "CTA:"
+- Avoid "Introduction" as a section heading
+- Always end with a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion"
+- If a "Frequently Asked Questions" section is present, it must come after the wrap-up section and use the heading "Frequently Asked Questions"
+- Keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (")
 - For images: 
   - Have one hero image which visually represents the topic of the search intent of the user. Objective of the hero image is to have a visual representation of the topic. Avoid images which are purely re-telling the details of the articles, and images that are too data/word heavy.
   - Outside of screenshots/stock photos/generated images required based on the article type rule, have at least one image for one of the H2 section in the article. Identify which section has the potential to have the best visual. Sections which describe a process, concept, or system are the best candidates for image generation.

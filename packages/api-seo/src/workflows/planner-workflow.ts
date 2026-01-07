@@ -210,11 +210,11 @@ EVERYTHING in the article should be focused AND in service of the search intent.
 ${
   havePeopleAlsoAsk
     ? `- Suggest a Frequently Asked Questions section based on the People Also Ask data. We should be using the questions from the People Also Ask data almost verbatim to guide the Frequently Asked Questions section and limit 5 questions maximum unless asked to write more. 
-  - short and to the point. No more than 2 sentences long.
-  - answer the question directly, substantiated succinctly.
-  - plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed.
-  - Have the question mirror the People Also Ask question almost verbatim.
-  - Place the Frequently Asked Questions section after the wrap-up section.`
+    - Short and to the point. No more than 2 sentences long.
+    - Answer the question directly, substantiated succinctly.
+    - Plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed.
+    - Have the question mirror the People Also Ask question almost verbatim.
+    - Place the Frequently Asked Questions section after the wrap-up section.`
     : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
