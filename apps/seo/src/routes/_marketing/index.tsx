@@ -8,6 +8,7 @@ import { CTA } from "./-components/cta";
 import { Footer } from "./-components/footer";
 import { Header } from "./-components/header";
 
+// Landing page for freelancers - Section 1 to 5
 export const Route = createFileRoute("/_marketing/")({
   component: App,
 
