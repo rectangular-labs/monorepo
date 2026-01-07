@@ -285,22 +285,24 @@ ${additionalRules ? `6) Follow the additional article rules as overriding constr
   - First H2 - incredibly focused and targeted toward answering the main intent of the searcher
   - Most H2s should have the primary keyword ${primaryKeyword} naturally written into it
   - H3 be related to the H2, and to the point
-- Introduction - maximum of two paragraph of 3 sentences long each. Should 
+- Lead section (no "Introduction" heading) - maximum of two paragraphs of 3 sentences long each. Should 
   1. intrigue the reader - why this is important for the reader and include any interesting stats
   2. contextualize the topic for the reader's search intent
   3. contextualize how this has been recently important and what recent developments in the space are (if applicable - i.e. if the topic has significant recent updates)
   4. summarize the topics that the article would cover 
+- Include a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion".
 - Add in a target word count to the plan so the writer knows how much to write.
   - Most articles should have a word count around 1,000 to 1,500 words. Long research pieces can have more, but 95% of articles should fall within 1,000 to 1,500 words. 
   - If there is a struggle to keep it below this word count, look to focus the article up, and talk about fewer ideas. 
 ${
   havePeopleAlsoAsk
-    ? `- Suggest FAQ sections Based on the People Also Ask data. Use the People Also Ask data to guide the FAQ sections and limit 5 questions maximum unless asked to write more. 
+    ? `- Suggest a Frequently Asked Questions section based on the People Also Ask data. We should be using the questions from the People Also Ask data almost verbatim to guide the Frequently Asked Questions section and limit 5 questions maximum unless asked to write more. 
   - short and to the point. No more than 2 sentences long.
   - answer the question directly, substantiated succinctly.
   - plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed.
-  - Have the question mirror the People Also Ask question almost verbatim.`
-    : "- Do not suggest FAQ sections."
+  - Have the question mirror the People Also Ask question almost verbatim.
+  - Place the Frequently Asked Questions section after the wrap-up section.`
+    : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
 - Include any relevant stats that we should cite or internal links to relevant articles that we should link to.

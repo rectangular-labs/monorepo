@@ -224,6 +224,10 @@ The goal is to create a plan that a writer can follow to:
 <critical-requirements>
 - The final artifact MUST be a cohesive plan that a writer can follow end-to-end without guessing.
 - The plan MUST include a concrete title and a H2/H3 outline with section-by-section notes (what to say, what to cite, and what unique angle to add).
+- Avoid a generic "Introduction" heading; start with a strong lead paragraph and then specific H2s.
+- Include a wrap-up section that summarizes the article; use a varied heading instead of always "Conclusion".
+- If a "Frequently Asked Questions" section is included, it must come after the wrap-up section and use the heading "Frequently Asked Questions".
+- Expand abbreviations on first use.
 - Prefer tool-grounded claims. When you cite stats or claims, link the source URL in the claim itself.
   <example>
   According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
@@ -246,7 +250,7 @@ The goal is to create a plan that a writer can follow to:
 4) Synthesize into a single best-possible plan + outline, with a POV section and asset plan (tables/diagrams). ONLY OUTPUT THIS SECTION IN THE PLAN FILE. DO NOT OUTPUT ANY OTHER SECTIONS.
     - The plan should follow closely the structure of competitor pages ${serpData.aiOverview ? "and the AI Overview" : ""} while also adding unique insights and angles. 
     - Add in a target word count to the plan so the writer knows how much to write.
-    - Only suggest FAQ sections if the People Also Ask data is available. Use the People Also Ask data to guide the FAQ sections and limit 5 questions maximum. 
+    - Only suggest Frequently Asked Questions sections if the People Also Ask data is available. Use the People Also Ask data to guide the Frequently Asked Questions section and limit 5 questions maximum. 
     - Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
 5) Use write_file to save the plan to the location specified in the instructions.
 </workflow>

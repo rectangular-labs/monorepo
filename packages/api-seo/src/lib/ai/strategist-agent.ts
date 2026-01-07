@@ -56,12 +56,12 @@ function formatCurrentPageFocusReminder(
 What to deliver:
 - Improving existing content:
   - Use google_search_console_query across time ranges to identify decaying pages/queries; propose specific refresh actions, target queries, and expected impact.
-  - Find pages with weak CTR vs position; propose improved titles/meta, angle changes, and SERP feature optimizations (rich results, FAQs, etc.).
+  - Find pages with weak CTR vs position; propose improved titles/meta, angle changes, and SERP feature optimizations (rich results, Frequently Asked Questions, etc.).
 - Creating new content:
   - Build a data-driven keyword universe with get_keyword_suggestions and get_keywords_overview; group by intent and funnel stage; output a prioritized content plan with working titles, target queries, angle, format, and internal links.
   - Map the end-to-end user journey; recommend content to cover each step. Ask for missing journey details if needed.
   - Perform competitor analysis using get_ranked_keywords_for_site and get_ranked_pages_for_site on competitor hostnames to uncover opportunities and quick wins.
-  - Create Q&A style content to answer common user questions; list FAQs and provide brief outlines.
+  - Create Q&A style content to answer common user questions; list Frequently Asked Questions and provide brief outlines.
 - Highlighting opportunities:
   - Suggest guerrilla marketing and distribution tactics (e.g., targeted Reddit threads, X posts, community forums, PR/backlinks, features) with concrete next steps and candidate targets.
   - Recommend internal linking, schema, and technical quick wins where relevant.

@@ -1,20 +1,13 @@
-import { openai } from "@ai-sdk/openai";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  stepCountIs,
-  tool,
-} from "ai";
+import { google } from "@ai-sdk/google";
+import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { fetchPageContent } from "../../cloudflare/fetch-page-content";
 import type { AgentToolDefinition } from "./utils";
 
 const webFetchInputSchema = type({
   url: type("string").describe("The URL to fetch."),
-  userAgent: type("string")
-    .describe("The user agent to use for the fetch.")
-    .optional(),
+  query: type("string").describe(
+    "What to find or answer from the page content.",
+  ),
 });
 
 const webSearchInputSchema = type({
@@ -29,65 +22,83 @@ const webSearchInputSchema = type({
 export function createWebToolsWithMetadata() {
   const webFetch = tool({
     description:
-      "Fetch a webpage and extract its content as Markdown. This tool renders the page in a browser and converts it to Markdown format, which is useful for extracting readable content from web pages. You can optionally set a custom user agent if the fetch failed or blocks the request.",
+      "Fetch a webpage and answer a specific query regarding a webpage.",
     inputSchema: jsonSchema<typeof webFetchInputSchema.infer>(
       webFetchInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute({ url, userAgent }) {
-      const result = await fetchPageContent({ url, userAgent });
-      if (!result.ok) {
+    async execute({ url, query }) {
+      const prompt = [
+        "Fetch the page content using url_context and answer the query.",
+        "Provide a direct answer first, then supporting text that cites or paraphrases the page.",
+        "Exclude navigation, footer, cookie banners, and unrelated boilerplate.",
+        "Do not add commentary beyond the answer and supporting text.",
+        "If the query is not related to the page, return 'No relevant information found.'",
+        `URL: ${url}`,
+        `Query: ${query}`,
+      ].join("\n");
+      const { text } = await generateText({
+        model: google("gemini-3-flash-preview"),
+        system: "You are a precise web content extractor.",
+        prompt,
+        tools: {
+          url_context: google.tools.urlContext({}),
+        },
+      }).catch((error) => {
+        console.error("Error in web fetch", error);
+        return { text: null };
+      });
+      if (!text?.trim()) {
         return {
           success: false,
-          error: result.error.message,
+          error: "Failed to fetch page content.",
         };
       }
-
+      const cleaned = text.trim();
       return {
         success: true,
-        markdown: result.value.markdown,
-        wordCount: result.value.markdown.split(/\s+/).filter((word) => !!word)
-          .length,
-        url: result.value.url,
+        answer: cleaned,
+        url,
       };
     },
   });
 
   const webSearch = tool({
     description:
-      "Run a live web search for up-to-date information. This tool uses the web to search for the latest information on the given queries.",
+      "Run a live Google search for up-to-date information. This tool uses live SERP data to find the latest information on the given queries.",
     inputSchema: jsonSchema<typeof webSearchInputSchema.infer>(
       webSearchInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ instruction, queries }) {
+      const searchQueries =
+        queries.length > 0 ? queries : instruction ? [instruction] : [];
+      if (searchQueries.length === 0) {
+        return {
+          success: false,
+          error: "No queries provided for web search.",
+        };
+      }
+
+      const prompt = [
+        "Run a live web search using the google_search tool.",
+        "Return a concise list of the top sources for each query with title, URL, and one-line summary.",
+        "Use clear separation by query.",
+        `Instruction: ${instruction}`,
+        "Queries:",
+        ...searchQueries.map((q) => `- ${q}`),
+      ].join("\n");
+
       const { text } = await generateText({
-        model: openai("gpt-5.2"),
-        system: instruction,
-        messages: [
-          {
-            role: "user",
-            content:
-              queries.length > 0
-                ? `Search for the following queries: ${queries.join("\n")}`
-                : "Please go ahead and search for the latest information on the web.",
-          },
-        ],
+        model: google("gemini-3-flash-preview"),
+        system: "You are a precise research assistant.",
+        prompt,
         tools: {
-          web_search: openai.tools.webSearch({
-            externalWebAccess: true,
-            searchContextSize: "medium",
-            userLocation: {
-              type: "approximate",
-              city: "San Francisco",
-              region: "California",
-            },
-          }),
+          google_search: google.tools.googleSearch({}),
         },
-        stopWhen: [stepCountIs(10)],
-      }).catch((e) => {
-        console.error("Error in web search", e);
+      }).catch((error) => {
+        console.error("Error in web search", error);
         return { text: null };
       });
-      if (!text) {
+      if (!text?.trim()) {
         return {
           success: false,
           error: "Failed to search.",
@@ -96,8 +107,8 @@ export function createWebToolsWithMetadata() {
 
       return {
         success: true,
-        queries,
-        result: text,
+        queries: searchQueries,
+        result: text.trim(),
       };
     },
   });

@@ -13,8 +13,8 @@ export const ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES: Partial<
 1. Always include comparison tables at the top of the article that summarizes the key points
 2. Always mention ideal screenshots of ALL the items being compared. Include what you'd like to have and acceptable fallbacks if not available.`,
   "how-to": `## How to (guide)
-1. Include screenshots, diagrams, pictures for ALL the steps
-2. Checklist should be included after the introduction to signpost the article`,
+1. Use a calm, authoritative, instructional tone with clear, flowing step-by-step guidance.
+2. Include screenshots, diagrams, or pictures for key steps that benefit from visuals`,
   listicle: `## Listicle (generically)
 1. Include screenshots, diagrams, for every listed item
 2. Maximum of 20 total items
@@ -22,9 +22,9 @@ export const ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES: Partial<
   "long-form-opinion": `## Long form - opinions
 1. Clear opinion that should be reached at the end
 2. Must take a side and an opinion - strong POV`,
-  faq: `## FAQs
+  faq: `## Frequently Asked Questions
 1. Headings should be the questions
-2. Short word counts`,
+2. Short, direct answers`,
   news: `## News
 1. Structure should cover: i) what happened, ii) why it matters, iii) key details, iv) what's next (if applicable)`,
   whitepaper: `## Whitepapers
@@ -86,9 +86,10 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
 3. Include external links to the product/item being compared to organically (for e.g. wrapping the link around the anchor text of the item/service being linked to).
 4. Must clearly take a stance on which product is better for what purposes and why - opinion must be given by the end`,
     "how-to": `## How to (guide)
-1. Include screenshots, diagrams, pictures for ALL the steps
-2. Tone should be instructional and confident
-3. Opinions can be given but should be clearly labelled as opinions`,
+1. Use a calm, authoritative, instructional tone with clear, flowing step-by-step guidance.
+2. Avoid rigid checklists; explain each step in short paragraphs with the why and the expected outcome.
+3. Include screenshots, diagrams, or pictures for key steps that benefit from visuals.
+4. Opinions can be given but should be clearly labelled as opinions`,
     listicle: `## Listicle (generically)
 1. Include screenshots, diagrams, for every listed item. The images should come right after the heading introducing the item on the list.
 2. Always include an external link to each item on the list organically (for e.g. wrapping the link around the anchor text of the item/service being linked to).
@@ -98,7 +99,7 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
 2. Write in a stream-of-consciousness - raw, and relatable 
 3. Substantiated by clearly cited evidence and sources
 4. Must take a side and an opinion - strong POV`,
-    faq: `## FAQs (?)
+    faq: `## Frequently Asked Questions
 1. Heavy internal linking organically (for e.g. wrapping the link around the anchor text of the other question being referenced).
 2. Clear, direct, succinct answers to the questions
 3. No CTAs or product plugs`,
@@ -165,7 +166,9 @@ export const DEFAULT_BRAND_VOICE = `Use a mix of short sentences, longer ones, a
 - do not use em dashes
 - do not use bold words, outside of headings and the start of bullet points
 - do not use chiasmus in the form of "it's not X, it's Y"
-- do not use emojis`;
+- do not use emojis
+- use one consistent voice throughout; do not blend incompatible styles
+- expand abbreviations on first use`;
 
 export const DEFAULT_USER_INSTRUCTIONS = `Plugging the company's product
 a) NEVER FORCE MENTIONS
