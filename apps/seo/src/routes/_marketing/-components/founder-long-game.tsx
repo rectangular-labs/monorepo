@@ -11,8 +11,8 @@ export function FounderLongGame() {
             Sustainable Growth
           </p>
           <h2 className="font-regular text-3xl text-foreground tracking-tight sm:text-4xl lg:text-5xl">
-            Your co-founder for the{" "}
-            <span className="font-semibold text-primary">long game</span>
+            Ready to win with your <br />
+            <span className="font-semibold text-primary">SEO co-founder?</span>
           </h2>
           <p className="text-muted-foreground text-xl leading-relaxed">
             Real growth doesn’t come from perfect plans — it comes from fast,
@@ -21,24 +21,23 @@ export function FounderLongGame() {
           </p>
         </div>
 
-        <div className="relative mx-auto max-w-4xl">
+        <div className="relative mx-auto max-w-2xl">
           <ChatMockup>
             <ChatMockupMessage role="assistant" delay={0.5}>
-              We've reached a traffic plateau in the "Founders" cluster.
-              Competitor 'X' has launched a new interactive tool that's sucking
-              up SERP intent. I'm pivoting our next 3 pieces to focus on
-              "Comparison" intent to intercept that traffic.
+              Ready to start gaining traction online? I have a plan ready for you.
+            </ChatMockupMessage>
+            <ChatMockupMessage role="user" delay={1}>
+              Yes.
+            </ChatMockupMessage>
+            <ChatMockupMessage role="assistant" delay={1.5}>
+              Let's get to work.
             </ChatMockupMessage>
             <ChatMockupTool
               state="input-streaming"
-              title="Iterative Strategy Pivot"
-              output="Analysing competitor signal... Restructuring roadmap... Ready for alignment."
-              delay={1}
+              title="Analysing Data & Surfaces Strategy"
+              output="Mapping keyword gaps... Clustering commercial intent... Strategy justification complete."
+              delay={2}
             />
-            <ChatMockupMessage role="assistant" delay={1.5}>
-              This is the 4th pivot based on live signals this quarter. We're
-              staying ahead of the drift.
-            </ChatMockupMessage>
           </ChatMockup>
           <motion.div
             className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
@@ -46,7 +45,7 @@ export function FounderLongGame() {
             transition={{ duration: 5, repeat: Infinity }}
           />
         </div>
-
+        
         <div className="mx-auto max-w-3xl space-y-6 text-center">
           <p className="text-lg text-muted-foreground">
             Through early traction, plateaus, pivots, and breakthroughs, it

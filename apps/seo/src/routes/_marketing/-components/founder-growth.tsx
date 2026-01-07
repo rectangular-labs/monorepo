@@ -26,34 +26,59 @@ export function FounderGrowth() {
             not just your website
           </h2>
           <p className="text-muted-foreground text-xl leading-relaxed">
-            Rankings don’t matter unless they drive leads and trust. Fluid Posts
-            aligns every action to real commercial intent.
+            Rankings don’t matter unless they drive leads, conversions, and trust. 
+            Fluid Posts aligns every action to real commercial intent.
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-16 lg:grid-cols-[7fr,5fr] lg:items-center">
+          <div className="relative">
+            <ChatMockup>
+              <ChatMockupMessage role="assistant" delay={0.5}>
+                I'm updating our "Enterprise SEO" guide. Instead of just
+                explaining the concept, I've integrated a "Product Spotlight"
+                section showing how Fluid Posts solves the audit-to-execution
+                gap naturally.
+              </ChatMockupMessage>
+              <ChatMockupTool
+                title="Commercial Intent Optimization"
+                output="Added 3 natural product CTAs. Restructured intro to focus on 'Business ROI' over 'Keyword Density'."
+                delay={1}
+              />
+              <ChatMockupMessage role="assistant" delay={1.5}>
+                Every piece of content is now written with an awareness of what 
+                you sell, who you sell to, and why it matters. 
+              </ChatMockupMessage>
+            </ChatMockup>
+            <motion.div
+              className="absolute -top-10 -right-10 -z-10 h-40 w-40 rounded-full bg-emerald-500/5 blur-3xl"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 5, repeat: Infinity }}
+            />
+          </div>
+
           <div className="space-y-6">
-            <div className="grid gap-4">
+            <div className="grid gap-6">
               {[
                 {
                   icon: Users,
-                  title: "Leads over Traffic",
-                  desc: "Prioritizes clusters that convert, not just high-volume vanity keywords.",
-                },
-                {
-                  icon: Check,
-                  title: "Natural Integration",
-                  desc: "Integrates your product naturally into content to build trust and demand.",
+                  title: "Organic Product Integration",
+                  desc: "Plugs your services and products organically within content to drive real leads.",
                 },
                 {
                   icon: Zap,
-                  title: "Leverage Finder",
-                  desc: "Continuously looks for new SEO leverage points for your specific business model.",
+                  title: "Beyond the Scope",
+                  desc: "Continuously looks for opportunities for wins outside of its current scope.",
+                },
+                {
+                  icon: Check,
+                  title: "Commercial Awareness",
+                  desc: "Every piece is written with an awareness of what you sell and why it matters.",
                 },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
                   className="flex items-start gap-4 rounded-2xl border border-border bg-background p-5 shadow-sm"
@@ -70,31 +95,9 @@ export function FounderGrowth() {
                 </motion.div>
               ))}
             </div>
-          </div>
-
-          <div className="relative">
-            <ChatMockup>
-              <ChatMockupMessage role="assistant" delay={0.5}>
-                I'm updating our "Enterprise SEO" guide. Instead of just
-                explaining the concept, I've integrated a "Product Spotlight"
-                section showing how Fluid Posts solves the audit-to-execution
-                gap naturally.
-              </ChatMockupMessage>
-              <ChatMockupTool
-                title="Commercial Intent Optimization"
-                output="Added 3 natural product CTAs. Restructured intro to focus on 'Business ROI' over 'Keyword Density'."
-                delay={1}
-              />
-              <ChatMockupMessage role="assistant" delay={1.5}>
-                This should increase lead conversion from this cluster by
-                estimated 20% based on similar patterns.
-              </ChatMockupMessage>
-            </ChatMockup>
-            <motion.div
-              className="absolute -top-10 -right-10 -z-10 h-40 w-40 rounded-full bg-emerald-500/5 blur-3xl"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 5, repeat: Infinity }}
-            />
+            <p className="text-lg font-bold text-primary italic">
+              SEO that compounds business results — not just rankings.
+            </p>
           </div>
         </div>
       </div>
