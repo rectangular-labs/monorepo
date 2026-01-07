@@ -95,7 +95,6 @@ export function createWebToolsWithMetadata(
         };
       }
       const cleaned = text.trim();
-      console.log("web fetch result", cleaned);
       return {
         success: true,
         answer: cleaned,
@@ -106,7 +105,7 @@ export function createWebToolsWithMetadata(
 
   const webSearch = tool({
     description:
-      "Run a live web search for up-to-date information. This tool uses DataForSEO SERP data to find the latest information on the given queries.",
+      "Run a live web search for up-to-date information. This tool uses the web to find the latest information on the given queries.",
     inputSchema: jsonSchema<typeof webSearchInputSchema.infer>(
       webSearchInputSchema.toJsonSchema() as JSONSchema7,
     ),
@@ -153,7 +152,7 @@ export function createWebToolsWithMetadata(
 
       const prompt = `Use the SERP data and url_context tool to answer the instruction.
 Read as many sites as needed to produce accurate, cited information.
-Return JSON only in the format: { results: [{ url, siteCitation, relevantInformation }] }.
+Return JSON only in the format: { results: [{ url, siteGroundingText, relevantInformation }] }.
 Each result should map to a URL you actually accessed via the url_context tool.
 
 ## Instruction
