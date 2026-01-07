@@ -26,10 +26,10 @@ const webFetchInputSchema = type({
 
 const webSearchInputSchema = type({
   instruction: type("string").describe(
-    "The instruction for what the web search should focus on.",
+    "The instruction for what the web search should focus on. The instruction should be focused on a singular goal or topic. Break out multiple goals into multiple instructions via multiple web_search tool calls.",
   ),
   queries: type("string[]").describe(
-    "The queries to that the search itself should be focused on.",
+    "The queries to that the search itself should be focused on that would help fulfill the instruction.",
   ),
 });
 
@@ -201,9 +201,6 @@ ${item.result
           error: "Failed to find relevant information from SERP results.",
         };
       }
-
-      console.log("web search input queries", queries);
-      console.log("web search result", object.results);
 
       return {
         success: true,
