@@ -50,6 +50,9 @@ export function createWebToolsWithMetadata() {
         tools: {
           url_context: google.tools.urlContext({}),
         },
+        onStepFinish: (step) => {
+          console.log("web fetch step", step);
+        },
         stopWhen: [stepCountIs(25)],
       }).catch((error) => {
         console.error("Error in web fetch", error);
@@ -90,6 +93,7 @@ export function createWebToolsWithMetadata() {
       const prompt = [
         "Run a live web search using the google_search tool.",
         "Return the answer to the queries along with a concise list of the top sources for each query with title, URL, and one-line summary of the url.",
+        "Make sure to validate the URLs as still working using the url_context tool before citing or linking to them.",
         "Use clear separation by query.",
         `Instruction: ${instruction}`,
         "Queries:",
@@ -102,6 +106,10 @@ export function createWebToolsWithMetadata() {
         prompt,
         tools: {
           google_search: google.tools.googleSearch({}),
+          url_context: google.tools.urlContext({}),
+        },
+        onStepFinish: (step) => {
+          console.log("web search step", step);
         },
         stopWhen: [stepCountIs(25)],
       }).catch((error) => {

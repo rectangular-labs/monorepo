@@ -181,9 +181,8 @@ EVERYTHING in the article should be focused AND in service of the search intent.
   ii) slug - the most efficient way to include keywords in the url
   iii) description - summarize content succinctly and accurately while stating the keyword
 3) Gather sources: use web_search for fresh stats, studies, definitions, and quotes.
-4) Validate every source from web_search with web_fetch before citing it. If a page is invalid, unrelated, or inaccessible, find an alternative and validate it with web_fetch.
-5) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
-6) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
+4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
+5) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
 </workflow>
 
 <critical-plan-requirements>
@@ -218,7 +217,7 @@ ${
     : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Include any relevant stats that we should cite or internal links to relevant articles that we should link to. Make sure to use the web_fetch tool to verify the internal and external links are valid and relevant to the article before citing or linking to them.
+- Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
   <example>
     According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
   </example>
