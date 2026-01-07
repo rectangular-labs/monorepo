@@ -22,7 +22,6 @@ import {
 } from "ai";
 import { type } from "arktype";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
-import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -273,9 +272,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           const { project, node } = workspaceResult.value;
 
           const webTools = createWebToolsWithMetadata();
-          const internalLinksTools = createInternalLinksToolWithMetadata(
-            project.websiteUrl,
-          );
+
           const imageTools = createImageToolsWithMetadata({
             organizationId: input.organizationId,
             projectId: input.projectId,
@@ -288,8 +285,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             instanceId: event.instanceId,
             path: input.path,
             webToolCount: Object.keys(webTools.tools).length,
-            internalLinksToolCount: Object.keys(internalLinksTools.tools)
-              .length,
             imageToolCount: Object.keys(imageTools.tools).length,
           });
 
@@ -334,7 +329,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               },
               tools: {
                 ...webTools.tools,
-                ...internalLinksTools.tools,
                 ...imageTools.tools,
                 ...todoTool.tools,
               },

@@ -27,6 +27,7 @@ import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
 } from "../lib/ai/tools/todo-tool";
+import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import {
   configureDataForSeoClient,
   fetchWithCache,
@@ -179,9 +180,10 @@ EVERYTHING in the article should be focused AND in service of the search intent.
   i) title - how to use the primary keyword in the title, phrase it to capture attention, and promise the searcher their search intent will be fulfilled
   ii) slug - the most efficient way to include keywords in the url
   iii) description - summarize content succinctly and accurately while stating the keyword
-3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
-4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
-5) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
+3) Gather sources: use web_search for fresh stats, studies, definitions, and quotes.
+4) Validate every source from web_search with web_fetch before citing it. If a page is invalid, unrelated, or inaccessible, find an alternative and validate it with web_fetch.
+5) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
+6) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
 </workflow>
 
 <critical-plan-requirements>
@@ -215,8 +217,8 @@ ${
   - Place the Frequently Asked Questions section after the wrap-up section.`
     : "- Do not suggest a Frequently Asked Questions section."
 }
-- Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
+- Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
+- Include any relevant stats that we should cite or internal links to relevant articles that we should link to. Make sure to use the web_fetch tool to verify the internal and external links are valid and relevant to the article before citing or linking to them.
   <example>
     According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
   </example>
@@ -243,6 +245,7 @@ ${JSON.stringify(serp)}
 </live-serp-data>`;
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
+  const webTools = createWebToolsWithMetadata();
   const outputSchema = type({
     title: type("string").describe(
       "Meta title (max 60 characters): clear, enticing, includes the primary keyword once naturally, directly answers search intent.",
@@ -271,8 +274,7 @@ ${JSON.stringify(serp)}
         } satisfies GoogleGenerativeAIProviderOptions,
       },
       tools: {
-        url_context: google.tools.urlContext({}),
-        google_search: google.tools.googleSearch({}),
+        ...webTools.tools,
         ...todoTool.tools,
       },
       system,

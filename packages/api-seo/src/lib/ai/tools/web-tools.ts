@@ -1,5 +1,11 @@
 import { google } from "@ai-sdk/google";
-import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
+import {
+  generateText,
+  type JSONSchema7,
+  jsonSchema,
+  stepCountIs,
+  tool,
+} from "ai";
 import { type } from "arktype";
 import type { AgentToolDefinition } from "./utils";
 
@@ -31,8 +37,9 @@ export function createWebToolsWithMetadata() {
         "Fetch the page content using url_context and answer the query.",
         "Provide a direct answer first, then supporting text that cites or paraphrases the page.",
         "Exclude navigation, footer, cookie banners, and unrelated boilerplate.",
-        "Do not add commentary beyond the answer and supporting text.",
+        "Do not add commentary beyond the answer and supporting text from the page.",
         "If the query is not related to the page, return 'No relevant information found.'",
+        "If the page is not accessible or we have any issues fetching it, return with a relevant message to let the agent know and suggest it to use the web_search tool to find an alternative page.",
         `URL: ${url}`,
         `Query: ${query}`,
       ].join("\n");
@@ -43,6 +50,7 @@ export function createWebToolsWithMetadata() {
         tools: {
           url_context: google.tools.urlContext({}),
         },
+        stopWhen: [stepCountIs(25)],
       }).catch((error) => {
         console.error("Error in web fetch", error);
         return { text: null };
@@ -54,6 +62,7 @@ export function createWebToolsWithMetadata() {
         };
       }
       const cleaned = text.trim();
+      console.log("web fetch result", cleaned);
       return {
         success: true,
         answer: cleaned,
@@ -80,7 +89,7 @@ export function createWebToolsWithMetadata() {
 
       const prompt = [
         "Run a live web search using the google_search tool.",
-        "Return a concise list of the top sources for each query with title, URL, and one-line summary.",
+        "Return the answer to the queries along with a concise list of the top sources for each query with title, URL, and one-line summary of the url.",
         "Use clear separation by query.",
         `Instruction: ${instruction}`,
         "Queries:",
@@ -94,6 +103,7 @@ export function createWebToolsWithMetadata() {
         tools: {
           google_search: google.tools.googleSearch({}),
         },
+        stopWhen: [stepCountIs(25)],
       }).catch((error) => {
         console.error("Error in web search", error);
         return { text: null };
@@ -104,6 +114,8 @@ export function createWebToolsWithMetadata() {
           error: "Failed to search.",
         };
       }
+
+      console.log("web search result", text);
 
       return {
         success: true,
