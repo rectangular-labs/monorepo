@@ -1,7 +1,7 @@
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { convertToModelMessages, type streamText } from "ai";
-import type { SeoChatMessage, WebSocketContext } from "../../types";
+import type { InitialContext, SeoChatMessage, WebSocketContext } from "../../types";
 import { formatBusinessBackground } from "./format-business-background";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
@@ -79,12 +79,14 @@ export function createStrategistAgent({
   project,
   userId,
   currentPage,
+  cacheKV,
 }: {
   messages: SeoChatMessage[];
   gscProperty: WebSocketContext["cache"]["gscProperty"];
   project: NonNullable<WebSocketContext["cache"]["project"]>;
   userId: string;
   currentPage: ProjectChatCurrentPage;
+  cacheKV: InitialContext["cacheKV"];
 }): Parameters<typeof streamText>[0] {
   const hasGsc = !!(
     gscProperty?.accessToken &&
@@ -107,7 +109,7 @@ export function createStrategistAgent({
     userId,
     publishingSettings: project.publishingSettings,
   });
-  const webTools = createWebToolsWithMetadata();
+  const webTools = createWebToolsWithMetadata(project, cacheKV);
   const gscTools = createGscToolWithMetadata({
     accessToken: gscProperty?.accessToken ?? null,
     siteUrl: gscProperty?.domain ?? null,

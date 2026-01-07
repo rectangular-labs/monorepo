@@ -2,9 +2,11 @@ import {
   type businessBackgroundSchema,
   COUNTRY_CODE_MAP,
 } from "@rectangular-labs/core/schemas/project-parsers";
+import { fetchSerp } from "@rectangular-labs/dataforseo";
 import { client } from "@rectangular-labs/dataforseo/client";
 import { ok, type Result, safe } from "@rectangular-labs/result";
 import { apiEnv } from "../../env";
+import type { InitialContext } from "../../types";
 
 export function getLocationAndLanguage(project: {
   businessBackground?: typeof businessBackgroundSchema.infer | null;
@@ -32,12 +34,43 @@ export function configureDataForSeoClient() {
   });
 }
 
-export function getSerpCacheKey(
+export function getSerpCacheDetails(
   primaryKeyword: string,
   locationName: string,
   languageCode: string,
 ) {
-  return `serp-${primaryKeyword}-${locationName}-${languageCode}`;
+  return {
+    key: `serp-${primaryKeyword}-${locationName}-${languageCode}`,
+    options: {
+      ttlSeconds: 60 * 60 * 24 * 7, // 1 week
+    },
+  };
+}
+
+export function fetchSerpWithCache({
+  keyword,
+  locationName,
+  languageCode,
+  cacheKV,
+}: {
+  keyword: string;
+  locationName: string;
+  languageCode: string;
+  cacheKV: InitialContext["cacheKV"];
+}) {
+  return fetchWithCache({
+    ...getSerpCacheDetails(keyword, locationName, languageCode),
+    fn: async () => {
+      const result = await fetchSerp({
+        keyword,
+        locationName,
+        languageCode,
+      });
+      if (!result.ok) throw result.error;
+      return result.value;
+    },
+    cacheKV,
+  });
 }
 
 export async function fetchWithCache<T>({
@@ -48,7 +81,7 @@ export async function fetchWithCache<T>({
 }: {
   key: string;
   fn: () => Promise<T>;
-  cacheKV: KVNamespace;
+  cacheKV: InitialContext["cacheKV"];
   options?: {
     ttlSeconds?: number;
   };

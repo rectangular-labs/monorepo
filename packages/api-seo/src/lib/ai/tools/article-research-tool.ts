@@ -12,7 +12,7 @@ import {
   tool,
 } from "ai";
 import { type } from "arktype";
-import type { WebSocketContext } from "../../../types";
+import type { InitialContext, WebSocketContext } from "../../../types";
 import { fetchPageContent } from "../../cloudflare/fetch-page-content";
 import { createDataforseoToolWithMetadata } from "./dataforseo-tool";
 import { createFileToolsWithMetadata } from "./file-tool";
@@ -160,8 +160,10 @@ export async function fetchSerpBundle(args: {
 
 export function createArticleResearchToolWithMetadata({
   project,
+  cacheKV,
 }: {
   project: NonNullable<WebSocketContext["cache"]["project"]>;
+  cacheKV: InitialContext["cacheKV"];
 }) {
   const performArticleResearch = tool({
     description:
@@ -174,7 +176,7 @@ export function createArticleResearchToolWithMetadata({
         publishingSettings: project.publishingSettings,
         userId: undefined,
       });
-      const webTools = createWebToolsWithMetadata();
+      const webTools = createWebToolsWithMetadata(project, cacheKV);
       const dataforseoTools = createDataforseoToolWithMetadata(project);
       const internalLinksTools = createInternalLinksToolWithMetadata(
         project.websiteUrl,

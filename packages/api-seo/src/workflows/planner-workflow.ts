@@ -11,7 +11,6 @@ import type {
   seoPlanKeywordTaskInputSchema,
   seoPlanKeywordTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
-import { fetchSerp } from "@rectangular-labs/dataforseo";
 import type { schema } from "@rectangular-labs/db";
 import { writeToFile } from "@rectangular-labs/loro-file-system";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
@@ -30,9 +29,9 @@ import {
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import {
   configureDataForSeoClient,
-  fetchWithCache,
+  fetchSerpWithCache,
   getLocationAndLanguage,
-  getSerpCacheKey,
+  getSerpCacheDetails,
 } from "../lib/dataforseo/utils";
 import {
   loadWorkspaceForWorkflow,
@@ -131,9 +130,11 @@ async function generateOutline({
   locationName,
   languageCode,
   serp,
+  cache,
 }: {
   project: Omit<typeof schema.seoProject.$inferSelect, "serpSnapshot">;
   notes?: string;
+  cache: InitialContext["cacheKV"];
   primaryKeyword: string;
   locationName: string;
   languageCode: string;
@@ -166,7 +167,7 @@ We identify the search intent of the primary keyword from the SERPs, your natura
 2. what they already know or are aware of (eg. are they aware of the existence of a product or solution, or not yet).
 3. what they are not aware of.
 
-Once the search intent is identified, the article should be focused on answering precisely it without delay, substantiated with all the information, evidence, explanation and sourcing arising from it. 
+Once the search intent is identified, the article should be focused on answering precisely it, substantiated with all the information, evidence, explanation and sourcing found from doing research on the web/links to relevant articles that we've written in the past. Refer to workflow for more details on how we prepare the article outline
 
 EVERYTHING in the article should be focused AND in service of the search intent.
 </role>
@@ -180,7 +181,7 @@ EVERYTHING in the article should be focused AND in service of the search intent.
   i) title - how to use the primary keyword in the title, phrase it to capture attention, and promise the searcher their search intent will be fulfilled
   ii) slug - the most efficient way to include keywords in the url
   iii) description - summarize content succinctly and accurately while stating the keyword
-3) Gather sources: use web_search for fresh stats, studies, definitions, and quotes.
+3) Gather sources: YOU MUST USE web_search for fresh stats, studies, definitions, quotes, and other articles that we might've wrote in the past Alternatively, you are free to suggest URLS, but they must be validated via web_fetch. DO NOT cite URLs or sources not returned from web_search or validated via web_fetch. MAKE SEPARATE web_fetch TOOL CALLS for searches for internal links and external sources.
 4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
 5) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
 </workflow>
@@ -217,7 +218,7 @@ ${
     : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
+- Include any relevant stats that we should cite or internal links to relevant articles that we should link to. Make sure that all links have either been validated via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links.
   <example>
     According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
   </example>
@@ -244,7 +245,7 @@ ${JSON.stringify(serp)}
 </live-serp-data>`;
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
-  const webTools = createWebToolsWithMetadata();
+  const webTools = createWebToolsWithMetadata(project, cache);
   const outputSchema = type({
     title: type("string").describe(
       "Meta title (max 60 characters): clear, enticing, includes the primary keyword once naturally, directly answers search intent.",
@@ -326,31 +327,10 @@ type PlannerInput = type.infer<typeof seoPlanKeywordTaskInputSchema>;
 export class SeoPlannerWorkflow extends WorkflowEntrypoint<
   {
     SEO_WRITER_WORKFLOW: InitialContext["seoWriterWorkflow"];
-    CACHE: KVNamespace;
+    CACHE: InitialContext["cacheKV"];
   },
   PlannerInput
 > {
-  fetchSerpWithCache = async (
-    keyword: string,
-    locationName: string,
-    languageCode: string,
-  ) => {
-    const serpKey = getSerpCacheKey(keyword, locationName, languageCode);
-    const serpResult = await fetchWithCache({
-      key: serpKey,
-      fn: async () => {
-        const result = await fetchSerp({
-          keyword,
-          locationName,
-          languageCode,
-        });
-        if (!result.ok) throw result.error;
-        return result.value;
-      },
-      cacheKV: this.env.CACHE,
-    });
-    return serpResult;
-  };
   async run(event: WorkflowEvent<PlannerInput>, step: WorkflowStep) {
     const input = event.payload;
 
@@ -389,19 +369,20 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             `Primary keyword not found for ${input.path}`,
           );
         }
-        const serpKey = getSerpCacheKey(
+        const serpCacheDetails = getSerpCacheDetails(
           primaryKeyword,
           locationName,
           languageCode,
         );
-        const serpResult = await this.fetchSerpWithCache(
-          primaryKeyword,
+        const serpResult = await fetchSerpWithCache({
+          keyword: primaryKeyword,
           locationName,
           languageCode,
-        );
+          cacheKV: this.env.CACHE,
+        });
         if (!serpResult.ok) throw serpResult.error;
         return {
-          serpKey,
+          serpKey: serpCacheDetails.key,
           primaryKeyword,
           locationName,
           languageCode,
@@ -434,11 +415,12 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             languageCode,
           });
 
-          const serp = await this.fetchSerpWithCache(
-            primaryKeyword,
+          const serp = await fetchSerpWithCache({
+            keyword: primaryKeyword,
             locationName,
             languageCode,
-          );
+            cacheKV: this.env.CACHE,
+          });
           if (!serp.ok) {
             throw serp.error;
           }
@@ -468,6 +450,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             locationName,
             languageCode,
             serp: serpWithOutlines,
+            cache: this.env.CACHE,
           });
           if (!result.ok) throw result.error;
           const { outline, title, description } = result.value;

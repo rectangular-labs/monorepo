@@ -132,10 +132,12 @@ export function createWriterAgent({
   messages,
   project,
   publicImagesBucket,
+  cacheKV,
 }: {
   messages: SeoChatMessage[];
   project: NonNullable<WebSocketContext["cache"]["project"]>;
   publicImagesBucket: InitialContext["publicImagesBucket"];
+  cacheKV: InitialContext["cacheKV"];
 }): Parameters<typeof streamText>[0] {
   const plannerTools = createPlannerToolsWithMetadata();
   const todoTools = createTodoToolWithMetadata({ messages });
@@ -144,11 +146,15 @@ export function createWriterAgent({
     userId: undefined,
     publishingSettings: project.publishingSettings,
   });
-  const webTools = createWebToolsWithMetadata();
-  const researchTools = createArticleResearchToolWithMetadata({ project });
+  const webTools = createWebToolsWithMetadata(project, cacheKV);
+  const researchTools = createArticleResearchToolWithMetadata({
+    project,
+    cacheKV,
+  });
   const writingTools = createArticleWritingToolWithMetadata({
     project,
     publicImagesBucket,
+    cacheKV,
   });
 
   const skillDefinitions: AgentToolDefinition[] = [

@@ -139,6 +139,7 @@ type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
 export class SeoWriterWorkflow extends WorkflowEntrypoint<
   {
     SEO_PLANNER_WORKFLOW: InitialContext["seoPlannerWorkflow"];
+    CACHE: InitialContext["cacheKV"];
   },
   WriterInput
 > {
@@ -271,7 +272,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           if (!workspaceResult.ok) throw workspaceResult.error;
           const { project, node } = workspaceResult.value;
 
-          const webTools = createWebToolsWithMetadata();
+          const webTools = createWebToolsWithMetadata(project, this.env.CACHE);
 
           const imageTools = createImageToolsWithMetadata({
             organizationId: input.organizationId,

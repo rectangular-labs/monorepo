@@ -1,12 +1,20 @@
 import { google } from "@ai-sdk/google";
+import type { schema } from "@rectangular-labs/db";
 import {
   generateText,
   type JSONSchema7,
   jsonSchema,
+  Output,
   stepCountIs,
   tool,
 } from "ai";
 import { type } from "arktype";
+import type { InitialContext } from "../../../types";
+import {
+  configureDataForSeoClient,
+  fetchSerpWithCache,
+  getLocationAndLanguage,
+} from "../../dataforseo/utils";
 import type { AgentToolDefinition } from "./utils";
 
 const webFetchInputSchema = type({
@@ -25,7 +33,29 @@ const webSearchInputSchema = type({
   ),
 });
 
-export function createWebToolsWithMetadata() {
+const webSearchOutputSchema = type({
+  results: type({
+    url: type("string").describe(
+      "The URL of the site that contains the relevant information.",
+    ),
+    siteGroundingText: type("string").describe(
+      "The text from the site that grounds the relevant information.",
+    ),
+    relevantInformation: type("string").describe(
+      "The relevant information from the site that helps fulfill the instruction.",
+    ),
+  })
+    .array()
+    .describe("Array of relevant web search results."),
+});
+
+export function createWebToolsWithMetadata(
+  project: Omit<typeof schema.seoProject.$inferSelect, "serpSnapshot">,
+  cacheKV: InitialContext["cacheKV"],
+) {
+  configureDataForSeoClient();
+  const { locationName, languageCode } = getLocationAndLanguage(project);
+
   const webFetch = tool({
     description:
       "Fetch a webpage and answer a specific query regarding a webpage.",
@@ -76,59 +106,109 @@ export function createWebToolsWithMetadata() {
 
   const webSearch = tool({
     description:
-      "Run a live Google search for up-to-date information. This tool uses live SERP data to find the latest information on the given queries.",
+      "Run a live web search for up-to-date information. This tool uses DataForSEO SERP data to find the latest information on the given queries.",
     inputSchema: jsonSchema<typeof webSearchInputSchema.infer>(
       webSearchInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({ instruction, queries }) {
-      const searchQueries =
-        queries.length > 0 ? queries : instruction ? [instruction] : [];
-      if (searchQueries.length === 0) {
+      if (queries.length === 0) {
         return {
           success: false,
           error: "No queries provided for web search.",
         };
       }
 
-      const prompt = [
-        "Run a live web search using the google_search tool.",
-        "Return the answer to the queries along with a concise list of the top sources for each query with title, URL, and one-line summary of the url.",
-        "Make sure to validate the URLs as still working using the url_context tool before citing or linking to them.",
-        "Use clear separation by query.",
-        `Instruction: ${instruction}`,
-        "Queries:",
-        ...searchQueries.map((q) => `- ${q}`),
-      ].join("\n");
+      const serpResponses = await Promise.all(
+        queries.map(async (keyword) => {
+          const serpResult = await fetchSerpWithCache({
+            keyword,
+            locationName,
+            languageCode,
+            cacheKV,
+          });
+          if (!serpResult.ok) {
+            throw new Error(
+              `DFS serp error: ${JSON.stringify(serpResult.error, null, 2)}`,
+              { cause: serpResult.error },
+            );
+          }
+          return {
+            query: keyword,
+            result: serpResult.value.searchResult ?? [],
+          };
+        }),
+      );
 
-      const { text } = await generateText({
+      const organicResults = serpResponses.flatMap(({ query, result }) => ({
+        result: result
+          .filter((item) => item.type === "organic")
+          .map((item) => ({
+            url: item.url ?? "",
+            title: item.title ?? "",
+            description: item.description ?? "",
+            extendedSnippet: item.extendedSnippet ?? "",
+          })),
+        query,
+      }));
+
+      const prompt = `Use the SERP data and url_context tool to answer the instruction.
+Read as many sites as needed to produce accurate, cited information.
+Return JSON only in the format: { results: [{ url, siteCitation, relevantInformation }] }.
+Each result should map to a URL you actually accessed via the url_context tool.
+
+## Instruction
+
+${instruction}
+
+## Organic SERP results
+
+${organicResults
+  .map(
+    (item) =>
+      `- Query: ${item.query}
+${item.result
+  .map(
+    (r) => `  - URL: ${r.url}
+    Title: ${r.title}
+    Description: ${r.description}
+    Snippet: ${r.extendedSnippet}`,
+  )
+  .join("\n")}`,
+  )
+  .join("\n")}`;
+
+      const { experimental_output: object } = await generateText({
         model: google("gemini-3-flash-preview"),
+        experimental_output: Output.object({
+          schema: jsonSchema<typeof webSearchOutputSchema.infer>(
+            webSearchOutputSchema.toJsonSchema() as JSONSchema7,
+          ),
+        }),
         system: "You are a precise research assistant.",
         prompt,
         tools: {
-          google_search: google.tools.googleSearch({}),
           url_context: google.tools.urlContext({}),
         },
         onStepFinish: (step) => {
           console.log("web search step", step);
         },
         stopWhen: [stepCountIs(25)],
-      }).catch((error) => {
-        console.error("Error in web search", error);
-        return { text: null };
       });
-      if (!text?.trim()) {
+
+      if (object.results.length === 0) {
         return {
           success: false,
-          error: "Failed to search.",
+          error: "Failed to find relevant information from SERP results.",
         };
       }
 
-      console.log("web search result", text);
+      console.log("web search input queries", queries);
+      console.log("web search result", object.results);
 
       return {
         success: true,
-        queries: searchQueries,
-        result: text.trim(),
+        queries,
+        result: object.results,
       };
     },
   });

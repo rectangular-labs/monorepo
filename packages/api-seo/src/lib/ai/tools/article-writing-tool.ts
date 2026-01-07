@@ -54,9 +54,11 @@ function readWorkspaceFile(
 export function createArticleWritingToolWithMetadata({
   project,
   publicImagesBucket,
+  cacheKV,
 }: {
   project: NonNullable<WebSocketContext["cache"]["project"]>;
   publicImagesBucket: InitialContext["publicImagesBucket"];
+  cacheKV: InitialContext["cacheKV"];
 }) {
   const writeArticleContent = tool({
     description:
@@ -169,7 +171,7 @@ ${writingSettings?.metadata?.length ? writingSettings.metadata.map((m) => `- ${m
         userId: undefined,
         publishingSettings: project.publishingSettings,
       });
-      const webTools = createWebToolsWithMetadata();
+      const webTools = createWebToolsWithMetadata(project, cacheKV);
       const imageTools = createImageToolsWithMetadata({
         organizationId: project.organizationId,
         projectId: project.id,

@@ -72,6 +72,7 @@ const room = websocketBase
         project,
         userId: context.userId,
         currentPage: "content-list",
+        cacheKV: context.cacheKV,
       }),
       onStepFinish: (step) => {
         console.log("campaign.write step", step);

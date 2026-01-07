@@ -102,6 +102,7 @@ export const chat = withOrganizationIdBase
           messages: input.messages,
           project,
           publicImagesBucket: context.publicImagesBucket,
+          cacheKV: context.cacheKV,
         });
       }
       return createStrategistAgent({
@@ -110,6 +111,7 @@ export const chat = withOrganizationIdBase
         project,
         userId: context.user.id,
         currentPage: input.currentPage,
+        cacheKV: context.cacheKV,
       });
     })();
 
