@@ -1,7 +1,11 @@
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { convertToModelMessages, type streamText } from "ai";
-import type { InitialContext, SeoChatMessage, WebSocketContext } from "../../types";
+import type {
+  InitialContext,
+  SeoChatMessage,
+  WebSocketContext,
+} from "../../types";
 import { formatBusinessBackground } from "./format-business-background";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
