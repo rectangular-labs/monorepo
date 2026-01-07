@@ -1,11 +1,6 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import {
-  ArrowUpRight,
-  TrendingDown,
-  TrendingUp,
-  Info,
-} from "@rectangular-labs/ui/components/icon";
+import { MoveUpRight, MoveDownLeft, TrendingUp, Info } from "@rectangular-labs/ui/components/icon";
 
 const signalCards = [
   {
@@ -23,7 +18,7 @@ const signalCards = [
     status: "negative",
     value: "-3.1%",
     desc: "Cluster: 'Social Media Tips'",
-    icon: TrendingDown,
+    icon: MoveDownLeft,
     color: "text-rose-500",
     bgColor: "bg-rose-500/10",
     borderColor: "border-rose-500/20",
@@ -90,13 +85,13 @@ export function Reporting() {
               </div>
               <div className="mt-8 border-current/10 border-t pt-4 opacity-60">
                 <div className="flex items-center gap-2 font-bold text-[10px] text-foreground uppercase tracking-tighter">
-                  View full cluster signals <ArrowUpRight className="h-3 w-3" />
+                  View full cluster signals <MoveUpRight className="h-3 w-3" />
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
-
+        
         <p className="text-center font-medium text-muted-foreground text-sm italic">
           Clarity at your fingertips is unfair.
         </p>

@@ -35,7 +35,7 @@ export function Proof() {
           <a
             className={buttonVariants({
               className: "gap-3",
-              size: "md",
+              size: "sm",
             })}
             href={ONBOARD_LINK}
             rel="noopener"

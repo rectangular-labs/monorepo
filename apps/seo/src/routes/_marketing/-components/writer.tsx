@@ -2,16 +2,16 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
 import {
   Check,
-  Edit3,
+  Pencil,
   Globe,
   Search,
-  ShieldCheck,
+  Shield,
 } from "@rectangular-labs/ui/components/icon";
 
 const alignmentChecks = [
   { icon: Globe, label: "What’s already winning", status: "Aligned" },
   { icon: Search, label: "Top SERPs and AIO", status: "Optimized" },
-  { icon: ShieldCheck, label: "Your standards", status: "Verified" },
+  { icon: Shield, label: "Your standards", status: "Verified" },
 ];
 
 export function Writer() {
@@ -72,7 +72,7 @@ export function Writer() {
 
               <div className="mt-8 flex justify-end">
                 <div className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground text-xs">
-                  <Edit3 className="h-3 w-3" /> Drafting...
+                  <Pencil className="h-3 w-3" /> Drafting...
                 </div>
               </div>
             </div>
