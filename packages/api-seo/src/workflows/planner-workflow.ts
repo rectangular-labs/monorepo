@@ -6,14 +6,11 @@ import {
 import { NonRetryableError } from "cloudflare:workflows";
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import type { ArticleType } from "@rectangular-labs/core/loro-file-system";
-import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type { searchItemSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import type {
   seoPlanKeywordTaskInputSchema,
   seoPlanKeywordTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
-import { fetchSerp } from "@rectangular-labs/dataforseo";
 import type { schema } from "@rectangular-labs/db";
 import { writeToFile } from "@rectangular-labs/loro-file-system";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
@@ -29,17 +26,17 @@ import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
 } from "../lib/ai/tools/todo-tool";
+import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import {
   configureDataForSeoClient,
-  fetchWithCache,
+  fetchSerpWithCache,
   getLocationAndLanguage,
-  getSerpCacheKey,
+  getSerpCacheDetails,
 } from "../lib/dataforseo/utils";
 import {
   loadWorkspaceForWorkflow,
   persistWorkspaceSnapshot,
 } from "../lib/workspace/workflow";
-import { ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES } from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -126,88 +123,6 @@ ${serpValue}
   });
 }
 
-const inferArticleTypeSchema = type({
-  articleType: articleTypeSchema,
-}).describe("Chosen article type for the planned content");
-async function inferArticleType({
-  primaryKeyword,
-  notes,
-  serp,
-}: {
-  primaryKeyword: string;
-  notes?: string;
-  serp: SearchItem[];
-}): Promise<ArticleType> {
-  const prompt = `Choose the single best article type for the intended content.
-
-Return ONLY JSON matching: { "articleType": string }
-
-"articleType" must be one of:
-- "best-of-list"
-- "comparison"
-- "how-to"
-- "listicle"
-- "long-form-opinion"
-- "faq"
-- "news"
-- "whitepaper"
-- "infographic"
-- "case-study"
-- "press-release"
-- "interview"
-- "product-update"
-- "contest-giveaway"
-- "research-summary"
-- "event-recap"
-- "best-practices"
-- "other"
-
-Decision rules:
-- If notes clearly specify a format (e.g. "press release", "interview", "case study"), prioritize notes over SERP.
-- If SERP intent is obvious (e.g. the SERP is dominated by comparisons, best-of lists, or how-to guides), match it.
-- Use "best-of-list" only for explicit "best/top" ranking intent; otherwise use "listicle" for general lists.
-- Use "other" if none apply.
-
-<primary_keyword>
-${primaryKeyword}
-</primary_keyword>
-
-<notes>
-${notes ?? ""}
-</notes>
-
-<serp>
-${JSON.stringify(serp)}
-</serp>`;
-
-  const result = await safe(() =>
-    generateText({
-      model: google("gemini-3-flash-preview"),
-      experimental_output: Output.object({
-        schema: jsonSchema<typeof inferArticleTypeSchema.infer>(
-          // Google api doesn't support const keyword in json schema for anyOf, only string.
-          JSON.parse(
-            JSON.stringify(inferArticleTypeSchema.toJsonSchema()).replaceAll(
-              "const",
-              "string",
-            ),
-          ) as JSONSchema7,
-        ),
-      }),
-      prompt,
-    }),
-  );
-
-  if (!result.ok) {
-    logError("failed to infer article type; defaulting to other", {
-      error: result.error,
-    });
-    return "other";
-  }
-
-  return result.value.experimental_output.articleType;
-}
-
 async function generateOutline({
   project,
   notes,
@@ -215,9 +130,11 @@ async function generateOutline({
   locationName,
   languageCode,
   serp,
+  cache,
 }: {
   project: Omit<typeof schema.seoProject.$inferSelect, "serpSnapshot">;
   notes?: string;
+  cache: InitialContext["cacheKV"];
   primaryKeyword: string;
   locationName: string;
   languageCode: string;
@@ -226,7 +143,6 @@ async function generateOutline({
   Result<
     {
       outline: string;
-      articleType: ArticleType;
       title: string;
       description: string;
     },
@@ -235,8 +151,6 @@ async function generateOutline({
 > {
   const haveAiOverview = serp.some((s) => s.type === "ai_overview");
   const havePeopleAlsoAsk = serp.some((s) => s.type === "people_also_ask");
-  const articleType = await inferArticleType({ primaryKeyword, notes, serp });
-  const additionalRules = ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES[articleType];
   const system = `<role>
 You are an expert SEO article researcher and strategist. Your job is to produce a writer-ready plan and outline for the BEST possible article for the target keyword. You MUST synthesize findings from competitor pages, people also ask questions, related searches, and AI overview should they exists. 
 
@@ -253,7 +167,7 @@ We identify the search intent of the primary keyword from the SERPs, your natura
 2. what they already know or are aware of (eg. are they aware of the existence of a product or solution, or not yet).
 3. what they are not aware of.
 
-Once the search intent is identified, the article should be focused on answering precisely it without delay, substantiated with all the information, evidence, explanation and sourcing arising from it. 
+Once the search intent is identified, the article should be focused on answering precisely it, substantiated with all the information, evidence, explanation and sourcing found from doing research on the web/links to relevant articles that we've written in the past. Refer to workflow for more details on how we prepare the article outline
 
 EVERYTHING in the article should be focused AND in service of the search intent.
 </role>
@@ -267,10 +181,9 @@ EVERYTHING in the article should be focused AND in service of the search intent.
   i) title - how to use the primary keyword in the title, phrase it to capture attention, and promise the searcher their search intent will be fulfilled
   ii) slug - the most efficient way to include keywords in the url
   iii) description - summarize content succinctly and accurately while stating the keyword
-3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
+3) Gather sources: YOU MUST USE web_search for fresh stats, studies, definitions, quotes, and other articles that we might've wrote in the past Alternatively, you are free to suggest URLS, but they must be validated via web_fetch. DO NOT cite URLs or sources not returned from web_search or validated via web_fetch. MAKE SEPARATE web_fetch TOOL CALLS for searches for internal links and external sources.
 4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
 5) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
-${additionalRules ? `6) Follow the additional article rules as overriding constraints: ${additionalRules}` : ""}
 </workflow>
 
 <critical-plan-requirements>
@@ -285,25 +198,27 @@ ${additionalRules ? `6) Follow the additional article rules as overriding constr
   - First H2 - incredibly focused and targeted toward answering the main intent of the searcher
   - Most H2s should have the primary keyword ${primaryKeyword} naturally written into it
   - H3 be related to the H2, and to the point
-- Introduction - maximum of two paragraph of 3 sentences long each. Should 
+- Lead section (no "Introduction" heading) - maximum of two paragraphs of 3 sentences long each. Should 
   1. intrigue the reader - why this is important for the reader and include any interesting stats
   2. contextualize the topic for the reader's search intent
   3. contextualize how this has been recently important and what recent developments in the space are (if applicable - i.e. if the topic has significant recent updates)
   4. summarize the topics that the article would cover 
+- Include a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion".
 - Add in a target word count to the plan so the writer knows how much to write.
   - Most articles should have a word count around 1,000 to 1,500 words. Long research pieces can have more, but 95% of articles should fall within 1,000 to 1,500 words. 
   - If there is a struggle to keep it below this word count, look to focus the article up, and talk about fewer ideas. 
 ${
   havePeopleAlsoAsk
-    ? `- Suggest FAQ sections Based on the People Also Ask data. Use the People Also Ask data to guide the FAQ sections and limit 5 questions maximum unless asked to write more. 
-  - short and to the point. No more than 2 sentences long.
-  - answer the question directly, substantiated succinctly.
-  - plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed.
-  - Have the question mirror the People Also Ask question almost verbatim.`
-    : "- Do not suggest FAQ sections."
+    ? `- Suggest a Frequently Asked Questions section based on the People Also Ask data. We should be using the questions from the People Also Ask data almost verbatim to guide the Frequently Asked Questions section and limit 5 questions maximum unless asked to write more. 
+    - Short and to the point. No more than 2 sentences long.
+    - Answer the question directly, substantiated succinctly.
+    - Plug the service and product of the company by directly stating the company name, but only naturally and when relevant to the question posed.
+    - Have the question mirror the People Also Ask question almost verbatim.
+    - Place the Frequently Asked Questions section after the wrap-up section.`
+    : "- Do not suggest a Frequently Asked Questions section."
 }
-- Use the related_searches to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Include any relevant stats that we should cite or internal links to relevant articles that we should link to.
+- Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
+- Include any relevant stats that we should cite or internal links to relevant articles that we should link to. Make sure that all links have either been validated via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links.
   <example>
     According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
   </example>
@@ -322,7 +237,6 @@ ${
 - Primary keyword: ${primaryKeyword}
 - Target country: ${locationName}
 - Target language: ${languageCode}
-- Article type: ${articleType}
 </project context>
 
 
@@ -331,6 +245,7 @@ ${JSON.stringify(serp)}
 </live-serp-data>`;
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
+  const webTools = createWebToolsWithMetadata(project, cache);
   const outputSchema = type({
     title: type("string").describe(
       "Meta title (max 60 characters): clear, enticing, includes the primary keyword once naturally, directly answers search intent.",
@@ -359,8 +274,7 @@ ${JSON.stringify(serp)}
         } satisfies GoogleGenerativeAIProviderOptions,
       },
       tools: {
-        url_context: google.tools.urlContext({}),
-        google_search: google.tools.googleSearch({}),
+        ...webTools.tools,
         ...todoTool.tools,
       },
       system,
@@ -406,38 +320,17 @@ ${JSON.stringify(serp)}
   const description = output.description.trim();
   if (!outline) return err(new Error("Empty outline returned by model"));
   if (!title) return err(new Error("Empty title returned by model"));
-  return ok({ outline, articleType, title, description });
+  return ok({ outline, title, description });
 }
 
 type PlannerInput = type.infer<typeof seoPlanKeywordTaskInputSchema>;
 export class SeoPlannerWorkflow extends WorkflowEntrypoint<
   {
     SEO_WRITER_WORKFLOW: InitialContext["seoWriterWorkflow"];
-    CACHE: KVNamespace;
+    CACHE: InitialContext["cacheKV"];
   },
   PlannerInput
 > {
-  fetchSerpWithCache = async (
-    keyword: string,
-    locationName: string,
-    languageCode: string,
-  ) => {
-    const serpKey = getSerpCacheKey(keyword, locationName, languageCode);
-    const serpResult = await fetchWithCache({
-      key: serpKey,
-      fn: async () => {
-        const result = await fetchSerp({
-          keyword,
-          locationName,
-          languageCode,
-        });
-        if (!result.ok) throw result.error;
-        return result.value;
-      },
-      cacheKV: this.env.CACHE,
-    });
-    return serpResult;
-  };
   async run(event: WorkflowEvent<PlannerInput>, step: WorkflowStep) {
     const input = event.payload;
 
@@ -476,19 +369,20 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             `Primary keyword not found for ${input.path}`,
           );
         }
-        const serpKey = getSerpCacheKey(
+        const serpCacheDetails = getSerpCacheDetails(
           primaryKeyword,
           locationName,
           languageCode,
         );
-        const serpResult = await this.fetchSerpWithCache(
-          primaryKeyword,
+        const serpResult = await fetchSerpWithCache({
+          keyword: primaryKeyword,
           locationName,
           languageCode,
-        );
+          cacheKV: this.env.CACHE,
+        });
         if (!serpResult.ok) throw serpResult.error;
         return {
-          serpKey,
+          serpKey: serpCacheDetails.key,
           primaryKeyword,
           locationName,
           languageCode,
@@ -521,11 +415,12 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             languageCode,
           });
 
-          const serp = await this.fetchSerpWithCache(
-            primaryKeyword,
+          const serp = await fetchSerpWithCache({
+            keyword: primaryKeyword,
             locationName,
             languageCode,
-          );
+            cacheKV: this.env.CACHE,
+          });
           if (!serp.ok) {
             throw serp.error;
           }
@@ -555,18 +450,18 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             locationName,
             languageCode,
             serp: serpWithOutlines,
+            cache: this.env.CACHE,
           });
           if (!result.ok) throw result.error;
-          const { outline, articleType, title, description } = result.value;
+          const { outline, title, description } = result.value;
           logInfo("outline generated", {
             instanceId: event.instanceId,
             path: input.path,
             outlineChars: outline.length,
-            articleType,
             titleChars: title.length,
             descriptionChars: description.length,
           });
-          return { outline, articleType, title, description };
+          return { outline, title, description };
         },
       );
 
@@ -587,7 +482,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             { key: "outline", value: outlineResult.outline },
             { key: "title", value: outlineResult.title },
             { key: "description", value: outlineResult.description },
-            { key: "articleType", value: outlineResult.articleType },
           ],
         });
         if (!writeResult.success) throw new Error(writeResult.message);
@@ -634,7 +528,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         type: "seo-plan-keyword",
         path: input.path,
         outline: outlineResult.outline,
-        articleType: outlineResult.articleType,
       } satisfies typeof seoPlanKeywordTaskOutputSchema.infer;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

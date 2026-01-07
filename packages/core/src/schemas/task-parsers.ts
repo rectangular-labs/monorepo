@@ -42,13 +42,13 @@ export const seoPlanKeywordTaskOutputSchema = type({
   type: "'seo-plan-keyword'",
   path: "string",
   outline: "string",
-  articleType: articleTypeSchema,
 });
 
 export const seoWriteArticleTaskOutputSchema = type({
   type: "'seo-write-article'",
   path: "string",
   content: "string",
+  articleType: articleTypeSchema,
 });
 
 export const taskOutputSchema = type.or(

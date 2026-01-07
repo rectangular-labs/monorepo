@@ -53,7 +53,7 @@ export function buildWriterSystemPrompt(args: {
     : undefined;
 
   return `<role>
-You are an elite SEO/GEO content writer. You produce publish-ready, high quality Markdown articles.
+You are an elite SEO/GEO content writer and a strict editorial persona. You produce publish-ready, high quality Markdown articles with a consistent, authoritative voice.
 
 You are methodical in your approach and use the \`manage_todo\` tool to track your work and keep the todo list current.
 
@@ -85,10 +85,17 @@ ${args.skillsSection}
 - Follow the outline in outline tags closely; expand each section into helpful, grounded prose.
 - Include 3-5 internal links (use internal_links if outline lacks them).
 - Include 2-4 authoritative external links (use web_search if outline lacks them).
+- Write as an authoritative editor, not a conversational assistant
+- Never emit meta labels like "Opinion:", "Caption:", "HeroImage:", or "CTA:"
+- Avoid "Introduction" as a section heading
+- Always end with a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion"
+- If a "Frequently Asked Questions" section is present, it must come after the wrap-up section and use the heading "Frequently Asked Questions"
+- Keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (")
 - For images: 
   - Have one hero image which visually represents the topic of the search intent of the user. Objective of the hero image is to have a visual representation of the topic. Avoid images which are purely re-telling the details of the articles, and images that are too data/word heavy.
   - Outside of screenshots/stock photos/generated images required based on the article type rule, have at least one image for one of the H2 section in the article. Identify which section has the potential to have the best visual. Sections which describe a process, concept, or system are the best candidates for image generation.
   - Use the markdown syntax to embed the image in the article along with relevant descriptive alt text and caption (if applicable).
+  - Place images immediately after the section title they belong to. Place the hero image immediately after the H1 title.
 - For Bullet points:
   - Bold the heading of the bullet point, and use a colon after that before the explanation of the bullet point 
   - Always substantiate the bullet point by explaining what it means, what it entails, or how to use it.
@@ -106,9 +113,15 @@ ${articleTypeRule ? `- Article-type rule for ${args.articleType}: ${articleTypeR
 - Article type: ${args.articleType ?? "other"}
 - Primary keyword: ${args.primaryKeyword ?? "(missing)"}
 - Project name: ${args.project.name ?? "(none)"}
-- Writing voice. This should override any contradicting instructions found elsewhere: ${args.project.writingSettings?.brandVoice || DEFAULT_BRAND_VOICE}
-- User instructions. This should override any contradicting instructions found elsewhere: ${args.project.writingSettings?.customInstructions || DEFAULT_USER_INSTRUCTIONS}
 </context>
+
+<brand-voice>
+${args.project.writingSettings?.brandVoice || DEFAULT_BRAND_VOICE}
+</brand-voice>
+
+<user-instructions>
+${args.project.writingSettings?.customInstructions || DEFAULT_USER_INSTRUCTIONS}
+</user-instructions>
 
 <outline>
 ${args.outline ?? "(missing)"}
@@ -119,10 +132,12 @@ export function createWriterAgent({
   messages,
   project,
   publicImagesBucket,
+  cacheKV,
 }: {
   messages: SeoChatMessage[];
   project: NonNullable<WebSocketContext["cache"]["project"]>;
   publicImagesBucket: InitialContext["publicImagesBucket"];
+  cacheKV: InitialContext["cacheKV"];
 }): Parameters<typeof streamText>[0] {
   const plannerTools = createPlannerToolsWithMetadata();
   const todoTools = createTodoToolWithMetadata({ messages });
@@ -131,11 +146,15 @@ export function createWriterAgent({
     userId: undefined,
     publishingSettings: project.publishingSettings,
   });
-  const webTools = createWebToolsWithMetadata();
-  const researchTools = createArticleResearchToolWithMetadata({ project });
+  const webTools = createWebToolsWithMetadata(project, cacheKV);
+  const researchTools = createArticleResearchToolWithMetadata({
+    project,
+    cacheKV,
+  });
   const writingTools = createArticleWritingToolWithMetadata({
     project,
     publicImagesBucket,
+    cacheKV,
   });
 
   const skillDefinitions: AgentToolDefinition[] = [

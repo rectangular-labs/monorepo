@@ -6,6 +6,7 @@ import {
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type {
   seoWriteArticleTaskInputSchema,
   seoWriteArticleTaskOutputSchema,
@@ -21,7 +22,6 @@ import {
 } from "ai";
 import { type } from "arktype";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
-import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -37,7 +37,10 @@ import {
   persistWorkspaceSnapshot,
   repairPublicBucketImageLinks,
 } from "../lib/workspace/workflow";
-import { ARTICLE_TYPE_TO_WRITER_RULE } from "../lib/workspace/workflow.constant";
+import {
+  ARTICLE_TYPE_TO_WRITER_RULE,
+  type ArticleType,
+} from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -53,10 +56,90 @@ const reviewArticleOutputSchema = type({
   changes: type("string[]").describe("Changes to be made to the article."),
 });
 
+const inferArticleTypeSchema = type({
+  articleType: articleTypeSchema,
+}).describe("Chosen article type for the content");
+
+async function inferArticleType(args: {
+  primaryKeyword?: string | null;
+  notes?: string | null;
+  outline?: string | null;
+}): Promise<ArticleType> {
+  const { primaryKeyword, notes, outline } = args;
+  if (!primaryKeyword && !outline && !notes) return "other";
+
+  const prompt = `Choose the single best article type for the intended content.
+
+Return ONLY JSON matching: { "articleType": string }
+
+"articleType" must be one of:
+- "best-of-list"
+- "comparison"
+- "how-to"
+- "listicle"
+- "long-form-opinion"
+- "faq"
+- "news"
+- "whitepaper"
+- "infographic"
+- "case-study"
+- "press-release"
+- "interview"
+- "product-update"
+- "contest-giveaway"
+- "research-summary"
+- "event-recap"
+- "best-practices"
+- "other"
+
+Decision rules:
+- If notes clearly specify a format (e.g. "press release", "interview", "case study"), prioritize notes over outline.
+- If the outline structure signals a format (steps, Q&A headings, comparisons, rankings), match it.
+- Use "best-of-list" only for explicit "best/top" ranking intent; otherwise use "listicle" for general lists.
+- Use "other" if none apply.
+
+<primary_keyword>
+${primaryKeyword ?? ""}
+</primary_keyword>
+
+<notes>
+${notes ?? ""}
+</notes>
+
+<outline>
+${outline ?? ""}
+</outline>`;
+
+  try {
+    const result = await generateText({
+      model: google("gemini-3-flash-preview"),
+      experimental_output: Output.object({
+        schema: jsonSchema<typeof inferArticleTypeSchema.infer>(
+          // Google api doesn't support const keyword in json schema for anyOf, only string.
+          JSON.parse(
+            JSON.stringify(inferArticleTypeSchema.toJsonSchema()).replaceAll(
+              "enum",
+              'type":"string","enum',
+            ),
+          ) as JSONSchema7,
+        ),
+      }),
+      prompt,
+    });
+    return result.experimental_output.articleType;
+  } catch (error) {
+    logError("failed to infer article type; defaulting to other", {
+      error,
+    });
+    return "other";
+  }
+}
+
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
 export class SeoWriterWorkflow extends WorkflowEntrypoint<
   {
     SEO_PLANNER_WORKFLOW: InitialContext["seoPlannerWorkflow"];
+    CACHE: InitialContext["cacheKV"];
   },
   WriterInput
 > {
@@ -174,7 +257,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       path: input.path,
     });
     try {
-      const articleMarkdown = await step.do(
+      const { text: articleMarkdown, articleType } = await step.do(
         "generate article markdown",
         {
           timeout: "30 minutes",
@@ -189,10 +272,8 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           if (!workspaceResult.ok) throw workspaceResult.error;
           const { project, node } = workspaceResult.value;
 
-          const webTools = createWebToolsWithMetadata();
-          const internalLinksTools = createInternalLinksToolWithMetadata(
-            project.websiteUrl,
-          );
+          const webTools = createWebToolsWithMetadata(project, this.env.CACHE);
+
           const imageTools = createImageToolsWithMetadata({
             organizationId: input.organizationId,
             projectId: input.projectId,
@@ -205,14 +286,17 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             instanceId: event.instanceId,
             path: input.path,
             webToolCount: Object.keys(webTools.tools).length,
-            internalLinksToolCount: Object.keys(internalLinksTools.tools)
-              .length,
             imageToolCount: Object.keys(imageTools.tools).length,
           });
 
           const outline = node.data.get("outline");
-          const articleType = node.data.get("articleType");
           const primaryKeyword = node.data.get("primaryKeyword");
+          const notes = node.data.get("notes");
+          const articleType = await inferArticleType({
+            primaryKeyword,
+            notes,
+            outline,
+          });
           const systemPrompt = buildWriterSystemPrompt({
             project,
             skillsSection: "",
@@ -246,7 +330,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               },
               tools: {
                 ...webTools.tools,
-                ...internalLinksTools.tools,
                 ...imageTools.tools,
                 ...todoTool.tools,
               },
@@ -328,6 +411,7 @@ ${changes.join("\n")}
               },
               tools: {
                 ...webTools.tools,
+                ...todoTool.tools,
               },
               system: `<role>
 You are a strict SEO content QA reviewer. Your job is to verify the writer followed ALL explicit rules and that the article is publish-ready.
@@ -406,6 +490,20 @@ ${text}
                   usage: step.usage,
                 });
               },
+              prepareStep: ({ messages }) => {
+                return {
+                  messages: [
+                    ...messages,
+                    {
+                      role: "assistant",
+                      content: formatTodoFocusReminder({
+                        todos: todoTool.getSnapshot(),
+                        maxOpen: 5,
+                      }),
+                    },
+                  ],
+                };
+              },
               stopWhen: [stepCountIs(20)],
             });
             ++attempts;
@@ -417,7 +515,7 @@ ${text}
               changes,
             });
           }
-          return text;
+          return { text, articleType };
         },
       );
 
@@ -441,6 +539,7 @@ ${text}
                 ? ("pending-review" satisfies SeoFileStatus)
                 : ("scheduled" satisfies SeoFileStatus),
             },
+            { key: "articleType", value: articleType },
           ],
         });
         if (!writeResult.success) throw new Error(writeResult.message);
@@ -458,6 +557,7 @@ ${text}
         type: "seo-write-article",
         path: input.path,
         content: articleMarkdown,
+        articleType,
       } satisfies typeof seoWriteArticleTaskOutputSchema.infer;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unknown error";

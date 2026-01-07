@@ -85,7 +85,13 @@ export function createTodoToolWithMetadata(args: {
     description:
       "Manage todos for the SEO campaign. Todos are stored in chat history via tool results (not in the workspace filesystem).",
     inputSchema: jsonSchema<typeof manageTodoInputSchema.infer>(
-      manageTodoInputSchema.toJsonSchema() as JSONSchema7,
+      // Google api doesn't support const keyword in json schema for anyOf, only string.
+      JSON.parse(
+        JSON.stringify(manageTodoInputSchema.toJsonSchema()).replaceAll(
+          "enum",
+          'type":"string","enum',
+        ),
+      ) as JSONSchema7,
     ),
     async execute({ action, todo }) {
       await Promise.resolve();
@@ -154,7 +160,7 @@ export function createTodoToolWithMetadata(args: {
 
       return {
         success: false,
-        message: `Unknown action: ${action}`,
+        message: `Unknown action: ${action}. Action must be one of: create, list, update.`,
       };
     },
   });

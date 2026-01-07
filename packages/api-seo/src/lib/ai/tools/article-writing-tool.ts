@@ -54,9 +54,11 @@ function readWorkspaceFile(
 export function createArticleWritingToolWithMetadata({
   project,
   publicImagesBucket,
+  cacheKV,
 }: {
   project: NonNullable<WebSocketContext["cache"]["project"]>;
   publicImagesBucket: InitialContext["publicImagesBucket"];
+  cacheKV: InitialContext["cacheKV"];
 }) {
   const writeArticleContent = tool({
     description:
@@ -90,7 +92,7 @@ You are an elite SEO content writer specializing in creating high-performing, se
 </role>
 
 <task>
-${hasExistingArticle ? "Update" : "Create"} a comprehensive, publish-ready article. Refer to ${extracted.planPath} for the plan which will include the target keyword, 2 letter target country code, 2 letter target language code, title/H2 outline, angle, FAQs, relevant text pointing to the sources to cite, internal link targets, target word count and any other instructions that should be followed.
+${hasExistingArticle ? "Update" : "Create"} a comprehensive, publish-ready article. Refer to ${extracted.planPath} for the plan which will include the target keyword, 2 letter target country code, 2 letter target language code, title/H2 outline, angle, Frequently Asked Questions, relevant text pointing to the sources to cite, internal link targets, target word count and any other instructions that should be followed.
 
 The first thing you should do is to read the plan. Then execute the plan to perfection.
 </task>
@@ -107,6 +109,14 @@ Instruction from the user OVERRIDES the plan.
    - Use structured formatting (lists/tables) for scannability.
    - Include semantic variations and LSI keywords based on the related searches.
    ${extracted.funnelStep !== "unknown" ? `- Optimize CTAs and depth for funnel step: ${extracted.funnelStep}.` : ""}
+   - Maintain one consistent voice throughout; do not blend incompatible styles.
+   - Write as an authoritative editor, not a conversational assistant. Avoid offers of help or implied interactivity.
+   - Never emit meta labels like "Opinion:", "Caption:", "HeroImage:", or "CTA:".
+   - Avoid "Introduction" as a section heading. Open with a strong lead paragraph, then use specific H2s.
+   - Always end with a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion".
+   - If a "Frequently Asked Questions" section is present, it must come after the wrap-up section and use the heading "Frequently Asked Questions".
+   - Expand abbreviations on first use.
+   - Keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (").
 
 2. Internal links:
    - Include 3-5 internal links when possible.
@@ -138,6 +148,7 @@ Instruction from the user OVERRIDES the plan.
    - Add in-article images as required to keep the article engaging and enjoyable.
    - Use either the generate_image or capture_screenshot tool to produce images to use in the article. Note that if the images are not what we expect, please replace them either with the generate_image tool or capture_screenshot tool.
    - Use the included returned URLs from the generate_image or capture_screenshot tools in markdown with relevant and optimized descriptive alt text.
+   - Place images immediately after the section title they belong to. Place the hero image immediately after the H1 title.
 
 5. Brand voice: ${writingSettings?.brandVoice || "Professional, authoritative, and helpful"}
 6. Custom instructions: ${writingSettings?.customInstructions || "None specified"}
@@ -153,13 +164,14 @@ ${writingSettings?.metadata?.length ? writingSettings.metadata.map((m) => `- ${m
   - Write for humans first, but optimize for search engines and AI
   - Every claim should be backed by research or clearly marked as opinion
   - Make the content genuinely useful, not just SEO-stuffed
+  - Do not promise visuals or interactivity unless they are actually included
 </reminders>`;
 
       const fileTools = createFileToolsWithMetadata({
         userId: undefined,
         publishingSettings: project.publishingSettings,
       });
-      const webTools = createWebToolsWithMetadata();
+      const webTools = createWebToolsWithMetadata(project, cacheKV);
       const imageTools = createImageToolsWithMetadata({
         organizationId: project.organizationId,
         projectId: project.id,

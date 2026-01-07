@@ -569,7 +569,6 @@ export function ArticleEditorTakeover({
                     Regenerate outline
                   </Button>
                   <Button
-                    disabled={isReadOnly}
                     isLoading={isRegeneratingArticle}
                     onClick={handleRegenerateArticle}
                     size="sm"
