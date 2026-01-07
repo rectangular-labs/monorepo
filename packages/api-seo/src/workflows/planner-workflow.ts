@@ -6,8 +6,6 @@ import {
 import { NonRetryableError } from "cloudflare:workflows";
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import type { ArticleType } from "@rectangular-labs/core/loro-file-system";
-import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type { searchItemSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import type {
   seoPlanKeywordTaskInputSchema,
@@ -39,7 +37,6 @@ import {
   loadWorkspaceForWorkflow,
   persistWorkspaceSnapshot,
 } from "../lib/workspace/workflow";
-import { ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES } from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -126,88 +123,6 @@ ${serpValue}
   });
 }
 
-const inferArticleTypeSchema = type({
-  articleType: articleTypeSchema,
-}).describe("Chosen article type for the planned content");
-async function inferArticleType({
-  primaryKeyword,
-  notes,
-  serp,
-}: {
-  primaryKeyword: string;
-  notes?: string;
-  serp: SearchItem[];
-}): Promise<ArticleType> {
-  const prompt = `Choose the single best article type for the intended content.
-
-Return ONLY JSON matching: { "articleType": string }
-
-"articleType" must be one of:
-- "best-of-list"
-- "comparison"
-- "how-to"
-- "listicle"
-- "long-form-opinion"
-- "faq"
-- "news"
-- "whitepaper"
-- "infographic"
-- "case-study"
-- "press-release"
-- "interview"
-- "product-update"
-- "contest-giveaway"
-- "research-summary"
-- "event-recap"
-- "best-practices"
-- "other"
-
-Decision rules:
-- If notes clearly specify a format (e.g. "press release", "interview", "case study"), prioritize notes over SERP.
-- If SERP intent is obvious (e.g. the SERP is dominated by comparisons, best-of lists, or how-to guides), match it.
-- Use "best-of-list" only for explicit "best/top" ranking intent; otherwise use "listicle" for general lists.
-- Use "other" if none apply.
-
-<primary_keyword>
-${primaryKeyword}
-</primary_keyword>
-
-<notes>
-${notes ?? ""}
-</notes>
-
-<serp>
-${JSON.stringify(serp)}
-</serp>`;
-
-  const result = await safe(() =>
-    generateText({
-      model: google("gemini-3-flash-preview"),
-      experimental_output: Output.object({
-        schema: jsonSchema<typeof inferArticleTypeSchema.infer>(
-          // Google api doesn't support const keyword in json schema for anyOf, only string.
-          JSON.parse(
-            JSON.stringify(inferArticleTypeSchema.toJsonSchema()).replaceAll(
-              "const",
-              "string",
-            ),
-          ) as JSONSchema7,
-        ),
-      }),
-      prompt,
-    }),
-  );
-
-  if (!result.ok) {
-    logError("failed to infer article type; defaulting to other", {
-      error: result.error,
-    });
-    return "other";
-  }
-
-  return result.value.experimental_output.articleType;
-}
-
 async function generateOutline({
   project,
   notes,
@@ -226,7 +141,6 @@ async function generateOutline({
   Result<
     {
       outline: string;
-      articleType: ArticleType;
       title: string;
       description: string;
     },
@@ -235,8 +149,6 @@ async function generateOutline({
 > {
   const haveAiOverview = serp.some((s) => s.type === "ai_overview");
   const havePeopleAlsoAsk = serp.some((s) => s.type === "people_also_ask");
-  const articleType = await inferArticleType({ primaryKeyword, notes, serp });
-  const additionalRules = ARTICLE_TYPE_TO_ADDITIONAL_PLAN_RULES[articleType];
   const system = `<role>
 You are an expert SEO article researcher and strategist. Your job is to produce a writer-ready plan and outline for the BEST possible article for the target keyword. You MUST synthesize findings from competitor pages, people also ask questions, related searches, and AI overview should they exists. 
 
@@ -270,7 +182,6 @@ EVERYTHING in the article should be focused AND in service of the search intent.
 3) Gather sources: use google_search (and optionally url_context) for fresh stats, studies, definitions, and quotes.
 4) Synthesize into a brief article outline. Follow the critical-plan-requirements and the project context.
 5) Output ONLY valid JSON (no markdown, no commentary) matching the required schema.
-${additionalRules ? `6) Follow the additional article rules as overriding constraints: ${additionalRules}` : ""}
 </workflow>
 
 <critical-plan-requirements>
@@ -324,7 +235,6 @@ ${
 - Primary keyword: ${primaryKeyword}
 - Target country: ${locationName}
 - Target language: ${languageCode}
-- Article type: ${articleType}
 </project context>
 
 
@@ -408,7 +318,7 @@ ${JSON.stringify(serp)}
   const description = output.description.trim();
   if (!outline) return err(new Error("Empty outline returned by model"));
   if (!title) return err(new Error("Empty title returned by model"));
-  return ok({ outline, articleType, title, description });
+  return ok({ outline, title, description });
 }
 
 type PlannerInput = type.infer<typeof seoPlanKeywordTaskInputSchema>;
@@ -559,16 +469,15 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             serp: serpWithOutlines,
           });
           if (!result.ok) throw result.error;
-          const { outline, articleType, title, description } = result.value;
+          const { outline, title, description } = result.value;
           logInfo("outline generated", {
             instanceId: event.instanceId,
             path: input.path,
             outlineChars: outline.length,
-            articleType,
             titleChars: title.length,
             descriptionChars: description.length,
           });
-          return { outline, articleType, title, description };
+          return { outline, title, description };
         },
       );
 
@@ -589,7 +498,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             { key: "outline", value: outlineResult.outline },
             { key: "title", value: outlineResult.title },
             { key: "description", value: outlineResult.description },
-            { key: "articleType", value: outlineResult.articleType },
           ],
         });
         if (!writeResult.success) throw new Error(writeResult.message);
@@ -636,7 +544,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         type: "seo-plan-keyword",
         path: input.path,
         outline: outlineResult.outline,
-        articleType: outlineResult.articleType,
       } satisfies typeof seoPlanKeywordTaskOutputSchema.infer;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

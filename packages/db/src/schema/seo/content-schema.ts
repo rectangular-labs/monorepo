@@ -30,7 +30,6 @@ export const seoContent = pgSeoTable(
         onUpdate: "cascade",
       }),
 
-    // Slim content model
     slug: text().notNull(),
     title: text().notNull(),
     createdByUserId: text()
