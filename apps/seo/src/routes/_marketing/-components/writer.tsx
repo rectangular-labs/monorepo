@@ -6,13 +6,9 @@ import {
   Globe,
   Search,
   Shield,
+  FileText,
 } from "@rectangular-labs/ui/components/icon";
-
-const alignmentChecks = [
-  { icon: Globe, label: "What’s already winning", status: "Aligned" },
-  { icon: Search, label: "Top SERPs and AIO", status: "Optimized" },
-  { icon: Shield, label: "Your standards", status: "Verified" },
-];
+import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 
 export function Writer() {
   return (
@@ -20,93 +16,101 @@ export function Writer() {
       <div className="mx-auto max-w-6xl space-y-12">
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
-            Section 4
+            Scale Without Limits
           </p>
           <h2 className="font-regular text-3xl text-foreground tracking-tight sm:text-4xl lg:text-5xl">
             Your{" "}
-            <span className="font-semibold text-primary">Limitless Writer</span>
+            <span className="font-semibold text-primary">
+              Writing Team, at Your Fingertips.
+            </span>
           </h2>
           <p className="text-muted-foreground text-xl leading-relaxed">
-            You decide. It keeps going. Fluid Posts writes in your brand’s
-            voice, ensuring every piece meets your highest standards and the
-            market's demand.
+            Approve, and it goes to work. Fluid Posts writes in your brand’s
+            voice, grounded in fulfilling real search intent.
           </p>
         </div>
 
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="relative">
-            <div className="rounded-3xl border border-border bg-background p-6 shadow-xl">
-              <div className="mb-6 flex items-center justify-between border-border border-b pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-rose-500" />
-                  <div className="h-3 w-3 rounded-full bg-amber-500" />
-                  <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                </div>
-                <div className="font-medium text-muted-foreground text-xs uppercase tracking-widest">
-                  Brand Voice Editor
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="h-4 w-3/4 rounded-full bg-muted/60" />
-                <div className="h-4 w-full rounded-full bg-muted/60" />
-                <div className="h-4 w-5/6 rounded-full bg-muted/60" />
-                <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: "90%" }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                  className="relative h-4 overflow-hidden rounded-full bg-primary/20"
-                >
-                  <motion.div
-                    className="absolute inset-0 bg-primary/40"
-                    animate={{ x: ["-100%", "100%"] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  />
-                </motion.div>
-                <div className="h-4 w-2/3 rounded-full bg-muted/60" />
-              </div>
-
-              <div className="mt-8 flex justify-end">
-                <div className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground text-xs">
-                  <Pencil className="h-3 w-3" /> Drafting...
-                </div>
-              </div>
-            </div>
+            <ChatMockup>
+              <ChatMockupMessage role="user" delay={0.5}>
+                Approve the roadmap. Let's start with the "AI Workflow for
+                Enterprise" guide.
+              </ChatMockupMessage>
+              <ChatMockupTool
+                state="input-streaming"
+                title="Analysing SERPs & AI Overviews"
+                output="Identifying key information gaps and utility requirements for 'Enterprise' intent..."
+                delay={1}
+              />
+              <ChatMockupTool
+                state="output-available"
+                title="Drafting Content"
+                output={
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-primary">
+                      <FileText className="h-3 w-3" />
+                      <span className="font-bold">
+                        Enterprise_Workflow_Guide_v1.md
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="rounded bg-emerald-500/10 px-1.5 py-0.5 font-bold text-[8px] text-emerald-600 uppercase">
+                        SEO Optimized
+                      </div>
+                      <div className="rounded bg-blue-500/10 px-1.5 py-0.5 font-bold text-[8px] text-blue-600 uppercase">
+                        GEO Ready
+                      </div>
+                      <div className="rounded bg-amber-500/10 px-1.5 py-0.5 font-bold text-[8px] text-amber-600 uppercase">
+                        Brand Voice: Applied
+                      </div>
+                    </div>
+                  </div>
+                }
+                delay={1.5}
+              />
+              <ChatMockupMessage role="assistant" delay={2}>
+                The first draft is ready. I've focused on visibility across
+                traditional search and AI-driven discovery (GEO). Ready for your
+                review?
+              </ChatMockupMessage>
+            </ChatMockup>
+            {/* Decorative breakthrough elements */}
+            <motion.div
+              className="absolute -bottom-10 -left-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 5, repeat: Infinity }}
+            />
           </div>
 
           <div className="space-y-6">
             <h3 className="font-semibold text-2xl tracking-tight">
-              Aligned with your standards, <br />
-              <span className="font-normal italic">every time.</span>
+              Output that scales <br />
+              <span className="font-normal text-primary italic">
+                without a ceiling.
+              </span>
             </h3>
             <div className="space-y-4">
-              {alignmentChecks.map((check, index) => (
+              {[
+                "Search intent uncovered through analysis of top-ranking SERPs and AI overviews",
+                "Focused, clearly structured writing that prioritises usefulness and readability",
+                "SEO and GEO applied intentionally and effectively",
+                "Built for visibility across traditional search and AI-driven discovery",
+              ].map((item, index) => (
                 <motion.div
-                  key={check.label}
+                  key={index}
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center justify-between rounded-2xl border border-border/60 bg-background p-4 shadow-sm"
+                  className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background p-4 shadow-sm"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <check.icon className="h-4 w-4" />
-                    </div>
-                    <span className="font-medium text-sm">{check.label}</span>
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Check className="h-3 w-3" />
                   </div>
-                  <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-1 font-bold text-[10px] text-emerald-600 uppercase tracking-widest">
-                    <Check className="h-3 w-3" /> {check.status}
-                  </div>
+                  <span className="text-sm leading-relaxed">{item}</span>
                 </motion.div>
               ))}
             </div>
-            <p className="text-muted-foreground text-sm">
-              Deliver without limits. Your expertise scaled to infinite output.
-            </p>
           </div>
         </div>
       </div>

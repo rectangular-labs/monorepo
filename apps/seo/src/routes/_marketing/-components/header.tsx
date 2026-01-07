@@ -6,6 +6,7 @@ import { useState } from "react";
 import { SeoLogo } from "./seo-logo";
 
 const menuItems = [
+  { name: "SEO Experts", href: "/seo-experts" },
   { name: "Benefits", href: "#benefits" },
   { name: "Who we are", href: "#credentials" },
   { name: "FAQ", href: "#faq" },
