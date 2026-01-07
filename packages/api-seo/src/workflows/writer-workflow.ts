@@ -118,8 +118,8 @@ ${outline ?? ""}
           // Google api doesn't support const keyword in json schema for anyOf, only string.
           JSON.parse(
             JSON.stringify(inferArticleTypeSchema.toJsonSchema()).replaceAll(
-              "const",
-              "string",
+              "enum",
+              'type":"string","enum',
             ),
           ) as JSONSchema7,
         ),
@@ -410,6 +410,7 @@ ${changes.join("\n")}
               },
               tools: {
                 ...webTools.tools,
+                ...todoTool.tools,
               },
               system: `<role>
 You are a strict SEO content QA reviewer. Your job is to verify the writer followed ALL explicit rules and that the article is publish-ready.
@@ -487,6 +488,20 @@ ${text}
                   toolResults: JSON.stringify(step.toolResults, null, 2),
                   usage: step.usage,
                 });
+              },
+              prepareStep: ({ messages }) => {
+                return {
+                  messages: [
+                    ...messages,
+                    {
+                      role: "assistant",
+                      content: formatTodoFocusReminder({
+                        todos: todoTool.getSnapshot(),
+                        maxOpen: 5,
+                      }),
+                    },
+                  ],
+                };
               },
               stopWhen: [stepCountIs(20)],
             });

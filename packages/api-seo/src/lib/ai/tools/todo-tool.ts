@@ -88,8 +88,8 @@ export function createTodoToolWithMetadata(args: {
       // Google api doesn't support const keyword in json schema for anyOf, only string.
       JSON.parse(
         JSON.stringify(manageTodoInputSchema.toJsonSchema()).replaceAll(
-          "const",
-          "string",
+          "enum",
+          'type":"string","enum',
         ),
       ) as JSONSchema7,
     ),
@@ -160,7 +160,7 @@ export function createTodoToolWithMetadata(args: {
 
       return {
         success: false,
-        message: `Unknown action: ${action}`,
+        message: `Unknown action: ${action}. Action must be one of: create, list, update.`,
       };
     },
   });
