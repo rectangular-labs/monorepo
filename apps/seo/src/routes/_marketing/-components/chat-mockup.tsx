@@ -2,6 +2,13 @@ import {
   Message,
   MessageContent,
 } from "@rectangular-labs/ui/components/ai-elements/message";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@rectangular-labs/ui/components/ai-elements/tool";
 import { MarkdownContent } from "@rectangular-labs/ui/components/chat/markdown-content";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { motion } from "motion/react";
