@@ -1,3 +1,4 @@
+import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -11,8 +12,6 @@ import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
 import { seoContent } from "./content-schema";
 import { seoProject } from "./project-schema";
-
-const contentScheduleStatuses = ["draft", "scheduled", "published"] as const;
 
 export const seoContentSchedule = pgSeoTable(
   "content_schedule",
@@ -37,10 +36,10 @@ export const seoContentSchedule = pgSeoTable(
         onUpdate: "cascade",
       }),
     status: text({
-      enum: contentScheduleStatuses,
+      enum: ["scheduled", "published"] as const satisfies SeoFileStatus[],
     })
       .notNull()
-      .default("draft"),
+      .default("scheduled"),
     destination: text(),
     scheduledFor: timestamp({ mode: "date", withTimezone: true }),
     publishedAt: timestamp({ mode: "date", withTimezone: true }),
@@ -83,13 +82,7 @@ export const seoContentScheduleSelectSchema =
 export const seoContentScheduleUpdateSchema = createUpdateSchema(
   seoContentSchedule,
 )
-  .omit(
-    "createdAt",
-    "updatedAt",
-    "organizationId",
-    "projectId",
-    "contentId",
-  )
+  .omit("createdAt", "updatedAt", "organizationId", "projectId", "contentId")
   .merge(
     type({
       id: "string.uuid",

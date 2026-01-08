@@ -1,18 +1,11 @@
 import type { LoroText, LoroTree } from "loro-crdt";
-import type { articleTypeSchema } from "../schemas/content-parsers";
+import type {
+  ARTICLE_TYPES,
+  CONTENT_STATUSES,
+} from "../schemas/content-parsers";
 
-export type SeoFileStatus =
-  | "suggested"
-  | "queued"
-  | "generating"
-  | "generation-failed"
-  | "pending-review"
-  | "scheduled"
-  | "published"
-  | "suggestion-rejected"
-  | "review-denied";
-
-export type ArticleType = typeof articleTypeSchema.infer;
+export type SeoFileStatus = (typeof CONTENT_STATUSES)[number];
+export type ArticleType = (typeof ARTICLE_TYPES)[number];
 
 export type FsNodePayload =
   | {
