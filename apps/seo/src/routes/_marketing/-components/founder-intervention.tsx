@@ -1,7 +1,13 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import { Check, EyeOn, AlertIcon } from "@rectangular-labs/ui/components/icon";
+import {
+  Check,
+  EyeOn,
+  AlertIcon,
+  RotateCcw,
+} from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function FounderIntervention() {
   const interventionItems = [
@@ -34,7 +40,7 @@ export function FounderIntervention() {
             <span className="font-semibold text-primary">where it counts</span>
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground text-xl leading-relaxed">
-            Founders shouldn’t be micromanaging SEO. Fluid Posts handles
+            Founders shouldn't be micromanaging SEO. Fluid Posts handles
             auditing, planning, writing, and publishing — pulling you in only at
             critical moments.
           </p>
@@ -180,7 +186,8 @@ export function FounderIntervention() {
 
         <div className="mx-auto max-w-3xl pt-12 text-center">
           <p className="border-primary/20 border-l-4 pl-6 font-medium text-muted-foreground text-xl italic">
-            "You stay close to the vision without being trapped in the weeds."
+            &quot;You stay close to the vision without being trapped in the
+            weeds.&quot;
           </p>
         </div>
       </div>

@@ -11,20 +11,28 @@ import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 export function Reporting() {
   const recentArticles = [
     {
-      title: "Enterprise AI Workflows",
-      keyword: "AI Execution",
-      impressions: "1.2k",
-      clicks: 45,
-      url: "/blog/enterprise-ai",
-      cluster: "Workflows",
+      title: "Build an MVP With AI (Step-by-Step)",
+      keyword: "AI MVP",
+      impressions: "34.9k",
+      clicks: 1420,
+      url: "/blog/ai-mvp-guide",
+      cluster: "MVP Build",
     },
     {
-      title: "SaaS Content Automation",
-      keyword: "SaaS SEO",
-      impressions: "850",
-      clicks: 32,
-      url: "/blog/saas-automation",
-      cluster: "Automation",
+      title: "AI App Builder vs Hiring a Developer",
+      keyword: "Cost vs ROI",
+      impressions: "28.1k",
+      clicks: 1030,
+      url: "/blog/cost-compare",
+      cluster: "Comparison",
+    },
+    {
+      title: "SaaS Prototype Checklist",
+      keyword: "SaaS Prototype",
+      impressions: "19.6k",
+      clicks: 760,
+      url: "/blog/saas-checklist",
+      cluster: "Actionable",
     },
   ];
 
@@ -79,19 +87,46 @@ export function Reporting() {
 
             <ChatMockupMessage from="assistant" delay={0.5}>
               <div className="space-y-5">
+                <div className="grid grid-cols-2 gap-3 border-border border-b pb-4">
+                  <div className="space-y-1">
+                    <p className="font-bold text-[9px] text-muted-foreground uppercase tracking-widest">
+                      Organic Clicks
+                    </p>
+                    <p className="font-bold text-foreground text-lg">
+                      4,820{" "}
+                      <span className="text-[10px] text-emerald-500">
+                        (+41%)
+                      </span>
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-bold text-[9px] text-muted-foreground uppercase tracking-widest">
+                      Avg Position
+                    </p>
+                    <p className="font-bold text-foreground text-lg">
+                      11.6{" "}
+                      <span className="text-[10px] text-emerald-500">
+                        (+2.6)
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <p className="font-bold text-[10px] text-muted-foreground uppercase tracking-widest">
-                    Overall Strategy:
+                    Monthly Analysis:
                   </p>
-                  <p className="font-medium text-xs">
-                    Aggressive acquisition of 'Execution-Intent' keywords to
-                    bypass generic competition.
+                  <p className="font-medium text-xs leading-relaxed">
+                    Winning on{" "}
+                    <span className="text-primary">"how-to / comparison"</span>{" "}
+                    queries. BOFU content is pulling high-intent traffic, but 2
+                    definition-style posts need CTR surgery.
                   </p>
                 </div>
 
                 <div className="space-y-3">
                   <p className="font-bold text-[10px] text-muted-foreground uppercase tracking-widest">
-                    Articles Written This Month:
+                    Top Performers (Last 28 Days):
                   </p>
                   <div className="grid gap-2">
                     {recentArticles.map((art) => (
@@ -105,7 +140,7 @@ export function Reporting() {
                           </p>
                           <div className="mt-0.5 flex items-center gap-2">
                             <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[8px] text-muted-foreground">
-                              Key: {art.keyword}
+                              {art.keyword}
                             </span>
                             <span className="font-medium text-[8px] text-primary">
                               {art.cluster}
@@ -115,12 +150,6 @@ export function Reporting() {
                         <div className="flex shrink-0 items-center gap-3 text-[9px]">
                           <div className="text-right">
                             <p className="font-bold text-foreground">
-                              {art.impressions}
-                            </p>
-                            <p className="text-muted-foreground">Imps</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-emerald-600">
                               {art.clicks}
                             </p>
                             <p className="text-muted-foreground">Clicks</p>
@@ -132,24 +161,27 @@ export function Reporting() {
                   </div>
                 </div>
 
-                <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/[0.02] p-3">
-                  <div className="flex items-center gap-2 font-bold text-[10px] text-primary">
+                <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/[0.02] p-3 text-[10px]">
+                  <div className="flex items-center gap-2 font-bold text-primary uppercase tracking-tighter">
                     <TrendingUp className="h-3 w-3" /> Thesis on Performance
                   </div>
-                  <p className="border-primary/20 border-l-2 pl-3 text-[10px] text-muted-foreground italic leading-relaxed">
-                    "The 'Workflows' cluster is over-performing (+24% CTR)
-                    because competitors are still chasing word count while we
-                    provide direct implementation steps."
+                  <p className="border-primary/20 border-l-2 pl-3 text-muted-foreground italic leading-relaxed">
+                    Comparison content helps users decide ("X vs Y", "cost").
+                    These keywords sit closer to purchase intent—rewarding our
+                    "actionable" structure over generic definitions.
                   </p>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex items-center justify-between pt-2">
                   <button
                     type="button"
                     className="flex items-center gap-1 font-bold text-[10px] text-primary hover:underline"
                   >
-                    View Full Client Report <ArrowRight className="h-2 w-2" />
+                    View Full Insight <ArrowRight className="h-2 w-2" />
                   </button>
+                  <span className="text-[9px] text-muted-foreground italic">
+                    Generated in 1.4s
+                  </span>
                 </div>
               </div>
             </ChatMockupMessage>

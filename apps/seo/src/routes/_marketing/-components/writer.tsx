@@ -68,7 +68,8 @@ export function Writer() {
                           <FileText className="h-4 w-4" />
                         </div>
                         <p className="font-bold text-[11px] italic">
-                          "How AI Workflows are Replacing Manual SEO Audits"
+                          "AI App Builder for Small Business: What It Is and How
+                          to Choose"
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -93,41 +94,76 @@ export function Writer() {
                           className="overflow-hidden"
                         >
                           <div className="mt-4 space-y-4 border-border/50 border-t pt-4">
-                            <div className="max-h-[250px] overflow-y-auto rounded-lg border border-border/50 bg-background p-4 text-left shadow-inner">
-                              <h4 className="mb-1.5 font-bold text-sm">
-                                Introduction
-                              </h4>
-                              <p className="mb-3 text-[10px] text-muted-foreground leading-relaxed">
-                                The era of manual audits is ending. Founders no
-                                longer have 40 hours a week to spend staring at
-                                spreadsheets. The new paradigm is **Autonomous
-                                Execution**...
+                            <div className="max-h-[300px] overflow-y-auto rounded-lg border border-border/50 bg-background p-4 text-left shadow-inner">
+                              <div className="mb-4 space-y-1">
+                                <p className="font-bold text-[10px] text-primary uppercase tracking-tighter">
+                                  Target Intent: Commercial + Informational
+                                </p>
+                                <h4 className="font-bold text-sm">
+                                  AI App Builder for Small Business: What It Is,
+                                  What It Can Build, and How to Choose
+                                </h4>
+                              </div>
+
+                              <p className="mb-3 text-[10px] text-muted-foreground italic leading-relaxed">
+                                Small businesses don't fail because they lack
+                                ideas — they stall because building software
+                                used to require a big budget... An AI app
+                                builder changes that by letting you describe
+                                what you want in plain English.
                               </p>
-                              <h4 className="mb-1.5 font-bold text-primary text-sm">
-                                The ROI Gap
-                              </h4>
-                              <p className="mb-3 text-[10px] text-muted-foreground leading-relaxed">
-                                Most agencies sell you "reports". We sell you
-                                "pivots". When data shows a cluster is failing,
-                                the system identifies the drift and prepares the
-                                fix immediately...
-                              </p>
+
+                              <div className="mb-4 space-y-2">
+                                <div className="rounded border border-muted-foreground/10 bg-muted/20 p-2 text-[9px]">
+                                  <p className="mb-1 font-bold">
+                                    H2: What small businesses build first
+                                    (high-ROI examples)
+                                  </p>
+                                  <ul className="list-inside list-disc opacity-70">
+                                    <li>
+                                      Client onboarding + forms + approvals
+                                    </li>
+                                    <li>
+                                      Lightweight CRM, quotes, and invoicing
+                                    </li>
+                                  </ul>
+                                </div>
+                              </div>
+
+                              <div className="mb-4 space-y-2">
+                                <p className="font-bold text-[10px]">
+                                  FAQ block (Snippet Targeting)
+                                </p>
+                                <div className="space-y-2 rounded border border-emerald-500/10 bg-emerald-500/[0.02] p-2 text-[9px]">
+                                  <p className="font-bold text-emerald-700">
+                                    Q: Can an AI app builder connect to Stripe?
+                                  </p>
+                                  <p className="text-muted-foreground italic">
+                                    A: Yes for common integrations—confirm
+                                    exactly which systems you need and test a
+                                    small workflow first.
+                                  </p>
+                                </div>
+                              </div>
+
                               <div className="flex items-center gap-2 rounded border border-emerald-100 bg-emerald-50 p-2">
                                 <Check className="h-2.5 w-2.5 text-emerald-600" />
                                 <span className="font-medium text-[9px] text-emerald-700 italic">
-                                  Organic Product Plug Applied
+                                  Conversion CTA Applied: "Describe your app in
+                                  5 sentences → get a build plan"
                                 </span>
                               </div>
                             </div>
                             <div className="flex items-center justify-between gap-4">
                               <p className="text-[8px] text-muted-foreground">
-                                Word Count: 1,240 | Read Time: 6 min
+                                Structure: Answer-First | FAQ Schema |
+                                Interlinked Cluster
                               </p>
                               <button
                                 type="button"
                                 className="flex items-center gap-1 font-bold text-[8px] text-primary hover:underline"
                               >
-                                Open Full Article{" "}
+                                Open in Dashboard{" "}
                                 <ExternalLink className="h-2 w-2" />
                               </button>
                             </div>

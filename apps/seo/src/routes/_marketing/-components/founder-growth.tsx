@@ -45,7 +45,7 @@ export function FounderGrowth() {
             not just your website
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground text-xl leading-relaxed">
-            Rankings don’t matter unless they drive leads, conversions, and
+            Rankings don't matter unless they drive leads, conversions, and
             trust. Fluid Posts aligns every action to real commercial intent.
           </p>
         </div>
