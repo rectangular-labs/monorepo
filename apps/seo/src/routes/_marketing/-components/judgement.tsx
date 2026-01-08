@@ -1,11 +1,4 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { motion } from "motion/react";
-import {
-  Check,
-  User,
-  Zap,
-  Sparkles,
-} from "@rectangular-labs/ui/components/icon";
 import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 
 export function Judgement() {
@@ -38,7 +31,7 @@ export function Judgement() {
 
         <div className="relative">
           <ChatMockup>
-            <ChatMockupMessage role="assistant" delay={0.5}>
+            <ChatMockupMessage from="assistant" delay={0.5}>
               I've drafted the outline for the "Enterprise SEO Strategy" piece.
               I've focused on the technical requirements for multi-tenant
               architectures as you requested.
@@ -48,11 +41,11 @@ export function Judgement() {
               output="Section 1: The Multi-tenant Challenge. Section 2: Data Isolation & Crawling. Section 3: Performance at Scale."
               delay={1}
             />
-            <ChatMockupMessage role="user" delay={1.5}>
+            <ChatMockupMessage from="user" delay={1.5}>
               The structure is good, but let's lean more into the security
               implications of shared data in Section 2.
             </ChatMockupMessage>
-            <ChatMockupMessage role="assistant" delay={2}>
+            <ChatMockupMessage from="assistant" delay={2}>
               Understood. Updating the Section 2 thinking to prioritize
               security-first architecture. Ready for next step?
             </ChatMockupMessage>

@@ -1,7 +1,7 @@
-import { MoveRight, Sparkles } from "@rectangular-labs/ui/components/icon";
+import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { buttonVariants } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { lazy, Suspense } from "react";
 import { ONBOARD_LINK } from "./constants";
 import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
@@ -47,7 +47,7 @@ export const Hero = () => {
           </div>
           <div className="relative w-full">
             <ChatMockup>
-              <ChatMockupMessage role="assistant" delay={0.5}>
+              <ChatMockupMessage from="assistant" delay={0.5}>
                 I've completed the morning sweep. We have 3 new content
                 opportunities and a performance update on your 'AI tools'
                 cluster. Ready for your review?
@@ -57,7 +57,7 @@ export const Hero = () => {
                 output="Traffic up 12% in targeted clusters. Drafted 5 new briefs based on current SERP shifts."
                 delay={1}
               />
-              <ChatMockupMessage role="user" delay={1.5}>
+              <ChatMockupMessage from="user" delay={1.5}>
                 Approve the briefs. Let's focus on the 'Enterprise' intent.
               </ChatMockupMessage>
               <ChatMockupTool

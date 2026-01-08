@@ -1,12 +1,7 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import {
-  Search,
-  Sparkles,
-  Target,
-  Zap,
-} from "@rectangular-labs/ui/components/icon";
-import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
+import { Sparkles, Target } from "@rectangular-labs/ui/components/icon";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function Strategy() {
   return (
@@ -14,7 +9,7 @@ export function Strategy() {
       <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-[7fr,5fr] lg:items-center">
         <div className="relative order-2 lg:order-1">
           <ChatMockup>
-            <ChatMockupMessage role="assistant" delay={0.5}>
+            <ChatMockupMessage from="assistant" delay={0.5}>
               <div className="space-y-4">
                 <p>
                   I've surfaced 3 high-priority actions for the "Fluid Posts"

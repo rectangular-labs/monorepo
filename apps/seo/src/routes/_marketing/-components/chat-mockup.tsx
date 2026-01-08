@@ -27,27 +27,17 @@ export function ChatMockup({ className, children }: ChatMockupProps) {
         className,
       )}
     >
-      <div className="mb-4 flex items-center justify-between border-border border-b pb-3">
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-rose-500/50" />
-          <div className="h-2 w-2 rounded-full bg-amber-500/50" />
-          <div className="h-2 w-2 rounded-full bg-emerald-500/50" />
-        </div>
-        <div className="font-bold text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
-          Fluid Posts AI
-        </div>
-      </div>
       <div className="space-y-4">{children}</div>
     </div>
   );
 }
 
 export function ChatMockupMessage({
-  role,
+  from,
   children,
   delay = 0,
 }: {
-  role: "user" | "assistant";
+  from: "user" | "assistant";
   children: ReactNode;
   delay?: number;
 }) {
@@ -58,7 +48,7 @@ export function ChatMockupMessage({
       transition={{ delay, duration: 0.5 }}
       viewport={{ once: true }}
     >
-      <Message from={role} className="p-0">
+      <Message from={from} className="p-0">
         <MessageContent className="max-w-none">
           <div className="prose prose-sm dark:prose-invert text-sm leading-relaxed">
             {typeof children === "string" ? (

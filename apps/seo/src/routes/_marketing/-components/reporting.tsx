@@ -1,12 +1,7 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import {
-  MoveUpRight,
-  MoveDownLeft,
-  TrendingUp,
-  Info,
-} from "@rectangular-labs/ui/components/icon";
-import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
+import { TrendingUp } from "@rectangular-labs/ui/components/icon";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function Reporting() {
   return (
@@ -48,7 +43,7 @@ export function Reporting() {
 
           <div className="relative">
             <ChatMockup>
-              <ChatMockupMessage role="assistant" delay={0.5}>
+              <ChatMockupMessage from="assistant" delay={0.5}>
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm">
                     <TrendingUp className="h-4 w-4 text-primary" />
@@ -88,7 +83,7 @@ export function Reporting() {
                   </p>
                 </div>
               </ChatMockupMessage>
-              <ChatMockupMessage role="user" delay={1.5}>
+              <ChatMockupMessage from="user" delay={1.5}>
                 Looks good. Add a note about the new "AI Workflow" strategy
                 we're starting next week.
               </ChatMockupMessage>

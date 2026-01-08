@@ -1,11 +1,4 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { motion } from "motion/react";
-import {
-  Check,
-  User,
-  Zap,
-  Sparkles,
-} from "@rectangular-labs/ui/components/icon";
 import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 
 export function Expertise() {
@@ -43,7 +36,7 @@ export function Expertise() {
               output="Analysed 4,500 keywords across 12 competitor domains. Found 3 untapped strategic clusters."
               delay={0.5}
             />
-            <ChatMockupMessage role="assistant" delay={1}>
+            <ChatMockupMessage from="assistant" delay={1}>
               <div className="space-y-4">
                 <p>
                   I've drafted a new strategy for{" "}

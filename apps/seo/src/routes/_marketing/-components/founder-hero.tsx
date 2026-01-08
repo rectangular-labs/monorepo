@@ -41,7 +41,7 @@ export const FounderHero = () => {
         </div>
         <div className="relative w-full">
           <ChatMockup>
-            <ChatMockupMessage role="assistant" delay={0.5}>
+            <ChatMockupMessage from="assistant" delay={0.5}>
               I've reviewed our latest conversion data. While traffic to our
               "SEO Tips" cluster is up, it's not driving leads. I'm pivoting our
               strategy to focus on "Enterprise SEO Workflows" which has a 3x
@@ -52,7 +52,7 @@ export const FounderHero = () => {
               output="Identified 14 high-traffic pages with low lead conversion. Recommend structural pivot."
               delay={1}
             />
-            <ChatMockupMessage role="user" delay={1.5}>
+            <ChatMockupMessage from="user" delay={1.5}>
               Agreed. We need leads, not just eyeballs. Show me the new thesis.
             </ChatMockupMessage>
           </ChatMockup>

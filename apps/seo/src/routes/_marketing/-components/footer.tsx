@@ -24,7 +24,7 @@ export function Footer() {
             ) : (
               <Link
                 className="text-muted-foreground transition-colors hover:text-foreground"
-                to={link.href as any}
+                to={link.href}
                 key={link.title}
               >
                 {link.title}

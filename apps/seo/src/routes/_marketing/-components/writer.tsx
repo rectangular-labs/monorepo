@@ -1,13 +1,6 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import {
-  Check,
-  Pencil,
-  Globe,
-  Search,
-  Shield,
-  FileText,
-} from "@rectangular-labs/ui/components/icon";
+import { Check, FileText } from "@rectangular-labs/ui/components/icon";
 import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 
 export function Writer() {
@@ -33,7 +26,7 @@ export function Writer() {
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="relative">
             <ChatMockup>
-              <ChatMockupMessage role="user" delay={0.5}>
+              <ChatMockupMessage from="user" delay={0.5}>
                 Approve the roadmap. Let's start with the "AI Workflow for
                 Enterprise" guide.
               </ChatMockupMessage>
@@ -69,7 +62,7 @@ export function Writer() {
                 }
                 delay={1.5}
               />
-              <ChatMockupMessage role="assistant" delay={2}>
+              <ChatMockupMessage from="assistant" delay={2}>
                 The first draft is ready. I've focused on visibility across
                 traditional search and AI-driven discovery (GEO). Ready for your
                 review?
@@ -96,9 +89,9 @@ export function Writer() {
                 "Focused, clearly structured writing that prioritises usefulness and readability",
                 "SEO and GEO applied intentionally and effectively",
                 "Built for visibility across traditional search and AI-driven discovery",
-              ].map((item, index) => (
+              ].map((item) => (
                 <motion.div
-                  key={index}
+                  key={item}
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}

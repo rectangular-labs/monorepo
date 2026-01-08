@@ -23,13 +23,14 @@ export function FounderLongGame() {
 
         <div className="relative mx-auto max-w-2xl">
           <ChatMockup>
-            <ChatMockupMessage role="assistant" delay={0.5}>
-              Ready to start gaining traction online? I have a plan ready for you.
+            <ChatMockupMessage from="assistant" delay={0.5}>
+              Ready to start gaining traction online? I have a plan ready for
+              you.
             </ChatMockupMessage>
-            <ChatMockupMessage role="user" delay={1}>
+            <ChatMockupMessage from="user" delay={1}>
               Yes.
             </ChatMockupMessage>
-            <ChatMockupMessage role="assistant" delay={1.5}>
+            <ChatMockupMessage from="assistant" delay={1.5}>
               Let's get to work.
             </ChatMockupMessage>
             <ChatMockupTool
@@ -45,7 +46,7 @@ export function FounderLongGame() {
             transition={{ duration: 5, repeat: Infinity }}
           />
         </div>
-        
+
         <div className="mx-auto max-w-3xl space-y-6 text-center">
           <p className="text-lg text-muted-foreground">
             Through early traction, plateaus, pivots, and breakthroughs, it
