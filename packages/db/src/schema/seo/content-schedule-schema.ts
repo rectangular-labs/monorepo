@@ -1,4 +1,3 @@
-import type { contentScheduleStatusSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -6,13 +5,14 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import { index, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
-import { seoContentCampaign } from "./content-campaign-schema";
 import { seoContent } from "./content-schema";
 import { seoProject } from "./project-schema";
+
+const contentScheduleStatuses = ["draft", "scheduled", "published"] as const;
 
 export const seoContentSchedule = pgSeoTable(
   "content_schedule",
@@ -36,35 +36,20 @@ export const seoContentSchedule = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    originatingContentCampaignId: uuid()
-      .notNull()
-      .references(() => seoContentCampaign.id, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
-      }),
     status: text({
-      enum: [
-        "draft",
-        "scheduled",
-        "published",
-      ] as const satisfies (typeof contentScheduleStatusSchema.infer)[],
+      enum: contentScheduleStatuses,
     })
       .notNull()
       .default("draft"),
+    destination: text(),
     scheduledFor: timestamp({ mode: "date", withTimezone: true }),
     publishedAt: timestamp({ mode: "date", withTimezone: true }),
-    publishedLinks: jsonb()
-      .$type<string[]>()
-      .notNull()
-      .$defaultFn(() => []),
+    publishedUrl: text(),
     ...timestamps,
   },
   (table) => [
     index("seo_content_schedule_org_idx").on(table.organizationId),
     index("seo_content_schedule_project_idx").on(table.projectId),
-    index("seo_content_schedule_originating_content_campaign_idx").on(
-      table.originatingContentCampaignId,
-    ),
     index("seo_content_schedule_content_idx").on(table.contentId),
     index("seo_content_schedule_status_idx").on(table.status),
     index("seo_content_schedule_scheduled_for_idx").on(table.scheduledFor),
@@ -87,10 +72,6 @@ export const seoContentScheduleRelations = relations(
       fields: [seoContentSchedule.contentId],
       references: [seoContent.id],
     }),
-    originatingContentCampaign: one(seoContentCampaign, {
-      fields: [seoContentSchedule.originatingContentCampaignId],
-      references: [seoContentCampaign.id],
-    }),
   }),
 );
 
@@ -108,7 +89,6 @@ export const seoContentScheduleUpdateSchema = createUpdateSchema(
     "organizationId",
     "projectId",
     "contentId",
-    "originatingContentCampaignId",
   )
   .merge(
     type({

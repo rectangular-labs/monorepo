@@ -1,0 +1,120 @@
+import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
+import { type } from "arktype";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-arktype";
+import { relations } from "drizzle-orm";
+import { index, text, uuid } from "drizzle-orm/pg-core";
+import { timestamps, uuidv7 } from "../_helper";
+import { pgSeoTable } from "../_table";
+import { organization, user } from "../auth-schema";
+import { seoContent } from "./content-schema";
+import { seoProject } from "./project-schema";
+import { seoTaskRun } from "./task-run-schema";
+
+export const seoContentDraft = pgSeoTable(
+  "content_draft",
+  {
+    id: uuid().primaryKey().$defaultFn(uuidv7),
+    organizationId: text()
+      .notNull()
+      .references(() => organization.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    projectId: uuid()
+      .notNull()
+      .references(() => seoProject.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    baseContentId: uuid().references(() => seoContent.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+    createdByUserId: text().references(() => user.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+
+    title: text().notNull().default(""),
+    description: text().notNull().default(""),
+    slug: text().notNull(),
+    primaryKeyword: text().notNull(),
+
+    status: text({
+      enum: [
+        "suggested",
+        "suggestion-rejected",
+        "queued",
+        "generating",
+        "generation-failed",
+        "pending-review",
+        "review-denied",
+      ] as const satisfies SeoFileStatus[],
+    })
+      .notNull()
+      .default("suggested"),
+
+    notes: text(),
+    outlineGeneratedByTaskRunId: uuid().references(() => seoTaskRun.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    outline: text(),
+
+    generatedByTaskRunId: uuid().references(() => seoTaskRun.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    articleType: text({ enum: ARTICLE_TYPES }),
+    contentMarkdown: text(),
+
+    ...timestamps,
+  },
+  (table) => [
+    index("seo_content_branch_org_idx").on(table.organizationId),
+    index("seo_content_branch_project_idx").on(table.projectId),
+    index("seo_content_branch_base_content_id_idx").on(table.baseContentId),
+    index("seo_content_branch_status_idx").on(table.status),
+  ],
+);
+
+export const seoContentDraftRelations = relations(
+  seoContentDraft,
+  ({ one }) => ({
+    baseContent: one(seoContent, {
+      fields: [seoContentDraft.baseContentId],
+      references: [seoContent.id],
+    }),
+    createdByUser: one(user, {
+      fields: [seoContentDraft.createdByUserId],
+      references: [user.id],
+    }),
+    outlineTask: one(seoTaskRun, {
+      fields: [seoContentDraft.outlineGeneratedByTaskRunId],
+      references: [seoTaskRun.id],
+    }),
+    contentTask: one(seoTaskRun, {
+      fields: [seoContentDraft.generatedByTaskRunId],
+      references: [seoTaskRun.id],
+    }),
+  }),
+);
+
+export const seoContentDraftInsertSchema = createInsertSchema(
+  seoContentDraft,
+).omit("id", "createdAt", "updatedAt");
+export const seoContentDraftSelectSchema = createSelectSchema(seoContentDraft);
+export const seoContentDraftUpdateSchema = createUpdateSchema(seoContentDraft)
+  .omit("createdAt", "updatedAt")
+  .merge(
+    type({
+      id: "string.uuid",
+      projectId: "string.uuid",
+      organizationId: "string",
+    }),
+  );
