@@ -42,34 +42,34 @@ export function FounderStrategist() {
   ];
 
   return (
-    <Section className="overflow-hidden border-border border-t">
-      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[450px,1fr] lg:items-center">
-        <div className="space-y-6">
-          <div className="space-y-2">
+    <Section className="border-border border-t">
+      <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-2 lg:items-center">
+        <div className="space-y-8 text-left">
+          <div className="space-y-4">
             <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
               The 24/7 Strategist
             </p>
-            <h2 className="font-regular text-3xl text-foreground tracking-tight sm:text-4xl lg:text-5xl">
-              Never guess{" "}
+            <h2 className="font-regular text-3xl text-foreground leading-tight tracking-tight sm:text-4xl lg:text-6xl">
+              Never guess <br />
               <span className="font-semibold text-primary">
                 what to do next
               </span>
             </h2>
+            <p className="text-muted-foreground text-xl leading-relaxed">
+              Fluid Posts analyzes live keyword data, GEO signals, and search
+              behavior to decide what matters next — so strategy arrives
+              justified and ready for approval.
+            </p>
           </div>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Fluid Posts is the strategist that never clocks out, analyzing live
-            keyword data, GEO signals, and search behavior to decide what
-            matters next — so strategy arrives justified and ready for approval.
-          </p>
           <div className="space-y-4">
             <p className="font-bold text-primary text-sm italic">
-              Strategy won’t pause, and neither will momentum.
+              "Strategy won’t pause, and neither will momentum."
             </p>
           </div>
         </div>
 
         <div className="relative">
-          <ChatMockup className="min-h-[500px]">
+          <ChatMockup className="min-h-[500px] shadow-2xl">
             <ChatMockupMessage from="assistant">
               <div className="space-y-6">
                 <p className="font-medium text-sm">
@@ -86,7 +86,7 @@ export function FounderStrategist() {
                       className={cn(
                         "flex items-start gap-4 rounded-2xl border p-4 text-left transition-all duration-300",
                         activeStrategy === s.id
-                          ? `border-${s.color}-500 bg-${s.color}-500/5 ring-1 ring-${s.color}-500/20`
+                          ? `border-${s.color}-500 bg-${s.color}-500/[0.03] ring-1 ring-${s.color}-500/20 shadow-md`
                           : "border-border bg-background/50 hover:border-primary/50 hover:bg-muted/50",
                       )}
                     >
@@ -100,9 +100,11 @@ export function FounderStrategist() {
                       >
                         <s.icon className="h-5 w-5" />
                       </div>
-                      <div className="flex-1 space-y-1">
+                      <div className="min-w-0 flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <p className="font-bold text-xs">{s.title}</p>
+                          <p className="truncate font-bold text-[11px]">
+                            {s.title}
+                          </p>
                           <ArrowRight
                             className={cn(
                               "h-3 w-3 transition-transform duration-300",

@@ -31,22 +31,22 @@ export function FounderTransparency() {
             Tells it{" "}
             <span className="font-semibold text-primary">like it is</span>
           </h2>
-          <p className="text-muted-foreground text-xl leading-relaxed">
+          <p className="mx-auto max-w-2xl text-muted-foreground text-xl leading-relaxed">
             Tools dump numbers and leave you to make sense of it. SEO services
             polish narratives and stop working after KPIs are met. Your
             co-founder wouldn't do that, so Fluid Posts doesn't.
           </p>
         </div>
 
-        <div className="mx-auto max-w-5xl space-y-8">
+        <div className="mx-auto max-w-5xl space-y-12">
           {/* Phase 1: Thesis */}
-          <div className="grid gap-8 lg:grid-cols-[1fr,400px] lg:items-center">
+          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
             <div className="relative">
-              <ChatMockup className="border-emerald-500/20 bg-emerald-500/[0.02]">
-                <div className="space-y-2">
+              <ChatMockup className="border-emerald-500/20 bg-emerald-500/[0.02] shadow-emerald-500/5">
+                <div className="space-y-4">
                   <div className="flex items-center gap-2 font-bold text-[10px] text-emerald-500 uppercase tracking-widest">
                     <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    Week 1: The Thesis
+                    Week 1: Strategy Formulation
                   </div>
                   <ChatMockupMessage from="assistant">
                     <div className="space-y-3">
@@ -65,16 +65,13 @@ export function FounderTransparency() {
               </ChatMockup>
             </div>
             <div className="space-y-6">
-              <ul className="grid gap-4">
+              <ul className="grid gap-5">
                 {thesisValues.map((v) => (
-                  <li
-                    key={v.label}
-                    className="group flex items-start gap-4 font-medium"
-                  >
-                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 transition-colors group-hover:bg-emerald-500/20">
-                      <v.icon className="h-4 w-4" />
+                  <li key={v.label} className="group flex items-start gap-4">
+                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 transition-all group-hover:scale-110">
+                      <v.icon className="h-5 w-5" />
                     </div>
-                    <span className="py-1 text-lg leading-tight">
+                    <span className="pt-1.5 font-medium text-lg leading-tight">
                       {v.label}
                     </span>
                   </li>
@@ -84,22 +81,22 @@ export function FounderTransparency() {
           </div>
 
           {/* Time Divider */}
-          <div className="relative max-w-[calc(100%-400px-2rem)] py-4">
+          <div className="relative py-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-border border-t border-dashed" />
             </div>
             <div className="relative flex justify-center">
-              <span className="rounded-full border border-border bg-background px-4 py-1 font-bold text-[10px] text-muted-foreground uppercase tracking-widest shadow-sm">
-                2 Weeks Later
+              <span className="rounded-full border border-border bg-background px-6 py-1.5 font-bold text-[10px] text-muted-foreground uppercase tracking-widest shadow-sm">
+                2 Weeks of Data Collection
               </span>
             </div>
           </div>
 
           {/* Phase 2: Audit */}
-          <div className="grid gap-8 lg:grid-cols-[1fr,400px] lg:items-center">
+          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
             <div className="relative">
-              <ChatMockup className="border-rose-500/20 bg-rose-500/[0.02]">
-                <div className="space-y-2">
+              <ChatMockup className="border-rose-500/20 bg-rose-500/[0.02] shadow-rose-500/5">
+                <div className="space-y-4">
                   <div className="flex items-center gap-2 font-bold text-[10px] text-rose-500 uppercase tracking-widest">
                     <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-rose-500" />
                     Week 3: The Self-Audit
@@ -107,14 +104,14 @@ export function FounderTransparency() {
                   <ChatMockupMessage from="assistant">
                     <div className="space-y-3">
                       <p className="font-bold text-rose-600 text-sm">
-                        Self-Audit: Assumption Broken
+                        Audit Result: Assumption Broken
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
                         Traffic to ROI Calculators is high, but dwell time is
                         low (avg 14s). Diagnosis: The calculators are too
                         complex for mobile users.
                       </p>
-                      <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 font-medium text-[11px] text-rose-700 italic leading-relaxed">
+                      <div className="rounded-xl border border-rose-500/20 border-l-4 bg-rose-500/5 p-4 font-medium text-[11px] text-rose-700 italic leading-relaxed">
                         "I am simplifying the inputs and pivoting to a
                         'Quick-Check' format to salvage the cluster."
                       </div>
@@ -124,16 +121,13 @@ export function FounderTransparency() {
               </ChatMockup>
             </div>
             <div className="space-y-6">
-              <ul className="grid gap-4">
+              <ul className="grid gap-5">
                 {auditValues.map((v) => (
-                  <li
-                    key={v.label}
-                    className="group flex items-start gap-4 font-medium"
-                  >
-                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 transition-colors group-hover:bg-rose-500/20">
-                      <v.icon className="h-4 w-4" />
+                  <li key={v.label} className="group flex items-start gap-4">
+                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 transition-all group-hover:scale-110">
+                      <v.icon className="h-5 w-5" />
                     </div>
-                    <span className="py-1 text-lg leading-tight">
+                    <span className="pt-1.5 font-medium text-lg leading-tight">
                       {v.label}
                     </span>
                   </li>
@@ -143,7 +137,7 @@ export function FounderTransparency() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-3xl border-border/50 border-t pt-8 text-center">
+        <div className="mx-auto max-w-3xl border-border/50 border-t pt-12 text-center">
           <p className="font-medium text-foreground text-xl italic">
             Fluid Posts works like a co-founder:{" "}
             <span className="font-bold text-primary not-italic">

@@ -29,7 +29,7 @@ export function FounderGrowth() {
           <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
             Commercial ROI
           </p>
-          <h2 className="font-regular text-3xl text-foreground tracking-tight sm:text-4xl lg:text-5xl">
+          <h2 className="font-regular text-3xl text-foreground leading-tight tracking-tight sm:text-4xl lg:text-5xl">
             Built to{" "}
             <span className="font-semibold text-primary">
               grow your business
@@ -38,14 +38,14 @@ export function FounderGrowth() {
             <br />
             not just your website
           </h2>
-          <p className="text-muted-foreground text-xl leading-relaxed">
+          <p className="mx-auto max-w-2xl text-muted-foreground text-xl leading-relaxed">
             Rankings don’t matter unless they drive leads, conversions, and
             trust. Fluid Posts aligns every action to real commercial intent.
           </p>
         </div>
 
         <div className="grid gap-16 lg:grid-cols-[1.2fr,1fr] lg:items-center">
-          <div className="relative order-2 lg:order-1">
+          <div className="relative">
             <ChatMockup className="border-primary/20 shadow-primary/5">
               <ChatMockupMessage from="assistant">
                 I'm finishing the "Scale-Up SEO Strategy" article.
@@ -62,25 +62,24 @@ export function FounderGrowth() {
                       <p>
                         • <strong>Organic Plug:</strong> Interjected "automated
                         reporting" feature mention into the 'Manual Audit'
-                        section as a logical solution.
+                        section.
                       </p>
                       <p>
-                        • <strong>Opportunity:</strong> Noticed high-volume
-                        queries for "post-Series A SEO" - I've drafted a
-                        follow-up brief to capture this high-intent segment.
+                        • <strong>Beyond Scope:</strong> Noticed high-volume
+                        queries for "post-Series A SEO" - drafted follow-up
+                        brief.
                       </p>
                       <p>
-                        • <strong>Voice:</strong> Removed academic jargon.
-                        Switched to 'Founder-to-Founder' tone as per your
-                        product DNA.
+                        • <strong>Commercial Awareness:</strong> Switched to
+                        'Founder-to-Founder' tone as per your product DNA.
                       </p>
                     </div>
                   </div>
                 }
               />
               <ChatMockupMessage from="assistant">
-                The content now demonstrates exactly how your product solves the
-                reader's pain points. Ready to publish?
+                Every piece of content is written with an awareness of what you
+                sell, who you sell to and why it matters. Ready to publish?
               </ChatMockupMessage>
             </ChatMockup>
             <motion.div
@@ -90,7 +89,7 @@ export function FounderGrowth() {
             />
           </div>
 
-          <div className="order-1 space-y-8 lg:order-2">
+          <div className="space-y-8">
             <div className="grid gap-6">
               {points.map((item, i) => (
                 <motion.div
@@ -98,7 +97,7 @@ export function FounderGrowth() {
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="flex items-start gap-4"
+                  className="flex items-start gap-5 rounded-2xl border border-border/50 bg-background/50 p-4 shadow-sm backdrop-blur transition-colors hover:border-primary/20"
                 >
                   <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <item.icon className="h-5 w-5" />
@@ -114,8 +113,8 @@ export function FounderGrowth() {
                 </motion.div>
               ))}
             </div>
-            <p className="border-border border-t pt-6 font-bold text-primary text-xl italic">
-              SEO that compounds business results — not just rankings.
+            <p className="border-primary/20 border-l-4 pl-6 font-bold text-primary text-xl italic leading-relaxed">
+              "SEO that compounds business results — not just rankings."
             </p>
           </div>
         </div>
