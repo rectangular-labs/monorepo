@@ -5,7 +5,7 @@ import type {
   UnlaziedRouter,
 } from "@orpc/server";
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
-import type { contentCampaignMessageMetadataSchema } from "@rectangular-labs/core/schemas/content-campaign-message-parser";
+import type { chatMessageMetadataSchema } from "@rectangular-labs/core/schemas/chat-message-parser";
 import type {
   seoPlanKeywordTaskInputSchema,
   seoWriteArticleTaskInputSchema,
@@ -39,7 +39,7 @@ type AiTools = InferUITools<
     ReturnType<typeof createSuggestArticlesToolWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
-  typeof contentCampaignMessageMetadataSchema.infer,
+  typeof chatMessageMetadataSchema.infer,
   UIDataTypes,
   AiTools
 >;
@@ -49,7 +49,7 @@ export type WebSocketMessages =
       type: "msg-chunk";
       clientMessageId: string;
       chunk: UIMessageChunk<
-        typeof contentCampaignMessageMetadataSchema.infer,
+        typeof chatMessageMetadataSchema.infer,
         UIDataTypes
       >;
     };

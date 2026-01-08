@@ -1,6 +1,6 @@
 import { type } from "arktype";
 
-export const contentCampaignMessageMetadataSchema = type({
+export const chatMessageMetadataSchema = type({
   userId: "string|null",
   sentAt: "string.date.iso",
 });

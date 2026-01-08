@@ -1,47 +1,47 @@
 import { err, ok, safe } from "@rectangular-labs/result";
 import { type DB, schema } from "../../client";
-import type { seoContentCampaignMessageInsertSchema } from "../../schema/seo";
+import type { seoChatMessageInsertSchema } from "../../schema/seo";
 
-export async function createContentCampaignMessage({
+export async function createChatMessage({
   db,
   value,
 }: {
   db: DB;
-  value: typeof seoContentCampaignMessageInsertSchema.infer;
+  value: typeof seoChatMessageInsertSchema.infer;
 }) {
   const result = await safe(() =>
-    db.insert(schema.seoContentCampaignMessage).values(value).returning(),
+    db.insert(schema.seoChatMessage).values(value).returning(),
   );
   if (!result.ok) {
     return result;
   }
   const row = result.value[0];
   if (!row) {
-    return err(new Error("Failed to create content campaign message"));
+    return err(new Error("Failed to create chat message"));
   }
   return ok(row);
 }
 
-export async function getContentCampaignMessageById({
+export async function getChatMessageById({
   db,
   organizationId,
   projectId,
-  campaignId,
+  chatId,
   id,
 }: {
   db: DB;
   organizationId: string;
   projectId: string;
-  campaignId: string;
+  chatId: string;
   id: string;
 }) {
   const result = await safe(() =>
-    db.query.seoContentCampaignMessage.findFirst({
+    db.query.seoChatMessage.findFirst({
       where: (table, { and, eq }) =>
         and(
           eq(table.organizationId, organizationId),
           eq(table.projectId, projectId),
-          eq(table.campaignId, campaignId),
+          eq(table.chatId, chatId),
           eq(table.id, id),
         ),
     }),
@@ -52,28 +52,28 @@ export async function getContentCampaignMessageById({
   return ok(result.value ?? null);
 }
 
-export async function listContentCampaignMessages({
+export async function listChatMessages({
   db,
   organizationId,
   projectId,
-  campaignId,
+  chatId,
   limit = 10,
   cursor,
 }: {
   db: DB;
   organizationId: string;
   projectId: string;
-  campaignId: string;
+  chatId: string;
   limit?: number;
   cursor?: string;
 }) {
   const result = await safe(() =>
-    db.query.seoContentCampaignMessage.findMany({
+    db.query.seoChatMessage.findMany({
       where: (table, { and, eq, lt }) =>
         and(
           eq(table.organizationId, organizationId),
           eq(table.projectId, projectId),
-          eq(table.campaignId, campaignId),
+          eq(table.chatId, chatId),
           cursor ? lt(table.id, cursor) : undefined,
         ),
       orderBy: (fields, { desc }) => [desc(fields.id)],
