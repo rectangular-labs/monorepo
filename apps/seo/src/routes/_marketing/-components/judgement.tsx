@@ -1,5 +1,6 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
+import { motion } from "motion/react";
 
 export function Judgement() {
   return (

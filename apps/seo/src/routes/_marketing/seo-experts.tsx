@@ -7,7 +7,7 @@ import { Writer } from "./-components/writer";
 import { Judgement } from "./-components/judgement";
 import { CTA } from "./-components/cta";
 
-export const Route = createFileRoute("/_marketing/seo-experts")({
+export const Route = createFileRoute("/_marketing/seo-experts" as any)({
   component: SEOExpertsPage,
 });
 

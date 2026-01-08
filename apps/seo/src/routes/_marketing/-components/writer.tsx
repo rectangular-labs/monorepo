@@ -89,7 +89,7 @@ export function Writer() {
                 "Focused, clearly structured writing that prioritises usefulness and readability",
                 "SEO and GEO applied intentionally and effectively",
                 "Built for visibility across traditional search and AI-driven discovery",
-              ].map((item) => (
+              ].map((item, index) => (
                 <motion.div
                   key={item}
                   initial={{ opacity: 0, x: 20 }}

@@ -1,6 +1,6 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import { Sparkles, Target } from "@rectangular-labs/ui/components/icon";
+import { Sparkles, Target, Zap } from "@rectangular-labs/ui/components/icon";
 import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function Strategy() {
