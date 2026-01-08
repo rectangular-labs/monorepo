@@ -11,6 +11,7 @@ import {
   ChevronsUpDownIcon,
   CircleSlashIcon,
   CircleXIcon,
+  ClockIcon,
   CopyIcon,
   DotIcon,
   ExternalLinkIcon,
@@ -65,6 +66,8 @@ import {
   UserIcon,
   UsersIcon,
   ZapIcon,
+  BarChart3Icon,
+  ChartBarIcon,
 } from "lucide-react";
 import type { SVGProps } from "react";
 
@@ -130,6 +133,9 @@ export const Sun = SunIcon;
 export const Target = TargetIcon;
 export const Terminal = TerminalIcon;
 export const Timer = TimerIcon;
+export const Clock = ClockIcon;
+export const BarChart3 = BarChart3Icon;
+export const ChartBar = ChartBarIcon;
 export const Trash = TrashIcon;
 export const TrendingUp = TrendingUpIcon;
 export const User = UserIcon;
