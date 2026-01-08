@@ -14,29 +14,31 @@ export function FounderStrategist() {
 
   const strategies = [
     {
-      id: "authority",
+      id: "fix",
       icon: Sparkles,
       color: "emerald",
-      title: "Authority Win: 'Founders SEO Framework'",
+      title: "Strategy A: Fix Low CTR Winners",
       summary:
-        "Data shows search intent shifting from 'How-to Tips' to 'Actionable Frameworks'.",
+        "3 pages are ranking on Page 1 but losing clicks. Immediate win via title & snippet alignment.",
       details: [
-        "Clustering: Map current 'Tips' content into a cohesive 'Founder Operating System' series.",
-        "Link Juice: Redirect authority from high-traffic, low-converting posts into the new framework.",
-        "Outcome: Projected 40% increase in lead-intent traffic within 30 days.",
+        "Priority: '/ai-vs-no-code' (9.7k impressions, 0.8% CTR).",
+        "Action: Rewrite title to 'AI vs No-Code vs Developers: The Fastest Path to a Real Client Portal (2026)'.",
+        "Enhancement: Add FAQ schema + 'What you'll build' sections to expand SERP real estate.",
+        "Internal Links: Funnel authority from winners into '/client-portal-starter' template.",
       ],
     },
     {
       id: "gap",
       icon: Target,
       color: "blue",
-      title: "Gap: Competitor 'AgencyPro' Content Drift",
+      title: "Strategy B: Competitor Gap (GEO + Long-tail)",
       summary:
-        "Competitor 'AgencyPro' has stopped updating their 'Automation' cluster.",
+        "Target service-niche + workflow queries that major competitors like 'AgencyPro' ignore.",
       details: [
-        "Overtake: Update our 'Workflow Automation' guide with fresh 2026 data and interactive examples.",
-        "GEO Hijack: Add specific GEO-intent tokens that Competitor 'AgencyPro' is currently missing.",
-        "Outcome: Probability of stealing Position #1 is >85% within 14 days.",
+        "Theme: 'client portal app for HVAC company' + 'job scheduling app for cleaning business'.",
+        "Gap: Big competitors target generic head terms; we win on specific 'build X for Y' long-tail.",
+        "Publication: New industry BOFU pages like '/solutions/industries/hvac/client-portal-app/'.",
+        "GEO: (Optional) Add 'AI app builder for [City]' modifiers where you have support coverage.",
       ],
     },
   ];

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import {
   Shield,
@@ -5,10 +6,19 @@ import {
   Zap,
   RotateCcw,
   TrendingUp,
+  ChevronRight,
+  Check,
+  FileText,
+  BarChart3,
 } from "@rectangular-labs/ui/components/icon";
 import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
+import { motion, AnimatePresence } from "motion/react";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 
 export function FounderTransparency() {
+  const [expandedThesis, setExpandedThesis] = useState(false);
+  const [expandedAudit, setExpandedAudit] = useState(false);
+
   const thesisValues = [
     { icon: Search, label: "Forms a clear thesis for organic growth" },
     { icon: Zap, label: "Executes it end-to-end" },
@@ -40,31 +50,81 @@ export function FounderTransparency() {
 
         <div className="mx-auto max-w-5xl space-y-12">
           {/* Phase 1: Thesis */}
-          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-center">
-            <div className="relative">
-              <ChatMockup className="border-emerald-500/20 bg-emerald-500/[0.02] shadow-emerald-500/5">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 font-bold text-[10px] text-emerald-500 uppercase tracking-widest">
-                    <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    Week 1: Strategy Formulation
-                  </div>
-                  <ChatMockupMessage from="assistant">
-                    <div className="space-y-3">
-                      <p className="font-bold text-sm">
-                        Growth Thesis: "Utility-First SEO"
-                      </p>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        FluidPosts.com will win by building 12 "SEO ROI
-                        Calculators" targeting founders directly. Thesis:
-                        Value-exchange beats passive reading for lead
-                        conversion.
+          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-start">
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={() => setExpandedThesis(!expandedThesis)}
+                className="group w-full text-left"
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.03] p-6 transition-all hover:bg-emerald-500/[0.06] hover:shadow-emerald-500/5 hover:shadow-lg">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 font-bold text-[10px] text-emerald-600 uppercase tracking-widest">
+                        <BarChart3 className="h-3.5 w-3.5" />
+                        Week 1: Strategy Formulation
+                      </div>
+                      <h3 className="font-bold text-foreground text-xl">
+                        Establish Topical Authority
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        Own the "AI-assisted custom software" niche via hub-and-spoke content.
                       </p>
                     </div>
-                  </ChatMockupMessage>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 transition-transform group-hover:rotate-90">
+                      <ChevronRight className="h-5 w-5" />
+                    </div>
+                  </div>
                 </div>
-              </ChatMockup>
+              </button>
+
+              <AnimatePresence>
+                {expandedThesis && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <ChatMockup className="border-emerald-500/10 bg-emerald-500/[0.01]">
+                      <ChatMockupMessage from="assistant">
+                        <div className="space-y-4">
+                          <div className="space-y-1.5">
+                            <p className="font-bold text-sm">Thesis: Topical Authority Leadership</p>
+                            <p className="text-muted-foreground text-xs leading-relaxed">
+                              We'll win by owning the topic: <strong>AI-assisted custom software for small service businesses.</strong> We build one parent hub and supporting child pages that answer the exact questions people search before they buy.
+                            </p>
+                          </div>
+
+                          <div className="grid gap-2">
+                            <div className="rounded-lg bg-emerald-500/5 p-3 text-[11px]">
+                              <p className="mb-2 font-bold text-emerald-700 uppercase tracking-tight">Suggested Clusters:</p>
+                              <ul className="space-y-1 text-muted-foreground">
+                                <li>• <span className="text-foreground">Educational:</span> ai-app-development</li>
+                                <li>• <span className="text-foreground">Solutions:</span> custom ai app solutions for small businesses</li>
+                                <li>• <span className="text-foreground">Templates:</span> custom app templates for service ops</li>
+                              </ul>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground italic">
+                              Why: Interlinked entity coverage (portals, internal tools, workflow automation) makes Google trust you on the category.
+                            </p>
+                          </div>
+
+                          <div className="flex items-center justify-between border-emerald-500/10 border-t pt-4">
+                            <p className="text-[10px] text-muted-foreground">Generating outlines pending approval...</p>
+                            <Button size="sm" className="h-8 bg-emerald-600 px-3 text-[11px] hover:bg-emerald-700">
+                              <Check className="mr-1.5 h-3.5 w-3.5" /> Approve Strategy
+                            </Button>
+                          </div>
+                        </div>
+                      </ChatMockupMessage>
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="space-y-6">
+            
+            <div className="pt-4 md:pt-12">
               <ul className="grid gap-5">
                 {thesisValues.map((v) => (
                   <li key={v.label} className="group flex items-start gap-4">
@@ -93,34 +153,101 @@ export function FounderTransparency() {
           </div>
 
           {/* Phase 2: Audit */}
-          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-center">
-            <div className="relative">
-              <ChatMockup className="border-amber-500/20 bg-amber-500/[0.02] shadow-amber-500/5">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 font-bold text-[10px] text-amber-500 uppercase tracking-widest">
-                    <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
-                    Week 3: The Self-Audit
-                  </div>
-                  <ChatMockupMessage from="assistant">
-                    <div className="space-y-3">
-                      <p className="font-bold text-amber-600 text-sm">
-                        Audit Result: Assumption Broken
-                      </p>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        Traffic to ROI Calculators is high, but dwell time is
-                        low (avg 14s). Diagnosis: The calculators are too
-                        complex for mobile users.
-                      </p>
-                      <div className="rounded-xl border border-amber-500/20 border-l-4 bg-amber-500/5 p-4 font-medium text-[11px] text-amber-700 italic leading-relaxed">
-                        "I am simplifying the inputs and pivoting to a
-                        'Quick-Check' format to salvage the cluster."
+          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-start">
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={() => setExpandedAudit(!expandedAudit)}
+                className="group w-full text-left"
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-amber-500/[0.03] p-6 transition-all hover:bg-amber-500/[0.06] hover:shadow-amber-500/5 hover:shadow-lg">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 font-bold text-[10px] text-amber-600 uppercase tracking-widest">
+                        <FileText className="h-3.5 w-3.5" />
+                        Week 3: The Self-Audit
                       </div>
+                      <h3 className="font-bold text-foreground text-xl">
+                        Cluster Performance Audit
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        Winner: "Examples" content vs low CTR on "Comparison" pages.
+                      </p>
                     </div>
-                  </ChatMockupMessage>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 transition-transform group-hover:rotate-90">
+                      <ChevronRight className="h-5 w-5" />
+                    </div>
+                  </div>
                 </div>
-              </ChatMockup>
+              </button>
+
+              <AnimatePresence>
+                {expandedAudit && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <ChatMockup className="border-amber-500/10 bg-amber-500/[0.01]">
+                      <ChatMockupMessage from="assistant">
+                        <div className="space-y-4">
+                          <p className="font-bold text-sm">Audit: First 8 Articles (Last 14 Days)</p>
+                          
+                          <div className="overflow-x-auto rounded-lg border border-amber-500/10 bg-background/50">
+                            <table className="w-full text-left text-[10px]">
+                              <thead>
+                                <tr className="border-amber-500/10 border-b bg-amber-500/5 text-amber-800">
+                                  <th className="px-3 py-2 font-bold uppercase tracking-tighter">Slug</th>
+                                  <th className="px-3 py-2 text-right font-bold">Impr</th>
+                                  <th className="px-3 py-2 text-right font-bold">CTR</th>
+                                  <th className="px-3 py-2 font-bold">Insight</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-amber-500/5">
+                                <tr>
+                                  <td className="px-3 py-2 font-medium">/internal-tools-examples</td>
+                                  <td className="px-3 py-2 text-right">18.4k</td>
+                                  <td className="px-3 py-2 text-right font-bold text-emerald-600">2.7%</td>
+                                  <td className="px-3 py-2 text-muted-foreground italic">Winner</td>
+                                </tr>
+                                <tr>
+                                  <td className="px-3 py-2 font-medium">/ai-vs-no-code</td>
+                                  <td className="px-3 py-2 text-right">9.7k</td>
+                                  <td className="px-3 py-2 text-right font-bold text-amber-600">0.8%</td>
+                                  <td className="px-3 py-2 text-muted-foreground italic">Low Intent</td>
+                                </tr>
+                                <tr>
+                                  <td className="px-3 py-2 font-medium">/hvac-portal-builder</td>
+                                  <td className="px-3 py-2 text-right">4.6k</td>
+                                  <td className="px-3 py-2 text-right font-bold text-emerald-600">4.6%</td>
+                                  <td className="px-3 py-2 text-muted-foreground italic">High Conversion</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="rounded-lg border-amber-500/20 border-l-2 bg-amber-500/5 p-3 text-[11px]">
+                              <p className="mb-1 font-bold text-amber-800">The Pivot:</p>
+                              <p className="text-muted-foreground">
+                                "Comparison" pages underperformed (0.8% CTR). <strong>Audit says:</strong> Templates won't lift until they're positioned as assets linked from "Example" winners.
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 rounded bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700">
+                              <RotateCcw className="h-3.5 w-3.5" />
+                              <span className="font-bold">Updating Thesis:</span> Prioritizing "Examples" funnel over "Definitions".
+                            </div>
+                          </div>
+                        </div>
+                      </ChatMockupMessage>
+                    </ChatMockup>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="space-y-6">
+
+            <div className="pt-4 md:pt-12">
               <ul className="grid gap-5">
                 {auditValues.map((v) => (
                   <li key={v.label} className="group flex items-start gap-4">
@@ -145,6 +272,11 @@ export function FounderTransparency() {
             </span>
           </p>
         </div>
+      </div>
+    </Section>
+  );
+}
+
       </div>
     </Section>
   );
