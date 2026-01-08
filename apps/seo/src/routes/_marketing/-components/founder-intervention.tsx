@@ -70,18 +70,34 @@ export function FounderIntervention() {
                 {i === 0 && (
                   <div className="space-y-4 rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.02] p-6 shadow-sm transition-shadow hover:shadow-md">
                     <div className="flex items-center gap-2 font-bold text-[10px] text-emerald-600 uppercase tracking-widest">
-                      <Check className="h-3 w-3" /> Step 1: Strategic Greenlight
+                      <Check className="h-3 w-3" /> Step 1: Strategic Direction
                     </div>
-                    <p className="font-medium text-xs leading-relaxed">
-                      "I recommend pivoting our 'How-To' guides into 'Enterprise
-                      Frameworks' to attract higher ACV leads."
-                    </p>
-                    <Button
-                      size="sm"
-                      className="h-9 w-full gap-2 bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
-                    >
-                      <Check className="h-4 w-4" /> Approve Direction
-                    </Button>
+                    <div className="space-y-3 rounded-xl border border-emerald-500/10 bg-background p-4 shadow-sm">
+                      <p className="font-bold text-xs">
+                        Approve this overall strategy?
+                      </p>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">
+                        Topical authority hub for{" "}
+                        <strong>&quot;AI-assisted custom software&quot;</strong>
+                        . Pivot: Funnel &quot;Examples&quot; into high-intent
+                        asset pages.
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          className="h-8 bg-emerald-600 text-[10px] hover:bg-emerald-700"
+                        >
+                          Approve & Start Outlines
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-[10px]"
+                        >
+                          Narrow to &quot;HVAC only&quot; first
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -90,23 +106,35 @@ export function FounderIntervention() {
                     <div className="flex items-center gap-2 font-bold text-[10px] text-blue-600 uppercase tracking-widest">
                       <EyeOn className="h-3 w-3" /> Step 2: Quality Scan
                     </div>
-                    <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-background p-3">
-                      <span className="truncate font-bold text-xs">
-                        Draft: "The ROI of Fluid SEO for CEOs"
-                      </span>
-                      <span className="shrink-0 rounded border border-blue-100 bg-blue-50 px-2 py-0.5 font-bold text-[10px] text-blue-600 uppercase tracking-tighter">
-                        Scan Logic
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-9 gap-2 border-blue-200 text-blue-700 text-xs hover:bg-blue-50"
-                      >
-                        <EyeOn className="h-4 w-4" /> Quick Review
-                      </Button>
-                    </div>
+                    <ChatMockup className="border-blue-500/10 bg-background/80 shadow-none">
+                      <ChatMockupMessage from="assistant">
+                        <div className="space-y-3">
+                          <p className="font-bold text-[11px]">
+                            Draft Ready: &quot;The ROI of Fluid SEO&quot;
+                          </p>
+                          <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            Please review for brand alignment. Let me know if
+                            any part of the logic feels misaligned with your
+                            intent, or if we need a sharper tone tweak.
+                          </p>
+                          <div className="flex gap-2 border-blue-500/10 border-t pt-3">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 border-blue-200 text-[9px] text-blue-700"
+                            >
+                              Open in Editor
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="h-7 bg-blue-600 text-[9px]"
+                            >
+                              Publish Now
+                            </Button>
+                          </div>
+                        </div>
+                      </ChatMockupMessage>
+                    </ChatMockup>
                   </div>
                 )}
 
@@ -115,17 +143,34 @@ export function FounderIntervention() {
                     <div className="flex items-center gap-2 font-bold text-[10px] text-rose-600 uppercase tracking-widest">
                       <AlertIcon className="h-3 w-3" /> Step 3: Drift Correction
                     </div>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      System detected a 15% drift in brand voice relative to
-                      your "Founder Tone" settings. Redirecting outputs now.
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-9 gap-2 border-rose-200 text-rose-700 text-xs hover:bg-rose-50"
-                    >
-                      <AlertIcon className="h-4 w-4" /> Correct Intent Drift
-                    </Button>
+                    <div className="space-y-3 rounded-xl border border-rose-500/10 bg-background p-4 shadow-sm">
+                      <div className="flex items-center gap-2 font-bold text-[11px] text-rose-600">
+                        <RotateCcw className="h-3.5 w-3.5" /> Prompting for
+                        Intent
+                      </div>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">
+                        I&apos;ve detected our recent drafts are skewing too
+                        technical. Should I recalibrate to a{" "}
+                        <strong>C-Suite/Founder tone</strong> before generating
+                        the next batch of outlines?
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 border-rose-200 text-[10px] text-rose-700"
+                        >
+                          Recalibrate Tone
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 text-[10px]"
+                        >
+                          Ignore (Keep Tech Detail)
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

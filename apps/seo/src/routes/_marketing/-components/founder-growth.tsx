@@ -1,7 +1,13 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import { Users, Check, Zap } from "@rectangular-labs/ui/components/icon";
-import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
+import {
+  Users,
+  Check,
+  Zap,
+  ArrowRight,
+  MousePointer2,
+} from "@rectangular-labs/ui/components/icon";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function FounderGrowth() {
   const points = [
@@ -71,43 +77,103 @@ export function FounderGrowth() {
               </div>
 
               <div className="relative">
-                <ChatMockup className="border-primary/20 shadow-primary/5">
-                  <ChatMockupMessage from="assistant">
-                    {i === 0 &&
-                      "I'm optimizing the 'Enterprise SEO Guide' to mention your 'Audit API' as the primary solution."}
-                    {i === 1 &&
-                      "Found a trending discussion on LinkedIn about 'Post-AI Content'. Drafting a response thesis."}
-                    {i === 2 &&
-                      "The 'Strategy' page now emphasizes your fixed-price model to align with target audience preferences."}
-                  </ChatMockupMessage>
-                  <ChatMockupTool
-                    title={
-                      i === 0
-                        ? "Product Integration Scan"
-                        : i === 1
-                          ? "Opportunity Detection"
-                          : "Commercial Voice Check"
-                    }
-                    output={
+                {i === 0 && (
+                  <div className="relative h-[200px] overflow-hidden rounded-2xl border border-border bg-background/50 p-6 shadow-sm">
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-background to-transparent" />
+                    <div className="space-y-4 opacity-40 blur-[0.5px]">
+                      <div className="h-4 w-3/4 rounded bg-muted" />
+                      <div className="h-4 w-full rounded bg-muted" />
+                    </div>
+                    <div className="relative my-4 rounded-xl border border-primary/20 bg-primary/5 p-4 shadow-sm">
+                      <div className="absolute -top-3 -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-lg">
+                        <MousePointer2 className="h-3 w-3" />
+                      </div>
+                      <p className="text-foreground text-sm leading-relaxed">
+                        ...we&apos;ve found that{" "}
+                        <span className="rounded bg-primary/20 px-1 font-bold text-primary">
+                          store.ai offers a comprehensive platform
+                        </span>{" "}
+                        that simplifies the process for beginners, handling
+                        everything from hosting to e-commerce...
+                      </p>
+                    </div>
+                    <div className="space-y-4 opacity-40 blur-[0.5px]">
+                      <div className="h-4 w-full rounded bg-muted" />
+                      <div className="h-4 w-5/6 rounded bg-muted" />
+                    </div>
+                  </div>
+                )}
+
+                {i === 1 && (
+                  <ChatMockup className="border-blue-500/20 bg-blue-500/[0.02]">
+                    <ChatMockupMessage from="assistant">
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2 rounded bg-emerald-50 px-2 py-1 font-bold text-[10px] text-emerald-600">
-                          <Check className="h-3 w-3" />
-                          {i === 0 && "Applied: Internal Product Linking"}
-                          {i === 1 && "Applied: Trend Exploitation"}
-                          {i === 2 && "Applied: Persona Alignment"}
+                        <div className="flex items-center gap-2 font-bold text-[10px] text-blue-600 uppercase tracking-widest">
+                          <Zap className="h-3 w-3" /> Parallel Opportunity
+                          Identified
                         </div>
-                        <div className="text-[11px] text-muted-foreground italic">
-                          {i === 0 &&
-                            "• Injected 'Audit API' into 'Scalability' section."}
-                          {i === 1 &&
-                            "• Drafting 1,200 words on 'Why Humans Still Matter'."}
-                          {i === 2 &&
-                            "• Switched tone from 'Technical' to 'C-Suite Strategy'."}
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                          Beyond our core thesis, I recommend launching a{" "}
+                          <strong>&quot;Use Case Gallery&quot;</strong>.
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            "Customer Intake",
+                            "Quote Generator",
+                            "Client Portal",
+                          ].map((u) => (
+                            <div
+                              key={u}
+                              className="flex items-center gap-2 rounded-lg border border-blue-500/10 bg-background p-2 text-[10px]"
+                            >
+                              <ArrowRight className="h-2.5 w-2.5 text-blue-500" />{" "}
+                              {u}
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-blue-700/70 italic">
+                          Logic: These serve as sales enablement—allowing
+                          readers to &quot;pick a workflow → start
+                          building&quot; immediately.
+                        </p>
+                      </div>
+                    </ChatMockupMessage>
+                  </ChatMockup>
+                )}
+
+                {i === 2 && (
+                  <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.02] p-6 shadow-sm">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 font-bold text-[10px] text-emerald-600 uppercase tracking-widest">
+                        <Check className="h-3 w-3" /> De-Risking the Build
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <div className="rounded-xl border border-border bg-background p-3 shadow-sm">
+                          <p className="font-bold text-[11px] text-foreground">
+                            Pain Point Identified:
+                          </p>
+                          <p className="text-[11px] text-muted-foreground italic">
+                            &quot;I&apos;m worried about technical debt if I DIY
+                            this...&quot;
+                          </p>
+                        </div>
+                        <div className="flex justify-center">
+                          <div className="h-4 w-0.5 bg-emerald-500/20" />
+                        </div>
+                        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 shadow-sm">
+                          <p className="font-bold text-[11px] text-emerald-700">
+                            Commercial Bridge Applied:
+                          </p>
+                          <p className="text-[11px] text-emerald-600 leading-relaxed">
+                            Interjected &quot;Done-for-you&quot; pathing within
+                            the &quot;DIY Tutorial&quot; to capture high-intent
+                            users who realize they need professional help.
+                          </p>
                         </div>
                       </div>
-                    }
-                  />
-                </ChatMockup>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -115,7 +181,7 @@ export function FounderGrowth() {
 
         <div className="mx-auto max-w-3xl pt-12 text-center">
           <p className="border-primary/20 border-l-4 pl-6 font-bold text-primary text-xl italic leading-relaxed">
-            "SEO that compounds business results — not just rankings."
+            &quot;SEO that compounds business results — not just rankings.&quot;
           </p>
         </div>
       </div>
