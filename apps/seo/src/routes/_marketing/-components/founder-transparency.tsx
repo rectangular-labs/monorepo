@@ -40,7 +40,7 @@ export function FounderTransparency() {
 
         <div className="mx-auto max-w-5xl space-y-12">
           {/* Phase 1: Thesis */}
-          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
+          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-center">
             <div className="relative">
               <ChatMockup className="border-emerald-500/20 bg-emerald-500/[0.02] shadow-emerald-500/5">
                 <div className="space-y-4">
@@ -93,17 +93,17 @@ export function FounderTransparency() {
           </div>
 
           {/* Phase 2: Audit */}
-          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
+          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-center">
             <div className="relative">
-              <ChatMockup className="border-rose-500/20 bg-rose-500/[0.02] shadow-rose-500/5">
+              <ChatMockup className="border-amber-500/20 bg-amber-500/[0.02] shadow-amber-500/5">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 font-bold text-[10px] text-rose-500 uppercase tracking-widest">
-                    <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-rose-500" />
+                  <div className="flex items-center gap-2 font-bold text-[10px] text-amber-500 uppercase tracking-widest">
+                    <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
                     Week 3: The Self-Audit
                   </div>
                   <ChatMockupMessage from="assistant">
                     <div className="space-y-3">
-                      <p className="font-bold text-rose-600 text-sm">
+                      <p className="font-bold text-amber-600 text-sm">
                         Audit Result: Assumption Broken
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
@@ -111,7 +111,7 @@ export function FounderTransparency() {
                         low (avg 14s). Diagnosis: The calculators are too
                         complex for mobile users.
                       </p>
-                      <div className="rounded-xl border border-rose-500/20 border-l-4 bg-rose-500/5 p-4 font-medium text-[11px] text-rose-700 italic leading-relaxed">
+                      <div className="rounded-xl border border-amber-500/20 border-l-4 bg-amber-500/5 p-4 font-medium text-[11px] text-amber-700 italic leading-relaxed">
                         "I am simplifying the inputs and pivoting to a
                         'Quick-Check' format to salvage the cluster."
                       </div>
@@ -124,7 +124,7 @@ export function FounderTransparency() {
               <ul className="grid gap-5">
                 {auditValues.map((v) => (
                   <li key={v.label} className="group flex items-start gap-4">
-                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 transition-all group-hover:scale-110">
+                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 transition-all group-hover:scale-110">
                       <v.icon className="h-5 w-5" />
                     </div>
                     <span className="pt-1.5 font-medium text-lg leading-tight">
