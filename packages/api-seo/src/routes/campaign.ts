@@ -1,17 +1,16 @@
 import { ORPCError, type as orpcType } from "@orpc/server";
-import { contentCampaignMessageMetadataSchema } from "@rectangular-labs/core/schemas/content-campaign-message-parser";
+import { chatMessageMetadataSchema } from "@rectangular-labs/core/schemas/chat-message-parser";
 import {
-  CAMPAIGN_DEFAULT_TITLE,
-  contentCampaignStatusSchema,
-} from "@rectangular-labs/core/schemas/content-campaign-parser";
-import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
+  CHAT_DEFAULT_TITLE,
+  chatStatusSchema,
+} from "@rectangular-labs/core/schemas/chat-parser";
 import { schema, sql } from "@rectangular-labs/db";
 import {
-  createContentCampaign,
-  deleteContentCampaign,
-  getDefaultContentCampaign,
-  listContentCampaignMessages,
-  updateContentCampaign,
+  createChat,
+  deleteChat,
+  getDefaultChat,
+  listChatMessages,
+  updateChat,
 } from "@rectangular-labs/db/operations";
 import { validateUIMessages } from "ai";
 import { type } from "arktype";
@@ -27,24 +26,24 @@ const list = withOrganizationIdBase
       projectId: "string",
       limit: "1<=number<=100 = 20",
       "cursor?": "string.uuid|undefined",
-      "status?": contentCampaignStatusSchema,
+      "status?": chatStatusSchema,
       "search?": "string|undefined",
     }),
   )
   .output(
     type({
-      data: schema.seoContentCampaignSelectSchema.array(),
+      data: schema.seoChatSelectSchema.array(),
       nextPageCursor: "string.uuid|undefined",
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
-    const campaigns = await context.db.query.seoContentCampaign.findMany({
+    const chats = await context.db.query.seoChat.findMany({
       where: (table, { eq, and, ne, lt }) =>
         and(
           eq(table.projectId, input.projectId),
           eq(table.organizationId, input.organizationId),
-          ne(table.title, CAMPAIGN_DEFAULT_TITLE),
+          ne(table.title, CHAT_DEFAULT_TITLE),
           input.cursor ? lt(table.id, input.cursor) : undefined,
           input.status ? eq(table.status, input.status) : undefined,
           // https://orm.drizzle.team/docs/guides/postgresql-full-text-search
@@ -55,9 +54,9 @@ const list = withOrganizationIdBase
       orderBy: (fields, { desc }) => [desc(fields.id)],
       limit: input.limit + 1,
     });
-    const data = campaigns.slice(0, input.limit);
+    const data = chats.slice(0, input.limit);
     const nextPageCursor =
-      campaigns.length > input.limit ? data.at(-1)?.id : undefined;
+      chats.length > input.limit ? data.at(-1)?.id : undefined;
     return { data, nextPageCursor };
   });
 
@@ -65,9 +64,9 @@ const get = withOrganizationIdBase
   .route({ method: "GET", path: "/{id}" })
   .input(type({ id: "string", projectId: "string", organizationId: "string" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
-  .output(type({ campaign: schema.seoContentCampaignSelectSchema }))
+  .output(type({ campaign: schema.seoChatSelectSchema }))
   .handler(async ({ context, input }) => {
-    const campaign = await context.db.query.seoContentCampaign.findFirst({
+    const campaign = await context.db.query.seoChat.findFirst({
       where: (table, { and, eq }) =>
         and(
           eq(table.id, input.id),
@@ -76,7 +75,7 @@ const get = withOrganizationIdBase
         ),
     });
     if (!campaign) {
-      throw new ORPCError("NOT_FOUND", { message: "Campaign not found" });
+      throw new ORPCError("NOT_FOUND", { message: "Chat not found" });
     }
     return { campaign };
   });
@@ -84,14 +83,14 @@ const get = withOrganizationIdBase
 const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
   .input(
-    schema.seoContentCampaignInsertSchema.merge(
+    schema.seoChatInsertSchema.merge(
       type({ organizationId: "string" }),
     ),
   )
-  .output(schema.seoContentCampaignSelectSchema)
+  .output(schema.seoChatSelectSchema)
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
-    const existingDefaultCampaignResult = await getDefaultContentCampaign({
+    const existingDefaultCampaignResult = await getDefaultChat({
       db: context.db,
       projectId: input.projectId,
       organizationId: context.session.activeOrganizationId,
@@ -99,7 +98,7 @@ const create = withOrganizationIdBase
     });
     if (!existingDefaultCampaignResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get default campaign",
+        message: "Failed to get default chat",
         cause: existingDefaultCampaignResult.error,
       });
     }
@@ -107,50 +106,45 @@ const create = withOrganizationIdBase
       return existingDefaultCampaignResult.value;
     }
 
-    const createContentCampaignResult = await createContentCampaign(
+    const createChatResult = await createChat(
       context.db,
       {
         projectId: input.projectId,
         organizationId: context.organization.id,
         createdByUserId: context.user.id,
-        workspaceBlobUri: getWorkspaceBlobUri({
-          orgId: context.organization.id,
-          projectId: input.projectId,
-          campaignId: undefined,
-        }),
       },
     );
-    if (!createContentCampaignResult.ok) {
+    if (!createChatResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to create campaign",
-        cause: createContentCampaignResult.error,
+        message: "Failed to create chat",
+        cause: createChatResult.error,
       });
     }
 
-    return createContentCampaignResult.value;
+    return createChatResult.value;
   });
 
 const update = withOrganizationIdBase
   .route({ method: "PATCH", path: "/{id}" })
   .input(
-    schema.seoContentCampaignUpdateSchema.merge(
+    schema.seoChatUpdateSchema.merge(
       type({ organizationId: "string" }),
     ),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
-  .output(schema.seoContentCampaignSelectSchema)
+  .output(schema.seoChatSelectSchema)
   .handler(async ({ context, input }) => {
-    if (input.title === CAMPAIGN_DEFAULT_TITLE) {
+    if (input.title === CHAT_DEFAULT_TITLE) {
       throw new ORPCError("BAD_REQUEST", {
         message: "Title cannot be the default title",
       });
     }
-    if (!input.title && !input.status && !input.workspaceBlobUri) {
+    if (!input.title && !input.status) {
       throw new ORPCError("BAD_REQUEST", {
         message: "At least one field must be provided",
       });
     }
-    const updateContentCampaignResult = await updateContentCampaign({
+    const updateChatResult = await updateChat({
       db: context.db,
       values: {
         id: input.id,
@@ -158,19 +152,18 @@ const update = withOrganizationIdBase
         organizationId: context.organization.id,
         title: input.title,
         status: input.status,
-        workspaceBlobUri: input.workspaceBlobUri,
       },
     });
-    if (!updateContentCampaignResult.ok) {
+    if (!updateChatResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to update campaign",
-        cause: updateContentCampaignResult.error,
+        message: "Failed to update chat",
+        cause: updateChatResult.error,
       });
     }
-    if (!updateContentCampaignResult.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Campaign not found" });
+    if (!updateChatResult.value) {
+      throw new ORPCError("NOT_FOUND", { message: "Chat not found" });
     }
-    return updateContentCampaignResult.value;
+    return updateChatResult.value;
   });
 
 const remove = withOrganizationIdBase
@@ -178,20 +171,20 @@ const remove = withOrganizationIdBase
   .input(type({ id: "string", projectId: "string" }))
   .output(type({ success: "true" }))
   .handler(async ({ context, input }) => {
-    const deleteContentCampaignResult = await deleteContentCampaign({
+    const deleteChatResult = await deleteChat({
       db: context.db,
       id: input.id,
       projectId: input.projectId,
       organizationId: context.session.activeOrganizationId,
     });
-    if (!deleteContentCampaignResult.ok) {
+    if (!deleteChatResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to delete campaign",
-        cause: deleteContentCampaignResult.error,
+        message: "Failed to delete chat",
+        cause: deleteChatResult.error,
       });
     }
-    if (!deleteContentCampaignResult.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Campaign not found" });
+    if (!deleteChatResult.value) {
+      throw new ORPCError("NOT_FOUND", { message: "Chat not found" });
     }
     return { success: true } as const;
   });
@@ -212,17 +205,17 @@ const messages = withOrganizationIdBase
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
-    const result = await listContentCampaignMessages({
+    const result = await listChatMessages({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      campaignId: input.id,
+      chatId: input.id,
       limit: input.limit,
       cursor: input.cursor,
     });
     if (!result.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to list campaign messages",
+        message: "Failed to list chat messages",
         cause: result.error,
       });
     }
@@ -244,7 +237,7 @@ const messages = withOrganizationIdBase
           },
         };
       }),
-      metadataSchema: contentCampaignMessageMetadataSchema,
+      metadataSchema: chatMessageMetadataSchema,
     });
     return { data: uiMessageSchema, nextPageCursor };
   });

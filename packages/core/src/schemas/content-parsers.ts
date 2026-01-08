@@ -1,5 +1,8 @@
 import { type } from "arktype";
 
+export const contentStatusSchema = type(
+  "'suggested'|'queued'|'generating'|'generation-failed'|'pending-review'|'scheduled'|'published'|'suggestion-rejected'|'review-denied'",
+).describe("The status of the content");
 export const CONTENT_STATUSES = [
   "suggested",
   "queued",
@@ -10,7 +13,7 @@ export const CONTENT_STATUSES = [
   "published",
   "suggestion-rejected",
   "review-denied",
-] as const;
+] as const satisfies (typeof contentStatusSchema.infer)[];
 
 export const articleTypeSchema = type(
   "'listicle'|'comparison'|'how-to'|'case-study'|'faq'|'news'|'best-of-list'|'long-form-opinion'|'whitepaper'|'infographic'|'press-release'|'interview'|'product-update'|'contest-giveaway'|'research-summary'|'event-recap'|'best-practices'|'other'",

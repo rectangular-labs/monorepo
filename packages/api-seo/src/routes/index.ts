@@ -2,7 +2,6 @@ import { lazy } from "@orpc/server";
 
 export const router = {
   project: lazy(() => import("./project")),
-  content: lazy(() => import("./content")),
   // This is named campaigns because somehow using campaign causes the route to collide with the project router
   campaigns: lazy(() => import("./campaign")),
   task: lazy(() => import("./task")),

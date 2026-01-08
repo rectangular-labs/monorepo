@@ -274,10 +274,6 @@ const pullDocument = withOrganizationIdBase
         const forkedBuffer = await forkAndUpdateWorkspaceBlob({
           blob: mainBlob,
           newWorkspaceBlobUri: workspaceBlobUri,
-          projectId: input.projectId,
-          campaignId: input.campaignId,
-          organizationId: context.organization.id,
-          db: context.db,
           workspaceBucket: context.workspaceBucket,
         });
         return forkedBuffer;
@@ -353,10 +349,6 @@ const pushDocument = withOrganizationIdBase
         const forkedBuffer = await forkAndUpdateWorkspaceBlob({
           blob: mainBlob,
           newWorkspaceBlobUri: workspaceBlobUri,
-          projectId: input.projectId,
-          campaignId: input.campaignId,
-          organizationId: context.organization.id,
-          db: context.db,
           workspaceBucket: context.workspaceBucket,
         });
         return forkedBuffer;

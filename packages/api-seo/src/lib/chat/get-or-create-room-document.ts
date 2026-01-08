@@ -1,5 +1,5 @@
 import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
-import { getContentCampaignById } from "@rectangular-labs/db/operations";
+import { getChatById } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import { LoroServerAdaptor } from "loro-adaptors/loro";
 import { CrdtType } from "loro-protocol";
@@ -42,18 +42,8 @@ export async function getOrCreateRoomDocument(
     },
   };
 
-  const campaignResult = await (async () => {
-    if (!context.campaignId) {
-      return ok({
-        workspaceBlobUri: getWorkspaceBlobUri({
-          orgId: context.organizationId,
-          projectId: context.projectId,
-          campaignId: undefined,
-        }),
-      });
-    }
-
-    const campaignResult = await getContentCampaignById({
+  if (context.campaignId) {
+    const campaignResult = await getChatById({
       db: context.db,
       id: context.campaignId,
       projectId: context.projectId,
@@ -62,48 +52,53 @@ export async function getOrCreateRoomDocument(
     if (!campaignResult.ok) {
       return campaignResult;
     }
-    const campaign = campaignResult.value;
-    if (!campaign) {
+    if (!campaignResult.value) {
       return err(new Error(`Campaign (${context.campaignId}) not found`));
     }
-    return ok(campaign);
-  })();
-  if (!campaignResult.ok) {
-    return campaignResult;
   }
-  const campaign = campaignResult.value;
+
+  const mainWorkspaceBlobUri = getWorkspaceBlobUri({
+    orgId: context.organizationId,
+    projectId: context.projectId,
+    campaignId: undefined,
+  });
+  const desiredWorkspaceBlobUri = getWorkspaceBlobUri({
+    orgId: context.organizationId,
+    projectId: context.projectId,
+    campaignId: context.campaignId,
+  });
 
   switch (roomKey) {
     case getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro): {
-      const campaignWorkspaceBlobUri = getWorkspaceBlobUri({
-        orgId: context.organizationId,
-        projectId: context.projectId,
-        campaignId: context.campaignId,
-      });
-      const blob = await context.workspaceBucket.getSnapshot(
-        campaign.workspaceBlobUri,
-      );
-      if (!blob) {
+      const desiredBlob =
+        await context.workspaceBucket.getSnapshot(desiredWorkspaceBlobUri);
+      if (desiredBlob) {
+        newRoomDoc.data = desiredBlob;
+        context.roomDocumentMap.set(roomKey, newRoomDoc);
+        return ok(newRoomDoc);
+      }
+
+      if (!context.campaignId) {
         return err(
-          new Error(`Workspace blob (${campaign.workspaceBlobUri}) not found`),
+          new Error(`Workspace blob (${desiredWorkspaceBlobUri}) not found`),
         );
       }
-      if (campaign.workspaceBlobUri !== campaignWorkspaceBlobUri) {
-        // still on main blob, fork and update
-        const forkedBuffer = await forkAndUpdateWorkspaceBlob({
-          blob,
-          newWorkspaceBlobUri: campaignWorkspaceBlobUri,
-          campaignId: context.campaignId,
-          projectId: context.projectId,
-          organizationId: context.organizationId,
-          db: context.db,
-          workspaceBucket: context.workspaceBucket,
-        });
-        newRoomDoc.data = forkedBuffer;
-        newRoomDoc.lastSaved = Date.now();
-      } else {
-        newRoomDoc.data = blob;
+
+      const mainBlob =
+        await context.workspaceBucket.getSnapshot(mainWorkspaceBlobUri);
+      if (!mainBlob) {
+        return err(
+          new Error(`Workspace blob (${mainWorkspaceBlobUri}) not found`),
+        );
       }
+
+      const forkedBuffer = await forkAndUpdateWorkspaceBlob({
+        blob: mainBlob,
+        newWorkspaceBlobUri: desiredWorkspaceBlobUri,
+        workspaceBucket: context.workspaceBucket,
+      });
+      newRoomDoc.data = forkedBuffer;
+      newRoomDoc.lastSaved = Date.now();
       context.roomDocumentMap.set(roomKey, newRoomDoc);
       return ok(newRoomDoc);
     }

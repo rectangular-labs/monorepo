@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { contentStatusSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import { and, eq, schema } from "@rectangular-labs/db";
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
@@ -8,7 +9,7 @@ const list = withOrganizationIdBase
   .input(
     type({
       projectId: "string",
-      "status?": type("'draft'|'scheduled'|'published'|undefined"),
+      "status?": contentStatusSchema.extract("'scheduled'|'published'"),
     }),
   )
   .output(
@@ -84,7 +85,8 @@ const update = withOrganizationIdBase
         status: input.status,
         scheduledFor: input.scheduledFor,
         publishedAt: input.publishedAt,
-        publishedLinks: input.publishedLinks,
+        destination: input.destination,
+        publishedUrl: input.publishedUrl,
       })
       .where(
         and(
@@ -132,5 +134,5 @@ const remove = withOrganizationIdBase
   });
 
 export default withOrganizationIdBase
-  .prefix("/project/{projectId}/schedule")
+  .prefix("/organization/{organizationId}/project/{projectId}/schedule")
   .router({ list, get, create, update, remove });

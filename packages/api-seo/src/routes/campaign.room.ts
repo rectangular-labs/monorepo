@@ -1,5 +1,5 @@
 import { ORPCError, type } from "@orpc/server";
-import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/core/schemas/content-campaign-parser";
+import { CHAT_DEFAULT_TITLE } from "@rectangular-labs/core/schemas/chat-parser";
 import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { uuidv7 } from "@rectangular-labs/db";
 import { hasToolCall, streamText } from "ai";
@@ -60,7 +60,7 @@ const room = websocketBase
       }
     }
 
-    if (context.campaignTitle === CAMPAIGN_DEFAULT_TITLE && latestMessage) {
+    if (context.campaignTitle === CHAT_DEFAULT_TITLE && latestMessage) {
       console.log("Generating title for campaign", context.campaignId);
       await handleTitleGeneration(latestMessage);
     }
