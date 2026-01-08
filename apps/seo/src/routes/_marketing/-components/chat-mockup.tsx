@@ -52,7 +52,7 @@ export function ChatMockupMessage({
         <MessageContent className="max-w-none">
           <div className="prose prose-sm dark:prose-invert text-sm leading-relaxed">
             {typeof children === "string" ? (
-              <MarkdownContent content={children} id={children.slice(0, 10)} />
+              <MarkdownContent content={children} />
             ) : (
               children
             )}
