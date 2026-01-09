@@ -1,18 +1,20 @@
 import { type } from "arktype";
 
 export const contentStatusSchema = type(
-  "'suggested'|'queued'|'generating'|'generation-failed'|'pending-review'|'scheduled'|'published'|'suggestion-rejected'|'review-denied'",
+  "'suggested'|'queued'|'planning'|'writing'|'reviewing'|'pending-review'|'scheduled'|'published'|'suggestion-rejected'|'review-denied'|'deleted'",
 ).describe("The status of the content");
 export const CONTENT_STATUSES = [
   "suggested",
   "queued",
-  "generating",
-  "generation-failed",
+  "planning",
+  "writing",
+  "reviewing",
   "pending-review",
   "scheduled",
   "published",
   "suggestion-rejected",
   "review-denied",
+  "deleted",
 ] as const satisfies (typeof contentStatusSchema.infer)[];
 
 export const articleTypeSchema = type(

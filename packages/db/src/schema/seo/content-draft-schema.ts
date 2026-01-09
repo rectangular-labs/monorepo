@@ -7,10 +7,11 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import { index, text, uuid } from "drizzle-orm/pg-core";
+import { index, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
+import { seoChat } from "./chat-schema";
 import { seoContent } from "./content-schema";
 import { seoProject } from "./project-schema";
 import { seoTaskRun } from "./task-run-schema";
@@ -35,14 +36,21 @@ export const seoContentDraft = pgSeoTable(
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
+    originatingChatId: uuid().references(() => seoChat.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     createdByUserId: text().references(() => user.id, {
       onDelete: "set null",
       onUpdate: "cascade",
     }),
+    targetReleaseDate: timestamp({ mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
 
     title: text().notNull().default(""),
     description: text().notNull().default(""),
-    slug: text().notNull(),
+    slug: text().notNull().default(""),
     primaryKeyword: text().notNull(),
     // we don't have published / scheduled statuses for drafts since they will be promoted to content-schema when they hit those statuses
     status: text({
@@ -54,6 +62,7 @@ export const seoContentDraft = pgSeoTable(
         "generation-failed",
         "pending-review",
         "review-denied",
+        "deleted",
       ] as const satisfies SeoFileStatus[],
     })
       .notNull()
@@ -80,6 +89,9 @@ export const seoContentDraft = pgSeoTable(
     index("seo_content_branch_org_idx").on(table.organizationId),
     index("seo_content_branch_project_idx").on(table.projectId),
     index("seo_content_branch_base_content_id_idx").on(table.baseContentId),
+    index("seo_content_branch_originating_chat_id_idx").on(
+      table.originatingChatId,
+    ),
     index("seo_content_branch_status_idx").on(table.status),
   ],
 );
@@ -90,6 +102,10 @@ export const seoContentDraftRelations = relations(
     baseContent: one(seoContent, {
       fields: [seoContentDraft.baseContentId],
       references: [seoContent.id],
+    }),
+    originatingChat: one(seoChat, {
+      fields: [seoContentDraft.originatingChatId],
+      references: [seoChat.id],
     }),
     createdByUser: one(user, {
       fields: [seoContentDraft.createdByUserId],
