@@ -46,12 +46,6 @@ export const Route = createRootRouteWithContext<{
         as: "style",
         fetchPriority: "high",
       },
-      {
-        rel: "alternate",
-        type: "application/rss+xml",
-        href: "/blog/rss.xml",
-        title: "Fluid Posts Blog RSS",
-      },
       { rel: "stylesheet", href: appCss },
       {
         rel: "apple-touch-icon",

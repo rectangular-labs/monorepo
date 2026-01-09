@@ -2,14 +2,12 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import { generateSitemap } from "tanstack-router-sitemap";
 import mkcert from "vite-plugin-mkcert";
 import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 import { serverEnv } from "./src/lib/env";
-import { sitemap } from "./src/lib/sitemap";
 
 // validate env
 serverEnv();
@@ -21,7 +19,6 @@ const config = defineConfig({
     }),
     tailwindcss(),
     mkcert(),
-    generateSitemap(sitemap),
     tanstackStart({
       // ! Not supported yet on cloudflare vite plugin
       // prerender: {

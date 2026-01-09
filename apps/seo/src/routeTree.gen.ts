@@ -10,18 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as MarketingRouteRouteImport } from './routes/_marketing/route'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
-import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
-import { Route as MarketingBlogRouteRouteImport } from './routes/_marketing/blog/route'
 import { Route as AuthedOrganizationSlugRouteRouteImport } from './routes/_authed/$organizationSlug/route'
-import { Route as MarketingBlogIndexRouteImport } from './routes/_marketing/blog/index'
 import { Route as AuthedOnboardingIndexRouteImport } from './routes/_authed/onboarding/index'
 import { Route as AuthedOrganizationSlugIndexRouteImport } from './routes/_authed/$organizationSlug/index'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
-import { Route as MarketingBlogRssDotxmlRouteImport } from './routes/_marketing/blog/rss[.]xml'
-import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog/$'
 import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/route'
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/route'
@@ -42,28 +37,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MarketingRouteRoute = MarketingRouteRouteImport.update({
-  id: '/_marketing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthedRouteRoute = AuthedRouteRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MarketingIndexRoute = MarketingIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => MarketingRouteRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSplatRoute = ApiSplatRouteImport.update({
   id: '/api/$',
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingBlogRouteRoute = MarketingBlogRouteRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => MarketingRouteRoute,
 } as any)
 const AuthedOrganizationSlugRouteRoute =
   AuthedOrganizationSlugRouteRouteImport.update({
@@ -71,11 +57,6 @@ const AuthedOrganizationSlugRouteRoute =
     path: '/$organizationSlug',
     getParentRoute: () => AuthedRouteRoute,
   } as any)
-const MarketingBlogIndexRoute = MarketingBlogIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MarketingBlogRouteRoute,
-} as any)
 const AuthedOnboardingIndexRoute = AuthedOnboardingIndexRouteImport.update({
   id: '/onboarding/',
   path: '/onboarding/',
@@ -91,16 +72,6 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: '/api/rpc/$',
   path: '/api/rpc/$',
   getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingBlogRssDotxmlRoute = MarketingBlogRssDotxmlRouteImport.update({
-  id: '/rss.xml',
-  path: '/rss.xml',
-  getParentRoute: () => MarketingBlogRouteRoute,
-} as any)
-const MarketingBlogSplatRoute = MarketingBlogSplatRouteImport.update({
-  id: '/$',
-  path: '/$',
-  getParentRoute: () => MarketingBlogRouteRoute,
 } as any)
 const AuthedOrganizationSlugProjectSlugRouteRoute =
   AuthedOrganizationSlugProjectSlugRouteRouteImport.update({
@@ -192,18 +163,14 @@ const AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
-  '/blog': typeof MarketingBlogRouteRouteWithChildren
   '/api/$': typeof ApiSplatRoute
-  '/': typeof MarketingIndexRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
-  '/blog/$': typeof MarketingBlogSplatRoute
-  '/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
-  '/blog/': typeof MarketingBlogIndexRoute
   '/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
@@ -219,15 +186,12 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug/$projectSlug/campaign/$campaignId/': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/api/$': typeof ApiSplatRoute
-  '/': typeof MarketingIndexRoute
-  '/blog/$': typeof MarketingBlogSplatRoute
-  '/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
-  '/blog': typeof MarketingBlogIndexRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/$organizationSlug/$projectSlug/content/planner': typeof AuthedOrganizationSlugProjectSlugContentPlannerRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
@@ -241,20 +205,15 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteRouteWithChildren
-  '/_marketing': typeof MarketingRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_authed/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
-  '/_marketing/blog': typeof MarketingBlogRouteRouteWithChildren
   '/api/$': typeof ApiSplatRoute
-  '/_marketing/': typeof MarketingIndexRoute
   '/_authed/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
-  '/_marketing/blog/$': typeof MarketingBlogSplatRoute
-  '/_marketing/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_authed/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
-  '/_marketing/blog/': typeof MarketingBlogIndexRoute
   '/_authed/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
@@ -272,18 +231,14 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/login'
     | '/$organizationSlug'
-    | '/blog'
     | '/api/$'
-    | '/'
     | '/$organizationSlug/$projectSlug'
-    | '/blog/$'
-    | '/blog/rss.xml'
     | '/api/rpc/$'
     | '/$organizationSlug/'
     | '/onboarding'
-    | '/blog/'
     | '/$organizationSlug/$projectSlug/content'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug/'
@@ -299,15 +254,12 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/campaign/$campaignId/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/api/$'
-    | '/'
-    | '/blog/$'
-    | '/blog/rss.xml'
     | '/api/rpc/$'
     | '/$organizationSlug'
     | '/onboarding'
-    | '/blog'
     | '/$organizationSlug/$projectSlug'
     | '/$organizationSlug/$projectSlug/content/planner'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
@@ -320,20 +272,15 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/campaign/$campaignId'
   id:
     | '__root__'
+    | '/'
     | '/_authed'
-    | '/_marketing'
     | '/login'
     | '/_authed/$organizationSlug'
-    | '/_marketing/blog'
     | '/api/$'
-    | '/_marketing/'
     | '/_authed/$organizationSlug/$projectSlug'
-    | '/_marketing/blog/$'
-    | '/_marketing/blog/rss.xml'
     | '/api/rpc/$'
     | '/_authed/$organizationSlug/'
     | '/_authed/onboarding/'
-    | '/_marketing/blog/'
     | '/_authed/$organizationSlug/$projectSlug/content'
     | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/$projectSlug/'
@@ -350,8 +297,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
-  MarketingRouteRoute: typeof MarketingRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiSplatRoute: typeof ApiSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
@@ -366,13 +313,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_marketing': {
-      id: '/_marketing'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof MarketingRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authed': {
       id: '/_authed'
       path: ''
@@ -380,12 +320,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_marketing/': {
-      id: '/_marketing/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof MarketingIndexRouteImport
-      parentRoute: typeof MarketingRouteRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/$': {
       id: '/api/$'
@@ -394,26 +334,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_marketing/blog': {
-      id: '/_marketing/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof MarketingBlogRouteRouteImport
-      parentRoute: typeof MarketingRouteRoute
-    }
     '/_authed/$organizationSlug': {
       id: '/_authed/$organizationSlug'
       path: '/$organizationSlug'
       fullPath: '/$organizationSlug'
       preLoaderRoute: typeof AuthedOrganizationSlugRouteRouteImport
       parentRoute: typeof AuthedRouteRoute
-    }
-    '/_marketing/blog/': {
-      id: '/_marketing/blog/'
-      path: '/'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof MarketingBlogIndexRouteImport
-      parentRoute: typeof MarketingBlogRouteRoute
     }
     '/_authed/onboarding/': {
       id: '/_authed/onboarding/'
@@ -435,20 +361,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/rpc/$'
       preLoaderRoute: typeof ApiRpcSplatRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_marketing/blog/rss.xml': {
-      id: '/_marketing/blog/rss.xml'
-      path: '/rss.xml'
-      fullPath: '/blog/rss.xml'
-      preLoaderRoute: typeof MarketingBlogRssDotxmlRouteImport
-      parentRoute: typeof MarketingBlogRouteRoute
-    }
-    '/_marketing/blog/$': {
-      id: '/_marketing/blog/$'
-      path: '/$'
-      fullPath: '/blog/$'
-      preLoaderRoute: typeof MarketingBlogSplatRouteImport
-      parentRoute: typeof MarketingBlogRouteRoute
     }
     '/_authed/$organizationSlug/$projectSlug': {
       id: '/_authed/$organizationSlug/$projectSlug'
@@ -670,38 +582,9 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
   AuthedRouteRouteChildren,
 )
 
-interface MarketingBlogRouteRouteChildren {
-  MarketingBlogSplatRoute: typeof MarketingBlogSplatRoute
-  MarketingBlogRssDotxmlRoute: typeof MarketingBlogRssDotxmlRoute
-  MarketingBlogIndexRoute: typeof MarketingBlogIndexRoute
-}
-
-const MarketingBlogRouteRouteChildren: MarketingBlogRouteRouteChildren = {
-  MarketingBlogSplatRoute: MarketingBlogSplatRoute,
-  MarketingBlogRssDotxmlRoute: MarketingBlogRssDotxmlRoute,
-  MarketingBlogIndexRoute: MarketingBlogIndexRoute,
-}
-
-const MarketingBlogRouteRouteWithChildren =
-  MarketingBlogRouteRoute._addFileChildren(MarketingBlogRouteRouteChildren)
-
-interface MarketingRouteRouteChildren {
-  MarketingBlogRouteRoute: typeof MarketingBlogRouteRouteWithChildren
-  MarketingIndexRoute: typeof MarketingIndexRoute
-}
-
-const MarketingRouteRouteChildren: MarketingRouteRouteChildren = {
-  MarketingBlogRouteRoute: MarketingBlogRouteRouteWithChildren,
-  MarketingIndexRoute: MarketingIndexRoute,
-}
-
-const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
-  MarketingRouteRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
-  MarketingRouteRoute: MarketingRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiSplatRoute: ApiSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
