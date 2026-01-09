@@ -280,6 +280,28 @@ export function FounderTransparency() {
                                         </td>
                                       </tr>
                                       <tr>
+                                        <td className="px-2 py-1.5 font-medium">
+                                          /saas-checklist
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right">
+                                          12.9k
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right font-bold text-emerald-600">
+                                          2.8%
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1.5 font-medium opacity-50">
+                                          /ai-vs-no-code
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right opacity-50">
+                                          9.7k
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right font-bold text-amber-600">
+                                          0.8%
+                                        </td>
+                                      </tr>
+                                      <tr>
                                         <td className="px-2 py-1.5 font-medium opacity-50">
                                           /templates-starter
                                         </td>
