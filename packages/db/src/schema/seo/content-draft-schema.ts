@@ -44,7 +44,7 @@ export const seoContentDraft = pgSeoTable(
     description: text().notNull().default(""),
     slug: text().notNull(),
     primaryKeyword: text().notNull(),
-
+    // we don't have published / scheduled statuses for drafts since they will be promoted to content-schema when they hit those statuses
     status: text({
       enum: [
         "suggested",
@@ -76,6 +76,7 @@ export const seoContentDraft = pgSeoTable(
     ...timestamps,
   },
   (table) => [
+    // note that the lack of unique constraints on the slug is intentional because we can have two drafts of the same content being worked on concurrently.
     index("seo_content_branch_org_idx").on(table.organizationId),
     index("seo_content_branch_project_idx").on(table.projectId),
     index("seo_content_branch_base_content_id_idx").on(table.baseContentId),

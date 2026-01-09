@@ -38,13 +38,13 @@ export const seoContent = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    createdByUserUserId: text().references(() => user.id, {
+    createdByUserId: text().references(() => user.id, {
       onDelete: "set null",
       onUpdate: "cascade",
     }),
 
     version: integer().notNull().default(1),
-    isCurrentPublished: boolean().notNull().default(false),
+    isLiveVersion: boolean().notNull().default(false),
 
     title: text().notNull(),
     description: text().notNull(),
@@ -68,23 +68,23 @@ export const seoContent = pgSeoTable(
     ...timestamps,
   },
   (table) => [
-    unique("seo_content_version_idx").on(
+    unique("seo_content_project_slug_version_unique").on(
       table.projectId,
       table.slug,
       table.version,
     ),
-    unique("seo_content_version_idx").on(
+    unique("seo_content_project_title_version_unique").on(
       table.projectId,
       table.title,
       table.version,
     ),
     index("seo_content_project_idx").on(table.projectId),
     index("seo_content_organization_idx").on(table.organizationId),
-    index("seo_content_created_by_user_idx").on(table.createdByUserUserId),
+    index("seo_content_created_by_user_idx").on(table.createdByUserId),
     index("seo_content_slug_idx").on(table.slug),
     index("seo_content_primary_keyword_idx").on(table.primaryKeyword),
     index("seo_content_version_idx").on(table.version),
-    index("seo_content_is_current_published_idx").on(table.isCurrentPublished),
+    index("seo_content_is_live_version_idx").on(table.isLiveVersion),
   ],
 );
 
@@ -98,7 +98,7 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
     references: [organization.id],
   }),
   createdByUser: one(user, {
-    fields: [seoContent.createdByUserUserId],
+    fields: [seoContent.createdByUserId],
     references: [user.id],
   }),
   outlineTask: one(seoTaskRun, {
