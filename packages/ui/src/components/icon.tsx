@@ -66,6 +66,7 @@ import {
   UserIcon,
   UsersIcon,
   ZapIcon,
+  MousePointer2Icon,
   BarChart3Icon,
   ChartBarIcon,
 } from "lucide-react";
@@ -114,6 +115,7 @@ export const MoreHorizontal = MoreHorizontalIcon;
 export const MoveDownLeft = MoveDownLeftIcon;
 export const MoveRight = MoveRightIcon;
 export const MoveUpRight = MoveUpRightIcon;
+export const MousePointer2 = MousePointer2Icon;
 export const PanelLeft = PanelLeftIcon;
 export const PanelLeftClose = PanelLeftCloseIcon;
 export const PartyPopper = PartyPopperIcon;
