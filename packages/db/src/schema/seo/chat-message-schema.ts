@@ -5,11 +5,11 @@ import { index, jsonb, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
-import { seoContentCampaign } from "./content-campaign-schema";
+import { seoChat } from "./chat-schema";
 import { seoProject } from "./project-schema";
 
-export const seoContentCampaignMessage = pgSeoTable(
-  "content_campaign_message",
+export const seoChatMessage = pgSeoTable(
+  "chat_message",
   {
     id: uuid().primaryKey().$defaultFn(uuidv7),
     organizationId: text()
@@ -24,9 +24,9 @@ export const seoContentCampaignMessage = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    campaignId: uuid()
+    chatId: uuid()
       .notNull()
-      .references(() => seoContentCampaign.id, {
+      .references(() => seoChat.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
@@ -41,28 +41,26 @@ export const seoContentCampaignMessage = pgSeoTable(
     ...timestamps,
   },
   (table) => [
-    index("seo_content_campaign_message_org_project_campaign_id_idx").on(
+    index("seo_chat_message_org_project_chat_id_idx").on(
       table.organizationId,
       table.projectId,
-      table.campaignId,
+      table.chatId,
       table.id,
     ),
   ],
 );
 
-export const seoContentCampaignMessageRelations = relations(
-  seoContentCampaignMessage,
+export const seoChatMessageRelations = relations(
+  seoChatMessage,
   ({ one }) => ({
-    campaign: one(seoContentCampaign, {
-      fields: [seoContentCampaignMessage.campaignId],
-      references: [seoContentCampaign.id],
+    chat: one(seoChat, {
+      fields: [seoChatMessage.chatId],
+      references: [seoChat.id],
     }),
   }),
 );
 
-export const seoContentCampaignMessageInsertSchema = createInsertSchema(
-  seoContentCampaignMessage,
+export const seoChatMessageInsertSchema = createInsertSchema(
+  seoChatMessage,
 ).omit("createdAt", "updatedAt");
-export const seoContentCampaignMessageSelectSchema = createSelectSchema(
-  seoContentCampaignMessage,
-);
+export const seoChatMessageSelectSchema = createSelectSchema(seoChatMessage);

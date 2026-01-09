@@ -1,12 +1,12 @@
 import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
+import type { schema } from "@rectangular-labs/db";
 import { normalizePath } from "@rectangular-labs/loro-file-system";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { CrdtType } from "loro-protocol";
 import { getWebsocketContext } from "../../../context";
-import type { ChatContext } from "../../../types";
-import { getRoomKey } from "../../chat/get-room-key";
+import { getRoomKey } from "../../websocket/get-room-key";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../../workspace/constants";
 import { loroWriter } from "../../workspace/loro-writer";
 import { withLoroTree } from "../../workspace/with-loro-tree";
@@ -38,7 +38,7 @@ export function createSuggestArticlesToolWithMetadata({
   project,
 }: {
   userId: string;
-  project: NonNullable<ChatContext["cache"]["project"]>;
+  project: Pick<typeof schema.seoProject.$inferSelect, "publishingSettings">;
 }) {
   const suggestArticles = tool({
     description:

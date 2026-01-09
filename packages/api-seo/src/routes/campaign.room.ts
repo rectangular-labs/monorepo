@@ -1,17 +1,17 @@
 import { ORPCError, type } from "@orpc/server";
-import { CAMPAIGN_DEFAULT_TITLE } from "@rectangular-labs/core/schemas/content-campaign-parser";
+import { CHAT_DEFAULT_TITLE } from "@rectangular-labs/core/schemas/chat-parser";
 import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { uuidv7 } from "@rectangular-labs/db";
 import { hasToolCall, streamText } from "ai";
 import { CrdtType } from "loro-protocol";
 import { websocketBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
-import { broadcastMessageToRoom } from "../lib/chat/broadcast-to-room";
-import { getRoomKey } from "../lib/chat/get-room-key";
-import { handleTitleGeneration } from "../lib/chat/handle-title-generation";
-import { handleWebsocketMessage } from "../lib/chat/handle-websocket-message";
 import { getGSCPropertyInWebsocketChat } from "../lib/database/gsc-property";
 import { getProjectInWebsocketChat } from "../lib/database/project";
+import { broadcastMessageToRoom } from "../lib/websocket/broadcast-to-room";
+import { getRoomKey } from "../lib/websocket/get-room-key";
+import { handleTitleGeneration } from "../lib/websocket/handle-title-generation";
+import { handleWebsocketMessage } from "../lib/websocket/handle-websocket-message";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
 import type { SeoChatMessage } from "../types";
 
@@ -60,7 +60,7 @@ const room = websocketBase
       }
     }
 
-    if (context.campaignTitle === CAMPAIGN_DEFAULT_TITLE && latestMessage) {
+    if (context.campaignTitle === CHAT_DEFAULT_TITLE && latestMessage) {
       console.log("Generating title for campaign", context.campaignId);
       await handleTitleGeneration(latestMessage);
     }

@@ -1,22 +1,11 @@
 import type { ToolSet } from "ai";
 
-type AnyTool = ToolSet[string];
 export interface AgentToolDefinition {
   toolName: string;
   toolDescription: string;
   toolInstruction: string;
   callDirect?: boolean;
-  tool: AnyTool;
-}
-
-export function toolDefinitionsToToolSet(
-  definitions: readonly AgentToolDefinition[],
-): ToolSet {
-  const tools: Record<string, AnyTool> = {};
-  for (const def of definitions) {
-    tools[def.toolName] = def.tool;
-  }
-  return tools;
+  tool: ToolSet[string];
 }
 
 export function formatToolSkillsSection(

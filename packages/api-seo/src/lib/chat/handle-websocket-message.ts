@@ -1,4 +1,4 @@
-import { createContentCampaignMessage } from "@rectangular-labs/db/operations";
+import { createChatMessage } from "@rectangular-labs/db/operations";
 import { err, ok } from "@rectangular-labs/result";
 import { getWebsocketContext } from "../../context";
 import type { SeoChatMessage } from "../../types";
@@ -15,13 +15,13 @@ export async function handleWebsocketMessage({
 }) {
   const context = getWebsocketContext();
 
-  const messageResult = await createContentCampaignMessage({
+  const messageResult = await createChatMessage({
     db: context.db,
     value: {
       ...(message.id ? { id: message.id } : {}),
       organizationId: context.organizationId,
       projectId: context.projectId,
-      campaignId: context.campaignId,
+      chatId: context.campaignId,
       userId,
       message: message.parts,
       source: message.role,

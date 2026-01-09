@@ -9,9 +9,9 @@ import { CrdtType } from "loro-protocol";
 import { withOrganizationIdBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
 import { createWriterAgent } from "../lib/ai/writer-agent";
-import { getRoomKey } from "../lib/chat/get-room-key";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { getRoomKey } from "../lib/websocket/get-room-key";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
 import type { ChatContext, InitialContext, SeoChatMessage } from "../types";
 
