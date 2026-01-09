@@ -85,7 +85,7 @@ const posts = defineCollection({
 
 const seoPosts = defineCollection({
   name: "seoPosts",
-  directory: "../../apps/seo/content",
+  directory: "../../apps/seo-www/content",
   include: "**/*.mdx",
   schema: PostSchema,
   transform: (document, context) => mdxTransformer(document, context),
@@ -110,7 +110,7 @@ const postMetas = defineCollection({
 
 const seoPostMetas = defineCollection({
   name: "seoPostMetas",
-  directory: "../../apps/seo/content",
+  directory: "../../apps/seo-www/content",
   include: "**/meta.json",
   parser: "json",
   schema: MetaSchema,

@@ -1,5 +1,5 @@
 {
-  "name": "www",
+  "name": "seo-www",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -21,8 +21,6 @@
     "cf-typegen": "wrangler types --env-interface Env"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.4.0",
     "@rectangular-labs/content": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
@@ -36,7 +34,7 @@
     "motion": "^12.23.24",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "three": "^0.181.2"
+    "tanstack-router-sitemap": "^1.0.13"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.15.2",
@@ -47,7 +45,6 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@types/three": "^0.181.0",
     "@vitejs/plugin-react": "^5.1.1",
     "jiti": "^2.6.1",
     "jsdom": "^26.1.0",
