@@ -11,9 +11,9 @@ import {
   UpdateErrorCode,
 } from "loro-protocol";
 import { getWebsocketContext } from "../context";
-import { broadcastLoroToRoom } from "../lib/chat/broadcast-to-room";
-import { getOrCreateRoomDocument } from "../lib/chat/get-or-create-room-document";
-import { replyToSender } from "../lib/chat/reply-to-sender";
+import { broadcastLoroToRoom } from "../lib/websocket/broadcast-to-room";
+import { getOrCreateRoomDocument } from "../lib/websocket/get-or-create-room-document";
+import { replyToSender } from "../lib/websocket/reply-to-sender";
 import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
 
 export async function handleLoroMessage({

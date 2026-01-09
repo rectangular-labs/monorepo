@@ -1,7 +1,7 @@
 import type { LoroDocMapping } from "@rectangular-labs/core/loro-file-system";
 import { LoroDoc } from "loro-crdt";
 import { CrdtType } from "loro-protocol";
-import { getOrCreateRoomDocument } from "../chat/get-or-create-room-document";
+import { getOrCreateRoomDocument } from "../websocket/get-or-create-room-document";
 import { WORKSPACE_CONTENT_ROOM_ID } from "./constants";
 
 export async function withLoroTree<TResult>({

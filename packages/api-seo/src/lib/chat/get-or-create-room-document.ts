@@ -53,7 +53,7 @@ export async function getOrCreateRoomDocument(
       return campaignResult;
     }
     if (!campaignResult.value) {
-      return err(new Error(`Campaign (${context.campaignId}) not found`));
+      return err(new Error(`Chat (${context.campaignId}) not found`));
     }
   }
 
@@ -70,8 +70,9 @@ export async function getOrCreateRoomDocument(
 
   switch (roomKey) {
     case getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro): {
-      const desiredBlob =
-        await context.workspaceBucket.getSnapshot(desiredWorkspaceBlobUri);
+      const desiredBlob = await context.workspaceBucket.getSnapshot(
+        desiredWorkspaceBlobUri,
+      );
       if (desiredBlob) {
         newRoomDoc.data = desiredBlob;
         context.roomDocumentMap.set(roomKey, newRoomDoc);
