@@ -17,43 +17,43 @@ export function Strategy() {
 
   const actions = [
     {
-      id: "win",
+      id: "cta",
       icon: Sparkles,
       color: "emerald",
-      title: "CTR Fix Sprint: 'What Is an AI App Builder?'",
-      summary: "High impressions but low CTR. Quick win via snippet upgrade.",
-      details: [
-        "SEO Title: Update to 'AI App Builder: Build Apps From Plain English (2026)'.",
-        "Meta: Emphasize outcome + solopreneur audience to win the click.",
-        "Snippet: Add FAQ schema ('Is it secure?', 'Stripe integration?') to expand real estate.",
-        "Impact: Projected +20-40% CTR uplift if current Page 1 position holds.",
-      ],
+      title: "Fixing CTAs in published articles",
+      summary: "High impressions but low conversion path engagement.",
+      issue:
+        "Current articles rank well but use generic 'Contact Us' buttons, resulting in a 0.5% lead conversion rate.",
+      actionable:
+        "Implement context-specific CTAs (e.g., 'Download MVP Checklist') mapped to the reader's decision stage.",
+      impact:
+        "Projected 3x increase in lead capture without requiring new traffic or higher rankings.",
     },
     {
-      id: "gap",
+      id: "mvp",
       icon: Target,
       color: "blue",
-      title: "Double Down: /resources/ai-mvp/",
-      summary: "Our 'MVP Build' cluster is winning. Expand to own the topic.",
-      details: [
-        "Pillar: /resources/ai-mvp/build-an-mvp-with-ai/",
-        "Expansion: Launch 'MVP Cost to Build' and 'Weeks vs Months Timeline' children.",
-        "Linking: Tight internal interlinking to establish absolute topical authority.",
-        "Logic: Capture the follow-up intent of readers who liked the first MVP guide.",
-      ],
+      title: "Double down on MVP building cluster",
+      summary: "Topical authority established; high CTR on parent pillar.",
+      issue:
+        "The '/resources/ai-mvp/' pillar is over-performing, but lacks depth in technical child pages to keep users on-site.",
+      actionable:
+        "Launch 4 new child articles covering 'Cost', 'Tech Stack', and 'Timeline' to own the cluster end-to-end.",
+      impact:
+        "Establish absolute topical authority, making it harder for competitors to displace our Page 1 positions.",
     },
     {
-      id: "fix",
+      id: "internal",
       icon: Zap,
       color: "rose",
-      title: "New Cluster: 'Internal Tools for SMB'",
-      summary: "Targets automation seekers. High ROI leads for Quantum Byte.",
-      details: [
-        "Focus: 'Client Onboarding Automation' and 'AI Invoicing Workflows'.",
-        "Commercial: Introduce Quantum Byte as the practical build partner.",
-        "Intent: Natural bridge between 'AI can build apps' and actual business value.",
-        "Probability: High intent, low SERP competition for specific SMB workflows.",
-      ],
+      title: "New Cluster: internal tools for SMBs",
+      summary: "Identified gap in low-competition, high-ACV keywords.",
+      issue:
+        "Competitors are ignoring small business internal automation queries like 'custom inventory tracker for SMB'.",
+      actionable:
+        "Create a new cluster targeting 'Workflow Automation' and 'Internal Dashboards' for service businesses.",
+      impact:
+        "Capture high-intent leads who are specifically looking for build partners, leading to higher quality sales calls.",
     },
   ];
 
@@ -62,8 +62,10 @@ export function Strategy() {
       <div className="mx-auto w-full space-y-12 px-4 md:px-12">
         <div className="mx-auto max-w-4xl space-y-6 text-center">
           <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
-            Always Ready with the <br />
-            <span className="font-semibold text-primary">Next Win</span>
+            Surfacing 3 high-priority actions for <br />
+            <span className="font-semibold text-primary">
+              aiappbuilder.example
+            </span>
           </h2>
           <p className="text-muted-foreground text-xl leading-relaxed">
             Fluid Posts is always working ahead of you — surfacing gaps to fill,
@@ -77,7 +79,7 @@ export function Strategy() {
               <ChatMockupMessage from="assistant" delay={0.5}>
                 <div className="space-y-6">
                   <p className="text-sm">
-                    I've surfaced 3 high-priority actions for{" "}
+                    Surfacing 3 high-priority actions for{" "}
                     <strong>aiappbuilder.example</strong>:
                   </p>
                   <div className="grid gap-3">
@@ -134,23 +136,48 @@ export function Strategy() {
                               exit={{ height: 0, opacity: 0 }}
                               className="overflow-hidden"
                             >
-                              <div className="mt-4 space-y-2 border-border/50 border-t pt-4">
-                                {act.details.map((detail) => (
-                                  <div
-                                    key={detail}
-                                    className="flex items-start gap-2 text-[10px]"
-                                  >
-                                    <div
-                                      className={cn(
-                                        "mt-1.5 h-1 w-1 shrink-0 rounded-full",
-                                        `bg-${act.color}-500`,
-                                      )}
-                                    />
-                                    <span className="text-muted-foreground leading-relaxed">
-                                      {detail}
-                                    </span>
+                              <div className="mt-4 space-y-4 border-border/50 border-t pt-4 text-[10px]">
+                                <div className="space-y-3">
+                                  <div className="space-y-1">
+                                    <p className="font-bold text-[8px] text-primary uppercase tracking-widest">
+                                      i) Issue / Opportunity
+                                    </p>
+                                    <p className="text-muted-foreground leading-relaxed">
+                                      {(act as any).issue}
+                                    </p>
                                   </div>
-                                ))}
+                                  <div className="space-y-1">
+                                    <p className="font-bold text-[8px] text-primary uppercase tracking-widest">
+                                      ii) Suggested Actionable
+                                    </p>
+                                    <p className="text-muted-foreground leading-relaxed">
+                                      {(act as any).actionable}
+                                    </p>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="font-bold text-[8px] text-primary uppercase tracking-widest">
+                                      iii) Impact
+                                    </p>
+                                    <p className="font-medium text-muted-foreground leading-relaxed">
+                                      {(act as any).impact}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex gap-2 pt-2">
+                                  <button
+                                    type="button"
+                                    className="h-8 flex-1 rounded bg-emerald-600 font-bold text-[10px] text-white transition-colors hover:bg-emerald-700"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="h-8 flex-1 rounded border border-border bg-background font-bold text-[10px] transition-colors hover:bg-muted"
+                                  >
+                                    Alter
+                                  </button>
+                                </div>
                               </div>
                             </motion.div>
                           )}
@@ -159,7 +186,8 @@ export function Strategy() {
                     ))}
                   </div>
                   <p className="border-primary/20 border-l pl-2 text-[10px] text-muted-foreground italic">
-                    Click a win to see the detailed stats and reasoning.
+                    Click a win to see the detailed justifications and take
+                    action.
                   </p>
                 </div>
               </ChatMockupMessage>

@@ -91,78 +91,85 @@ export function Writer() {
                           className="overflow-hidden"
                         >
                           <div className="mt-4 space-y-4 border-border/50 border-t pt-4">
-                            <div className="max-h-[300px] overflow-y-auto rounded-lg border border-border/50 bg-background p-4 text-left shadow-inner">
-                              <div className="mb-4 space-y-1">
-                                <p className="font-bold text-[10px] text-primary uppercase tracking-tighter">
-                                  Target Intent: Commercial + Informational
+                            <div className="max-h-[400px] overflow-y-auto rounded-lg border border-border/50 bg-background p-6 text-left shadow-inner">
+                              <div className="prose prose-sm max-w-none text-[11px] text-muted-foreground leading-relaxed">
+                                <p>
+                                  In accounts payable, one small slip can turn
+                                  into a very real cash leak. A duplicate
+                                  invoice comes in, it looks “close enough,” and
+                                  it gets paid. Then it happens again next week.
+                                  Rather than striving for a perfect process
+                                  immediately, implementing a system that
+                                  catches expensive mistakes at the final stage
+                                  is ideal, before money leaves your account.
                                 </p>
-                                <h4 className="font-bold text-sm">
-                                  AI App Builder for Small Business: What It Is,
-                                  What It Can Build, and How to Choose
-                                </h4>
-                              </div>
-
-                              <p className="mb-3 text-[10px] text-muted-foreground italic leading-relaxed">
-                                Small businesses don't fail because they lack
-                                ideas — they stall because building software
-                                used to require a big budget... An AI app
-                                builder changes that by letting you describe
-                                what you want in plain English.
-                              </p>
-
-                              <div className="mb-4 space-y-2">
-                                <div className="rounded border border-muted-foreground/10 bg-muted/20 p-2 text-[9px]">
-                                  <p className="mb-1 font-bold">
-                                    H2: What small businesses build first
-                                    (high-ROI examples)
-                                  </p>
-                                  <ul className="list-inside list-disc opacity-70">
-                                    <li>
-                                      Client onboarding + forms + approvals
-                                    </li>
-                                    <li>
-                                      Lightweight CRM, quotes, and invoicing
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-
-                              <div className="mb-4 space-y-2">
-                                <p className="font-bold text-[10px]">
-                                  FAQ block (Snippet Targeting)
+                                <p>
+                                  Industry estimates put duplicate payments at
+                                  roughly{" "}
+                                  <a
+                                    href="https://www.stampli.com/blog/ap-automation/is-your-duplicate-invoice-detection-duplicitous/"
+                                    className="text-primary underline"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    0.1% to 0.05%
+                                  </a>{" "}
+                                  of annual spend, which climbs fast as your
+                                  vendor count and invoice volume grows. The
+                                  good news: modern workflows and AI-driven
+                                  finance solutions can shift you from “find
+                                  errors in an audit later” to “block them in
+                                  real time.”
                                 </p>
-                                <div className="space-y-2 rounded border border-emerald-500/10 bg-emerald-500/[0.02] p-2 text-[9px]">
-                                  <p className="font-bold text-emerald-700">
-                                    Q: Can an AI app builder connect to Stripe?
-                                  </p>
-                                  <p className="text-muted-foreground italic">
-                                    A: Yes for common integrations—confirm
-                                    exactly which systems you need and test a
-                                    small workflow first.
-                                  </p>
-                                </div>
+                                <p>
+                                  This guide walks you through a practical,
+                                  step-by-step setup for duplicate invoice
+                                  detection. You can implement the early steps
+                                  in days, then level up with AI when you are
+                                  ready.
+                                </p>
+
+                                <h2 className="mt-6 mb-2 font-bold text-foreground text-sm">
+                                  What is Duplicate Invoice Detection and Why It
+                                  Matters
+                                </h2>
+                                <p>
+                                  Duplicate invoice detection is the process of
+                                  spotting invoices that represent the same
+                                  underlying charge, before you approve and pay
+                                  them.
+                                </p>
+                                <p>There are two terms people mix up:</p>
+                                <ul className="list-disc space-y-2 pl-4">
+                                  <li>
+                                    <strong>Duplicate invoice</strong>: Two
+                                    documents that refer to one transaction.
+                                    This can be accidental (vendor re-sends) or
+                                    intentional (fraud). It can also be a “near
+                                    duplicate” where fields differ slightly.
+                                  </li>
+                                  <li>
+                                    <strong>Duplicate payment</strong>: The
+                                    money actually leaves twice. This is the
+                                    damage you are trying to prevent.
+                                  </li>
+                                </ul>
+                                <p className="mt-4 opacity-50">...</p>
                               </div>
 
-                              <div className="flex items-center gap-2 rounded border border-emerald-100 bg-emerald-50 p-2">
-                                <Check className="h-2.5 w-2.5 text-emerald-600" />
-                                <span className="font-medium text-[9px] text-emerald-700 italic">
-                                  Conversion CTA Applied: "Describe your app in
-                                  5 sentences → get a build plan"
-                                </span>
+                              <div className="mt-6 flex items-center justify-between border-border border-t pt-4">
+                                <p className="text-[9px] text-muted-foreground">
+                                  Structure: Answer-First | SEO Optimized |
+                                  Cluster Interlinked
+                                </p>
+                                <button
+                                  type="button"
+                                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-bold text-[10px] text-white transition-colors hover:bg-primary/90"
+                                >
+                                  View Full Article{" "}
+                                  <ExternalLink className="h-3 w-3" />
+                                </button>
                               </div>
-                            </div>
-                            <div className="flex items-center justify-between gap-4">
-                              <p className="text-[8px] text-muted-foreground">
-                                Structure: Answer-First | FAQ Schema |
-                                Interlinked Cluster
-                              </p>
-                              <button
-                                type="button"
-                                className="flex items-center gap-1 font-bold text-[8px] text-primary hover:underline"
-                              >
-                                Open in Dashboard{" "}
-                                <ExternalLink className="h-2 w-2" />
-                              </button>
                             </div>
                           </div>
                         </motion.div>
