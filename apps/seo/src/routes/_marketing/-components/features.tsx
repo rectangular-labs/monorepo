@@ -1,84 +1,53 @@
-import { User } from "@rectangular-labs/ui/components/icon";
-import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 
-export const Feature = () => (
-  <Section id="features">
-    <div className="flex flex-col gap-10">
-      <div className="flex flex-col items-start gap-4">
-        <div>
-          <Badge>What it does</Badge>
-        </div>
-        <div className="flex flex-col gap-2">
-          <h2 className="max-w-xl text-left font-regular text-3xl tracking-tighter md:text-5xl">
-            End-to-end SEO that ships itself
+const features = [
+  {
+    title: "Strategy-aware chat",
+    body: "Connected to Google Search Console and keyword data so the workflow understands real demand before it writes.",
+  },
+  {
+    title: "Article planning & writing",
+    body: "Aligns every brief with your intent, audience, and priority so the drafts feel like yours from the first pass.",
+  },
+  {
+    title: "Direct publishing",
+    body: "Publishes straight to your CMS with no manual handoffs and no missed approvals.",
+  },
+];
+
+export function Features() {
+  return (
+    <Section className="border-border border-t">
+      <div className="mx-auto max-w-6xl space-y-10">
+        <div className="space-y-2">
+          <p className="text-muted-foreground text-xs uppercase tracking-[0.4em]">
+            Everything You Need, Nothing You Don’t
+          </p>
+          <h2 className="font-regular text-3xl text-foreground sm:text-4xl">
+            One workflow. End to end.
           </h2>
-          <p className="max-w-xl text-left text-lg text-muted-foreground leading-relaxed tracking-tight lg:max-w-lg">
-            Onboard once. Your AI SEO employee understands your site, plans by
-            intent, forecasts ranges, and schedules to ship—automatically.
+          <p className="max-w-2xl text-lg text-muted-foreground">
+            Fluid Posts keeps strategy, planning, writing, and publishing in a
+            single flow so you never feel like you are ping-ponging between
+            tools.
           </p>
         </div>
-      </div>
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="flex aspect-square h-full flex-col justify-between rounded-md bg-muted p-6 lg:col-span-2 lg:aspect-auto">
-          <User className="h-8 w-8 stroke-1" />
-          <div className="flex flex-col">
-            <h3 className="text-xl tracking-tight">Campaign briefs</h3>
-            <p className="max-w-xs text-base text-muted-foreground">
-              Ready-to-write briefs with outlines, keywords, internal links, and
-              intent notes.
-            </p>
-          </div>
-        </div>
-        <div className="flex aspect-square flex-col justify-between rounded-md bg-muted p-6">
-          <User className="h-8 w-8 stroke-1" />
-          <div className="flex flex-col">
-            <h3 className="text-xl tracking-tight">Keyword clusters</h3>
-            <p className="max-w-xs text-base text-muted-foreground">
-              Opportunity mapping by user intent and difficulty across the
-              funnel.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex aspect-square flex-col justify-between rounded-md bg-muted p-6">
-          <User className="h-8 w-8 stroke-1" />
-          <div className="flex flex-col">
-            <h3 className="text-xl tracking-tight">Forecasts</h3>
-            <p className="max-w-xs text-base text-muted-foreground">
-              Time-to-rank and traffic lift ranges with confidence bands.
-            </p>
-          </div>
-        </div>
-        <div className="flex aspect-square h-full flex-col justify-between rounded-md bg-muted p-6 lg:col-span-2 lg:aspect-auto">
-          <User className="h-8 w-8 stroke-1" />
-          <div className="flex flex-col">
-            <h3 className="text-xl tracking-tight">Content calendar</h3>
-            <p className="max-w-xs text-base text-muted-foreground">
-              Auto-scheduling with reminders, so campaigns actually ship on
-              time.
-            </p>
-          </div>
-        </div>
-        <div className="flex aspect-square flex-col justify-between rounded-md bg-muted p-6">
-          <User className="h-8 w-8 stroke-1" />
-          <div className="flex flex-col">
-            <h3 className="text-xl tracking-tight">Reporting</h3>
-            <p className="max-w-xs text-base text-muted-foreground">
-              Campaign-level metrics tied to intent and keyword targets.
-            </p>
-          </div>
-        </div>
-        <div className="flex aspect-square flex-col justify-between rounded-md bg-muted p-6">
-          <User className="h-8 w-8 stroke-1" />
-          <div className="flex flex-col">
-            <h3 className="text-xl tracking-tight">Integrations</h3>
-            <p className="max-w-xs text-base text-muted-foreground">
-              CMS, Search Console, and Analytics to keep everything in sync.
-            </p>
-          </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => (
+            <article
+              key={feature.title}
+              className="rounded-3xl border border-border/40 bg-muted/40 p-6 transition hover:border-primary/70"
+            >
+              <h3 className="font-semibold text-foreground text-xl">
+                {feature.title}
+              </h3>
+              <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
+                {feature.body}
+              </p>
+            </article>
+          ))}
         </div>
       </div>
-    </div>
-  </Section>
-);
+    </Section>
+  );
+}

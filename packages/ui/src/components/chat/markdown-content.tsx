@@ -1,6 +1,5 @@
-import { marked } from "marked";
 import type * as React from "react";
-import { isValidElement, memo, Suspense, useMemo } from "react";
+import { memo, Suspense, isValidElement } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "../../utils/cn";
@@ -271,48 +270,13 @@ const components: Partial<Components> = {
   pre: ({ children }) => <>{children}</>,
 };
 
-function parseMarkdownIntoBlocks(markdown: string): string[] {
-  if (!markdown) {
-    return [];
-  }
-  const tokens = marked.lexer(markdown);
-  return tokens.map((token) => token.raw);
-}
-
-const MemoizedMarkdownBlock = memo(
-  ({ content }: { content: string }) => {
+export const MarkdownContent = memo(
+  ({ content }: { content: string; id?: string }) => {
     return (
       <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
         {content}
       </ReactMarkdown>
     );
-  },
-  (prevProps, nextProps) => {
-    if (prevProps.content !== nextProps.content) {
-      return false;
-    }
-    return true;
-  },
-);
-
-MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
-
-export const MarkdownContent = memo(
-  ({ content, id }: { content: string; id: string }) => {
-    const blocks = useMemo(
-      () => parseMarkdownIntoBlocks(content || ""),
-      [content],
-    );
-
-    return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock
-        content={block}
-        key={`${id}-block_${
-          // biome-ignore lint/suspicious/noArrayIndexKey: Needed for react key
-          index
-        }`}
-      />
-    ));
   },
 );
 

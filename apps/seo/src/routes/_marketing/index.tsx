@@ -1,41 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Benefits } from "./-components/benefits";
-import { Credentials } from "./-components/credentials";
-import { CTA } from "./-components/cta";
-import { FAQ } from "./-components/faq";
-import { Hero } from "./-components/hero";
-import { Stats } from "./-components/stats";
+import { FounderHero } from "./-components/founder-hero";
+import { FounderTransparency } from "./-components/founder-transparency";
+import { FounderStrategist } from "./-components/founder-strategist";
+import { FounderGrowth } from "./-components/founder-growth";
+import { FounderIntervention } from "./-components/founder-intervention";
+import { FounderLongGame } from "./-components/founder-long-game";
+import { FounderCTA } from "./-components/founder-cta";
 
+// Landing page for founders
 export const Route = createFileRoute("/_marketing/")({
   component: App,
-
-  head: () => ({
-    scripts: [
-      {
-        src:
-          "https://assets.apollo.io/micro/website-tracker/tracker.iife.js?nocache=" +
-          Math.random().toString(36).substring(7),
-        async: true,
-        defer: true,
-        onLoad: () =>
-          // biome-ignore lint/suspicious/noExplicitAny: apollo tracking
-          (window as any).trackingFunctions.onLoad({
-            appId: "68e8553db8cc65001148717d",
-          }),
-      },
-    ],
-  }),
 });
 
 function App() {
   return (
-    <div className="bg-background">
-      <Hero />
-      <Benefits />
-      <Credentials />
-      <Stats />
-      <CTA />
-      <FAQ />
-    </div>
+    <>
+      <FounderHero />
+      <FounderTransparency />
+      <FounderStrategist />
+      <FounderGrowth />
+      <FounderIntervention />
+      <FounderLongGame />
+      <FounderCTA />
+    </>
   );
 }
