@@ -4,14 +4,11 @@ import { motion } from "motion/react";
 
 export function Judgement() {
   return (
-    <Section className="border-border border-t bg-background">
-      <div className="mx-auto max-w-6xl gap-16 lg:grid lg:grid-cols-[5fr,7fr] lg:items-center">
+    <Section className="max-w-none border-border border-t bg-background">
+      <div className="mx-auto grid w-full gap-16 px-4 md:px-12 lg:grid lg:grid-cols-[5fr,7fr] lg:items-center">
         <div className="space-y-6">
-          <div className="space-y-2">
-            <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
-              Expert-in-the-loop
-            </p>
-            <h2 className="font-regular text-3xl text-foreground tracking-tight sm:text-4xl lg:text-5xl">
+          <div className="space-y-4">
+            <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
               Limitless output, <br />
               <span className="font-semibold text-primary">
                 anchored by your judgement

@@ -58,13 +58,10 @@ export function Strategy() {
   ];
 
   return (
-    <Section className="border-border border-t bg-background">
-      <div className="mx-auto max-w-6xl space-y-12">
-        <div className="mx-auto max-w-3xl space-y-4 text-center">
-          <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
-            Continuous Momentum
-          </p>
-          <h2 className="font-regular text-3xl text-foreground leading-[1.1] tracking-tight sm:text-4xl lg:text-6xl">
+    <Section className="max-w-none border-border border-t bg-background">
+      <div className="mx-auto w-full space-y-12 px-4 md:px-12">
+        <div className="mx-auto max-w-4xl space-y-6 text-center">
+          <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
             Always Ready with the <br />
             <span className="font-semibold text-primary">Next Win</span>
           </h2>
@@ -81,7 +78,7 @@ export function Strategy() {
                 <div className="space-y-6">
                   <p className="text-sm">
                     I've surfaced 3 high-priority actions for{" "}
-                    <strong>Fluid Posts</strong>:
+                    <strong>aiappbuilder.example</strong>:
                   </p>
                   <div className="grid gap-3">
                     {actions.map((act) => (

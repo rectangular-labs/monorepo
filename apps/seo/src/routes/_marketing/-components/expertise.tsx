@@ -3,45 +3,36 @@ import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import {
-  Sparkles,
+  FileText,
   ArrowRight,
   Target,
   BarChart3,
   Clock,
   Zap,
+  Check,
 } from "@rectangular-labs/ui/components/icon";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 
 export function Expertise() {
   const [showDetail, setShowDetail] = useState(false);
 
   return (
-    <Section className="border-border border-t bg-muted/30">
-      <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-2 lg:items-center">
-        <div className="space-y-8 text-left">
-          <div className="space-y-4">
-            <p className="font-bold text-primary text-xs uppercase tracking-[0.4em]">
-              Strategy First
-            </p>
-            <h2 className="font-regular text-3xl text-foreground leading-tight tracking-tight sm:text-4xl lg:text-6xl">
-              Never start strategy <br />
-              <span className="font-semibold text-primary">
-                from zero again
-              </span>
-            </h2>
-            <p className="text-muted-foreground text-xl leading-relaxed">
-              Fluid Posts analyzes keyword data, studies your industry, and
-              surfaces data-backed strategic directions before you even ask.
-            </p>
-          </div>
-          <div className="space-y-4 border-primary/20 border-l-2 pl-6 text-lg text-muted-foreground italic">
-            "You start from a concrete thesis, ready to be shaped, approved, or
-            challenged."
-          </div>
+    <Section className="max-w-none border-border border-t bg-muted/30">
+      <div className="mx-auto flex w-full flex-col gap-12 px-4 text-center md:px-12">
+        <div className="space-y-6">
+          <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
+            Never start strategy <br />
+            <span className="font-semibold text-primary">from zero again</span>
+          </h2>
+          <p className="mx-auto max-w-3xl text-muted-foreground text-xl leading-relaxed">
+            Fluid Posts analyzes keyword data, studies your industry, and
+            surfaces data-backed strategic directions before you even ask.
+          </p>
         </div>
 
-        <div className="relative">
-          <ChatMockup className="min-h-[450px] shadow-2xl">
+        <div className="relative mx-auto w-full max-w-4xl">
+          <ChatMockup className="min-h-[450px] text-left shadow-2xl">
             <ChatMockupTool
               title="Autonomous Market Analysis"
               output="Analysed 4,500 keywords across 12 competitor domains. Found 3 untapped strategic clusters."
@@ -50,8 +41,8 @@ export function Expertise() {
             <ChatMockupMessage from="assistant" delay={1}>
               <div className="space-y-4">
                 <p className="text-sm">
-                  I've justified a new high-impact strategy for{" "}
-                  <strong>FluidPosts.com</strong>:
+                  Your strategy for <strong>aiappbuilder.example</strong> is
+                  ready for approval:
                 </p>
 
                 <button
@@ -67,10 +58,11 @@ export function Expertise() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <Sparkles className="h-4 w-4" />
+                        <FileText className="h-4 w-4" />
                       </div>
                       <p className="font-bold text-[11px]">
-                        Thesis: "AI Execution Leadership"
+                        Strategy for the week - focus on longer tail keywords
+                        targeting financial automations for smaller businesses
                       </p>
                     </div>
                     <ArrowRight
@@ -96,10 +88,11 @@ export function Expertise() {
                                 <Target className="h-2.5 w-2.5" /> Target
                                 Keywords
                               </p>
-                              <p className="text-muted-foreground">
-                                "Enterprise SEO AI", "Automated Content
-                                Execution", "AI SEO Workflows"
-                              </p>
+                              <div className="space-y-1 text-muted-foreground">
+                                <p>• "transport management system automation"</p>
+                                <p>• "fleet management system automation for small businesses"</p>
+                                <p>• "custom logistics workflows for smb"</p>
+                              </div>
                             </div>
                             <div className="space-y-1">
                               <p className="flex items-center gap-1.5 font-bold text-[8px] text-primary uppercase tracking-widest">
@@ -117,21 +110,22 @@ export function Expertise() {
                               <Zap className="h-2.5 w-2.5" /> Why we win
                             </p>
                             <p className="text-muted-foreground italic leading-relaxed">
-                              Competitors focus on volume. By focusing on
-                              "Execution Logic", we capture high-ACV clients who
-                              value reliability.
+                              Writing a strong pillar article with related
+                              longer-tail keywords will establish our site as an
+                              authority in the area, and will capture informed
+                              potential clients with high intent.
                             </p>
                           </div>
-                          <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/50 p-2">
-                            <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between gap-4 border-border/50 border-t pt-4">
+                            <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-2">
                               <Clock className="h-3 w-3 text-muted-foreground" />
                               <span className="font-medium text-[8px] text-muted-foreground uppercase tracking-tight">
                                 Audit Schedule: 14 Days
                               </span>
                             </div>
-                            <span className="font-bold text-[8px] text-emerald-600 uppercase">
-                              Ready
-                            </span>
+                            <Button className="h-8 bg-emerald-600 px-4 text-[10px] text-white hover:bg-emerald-700">
+                              <Check className="mr-1.5 h-3.5 w-3.5" /> Approve Strategy
+                            </Button>
                           </div>
                         </div>
                       </motion.div>
@@ -139,9 +133,11 @@ export function Expertise() {
                   </AnimatePresence>
                 </button>
 
-                <p className="border-primary/20 border-l pl-2 text-[10px] text-muted-foreground italic">
-                  Click the strategy to see keywords, stats, and expectations.
-                </p>
+                {!showDetail && (
+                  <p className="border-primary/20 border-l pl-2 text-[10px] text-muted-foreground italic">
+                    Click the strategy to see keywords, stats, and expectations.
+                  </p>
+                )}
               </div>
             </ChatMockupMessage>
           </ChatMockup>
@@ -153,5 +149,7 @@ export function Expertise() {
         </div>
       </div>
     </Section>
+  );
+}
   );
 }

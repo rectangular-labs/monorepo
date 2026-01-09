@@ -16,11 +16,11 @@ import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 export const Hero = () => {
   return (
     <div className="relative flex min-h-screen w-full items-center bg-muted/30 lg:min-h-[calc(100vh-70px)]">
-      <Section className="relative z-10 w-full py-20 lg:py-32">
-        <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-[1fr,1.2fr]">
+      <Section className="relative z-10 w-full max-w-none px-4 py-20 md:px-12 lg:py-32">
+        <div className="mx-auto grid w-full items-center gap-16 lg:grid-cols-[1fr,1.2fr]">
           <div className="space-y-8 text-left">
             <div className="space-y-4">
-              <h1 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
+              <h1 className="font-regular text-4xl text-foreground leading-[1.05] tracking-tight sm:text-5xl lg:text-7xl">
                 Move from SEO employee to <br />
                 <span className="font-semibold text-primary">
                   decision-maker.
@@ -52,13 +52,13 @@ export const Hero = () => {
             <ChatMockup className="border-primary/10 bg-background/80 shadow-primary/10 backdrop-blur-2xl">
               <div className="mb-4 flex items-center gap-2 font-bold text-[10px] text-primary uppercase tracking-widest">
                 <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-                Onboarding: Client 'GrowthSaaS'
+                Onboarding: Client 'AIAppBuilder'
               </div>
               <ChatMockupMessage from="assistant" delay={0.5}>
                 Onboarding complete. I've finished crawling{" "}
-                <strong>growthsaas.com</strong> and analysing their competitors.
-                I now have a deep understanding of their business model and
-                current SEO standing.
+                <strong>aiappbuilder.example</strong> and analysing their
+                competitors. I now have a deep understanding of their business
+                model and current SEO standing.
               </ChatMockupMessage>
               <ChatMockupMessage from="assistant" delay={1.5}>
                 I've identified a significant gap in their "AI Integration"

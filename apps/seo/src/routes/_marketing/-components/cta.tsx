@@ -5,14 +5,11 @@ import { MoveRight } from "@rectangular-labs/ui/components/icon";
 
 export function CTA() {
   return (
-    <Section className="border-border border-t bg-primary/5 content-vis-auto">
-      <div className="relative overflow-hidden rounded-3xl border bg-background p-12 text-center shadow-2xl md:p-20">
+    <Section className="max-w-none border-border border-t bg-primary/5 content-vis-auto">
+      <div className="relative mx-auto w-full overflow-hidden rounded-3xl border bg-background p-12 px-4 text-center shadow-2xl md:p-20 md:px-12">
         <div className="absolute top-0 left-1/2 -z-10 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-3xl" />
 
-        <p className="mb-4 font-bold text-primary text-xs uppercase tracking-[0.4em]">
-          Ready to scale?
-        </p>
-        <h2 className="mb-6 font-semibold text-4xl tracking-tight md:text-6xl">
+        <h2 className="mb-6 font-semibold text-4xl leading-[1.1] tracking-tight md:text-7xl">
           Put your expertise to work — <br />
           <span className="text-primary">without the ceiling.</span>
         </h2>

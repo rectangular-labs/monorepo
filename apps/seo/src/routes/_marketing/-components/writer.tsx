@@ -14,13 +14,10 @@ export function Writer() {
   const [showPreview, setShowPreview] = useState(false);
 
   return (
-    <Section className="border-border border-t bg-muted/20">
-      <div className="mx-auto max-w-6xl space-y-12">
-        <div className="mx-auto max-w-3xl space-y-4 text-center">
-          <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
-            Scale Without Drift
-          </p>
-          <h2 className="font-regular text-3xl text-foreground leading-[1.1] tracking-tight sm:text-4xl lg:text-6xl">
+    <Section className="max-w-none border-border border-t bg-muted/20">
+      <div className="mx-auto w-full space-y-12 px-4 md:px-12">
+        <div className="mx-auto max-w-4xl space-y-6 text-center">
+          <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
             Your Writing Team, <br />
             <span className="font-semibold text-primary">
               at Your Fingertips.

@@ -14,6 +14,7 @@ import {
 import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { cn } from "@rectangular-labs/ui/utils/cn";
 
 export function FounderTransparency() {
   const [expandedThesis, setExpandedThesis] = useState(false);

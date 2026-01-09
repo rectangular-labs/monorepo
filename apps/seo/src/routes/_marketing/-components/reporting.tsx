@@ -37,14 +37,11 @@ export function Reporting() {
   ];
 
   return (
-    <Section className="border-border border-t">
-      <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-2 lg:items-center">
+    <Section className="max-w-none border-border border-t">
+      <div className="mx-auto grid w-full gap-16 px-4 md:px-12 lg:grid-cols-2 lg:items-center">
         <div className="space-y-8 text-left">
-          <div className="space-y-4">
-            <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
-              Deep Insights
-            </p>
-            <h2 className="font-regular text-3xl text-foreground leading-tight tracking-tight sm:text-4xl lg:text-6xl">
+          <div className="space-y-6">
+            <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
               Turn SEO reporting into your <br />
               <span className="font-semibold text-primary">
                 unfair advantage.
