@@ -19,7 +19,7 @@ export const seo = ({
     { name: "twitter:creator", content: "@winston_yeo" },
     { name: "twitter:site", content: "@winston_yeo" },
     { name: "og:type", content: "website" },
-    { name: "og:site_name", content: "SEO" },
+    { name: "og:site_name", content: "Fluid Posts" },
     { name: "og:title", content: title },
     { name: "og:description", content: description },
     ...(image

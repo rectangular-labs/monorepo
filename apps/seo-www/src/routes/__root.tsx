@@ -75,7 +75,7 @@ export const Route = createRootRouteWithContext<{
         type: "image/x-icon",
         href: "/favicon.ico",
       },
-      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
+      { rel: "manifest", href: "/site.webmanifest", color: "#ffffff" },
     ],
   }),
   component: RootLayout,
