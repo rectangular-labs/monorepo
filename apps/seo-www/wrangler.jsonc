@@ -28,7 +28,7 @@
     "{env.PULL_REQUEST}": {
       "routes": [
         {
-          "pattern": "{env.PULL_REQUEST}.www.fluidposts.com",
+          "pattern": "www-{env.PULL_REQUEST}.fluidposts.com",
           "custom_domain": true
         }
       ]
