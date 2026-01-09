@@ -50,92 +50,115 @@ export function FounderTransparency() {
 
         <div className="mx-auto max-w-5xl space-y-12">
           {/* Phase 1: Thesis */}
-          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-start">
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.03] p-4">
-                <div className="mb-3 flex items-center gap-2 font-bold text-[10px] text-emerald-600 uppercase tracking-widest">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  Week 1: Strategy Formulation
-                </div>
-                <h3 className="mb-2 font-bold text-foreground text-xl">
-                  Growth Thesis: &quot;Utility-First SEO&quot;
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  FluidPosts.com will win by building 12 &quot;SEO ROI
-                  Calculators&quot; targeting founders directly. Thesis:
-                  Value-exchange beats passive reading for lead conversion.
-                </p>
-              </div>
-
-              <ChatMockup className="border-emerald-500/10 bg-emerald-500/[0.01]">
-                <ChatMockupMessage from="assistant">
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <p className="font-bold text-sm">
-                        Thesis: Topical Authority Leadership
-                      </p>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        We'll win by owning the topic:{" "}
-                        <strong>
-                          AI-assisted custom software for small service
-                          businesses.
-                        </strong>{" "}
-                        We build one parent hub and supporting child pages that
-                        answer the exact questions people search before they
-                        buy.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <div className="rounded-lg bg-emerald-500/5 p-3 text-[11px]">
-                        <p className="mb-2 font-bold text-emerald-700 uppercase tracking-tight">
-                          Suggested Clusters:
-                        </p>
-                        <ul className="space-y-1 text-muted-foreground">
-                          <li>
-                            •{" "}
-                            <span className="text-foreground">
-                              Educational:
-                            </span>{" "}
-                            ai-app-development
-                          </li>
-                          <li>
-                            •{" "}
-                            <span className="text-foreground">Solutions:</span>{" "}
-                            custom ai app solutions for small businesses
-                          </li>
-                          <li>
-                            •{" "}
-                            <span className="text-foreground">Templates:</span>{" "}
-                            custom app templates for service ops
-                          </li>
-                        </ul>
+          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setExpandedThesis(!expandedThesis)}
+                className="group w-full text-left"
+              >
+                <div
+                  className={cn(
+                    "relative overflow-hidden rounded-2xl border p-6 transition-all duration-300",
+                    expandedThesis
+                      ? "border-emerald-500/30 bg-emerald-500/[0.06] shadow-emerald-500/5 shadow-lg"
+                      : "border-emerald-500/20 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.04] hover:shadow-md",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 font-bold text-[10px] text-emerald-600 uppercase tracking-widest">
+                        <BarChart3 className="h-3 w-3" /> Week 1: Strategy
                       </div>
-                      <p className="text-[10px] text-muted-foreground italic">
-                        Why: Interlinked entity coverage (portals, internal
-                        tools, workflow automation) makes Google trust you on
-                        the category.
+                      <h3 className="font-bold text-foreground text-lg">
+                        Growth Thesis: &quot;Topical Authority&quot;
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground">
+                        Own the niche: AI-assisted custom software for service
+                        businesses.
                       </p>
                     </div>
-
-                    <div className="flex items-center justify-between border-emerald-500/10 border-t pt-4">
-                      <p className="text-[10px] text-muted-foreground">
-                        Generating outlines pending approval...
-                      </p>
-                      <Button
-                        size="sm"
-                        className="h-8 bg-emerald-600 px-3 text-[11px] hover:bg-emerald-700"
-                      >
-                        <Check className="mr-1.5 h-3.5 w-3.5" /> Approve
-                        Strategy
-                      </Button>
-                    </div>
+                    <ChevronRight
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-emerald-500 transition-transform duration-300",
+                        expandedThesis
+                          ? "rotate-90"
+                          : "opacity-30 group-hover:opacity-100",
+                      )}
+                    />
                   </div>
-                </ChatMockupMessage>
-              </ChatMockup>
+
+                  <AnimatePresence>
+                    {expandedThesis && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-6 space-y-4 border-emerald-500/10 border-t pt-6">
+                          <ChatMockup className="border-emerald-500/10 bg-background/50 shadow-sm">
+                            <ChatMockupMessage from="assistant">
+                              <div className="space-y-4">
+                                <p className="font-bold text-sm">
+                                  Thesis: Establish Topical Authority
+                                </p>
+                                <p className="text-muted-foreground text-xs leading-relaxed">
+                                  We&apos;ll win by owning the topic:{" "}
+                                  <strong>
+                                    AI-assisted custom software for small
+                                    service businesses.
+                                  </strong>{" "}
+                                  Building one parent hub + supporting child
+                                  pages to answer pre-purchase questions.
+                                </p>
+                                <div className="rounded-lg bg-emerald-500/5 p-3 text-[11px]">
+                                  <p className="mb-2 font-bold text-emerald-700 uppercase tracking-tight">
+                                    Suggested Clusters:
+                                  </p>
+                                  <ul className="space-y-1 text-muted-foreground">
+                                    <li>
+                                      • <strong>Edu:</strong> ai-app-development
+                                    </li>
+                                    <li>
+                                      • <strong>Solutions:</strong> custom ai
+                                      apps for SMBs
+                                    </li>
+                                    <li>
+                                      • <strong>Templates:</strong> service ops
+                                      templates
+                                    </li>
+                                  </ul>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground italic">
+                                  Logic: Consistent entity coverage makes Google
+                                  trust you on the category.
+                                </p>
+                                <div className="flex items-center justify-between border-emerald-500/10 border-t pt-3">
+                                  <span className="text-[10px] text-muted-foreground">
+                                    Awaiting approval...
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    className="h-8 bg-emerald-600 px-3 text-[11px] hover:bg-emerald-700"
+                                  >
+                                    <Check className="mr-1.5 h-3 w-3" /> Approve
+                                    Strategy
+                                  </Button>
+                                </div>
+                              </div>
+                            </ChatMockupMessage>
+                          </ChatMockup>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </button>
             </div>
 
-            <div className="pt-4 md:pt-12">
+            <div className="space-y-6">
               <ul className="grid gap-5">
                 {thesisValues.map((v) => (
                   <li key={v.label} className="group flex items-start gap-4">
@@ -164,111 +187,144 @@ export function FounderTransparency() {
           </div>
 
           {/* Phase 2: Audit */}
-          <div className="grid gap-12 md:grid-cols-[1.2fr,1fr] md:items-start">
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.03] p-4">
-                <div className="mb-3 flex items-center gap-2 font-bold text-[10px] text-amber-600 uppercase tracking-widest">
-                  <FileText className="h-3.5 w-3.5" />
-                  Week 3: The Self-Audit
-                </div>
-                <h3 className="mb-2 font-bold text-foreground text-xl">
-                  Cluster Performance Audit
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  Winner: &quot;Examples&quot; content vs low CTR on
-                  &quot;Comparison&quot; pages.
-                </p>
-              </div>
-
-              <ChatMockup className="border-amber-500/10 bg-amber-500/[0.01]">
-                <ChatMockupMessage from="assistant">
-                  <div className="space-y-4">
-                    <p className="font-bold text-sm">
-                      Audit: First 8 Articles (Last 14 Days)
-                    </p>
-
-                    <div className="overflow-x-auto rounded-lg border border-amber-500/10 bg-background/50">
-                      <table className="w-full text-left text-[10px]">
-                        <thead>
-                          <tr className="border-amber-500/10 border-b bg-amber-500/5 text-amber-800">
-                            <th className="px-3 py-2 font-bold uppercase tracking-tighter">
-                              Slug
-                            </th>
-                            <th className="px-3 py-2 text-right font-bold">
-                              Impr
-                            </th>
-                            <th className="px-3 py-2 text-right font-bold">
-                              CTR
-                            </th>
-                            <th className="px-3 py-2 font-bold">Insight</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-amber-500/5">
-                          <tr>
-                            <td className="px-3 py-2 font-medium">
-                              /internal-tools-examples
-                            </td>
-                            <td className="px-3 py-2 text-right">18.4k</td>
-                            <td className="px-3 py-2 text-right font-bold text-emerald-600">
-                              2.7%
-                            </td>
-                            <td className="px-3 py-2 text-muted-foreground italic">
-                              Winner
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-3 py-2 font-medium">
-                              /ai-vs-no-code
-                            </td>
-                            <td className="px-3 py-2 text-right">9.7k</td>
-                            <td className="px-3 py-2 text-right font-bold text-amber-600">
-                              0.8%
-                            </td>
-                            <td className="px-3 py-2 text-muted-foreground italic">
-                              Low Intent
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-3 py-2 font-medium">
-                              /hvac-portal-builder
-                            </td>
-                            <td className="px-3 py-2 text-right">4.6k</td>
-                            <td className="px-3 py-2 text-right font-bold text-emerald-600">
-                              4.6%
-                            </td>
-                            <td className="px-3 py-2 text-muted-foreground italic">
-                              High Conversion
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="rounded-lg border-amber-500/20 border-l-2 bg-amber-500/5 p-3 text-[11px]">
-                        <p className="mb-1 font-bold text-amber-800">
-                          The Pivot:
-                        </p>
-                        <p className="text-muted-foreground">
-                          &quot;Comparison&quot; pages underperformed (0.8%
-                          CTR). <strong>Audit says:</strong> Templates
-                          won&apos;t lift until they&apos;re positioned as
-                          assets linked from &quot;Example&quot; winners.
-                        </p>
+          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setExpandedAudit(!expandedAudit)}
+                className="group w-full text-left"
+              >
+                <div
+                  className={cn(
+                    "relative overflow-hidden rounded-2xl border p-6 transition-all duration-300",
+                    expandedAudit
+                      ? "border-amber-500/30 bg-amber-500/[0.06] shadow-amber-500/5 shadow-lg"
+                      : "border-amber-500/20 bg-amber-500/[0.02] hover:bg-amber-500/[0.04] hover:shadow-md",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 font-bold text-[10px] text-amber-600 uppercase tracking-widest">
+                        <FileText className="h-3 w-3" /> Week 3: Self-Audit
                       </div>
-                      <div className="flex items-center gap-2 rounded bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700">
-                        <RotateCcw className="h-3.5 w-3.5" />
-                        <span className="font-bold">Updating Thesis:</span>{" "}
-                        Prioritizing &quot;Examples&quot; funnel over
-                        &quot;Definitions&quot;.
-                      </div>
+                      <h3 className="font-bold text-foreground text-lg">
+                        Cluster Performance Audit
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground">
+                        Winner: &quot;Examples&quot; vs underperforming
+                        &quot;Templates&quot;. Pivot detected.
+                      </p>
                     </div>
+                    <ChevronRight
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-amber-500 transition-transform duration-300",
+                        expandedAudit
+                          ? "rotate-90"
+                          : "opacity-30 group-hover:opacity-100",
+                      )}
+                    />
                   </div>
-                </ChatMockupMessage>
-              </ChatMockup>
+
+                  <AnimatePresence>
+                    {expandedAudit && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-6 space-y-4 border-amber-500/10 border-t pt-6">
+                          <ChatMockup className="border-amber-500/10 bg-background/50 shadow-sm">
+                            <ChatMockupMessage from="assistant">
+                              <div className="space-y-4">
+                                <p className="font-bold text-sm">
+                                  Self-Audit: First 8 Articles
+                                </p>
+                                <div className="overflow-hidden rounded-lg border border-amber-500/10 bg-background/50">
+                                  <table className="w-full text-left text-[9px]">
+                                    <thead className="bg-amber-500/5 text-amber-800">
+                                      <tr>
+                                        <th className="px-2 py-1.5 font-bold uppercase">
+                                          Slug
+                                        </th>
+                                        <th className="px-2 py-1.5 text-right font-bold">
+                                          Impr
+                                        </th>
+                                        <th className="px-2 py-1.5 text-right font-bold">
+                                          CTR
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-amber-500/5">
+                                      <tr>
+                                        <td className="px-2 py-1.5 font-medium">
+                                          /internal-tools-examples
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right">
+                                          18.4k
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right font-bold text-emerald-600">
+                                          2.7%
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1.5 font-medium">
+                                          /hvac-portal-builder
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right">
+                                          4.6k
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right font-bold text-emerald-600">
+                                          4.6%
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1.5 font-medium opacity-50">
+                                          /templates-starter
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right opacity-50">
+                                          2.1k
+                                        </td>
+                                        <td className="px-2 py-1.5 text-right font-bold text-amber-600">
+                                          0.9%
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="rounded-lg border-amber-500/20 border-l-2 bg-amber-500/5 p-3 text-[11px]">
+                                    <p className="mb-1 font-bold text-amber-800">
+                                      What didn&apos;t work:
+                                    </p>
+                                    <p className="text-muted-foreground leading-relaxed">
+                                      Templates underperformed because they
+                                      weren&apos;t presented as assets. They
+                                      won&apos;t lift until linked from the
+                                      &quot;Example&quot; winners.
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-2 rounded bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700">
+                                    <RotateCcw className="h-3 w-3" />
+                                    <span className="font-bold">
+                                      The Pivot:
+                                    </span>{" "}
+                                    Funneling winners into asset pages.
+                                  </div>
+                                </div>
+                              </div>
+                            </ChatMockupMessage>
+                          </ChatMockup>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </button>
             </div>
 
-            <div className="pt-4 md:pt-12">
+            <div className="space-y-6">
               <ul className="grid gap-5">
                 {auditValues.map((v) => (
                   <li key={v.label} className="group flex items-start gap-4">
