@@ -41,7 +41,6 @@ export const seoProject = pgSeoTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    workspaceBlobUri: text(),
     ...timestamps,
   },
   (table) => [

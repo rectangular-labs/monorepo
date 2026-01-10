@@ -428,15 +428,6 @@ importers:
       jimp:
         specifier: ^1.6.0
         version: 1.6.0
-      loro-adaptors:
-        specifier: 0.4.0
-        version: 0.4.0(@loro-dev/flock@1.1.1)(loro-crdt@1.10.0)
-      loro-crdt:
-        specifier: ^1.10.0
-        version: 1.10.0
-      loro-protocol:
-        specifier: ^0.2.0
-        version: 0.2.0
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251121.0
@@ -4221,10 +4212,6 @@ packages:
 
   '@lezer/yaml@1.0.3':
     resolution: {integrity: sha512-GuBLekbw9jDBDhGur82nuwkxKQ+a3W5H0GfaAthDXcAu+XdpS43VlnxA9E9hllkpSP5ellRDKjLLj7Lu9Wr6xA==}
-
-  '@loro-dev/flock@1.1.1':
-    resolution: {integrity: sha512-/vlxNuf/fYshkv4hg+MsVLDbTgnRleXQK1BsdPIFBCUJ+MlYwaxJEG6hBWMb0HcQW2z9NUXNAHcRkfzlRa4JVg==}
-    engines: {node: '>=18'}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -10709,21 +10696,6 @@ packages:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
 
-  loro-adaptors@0.4.0:
-    resolution: {integrity: sha512-NstQu7xs55lx1pdTuXlQk+awXRB2jM84CQmk0Q57QYnoGG5jhU5r4IkcmvSt22/K3hlPSE7IGVR5UUKSebM4cA==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      '@loro-dev/flock': ^1.1.1
-      loro-crdt: ^1.9.0
-      yjs: '*'
-    peerDependenciesMeta:
-      '@loro-dev/flock':
-        optional: true
-      loro-crdt:
-        optional: true
-      yjs:
-        optional: true
-
   loro-crdt@1.10.0:
     resolution: {integrity: sha512-Fms27q9IaDANUe5OACQL6qLMhJasMXzjRkyK+NAIiPQXGBK2VAp6C7pAr9fzuKbL71YyDgA4Pv69RGwiScWSPg==}
 
@@ -10738,10 +10710,6 @@ packages:
     resolution: {integrity: sha512-NrWEILkRqXC0G8aM+JymMo5ZaAzJtJNKzMd1Oc0HJwxKwywoCvfnGhYW33kVj+tfNC6AKfbZWmiJCEzDf6SshQ==}
     peerDependencies:
       loro-crdt: ^1.8.0
-
-  loro-protocol@0.2.0:
-    resolution: {integrity: sha512-16FCgPj8A1ZCK8T97O9NWpZHbwJmPbq0WNhE+Nh0IDPxKRNYOi6XbPVfEsnnoe7gZW7X4OEdWERXm1O0W3vhwQ==}
-    engines: {node: '>=18.0.0'}
 
   lower-case-first@1.0.2:
     resolution: {integrity: sha512-UuxaYakO7XeONbKrZf5FEgkantPf5DUqDayzP5VXZrtRPdH86s4kN47I8B3TW10S4QKiE3ziHNf3kRN//okHjA==}
@@ -18218,9 +18186,6 @@ snapshots:
       '@lezer/common': 1.5.0
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.5
-
-  '@loro-dev/flock@1.1.1':
-    optional: true
 
   '@manypkg/find-root@1.1.0':
     dependencies:
@@ -26256,13 +26221,6 @@ snapshots:
     dependencies:
       js-tokens: 4.0.0
 
-  loro-adaptors@0.4.0(@loro-dev/flock@1.1.1)(loro-crdt@1.10.0):
-    dependencies:
-      loro-protocol: 0.2.0
-    optionalDependencies:
-      '@loro-dev/flock': 1.1.1
-      loro-crdt: 1.10.0
-
   loro-crdt@1.10.0: {}
 
   loro-mirror-react@1.1.1(loro-crdt@1.10.0)(loro-mirror@1.1.1(loro-crdt@1.10.0))(react@19.2.3):
@@ -26275,8 +26233,6 @@ snapshots:
     dependencies:
       immer: 10.2.0
       loro-crdt: 1.10.0
-
-  loro-protocol@0.2.0: {}
 
   lower-case-first@1.0.2:
     dependencies:

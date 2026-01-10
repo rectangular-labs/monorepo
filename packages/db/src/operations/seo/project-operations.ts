@@ -132,7 +132,6 @@ export async function getSeoProjectByIdentifierAndOrgId<
         createdAt: true,
         updatedAt: true,
         gscPropertyId: true,
-        workspaceBlobUri: true,
         organizationId: true,
         ...(includeSettings ?? {}),
       },
