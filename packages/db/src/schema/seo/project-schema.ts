@@ -1,4 +1,3 @@
-import type { serpTrafficSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import type {
   businessBackgroundSchema,
   imageSettingsSchema,
@@ -38,7 +37,6 @@ export const seoProject = pgSeoTable(
     imageSettings: jsonb().$type<typeof imageSettingsSchema.infer>(),
     writingSettings: jsonb().$type<typeof writingSettingsSchema.infer>(),
     publishingSettings: jsonb().$type<typeof publishingSettingsSchema.infer>(),
-    serpSnapshot: jsonb().$type<typeof serpTrafficSchema.infer>(),
     gscPropertyId: uuid().references(() => seoGscProperty.id, {
       onDelete: "set null",
       onUpdate: "cascade",

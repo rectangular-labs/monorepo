@@ -1,4 +1,3 @@
-import type { serpTrafficSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import type {
   businessBackgroundSchema,
   imageSettingsSchema,
@@ -74,7 +73,6 @@ export async function getSeoProjectByIdentifierAndOrgId<
   B extends boolean = false,
   I extends boolean = false,
   A extends boolean = false,
-  S extends boolean = false,
   P extends boolean = false,
 >(
   db: DB,
@@ -84,7 +82,6 @@ export async function getSeoProjectByIdentifierAndOrgId<
     businessBackground?: B;
     imageSettings?: I;
     writingSettings?: A;
-    serpSnapshot?: S;
     publishingSettings?: P;
   },
 ): Promise<
@@ -94,7 +91,6 @@ export async function getSeoProjectByIdentifierAndOrgId<
         | "businessBackground"
         | "imageSettings"
         | "writingSettings"
-        | "serpSnapshot"
         | "publishingSettings"
       > &
         (B extends true
@@ -106,13 +102,8 @@ export async function getSeoProjectByIdentifierAndOrgId<
         (A extends true
           ? { writingSettings: typeof writingSettingsSchema.infer | null }
           : Record<string, never>) &
-        (S extends true
-          ? { serpSnapshot: typeof serpTrafficSchema.infer | null }
-          : Record<string, never>) &
         (P extends true
-          ? {
-              publishingSettings: typeof publishingSettingsSchema.infer | null;
-            }
+          ? { publishingSettings: typeof publishingSettingsSchema.infer | null }
           : Record<string, never>))
     | null,
     Error
