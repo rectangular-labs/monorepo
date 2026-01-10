@@ -1,4 +1,4 @@
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,

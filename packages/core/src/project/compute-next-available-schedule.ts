@@ -1,3 +1,4 @@
+import type { SeoFileStatus } from "../schemas/content-parsers";
 import type { publishingSettingsSchema } from "../schemas/project-parsers";
 
 type PublishingCadence = NonNullable<
@@ -41,17 +42,16 @@ function periodKeyUtc(date: Date, period: PublishingCadence["period"]): string {
   throw new Error(`Invalid period: ${period}`);
 }
 
-export type ScheduledItemSnapshot = {
-  status?: string | null;
-  scheduledFor?: string | null;
+export type ContentItemSnapshot = {
+  status: SeoFileStatus;
+  scheduledFor: string | null;
 };
-
 export function computeNextAvailableScheduleIso({
   cadence,
   scheduledItems,
 }: {
   cadence: PublishingCadence;
-  scheduledItems: ScheduledItemSnapshot[];
+  scheduledItems: ContentItemSnapshot[];
 }): string | undefined {
   const { allowedDays, period, frequency } = cadence;
   if (allowedDays.length === 0) return undefined;
@@ -68,9 +68,11 @@ export function computeNextAvailableScheduleIso({
   const usedByDay = new Map<string, number>();
   const usedByPeriod = new Map<string, number>();
 
-  const countableStatuses = new Set<string>([
+  const countableStatuses = new Set<SeoFileStatus>([
     "queued",
-    "generating",
+    "planning",
+    "writing",
+    "reviewing-writing",
     "pending-review",
     "scheduled",
     "published",

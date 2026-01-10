@@ -1,4 +1,4 @@
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
 import { type } from "arktype";
 import {
@@ -58,9 +58,12 @@ export const seoContentDraft = pgSeoTable(
         "suggested",
         "suggestion-rejected",
         "queued",
-        "generating",
-        "generation-failed",
+        "planning",
+        "writing",
+        "reviewing-writing",
         "pending-review",
+        "scheduled",
+        "published",
         "review-denied",
         "deleted",
       ] as const satisfies SeoFileStatus[],
