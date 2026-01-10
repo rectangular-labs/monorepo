@@ -2,18 +2,15 @@ import { ORPCError, os, streamToEventIterator, type } from "@orpc/server";
 import { asyncStorageMiddleware } from "@rectangular-labs/api-core/lib/context-storage";
 import type { Session } from "@rectangular-labs/auth";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
-import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import { type schema, uuidv7 } from "@rectangular-labs/db";
 import { hasToolCall, streamText } from "ai";
-import { CrdtType } from "loro-protocol";
 import { withOrganizationIdBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
 import { createWriterAgent } from "../lib/ai/writer-agent";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
+import { getProjectInChat } from "../lib/database/project";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
-import { getRoomKey } from "../lib/websocket/get-room-key";
-import { WORKSPACE_CONTENT_ROOM_ID } from "../lib/workspace/constants";
-import type { ChatContext, InitialContext, SeoChatMessage } from "../types";
+import type { InitialContext, SeoChatMessage } from "../types";
 
 const chatContextMiddleware = os
   .$context<
@@ -27,7 +24,6 @@ const chatContextMiddleware = os
         organizationId: context.organization.id,
         userId: context.user.id,
         sessionId: context.session.id,
-        roomDocumentMap: new Map(),
         cache: {
           messages: undefined,
           project: undefined,
@@ -37,52 +33,36 @@ const chatContextMiddleware = os
     });
   });
 
-async function persistDirtyWorkspaceSnapshot(context: ChatContext) {
-  const roomDoc = context.roomDocumentMap.get(
-    getRoomKey(WORKSPACE_CONTENT_ROOM_ID, CrdtType.Loro),
-  );
-  if (!roomDoc?.dirty || !roomDoc.descriptor.shouldPersist) return;
-
-  await context.workspaceBucket.setSnapshot(
-    getWorkspaceBlobUri({
-      orgId: context.organizationId,
-      projectId: context.projectId,
-      campaignId: undefined,
-    }),
-    roomDoc.data,
-  );
-  roomDoc.dirty = false;
-}
-
-export const chat = withOrganizationIdBase
-  .route({ method: "POST", path: "/{projectId}/chat" })
+export const sendMessage = withOrganizationIdBase
+  .route({ method: "POST", path: "/sendMessage" })
   .input(
     type<{
-      organizationIdentifier: string;
+      organizationId: string;
       projectId: string;
       currentPage: ProjectChatCurrentPage;
       messages: SeoChatMessage[];
       model?: string;
     }>(),
   )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .use(chatContextMiddleware, (input) => input.projectId)
   // TODO: clean up this hack to reinitialize the context for the chat items. rn  it runs in a double closure
   .use(asyncStorageMiddleware<InitialContext>())
   .handler(async ({ context, input }) => {
-    const project = await context.db.query.seoProject.findFirst({
-      where: (table, { and, eq }) =>
-        and(
-          eq(table.id, input.projectId),
-          eq(table.organizationId, context.organization.id),
-        ),
-      with: {
-        authors: true,
-      },
+    await getProjectInChat;
+    const projectResult = await getProjectInChat({
+      context,
     });
-    if (!project) {
+    if (!projectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Something went wrong loading the project",
+        cause: projectResult.error,
+      });
+    }
+    if (!projectResult.value) {
       throw new ORPCError("NOT_FOUND", { message: "Project not found" });
     }
+    const project = projectResult.value;
 
     const gscProperty = await (async () => {
       if (!project.gscPropertyId) return null;
@@ -101,7 +81,12 @@ export const chat = withOrganizationIdBase
         return createWriterAgent({
           messages: input.messages,
           project,
-          publicImagesBucket: context.publicImagesBucket,
+          context: {
+            db: context.db,
+            organizationId: context.organizationId,
+            projectId: context.projectId,
+            chatId: null,
+          },
           cacheKV: context.cacheKV,
         });
       }
@@ -110,6 +95,12 @@ export const chat = withOrganizationIdBase
         gscProperty: gscProperty ?? undefined,
         project,
         userId: context.user.id,
+        context: {
+          db: context.db,
+          organizationId: context.organizationId,
+          projectId: context.projectId,
+          chatId: null,
+        },
         currentPage: input.currentPage,
         cacheKV: context.cacheKV,
       });
@@ -118,7 +109,7 @@ export const chat = withOrganizationIdBase
     const result = streamText({
       ...agent,
       onError: (error) => {
-        console.error("project.chat error", error);
+        console.error("chat.sendMessage error", error);
       },
       stopWhen: [
         hasToolCall("ask_questions"),
@@ -141,16 +132,6 @@ export const chat = withOrganizationIdBase
             };
           }
           return;
-        },
-        onFinish: async () => {
-          try {
-            await persistDirtyWorkspaceSnapshot(context);
-          } catch (error) {
-            console.error(
-              "project.chat workspace snapshot persist error",
-              error,
-            );
-          }
         },
       }),
     );

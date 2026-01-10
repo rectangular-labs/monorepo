@@ -1,25 +1,16 @@
 import { DurableObject } from "cloudflare:workers";
-import { AsyncLocalStorage } from "node:async_hooks";
-import { createWebSocketRpcHandler } from "@rectangular-labs/api-core/lib/handlers";
-import { decode, type HexString } from "loro-protocol";
 import { createApiContext } from "./context";
 import type { apiEnv } from "./env";
-import { websocketRouter } from "./routes";
-import { handleLoroMessage } from "./routes/campaign.loro";
 import { serverClient } from "./server";
-import type { RoomDocument, UserFragment, WebSocketContext } from "./types";
-
-const webSocketHandler = createWebSocketRpcHandler(websocketRouter);
-const asyncLocalStorage = new AsyncLocalStorage<WebSocketContext>();
 
 interface SessionAttachment {
   userId: string;
   sessionId: string;
   projectId: string;
-  campaignId: string;
+  chatId: string;
   organizationId: string;
   url: string;
-  campaignTitle: string;
+  chatTitle: string;
 }
 
 // Durable Object
@@ -27,13 +18,6 @@ export class WebSocketServer extends DurableObject {
   // Keeps track of all WebSocket connections
   // When the DO hibernates, gets reconstructed in the constructor
   sessions: Map<WebSocket, SessionAttachment>;
-  // Keep track of the loro document for the workspace.
-  // currently this is the content document.
-  roomDocuments: Map<string, RoomDocument>;
-  // keeps track of the fragments for the user when sending large updates.
-  userFragments: Map<WebSocket, Map<HexString, UserFragment>>;
-
-  cache: WebSocketContext["cache"];
 
   constructor(ctx: DurableObjectState, env: ReturnType<typeof apiEnv>) {
     super(ctx, env);
@@ -54,10 +38,6 @@ export class WebSocketServer extends DurableObject {
         this.sessions.set(ws, { ...attachment });
       }
     });
-
-    this.roomDocuments = new Map();
-    this.userFragments = new Map();
-    this.cache = {};
 
     // Sets an application level auto response that does not wake hibernated WebSockets.
     this.ctx.setWebSocketAutoResponse(
@@ -92,30 +72,30 @@ export class WebSocketServer extends DurableObject {
     });
     const serverHandler = serverClient(context);
     const matches = url.pathname.match(
-      /^\/api\/realtime\/organization\/([^/]+)\/project\/([^/]+)\/campaign\/([^/]+)\/room$/,
+      /^\/api\/realtime\/organization\/([^/]+)\/project\/([^/]+)\/chat\/([^/]+)\/room$/,
     );
-    const [_fullMatch, organizationId, projectId, campaignId] = matches ?? [];
-    if (!organizationId || !projectId || !campaignId) {
+    const [_fullMatch, organizationId, projectId, chatId] = matches ?? [];
+    if (!organizationId || !projectId || !chatId) {
       console.error(`Invalid URL ${req.url}`);
       return new Response("Invalid URL", { status: 400 });
     }
 
-    const [{ campaign }, authDetails] = await Promise.all([
-      serverHandler.campaigns
+    const [{ chat }, authDetails] = await Promise.all([
+      serverHandler.chat
         .get({
-          id: campaignId,
+          id: chatId,
           projectId: projectId,
           organizationId: organizationId,
         })
         .catch(() => {
-          // if campaign not found or org invalid, we just return null
-          return { campaign: null };
+          // if chat not found or org invalid, we just return null
+          return { chat: null };
         }),
       serverHandler.auth.session.current(),
     ]);
-    if (!campaign || !authDetails) {
+    if (!chat || !authDetails) {
       console.error(
-        `Unauthorized. Missing campaign or auth details for ${req.url}`,
+        `Unauthorized. Missing chat or auth details for ${req.url}`,
       );
       return new Response("Unauthorized", { status: 401 });
     }
@@ -135,11 +115,11 @@ export class WebSocketServer extends DurableObject {
     const attachment: SessionAttachment = {
       sessionId: authDetails.session.id,
       userId: authDetails.user.id,
-      projectId: campaign.projectId,
-      campaignId: campaign.id,
-      organizationId: campaign.organizationId,
+      projectId: chat.projectId,
+      chatId: chat.id,
+      organizationId: chat.organizationId,
       url: url.toString(),
-      campaignTitle: campaign.title,
+      chatTitle: chat.title,
     };
     // Attach the session ID to the WebSocket connection and serialize it.
     // This is necessary to restore the state of the connection when the Durable Object wakes up.
@@ -154,7 +134,7 @@ export class WebSocketServer extends DurableObject {
     });
   }
 
-  async webSocketMessage(ws: WebSocket, message: ArrayBuffer | string) {
+  webSocketMessage(ws: WebSocket, message: ArrayBuffer | string) {
     // Get the session associated with the WebSocket connection.
     const session = this.sessions.get(ws);
     if (!session) {
@@ -163,46 +143,9 @@ export class WebSocketServer extends DurableObject {
       return;
     }
     console.log("[Websocket Server] received message", message, typeof message);
-    const context = createApiContext({
+    const _context = createApiContext({
       url: new URL(session.url),
     });
-
-    let userFragments = this.userFragments.get(ws);
-    if (!userFragments) {
-      userFragments = new Map();
-      this.userFragments.set(ws, userFragments);
-    }
-    const webSocketContext: WebSocketContext = {
-      allWebSockets: Array.from(this.sessions.keys()),
-      senderWebSocket: ws,
-      userId: session.userId,
-      sessionId: session.sessionId,
-      projectId: session.projectId,
-      campaignId: session.campaignId,
-      campaignTitle: session.campaignTitle,
-      organizationId: session.organizationId,
-      roomDocumentMap: this.roomDocuments,
-      userFragments,
-      updateCampaignTitle: (title: string) => {
-        session.campaignTitle = title;
-      },
-      cache: this.cache,
-      ...context,
-    };
-    if (typeof message === "string") {
-      return await webSocketHandler.message(ws, message, {
-        context: webSocketContext,
-      });
-    }
-
-    // loro messages are binary
-    const uintArray = new Uint8Array(message);
-    const loroMessage = decode(uintArray);
-    await asyncLocalStorage.run(webSocketContext, () =>
-      handleLoroMessage({
-        message: loroMessage,
-      }),
-    );
   }
 
   webSocketClose(
@@ -217,7 +160,7 @@ export class WebSocketServer extends DurableObject {
       return;
     }
     console.info(
-      `[Websocket Server] WebSocket for user ${session.userId} on campaign ${session.campaignId} ${wasClean ? "cleanly" : "abruptly"} closed (${code}): ${reason}`,
+      `[Websocket Server] WebSocket for user ${session.userId} on chat ${session.chatId} ${wasClean ? "cleanly" : "abruptly"} closed (${code}): ${reason}`,
     );
     this.sessions.delete(ws);
     ws.close(code, "Websocket Server is closing WebSocket");

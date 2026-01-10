@@ -8,6 +8,7 @@ import { schema, sql } from "@rectangular-labs/db";
 import {
   createChat,
   deleteChat,
+  getChatById,
   getDefaultChat,
   listChatMessages,
   updateChat,
@@ -17,6 +18,7 @@ import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import type { SeoChatMessage } from "../types";
+import { sendMessage } from "./chat.sendMessage";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -64,56 +66,53 @@ const get = withOrganizationIdBase
   .route({ method: "GET", path: "/{id}" })
   .input(type({ id: "string", projectId: "string", organizationId: "string" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
-  .output(type({ campaign: schema.seoChatSelectSchema }))
+  .output(type({ chat: schema.seoChatSelectSchema }))
   .handler(async ({ context, input }) => {
-    const campaign = await context.db.query.seoChat.findFirst({
-      where: (table, { and, eq }) =>
-        and(
-          eq(table.id, input.id),
-          eq(table.projectId, input.projectId),
-          eq(table.organizationId, context.organization.id),
-        ),
+    const chatResult = await getChatById({
+      db: context.db,
+      id: input.id,
+      projectId: input.projectId,
+      organizationId: context.organization.id,
     });
-    if (!campaign) {
+    if (!chatResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load chat",
+        cause: chatResult.error,
+      });
+    }
+    if (!chatResult.value) {
       throw new ORPCError("NOT_FOUND", { message: "Chat not found" });
     }
-    return { campaign };
+    return { chat: chatResult.value };
   });
 
 const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
-  .input(
-    schema.seoChatInsertSchema.merge(
-      type({ organizationId: "string" }),
-    ),
-  )
+  .input(schema.seoChatInsertSchema.merge(type({ organizationId: "string" })))
   .output(schema.seoChatSelectSchema)
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .handler(async ({ context, input }) => {
-    const existingDefaultCampaignResult = await getDefaultChat({
+    const existingDefaultChatResult = await getDefaultChat({
       db: context.db,
       projectId: input.projectId,
       organizationId: context.session.activeOrganizationId,
       userId: context.user.id,
     });
-    if (!existingDefaultCampaignResult.ok) {
+    if (!existingDefaultChatResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Failed to get default chat",
-        cause: existingDefaultCampaignResult.error,
+        cause: existingDefaultChatResult.error,
       });
     }
-    if (existingDefaultCampaignResult.value) {
-      return existingDefaultCampaignResult.value;
+    if (existingDefaultChatResult.value) {
+      return existingDefaultChatResult.value;
     }
 
-    const createChatResult = await createChat(
-      context.db,
-      {
-        projectId: input.projectId,
-        organizationId: context.organization.id,
-        createdByUserId: context.user.id,
-      },
-    );
+    const createChatResult = await createChat(context.db, {
+      projectId: input.projectId,
+      organizationId: context.organization.id,
+      createdByUserId: context.user.id,
+    });
     if (!createChatResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Failed to create chat",
@@ -126,11 +125,7 @@ const create = withOrganizationIdBase
 
 const update = withOrganizationIdBase
   .route({ method: "PATCH", path: "/{id}" })
-  .input(
-    schema.seoChatUpdateSchema.merge(
-      type({ organizationId: "string" }),
-    ),
-  )
+  .input(schema.seoChatUpdateSchema.merge(type({ organizationId: "string" })))
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .output(schema.seoChatSelectSchema)
   .handler(async ({ context, input }) => {
@@ -243,5 +238,5 @@ const messages = withOrganizationIdBase
   });
 
 export default withOrganizationIdBase
-  .prefix("/organization/{organizationId}/project/{projectId}/campaign")
-  .router({ list, get, create, update, remove, messages });
+  .prefix("/organization/{organizationId}/project/{projectId}/chat")
+  .router({ list, get, create, update, remove, messages, sendMessage });

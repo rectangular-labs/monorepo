@@ -10,7 +10,7 @@ import { createDb } from "@rectangular-labs/db";
 import { apiEnv } from "./env";
 import { createPublicImagesBucket, createWorkspaceBucket } from "./lib/bucket";
 import { createKvStore } from "./lib/kv";
-import type { InitialContext, WebSocketContext } from "./types";
+import type { InitialContext } from "./types";
 import { createWorkflows } from "./workflows";
 
 export const createApiContext = (
@@ -91,9 +91,3 @@ export const withOrganizationIdBase = protectedBase.use(({ context, next }) => {
   });
 });
 export const getContext = getBaseContext<InitialContext>;
-
-export const websocketBase = os
-  .$context<WebSocketContext>()
-  .use(loggerMiddleware)
-  .use(asyncStorageMiddleware<WebSocketContext>());
-export const getWebsocketContext = getBaseContext<WebSocketContext>;
