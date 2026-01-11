@@ -4,11 +4,19 @@ import { normalizeContentSlug } from "./normalize-content-slug";
 describe("normalizeContentSlug", () => {
   it("returns empty for blank or root paths", () => {
     expect(normalizeContentSlug("")).toBe("");
-    expect(normalizeContentSlug(" / ")).toBe("");
+    expect(normalizeContentSlug(" / ")).toBe("/");
+    expect(normalizeContentSlug("/")).toBe("/");
   });
-
-  it("normalizes slashes without touching extensions", () => {
-    expect(normalizeContentSlug(" /foo//bar.md ")).toBe("foo/bar.md");
-    expect(normalizeContentSlug("/foo/bar.MDX")).toBe("foo/bar.MDX");
+  it("returns the same path for a valid path", () => {
+    expect(normalizeContentSlug("/foo/bar")).toBe("/foo/bar");
+    expect(normalizeContentSlug("/foo/bar/")).toBe("/foo/bar");
+    expect(normalizeContentSlug("/foo/bar//")).toBe("/foo/bar");
+    expect(normalizeContentSlug("/foo/bar//baz")).toBe("/foo/bar/baz");
+    expect(normalizeContentSlug("/foo/bar//baz/")).toBe("/foo/bar/baz");
+  });
+  it("removes duplicate slashes", () => {
+    expect(normalizeContentSlug("/foo///bar/")).toBe("/foo/bar");
+    expect(normalizeContentSlug("//foo/bar//")).toBe("/foo/bar");
+    expect(normalizeContentSlug("//foo//bar//baz/")).toBe("/foo/bar/baz");
   });
 });

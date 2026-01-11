@@ -5,7 +5,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
   boolean,
@@ -86,11 +86,11 @@ export const seoContent = pgSeoTable(
     index("seo_content_project_idx").on(table.projectId),
     index("seo_content_organization_idx").on(table.organizationId),
     index("seo_content_created_by_user_idx").on(table.createdByUserId),
-    index("seo_content_slug_idx").on(table.slug),
-    index("seo_content_org_project_slug_live_idx").on(
+    index("seo_content_org_project_slug_live_idx").using(
+      "btree",
       table.organizationId,
       table.projectId,
-      table.slug,
+      sql`${table.slug} text_pattern_ops`,
       table.isLiveVersion,
     ),
     index("seo_content_primary_keyword_idx").on(table.primaryKeyword),

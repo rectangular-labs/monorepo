@@ -6,7 +6,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { index, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
@@ -94,6 +94,13 @@ export const seoContentDraft = pgSeoTable(
       table.projectId,
       table.originatingChatId,
       table.slug,
+    ),
+    index("seo_content_branch_org_project_chat_slug_prefix_idx").using(
+      "btree",
+      table.organizationId,
+      table.projectId,
+      table.originatingChatId,
+      sql`${table.slug} text_pattern_ops`,
     ),
     index("seo_content_branch_org_idx").on(table.organizationId),
     index("seo_content_branch_project_idx").on(table.projectId),

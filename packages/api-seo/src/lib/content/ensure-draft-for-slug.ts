@@ -33,7 +33,7 @@ export async function ensureDraftForSlug(args: {
     organizationId: args.organizationId,
     projectId: args.projectId,
     slug: args.slug,
-    withMarkdownContent: true,
+    withContent: true,
   });
   if (!liveResult.ok) {
     return liveResult;
@@ -57,6 +57,9 @@ export async function ensureDraftForSlug(args: {
       generatedByTaskRunId: live.generatedByTaskRunId,
       articleType: live.articleType,
       contentMarkdown: live.contentMarkdown,
+      // set to now, but really it'll be in the past once the draft eventually gets approved/published. which means it'll go live ASAP.
+      // Makes sense since it's an update to existing content.
+      targetReleaseDate: new Date(),
     });
     if (!draftResult.ok) {
       return draftResult;

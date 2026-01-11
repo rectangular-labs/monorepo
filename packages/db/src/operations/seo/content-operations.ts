@@ -11,20 +11,46 @@ export async function getContentBySlug(args: {
   organizationId: string;
   projectId: string;
   slug: string;
-  withMarkdownContent?: boolean;
+  withContent?: boolean;
 }) {
   return await safe(() =>
     args.db.query.seoContent.findFirst({
-      columns: args.withMarkdownContent
+      columns: args.withContent
         ? undefined
-        : { contentMarkdown: false },
-      where: (table, { and, eq }) =>
+        : { contentMarkdown: false, outline: false, notes: false },
+      where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           eq(table.slug, args.slug),
           eq(table.isLiveVersion, true),
+          isNull(table.deletedAt),
         ),
+    }),
+  );
+}
+
+export async function getContentsBySlug(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  slug: string;
+  withContent?: boolean;
+}) {
+  return await safe(() =>
+    args.db.query.seoContent.findMany({
+      columns: args.withContent
+        ? undefined
+        : { contentMarkdown: false, outline: false, notes: false },
+      where: (table, { and, eq, or, like, isNull }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          or(eq(table.slug, args.slug), like(table.slug, `${args.slug}%`)),
+          eq(table.isLiveVersion, true),
+          isNull(table.deletedAt),
+        ),
+      orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
     }),
   );
 }
@@ -106,17 +132,48 @@ export async function getDraftBySlug(args: {
   projectId: string;
   slug: string;
   originatingChatId?: string | null;
+  withContent?: boolean;
 }) {
   return await safe(() =>
     args.db.query.seoContentDraft.findFirst({
+      columns: args.withContent
+        ? undefined
+        : { contentMarkdown: false, outline: false, notes: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
-          eq(table.slug, args.slug),
           args.originatingChatId
             ? eq(table.originatingChatId, args.originatingChatId)
             : isNull(table.originatingChatId),
+          eq(table.slug, args.slug),
+        ),
+      orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
+    }),
+  );
+}
+
+export async function getDraftsBySlug(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  slug: string;
+  originatingChatId: string | null;
+  withContent?: boolean;
+}) {
+  return await safe(() =>
+    args.db.query.seoContentDraft.findMany({
+      columns: args.withContent
+        ? undefined
+        : { contentMarkdown: false, outline: false, notes: false },
+      where: (table, { and, eq, isNull, or, like }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          args.originatingChatId
+            ? eq(table.originatingChatId, args.originatingChatId)
+            : isNull(table.originatingChatId),
+          or(eq(table.slug, args.slug), like(table.slug, `${args.slug}%`)),
         ),
       orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
     }),

@@ -2,7 +2,7 @@ import { describe, it } from "vitest";
 import {
   analyzeArticleMarkdownForReview,
   repairPublicBucketImageLinks,
-} from "./workflow";
+} from "./review-utils";
 
 describe("analyzeArticleMarkdownForReview", () => {
   it("prints analysis for a sample article", () => {
