@@ -4,7 +4,7 @@ import {
   type FsNodePayload,
   type LoroDocMapping,
   type WriteToFilePublishingContext,
-} from "@rectangular-labs/core/loro-file-system";
+} from "@rectangular-labs/core/project";
 import { getWorkspaceBlobUri } from "@rectangular-labs/core/workspace/get-workspace-blob-uri";
 import {
   createWriteToFile,

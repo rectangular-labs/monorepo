@@ -1,7 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import {

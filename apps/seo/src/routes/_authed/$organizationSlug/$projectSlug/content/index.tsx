@@ -1,7 +1,7 @@
 "use client";
 
 import { toSlug } from "@rectangular-labs/core/format/to-slug";
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   Alert,

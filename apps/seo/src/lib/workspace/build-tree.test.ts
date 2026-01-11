@@ -1,7 +1,7 @@
 import type {
   FsNodePayload,
   LoroDocMapping,
-} from "@rectangular-labs/core/loro-file-system";
+} from "@rectangular-labs/core/project";
 import {
   moveNode,
   removeNodeAtPath,

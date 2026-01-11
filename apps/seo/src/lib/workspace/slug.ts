@@ -1,4 +1,4 @@
-import type { FsNodePayload } from "@rectangular-labs/core/loro-file-system";
+import type { FsNodePayload } from "@rectangular-labs/core/project";
 import {
   moveNode,
   normalizePath,

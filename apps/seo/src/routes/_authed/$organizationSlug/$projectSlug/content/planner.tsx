@@ -1,6 +1,6 @@
 "use client";
 
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
