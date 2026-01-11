@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@rectangular-labs/loro-file-system": "workspace:*",
-    "arktype": "^2.1.27",
-    "loro-crdt": "^1.10.0"
+    "arktype": "^2.1.29",
+    "loro-crdt": "^1.10.4"
   }
 }
