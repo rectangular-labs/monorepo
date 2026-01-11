@@ -1,11 +1,7 @@
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { schema } from "@rectangular-labs/db";
 import { convertToModelMessages, type streamText } from "ai";
-import type {
-  InitialContext,
-  SeoChatMessage,
-  WebSocketContext,
-} from "../../types";
+import type { ChatContext, SeoChatMessage } from "../../types";
 import {
   ARTICLE_TYPE_TO_WRITER_RULE,
   type ArticleType,
@@ -13,9 +9,8 @@ import {
   DEFAULT_USER_INSTRUCTIONS,
 } from "../workspace/workflow.constant";
 import { formatBusinessBackground } from "./format-business-background";
-import { createArticleResearchToolWithMetadata } from "./tools/article-research-tool";
-import { createArticleWritingToolWithMetadata } from "./tools/article-writing-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
+import { createInternalLinksToolWithMetadata } from "./tools/internal-links-tool";
 import { createPlannerToolsWithMetadata } from "./tools/planner-tools";
 import { createSkillTools } from "./tools/skill-tools";
 import {
@@ -82,6 +77,10 @@ ${args.skillsSection}
     : ""
 }
 <writing-requirements>
+- Use the primary keyword naturally in the title, opening paragraph, and key headings.
+- Provide clear, direct answers that AI systems can extract.
+- Use structured formatting (lists/tables) for scannability when helpful.
+- Use semantic variations and LSI keywords where they fit naturally.
 - Follow the outline in outline tags closely; expand each section into helpful, grounded prose.
 - Include 3-5 internal links (use internal_links if outline lacks them).
 - Include 2-4 authoritative external links (use web_search if outline lacks them).
@@ -90,6 +89,7 @@ ${args.skillsSection}
 - Avoid "Introduction" as a section heading
 - Always end with a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion"
 - If a "Frequently Asked Questions" section is present, it must come after the wrap-up section and use the heading "Frequently Asked Questions"
+- Expand abbreviations on first use.
 - Keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (")
 - For images: 
   - Have one hero image which visually represents the topic of the search intent of the user. Objective of the hero image is to have a visual representation of the topic. Avoid images which are purely re-telling the details of the articles, and images that are too data/word heavy.
@@ -131,13 +131,11 @@ ${args.outline ?? "(missing)"}
 export function createWriterAgent({
   messages,
   project,
-  publicImagesBucket,
-  cacheKV,
+  context,
 }: {
   messages: SeoChatMessage[];
-  project: NonNullable<WebSocketContext["cache"]["project"]>;
-  publicImagesBucket: InitialContext["publicImagesBucket"];
-  cacheKV: InitialContext["cacheKV"];
+  project: NonNullable<ChatContext["cache"]["project"]>;
+  context: ChatContext;
 }): Parameters<typeof streamText>[0] {
   const plannerTools = createPlannerToolsWithMetadata();
   const todoTools = createTodoToolWithMetadata({ messages });
@@ -145,23 +143,20 @@ export function createWriterAgent({
   const fileTools = createFileToolsWithMetadata({
     userId: undefined,
     publishingSettings: project.publishingSettings,
+    db: context.db,
+    organizationId: context.organizationId,
+    projectId: context.projectId,
+    chatId: context.chatId,
   });
-  const webTools = createWebToolsWithMetadata(project, cacheKV);
-  const researchTools = createArticleResearchToolWithMetadata({
-    project,
-    cacheKV,
-  });
-  const writingTools = createArticleWritingToolWithMetadata({
-    project,
-    publicImagesBucket,
-    cacheKV,
-  });
+  const webTools = createWebToolsWithMetadata(project, context.cacheKV);
+  const internalLinksTools = createInternalLinksToolWithMetadata(
+    project.websiteUrl,
+  );
 
   const skillDefinitions: AgentToolDefinition[] = [
     ...fileTools.toolDefinitions,
     ...webTools.toolDefinitions,
-    ...researchTools.toolDefinitions,
-    ...writingTools.toolDefinitions,
+    ...internalLinksTools.toolDefinitions,
   ];
   const skillsSection = formatToolSkillsSection(skillDefinitions);
 

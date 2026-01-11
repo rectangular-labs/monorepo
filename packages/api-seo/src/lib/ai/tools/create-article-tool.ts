@@ -1,7 +1,7 @@
 import { type DB, schema } from "@rectangular-labs/db";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { writeContentDraft } from "../../content/draft-writer";
+import { writeContentDraft } from "../../content/write-content-draft";
 import type { AgentToolDefinition } from "./utils";
 
 const createArticleInputSchema = type({

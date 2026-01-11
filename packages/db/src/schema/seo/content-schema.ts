@@ -7,6 +7,7 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   index,
   integer,
@@ -39,6 +40,10 @@ export const seoContent = pgSeoTable(
         onUpdate: "cascade",
       }),
     createdByUserId: text().references(() => user.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    parentContentId: uuid().references((): AnyPgColumn => seoContent.id, {
       onDelete: "set null",
       onUpdate: "cascade",
     }),
@@ -106,6 +111,10 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
   createdByUser: one(user, {
     fields: [seoContent.createdByUserId],
     references: [user.id],
+  }),
+  parentContent: one(seoContent, {
+    fields: [seoContent.parentContentId],
+    references: [seoContent.id],
   }),
   outlineTask: one(seoTaskRun, {
     fields: [seoContent.outlineGeneratedByTaskRunId],
