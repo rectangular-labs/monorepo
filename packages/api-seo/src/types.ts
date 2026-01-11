@@ -65,6 +65,7 @@ export interface InitialContext extends BaseContextWithAuth {
 
 export interface ChatContext extends InitialContext {
   userId: string;
+  chatId: string;
   sessionId: string;
   projectId: string;
   organizationId: string;
@@ -76,5 +77,6 @@ export interface ChatContext extends InitialContext {
     gscProperty?: typeof schema.seoGscProperty.$inferSelect & {
       accessToken?: string;
     };
+    chat?: typeof schema.seoChat.$inferSelect;
   };
 }

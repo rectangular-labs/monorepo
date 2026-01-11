@@ -1,13 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  computeNextAvailableScheduleIso,
-  type ContentItemSnapshot,
-} from "./compute-next-available-schedule";
-
-const makeItem = (
-  status: ContentItemSnapshot["status"],
-  scheduledFor: string | null,
-): ContentItemSnapshot => ({ status, scheduledFor });
+import { computeNextAvailableScheduleIso } from "./compute-next-available-schedule";
 
 describe("computeNextAvailableScheduleIso", () => {
   it("returns undefined when allowedDays is empty", () => {
@@ -27,10 +19,9 @@ describe("computeNextAvailableScheduleIso", () => {
     const result = computeNextAvailableScheduleIso({
       cadence: { allowedDays: ["mon"], period: "daily", frequency: 3 },
       scheduledItems: [
-        makeItem("queued", `${dayKey}T09:00:00.000Z`),
-        makeItem("scheduled", `${dayKey}T11:00:00.000Z`),
-        makeItem("published", `${dayKey}T13:00:00.000Z`),
-        makeItem("queued", "not-a-date"),
+        { scheduledFor: new Date(`${dayKey}T09:00:00.000Z`) },
+        { scheduledFor: new Date(`${dayKey}T11:00:00.000Z`) },
+        { scheduledFor: new Date(`${dayKey}T13:00:00.000Z`) },
       ],
     });
 
@@ -71,7 +62,7 @@ describe("computeNextAvailableScheduleIso", () => {
         period: "weekly",
         frequency: 3,
       },
-      scheduledItems: [makeItem("queued", `${monday}T09:00:00.000Z`)],
+      scheduledItems: [{ scheduledFor: new Date(`${monday}T09:00:00.000Z`) }],
     });
 
     expect(result).toBe("2026-01-05T11:00:00.000Z"); // Monday 11am
@@ -93,8 +84,8 @@ describe("computeNextAvailableScheduleIso", () => {
         frequency: 3,
       },
       scheduledItems: [
-        makeItem("queued", `${monday}T09:00:00.000Z`),
-        makeItem("scheduled", `${monday}T11:00:00.000Z`),
+        { scheduledFor: new Date(`${monday}T09:00:00.000Z`) },
+        { scheduledFor: new Date(`${monday}T11:00:00.000Z`) },
       ],
     });
 
@@ -118,9 +109,9 @@ describe("computeNextAvailableScheduleIso", () => {
         frequency: 3,
       },
       scheduledItems: [
-        makeItem("queued", `${monday}T09:00:00.000Z`),
-        makeItem("scheduled", `${monday}T11:00:00.000Z`),
-        makeItem("scheduled", `${wednesday}T09:00:00.000Z`),
+        { scheduledFor: new Date(`${monday}T09:00:00.000Z`) },
+        { scheduledFor: new Date(`${monday}T11:00:00.000Z`) },
+        { scheduledFor: new Date(`${wednesday}T09:00:00.000Z`) },
       ],
     });
 
@@ -144,8 +135,8 @@ describe("computeNextAvailableScheduleIso", () => {
         frequency: 7,
       },
       scheduledItems: [
-        makeItem("queued", `${tuesday}T09:00:00.000Z`),
-        makeItem("scheduled", `${thursday}T09:00:00.000Z`),
+        { scheduledFor: new Date(`${tuesday}T09:00:00.000Z`) },
+        { scheduledFor: new Date(`${thursday}T09:00:00.000Z`) },
       ],
     });
 
@@ -170,9 +161,9 @@ describe("computeNextAvailableScheduleIso", () => {
         frequency: 3,
       },
       scheduledItems: [
-        makeItem("queued", `${tuesday}T09:00:00.000Z`),
-        makeItem("scheduled", `${thursday}T09:00:00.000Z`),
-        makeItem("scheduled", `${followingTuesday}T09:00:00.000Z`),
+        { scheduledFor: new Date(`${tuesday}T09:00:00.000Z`) },
+        { scheduledFor: new Date(`${thursday}T09:00:00.000Z`) },
+        { scheduledFor: new Date(`${followingTuesday}T09:00:00.000Z`) },
       ],
     });
 

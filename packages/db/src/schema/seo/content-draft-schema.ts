@@ -7,7 +7,7 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import { index, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
@@ -50,7 +50,7 @@ export const seoContentDraft = pgSeoTable(
 
     title: text().notNull().default(""),
     description: text().notNull().default(""),
-    slug: text().notNull().default(""),
+    slug: text().notNull(),
     primaryKeyword: text().notNull(),
     // we don't have published / scheduled statuses for drafts since they will be promoted to content-schema when they hit those statuses
     status: text({
@@ -89,6 +89,12 @@ export const seoContentDraft = pgSeoTable(
   },
   (table) => [
     // note that the lack of unique constraints on the slug is intentional because we can have two drafts of the same content being worked on concurrently.
+    unique("seo_content_draft_org_project_chat_slug_unique").on(
+      table.organizationId,
+      table.projectId,
+      table.originatingChatId,
+      table.slug,
+    ),
     index("seo_content_branch_org_idx").on(table.organizationId),
     index("seo_content_branch_project_idx").on(table.projectId),
     index("seo_content_branch_base_content_id_idx").on(table.baseContentId),

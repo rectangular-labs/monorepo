@@ -82,6 +82,12 @@ export const seoContent = pgSeoTable(
     index("seo_content_organization_idx").on(table.organizationId),
     index("seo_content_created_by_user_idx").on(table.createdByUserId),
     index("seo_content_slug_idx").on(table.slug),
+    index("seo_content_org_project_slug_live_idx").on(
+      table.organizationId,
+      table.projectId,
+      table.slug,
+      table.isLiveVersion,
+    ),
     index("seo_content_primary_keyword_idx").on(table.primaryKeyword),
     index("seo_content_version_idx").on(table.version),
     index("seo_content_is_live_version_idx").on(table.isLiveVersion),

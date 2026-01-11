@@ -40,8 +40,8 @@ export const seoContentSchedule = pgSeoTable(
     })
       .notNull()
       .default("scheduled"),
-    destination: text(),
-    scheduledFor: timestamp({ mode: "date", withTimezone: true }),
+    destination: text().notNull(),
+    scheduledFor: timestamp({ mode: "date", withTimezone: true }).notNull(),
     publishedAt: timestamp({ mode: "date", withTimezone: true }),
     publishedUrl: text(),
     ...timestamps,

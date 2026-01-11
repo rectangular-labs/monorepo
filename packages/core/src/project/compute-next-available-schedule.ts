@@ -1,4 +1,3 @@
-import type { SeoFileStatus } from "../schemas/content-parsers";
 import type { publishingSettingsSchema } from "../schemas/project-parsers";
 
 type PublishingCadence = NonNullable<
@@ -42,16 +41,14 @@ function periodKeyUtc(date: Date, period: PublishingCadence["period"]): string {
   throw new Error(`Invalid period: ${period}`);
 }
 
-export type ContentItemSnapshot = {
-  status: SeoFileStatus;
-  scheduledFor: string | null;
-};
 export function computeNextAvailableScheduleIso({
   cadence,
   scheduledItems,
 }: {
   cadence: PublishingCadence;
-  scheduledItems: ContentItemSnapshot[];
+  scheduledItems: {
+    scheduledFor: Date;
+  }[];
 }): string | undefined {
   const { allowedDays, period, frequency } = cadence;
   if (allowedDays.length === 0) return undefined;
@@ -68,24 +65,11 @@ export function computeNextAvailableScheduleIso({
   const usedByDay = new Map<string, number>();
   const usedByPeriod = new Map<string, number>();
 
-  const countableStatuses = new Set<SeoFileStatus>([
-    "queued",
-    "planning",
-    "writing",
-    "reviewing-writing",
-    "pending-review",
-    "scheduled",
-    "published",
-  ]);
   for (const item of scheduledItems) {
-    if (!item.status || !countableStatuses.has(item.status)) continue;
-    const scheduledFor = item.scheduledFor;
-    if (!scheduledFor || scheduledFor.trim() === "") continue;
-    const d = new Date(scheduledFor);
-    if (Number.isNaN(d.getTime())) continue;
-    const dayKey = d.toISOString().slice(0, 10); // YYYY-MM-DD
+    const { scheduledFor } = item;
+    const dayKey = scheduledFor.toISOString().slice(0, 10); // YYYY-MM-DD
     usedByDay.set(dayKey, (usedByDay.get(dayKey) ?? 0) + 1);
-    const pKey = periodKeyUtc(d, period);
+    const pKey = periodKeyUtc(scheduledFor, period);
     usedByPeriod.set(pKey, (usedByPeriod.get(pKey) ?? 0) + 1);
   }
 
