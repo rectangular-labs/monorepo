@@ -4,7 +4,12 @@ import type { Session } from "@rectangular-labs/auth";
 import { CHAT_DEFAULT_TITLE } from "@rectangular-labs/core/schemas/chat-parser";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { type schema, uuidv7 } from "@rectangular-labs/db";
-import { createChat, getChatById } from "@rectangular-labs/db/operations";
+import {
+  createChat,
+  createChatMessage,
+  getChatById,
+  updateChat,
+} from "@rectangular-labs/db/operations";
 import { hasToolCall, streamText } from "ai";
 import { withOrganizationIdBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
@@ -42,7 +47,22 @@ const chatContextMiddleware = os
           if (!chat.value) {
             throw new ORPCError("NOT_FOUND", { message: "Chat not found" });
           }
-          return chat.value;
+          const updatedChatResult = await updateChat({
+            db: context.db,
+            values: {
+              id: chat.value.id,
+              projectId,
+              organizationId: context.organization.id,
+              status: "working",
+            },
+          });
+          if (!updatedChatResult.ok) {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+              message: "Failed to update chat",
+              cause: updatedChatResult.error,
+            });
+          }
+          return updatedChatResult.value;
         }
         const chat = await createChat(context.db, {
           projectId,
@@ -102,7 +122,6 @@ export const sendMessage = withOrganizationIdBase
   // TODO: clean up this hack to reinitialize the context for the chat items. rn  it runs in a double closure
   .use(asyncStorageMiddleware<InitialContext>())
   .handler(async ({ context, input }) => {
-    await getProjectInChat;
     const projectResult = await getProjectInChat({
       context,
     });
@@ -186,9 +205,46 @@ export const sendMessage = withOrganizationIdBase
             return {
               sentAt: new Date().toISOString(),
               userId: null,
+              chatId: context.chatId,
             };
           }
           return;
+        },
+        onFinish: async ({ responseMessage }) => {
+          const [updatedChat, createdChatMessage] = await Promise.all([
+            updateChat({
+              db: context.db,
+              values: {
+                id: context.chatId,
+                projectId: context.projectId,
+                organizationId: context.organization.id,
+                status: "idle",
+              },
+            }),
+            createChatMessage({
+              db: context.db,
+              value: {
+                id: responseMessage.id,
+                organizationId: context.organization.id,
+                projectId: context.projectId,
+                chatId: context.chatId,
+                source: "assistant",
+                message: responseMessage.parts,
+              },
+            }),
+          ]);
+          if (!updatedChat.ok) {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+              message: "Failed to update chat",
+              cause: updatedChat.error,
+            });
+          }
+          if (!createdChatMessage.ok) {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+              message: "Failed to create chat message",
+              cause: createdChatMessage.error,
+            });
+          }
         },
       }),
     );
