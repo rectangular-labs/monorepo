@@ -2,7 +2,11 @@
 
 import { useChat } from "@ai-sdk/react";
 import { eventIteratorToUnproxiedDataStream } from "@rectangular-labs/api-seo/client";
-import type { SeoChatMessage } from "@rectangular-labs/api-seo/types";
+import type {
+  RouterOutputs,
+  SeoChatMessage,
+} from "@rectangular-labs/api-seo/types";
+import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import {
   Action,
   Actions,
@@ -12,7 +16,6 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@rectangular-labs/ui/components/ai-elements/conversation";
-import { Loader } from "@rectangular-labs/ui/components/ai-elements/loader";
 import {
   Message,
   MessageContent,
@@ -57,18 +60,20 @@ import {
   SourcesContent,
   SourcesTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/sources";
-import { TaskItemFile } from "@rectangular-labs/ui/components/ai-elements/task";
 import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-  ToolOutput,
-} from "@rectangular-labs/ui/components/ai-elements/tool";
+  Task,
+  TaskContent,
+  TaskItem,
+  TaskItemFile,
+  TaskTrigger,
+} from "@rectangular-labs/ui/components/ai-elements/task";
 import {
   Copy,
   File,
+  History,
+  Pencil,
   RefreshCcw,
+  Search,
   X,
 } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
@@ -79,43 +84,40 @@ import {
   DialogDrawerHeader,
   DialogDrawerTitle,
 } from "@rectangular-labs/ui/components/ui/dialog-drawer";
+import {
+  DropDrawer,
+  DropDrawerContent,
+  DropDrawerItem,
+  DropDrawerLabel,
+  DropDrawerSeparator,
+  DropDrawerTrigger,
+} from "@rectangular-labs/ui/components/ui/dropdrawer";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@rectangular-labs/ui/components/ui/input-group";
+import { Kbd, KbdGroup } from "@rectangular-labs/ui/components/ui/kbd";
 import { Label } from "@rectangular-labs/ui/components/ui/label";
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@rectangular-labs/ui/components/ui/radio-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@rectangular-labs/ui/components/ui/tooltip";
+import { useIsApple } from "@rectangular-labs/ui/hooks/use-apple";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "@tanstack/react-router";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { getApiClient } from "~/lib/api";
+import { getApiClient, getApiClientRq } from "~/lib/api";
 import { useProjectChat } from "./project-chat-provider";
 
 type ChatMessagePart = SeoChatMessage["parts"][number];
 type ChatToolPart = Extract<ChatMessagePart, { type: `tool-${string}` }>;
-
-function isChatToolPart(part: ChatMessagePart): part is ChatToolPart {
-  return part.type.startsWith("tool-");
-}
-
-const TOOL_UI: Record<string, { title: string; defaultOpen?: boolean }> = {
-  read_skills: { title: "Read skills" },
-  use_skills: { title: "Use skill" },
-  ask_questions: { title: "Ask questions", defaultOpen: true },
-  create_plan: { title: "Create plan", defaultOpen: true },
-  get_historical_messages: { title: "Get historical messages" },
-  get_message_detail: { title: "Get message detail" },
-  manage_todo: { title: "Manage Task list" },
-  make_suggestions: { title: "Make suggestions", defaultOpen: true },
-};
-
-function focusChatTextarea() {
-  requestAnimationFrame(() => {
-    const textarea = document.querySelector<HTMLTextAreaElement>(
-      'textarea[name="message"]',
-    );
-    textarea?.focus();
-  });
-}
 
 function AskQuestionsToolPart({
   part,
@@ -162,14 +164,9 @@ function AskQuestionsToolPart({
 
   return (
     <div className="mb-4 w-full rounded-md border bg-background p-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="font-medium text-sm">Please answer these questions</div>
-        <div className="text-muted-foreground text-xs">
-          {questions.length} question{questions.length === 1 ? "" : "s"}
-        </div>
-      </div>
-
       <div className="space-y-4">
+        <div className="font-medium text-sm">Quick questions</div>
+
         {questions.map((q) => {
           const selected = answers[q.id]?.selected ?? [];
           const allowMultiple = q.allow_multiple === true;
@@ -370,33 +367,53 @@ type TodoSnapshot = Extract<
   Extract<ChatMessagePart, { type: `tool-manage_todo` }>,
   { state: `output-available` }
 >["output"]["todos"];
-export function ProjectChatPanel() {
-  const { close, currentPage, organizationIdentifier, projectId } =
-    useProjectChat();
-  const [input, setInput] = useState("");
+function inferCurrentPage(pathname: string): ProjectChatCurrentPage {
+  if (pathname.includes("/content")) return "content-list";
+  if (pathname.includes("/settings")) return "settings";
+  return "stats";
+}
+function ChatConversation({
+  organizationId,
+  projectId,
+  chatId,
+  onAdoptChatId,
+  initialMessages,
+  input,
+  setInput,
+  isMessagesLoading,
+}: {
+  organizationId: string;
+  projectId: string;
+  chatId: string | null;
+  initialMessages: SeoChatMessage[];
+  onAdoptChatId: (nextChatId: string) => void;
+  input: string;
+  setInput: (input: string) => void;
+  isMessagesLoading: boolean;
+}) {
+  const { pathname } = useLocation();
+  const currentPage = inferCurrentPage(pathname);
+
   const queryClient = useQueryClient();
-  const suggestionCompletionSetRef = useRef<Set<string>>(new Set());
   const todoSnapshotSetRef = useRef<Set<string>>(new Set());
   const [todoSnapshot, setTodoSnapshot] = useState<NonNullable<TodoSnapshot>>(
     [],
   );
 
-  const api = useMemo(() => getApiClient(), []);
-
-  const { messages, sendMessage, status, regenerate, stop } =
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const { messages, setMessages, sendMessage, status, regenerate, stop } =
     useChat<SeoChatMessage>({
+      messages: initialMessages,
       transport: {
         reconnectToStream: async () => null,
         sendMessages: async ({ abortSignal, messages }) => {
-          if (!organizationIdentifier || !projectId) {
-            throw new Error("Project chat requires an active project.");
-          }
-          const eventIterator = await api.project.chat(
+          const eventIterator = await getApiClient().chat.sendMessage(
             {
-              organizationIdentifier,
+              organizationId,
               projectId,
               currentPage,
               messages,
+              chatId: chatId ?? null,
               model: undefined,
             },
             { signal: abortSignal },
@@ -407,8 +424,20 @@ export function ProjectChatPanel() {
       onError: (error) => {
         console.error("project chat error", error);
       },
-      id: projectId ?? "project",
     });
+
+  useEffect(() => {
+    console.log("initialMessages", initialMessages);
+    setMessages(initialMessages);
+  }, [initialMessages, setMessages]);
+
+  useEffect(() => {
+    const createdChatId = messages.find((m) => m.metadata?.chatId)?.metadata
+      ?.chatId;
+    if (createdChatId && !chatId) {
+      onAdoptChatId(createdChatId);
+    }
+  }, [chatId, messages, onAdoptChatId]);
 
   useEffect(() => {
     for (const message of messages) {
@@ -416,12 +445,36 @@ export function ProjectChatPanel() {
         if (
           part.type === "tool-use_skills" &&
           part.state === "output-available" &&
-          part.input.skill === "suggest_articles" &&
-          !suggestionCompletionSetRef.current.has(part.toolCallId)
+          (part.input.skill === "create_articles" ||
+            part.input.skill === "write_file")
         ) {
-          suggestionCompletionSetRef.current.add(part.toolCallId);
+          // Bulk invalidate queries for all content.list* queries
           void queryClient.invalidateQueries({
-            queryKey: ["pullDocument"],
+            queryKey: getApiClientRq().content.listNewReviews.queryKey({
+              input: {
+                organizationIdentifier: organizationId,
+                projectId,
+                limit: 20,
+              },
+            }),
+          });
+          void queryClient.invalidateQueries({
+            queryKey: getApiClientRq().content.listSuggestions.queryKey({
+              input: {
+                organizationIdentifier: organizationId,
+                projectId,
+                limit: 20,
+              },
+            }),
+          });
+          void queryClient.invalidateQueries({
+            queryKey: getApiClientRq().content.listUpdateReviews.queryKey({
+              input: {
+                organizationIdentifier: organizationId,
+                projectId,
+                limit: 20,
+              },
+            }),
           });
         }
 
@@ -431,26 +484,21 @@ export function ProjectChatPanel() {
           !todoSnapshotSetRef.current.has(part.toolCallId)
         ) {
           todoSnapshotSetRef.current.add(part.toolCallId);
-          const output = part.output as { todos?: TodoSnapshot } | undefined;
-          if (output?.todos) {
-            setTodoSnapshot(output.todos);
+          if (part.output.todos) {
+            setTodoSnapshot(part.output.todos);
           }
         }
       }
     }
-  }, [messages, queryClient]);
-
-  const sendText = (text: string) => {
-    sendMessage({ text }, { body: {} });
-    setInput("");
-  };
+  }, [messages, queryClient, organizationId, projectId]);
 
   const rejectPlanPrefill = () => {
     setInput("Let's change the following:\n1. ");
-    focusChatTextarea();
+    textareaRef.current?.focus();
   };
 
   const handleSubmit = (message: PromptInputMessage) => {
+    if (isMessagesLoading) return;
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
     if (!(hasText || hasAttachments)) return;
@@ -470,28 +518,15 @@ export function ProjectChatPanel() {
     return todoSnapshot.filter((t) => t.status === "done");
   }, [todoSnapshot]);
 
+  const isInputDisabled = isMessagesLoading;
+  const showMessagesLoading = isMessagesLoading && messages.length === 0;
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      <div className="flex items-center justify-between gap-2 border-b px-3 py-2">
-        <div className="min-w-0">
-          <div className="truncate font-medium text-sm">Assistant</div>
-          <div className="truncate text-muted-foreground text-xs">
-            Context: {currentPage}
-          </div>
-        </div>
-        <Button
-          aria-label="Close chat"
-          onClick={() => close()}
-          size="icon"
-          variant="ghost"
-        >
-          <X className="size-4" />
-        </Button>
-      </div>
-
       <div className="flex min-h-0 flex-1 flex-col">
         <Conversation className="h-full">
           <ConversationContent>
+            {showMessagesLoading && <Shimmer>Loading messages…</Shimmer>}
             {messages.map((message) => (
               <div key={message.id}>
                 {message.role === "assistant" &&
@@ -545,21 +580,19 @@ export function ProjectChatPanel() {
                             )}
                         </Fragment>
                       );
-                    case "reasoning":
+                    case "reasoning": {
                       return (
                         <Reasoning
                           className="w-full"
-                          isStreaming={
-                            status === "streaming" &&
-                            i === message.parts.length - 1 &&
-                            message.id === messages.at(-1)?.id
-                          }
+                          defaultOpen={false}
+                          isStreaming={part.state !== "done"}
                           key={`${message.id}-${i}`}
                         >
                           <ReasoningTrigger />
                           <ReasoningContent>{part.text}</ReasoningContent>
                         </Reasoning>
                       );
+                    }
                     case "file":
                       return (
                         <TaskItemFile key={`${message.id}-${i}`}>
@@ -572,7 +605,7 @@ export function ProjectChatPanel() {
                         return (
                           <AskQuestionsToolPart
                             key={`${message.id}-${part.toolCallId}`}
-                            onSubmitAnswers={(text) => sendText(text)}
+                            onSubmitAnswers={(text) => handleSubmit({ text })}
                             part={part}
                           />
                         );
@@ -585,7 +618,9 @@ export function ProjectChatPanel() {
                           <CreatePlanToolPart
                             key={`${message.id}-${part.toolCallId}`}
                             onApprove={() =>
-                              sendText("plan looks good, let's start.")
+                              handleSubmit({
+                                text: "plan looks good, let's start.",
+                              })
                             }
                             onReject={() => rejectPlanPrefill()}
                             part={part}
@@ -595,46 +630,136 @@ export function ProjectChatPanel() {
                       return <Shimmer>Creating plan</Shimmer>;
                     }
                     case "tool-manage_todo": {
-                      if (part.state !== "output-available") {
-                        return <Shimmer>Managing tasks</Shimmer>;
+                      if (part.state === "input-streaming") {
+                        return (
+                          <Shimmer
+                            className="mb-4 text-sm"
+                            key={part.toolCallId}
+                          >
+                            Managing tasks
+                          </Shimmer>
+                        );
                       }
-                      return null;
-                    }
-                    default: {
-                      if (!isChatToolPart(part)) return null;
-                      const toolName = part.type.slice("tool-".length);
-                      const ui = TOOL_UI[toolName];
-                      const title = ui?.title;
-                      const defaultOpen =
-                        part.state === "output-error" ||
-                        ui?.defaultOpen === true;
 
+                      if (part.state === "input-available") {
+                        const { action } = part.input;
+                        const actionLabel = (() => {
+                          switch (action) {
+                            case "create":
+                              return "Creating task";
+                            case "update":
+                              return "Updating task";
+                            case "list":
+                              return "Listing tasks";
+                          }
+                        })();
+                        return (
+                          <Shimmer
+                            className="mb-4 text-sm"
+                            key={part.toolCallId}
+                          >
+                            {actionLabel}
+                          </Shimmer>
+                        );
+                      }
+
+                      if (part.state === "output-available") {
+                        const { action } = part.input;
+                        const actionLabel = (() => {
+                          switch (action) {
+                            case "create":
+                              return `Creating task ${part.input.todo?.title}`;
+                            case "update":
+                              return `Updating task`;
+                            case "list":
+                              return "Listed tasks";
+                          }
+                        })();
+                        return (
+                          <div
+                            className="mb-4 text-muted-foreground text-sm"
+                            key={part.toolCallId}
+                          >
+                            {actionLabel}
+                          </div>
+                        );
+                      }
                       return (
-                        <Tool
-                          defaultOpen={defaultOpen}
+                        <div
+                          className="mb-4 text-muted-foreground text-sm"
+                          key={`${message.id}-${part.toolCallId}`}
+                        >
+                          Something went wrong managing tasks
+                        </div>
+                      );
+                    }
+                    case "tool-read_skills": {
+                      if (part.state === "output-available") {
+                        const skillName = part.input.skill.replace("_", " ");
+                        return (
+                          <div
+                            className="mb-4 text-muted-foreground text-sm"
+                            key={`${message.id}-${part.toolCallId}`}
+                          >
+                            Done reading skill {skillName}.
+                          </div>
+                        );
+                      }
+                      return (
+                        <Shimmer
+                          className="mb-4"
+                          key={`${message.id}-${part.toolCallId}`}
+                        >
+                          Reading skill...
+                        </Shimmer>
+                      );
+                    }
+
+                    case "tool-use_skills": {
+                      const taskName =
+                        part.input?.taskName?.trim() || "Executing Task";
+                      const state = (() => {
+                        switch (part.state) {
+                          case "output-available": {
+                            const result = (() => {
+                              if (part.output?.success) {
+                                return part.output?.result ?? "Completed";
+                              }
+                              return "Failed";
+                            })();
+                            return result;
+                          }
+                          case "output-error":
+                            return part.errorText;
+                          default:
+                            return part.input?.instructions ?? "Running";
+                        }
+                      })();
+                      return (
+                        <Task
+                          className="mb-4"
+                          defaultOpen={false}
                           key={`${message.id}-${i}`}
                         >
-                          <ToolHeader
-                            state={part.state}
-                            title={title}
-                            type={part.type}
-                          />
-                          <ToolContent>
-                            <ToolInput input={part.input} />
-                            <ToolOutput
-                              errorText={part.errorText}
-                              output={part.output}
-                            />
-                          </ToolContent>
-                        </Tool>
+                          <TaskTrigger title={taskName} />
+                          <TaskContent>
+                            <TaskItem>{state}</TaskItem>
+                          </TaskContent>
+                        </Task>
                       );
+                    }
+
+                    default: {
+                      return null;
                     }
                   }
                 })}
               </div>
             ))}
 
-            {status === "submitted" && <Loader />}
+            {status === "submitted" && (
+              <Shimmer className="text-sm"> Preparing response...</Shimmer>
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
@@ -708,7 +833,9 @@ export function ProjectChatPanel() {
                 {(attachment) => <PromptInputAttachment data={attachment} />}
               </PromptInputAttachments>
               <PromptInputTextarea
+                disabled={isInputDisabled}
                 onChange={(e) => setInput(e.target.value)}
+                ref={textareaRef}
                 status={status}
                 value={input}
               />
@@ -716,14 +843,16 @@ export function ProjectChatPanel() {
             <PromptInputFooter>
               <PromptInputTools>
                 <PromptInputActionMenu>
-                  <PromptInputActionMenuTrigger />
+                  <PromptInputActionMenuTrigger disabled={isInputDisabled} />
                   <PromptInputActionMenuContent>
-                    <PromptInputActionAddAttachments />
+                    <PromptInputActionAddAttachments
+                      disabled={isInputDisabled}
+                    />
                   </PromptInputActionMenuContent>
                 </PromptInputActionMenu>
               </PromptInputTools>
               <PromptInputSubmit
-                disabled={!input && status === "ready"}
+                disabled={isInputDisabled || (!input && status === "ready")}
                 onClick={() => {
                   if (status === "streaming") stop?.();
                 }}
@@ -733,6 +862,175 @@ export function ProjectChatPanel() {
           </PromptInput>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function ProjectChatPanel() {
+  const {
+    close,
+    organizationId,
+    projectId,
+    activeChatId,
+    activeChat,
+    isActiveChatLoading,
+    startNewChat,
+    selectChat,
+    adoptChatId,
+    chatList,
+    isChatListLoading,
+    refetchChatList,
+    chatMessages,
+    isChatMessagesFetching,
+    input,
+    setInput,
+  } = useProjectChat();
+  const isApple = useIsApple();
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [historySearch, setHistorySearch] = useState("");
+  const [modKeyLabel, setModKeyLabel] = useState<"⌘" | "Ctrl">("Ctrl");
+
+  useEffect(() => {
+    setModKeyLabel(isApple ? "⌘" : "Ctrl");
+  }, [isApple]);
+
+  const historyChats = useMemo(() => {
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return chatList;
+    return chatList.filter((c) => c.title.toLowerCase().includes(q));
+  }, [chatList, historySearch]);
+
+  const startNewChatAndCloseHistory = () => {
+    startNewChat();
+    setIsHistoryOpen(false);
+  };
+
+  const selectChatAndCloseHistory = (
+    chat: RouterOutputs["chat"]["list"]["data"][number],
+  ) => {
+    selectChat(chat);
+    setIsHistoryOpen(false);
+  };
+
+  const onHistoryOpenChange = (open: boolean) => {
+    setIsHistoryOpen(open);
+    if (open) {
+      void refetchChatList();
+    }
+  };
+
+  if (!organizationId || !projectId) {
+    return (
+      <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+        Select a project to start chatting.
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-background">
+      <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2">
+        <div className="truncate font-medium text-sm">
+          {activeChat?.title ?? "New chat"}
+        </div>
+        <div className="flex items-center gap-1">
+          <DropDrawer onOpenChange={onHistoryOpenChange} open={isHistoryOpen}>
+            <DropDrawerTrigger asChild>
+              <Button aria-label="Chat history" size="icon" variant="ghost">
+                <History className="size-4" />
+              </Button>
+            </DropDrawerTrigger>
+            <DropDrawerContent align="end" className="w-80">
+              <DropDrawerLabel>Chat history</DropDrawerLabel>
+              <div className="p-2">
+                <InputGroup>
+                  <InputGroupAddon>
+                    <Search className="size-4 text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    onChange={(e) => setHistorySearch(e.target.value)}
+                    placeholder="Search recent tasks"
+                    value={historySearch}
+                  />
+                </InputGroup>
+              </div>
+              <DropDrawerSeparator />
+
+              <div className="max-h-[50vh] overflow-auto">
+                {isChatListLoading && (
+                  <div className="p-2 text-muted-foreground text-sm">
+                    Loading…
+                  </div>
+                )}
+                {!isChatListLoading && historyChats.length === 0 && (
+                  <div className="p-2 text-muted-foreground text-sm">
+                    No chats yet.
+                  </div>
+                )}
+                {historyChats.map((chat) => (
+                  <DropDrawerItem
+                    className={cn(
+                      "flex flex-col items-start gap-0.5",
+                      chat.id === activeChatId && "bg-muted",
+                    )}
+                    key={chat.id}
+                    onSelect={() => selectChatAndCloseHistory(chat)}
+                  >
+                    <span className="max-w-full truncate font-medium text-sm">
+                      {chat.title}
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {new Date(chat.updatedAt).toLocaleString()}
+                    </span>
+                  </DropDrawerItem>
+                ))}
+              </div>
+            </DropDrawerContent>
+          </DropDrawer>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                aria-label="New chat"
+                onClick={startNewChatAndCloseHistory}
+                size="icon"
+                variant="ghost"
+              >
+                <Pencil className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <KbdGroup>
+                <span>Shortcut:</span>
+                <Kbd>{modKeyLabel}</Kbd>
+                <span>+</span>
+                <Kbd>.</Kbd>
+              </KbdGroup>
+            </TooltipContent>
+          </Tooltip>
+          <Button
+            aria-label="Close chat"
+            onClick={() => close()}
+            size="icon"
+            variant="ghost"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      <ChatConversation
+        chatId={activeChatId}
+        initialMessages={chatMessages}
+        input={input}
+        isMessagesLoading={
+          !!activeChatId && (isChatMessagesFetching || isActiveChatLoading)
+        }
+        key={activeChat?.id}
+        onAdoptChatId={adoptChatId}
+        organizationId={organizationId}
+        projectId={projectId}
+        setInput={setInput}
+      />
     </div>
   );
 }

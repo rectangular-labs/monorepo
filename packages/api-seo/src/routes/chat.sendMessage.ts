@@ -28,7 +28,7 @@ const chatContextMiddleware = os
   .middleware(
     async (
       { next, context },
-      { projectId, chatId }: { projectId: string; chatId: string | undefined },
+      { projectId, chatId }: { projectId: string; chatId: string | null },
     ) => {
       console.log("[chat.sendMessage] chatContextMiddleware started", {
         projectId,
@@ -120,7 +120,7 @@ export const sendMessage = withOrganizationIdBase
       currentPage: ProjectChatCurrentPage;
       messages: SeoChatMessage[];
       model?: string;
-      chatId?: string;
+      chatId: string | null;
     }>(),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationId)

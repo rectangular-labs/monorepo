@@ -13,7 +13,6 @@ import type {
 import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { Scheduler } from "partywhen";
-import type { createCreateArticleToolWithMetadata } from "./lib/ai/tools/create-article-tool";
 import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
 import type { createSkillTools } from "./lib/ai/tools/skill-tools";
 import type { createTodoToolWithMetadata } from "./lib/ai/tools/todo-tool";
@@ -31,8 +30,7 @@ export type RouterOutputs = InferRouterOutputs<Router>;
 type AiTools = InferUITools<
   ReturnType<typeof createSkillTools> &
     ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
-    ReturnType<typeof createTodoToolWithMetadata>["tools"] &
-    ReturnType<typeof createCreateArticleToolWithMetadata>["tools"]
+    ReturnType<typeof createTodoToolWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
   typeof chatMessageMetadataSchema.infer,

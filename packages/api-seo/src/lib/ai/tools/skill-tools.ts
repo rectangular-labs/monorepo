@@ -106,7 +106,7 @@ export function createSkillTools({
             messages: [],
           },
         );
-        return result;
+        return result as { success: true; result: string };
       }
 
       const { text } = await generateText({

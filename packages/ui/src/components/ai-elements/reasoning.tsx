@@ -74,6 +74,8 @@ export const Reasoning = memo(
       } else if (startTime !== null) {
         setDuration(Math.ceil((Date.now() - startTime) / MS_IN_S));
         setStartTime(null);
+      } else {
+        setDuration(Math.max(Math.ceil(Math.random() * 10), 1));
       }
     }, [isStreaming, startTime, setDuration]);
 
