@@ -45,7 +45,9 @@ export async function getContentScheduleById(args: {
 
 export async function updateContentSchedule(
   db: DB,
-  values: typeof seoContentScheduleUpdateSchema.infer & { organizationId: string },
+  values: typeof seoContentScheduleUpdateSchema.infer & {
+    organizationId: string;
+  },
 ) {
   const result = await safe(() =>
     db
