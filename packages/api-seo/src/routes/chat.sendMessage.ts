@@ -119,6 +119,7 @@ export const sendMessage = withOrganizationIdBase
       projectId: string;
       currentPage: ProjectChatCurrentPage;
       messages: SeoChatMessage[];
+      messageId?: string;
       model?: string;
       chatId: string | null;
     }>(),
@@ -177,6 +178,35 @@ export const sendMessage = withOrganizationIdBase
         organizationId: context.organization.id,
       });
       console.log("[chat.sendMessage] Title generation completed");
+    }
+
+    const latestUserMessage = (() => {
+      for (let i = input.messages.length - 1; i >= 0; i -= 1) {
+        if (input.messages[i]?.role === "user") {
+          return input.messages[i];
+        }
+      }
+      return undefined;
+    })();
+    const userMessageId = latestUserMessage?.id;
+    if (!userMessageId && latestUserMessage) {
+      const createdUserMessage = await createChatMessage({
+        db: context.db,
+        value: {
+          organizationId: context.organization.id,
+          projectId: context.projectId,
+          chatId: context.chatId,
+          source: "user",
+          userId: context.user.id,
+          message: latestUserMessage.parts,
+        },
+      });
+      if (!createdUserMessage.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to create user chat message",
+          cause: createdUserMessage.error,
+        });
+      }
     }
 
     const agent = (() => {
