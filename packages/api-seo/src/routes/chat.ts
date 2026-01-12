@@ -64,7 +64,13 @@ const list = withOrganizationIdBase
 
 const get = withOrganizationIdBase
   .route({ method: "GET", path: "/{id}" })
-  .input(type({ id: "string", projectId: "string", organizationId: "string" }))
+  .input(
+    type({
+      id: "string.uuid",
+      projectId: "string.uuid",
+      organizationId: "string",
+    }),
+  )
   .use(validateOrganizationMiddleware, (input) => input.organizationId)
   .output(type({ chat: schema.seoChatSelectSchema }))
   .handler(async ({ context, input }) => {
@@ -163,7 +169,7 @@ const update = withOrganizationIdBase
 
 const remove = withOrganizationIdBase
   .route({ method: "DELETE", path: "/{id}" })
-  .input(type({ id: "string", projectId: "string" }))
+  .input(type({ id: "string.uuid", projectId: "string.uuid" }))
   .output(type({ success: "true" }))
   .handler(async ({ context, input }) => {
     const deleteChatResult = await deleteChat({

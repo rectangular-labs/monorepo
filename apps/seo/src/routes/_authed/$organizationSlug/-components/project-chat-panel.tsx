@@ -406,7 +406,8 @@ function ChatConversation({
       messages: initialMessages,
       transport: {
         reconnectToStream: async () => null,
-        sendMessages: async ({ abortSignal, messages }) => {
+        sendMessages: async ({ abortSignal, messages, messageId, trigger }) => {
+          console.log("messageId", messageId, trigger);
           const eventIterator = await getApiClient().chat.sendMessage(
             {
               organizationId,
@@ -414,6 +415,7 @@ function ChatConversation({
               currentPage,
               messages,
               chatId: chatId ?? null,
+              messageId,
               model: undefined,
             },
             { signal: abortSignal },
@@ -426,12 +428,32 @@ function ChatConversation({
       },
     });
 
+  const prevChatIdRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {
-    console.log("initialMessages", initialMessages);
-    setMessages(initialMessages);
-  }, [initialMessages, setMessages]);
+    const prevChatId = prevChatIdRef.current;
+    prevChatIdRef.current = chatId;
+
+    // uninitialized
+    if (prevChatId === undefined) {
+      setMessages(initialMessages);
+      return;
+    }
+
+    // new chat with chatId updated
+    const isAdoption = prevChatId === null && chatId !== null;
+    if (isAdoption) {
+      return;
+    }
+
+    // chat changed
+    const chatChanged = prevChatId !== chatId;
+    if (chatChanged) {
+      setMessages(initialMessages);
+    }
+  }, [chatId, initialMessages, setMessages]);
 
   useEffect(() => {
+    console.log("messages", messages);
     const createdChatId = messages.find((m) => m.metadata?.chatId)?.metadata
       ?.chatId;
     if (createdChatId && !chatId) {
@@ -564,7 +586,9 @@ function ChatConversation({
                               <Actions className="mt-2">
                                 <Action
                                   label="Retry"
-                                  onClick={() => regenerate()}
+                                  onClick={() =>
+                                    regenerate({ messageId: message.id })
+                                  }
                                 >
                                   <RefreshCcw className="size-3" />
                                 </Action>
@@ -610,7 +634,11 @@ function ChatConversation({
                           />
                         );
                       }
-                      return <Shimmer>Drilling into the details</Shimmer>;
+                      return (
+                        <Shimmer className="text-sm" key={part.toolCallId}>
+                          Drilling into the details
+                        </Shimmer>
+                      );
                     }
                     case "tool-create_plan": {
                       if (part.state === "output-available") {
@@ -695,7 +723,7 @@ function ChatConversation({
                     }
                     case "tool-read_skills": {
                       if (part.state === "output-available") {
-                        const skillName = part.input.skill.replace("_", " ");
+                        const skillName = part.input.skill.replaceAll("_", " ");
                         return (
                           <div
                             className="mb-4 text-muted-foreground text-sm"
@@ -707,7 +735,7 @@ function ChatConversation({
                       }
                       return (
                         <Shimmer
-                          className="mb-4"
+                          className="mb-4 text-sm"
                           key={`${message.id}-${part.toolCallId}`}
                         >
                           Reading skill...
@@ -735,13 +763,22 @@ function ChatConversation({
                             return part.input?.instructions ?? "Running";
                         }
                       })();
+                      const isRunning =
+                        part.state !== "output-available" &&
+                        part.state !== "output-error";
                       return (
                         <Task
                           className="mb-4"
                           defaultOpen={false}
                           key={`${message.id}-${i}`}
                         >
-                          <TaskTrigger title={taskName} />
+                          {isRunning ? (
+                            <Shimmer className="text-sm" key={part.toolCallId}>
+                              {taskName}
+                            </Shimmer>
+                          ) : (
+                            <TaskTrigger title={taskName} />
+                          )}
                           <TaskContent>
                             <TaskItem>{state}</TaskItem>
                           </TaskContent>
@@ -1025,7 +1062,6 @@ export function ProjectChatPanel() {
         isMessagesLoading={
           !!activeChatId && (isChatMessagesFetching || isActiveChatLoading)
         }
-        key={activeChat?.id}
         onAdoptChatId={adoptChatId}
         organizationId={organizationId}
         projectId={projectId}
