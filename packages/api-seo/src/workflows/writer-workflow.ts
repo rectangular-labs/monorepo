@@ -5,14 +5,12 @@ import {
 } from "cloudflare:workers";
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type {
   seoWriteArticleTaskInputSchema,
   seoWriteArticleTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
-import { createDb } from "@rectangular-labs/db";
-import { writeToFile } from "@rectangular-labs/loro-file-system";
+import { createDb, type schema } from "@rectangular-labs/db";
 import {
   generateText,
   type JSONSchema7,
@@ -22,6 +20,7 @@ import {
 } from "ai";
 import { type } from "arktype";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
+import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -29,14 +28,14 @@ import {
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { buildWriterSystemPrompt } from "../lib/ai/writer-agent";
 import { createPublicImagesBucket } from "../lib/bucket";
-import { configureDataForSeoClient } from "../lib/dataforseo/utils";
-import { createTask } from "../lib/task";
+import { ensureDraftForSlug, normalizeContentSlug } from "../lib/content";
 import {
   analyzeArticleMarkdownForReview,
-  loadWorkspaceForWorkflow,
-  persistWorkspaceSnapshot,
   repairPublicBucketImageLinks,
-} from "../lib/workspace/workflow";
+} from "../lib/content/review-utils";
+import { writeContentDraft } from "../lib/content/write-content-draft";
+import { configureDataForSeoClient } from "../lib/dataforseo/utils";
+import { createTask } from "../lib/task";
 import {
   ARTICLE_TYPE_TO_WRITER_RULE,
   type ArticleType,
@@ -135,6 +134,58 @@ ${outline ?? ""}
   }
 }
 
+type DraftRecord = typeof schema.seoContentDraft.$inferSelect;
+type ProjectRecord = Omit<
+  typeof schema.seoProject.$inferSelect,
+  "serpSnapshot"
+>;
+
+async function loadDraftAndProject(args: {
+  db: ReturnType<typeof createDb>;
+  organizationId: string;
+  projectId: string;
+  chatId?: string | null;
+  path: string;
+  userId?: string | null;
+}): Promise<{
+  draft: DraftRecord;
+  project: ProjectRecord;
+  slug: string;
+}> {
+  const slug = normalizeContentSlug(args.path);
+  if (!slug) {
+    throw new Error(`Invalid content path: ${args.path}`);
+  }
+
+  const draftResult = await ensureDraftForSlug({
+    db: args.db,
+    organizationId: args.organizationId,
+    projectId: args.projectId,
+    slug,
+    originatingChatId: args.chatId ?? null,
+    userId: args.userId ?? null,
+  });
+  if (!draftResult.ok) {
+    throw new Error(draftResult.error.message);
+  }
+  if (draftResult.value.draft.status === "deleted") {
+    throw new Error(`Draft (${slug}) is marked as deleted.`);
+  }
+
+  const project = await args.db.query.seoProject.findFirst({
+    where: (table, { and, eq }) =>
+      and(
+        eq(table.id, args.projectId),
+        eq(table.organizationId, args.organizationId),
+      ),
+  });
+  if (!project) {
+    throw new Error(`Project (${args.projectId}) not found`);
+  }
+
+  return { draft: draftResult.value.draft, project, slug };
+}
+
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
 export class SeoWriterWorkflow extends WorkflowEntrypoint<
   {
@@ -151,7 +202,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       path: input.path,
       organizationId: input.organizationId,
       projectId: input.projectId,
-      campaignId: input.campaignId,
+      chatId: input.chatId,
       userId: input.userId,
     });
     configureDataForSeoClient();
@@ -159,24 +210,26 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
     const isOutlinePresent = await step.do(
       "Ensure outline is present",
       async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
+        const db = createDb();
+        const { draft } = await loadDraftAndProject({
+          db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          campaignId: input.campaignId,
+          chatId: input.chatId,
           path: input.path,
+          userId: input.userId ?? null,
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const outline = workspaceResult.value.node.data.get("outline");
+        const outline = draft.outline;
         if (outline) {
           return true;
         }
         const result = await createTask({
-          db: createDb(),
+          db,
           input: {
             type: "seo-plan-keyword",
             projectId: input.projectId,
             organizationId: input.organizationId,
-            campaignId: input.campaignId,
+            chatId: input.chatId,
             path: input.path,
             callbackInstanceId: event.instanceId,
             userId: input.userId,
@@ -229,30 +282,27 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       }
     }
 
-    await step.do("mark generating", async () => {
-      const workspaceResult = await loadWorkspaceForWorkflow({
-        organizationId: input.organizationId,
-        projectId: input.projectId,
-        campaignId: input.campaignId,
-        path: input.path,
+    await step.do("mark writing", async () => {
+      const db = createDb();
+      const writeResult = await writeContentDraft({
+        db,
+        chatId: input.chatId ?? null,
+        userId: input.userId ?? null,
+        project: {
+          id: input.projectId,
+          publishingSettings: null,
+          organizationId: input.organizationId,
+        },
+        createIfNotExists: true,
+        lookup: { type: "slug", slug: input.path },
+        draftNewValues: {
+          slug: input.path,
+          status: "writing",
+        },
       });
-      if (!workspaceResult.ok) throw workspaceResult.error;
-      const { loroDoc, workspaceBlobUri } = workspaceResult.value;
-      const writeResult = await writeToFile({
-        tree: loroDoc.getTree("fs"),
-        path: input.path,
-        metadata: [
-          { key: "status", value: "generating" satisfies SeoFileStatus },
-        ],
-      });
-      if (!writeResult.success) throw new Error(writeResult.message);
-      const persistResult = await persistWorkspaceSnapshot({
-        workspaceBlobUri,
-        loroDoc,
-      });
-      if (!persistResult.ok) throw persistResult.error;
+      if (!writeResult.ok) throw new Error(writeResult.error.message);
     });
-    logInfo("status set to generating", {
+    logInfo("status set to writing", {
       instanceId: event.instanceId,
       path: input.path,
     });
@@ -263,14 +313,15 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           timeout: "30 minutes",
         },
         async () => {
-          const workspaceResult = await loadWorkspaceForWorkflow({
+          const db = createDb();
+          const { project, draft } = await loadDraftAndProject({
+            db,
             organizationId: input.organizationId,
             projectId: input.projectId,
-            campaignId: input.campaignId,
+            chatId: input.chatId,
             path: input.path,
+            userId: input.userId ?? null,
           });
-          if (!workspaceResult.ok) throw workspaceResult.error;
-          const { project, node } = workspaceResult.value;
 
           const webTools = createWebToolsWithMetadata(project, this.env.CACHE);
 
@@ -280,6 +331,9 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             imageSettings: project.imageSettings ?? null,
             publicImagesBucket: createPublicImagesBucket(),
           });
+          const internalLinksTools = createInternalLinksToolWithMetadata(
+            project.websiteUrl,
+          );
           const todoTool = createTodoToolWithMetadata({ messages: [] });
 
           logInfo("writer tools ready", {
@@ -289,9 +343,9 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             imageToolCount: Object.keys(imageTools.tools).length,
           });
 
-          const outline = node.data.get("outline");
-          const primaryKeyword = node.data.get("primaryKeyword");
-          const notes = node.data.get("notes");
+          const outline = draft.outline;
+          const primaryKeyword = draft.primaryKeyword;
+          const notes = draft.notes;
           const articleType = await inferArticleType({
             primaryKeyword,
             notes,
@@ -303,7 +357,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             mode: "workflow",
             articleType,
             primaryKeyword,
-            outline,
+            outline: outline ?? undefined,
           });
 
           logInfo("starting article generation", {
@@ -331,6 +385,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               tools: {
                 ...webTools.tools,
                 ...imageTools.tools,
+                ...internalLinksTools.tools,
                 ...todoTool.tools,
               },
               system: systemPrompt,
@@ -520,34 +575,36 @@ ${text}
       );
 
       await step.do("Save article to file and update status", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
+        const db = createDb();
+        const { project } = await loadDraftAndProject({
+          db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          campaignId: input.campaignId,
+          chatId: input.chatId,
           path: input.path,
+          userId: input.userId ?? null,
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { loroDoc, workspaceBlobUri, project } = workspaceResult.value;
-        const writeResult = await writeToFile({
-          tree: loroDoc.getTree("fs"),
-          path: input.path,
-          content: articleMarkdown,
-          metadata: [
-            {
-              key: "status",
-              value: project.publishingSettings?.requireContentReview
-                ? ("pending-review" satisfies SeoFileStatus)
-                : ("scheduled" satisfies SeoFileStatus),
-            },
-            { key: "articleType", value: articleType },
-          ],
+        const writeResult = await writeContentDraft({
+          db,
+          chatId: input.chatId ?? null,
+          userId: input.userId ?? null,
+          project: {
+            id: input.projectId,
+            publishingSettings: project.publishingSettings ?? null,
+            organizationId: input.organizationId,
+          },
+          createIfNotExists: true,
+          lookup: { type: "slug", slug: input.path },
+          draftNewValues: {
+            slug: input.path,
+            contentMarkdown: articleMarkdown,
+            status: project.publishingSettings?.requireContentReview
+              ? "pending-review"
+              : "scheduled",
+            articleType,
+          },
         });
-        if (!writeResult.success) throw new Error(writeResult.message);
-        const persistResult = await persistWorkspaceSnapshot({
-          workspaceBlobUri,
-          loroDoc,
-        });
-        if (!persistResult.ok) throw persistResult.error;
+        if (!writeResult.ok) throw new Error(writeResult.error.message);
       });
       logInfo("article saved", {
         instanceId: event.instanceId,
@@ -566,33 +623,7 @@ ${text}
         path: input.path,
         message,
       });
-      await step.do("mark generation failed", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
-          organizationId: input.organizationId,
-          projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
-        });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { loroDoc, workspaceBlobUri } = workspaceResult.value;
-        await writeToFile({
-          tree: loroDoc.getTree("fs"),
-          path: input.path,
-          metadata: [
-            {
-              key: "status",
-              value: "generation-failed" satisfies SeoFileStatus,
-            },
-            { key: "error", value: `Generation failed: ${message}` },
-            { key: "workflowId", value: event.instanceId },
-          ],
-        });
-        const persistResult = await persistWorkspaceSnapshot({
-          workspaceBlobUri,
-          loroDoc,
-        });
-        if (!persistResult.ok) throw persistResult.error;
-      });
+
       throw e;
     }
   }
