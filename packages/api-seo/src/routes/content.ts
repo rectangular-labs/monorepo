@@ -180,6 +180,39 @@ const listUpdateReviews = withOrganizationIdBase
     };
   });
 
+const getDraft = withOrganizationIdBase
+  .route({ method: "GET", path: "/draft/{id}" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+      id: "string.uuid",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(type({ draft: schema.seoContentDraftSelectSchema }))
+  .handler(async ({ context, input }) => {
+    const draftResult = await getDraftById({
+      db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
+      id: input.id,
+      originatingChatId: null,
+      withContent: true,
+    });
+    if (!draftResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to get content draft.",
+        cause: draftResult.error,
+      });
+    }
+    const draft = draftResult.value;
+    if (!draft) {
+      throw new ORPCError("NOT_FOUND", { message: "Content draft not found." });
+    }
+    return { draft };
+  });
+
 const updateContent = withOrganizationIdBase
   .route({ method: "PATCH", path: "/draft/{id}" })
   .input(
@@ -372,9 +405,7 @@ const markContent = withOrganizationIdBase
       slug: draft.slug,
       primaryKeyword: draft.primaryKeyword,
       notes: draft.notes,
-      outlineGeneratedByTaskRunId: draft.outlineGeneratedByTaskRunId,
       outline: draft.outline,
-      generatedByTaskRunId: draft.generatedByTaskRunId,
       articleType: draft.articleType,
       contentMarkdown: draft.contentMarkdown,
       parentContentId: latestContentForSlug?.id,
@@ -615,6 +646,7 @@ export default base
     listSuggestions,
     listNewReviews,
     listUpdateReviews,
+    getDraft,
     updateContent,
     markContent,
     publishContent,

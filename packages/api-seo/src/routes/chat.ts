@@ -229,6 +229,7 @@ const messages = withOrganizationIdBase
           metadata: {
             sentAt: row.createdAt.toISOString(),
             userId: row.userId,
+            chatId: input.id,
           },
         };
       }),

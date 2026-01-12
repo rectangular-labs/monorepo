@@ -59,9 +59,7 @@ export async function ensureDraftForSlug(args: {
       slug: args.slug,
       primaryKeyword: live.primaryKeyword,
       notes: live.notes,
-      outlineGeneratedByTaskRunId: live.outlineGeneratedByTaskRunId,
       outline: live.outline,
-      generatedByTaskRunId: live.generatedByTaskRunId,
       articleType: live.articleType,
       contentMarkdown: live.contentMarkdown,
       // set to now, but really it'll be in the past once the draft eventually gets approved/published. which means it'll go live ASAP.

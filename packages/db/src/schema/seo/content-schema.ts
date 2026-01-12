@@ -21,7 +21,6 @@ import { organization, user } from "../auth-schema";
 import { seoContentDraft } from "./content-draft-schema";
 import { seoContentSchedule } from "./content-schedule-schema";
 import { seoProject } from "./project-schema";
-import { seoTaskRun } from "./task-run-schema";
 
 export const seoContent = pgSeoTable(
   "content",
@@ -57,16 +56,8 @@ export const seoContent = pgSeoTable(
     primaryKeyword: text().notNull(),
 
     notes: text(),
-    outlineGeneratedByTaskRunId: uuid().references(() => seoTaskRun.id, {
-      onDelete: "set null",
-      onUpdate: "cascade",
-    }),
     outline: text(),
 
-    generatedByTaskRunId: uuid().references(() => seoTaskRun.id, {
-      onDelete: "set null",
-      onUpdate: "cascade",
-    }),
     articleType: text({ enum: ARTICLE_TYPES }).notNull(),
     contentMarkdown: text().notNull(),
 
@@ -115,14 +106,6 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
   parentContent: one(seoContent, {
     fields: [seoContent.parentContentId],
     references: [seoContent.id],
-  }),
-  outlineTask: one(seoTaskRun, {
-    fields: [seoContent.outlineGeneratedByTaskRunId],
-    references: [seoTaskRun.id],
-  }),
-  contentTask: one(seoTaskRun, {
-    fields: [seoContent.generatedByTaskRunId],
-    references: [seoTaskRun.id],
   }),
   schedules: many(seoContentSchedule),
   drafts: many(seoContentDraft),
