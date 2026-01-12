@@ -12,6 +12,7 @@ import type {
 } from "@rectangular-labs/core/schemas/task-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
+import type { Scheduler } from "partywhen";
 import type { createCreateArticleToolWithMetadata } from "./lib/ai/tools/create-article-tool";
 import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
 import type { createSkillTools } from "./lib/ai/tools/skill-tools";
@@ -61,6 +62,7 @@ export interface InitialContext extends BaseContextWithAuth {
   seoPlannerWorkflow: Workflow<typeof seoPlanKeywordTaskInputSchema.infer>;
   seoWriterWorkflow: Workflow<typeof seoWriteArticleTaskInputSchema.infer>;
   cacheKV: KVNamespace;
+  scheduler: DurableObjectStub<Scheduler>;
 }
 
 export interface ChatContext extends InitialContext {

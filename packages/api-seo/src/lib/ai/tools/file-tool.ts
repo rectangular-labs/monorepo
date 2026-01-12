@@ -67,7 +67,7 @@ const rmInputSchema = type({
   slug: type("string").describe("The slug of the file to delete."),
 });
 
-const mvInputSchema = type({
+const _mvInputSchema = type({
   fromSlug: type("string").describe("The slug of the file/directory to move."),
   toSlug: type("string").describe("The destination slug."),
 });
@@ -80,26 +80,22 @@ const writeFileInputSchema = type({
       "The primary keyword for the file (required when creating a new file).",
     ),
   "createIfMissing?": "boolean",
-  "content?": type("string|undefined|null").describe(
+  "content?": type("string|undefined").describe(
     "Deprecated alias for contentMarkdown.",
   ),
-  "contentMarkdown?": type("string|undefined|null").describe(
+  "contentMarkdown?": type("string|undefined").describe(
     "The Markdown content for the file.",
   ),
-  "title?": type("string|undefined|null").describe("The title of the file."),
-  "description?": type("string|undefined|null").describe(
+  "title?": type("string|undefined").describe("The title of the file."),
+  "description?": type("string|undefined").describe(
     "The meta description for the file.",
   ),
-  "notes?": type("string|undefined|null").describe(
-    "Internal notes about the file.",
-  ),
-  "outline?": type("string|undefined|null").describe(
-    "The outline for the file.",
-  ),
-  "articleType?": type("string|undefined|null").describe(
+  "notes?": type("string|undefined").describe("Internal notes about the file."),
+  "outline?": type("string|undefined").describe("The outline for the file."),
+  "articleType?": type("string|undefined").describe(
     "The article type (if setting).",
   ),
-  "status?": type("string|undefined|null").describe(
+  "status?": type("string|undefined").describe(
     "The draft status (e.g. 'writing', 'pending-review', etc.).",
   ),
 });
@@ -321,6 +317,12 @@ export function createFileToolsWithMetadata(args: {
           publishingSettings,
           organizationId: args.organizationId,
         },
+        createIfNotExists: true,
+        lookup: {
+          type: "slug",
+          slug: normalizedSlug,
+          primaryKeyword: nextPrimaryKeyword,
+        },
         draftNewValues: {
           slug: normalizedSlug,
           primaryKeyword: nextPrimaryKeyword,
@@ -340,7 +342,11 @@ export function createFileToolsWithMetadata(args: {
       if (!result.ok) {
         return { success: false, message: result.error.message };
       }
-      return { success: true, message: result.value.message };
+      return {
+        success: true,
+        message: "File updated.",
+        draft: result.value.draft,
+      };
     },
   });
 

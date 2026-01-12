@@ -428,6 +428,9 @@ importers:
       jimp:
         specifier: ^1.6.0
         version: 1.6.0
+      partywhen:
+        specifier: ^0.1.0
+        version: 0.1.0(@cloudflare/workers-types@4.20251121.0)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251121.0
@@ -630,9 +633,6 @@ importers:
       arktype:
         specifier: ^2.1.27
         version: 2.1.27
-      loro-crdt:
-        specifier: ^1.10.0
-        version: 1.10.0
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -8245,6 +8245,10 @@ packages:
   crelt@1.0.6:
     resolution: {integrity: sha512-VQ2MBenTq1fWZUH9DJNGti7kKv6EeAuYr3cLwxUWhIu1baTaXh4Ib5W2CqHVqib4/MqbYGJqiL3Zb8GJZr3l4g==}
 
+  cron-parser@5.4.0:
+    resolution: {integrity: sha512-HxYB8vTvnQFx4dLsZpGRa0uHp6X3qIzS3ZJgJ9v6l/5TJMgeWQbLkR5yiJ5hOxGbc9+jCADDnydIe15ReLZnJA==}
+    engines: {node: '>=18'}
+
   cronstrue@2.59.0:
     resolution: {integrity: sha512-YKGmAy84hKH+hHIIER07VCAHf9u0Ldelx1uU6EBxsRPDXIA1m5fsKmJfyC3xBhw6cVC/1i83VdbL4PvepTrt8A==}
     hasBin: true
@@ -10744,6 +10748,10 @@ packages:
   lucide-static@0.554.0:
     resolution: {integrity: sha512-BYYjEYeK9zuG80ttRn0ud1eXS72KlGNr0p3v5kSWRDVUZqoKF9JJAxeAvdNrFIRv4OIv7h2sKSvfz0xXhP3l/w==}
 
+  luxon@3.7.2:
+    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
+    engines: {node: '>=12'}
+
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
@@ -11636,8 +11644,16 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
 
+  partyserver@0.1.0:
+    resolution: {integrity: sha512-rtJ9ztQOglaheNfFUn+5RSZAoyC8se4LGq1SLWAE+zkk7w5Exw9bH0Aqh0HVewnyU3zuzinnbPNp+55DzA90yg==}
+    peerDependencies:
+      '@cloudflare/workers-types': ^4.20240729.0
+
   partysocket@1.1.6:
     resolution: {integrity: sha512-LkEk8N9hMDDsDT0iDK0zuwUDFVrVMUXFXCeN3850Ng8wtjPqPBeJlwdeY6ROlJSEh3tPoTTasXoSBYH76y118w==}
+
+  partywhen@0.1.0:
+    resolution: {integrity: sha512-/8KZ0RmzLTFZz/hXmYUMYyweqL7yhbJ1Hst1swLVgG85Lpi0xdKmXsrjhVMST95CmUbZfqWzLrKeY1x7b4alFw==}
 
   pascal-case@2.0.1:
     resolution: {integrity: sha512-qjS4s8rBOJa2Xm0jmxXiyh1+OFf6ekCWOvUaRgAQSktzlTbMotS0nmG9gyYAybCWBcuP4fsBeRCKNwGBnMe2OQ==}
@@ -23265,6 +23281,10 @@ snapshots:
 
   crelt@1.0.6: {}
 
+  cron-parser@5.4.0:
+    dependencies:
+      luxon: 3.7.2
+
   cronstrue@2.59.0: {}
 
   cross-env@7.0.3:
@@ -26260,6 +26280,8 @@ snapshots:
 
   lucide-static@0.554.0: {}
 
+  luxon@3.7.2: {}
+
   lz-string@1.5.0: {}
 
   maath@0.10.8(@types/three@0.181.0)(three@0.181.2):
@@ -27659,9 +27681,21 @@ snapshots:
   parseurl@1.3.3:
     optional: true
 
+  partyserver@0.1.0(@cloudflare/workers-types@4.20251121.0):
+    dependencies:
+      '@cloudflare/workers-types': 4.20251121.0
+      nanoid: 5.1.6
+
   partysocket@1.1.6:
     dependencies:
       event-target-polyfill: 0.0.4
+
+  partywhen@0.1.0(@cloudflare/workers-types@4.20251121.0):
+    dependencies:
+      cron-parser: 5.4.0
+      partyserver: 0.1.0(@cloudflare/workers-types@4.20251121.0)
+    transitivePeerDependencies:
+      - '@cloudflare/workers-types'
 
   pascal-case@2.0.1:
     dependencies:

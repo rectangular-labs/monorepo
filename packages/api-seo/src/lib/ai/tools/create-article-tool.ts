@@ -54,7 +54,7 @@ export function createCreateArticleToolWithMetadata({
   >;
   context: {
     db: DB;
-    chatId?: string | null;
+    chatId: string | null;
   };
 }) {
   const createArticle = tool({
@@ -90,6 +90,8 @@ export function createCreateArticleToolWithMetadata({
         userId,
         project,
         chatId: context.chatId,
+        lookup: { type: "slug", slug, primaryKeyword: keyword },
+        createIfNotExists: true,
         draftNewValues: {
           slug,
           status,

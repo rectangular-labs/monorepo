@@ -1,6 +1,7 @@
 export * from "./seo/chat-message-operations";
 export * from "./seo/chat-operations";
 export * from "./seo/content-operations";
+export * from "./seo/content-schedule-operations";
 export * from "./seo/gsc-property-operations";
 export * from "./seo/organization-operations";
 export * from "./seo/project-author-operations";

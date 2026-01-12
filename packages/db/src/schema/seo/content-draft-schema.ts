@@ -109,6 +109,7 @@ export const seoContentDraft = pgSeoTable(
       table.originatingChatId,
     ),
     index("seo_content_branch_status_idx").on(table.status),
+    index("seo_content_branch_deleted_at_idx").on(table.deletedAt),
   ],
 );
 
@@ -148,6 +149,5 @@ export const seoContentDraftUpdateSchema = createUpdateSchema(seoContentDraft)
     type({
       id: "string.uuid",
       projectId: "string.uuid",
-      organizationId: "string",
     }),
   );

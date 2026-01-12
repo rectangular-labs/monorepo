@@ -37,6 +37,7 @@ export async function deleteDraftForSlug(args: {
       originatingChatId: args.originatingChatId,
       userId: args.userId,
       primaryKeyword: data.content.primaryKeyword,
+      createIfNotExists: true,
     });
     if (!draftResult.ok) {
       return draftResult;

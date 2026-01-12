@@ -5,6 +5,7 @@ export const router = {
   chat: lazy(() => import("./chat")),
   task: lazy(() => import("./task")),
   schedule: lazy(() => import("./schedule")),
+  content: lazy(() => import("./content")),
   googleSearchConsole: lazy(() => import("./google-search-console")),
   auth: {
     session: lazy(() => import("./auth/session")),

@@ -38,7 +38,10 @@ export async function getContentForSlug(args: {
     });
   }
 
-  const liveResult = await getContentBySlug(args);
+  const liveResult = await getContentBySlug({
+    ...args,
+    contentType: "live",
+  });
   if (!liveResult.ok) {
     return liveResult;
   }

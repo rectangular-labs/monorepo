@@ -86,6 +86,7 @@ export async function moveDraftSlug(args: {
     organizationId: args.organizationId,
     projectId: args.projectId,
     slug: args.fromSlug,
+    contentType: "live",
     withContent: true,
   });
   if (!liveResult.ok) {

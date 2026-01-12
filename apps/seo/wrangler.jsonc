@@ -42,6 +42,10 @@
       {
         "class_name": "WebSocketServer",
         "name": "WEBSOCKET_SERVER"
+      },
+      {
+        "class_name": "Scheduler",
+        "name": "SCHEDULER"
       }
     ]
   },
@@ -52,6 +56,10 @@
     // },
     {
       "new_sqlite_classes": ["WebSocketServer"],
+      "tag": "v1"
+    },
+    {
+      "new_sqlite_classes": ["Scheduler"],
       "tag": "v1"
     }
   ],
@@ -110,6 +118,10 @@
           {
             "class_name": "WebSocketServer",
             "name": "WEBSOCKET_SERVER"
+          },
+          {
+            "class_name": "Scheduler",
+            "name": "SCHEDULER"
           }
         ]
       },
@@ -120,6 +132,10 @@
         // },
         {
           "new_sqlite_classes": ["WebSocketServer"],
+          "tag": "v1"
+        },
+        {
+          "new_sqlite_classes": ["Scheduler"],
           "tag": "v1"
         }
       ],
@@ -181,6 +197,10 @@
           {
             "class_name": "WebSocketServer",
             "name": "WEBSOCKET_SERVER"
+          },
+          {
+            "class_name": "Scheduler",
+            "name": "SCHEDULER"
           }
         ]
       },
@@ -192,6 +212,10 @@
         {
           "new_sqlite_classes": ["WebSocketServer"],
           "tag": "v1"
+        },
+        {
+          "new_sqlite_classes": ["Scheduler"],
+          "tag": "v2"
         }
       ],
       "r2_buckets": [

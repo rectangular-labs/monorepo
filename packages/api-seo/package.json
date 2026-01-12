@@ -16,6 +16,10 @@
       "types": "./dist/server.websocket.d.ts",
       "default": "./src/server.websocket.ts"
     },
+    "./scheduler-server": {
+      "types": "./dist/server.scheduler.d.ts",
+      "default": "./src/server.scheduler.ts"
+    },
     "./context": {
       "types": "./dist/context.d.ts",
       "default": "./src/context.ts"
@@ -71,6 +75,7 @@
     "arktype": "^2.1.27",
     "aws4fetch": "^1.0.20",
     "cloudflare": "^5.2.0",
-    "jimp": "^1.6.0"
+    "jimp": "^1.6.0",
+    "partywhen": "^0.1.0"
   }
 }
