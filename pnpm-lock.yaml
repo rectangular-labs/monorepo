@@ -85,7 +85,7 @@ importers:
         version: 5.1.9(react@19.2.3)(typescript@5.9.3)
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       '@tanstack/react-query':
         specifier: ^5.90.10
         version: 5.90.10(react@19.2.3)
@@ -111,8 +111,8 @@ importers:
         specifier: ^5.0.112
         version: 5.0.112(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
@@ -205,6 +205,8 @@ importers:
         specifier: ^4.50.0
         version: 4.50.0(@cloudflare/workers-types@4.20251121.0)
 
+  apps/seo-www: {}
+
   apps/www:
     dependencies:
       '@react-three/drei':
@@ -221,7 +223,7 @@ importers:
         version: link:../../packages/ui
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       '@tanstack/react-query':
         specifier: ^5.90.10
         version: 5.90.10(react@19.2.3)
@@ -241,8 +243,8 @@ importers:
         specifier: ^1.139.2
         version: 1.139.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.1))(webpack@5.99.5(@swc/core@1.13.5))
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       motion:
         specifier: ^12.23.24
         version: 12.23.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -318,7 +320,7 @@ importers:
     dependencies:
       '@orpc/arktype':
         specifier: ^1.11.3
-        version: 1.11.3(@ark/schema@0.55.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.11.3(@opentelemetry/api@1.9.0))(arktype@2.1.27)(crossws@0.3.5)(ws@8.18.3)
+        version: 1.11.3(@ark/schema@0.56.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.11.3(@opentelemetry/api@1.9.0))(arktype@2.1.29)(crossws@0.3.5)(ws@8.18.3)
       '@orpc/client':
         specifier: ^1.11.3
         version: 1.11.3(@opentelemetry/api@1.9.0)
@@ -341,8 +343,8 @@ importers:
         specifier: workspace:*
         version: link:../auth
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -412,13 +414,13 @@ importers:
         version: link:../task
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       ai:
         specifier: ^5.0.112
         version: 5.0.112(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       aws4fetch:
         specifier: ^1.0.20
         version: 1.0.20
@@ -476,7 +478,7 @@ importers:
         version: link:../result
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       ai:
         specifier: ^5.0.112
         version: 5.0.112(zod@4.1.12)
@@ -484,8 +486,8 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -516,10 +518,10 @@ importers:
         version: link:../ui
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       better-auth:
         specifier: 1.3.34
         version: 1.3.34(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -561,8 +563,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       feed:
         specifier: ^5.1.0
         version: 5.1.0
@@ -631,8 +633,8 @@ importers:
         specifier: workspace:*
         version: link:../loro-file-system
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -654,10 +656,10 @@ importers:
         version: link:../result
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
     devDependencies:
       '@rectangular-labs/db':
         specifier: workspace:*
@@ -685,16 +687,16 @@ importers:
         version: link:../result
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       ai:
         specifier: ^5.0.112
         version: 5.0.112(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       drizzle-arktype:
         specifier: ^0.1.3
-        version: 0.1.3(arktype@2.1.27)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251121.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)))
+        version: 0.1.3(arktype@2.1.29)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251121.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3)))
       drizzle-orm:
         specifier: ^0.44.7
         version: 0.44.7(@cloudflare/workers-types@4.20251121.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
@@ -788,10 +790,10 @@ importers:
         version: link:../result
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
     devDependencies:
       '@rectangular-labs/typescript':
         specifier: workspace:*
@@ -855,7 +857,7 @@ importers:
         version: link:../result
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)
+        version: 0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)
       '@trigger.dev/sdk':
         specifier: 4.1.1
         version: 4.1.1(ai@5.0.112(zod@4.1.12))(typescript@5.9.3)(zod@4.1.12)
@@ -863,8 +865,8 @@ importers:
         specifier: ^5.0.112
         version: 5.0.112(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       crawlee:
         specifier: ^3.15.3
         version: 3.15.3(playwright@1.56.1)
@@ -927,8 +929,8 @@ importers:
         specifier: ^5.0.112
         version: 5.0.112(zod@4.1.12)
       arktype:
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.1.29
+        version: 2.1.29
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1160,11 +1162,11 @@ packages:
   '@apify/utilities@2.18.2':
     resolution: {integrity: sha512-sLB1qEum2fs+odgTJ+x11R/QCYp/zVX/CYLhst9oub7mfo1geDvioOtZjljptS7aQLyqtco3hgn+Co3rtrIC1w==}
 
-  '@ark/schema@0.55.0':
-    resolution: {integrity: sha512-IlSIc0FmLKTDGr4I/FzNHauMn0MADA6bCjT1wauu4k6MyxhC1R9gz0olNpIRvK7lGGDwtc/VO0RUDNvVQW5WFg==}
+  '@ark/schema@0.56.0':
+    resolution: {integrity: sha512-ECg3hox/6Z/nLajxXqNhgPtNdHWC9zNsDyskwO28WinoFEnWow4IsERNz9AnXRhTZJnYIlAJ4uGn3nlLk65vZA==}
 
-  '@ark/util@0.55.0':
-    resolution: {integrity: sha512-aWFNK7aqSvqFtVsl1xmbTjGbg91uqtJV7Za76YGNEwIO4qLjMfyY8flmmbhooYMuqPCO2jyxu8hve943D+w3bA==}
+  '@ark/util@0.56.0':
+    resolution: {integrity: sha512-BghfRC8b9pNs3vBoDJhcta0/c1J1rsoS1+HgVUreMFPdhz/CRAKReAu57YEllNaSy98rWAdY1gE+gFup7OXpgA==}
 
   '@asamuzakjp/css-color@3.1.1':
     resolution: {integrity: sha512-hpRD68SV2OMcZCsrbdkccTw5FXjNDLo5OuqSHyHZfwweGsDWZwDJ2+gONyNAbazZclobMirACLw0lk8WVxIqxA==}
@@ -7535,11 +7537,11 @@ packages:
   aria-query@5.3.0:
     resolution: {integrity: sha512-b0P0sZPKtyu8HkeRAfCq0IfURZK+SuwMjY1UXGBU27wpAiTwQAIlq56IbIO+ytk/JjS1fMR14ee5WBBfKi5J6A==}
 
-  arkregex@0.0.3:
-    resolution: {integrity: sha512-bU21QJOJEFJK+BPNgv+5bVXkvRxyAvgnon75D92newgHxkBJTgiFwQxusyViYyJkETsddPlHyspshDQcCzmkNg==}
+  arkregex@0.0.5:
+    resolution: {integrity: sha512-ncYjBdLlh5/QnVsAA8De16Tc9EqmYM7y/WU9j+236KcyYNUXogpz3sC4ATIZYzzLxwI+0sEOaQLEmLmRleaEXw==}
 
-  arktype@2.1.27:
-    resolution: {integrity: sha512-enctOHxI4SULBv/TDtCVi5M8oLd4J5SVlPUblXDzSsOYQNMzmVbUosGBnJuZDKmFlN5Ie0/QVEuTE+Z5X1UhsQ==}
+  arktype@2.1.29:
+    resolution: {integrity: sha512-jyfKk4xIOzvYNayqnD8ZJQqOwcrTOUbIU4293yrzAjA3O1dWh61j71ArMQ6tS/u4pD7vabSPe7nG3RCyoXW6RQ==}
 
   array-union@2.1.0:
     resolution: {integrity: sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==}
@@ -14509,11 +14511,11 @@ snapshots:
       '@apify/consts': 2.44.1
       '@apify/log': 2.5.22
 
-  '@ark/schema@0.55.0':
+  '@ark/schema@0.56.0':
     dependencies:
-      '@ark/util': 0.55.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)
+      '@ark/util': 0.56.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)
 
-  '@ark/util@0.55.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)': {}
+  '@ark/util@0.56.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)': {}
 
   '@asamuzakjp/css-color@3.1.1':
     dependencies:
@@ -18705,12 +18707,12 @@ snapshots:
 
   '@orama/orama@3.1.16': {}
 
-  '@orpc/arktype@1.11.3(@ark/schema@0.55.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.11.3(@opentelemetry/api@1.9.0))(arktype@2.1.27)(crossws@0.3.5)(ws@8.18.3)':
+  '@orpc/arktype@1.11.3(@ark/schema@0.56.0)(@opentelemetry/api@1.9.0)(@orpc/contract@1.11.3(@opentelemetry/api@1.9.0))(arktype@2.1.29)(crossws@0.3.5)(ws@8.18.3)':
     dependencies:
-      '@ark/schema': 0.55.0
+      '@ark/schema': 0.56.0
       '@orpc/contract': 1.11.3(@opentelemetry/api@1.9.0)
       '@orpc/openapi': 1.11.3(@opentelemetry/api@1.9.0)(crossws@0.3.5)(ws@8.18.3)
-      arktype: 2.1.27
+      arktype: 2.1.29
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - crossws
@@ -21047,9 +21049,9 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@t3-oss/env-core@0.13.8(arktype@2.1.27)(typescript@5.9.3)(zod@4.1.12)':
+  '@t3-oss/env-core@0.13.8(arktype@2.1.29)(typescript@5.9.3)(zod@4.1.12)':
     optionalDependencies:
-      arktype: 2.1.27
+      arktype: 2.1.29
       typescript: 5.9.3
       zod: 4.1.12
 
@@ -22379,15 +22381,15 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
-  arkregex@0.0.3:
+  arkregex@0.0.5:
     dependencies:
-      '@ark/util': 0.55.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)
+      '@ark/util': 0.56.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)
 
-  arktype@2.1.27:
+  arktype@2.1.29:
     dependencies:
-      '@ark/schema': 0.55.0
-      '@ark/util': 0.55.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)
-      arkregex: 0.0.3
+      '@ark/schema': 0.56.0
+      '@ark/util': 0.56.0(patch_hash=6d7ed165ad61d797bca7a46766e775b0746da077b2867cc194fb35868e509924)
+      arkregex: 0.0.5
 
   array-union@2.1.0: {}
 
@@ -23720,9 +23722,9 @@ snapshots:
 
   draco3d@1.5.7: {}
 
-  drizzle-arktype@0.1.3(arktype@2.1.27)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251121.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))):
+  drizzle-arktype@0.1.3(arktype@2.1.29)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20251121.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))):
     dependencies:
-      arktype: 2.1.27
+      arktype: 2.1.29
       drizzle-orm: 0.44.7(@cloudflare/workers-types@4.20251121.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.5)(better-sqlite3@11.9.1)(gel@2.0.1)(kysely@0.28.5)(pg@8.16.3)(postgres@3.4.7)(prisma@6.6.0(typescript@5.9.3))
 
   drizzle-kit@0.31.7:

@@ -3,7 +3,6 @@ import { sliceContentLines } from "./slice-content-lines";
 
 describe("sliceContentLines", () => {
   const multiLineContent = "line 1\nline 2\nline 3\nline 4\nline 5";
-  const singleLineContent = "single line";
   const emptyContent = "";
 
   describe("success cases", () => {

@@ -31,6 +31,6 @@
     "@orpc/openapi-client": "^1.11.3",
     "@orpc/server": "^1.11.3",
     "@rectangular-labs/auth": "workspace:*",
-    "arktype": "^2.1.27"
+    "arktype": "^2.1.29"
   }
 }

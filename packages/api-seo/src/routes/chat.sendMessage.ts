@@ -30,6 +30,10 @@ const chatContextMiddleware = os
       { next, context },
       { projectId, chatId }: { projectId: string; chatId: string | undefined },
     ) => {
+      console.log("[chat.sendMessage] chatContextMiddleware started", {
+        projectId,
+        chatId,
+      });
       const resolvedChat = await (async () => {
         if (chatId) {
           const chat = await getChatById({
@@ -84,6 +88,11 @@ const chatContextMiddleware = os
         return chat.value;
       })();
 
+      console.log("[chat.sendMessage] chatContextMiddleware resolved chat", {
+        chatId: resolvedChat.id,
+        chatStatus: resolvedChat.status,
+      });
+
       return await next({
         context: {
           chatId: resolvedChat.id,
@@ -137,7 +146,11 @@ export const sendMessage = withOrganizationIdBase
     const project = projectResult.value;
 
     const gscProperty = await (async () => {
-      if (!project.gscPropertyId) return null;
+      if (!project.gscPropertyId) {
+        console.log("[chat.sendMessage] No GSC property ID, skipping");
+        return null;
+      }
+
       const result = await getGSCPropertyById(project.gscPropertyId);
       if (!result.ok) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -163,29 +176,43 @@ export const sendMessage = withOrganizationIdBase
         projectName: project.name ?? "",
         organizationId: context.organization.id,
       });
+      console.log("[chat.sendMessage] Title generation completed");
     }
 
     const agent = (() => {
       if (input.currentPage === "article-editor") {
-        return createWriterAgent({
+        const writerAgent = createWriterAgent({
           project,
           context,
           messages: input.messages,
         });
+        return writerAgent;
       }
-      return createStrategistAgent({
+      const strategistAgent = createStrategistAgent({
         project,
         context,
         messages: input.messages,
         currentPage: input.currentPage,
         gscProperty: gscProperty ?? undefined,
       });
+      return strategistAgent;
     })();
 
     const result = streamText({
       ...agent,
       onError: (error) => {
-        console.error("chat.sendMessage error", error);
+        console.error("[chat.sendMessage] streamText onError", {
+          error,
+        });
+      },
+      onStepFinish: (step) => {
+        console.log("[chat.sendMessage] step finished", {
+          text: step?.text,
+          toolResults: step?.toolResults,
+          toolCallCount: Array.isArray(step?.toolCalls)
+            ? step.toolCalls.length
+            : 0,
+        });
       },
       stopWhen: [
         hasToolCall("ask_questions"),
@@ -193,59 +220,63 @@ export const sendMessage = withOrganizationIdBase
         hasToolCall("manage_integrations"),
       ],
     });
+    console.log("[chat.sendMessage] streamText result created");
 
-    const assistantMessageId = uuidv7();
-    return streamToEventIterator(
-      result.toUIMessageStream<SeoChatMessage>({
-        sendSources: true,
-        sendReasoning: true,
-        generateMessageId: () => assistantMessageId,
-        messageMetadata: ({ part }) => {
-          if (part.type === "start") {
-            return {
-              sentAt: new Date().toISOString(),
-              userId: null,
+    const uiMessageStream = result.toUIMessageStream<SeoChatMessage>({
+      sendSources: true,
+      sendReasoning: true,
+      generateMessageId: uuidv7,
+      messageMetadata: ({ part }) => {
+        if (part.type === "start") {
+          console.log("[chat.sendMessage] messageMetadata - start part");
+          return {
+            sentAt: new Date().toISOString(),
+            userId: null,
+            chatId: context.chatId,
+          };
+        }
+        return;
+      },
+      onFinish: async ({ responseMessage }) => {
+        console.log("[chat.sendMessage] onFinish called", {
+          responseMessageId: responseMessage?.id,
+          responseMessagePartCount: responseMessage?.parts?.length ?? 0,
+        });
+        const [updatedChat, createdChatMessage] = await Promise.all([
+          updateChat({
+            db: context.db,
+            values: {
+              id: context.chatId,
+              projectId: context.projectId,
+              organizationId: context.organization.id,
+              status: "idle",
+            },
+          }),
+          createChatMessage({
+            db: context.db,
+            value: {
+              id: responseMessage.id,
+              organizationId: context.organization.id,
+              projectId: context.projectId,
               chatId: context.chatId,
-            };
-          }
-          return;
-        },
-        onFinish: async ({ responseMessage }) => {
-          const [updatedChat, createdChatMessage] = await Promise.all([
-            updateChat({
-              db: context.db,
-              values: {
-                id: context.chatId,
-                projectId: context.projectId,
-                organizationId: context.organization.id,
-                status: "idle",
-              },
-            }),
-            createChatMessage({
-              db: context.db,
-              value: {
-                id: responseMessage.id,
-                organizationId: context.organization.id,
-                projectId: context.projectId,
-                chatId: context.chatId,
-                source: "assistant",
-                message: responseMessage.parts,
-              },
-            }),
-          ]);
-          if (!updatedChat.ok) {
-            throw new ORPCError("INTERNAL_SERVER_ERROR", {
-              message: "Failed to update chat",
-              cause: updatedChat.error,
-            });
-          }
-          if (!createdChatMessage.ok) {
-            throw new ORPCError("INTERNAL_SERVER_ERROR", {
-              message: "Failed to create chat message",
-              cause: createdChatMessage.error,
-            });
-          }
-        },
-      }),
-    );
+              source: "assistant",
+              message: responseMessage.parts,
+            },
+          }),
+        ]);
+        if (!updatedChat.ok) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to update chat",
+            cause: updatedChat.error,
+          });
+        }
+        if (!createdChatMessage.ok) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to create chat message",
+            cause: createdChatMessage.error,
+          });
+        }
+      },
+    });
+    return streamToEventIterator(uiMessageStream);
   });

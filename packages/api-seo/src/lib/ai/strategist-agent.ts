@@ -117,6 +117,10 @@ export function createStrategistAgent({
     projectId: project.id,
     chatId: context.chatId,
   });
+  const readOnlyFileToolDefinitions = fileTools.toolDefinitions.filter(
+    (tool) => tool.toolName === "ls" || tool.toolName === "cat",
+  );
+
   const webTools = createWebToolsWithMetadata(project, context.cacheKV);
   const gscTools = createGscToolWithMetadata({
     accessToken: gscProperty?.accessToken ?? null,
@@ -129,10 +133,6 @@ export function createStrategistAgent({
     project,
     context,
   });
-
-  const readOnlyFileToolDefinitions = fileTools.toolDefinitions.filter(
-    (tool) => tool.toolName === "ls" || tool.toolName === "cat",
-  );
 
   const skillDefinitions: AgentToolDefinition[] = [
     ...settingsTools.toolDefinitions,

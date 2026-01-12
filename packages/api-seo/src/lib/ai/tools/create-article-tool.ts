@@ -1,45 +1,34 @@
-import { type DB, schema } from "@rectangular-labs/db";
+import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
+import type { DB, schema } from "@rectangular-labs/db";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
 import { writeContentDraft } from "../../content/write-content-draft";
 import type { AgentToolDefinition } from "./utils";
 
 const createArticleInputSchema = type({
-  primaryKeyword: schema.seoContentDraftInsertSchema
-    .get("primaryKeyword")
-    .describe("Primary keyword the article targets (required)."),
-  slug: schema.seoContentDraftInsertSchema
-    .get("slug")
-    .describe(
-      "SEO/GEO optimized slug for the targeted primary keyword. Must start with '/'. e.g. /business/how-to-start-a-business.",
-    ),
-  "title?": schema.seoContentDraftInsertSchema
-    .get("title")
+  primaryKeyword: type("string").describe(
+    "Primary keyword the article targets (required).",
+  ),
+  slug: type("string").describe(
+    "SEO/GEO optimized slug for the targeted primary keyword. Must start with '/'. e.g. /business/how-to-start-a-business.",
+  ),
+  "title?": type("string|null").describe(
+    "Article title should only be present if explicitly provided by the user or confirmed by the user in response to your suggestion.",
+  ),
+  "description?": type("string|null").describe(
+    "Article description should only be present if explicitly provided by the user or confirmed by the user in response to your suggestion.",
+  ),
+  "outline?": type("string|null").describe(
+    "Article outline should only be present if explicitly provided by the user or worked on together with the user. This should be a list of H2/H3 headings that the article will cover along with any additional context or notes for each section.",
+  ),
+  "articleType?": articleTypeSchema
     .or(type.null)
     .describe(
-      "Article title if explicitly provided by the user or confirmed by the user in response to your suggestion.",
+      "Article type should only be present if explicitly provided by the user or confirmed by the user in response to your suggestion.",
     ),
-  "description?": schema.seoContentDraftInsertSchema
-    .get("description")
-    .or(type.null)
-    .describe(
-      "Article description if explicitly provided by the user or confirmed by the user in response to your suggestion.",
-    ),
-  "outline?": schema.seoContentDraftInsertSchema
-    .get("outline")
-    .describe(
-      "Article outline if explicitly provided by the user or worked on together with the user. This should be a list of H2/H3 headings that the article will cover along with any additional context or notes for each section.",
-    ),
-  "articleType?": schema.seoContentDraftInsertSchema
-    .get("articleType")
-    .describe(
-      "Article type if explicitly provided by the user or confirmed by the user in response to your suggestion.",
-    ),
-  "notes?": schema.seoContentDraftInsertSchema
-    .get("notes")
-    .describe(
-      "Notes or guidance on what the user wants to focus on in the article/section/topic. No need to be provided if we already received/worked on an outline together with the user.",
-    ),
+  "notes?": type("string|null").describe(
+    "Notes or guidance on what the user wants to focus on in the article/section/topic. No need to be provided if we already received/worked on an outline together with the user.",
+  ),
 });
 
 export function createCreateArticleToolWithMetadata({

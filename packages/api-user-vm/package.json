@@ -44,6 +44,6 @@
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.112",
     "ai-sdk-provider-claude-code": "^2.1.0",
-    "arktype": "^2.1.27"
+    "arktype": "^2.1.29"
   }
 }
