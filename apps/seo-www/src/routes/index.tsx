@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Benefits } from "./-components/benefits";
-import { Credentials } from "./-components/credentials";
-import { CTA } from "./-components/cta";
-import { FAQ } from "./-components/faq";
-import { Hero } from "./-components/hero";
-import { Stats } from "./-components/stats";
+import { Benefits } from "~/routes/-components/benefits";
+import { Credentials } from "~/routes/-components/credentials";
+import { CTA } from "~/routes/-components/cta";
+import { FAQ } from "~/routes/-components/faq";
+import { Hero } from "~/routes/-components/hero";
+import { Stats } from "~/routes/-components/stats";
 
-export const Route = createFileRoute("/_marketing/")({
+export const Route = createFileRoute("/")({
   component: App,
 
   head: () => ({
@@ -29,13 +29,13 @@ export const Route = createFileRoute("/_marketing/")({
 
 function App() {
   return (
-    <div className="bg-background">
+    <main className="bg-background">
       <Hero />
       <Benefits />
       <Credentials />
       <Stats />
       <CTA />
       <FAQ />
-    </div>
+    </main>
   );
 }

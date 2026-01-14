@@ -95,9 +95,11 @@ jobs:
         run: |
           FILE_WWW="apps/www/wrangler.jsonc"
           FILE_SEO="apps/seo/wrangler.jsonc"
+          FILE_SEO_WWW="apps/seo-www/wrangler.jsonc"
           # Replace placeholder with computed slug
           sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_WWW"
           sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_SEO"
+          sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$FILE_SEO_WWW"
           sed -i "s|{env.PULL_REQUEST}|$ENVIRONMENT|g" "$ENV_PATH"
 
       - name: Prepare secrets
@@ -138,6 +140,18 @@ jobs:
           environment: ${{ steps.resolve.outputs.environment }}
           secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
 
+      - name: Deploy SEO WWW
+        id: deploy_seo_www
+        uses: cloudflare/wrangler-action@v3
+        with:
+          command: deploy --env=""
+          packageManager: pnpm
+          workingDirectory: apps/seo-www
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          environment: ${{ steps.resolve.outputs.environment }}
+          secrets: ${{ steps.prepare_secrets.outputs.secret_names }}
+
       - name: Comment for deployment details
         if: ${{ github.event_name == 'pull_request' }}
         uses: thollander/actions-comment-pull-request@v3
@@ -145,6 +159,7 @@ jobs:
           message: |
             Cloudflare Preview URL for WWW :balloon: : https://${{ steps.deploy_www.outputs.deployment-url }}
             Cloudflare Preview URL for SEO :balloon: : https://${{ steps.deploy_seo.outputs.deployment-url }}
+            Cloudflare Preview URL for SEO WWW :balloon: : https://${{ steps.deploy_seo_www.outputs.deployment-url }}
           comment-tag: execution
 
   cleanup:
@@ -163,9 +178,11 @@ jobs:
         run: |
           FILE_WWW="apps/www/wrangler.jsonc"
           FILE_SEO="apps/seo/wrangler.jsonc"
+          FILE_SEO_WWW="apps/seo-www/wrangler.jsonc"
           # Replace placeholder with computed slug
           sed -i "s|{env.PULL_REQUEST}|$STAGE|g" "$FILE_WWW"
           sed -i "s|{env.PULL_REQUEST}|$STAGE|g" "$FILE_SEO"
+          sed -i "s|{env.PULL_REQUEST}|$STAGE|g" "$FILE_SEO_WWW"
       - name: Destroy Preview Environment for WWW
         uses: cloudflare/wrangler-action@v3
         with:
@@ -180,6 +197,15 @@ jobs:
         with:
           packageManager: pnpm
           workingDirectory: apps/seo
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: delete --env ${{ env.STAGE }}
+
+      - name: Destroy Preview Environment for SEO WWW
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: pnpm
+          workingDirectory: apps/seo-www
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: delete --env ${{ env.STAGE }}
