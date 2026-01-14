@@ -34,9 +34,9 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.46",
     "@cloudflare/containers": "^0.0.30",
-    "@orpc/client": "^1.11.3",
-    "@orpc/contract": "^1.11.3",
-    "@orpc/server": "^1.11.3",
+    "@orpc/client": "^1.13.4",
+    "@orpc/contract": "^1.13.4",
+    "@orpc/server": "^1.13.4",
     "@rectangular-labs/api-core": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
