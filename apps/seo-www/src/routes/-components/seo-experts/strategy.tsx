@@ -1,16 +1,16 @@
-import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { motion, AnimatePresence } from "motion/react";
 import {
+  ArrowRight,
+  BarChart3,
   Sparkles,
   Target,
-  Zap,
-  ArrowRight,
   TrendingUp,
-  BarChart3,
+  Zap,
 } from "@rectangular-labs/ui/components/icon";
-import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
-import { useState } from "react";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function Strategy() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -76,7 +76,7 @@ export function Strategy() {
         <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="relative">
             <ChatMockup className="min-h-[500px] shadow-2xl">
-              <ChatMockupMessage from="assistant" delay={0.5}>
+              <ChatMockupMessage delay={0.5} from="assistant">
                 <div className="space-y-6">
                   <p className="text-sm">
                     Surfacing 3 high-priority actions for{" "}
@@ -85,17 +85,17 @@ export function Strategy() {
                   <div className="grid gap-3">
                     {actions.map((act) => (
                       <button
-                        key={act.id}
-                        type="button"
-                        onClick={() =>
-                          setExpandedId(expandedId === act.id ? null : act.id)
-                        }
                         className={cn(
                           "w-full rounded-xl border p-3.5 text-left transition-all duration-300",
                           expandedId === act.id
                             ? `border-${act.color}-500 bg-${act.color}-500/[0.03] ring-1 ring-${act.color}-500/20`
                             : "border-border bg-background/50 hover:border-primary/50",
                         )}
+                        key={act.id}
+                        onClick={() =>
+                          setExpandedId(expandedId === act.id ? null : act.id)
+                        }
+                        type="button"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -131,10 +131,10 @@ export function Strategy() {
                         <AnimatePresence>
                           {expandedId === act.id && (
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
                               animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
                               className="overflow-hidden"
+                              exit={{ height: 0, opacity: 0 }}
+                              initial={{ height: 0, opacity: 0 }}
                             >
                               <div className="mt-4 space-y-4 border-border/50 border-t pt-4 text-[10px]">
                                 <div className="space-y-3">
@@ -143,7 +143,7 @@ export function Strategy() {
                                       i) Issue / Opportunity
                                     </p>
                                     <p className="text-muted-foreground leading-relaxed">
-                                      {(act as any).issue}
+                                      {act.issue}
                                     </p>
                                   </div>
                                   <div className="space-y-1">
@@ -151,7 +151,7 @@ export function Strategy() {
                                       ii) Suggested Actionable
                                     </p>
                                     <p className="text-muted-foreground leading-relaxed">
-                                      {(act as any).actionable}
+                                      {act.actionable}
                                     </p>
                                   </div>
                                   <div className="space-y-1">
@@ -159,21 +159,21 @@ export function Strategy() {
                                       iii) Impact
                                     </p>
                                     <p className="font-medium text-muted-foreground leading-relaxed">
-                                      {(act as any).impact}
+                                      {act.impact}
                                     </p>
                                   </div>
                                 </div>
 
                                 <div className="flex gap-2 pt-2">
                                   <button
-                                    type="button"
                                     className="h-8 flex-1 rounded bg-emerald-600 font-bold text-[10px] text-white transition-colors hover:bg-emerald-700"
+                                    type="button"
                                   >
                                     Approve
                                   </button>
                                   <button
-                                    type="button"
                                     className="h-8 flex-1 rounded border border-border bg-background font-bold text-[10px] transition-colors hover:bg-muted"
+                                    type="button"
                                   >
                                     Alter
                                   </button>
@@ -193,8 +193,8 @@ export function Strategy() {
               </ChatMockupMessage>
             </ChatMockup>
             <motion.div
-              className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
               animate={{ scale: [1, 1.2, 1] }}
+              className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
               transition={{ duration: 5, repeat: Infinity }}
             />
           </div>
