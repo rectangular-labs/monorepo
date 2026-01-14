@@ -9,6 +9,7 @@ import {
   getDraftById,
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
+  listContentWithLatestSchedule,
   listDraftsByStatus,
   updateContentDraft,
   updateContentSchedule,
@@ -35,6 +36,7 @@ const contentDraftSummarySchema = schema.seoContentDraftSelectSchema.omit(
   "outline",
   "notes",
 );
+
 function prioritizeStatus<T extends { status: string }>(
   data: readonly T[],
   primary: string,
@@ -176,6 +178,52 @@ const listUpdateReviews = withOrganizationIdBase
 
     return {
       data: prioritizeStatus(page, "pending-review"),
+      nextPageCursor,
+    };
+  });
+
+const listLive = withOrganizationIdBase
+  .route({ method: "GET", path: "/" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+      limit: "1<=number<=100 = 20",
+      "cursor?": "string.uuid|undefined",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      data: schema.seoContentSelectSchema
+        .omit("contentMarkdown", "outline", "notes")
+        .merge(type({ schedule: schema.seoContentScheduleSelectSchema }))
+        .array(),
+      nextPageCursor: "string.uuid|undefined",
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const rowsResult = await listContentWithLatestSchedule({
+      db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
+      cursor: input.cursor,
+      limit: input.limit + 1,
+    });
+    if (!rowsResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load live content.",
+        cause: rowsResult.error,
+      });
+    }
+    const rows = rowsResult.value;
+
+    const page = rows.slice(0, input.limit);
+    const nextPageCursor =
+      rows.length > input.limit ? page.at(-1)?.id : undefined;
+
+    return {
+      data: page,
       nextPageCursor,
     };
   });
@@ -646,6 +694,7 @@ export default base
     listSuggestions,
     listNewReviews,
     listUpdateReviews,
+    listLive,
     getDraft,
     updateContent,
     markContent,

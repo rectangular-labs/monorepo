@@ -128,6 +128,50 @@ export async function updateContent(
   return ok(updatedContent);
 }
 
+export async function listContentWithLatestSchedule(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  cursor: string | undefined;
+  limit: number;
+}) {
+  return await safe(async () => {
+    const contentRows = await args.db.query.seoContent.findMany({
+      columns: { contentMarkdown: false, outline: false, notes: false },
+      where: (table, { and, eq, isNull, lt }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          eq(table.isLiveVersion, true),
+          isNull(table.deletedAt),
+          args.cursor ? lt(table.id, args.cursor) : undefined,
+        ),
+      with: {
+        schedules: {
+          where: (table, { isNull }) => isNull(table.deletedAt),
+          orderBy: (fields, { desc }) => [
+            desc(fields.scheduledFor),
+            desc(fields.id),
+          ],
+          limit: 1,
+        },
+      },
+      orderBy: (fields, { desc }) => [desc(fields.id)],
+      limit: args.limit,
+    });
+    return contentRows.map((content) => {
+      const schedule = content.schedules[0];
+      if (!schedule) {
+        throw new Error("No schedule found for content");
+      }
+      return {
+        ...content,
+        schedule,
+      };
+    });
+  });
+}
+
 export async function createContentDraft(
   db: DB,
   values: typeof seoContentDraftInsertSchema.infer,
