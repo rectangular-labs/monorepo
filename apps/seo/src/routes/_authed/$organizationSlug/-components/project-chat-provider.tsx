@@ -21,6 +21,8 @@ type ProjectChatContextValue = {
   open: () => void;
   close: () => void;
   toggle: () => void;
+  historyOpen: boolean;
+  setHistoryOpen: (open: boolean) => void;
   input: string;
   setInput: (input: string) => void;
   organizationId: string | null;
@@ -46,6 +48,7 @@ export function ProjectChatProvider({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   const matcher = useMatchRoute();
@@ -105,25 +108,43 @@ export function ProjectChatProvider({
 
   const startNewChat = useCallback(() => {
     setActiveChatId(null);
+    setHistoryOpen(false);
   }, []);
 
   const selectChat = useCallback(
     (chat: RouterOutputs["chat"]["list"]["data"][number]) => {
       if (!organizationId || !projectId) return;
       setActiveChatId(chat.id);
+      setHistoryOpen(false);
+      // arbitrary timeout to allow the chat to load before focusing the textarea
+      setTimeout(() => {
+        const textarea = document.querySelector<HTMLTextAreaElement>(
+          'textarea[name="message"]',
+        );
+        textarea?.focus();
+      }, 800);
     },
     [organizationId, projectId],
   );
 
   const adoptChatId = useCallback(
     (chatId: string) => {
-      if (activeChatId) return;
       setActiveChatId(chatId);
       void chatQuery.refetch();
       void chatsQuery.refetch();
     },
-    [activeChatId, chatsQuery.refetch, chatQuery.refetch],
+    [chatsQuery.refetch, chatQuery.refetch],
   );
+
+  const openChat = useCallback(() => {
+    setIsOpen(true);
+    if (activeChatId) {
+      return;
+    }
+    setHistoryOpen(true);
+    void chatQuery.refetch();
+    void chatsQuery.refetch();
+  }, [activeChatId, chatsQuery.refetch, chatQuery.refetch]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -161,7 +182,7 @@ export function ProjectChatProvider({
         return;
       }
 
-      setIsOpen(true);
+      openChat();
 
       // Try to focus the chat textarea once it mounts (best-effort).
       requestAnimationFrame(() => {
@@ -174,34 +195,41 @@ export function ProjectChatProvider({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen, startNewChat]);
+  }, [isOpen, startNewChat, openChat]);
 
   const value = useMemo<ProjectChatContextValue>(() => {
-    console.log("messagesQuery.DialogDrawerTitle", messagesQuery.data?.data);
+    console.log("messagesQuery", messagesQuery.data?.data);
 
     return {
       isOpen,
-      open: () => setIsOpen(true),
+      open: openChat,
       close: () => setIsOpen(false),
-      toggle: () => setIsOpen((v) => !v),
+      toggle: () => {
+        isOpen ? setIsOpen(false) : openChat();
+      },
+      historyOpen,
+      setHistoryOpen,
       input,
       setInput,
       organizationId,
       projectId,
       activeChatId,
-      activeChat: chatQuery.data?.chat ?? null,
-      isActiveChatLoading: chatQuery.isLoading,
       startNewChat,
       selectChat,
       adoptChatId,
       chatList: chatsQuery.data?.data ?? [],
       isChatListLoading: chatsQuery.isLoading,
       refetchChatList: chatsQuery.refetch,
-      chatMessages: messagesQuery.data?.data.toReversed() ?? [],
-      isChatMessagesFetching: messagesQuery.isFetching,
+      activeChat: activeChatId ? (chatQuery.data?.chat ?? null) : null,
+      isActiveChatLoading: activeChatId ? chatQuery.isLoading : false,
+      chatMessages: activeChatId
+        ? (messagesQuery.data?.data.toReversed() ?? [])
+        : [],
+      isChatMessagesFetching: activeChatId ? messagesQuery.isFetching : false,
     };
   }, [
     input,
+    historyOpen,
     activeChatId,
     adoptChatId,
     chatsQuery.isLoading,
@@ -216,6 +244,7 @@ export function ProjectChatProvider({
     projectId,
     selectChat,
     startNewChat,
+    openChat,
   ]);
 
   return (

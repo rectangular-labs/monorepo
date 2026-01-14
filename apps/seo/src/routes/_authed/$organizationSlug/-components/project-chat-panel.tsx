@@ -2,10 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { eventIteratorToUnproxiedDataStream } from "@rectangular-labs/api-seo/client";
-import type {
-  RouterOutputs,
-  SeoChatMessage,
-} from "@rectangular-labs/api-seo/types";
+import type { SeoChatMessage } from "@rectangular-labs/api-seo/types";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import {
   Action,
@@ -112,7 +109,8 @@ import { useIsApple } from "@rectangular-labs/ui/hooks/use-apple";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment } from "react/jsx-runtime";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { useProjectChat } from "./project-chat-provider";
 
@@ -399,11 +397,17 @@ function ChatConversation({
   const [todoSnapshot, setTodoSnapshot] = useState<NonNullable<TodoSnapshot>>(
     [],
   );
-
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const chatIdRef = useRef<string | null>(chatId);
+
   const { messages, setMessages, sendMessage, status, regenerate, stop } =
     useChat<SeoChatMessage>({
-      messages: initialMessages,
+      ...(!!chatIdRef.current && !isMessagesLoading
+        ? {
+            id: chatIdRef.current,
+            messages: initialMessages,
+          }
+        : {}),
       transport: {
         reconnectToStream: async () => null,
         sendMessages: async ({ abortSignal, messages, messageId, trigger }) => {
@@ -414,7 +418,7 @@ function ChatConversation({
               projectId,
               currentPage,
               messages,
-              chatId: chatId ?? null,
+              chatId: chatIdRef.current,
               messageId,
               model: undefined,
             },
@@ -426,40 +430,24 @@ function ChatConversation({
       onError: (error) => {
         console.error("project chat error", error);
       },
+      onToolCall: ({ toolCall }) => {
+        console.log("toolCall", toolCall);
+      },
+      onFinish: ({ message }) => {
+        const createdChatId = message.metadata?.chatId ?? null;
+        if (!createdChatId || !!chatIdRef.current) return;
+        onAdoptChatId(createdChatId);
+      },
     });
 
-  const prevChatIdRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {
-    const prevChatId = prevChatIdRef.current;
-    prevChatIdRef.current = chatId;
-
-    // uninitialized
-    if (prevChatId === undefined) {
-      setMessages(initialMessages);
-      return;
+    chatIdRef.current = chatId;
+    if (!chatId) {
+      setMessages([]);
     }
-
-    // new chat with chatId updated
-    const isAdoption = prevChatId === null && chatId !== null;
-    if (isAdoption) {
-      return;
-    }
-
-    // chat changed
-    const chatChanged = prevChatId !== chatId;
-    if (chatChanged) {
-      setMessages(initialMessages);
-    }
-  }, [chatId, initialMessages, setMessages]);
-
-  useEffect(() => {
-    console.log("messages", messages);
-    const createdChatId = messages.find((m) => m.metadata?.chatId)?.metadata
-      ?.chatId;
-    if (createdChatId && !chatId) {
-      onAdoptChatId(createdChatId);
-    }
-  }, [chatId, messages, onAdoptChatId]);
+    setTodoSnapshot([]);
+    todoSnapshotSetRef.current.clear();
+  }, [chatId, setMessages]);
 
   useEffect(() => {
     for (const message of messages) {
@@ -905,6 +893,8 @@ function ChatConversation({
 
 export function ProjectChatPanel() {
   const {
+    historyOpen,
+    setHistoryOpen,
     close,
     organizationId,
     projectId,
@@ -923,7 +913,6 @@ export function ProjectChatPanel() {
     setInput,
   } = useProjectChat();
   const isApple = useIsApple();
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [historySearch, setHistorySearch] = useState("");
   const [modKeyLabel, setModKeyLabel] = useState<"⌘" | "Ctrl">("Ctrl");
 
@@ -937,20 +926,8 @@ export function ProjectChatPanel() {
     return chatList.filter((c) => c.title.toLowerCase().includes(q));
   }, [chatList, historySearch]);
 
-  const startNewChatAndCloseHistory = () => {
-    startNewChat();
-    setIsHistoryOpen(false);
-  };
-
-  const selectChatAndCloseHistory = (
-    chat: RouterOutputs["chat"]["list"]["data"][number],
-  ) => {
-    selectChat(chat);
-    setIsHistoryOpen(false);
-  };
-
   const onHistoryOpenChange = (open: boolean) => {
-    setIsHistoryOpen(open);
+    setHistoryOpen(open);
     if (open) {
       void refetchChatList();
     }
@@ -971,13 +948,13 @@ export function ProjectChatPanel() {
           {activeChat?.title ?? "New chat"}
         </div>
         <div className="flex items-center gap-1">
-          <DropDrawer onOpenChange={onHistoryOpenChange} open={isHistoryOpen}>
+          <DropDrawer onOpenChange={onHistoryOpenChange} open={historyOpen}>
             <DropDrawerTrigger asChild>
               <Button aria-label="Chat history" size="icon" variant="ghost">
                 <History className="size-4" />
               </Button>
             </DropDrawerTrigger>
-            <DropDrawerContent align="end" className="w-80">
+            <DropDrawerContent align="end" className="md:w-80">
               <DropDrawerLabel>Chat history</DropDrawerLabel>
               <div className="p-2">
                 <InputGroup>
@@ -1011,7 +988,7 @@ export function ProjectChatPanel() {
                       chat.id === activeChatId && "bg-muted",
                     )}
                     key={chat.id}
-                    onSelect={() => selectChatAndCloseHistory(chat)}
+                    onSelect={() => selectChat(chat)}
                   >
                     <span className="max-w-full truncate font-medium text-sm">
                       {chat.title}
@@ -1028,7 +1005,7 @@ export function ProjectChatPanel() {
             <TooltipTrigger asChild>
               <Button
                 aria-label="New chat"
-                onClick={startNewChatAndCloseHistory}
+                onClick={startNewChat}
                 size="icon"
                 variant="ghost"
               >
