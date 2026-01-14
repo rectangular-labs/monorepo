@@ -23,26 +23,26 @@ export function FounderLongGame() {
         <div className="grid gap-16 lg:grid-cols-[1.2fr,1fr] lg:items-center">
           <div className="relative">
             <ChatMockup className="border-primary/10 shadow-2xl">
-              <ChatMockupMessage from="assistant" delay={0.5}>
+              <ChatMockupMessage delay={0.5} from="assistant">
                 Ready to start gaining traction online? I have a plan ready for
                 you.
               </ChatMockupMessage>
-              <ChatMockupMessage from="user" delay={1}>
+              <ChatMockupMessage delay={1} from="user">
                 Yes.
               </ChatMockupMessage>
-              <ChatMockupMessage from="assistant" delay={1.5}>
+              <ChatMockupMessage delay={1.5} from="assistant">
                 Let's get to work.
               </ChatMockupMessage>
               <ChatMockupTool
+                delay={2}
+                output="Mapping keyword gaps... Clustering commercial intent... Strategy justification complete."
                 state="input-streaming"
                 title="Analysing Data & Surfaces Strategy"
-                output="Mapping keyword gaps... Clustering commercial intent... Strategy justification complete."
-                delay={2}
               />
             </ChatMockup>
             <motion.div
-              className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
               animate={{ scale: [1, 1.2, 1] }}
+              className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
               transition={{ duration: 5, repeat: Infinity }}
             />
           </div>

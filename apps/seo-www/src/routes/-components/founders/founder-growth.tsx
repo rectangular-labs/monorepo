@@ -1,12 +1,12 @@
+import {
+  ArrowRight,
+  Check,
+  MousePointer2,
+  Users,
+  Zap,
+} from "@rectangular-labs/ui/components/icon";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import {
-  Users,
-  Check,
-  Zap,
-  ArrowRight,
-  MousePointer2,
-} from "@rectangular-labs/ui/components/icon";
 import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function FounderGrowth() {
@@ -29,7 +29,7 @@ export function FounderGrowth() {
   ];
 
   return (
-    <Section className="border-border border-t bg-primary/[0.02]">
+    <Section className="border-border border-t bg-primary/2">
       <div className="mx-auto max-w-6xl space-y-16">
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <p className="font-bold text-muted-foreground text-xs uppercase tracking-[0.4em]">
@@ -53,14 +53,14 @@ export function FounderGrowth() {
         <div className="space-y-20">
           {points.map((item, i) => (
             <div
-              key={item.title}
               className="grid gap-12 md:grid-cols-[1fr,1.2fr] md:items-center"
+              key={item.title}
             >
               <div className="space-y-6">
                 <motion.div
+                  className="flex items-start gap-5 rounded-2xl border border-border/50 bg-background/50 p-6 shadow-sm backdrop-blur transition-colors hover:border-primary/20"
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  className="flex items-start gap-5 rounded-2xl border border-border/50 bg-background/50 p-6 shadow-sm backdrop-blur transition-colors hover:border-primary/20"
                 >
                   <div className="mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <item.icon className="h-6 w-6" />
@@ -79,7 +79,7 @@ export function FounderGrowth() {
               <div className="relative">
                 {i === 0 && (
                   <div className="relative h-[200px] overflow-hidden rounded-2xl border border-border bg-background/50 p-6 shadow-sm">
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-background to-transparent" />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-linear-to-t from-background to-transparent" />
                     <div className="space-y-4 opacity-40 blur-[0.5px]">
                       <div className="h-4 w-3/4 rounded bg-muted" />
                       <div className="h-4 w-full rounded bg-muted" />
@@ -105,7 +105,7 @@ export function FounderGrowth() {
                 )}
 
                 {i === 1 && (
-                  <ChatMockup className="border-blue-500/20 bg-blue-500/[0.02]">
+                  <ChatMockup className="border-blue-500/20 bg-blue-500/2">
                     <ChatMockupMessage from="assistant">
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 font-bold text-[10px] text-blue-600 uppercase tracking-widest">
@@ -123,8 +123,8 @@ export function FounderGrowth() {
                             "Client Portal",
                           ].map((u) => (
                             <div
-                              key={u}
                               className="flex items-center gap-2 rounded-lg border border-blue-500/10 bg-background p-2 text-[10px]"
+                              key={u}
                             >
                               <ArrowRight className="h-2.5 w-2.5 text-blue-500" />{" "}
                               {u}
@@ -142,7 +142,7 @@ export function FounderGrowth() {
                 )}
 
                 {i === 2 && (
-                  <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.02] p-6 shadow-sm">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/2 p-6 shadow-sm">
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 font-bold text-[10px] text-emerald-600 uppercase tracking-widest">
                         <Check className="h-3 w-3" /> De-Risking the Build

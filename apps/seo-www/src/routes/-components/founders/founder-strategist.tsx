@@ -1,13 +1,13 @@
-import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { useState } from "react";
 import {
+  ArrowRight,
   Sparkles,
   Target,
-  ArrowRight,
 } from "@rectangular-labs/ui/components/icon";
-import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { cn } from "@rectangular-labs/ui/utils/cn";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function FounderStrategist() {
   const [activeStrategy, setActiveStrategy] = useState<string | null>(null);
@@ -80,17 +80,17 @@ export function FounderStrategist() {
                 <div className="grid gap-4">
                   {strategies.map((s) => (
                     <button
-                      key={s.id}
-                      type="button"
-                      onClick={() =>
-                        setActiveStrategy(activeStrategy === s.id ? null : s.id)
-                      }
                       className={cn(
                         "flex items-start gap-4 rounded-2xl border p-4 text-left transition-all duration-300",
                         activeStrategy === s.id
                           ? `border-${s.color}-500 bg-${s.color}-500/[0.03] ring-1 ring-${s.color}-500/20 shadow-md`
                           : "border-border bg-background/50 hover:border-primary/50 hover:bg-muted/50",
                       )}
+                      key={s.id}
+                      onClick={() =>
+                        setActiveStrategy(activeStrategy === s.id ? null : s.id)
+                      }
+                      type="button"
                     >
                       <div
                         className={cn(
@@ -123,17 +123,17 @@ export function FounderStrategist() {
                         <AnimatePresence>
                           {activeStrategy === s.id && (
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
                               animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
                               className="overflow-hidden"
+                              exit={{ height: 0, opacity: 0 }}
+                              initial={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
                             >
                               <div className="mt-4 space-y-2 border-border/50 border-t pt-4">
                                 {s.details.map((detail) => (
                                   <div
-                                    key={detail}
                                     className="flex items-start gap-2 text-[10px]"
+                                    key={detail}
                                   >
                                     <div
                                       className={cn(
@@ -163,8 +163,8 @@ export function FounderStrategist() {
             </ChatMockupMessage>
           </ChatMockup>
           <motion.div
-            className="absolute -right-10 -bottom-10 -z-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl"
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+            className="absolute -right-10 -bottom-10 -z-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl"
             transition={{ duration: 8, repeat: Infinity }}
           />
         </div>

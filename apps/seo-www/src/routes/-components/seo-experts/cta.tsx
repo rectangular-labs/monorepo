@@ -1,7 +1,7 @@
+import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { ONBOARD_LINK } from "./constants";
-import { MoveRight } from "@rectangular-labs/ui/components/icon";
 
 export function CTA() {
   return (
@@ -18,7 +18,7 @@ export function CTA() {
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-6">
-          <Button asChild size="lg" className="h-14 gap-3 px-10 text-lg">
+          <Button asChild className="h-14 gap-3 px-10 text-lg" size="lg">
             <a href={ONBOARD_LINK} rel="noopener" target="_blank">
               Join the waitlist <MoveRight className="h-5 w-5" />
             </a>

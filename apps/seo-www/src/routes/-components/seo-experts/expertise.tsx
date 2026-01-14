@@ -1,18 +1,18 @@
-import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
-import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
 import {
-  FileText,
   ArrowRight,
-  Target,
   BarChart3,
-  Clock,
-  Zap,
   Check,
+  Clock,
+  FileText,
+  Target,
+  Zap,
 } from "@rectangular-labs/ui/components/icon";
-import { cn } from "@rectangular-labs/ui/utils/cn";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
+import { cn } from "@rectangular-labs/ui/utils/cn";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 
 export function Expertise() {
   const [showDetail, setShowDetail] = useState(false);
@@ -34,11 +34,11 @@ export function Expertise() {
         <div className="relative mx-auto w-full max-w-4xl">
           <ChatMockup className="min-h-[450px] text-left shadow-2xl">
             <ChatMockupTool
-              title="Autonomous Market Analysis"
-              output="Analysed 4,500 keywords across 12 competitor domains. Found 3 untapped strategic clusters."
               delay={0.5}
+              output="Analysed 4,500 keywords across 12 competitor domains. Found 3 untapped strategic clusters."
+              title="Autonomous Market Analysis"
             />
-            <ChatMockupMessage from="assistant" delay={1}>
+            <ChatMockupMessage delay={1} from="assistant">
               <div className="space-y-4">
                 <p className="text-sm">
                   Your strategy for <strong>aiappbuilder.example</strong> is
@@ -46,14 +46,14 @@ export function Expertise() {
                 </p>
 
                 <button
-                  type="button"
-                  onClick={() => setShowDetail(!showDetail)}
                   className={cn(
                     "w-full rounded-xl border p-4 text-left transition-all duration-300",
                     showDetail
                       ? "border-primary bg-primary/[0.03] ring-1 ring-primary/20"
                       : "border-border bg-background/50 hover:border-primary/50 hover:bg-background",
                   )}
+                  onClick={() => setShowDetail(!showDetail)}
+                  type="button"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -76,10 +76,10 @@ export function Expertise() {
                   <AnimatePresence>
                     {showDetail && (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
+                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ height: 0, opacity: 0 }}
                       >
                         <div className="mt-4 space-y-4 border-border/50 border-t pt-4 text-[10px]">
                           <div className="grid grid-cols-2 gap-4">
@@ -148,8 +148,8 @@ export function Expertise() {
             </ChatMockupMessage>
           </ChatMockup>
           <motion.div
-            className="absolute -top-10 -left-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
             animate={{ scale: [1, 1.2, 1] }}
+            className="absolute -top-10 -left-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
             transition={{ duration: 5, repeat: Infinity }}
           />
         </div>

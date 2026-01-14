@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { Section } from "@rectangular-labs/ui/components/ui/section";
 import {
-  Shield,
-  Search,
-  Zap,
-  RotateCcw,
-  TrendingUp,
-  ChevronRight,
-  Check,
-  FileText,
   BarChart3,
+  Check,
+  ChevronRight,
+  FileText,
+  RotateCcw,
+  Search,
+  Shield,
+  TrendingUp,
+  Zap,
 } from "@rectangular-labs/ui/components/icon";
-import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
-import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function FounderTransparency() {
   const [expandedThesis, setExpandedThesis] = useState(false);
@@ -54,16 +54,16 @@ export function FounderTransparency() {
           <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
             <div className="relative">
               <button
-                type="button"
-                onClick={() => setExpandedThesis(!expandedThesis)}
                 className="group w-full text-left"
+                onClick={() => setExpandedThesis(!expandedThesis)}
+                type="button"
               >
                 <div
                   className={cn(
                     "relative overflow-hidden rounded-2xl border p-6 transition-all duration-300",
                     expandedThesis
-                      ? "border-emerald-500/30 bg-emerald-500/[0.06] shadow-emerald-500/5 shadow-lg"
-                      : "border-emerald-500/20 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.04] hover:shadow-md",
+                      ? "border-emerald-500/30 bg-emerald-500/6 shadow-emerald-500/5 shadow-lg"
+                      : "border-emerald-500/20 bg-emerald-500/2 hover:bg-emerald-500/4 hover:shadow-md",
                   )}
                 >
                   <div className="flex items-center justify-between gap-4">
@@ -92,11 +92,11 @@ export function FounderTransparency() {
                   <AnimatePresence>
                     {expandedThesis && (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
                         className="overflow-hidden"
+                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
                       >
                         <div className="mt-6 space-y-4 border-emerald-500/10 border-t pt-6">
                           <ChatMockup className="border-emerald-500/10 bg-background/50 shadow-sm">
@@ -141,8 +141,8 @@ export function FounderTransparency() {
                                     Awaiting approval...
                                   </span>
                                   <Button
-                                    size="sm"
                                     className="h-8 bg-emerald-600 px-3 text-[11px] hover:bg-emerald-700"
+                                    size="sm"
                                   >
                                     <Check className="mr-1.5 h-3 w-3" /> Approve
                                     Strategy
@@ -162,7 +162,7 @@ export function FounderTransparency() {
             <div className="space-y-6">
               <ul className="grid gap-5">
                 {thesisValues.map((v) => (
-                  <li key={v.label} className="group flex items-start gap-4">
+                  <li className="group flex items-start gap-4" key={v.label}>
                     <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 transition-all group-hover:scale-110">
                       <v.icon className="h-5 w-5" />
                     </div>
@@ -191,16 +191,16 @@ export function FounderTransparency() {
           <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
             <div className="relative">
               <button
-                type="button"
-                onClick={() => setExpandedAudit(!expandedAudit)}
                 className="group w-full text-left"
+                onClick={() => setExpandedAudit(!expandedAudit)}
+                type="button"
               >
                 <div
                   className={cn(
                     "relative overflow-hidden rounded-2xl border p-6 transition-all duration-300",
                     expandedAudit
-                      ? "border-amber-500/30 bg-amber-500/[0.06] shadow-amber-500/5 shadow-lg"
-                      : "border-amber-500/20 bg-amber-500/[0.02] hover:bg-amber-500/[0.04] hover:shadow-md",
+                      ? "border-amber-500/30 bg-amber-500/6 shadow-amber-500/5 shadow-lg"
+                      : "border-amber-500/20 bg-amber-500/2 hover:bg-amber-500/4 hover:shadow-md",
                   )}
                 >
                   <div className="flex items-center justify-between gap-4">
@@ -229,11 +229,11 @@ export function FounderTransparency() {
                   <AnimatePresence>
                     {expandedAudit && (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
                         className="overflow-hidden"
+                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
                       >
                         <div className="mt-6 space-y-4 border-amber-500/10 border-t pt-6">
                           <ChatMockup className="border-amber-500/10 bg-background/50 shadow-sm">
@@ -350,7 +350,7 @@ export function FounderTransparency() {
             <div className="space-y-6">
               <ul className="grid gap-5">
                 {auditValues.map((v) => (
-                  <li key={v.label} className="group flex items-start gap-4">
+                  <li className="group flex items-start gap-4" key={v.label}>
                     <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 transition-all group-hover:scale-110">
                       <v.icon className="h-5 w-5" />
                     </div>

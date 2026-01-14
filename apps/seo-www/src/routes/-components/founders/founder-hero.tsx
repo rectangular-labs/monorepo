@@ -2,8 +2,8 @@ import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { buttonVariants } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
+import { ONBOARD_LINK } from "../constants";
 import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
-import { ONBOARD_LINK } from "./constants";
 
 export const FounderHero = () => {
   return (
@@ -41,24 +41,24 @@ export const FounderHero = () => {
         </div>
         <div className="relative w-full">
           <ChatMockup>
-            <ChatMockupMessage from="assistant" delay={0.5}>
+            <ChatMockupMessage delay={0.5} from="assistant">
               I've reviewed our latest conversion data. While traffic to our
               "SEO Tips" cluster is up, it's not driving leads. I'm pivoting our
               strategy to focus on "Enterprise SEO Workflows" which has a 3x
               higher commercial intent.
             </ChatMockupMessage>
             <ChatMockupTool
-              title="Commercial Intent Audit"
-              output="Identified 14 high-traffic pages with low lead conversion. Recommend structural pivot."
               delay={1}
+              output="Identified 14 high-traffic pages with low lead conversion. Recommend structural pivot."
+              title="Commercial Intent Audit"
             />
-            <ChatMockupMessage from="user" delay={1.5}>
+            <ChatMockupMessage delay={1.5} from="user">
               Agreed. We need leads, not just eyeballs. Show me the new thesis.
             </ChatMockupMessage>
           </ChatMockup>
           <motion.div
-            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl"
             animate={{ scale: [1, 1.2, 1] }}
+            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl"
             transition={{ duration: 5, repeat: Infinity }}
           />
         </div>

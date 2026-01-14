@@ -1,6 +1,6 @@
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 import { motion } from "motion/react";
+import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 
 export function Judgement() {
   return (
@@ -29,29 +29,29 @@ export function Judgement() {
 
         <div className="relative">
           <ChatMockup>
-            <ChatMockupMessage from="assistant" delay={0.5}>
+            <ChatMockupMessage delay={0.5} from="assistant">
               I've drafted the outline for the "Enterprise SEO Strategy" piece.
               I've focused on the technical requirements for multi-tenant
               architectures as you requested.
             </ChatMockupMessage>
             <ChatMockupTool
-              title="Review Required: Content Outline"
-              output="Section 1: The Multi-tenant Challenge. Section 2: Data Isolation & Crawling. Section 3: Performance at Scale."
               delay={1}
+              output="Section 1: The Multi-tenant Challenge. Section 2: Data Isolation & Crawling. Section 3: Performance at Scale."
+              title="Review Required: Content Outline"
             />
-            <ChatMockupMessage from="user" delay={1.5}>
+            <ChatMockupMessage delay={1.5} from="user">
               The structure is good, but let's lean more into the security
               implications of shared data in Section 2.
             </ChatMockupMessage>
-            <ChatMockupMessage from="assistant" delay={2}>
+            <ChatMockupMessage delay={2} from="assistant">
               Understood. Updating the Section 2 thinking to prioritize
               security-first architecture. Ready for next step?
             </ChatMockupMessage>
           </ChatMockup>
           {/* Decorative breakthrough elements */}
           <motion.div
-            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
             animate={{ scale: [1, 1.2, 1] }}
+            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
             transition={{ duration: 5, repeat: Infinity }}
           />
         </div>

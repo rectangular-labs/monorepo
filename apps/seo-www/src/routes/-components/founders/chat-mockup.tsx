@@ -12,7 +12,7 @@ import {
 import { MarkdownContent } from "@rectangular-labs/ui/components/chat/markdown-content";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { motion } from "motion/react";
-import { useId, type ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 
 export interface ChatMockupProps {
   className?: string;
@@ -46,11 +46,11 @@ export function ChatMockupMessage({
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       viewport={{ once: true }}
+      whileInView={{ opacity: 1, y: 0 }}
     >
-      <Message from={from} className="p-0">
+      <Message className="p-0" from={from}>
         <MessageContent className="max-w-none">
           <div className="prose prose-sm dark:prose-invert text-sm leading-relaxed">
             {typeof children === "string" ? (
@@ -85,18 +85,18 @@ export function ChatMockupTool({
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
-      whileInView={{ opacity: 1, scale: 1 }}
       transition={{ delay, duration: 0.5 }}
       viewport={{ once: true }}
+      whileInView={{ opacity: 1, scale: 1 }}
     >
-      <Tool defaultOpen className="border-border/50 bg-muted/30">
+      <Tool className="border-border/50 bg-muted/30" defaultOpen>
         <ToolHeader state={state} title={title} type="tool-mock" />
         <ToolContent>
           {input && <ToolInput input={input} />}
           {output && (
             <ToolOutput
-              output={typeof output === "string" ? output : ""}
               errorText={undefined}
+              output={typeof output === "string" ? output : ""}
             />
           )}
           {typeof output !== "string" && output && (

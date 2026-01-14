@@ -1,12 +1,11 @@
-import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { motion } from "motion/react";
 import {
-  TrendingUp,
-  FileText,
-  ExternalLink,
   ArrowRight,
+  FileText,
+  TrendingUp,
   Zap,
 } from "@rectangular-labs/ui/components/icon";
+import { Section } from "@rectangular-labs/ui/components/ui/section";
+import { motion } from "motion/react";
 import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function Reporting() {
@@ -72,8 +71,8 @@ export function Reporting() {
               "Next actions",
             ].map((item) => (
               <div
-                key={item}
                 className="flex items-center gap-2 font-medium text-sm"
+                key={item}
               >
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                 {item}
@@ -160,8 +159,8 @@ export function Reporting() {
                     </div>
                     {recentArticles.map((art) => (
                       <div
-                        key={art.title}
                         className="grid grid-cols-[1fr,50px,50px] gap-2 border-border border-b px-3 py-2 last:border-0"
+                        key={art.title}
                       >
                         <span className="truncate font-medium">
                           {art.title}
@@ -217,8 +216,8 @@ export function Reporting() {
 
                 <div className="flex items-center justify-between border-border border-t pt-4">
                   <button
-                    type="button"
                     className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-bold text-[11px] text-white transition-colors hover:bg-primary/90"
+                    type="button"
                   >
                     View Full Insight <ArrowRight className="h-3 w-3" />
                   </button>
@@ -227,8 +226,8 @@ export function Reporting() {
             </ChatMockupMessage>
           </ChatMockup>
           <motion.div
-            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
             animate={{ scale: [1, 1.2, 1] }}
+            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl"
             transition={{ duration: 5, repeat: Infinity }}
           />
         </div>

@@ -1,16 +1,16 @@
 import {
+  ChartBar,
+  FileText,
   MoveRight,
   Search,
-  FileText,
-  ChartBar,
 } from "@rectangular-labs/ui/components/icon";
 import {
-  buttonVariants,
   Button,
+  buttonVariants,
 } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { motion } from "motion/react";
-import { ONBOARD_LINK } from "./constants";
+import { ONBOARD_LINK } from "../constants";
 import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export const Hero = () => {
@@ -54,36 +54,36 @@ export const Hero = () => {
                 <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
                 Onboarding: Client 'AIAppBuilder'
               </div>
-              <ChatMockupMessage from="assistant" delay={0.5}>
+              <ChatMockupMessage delay={0.5} from="assistant">
                 Onboarding complete. I've finished crawling{" "}
                 <strong>aiappbuilder.example</strong> and analysing their
                 competitors. I now have a deep understanding of their business
                 model and current SEO standing.
               </ChatMockupMessage>
-              <ChatMockupMessage from="assistant" delay={1.5}>
+              <ChatMockupMessage delay={1.5} from="assistant">
                 I've identified a significant gap in their "AI Integration"
                 cluster. I'm ready to treat you like the boss. What would you
                 like me to do next?
               </ChatMockupMessage>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
+                  className="h-8 gap-2 border-primary/20 text-[10px] hover:bg-primary/5"
                   size="sm"
                   variant="outline"
-                  className="h-8 gap-2 border-primary/20 text-[10px] hover:bg-primary/5"
                 >
                   <ChartBar className="h-3 w-3" /> Generate Historical Report
                 </Button>
                 <Button
+                  className="h-8 gap-2 border-primary/20 text-[10px] hover:bg-primary/5"
                   size="sm"
                   variant="outline"
-                  className="h-8 gap-2 border-primary/20 text-[10px] hover:bg-primary/5"
                 >
                   <Search className="h-3 w-3" /> Review Strategy
                 </Button>
                 <Button
+                  className="h-8 gap-2 border-primary/20 text-[10px] hover:bg-primary/5"
                   size="sm"
                   variant="outline"
-                  className="h-8 gap-2 border-primary/20 text-[10px] hover:bg-primary/5"
                 >
                   <FileText className="h-3 w-3" /> Write Articles
                 </Button>
@@ -92,13 +92,13 @@ export const Hero = () => {
 
             {/* Decorative breakthrough elements */}
             <motion.div
-              className="absolute -right-10 -bottom-10 -z-10 h-64 w-64 rounded-full bg-primary/10 blur-3xl"
               animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+              className="absolute -right-10 -bottom-10 -z-10 h-64 w-64 rounded-full bg-primary/10 blur-3xl"
               transition={{ duration: 8, repeat: Infinity }}
             />
             <motion.div
-              className="absolute -top-10 -left-10 -z-10 h-48 w-48 rounded-full bg-emerald-500/5 blur-3xl"
               animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
+              className="absolute -top-10 -left-10 -z-10 h-48 w-48 rounded-full bg-emerald-500/5 blur-3xl"
               transition={{ duration: 10, repeat: Infinity }}
             />
           </div>

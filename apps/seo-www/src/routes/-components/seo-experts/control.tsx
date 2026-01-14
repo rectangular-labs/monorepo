@@ -25,8 +25,8 @@ export function Control() {
           <ul className="mt-4 space-y-3">
             {checkpoints.map((item) => (
               <li
-                key={item}
                 className="flex items-center justify-between rounded-2xl border border-border/60 bg-background/80 px-4 py-3 text-foreground/80 text-sm"
+                key={item}
               >
                 <span>{item}</span>
                 <span className="text-primary">ready</span>

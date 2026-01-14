@@ -38,8 +38,8 @@ export function Data() {
         <div className="grid gap-6 md:grid-cols-3">
           {cards.map((card) => (
             <article
-              key={card.title}
               className="rounded-3xl border border-border/40 bg-muted/40 p-6 shadow-sm"
+              key={card.title}
             >
               <h3 className="text-muted-foreground text-sm uppercase tracking-[0.4em]">
                 {card.title}
