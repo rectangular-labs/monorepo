@@ -5,6 +5,8 @@ import {
   ArrowRightIcon,
   ArrowUpIcon,
   ArrowUpNarrowWideIcon,
+  BarChart3Icon,
+  ChartBarIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
@@ -38,6 +40,7 @@ import {
   MenuIcon,
   MoonIcon,
   MoreHorizontalIcon,
+  MousePointer2Icon,
   MoveDownLeftIcon,
   MoveRightIcon,
   MoveUpRightIcon,
@@ -66,9 +69,6 @@ import {
   UserIcon,
   UsersIcon,
   ZapIcon,
-  MousePointer2Icon,
-  BarChart3Icon,
-  ChartBarIcon,
 } from "lucide-react";
 import type { SVGProps } from "react";
 

@@ -3,7 +3,7 @@ import { buttonVariants } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { AnimatePresence, motion } from "motion/react";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { ONBOARD_LINK } from "./constants";
+import { ONBOARD_LINK } from "../constants";
 
 const CrowdCanvas = lazy(() =>
   import("@rectangular-labs/ui/components/background/crowd").then((m) => ({

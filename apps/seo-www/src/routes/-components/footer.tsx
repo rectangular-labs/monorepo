@@ -14,18 +14,18 @@ export function Footer() {
         <div className="flex flex-wrap justify-center gap-6 text-sm">
           {links.map((link) =>
             link.href.startsWith("#") ? (
-              <a
+              <Link
                 className="text-muted-foreground transition-colors hover:text-foreground"
-                href={link.href}
                 key={link.title}
+                to={link.href}
               >
                 {link.title}
-              </a>
+              </Link>
             ) : (
               <Link
                 className="text-muted-foreground transition-colors hover:text-foreground"
-                to={link.href}
                 key={link.title}
+                to={link.href}
               >
                 {link.title}
               </Link>

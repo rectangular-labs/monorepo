@@ -15,6 +15,30 @@ import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 export function Strategy() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  type ActionColor = "emerald" | "blue" | "rose";
+
+  const actionColorStyles: Record<
+    ActionColor,
+    { expanded: string; icon: string; approveButton: string }
+  > = {
+    emerald: {
+      expanded:
+        "border-emerald-500 bg-emerald-500/[0.03] ring-1 ring-emerald-500/20",
+      icon: "bg-emerald-500/10 text-emerald-600",
+      approveButton: "bg-emerald-600 hover:bg-emerald-700",
+    },
+    blue: {
+      expanded: "border-blue-500 bg-blue-500/[0.03] ring-1 ring-blue-500/20",
+      icon: "bg-blue-500/10 text-blue-600",
+      approveButton: "bg-blue-600 hover:bg-blue-700",
+    },
+    rose: {
+      expanded: "border-rose-500 bg-rose-500/[0.03] ring-1 ring-rose-500/20",
+      icon: "bg-rose-500/10 text-rose-600",
+      approveButton: "bg-rose-600 hover:bg-rose-700",
+    },
+  };
+
   const actions = [
     {
       id: "cta",
@@ -55,7 +79,16 @@ export function Strategy() {
       impact:
         "Capture high-intent leads who are specifically looking for build partners, leading to higher quality sales calls.",
     },
-  ];
+  ] satisfies Array<{
+    id: string;
+    icon: typeof Sparkles;
+    color: ActionColor;
+    title: string;
+    summary: string;
+    issue: string;
+    actionable: string;
+    impact: string;
+  }>;
 
   return (
     <Section className="max-w-none border-border border-t bg-background">
@@ -88,7 +121,7 @@ export function Strategy() {
                         className={cn(
                           "w-full rounded-xl border p-3.5 text-left transition-all duration-300",
                           expandedId === act.id
-                            ? `border-${act.color}-500 bg-${act.color}-500/[0.03] ring-1 ring-${act.color}-500/20`
+                            ? actionColorStyles[act.color].expanded
                             : "border-border bg-background/50 hover:border-primary/50",
                         )}
                         key={act.id}
@@ -102,11 +135,7 @@ export function Strategy() {
                             <div
                               className={cn(
                                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-                                act.color === "emerald"
-                                  ? "bg-emerald-500/10 text-emerald-600"
-                                  : act.color === "blue"
-                                    ? "bg-blue-500/10 text-blue-600"
-                                    : "bg-rose-500/10 text-rose-600",
+                                actionColorStyles[act.color].icon,
                               )}
                             >
                               <act.icon className="h-4 w-4" />
@@ -166,7 +195,11 @@ export function Strategy() {
 
                                 <div className="flex gap-2 pt-2">
                                   <button
-                                    className="h-8 flex-1 rounded bg-emerald-600 font-bold text-[10px] text-white transition-colors hover:bg-emerald-700"
+                                    className={cn(
+                                      "h-8 flex-1 rounded font-bold text-[10px] text-white transition-colors",
+                                      actionColorStyles[act.color]
+                                        .approveButton,
+                                    )}
                                     type="button"
                                   >
                                     Approve

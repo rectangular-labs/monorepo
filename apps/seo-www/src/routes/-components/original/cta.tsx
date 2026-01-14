@@ -1,6 +1,6 @@
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { ONBOARD_LINK } from "./constants";
+import { ONBOARD_LINK } from "../constants";
 
 export function CTA() {
   return (

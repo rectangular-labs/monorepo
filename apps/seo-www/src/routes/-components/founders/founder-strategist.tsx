@@ -12,6 +12,26 @@ import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 export function FounderStrategist() {
   const [activeStrategy, setActiveStrategy] = useState<string | null>(null);
 
+  type StrategyColor = "emerald" | "blue";
+
+  const strategyColorStyles: Record<
+    StrategyColor,
+    { expanded: string; icon: string; bulletDot: string }
+  > = {
+    emerald: {
+      expanded:
+        "border-emerald-500 bg-emerald-500/[0.03] ring-1 ring-emerald-500/20 shadow-md",
+      icon: "bg-emerald-500/10 text-emerald-600",
+      bulletDot: "bg-emerald-500",
+    },
+    blue: {
+      expanded:
+        "border-blue-500 bg-blue-500/[0.03] ring-1 ring-blue-500/20 shadow-md",
+      icon: "bg-blue-500/10 text-blue-600",
+      bulletDot: "bg-blue-500",
+    },
+  };
+
   const strategies = [
     {
       id: "fix",
@@ -41,7 +61,14 @@ export function FounderStrategist() {
         "GEO: (Optional) Add 'AI app builder for [City]' modifiers where you have support coverage.",
       ],
     },
-  ];
+  ] satisfies Array<{
+    id: string;
+    icon: typeof Sparkles;
+    color: StrategyColor;
+    title: string;
+    summary: string;
+    details: string[];
+  }>;
 
   return (
     <Section className="border-border border-t">
@@ -83,7 +110,7 @@ export function FounderStrategist() {
                       className={cn(
                         "flex items-start gap-4 rounded-2xl border p-4 text-left transition-all duration-300",
                         activeStrategy === s.id
-                          ? `border-${s.color}-500 bg-${s.color}-500/[0.03] ring-1 ring-${s.color}-500/20 shadow-md`
+                          ? strategyColorStyles[s.color].expanded
                           : "border-border bg-background/50 hover:border-primary/50 hover:bg-muted/50",
                       )}
                       key={s.id}
@@ -95,9 +122,7 @@ export function FounderStrategist() {
                       <div
                         className={cn(
                           "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                          s.color === "emerald"
-                            ? "bg-emerald-500/10 text-emerald-600"
-                            : "bg-blue-500/10 text-blue-600",
+                          strategyColorStyles[s.color].icon,
                         )}
                       >
                         <s.icon className="h-5 w-5" />
@@ -138,9 +163,7 @@ export function FounderStrategist() {
                                     <div
                                       className={cn(
                                         "mt-1.5 h-1 w-1 shrink-0 rounded-full",
-                                        s.color === "emerald"
-                                          ? "bg-emerald-500"
-                                          : "bg-blue-500",
+                                        strategyColorStyles[s.color].bulletDot,
                                       )}
                                     />
                                     <span className="text-muted-foreground leading-relaxed">
