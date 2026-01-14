@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Benefits } from "~/routes/-components/benefits";
-import { Credentials } from "~/routes/-components/credentials";
-import { CTA } from "~/routes/-components/cta";
-import { FAQ } from "~/routes/-components/faq";
-import { Hero } from "~/routes/-components/hero";
-import { Stats } from "~/routes/-components/stats";
+import { FounderCTA } from "~/routes/-components/founders/founder-cta";
+import { FounderGrowth } from "~/routes/-components/founders/founder-growth";
+import { FounderHero } from "~/routes/-components/founders/founder-hero";
+import { FounderIntervention } from "~/routes/-components/founders/founder-intervention";
+import { FounderLongGame } from "~/routes/-components/founders/founder-long-game";
+import { FounderStrategist } from "~/routes/-components/founders/founder-strategist";
+import { FounderTransparency } from "~/routes/-components/founders/founder-transparency";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -30,12 +31,14 @@ export const Route = createFileRoute("/")({
 function App() {
   return (
     <main className="bg-background">
-      <Hero />
-      <Benefits />
-      <Credentials />
-      <Stats />
-      <CTA />
-      <FAQ />
+      <FounderHero />
+      <FounderTransparency />
+      <FounderStrategist />
+      <FounderGrowth />
+      <FounderIntervention />
+      <FounderLongGame />
+      <FounderCTA />
     </main>
   );
 }
+
