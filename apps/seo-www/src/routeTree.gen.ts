@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SeoExpertsRouteImport } from './routes/seo-experts'
+import { Route as FoundersRouteImport } from './routes/founders'
 import { Route as BlogRouteRouteImport } from './routes/blog/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
@@ -16,6 +18,16 @@ import { Route as BlogRssDotxmlRouteImport } from './routes/blog/rss[.]xml'
 import { Route as BlogSplatRouteImport } from './routes/blog/$'
 import { Route as ApiBlogSearchRouteImport } from './routes/api/blog/search'
 
+const SeoExpertsRoute = SeoExpertsRouteImport.update({
+  id: '/seo-experts',
+  path: '/seo-experts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoundersRoute = FoundersRouteImport.update({
+  id: '/founders',
+  path: '/founders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogRouteRoute = BlogRouteRouteImport.update({
   id: '/blog',
   path: '/blog',
@@ -50,6 +62,8 @@ const ApiBlogSearchRoute = ApiBlogSearchRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteRouteWithChildren
+  '/founders': typeof FoundersRoute
+  '/seo-experts': typeof SeoExpertsRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/blog/': typeof BlogIndexRoute
@@ -57,6 +71,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/founders': typeof FoundersRoute
+  '/seo-experts': typeof SeoExpertsRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/blog': typeof BlogIndexRoute
@@ -66,6 +82,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteRouteWithChildren
+  '/founders': typeof FoundersRoute
+  '/seo-experts': typeof SeoExpertsRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/blog/': typeof BlogIndexRoute
@@ -76,16 +94,27 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
+    | '/founders'
+    | '/seo-experts'
     | '/blog/$'
     | '/blog/rss.xml'
     | '/blog/'
     | '/api/blog/search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/blog/$' | '/blog/rss.xml' | '/blog' | '/api/blog/search'
+  to:
+    | '/'
+    | '/founders'
+    | '/seo-experts'
+    | '/blog/$'
+    | '/blog/rss.xml'
+    | '/blog'
+    | '/api/blog/search'
   id:
     | '__root__'
     | '/'
     | '/blog'
+    | '/founders'
+    | '/seo-experts'
     | '/blog/$'
     | '/blog/rss.xml'
     | '/blog/'
@@ -95,11 +124,27 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogRouteRoute: typeof BlogRouteRouteWithChildren
+  FoundersRoute: typeof FoundersRoute
+  SeoExpertsRoute: typeof SeoExpertsRoute
   ApiBlogSearchRoute: typeof ApiBlogSearchRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/seo-experts': {
+      id: '/seo-experts'
+      path: '/seo-experts'
+      fullPath: '/seo-experts'
+      preLoaderRoute: typeof SeoExpertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/founders': {
+      id: '/founders'
+      path: '/founders'
+      fullPath: '/founders'
+      preLoaderRoute: typeof FoundersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog': {
       id: '/blog'
       path: '/blog'
@@ -164,6 +209,8 @@ const BlogRouteRouteWithChildren = BlogRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogRouteRoute: BlogRouteRouteWithChildren,
+  FoundersRoute: FoundersRoute,
+  SeoExpertsRoute: SeoExpertsRoute,
   ApiBlogSearchRoute: ApiBlogSearchRoute,
 }
 export const routeTree = rootRouteImport
