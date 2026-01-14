@@ -3,14 +3,10 @@
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
-import { useMemo } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "../-components/articles-table";
-import {
-  mapDraftToRow,
-  useReviewRowActions,
-} from "./-components/review-helpers";
+import { useReviewRowActions } from "./-hook/use-review-row-actions";
 
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/content/review/new-articles",
@@ -43,10 +39,6 @@ function ReviewNewArticlesPage() {
       },
     }),
   );
-
-  const rows = useMemo(() => {
-    return (newArticlesQuery.data?.data ?? []).map(mapDraftToRow);
-  }, [newArticlesQuery.data?.data]);
 
   const { getRowActions } = useReviewRowActions({
     organizationSlug,
@@ -94,7 +86,7 @@ function ReviewNewArticlesPage() {
                       search: { draftId: row.id },
                     });
                   }}
-                  rows={rows}
+                  rows={newArticlesQuery.data?.data ?? []}
                 />
               </div>
             </section>
