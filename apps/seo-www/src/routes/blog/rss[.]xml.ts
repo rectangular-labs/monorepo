@@ -8,7 +8,7 @@ function handle() {
   return new Response(xml);
 }
 
-export const Route = createFileRoute("/_marketing/blog/rss.xml")({
+export const Route = createFileRoute("/blog/rss.xml")({
   server: {
     handlers: {
       GET: handle,

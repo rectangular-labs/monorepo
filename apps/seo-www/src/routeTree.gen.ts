@@ -9,181 +9,162 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MarketingRouteRouteImport } from './routes/_marketing/route'
-import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
-import { Route as ApiSplatRouteImport } from './routes/api/$'
-import { Route as MarketingBlogRouteRouteImport } from './routes/_marketing/blog/route'
-import { Route as MarketingBlogIndexRouteImport } from './routes/_marketing/blog/index'
-import { Route as MarketingBlogRssDotxmlRouteImport } from './routes/_marketing/blog/rss[.]xml'
-import { Route as MarketingBlogSplatRouteImport } from './routes/_marketing/blog/$'
+import { Route as BlogRouteRouteImport } from './routes/blog/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogRssDotxmlRouteImport } from './routes/blog/rss[.]xml'
+import { Route as BlogSplatRouteImport } from './routes/blog/$'
+import { Route as ApiBlogSearchRouteImport } from './routes/api/blog/search'
 
-const MarketingRouteRoute = MarketingRouteRouteImport.update({
-  id: '/_marketing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingIndexRoute = MarketingIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MarketingRouteRoute,
-} as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingBlogRouteRoute = MarketingBlogRouteRouteImport.update({
+const BlogRouteRoute = BlogRouteRouteImport.update({
   id: '/blog',
   path: '/blog',
-  getParentRoute: () => MarketingRouteRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const MarketingBlogIndexRoute = MarketingBlogIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => MarketingBlogRouteRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const MarketingBlogRssDotxmlRoute = MarketingBlogRssDotxmlRouteImport.update({
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRouteRoute,
+} as any)
+const BlogRssDotxmlRoute = BlogRssDotxmlRouteImport.update({
   id: '/rss.xml',
   path: '/rss.xml',
-  getParentRoute: () => MarketingBlogRouteRoute,
+  getParentRoute: () => BlogRouteRoute,
 } as any)
-const MarketingBlogSplatRoute = MarketingBlogSplatRouteImport.update({
+const BlogSplatRoute = BlogSplatRouteImport.update({
   id: '/$',
   path: '/$',
-  getParentRoute: () => MarketingBlogRouteRoute,
+  getParentRoute: () => BlogRouteRoute,
+} as any)
+const ApiBlogSearchRoute = ApiBlogSearchRouteImport.update({
+  id: '/api/blog/search',
+  path: '/api/blog/search',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/blog': typeof MarketingBlogRouteRouteWithChildren
-  '/api/$': typeof ApiSplatRoute
-  '/': typeof MarketingIndexRoute
-  '/blog/$': typeof MarketingBlogSplatRoute
-  '/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
-  '/blog/': typeof MarketingBlogIndexRoute
+  '/': typeof IndexRoute
+  '/blog': typeof BlogRouteRouteWithChildren
+  '/blog/$': typeof BlogSplatRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlRoute
+  '/blog/': typeof BlogIndexRoute
+  '/api/blog/search': typeof ApiBlogSearchRoute
 }
 export interface FileRoutesByTo {
-  '/api/$': typeof ApiSplatRoute
-  '/': typeof MarketingIndexRoute
-  '/blog/$': typeof MarketingBlogSplatRoute
-  '/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
-  '/blog': typeof MarketingBlogIndexRoute
+  '/': typeof IndexRoute
+  '/blog/$': typeof BlogSplatRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlRoute
+  '/blog': typeof BlogIndexRoute
+  '/api/blog/search': typeof ApiBlogSearchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_marketing': typeof MarketingRouteRouteWithChildren
-  '/_marketing/blog': typeof MarketingBlogRouteRouteWithChildren
-  '/api/$': typeof ApiSplatRoute
-  '/_marketing/': typeof MarketingIndexRoute
-  '/_marketing/blog/$': typeof MarketingBlogSplatRoute
-  '/_marketing/blog/rss.xml': typeof MarketingBlogRssDotxmlRoute
-  '/_marketing/blog/': typeof MarketingBlogIndexRoute
+  '/': typeof IndexRoute
+  '/blog': typeof BlogRouteRouteWithChildren
+  '/blog/$': typeof BlogSplatRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlRoute
+  '/blog/': typeof BlogIndexRoute
+  '/api/blog/search': typeof ApiBlogSearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/blog' | '/api/$' | '/' | '/blog/$' | '/blog/rss.xml' | '/blog/'
+  fullPaths:
+    | '/'
+    | '/blog'
+    | '/blog/$'
+    | '/blog/rss.xml'
+    | '/blog/'
+    | '/api/blog/search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/api/$' | '/' | '/blog/$' | '/blog/rss.xml' | '/blog'
+  to: '/' | '/blog/$' | '/blog/rss.xml' | '/blog' | '/api/blog/search'
   id:
     | '__root__'
-    | '/_marketing'
-    | '/_marketing/blog'
-    | '/api/$'
-    | '/_marketing/'
-    | '/_marketing/blog/$'
-    | '/_marketing/blog/rss.xml'
-    | '/_marketing/blog/'
+    | '/'
+    | '/blog'
+    | '/blog/$'
+    | '/blog/rss.xml'
+    | '/blog/'
+    | '/api/blog/search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  MarketingRouteRoute: typeof MarketingRouteRouteWithChildren
-  ApiSplatRoute: typeof ApiSplatRoute
+  IndexRoute: typeof IndexRoute
+  BlogRouteRoute: typeof BlogRouteRouteWithChildren
+  ApiBlogSearchRoute: typeof ApiBlogSearchRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_marketing': {
-      id: '/_marketing'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof MarketingRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_marketing/': {
-      id: '/_marketing/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof MarketingIndexRouteImport
-      parentRoute: typeof MarketingRouteRoute
-    }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_marketing/blog': {
-      id: '/_marketing/blog'
+    '/blog': {
+      id: '/blog'
       path: '/blog'
       fullPath: '/blog'
-      preLoaderRoute: typeof MarketingBlogRouteRouteImport
-      parentRoute: typeof MarketingRouteRoute
+      preLoaderRoute: typeof BlogRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_marketing/blog/': {
-      id: '/_marketing/blog/'
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
       path: '/'
       fullPath: '/blog/'
-      preLoaderRoute: typeof MarketingBlogIndexRouteImport
-      parentRoute: typeof MarketingBlogRouteRoute
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRouteRoute
     }
-    '/_marketing/blog/rss.xml': {
-      id: '/_marketing/blog/rss.xml'
+    '/blog/rss.xml': {
+      id: '/blog/rss.xml'
       path: '/rss.xml'
       fullPath: '/blog/rss.xml'
-      preLoaderRoute: typeof MarketingBlogRssDotxmlRouteImport
-      parentRoute: typeof MarketingBlogRouteRoute
+      preLoaderRoute: typeof BlogRssDotxmlRouteImport
+      parentRoute: typeof BlogRouteRoute
     }
-    '/_marketing/blog/$': {
-      id: '/_marketing/blog/$'
+    '/blog/$': {
+      id: '/blog/$'
       path: '/$'
       fullPath: '/blog/$'
-      preLoaderRoute: typeof MarketingBlogSplatRouteImport
-      parentRoute: typeof MarketingBlogRouteRoute
+      preLoaderRoute: typeof BlogSplatRouteImport
+      parentRoute: typeof BlogRouteRoute
+    }
+    '/api/blog/search': {
+      id: '/api/blog/search'
+      path: '/api/blog/search'
+      fullPath: '/api/blog/search'
+      preLoaderRoute: typeof ApiBlogSearchRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface MarketingBlogRouteRouteChildren {
-  MarketingBlogSplatRoute: typeof MarketingBlogSplatRoute
-  MarketingBlogRssDotxmlRoute: typeof MarketingBlogRssDotxmlRoute
-  MarketingBlogIndexRoute: typeof MarketingBlogIndexRoute
+interface BlogRouteRouteChildren {
+  BlogSplatRoute: typeof BlogSplatRoute
+  BlogRssDotxmlRoute: typeof BlogRssDotxmlRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
-const MarketingBlogRouteRouteChildren: MarketingBlogRouteRouteChildren = {
-  MarketingBlogSplatRoute: MarketingBlogSplatRoute,
-  MarketingBlogRssDotxmlRoute: MarketingBlogRssDotxmlRoute,
-  MarketingBlogIndexRoute: MarketingBlogIndexRoute,
+const BlogRouteRouteChildren: BlogRouteRouteChildren = {
+  BlogSplatRoute: BlogSplatRoute,
+  BlogRssDotxmlRoute: BlogRssDotxmlRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 
-const MarketingBlogRouteRouteWithChildren =
-  MarketingBlogRouteRoute._addFileChildren(MarketingBlogRouteRouteChildren)
-
-interface MarketingRouteRouteChildren {
-  MarketingBlogRouteRoute: typeof MarketingBlogRouteRouteWithChildren
-  MarketingIndexRoute: typeof MarketingIndexRoute
-}
-
-const MarketingRouteRouteChildren: MarketingRouteRouteChildren = {
-  MarketingBlogRouteRoute: MarketingBlogRouteRouteWithChildren,
-  MarketingIndexRoute: MarketingIndexRoute,
-}
-
-const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
-  MarketingRouteRouteChildren,
+const BlogRouteRouteWithChildren = BlogRouteRoute._addFileChildren(
+  BlogRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  MarketingRouteRoute: MarketingRouteRouteWithChildren,
-  ApiSplatRoute: ApiSplatRoute,
+  IndexRoute: IndexRoute,
+  BlogRouteRoute: BlogRouteRouteWithChildren,
+  ApiBlogSearchRoute: ApiBlogSearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

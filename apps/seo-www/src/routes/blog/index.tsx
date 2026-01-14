@@ -9,7 +9,7 @@ const getBlogTree = createServerFn({ method: "GET" }).handler(() =>
   getPostsOverview(seoBlogSource),
 );
 
-export const Route = createFileRoute("/_marketing/blog/")({
+export const Route = createFileRoute("/blog/")({
   component: Page,
   loader: async () => {
     const postOverview = await getBlogTree();

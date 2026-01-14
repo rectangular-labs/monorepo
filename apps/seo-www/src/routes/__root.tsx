@@ -11,6 +11,8 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { seo } from "~/lib/seo";
 import appCss from "../styles.css?url";
+import { Footer } from "./-components/footer";
+import { Header } from "./-components/header";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -89,7 +91,13 @@ function RootLayout() {
       </head>
       <body className="flex min-h-screen flex-col">
         <ThemeProvider attribute="class" enableSystem>
-          <Outlet />
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <div className="flex-1">
+              <Outlet />
+            </div>
+            <Footer />
+          </div>
           <Toaster />
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-left" />
