@@ -28,14 +28,15 @@ import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport } fr
 import { Route as AuthedOrganizationSlugProjectSlugContentRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/route'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/index'
 import { Route as AuthedOrganizationSlugProjectSlugContentIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/index'
-import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/publishing-settings'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsProjectRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/project'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsImageSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/image-settings'
-import { Route as AuthedOrganizationSlugProjectSlugContentPlannerRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/planner'
-import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId.index'
-import { Route as AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport } from './routes/_authed/$organizationSlug_/$projectSlug/campaign.$campaignId.review'
+import { Route as AuthedOrganizationSlugProjectSlugContentReviewRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/route'
+import { Route as AuthedOrganizationSlugProjectSlugContentReviewIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/index'
+import { Route as AuthedOrganizationSlugProjectSlugContentReviewOutlinesRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/outlines'
+import { Route as AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/new-articles'
+import { Route as AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/article-updates'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -138,12 +139,6 @@ const AuthedOrganizationSlugProjectSlugContentIndexRoute =
     path: '/',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugContentRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute =
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteImport.update({
-    id: '/$organizationSlug_/$projectSlug/campaign/$campaignId',
-    path: '/$organizationSlug/$projectSlug/campaign/$campaignId',
-    getParentRoute: () => AuthedRouteRoute,
-  } as any)
 const AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute =
   AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRouteImport.update({
     id: '/writing-settings',
@@ -170,26 +165,42 @@ const AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute =
     path: '/image-settings',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugSettingsRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugContentPlannerRoute =
-  AuthedOrganizationSlugProjectSlugContentPlannerRouteImport.update({
-    id: '/planner',
-    path: '/planner',
+const AuthedOrganizationSlugProjectSlugContentReviewRouteRoute =
+  AuthedOrganizationSlugProjectSlugContentReviewRouteRouteImport.update({
+    id: '/review',
+    path: '/review',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugContentRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute =
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport.update({
+const AuthedOrganizationSlugProjectSlugContentReviewIndexRoute =
+  AuthedOrganizationSlugProjectSlugContentReviewIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute,
+      AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute =
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport.update({
-    id: '/review',
-    path: '/review',
+const AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute =
+  AuthedOrganizationSlugProjectSlugContentReviewOutlinesRouteImport.update({
+    id: '/outlines',
+    path: '/outlines',
     getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute,
+      AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
   } as any)
+const AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute =
+  AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRouteImport.update({
+    id: '/new-articles',
+    path: '/new-articles',
+    getParentRoute: () =>
+      AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
+  } as any)
+const AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute =
+  AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRouteImport.update(
+    {
+      id: '/article-updates',
+      path: '/article-updates',
+      getParentRoute: () =>
+        AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -207,16 +218,17 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/$organizationSlug/$projectSlug/content/planner': typeof AuthedOrganizationSlugProjectSlugContentPlannerRoute
+  '/$organizationSlug/$projectSlug/content/review': typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
   '/$organizationSlug/$projectSlug/settings/publishing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRoute
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
-  '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
   '/$organizationSlug/$projectSlug/content/': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
   '/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
-  '/$organizationSlug/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
-  '/$organizationSlug/$projectSlug/campaign/$campaignId/': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
+  '/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
+  '/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
+  '/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
+  '/$organizationSlug/$projectSlug/content/review/': typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -229,15 +241,16 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/blog': typeof MarketingBlogIndexRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/$organizationSlug/$projectSlug/content/planner': typeof AuthedOrganizationSlugProjectSlugContentPlannerRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
   '/$organizationSlug/$projectSlug/settings/publishing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRoute
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
   '/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
-  '/$organizationSlug/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
-  '/$organizationSlug/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
+  '/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
+  '/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
+  '/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
+  '/$organizationSlug/$projectSlug/content/review': typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -258,16 +271,17 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/_authed/$organizationSlug/$projectSlug/content/planner': typeof AuthedOrganizationSlugProjectSlugContentPlannerRoute
+  '/_authed/$organizationSlug/$projectSlug/content/review': typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
   '/_authed/$organizationSlug/$projectSlug/settings/publishing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
-  '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/content/': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
-  '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
-  '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/': typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
+  '/_authed/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
+  '/_authed/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
+  '/_authed/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
+  '/_authed/$organizationSlug/$projectSlug/content/review/': typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -287,16 +301,17 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/content'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug/'
-    | '/$organizationSlug/$projectSlug/content/planner'
+    | '/$organizationSlug/$projectSlug/content/review'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
     | '/$organizationSlug/$projectSlug/settings/project'
     | '/$organizationSlug/$projectSlug/settings/publishing-settings'
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
-    | '/$organizationSlug/$projectSlug/campaign/$campaignId'
     | '/$organizationSlug/$projectSlug/content/'
     | '/$organizationSlug/$projectSlug/settings/'
-    | '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
-    | '/$organizationSlug/$projectSlug/campaign/$campaignId/'
+    | '/$organizationSlug/$projectSlug/content/review/article-updates'
+    | '/$organizationSlug/$projectSlug/content/review/new-articles'
+    | '/$organizationSlug/$projectSlug/content/review/outlines'
+    | '/$organizationSlug/$projectSlug/content/review/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -309,15 +324,16 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/blog'
     | '/$organizationSlug/$projectSlug'
-    | '/$organizationSlug/$projectSlug/content/planner'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
     | '/$organizationSlug/$projectSlug/settings/project'
     | '/$organizationSlug/$projectSlug/settings/publishing-settings'
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
     | '/$organizationSlug/$projectSlug/content'
     | '/$organizationSlug/$projectSlug/settings'
-    | '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
-    | '/$organizationSlug/$projectSlug/campaign/$campaignId'
+    | '/$organizationSlug/$projectSlug/content/review/article-updates'
+    | '/$organizationSlug/$projectSlug/content/review/new-articles'
+    | '/$organizationSlug/$projectSlug/content/review/outlines'
+    | '/$organizationSlug/$projectSlug/content/review'
   id:
     | '__root__'
     | '/_authed'
@@ -337,16 +353,17 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug/$projectSlug/content'
     | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/$projectSlug/'
-    | '/_authed/$organizationSlug/$projectSlug/content/planner'
+    | '/_authed/$organizationSlug/$projectSlug/content/review'
     | '/_authed/$organizationSlug/$projectSlug/settings/image-settings'
     | '/_authed/$organizationSlug/$projectSlug/settings/project'
     | '/_authed/$organizationSlug/$projectSlug/settings/publishing-settings'
     | '/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
-    | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId'
     | '/_authed/$organizationSlug/$projectSlug/content/'
     | '/_authed/$organizationSlug/$projectSlug/settings/'
-    | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review'
-    | '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/'
+    | '/_authed/$organizationSlug/$projectSlug/content/review/article-updates'
+    | '/_authed/$organizationSlug/$projectSlug/content/review/new-articles'
+    | '/_authed/$organizationSlug/$projectSlug/content/review/outlines'
+    | '/_authed/$organizationSlug/$projectSlug/content/review/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -492,13 +509,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentIndexRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRoute
     }
-    '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId': {
-      id: '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId'
-      path: '/$organizationSlug/$projectSlug/campaign/$campaignId'
-      fullPath: '/$organizationSlug/$projectSlug/campaign/$campaignId'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
     '/_authed/$organizationSlug/$projectSlug/settings/writing-settings': {
       id: '/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
       path: '/writing-settings'
@@ -527,39 +537,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRoute
     }
-    '/_authed/$organizationSlug/$projectSlug/content/planner': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/planner'
-      path: '/planner'
-      fullPath: '/$organizationSlug/$projectSlug/content/planner'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentPlannerRouteImport
+    '/_authed/$organizationSlug/$projectSlug/content/review': {
+      id: '/_authed/$organizationSlug/$projectSlug/content/review'
+      path: '/review'
+      fullPath: '/$organizationSlug/$projectSlug/content/review'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRoute
     }
-    '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/': {
-      id: '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/'
+    '/_authed/$organizationSlug/$projectSlug/content/review/': {
+      id: '/_authed/$organizationSlug/$projectSlug/content/review/'
       path: '/'
-      fullPath: '/$organizationSlug/$projectSlug/campaign/$campaignId/'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
+      fullPath: '/$organizationSlug/$projectSlug/content/review/'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
     }
-    '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review': {
-      id: '/_authed/$organizationSlug_/$projectSlug/campaign/$campaignId/review'
-      path: '/review'
-      fullPath: '/$organizationSlug/$projectSlug/campaign/$campaignId/review'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute
+    '/_authed/$organizationSlug/$projectSlug/content/review/outlines': {
+      id: '/_authed/$organizationSlug/$projectSlug/content/review/outlines'
+      path: '/outlines'
+      fullPath: '/$organizationSlug/$projectSlug/content/review/outlines'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
+    }
+    '/_authed/$organizationSlug/$projectSlug/content/review/new-articles': {
+      id: '/_authed/$organizationSlug/$projectSlug/content/review/new-articles'
+      path: '/new-articles'
+      fullPath: '/$organizationSlug/$projectSlug/content/review/new-articles'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
+    }
+    '/_authed/$organizationSlug/$projectSlug/content/review/article-updates': {
+      id: '/_authed/$organizationSlug/$projectSlug/content/review/article-updates'
+      path: '/article-updates'
+      fullPath: '/$organizationSlug/$projectSlug/content/review/article-updates'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
     }
   }
 }
 
+interface AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren {
+  AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
+  AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
+  AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
+  AuthedOrganizationSlugProjectSlugContentReviewIndexRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
+}
+
+const AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren: AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren =
+  {
+    AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute:
+      AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute,
+    AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute:
+      AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute,
+    AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute:
+      AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute,
+    AuthedOrganizationSlugProjectSlugContentReviewIndexRoute:
+      AuthedOrganizationSlugProjectSlugContentReviewIndexRoute,
+  }
+
+const AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren =
+  AuthedOrganizationSlugProjectSlugContentReviewRouteRoute._addFileChildren(
+    AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren,
+  )
+
 interface AuthedOrganizationSlugProjectSlugContentRouteRouteChildren {
-  AuthedOrganizationSlugProjectSlugContentPlannerRoute: typeof AuthedOrganizationSlugProjectSlugContentPlannerRoute
+  AuthedOrganizationSlugProjectSlugContentReviewRouteRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren
   AuthedOrganizationSlugProjectSlugContentIndexRoute: typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
 }
 
 const AuthedOrganizationSlugProjectSlugContentRouteRouteChildren: AuthedOrganizationSlugProjectSlugContentRouteRouteChildren =
   {
-    AuthedOrganizationSlugProjectSlugContentPlannerRoute:
-      AuthedOrganizationSlugProjectSlugContentPlannerRoute,
+    AuthedOrganizationSlugProjectSlugContentReviewRouteRoute:
+      AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren,
     AuthedOrganizationSlugProjectSlugContentIndexRoute:
       AuthedOrganizationSlugProjectSlugContentIndexRoute,
   }
@@ -634,36 +682,15 @@ const AuthedOrganizationSlugRouteRouteWithChildren =
     AuthedOrganizationSlugRouteRouteChildren,
   )
 
-interface AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren {
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute
-}
-
-const AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren: AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren =
-  {
-    AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute:
-      AuthedOrganizationSlugProjectSlugCampaignCampaignIdReviewRoute,
-    AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute:
-      AuthedOrganizationSlugProjectSlugCampaignCampaignIdIndexRoute,
-  }
-
-const AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren =
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute._addFileChildren(
-    AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteChildren,
-  )
-
 interface AuthedRouteRouteChildren {
   AuthedOrganizationSlugRouteRoute: typeof AuthedOrganizationSlugRouteRouteWithChildren
   AuthedOnboardingIndexRoute: typeof AuthedOnboardingIndexRoute
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute: typeof AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedOrganizationSlugRouteRoute:
     AuthedOrganizationSlugRouteRouteWithChildren,
   AuthedOnboardingIndexRoute: AuthedOnboardingIndexRoute,
-  AuthedOrganizationSlugProjectSlugCampaignCampaignIdRoute:
-    AuthedOrganizationSlugProjectSlugCampaignCampaignIdRouteWithChildren,
 }
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(

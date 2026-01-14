@@ -8,7 +8,7 @@ export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/content",
 )({
   validateSearch: type({
-    "file?": "string",
+    "draftId?": "string.uuid",
   }),
   loader: async ({ context, params }) => {
     const activeProject = await context.queryClient.ensureQueryData(
@@ -30,18 +30,17 @@ export const Route = createFileRoute(
 
 function ContentLayout() {
   const { organizationSlug, projectSlug } = Route.useParams();
-  const { file } = Route.useSearch();
+  const { draftId } = Route.useSearch();
   const { projectId, organizationId } = Route.useLoaderData();
 
-  if (file) {
+  if (draftId) {
     return (
       <div className="min-h-[calc(100vh-100px)] w-full">
         <ArticleEditorTakeover
-          file={file}
+          draftId={draftId}
           organizationId={organizationId}
           organizationSlug={organizationSlug}
           projectId={projectId}
-          projectSlug={projectSlug}
         />
       </div>
     );
@@ -64,9 +63,9 @@ function ContentLayout() {
           </NavLink>
           <NavLink
             params={{ organizationSlug, projectSlug }}
-            to="/$organizationSlug/$projectSlug/content/planner"
+            to="/$organizationSlug/$projectSlug/content/review/outlines"
           >
-            Planner
+            Review
           </NavLink>
         </nav>
       </aside>

@@ -39,10 +39,12 @@ function statusLabel(status: SeoFileStatus) {
       return "Suggested";
     case "queued":
       return "Queued";
-    case "generating":
-      return "Generating";
-    case "generation-failed":
-      return "Generation failed";
+    case "planning":
+      return "Planning";
+    case "writing":
+      return "Writing";
+    case "reviewing-writing":
+      return "Reviewing (writing)";
     case "pending-review":
       return "Pending review";
     case "scheduled":
@@ -53,6 +55,12 @@ function statusLabel(status: SeoFileStatus) {
       return "Suggestion rejected";
     case "review-denied":
       return "Review denied";
+    case "deleted":
+      return "Deleted";
+    default: {
+      const never: never = status;
+      return never;
+    }
   }
 }
 
