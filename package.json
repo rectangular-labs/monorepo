@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "dev": "docker compose up -d && pnpm turbo watch dev --continue",
-    "dev:seo": "docker compose up -d && pnpm turbo watch dev --continue --filter=seo...",
+    "dev:seo": "docker compose up -d && pnpm turbo watch dev --continue --filter=seo... --filter=!seo-www",
+    "dev:seo-www": "pnpm turbo watch dev --continue --filter=seo-www",
     "build": "turbo build",
     "build:preview": "turbo build:preview",
     "build:production": "turbo build:production",
