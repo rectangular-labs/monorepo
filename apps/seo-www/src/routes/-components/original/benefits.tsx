@@ -1,7 +1,7 @@
 import { Check } from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { ONBOARD_LINK } from "./constants";
+import { ONBOARD_LINK } from "../constants";
 
 export function Benefits() {
   const items = [

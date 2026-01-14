@@ -57,7 +57,7 @@ export const FounderHero = () => {
             </ChatMockupMessage>
           </ChatMockup>
           <motion.div
-            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl "
+            className="absolute -right-10 -bottom-10 -z-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl"
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 5, repeat: Infinity }}
           />

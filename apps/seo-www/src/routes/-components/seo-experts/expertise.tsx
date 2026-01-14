@@ -89,8 +89,13 @@ export function Expertise() {
                                 Keywords
                               </p>
                               <div className="space-y-1 text-muted-foreground">
-                                <p>• "transport management system automation"</p>
-                                <p>• "fleet management system automation for small businesses"</p>
+                                <p>
+                                  • "transport management system automation"
+                                </p>
+                                <p>
+                                  • "fleet management system automation for
+                                  small businesses"
+                                </p>
                                 <p>• "custom logistics workflows for smb"</p>
                               </div>
                             </div>
@@ -124,7 +129,8 @@ export function Expertise() {
                               </span>
                             </div>
                             <Button className="h-8 bg-emerald-600 px-4 text-[10px] text-white hover:bg-emerald-700">
-                              <Check className="mr-1.5 h-3.5 w-3.5" /> Approve Strategy
+                              <Check className="mr-1.5 h-3.5 w-3.5" /> Approve
+                              Strategy
                             </Button>
                           </div>
                         </div>
