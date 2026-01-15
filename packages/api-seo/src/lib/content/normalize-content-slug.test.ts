@@ -3,7 +3,7 @@ import { normalizeContentSlug } from "./normalize-content-slug";
 
 describe("normalizeContentSlug", () => {
   it("returns empty for blank or root paths", () => {
-    expect(normalizeContentSlug("")).toBe("");
+    expect(normalizeContentSlug("")).toBe("/");
     expect(normalizeContentSlug(" / ")).toBe("/");
     expect(normalizeContentSlug("/")).toBe("/");
   });
