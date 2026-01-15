@@ -31,10 +31,6 @@ const chatContextMiddleware = os
       { next, context },
       { projectId, chatId }: { projectId: string; chatId: string | null },
     ) => {
-      console.log("[chat.sendMessage] chatContextMiddleware started", {
-        projectId,
-        chatId,
-      });
       const resolvedChat = await (async () => {
         if (chatId) {
           const chat = await getChatById({

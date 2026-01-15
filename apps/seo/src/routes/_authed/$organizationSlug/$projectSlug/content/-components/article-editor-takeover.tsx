@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  ARTICLE_TYPES,
+  type ArticleType,
+} from "@rectangular-labs/core/schemas/content-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
 import {
@@ -37,6 +41,13 @@ import {
 } from "@rectangular-labs/ui/components/ui/item";
 import { Label } from "@rectangular-labs/ui/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rectangular-labs/ui/components/ui/select";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -52,6 +63,20 @@ import { useEffect, useRef, useState } from "react";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
+
+const ARTICLE_TYPE_UNSET_VALUE = "__unset__";
+const ARTICLE_TYPE_OPTIONS = ARTICLE_TYPES.map((articleType) => ({
+  value: articleType,
+  label:
+    articleType === "faq"
+      ? "FAQ"
+      : articleType
+          .split("-")
+          .map((segment) =>
+            segment ? segment[0]?.toUpperCase() + segment.slice(1) : segment,
+          )
+          .join(" "),
+}));
 
 type SaveIndicatorState =
   | { status: "idle" }
@@ -90,6 +115,7 @@ export function ArticleEditorTakeover({
     description: "",
     slug: "",
     primaryKeyword: "",
+    articleType: null as ArticleType | null,
     notes: "",
     targetReleaseDate: null as string | null,
   });
@@ -177,6 +203,7 @@ export function ArticleEditorTakeover({
       description: draft.description ?? "",
       slug: draft.slug ?? "",
       primaryKeyword: draft.primaryKeyword ?? "",
+      articleType: draft.articleType ?? null,
       notes: draft.notes ?? "",
       targetReleaseDate: draft.targetReleaseDate
         ? isoToDatetimeLocalValue(draft.targetReleaseDate.toISOString())
@@ -214,6 +241,9 @@ export function ArticleEditorTakeover({
       },
       onSuccess: async () => {
         setSaveIndicator({ status: "saved", at: new Date().toISOString() });
+        setIsRegenerateOutlineOpen(false);
+        setIsRegenerateArticleOpen(false);
+
         await refetchDraft();
       },
     }),
@@ -254,6 +284,7 @@ export function ArticleEditorTakeover({
       description: draftDetails.description.trim(),
       slug: draftDetails.slug.trim(),
       primaryKeyword: draftDetails.primaryKeyword.trim(),
+      articleType: draftDetails.articleType ?? null,
       notes: draftDetails.notes.trim(),
       targetReleaseDate: nextTarget,
     });
@@ -303,10 +334,9 @@ export function ArticleEditorTakeover({
         notes: draftDetails.notes.trim(),
         outlineGeneratedByTaskRunId: null,
       });
-      setIsRegenerateOutlineOpen(false);
       toast.success("Outline regeneration started");
     } catch {
-      return;
+      // okay to ignore errors here since we handle it in the mutation
     }
   };
 
@@ -321,10 +351,9 @@ export function ArticleEditorTakeover({
         status: "queued",
         generatedByTaskRunId: null,
       });
-      setIsRegenerateArticleOpen(false);
       toast.success("Article regeneration started");
     } catch {
-      return;
+      // okay to ignore errors here since we handle it in the mutation
     }
   };
 
@@ -566,7 +595,8 @@ export function ArticleEditorTakeover({
           <SheetHeader className="border-b">
             <SheetTitle>Draft settings</SheetTitle>
             <SheetDescription>
-              Edit title, slug, keyword, description, notes, and target date.
+              Edit title, slug, keyword, type, description, notes, and target
+              date.
             </SheetDescription>
           </SheetHeader>
 
@@ -637,6 +667,39 @@ export function ArticleEditorTakeover({
                   placeholder="best crm for startups"
                   value={draftDetails.primaryKeyword}
                 />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="draft-article-type">
+                  Article type
+                </FieldLabel>
+                <Select
+                  disabled={!canEditDetails}
+                  onValueChange={(value) =>
+                    setDraftDetails((prev) => ({
+                      ...prev,
+                      articleType:
+                        value === ARTICLE_TYPE_UNSET_VALUE
+                          ? null
+                          : (value as ArticleType),
+                    }))
+                  }
+                  value={draftDetails.articleType ?? ARTICLE_TYPE_UNSET_VALUE}
+                >
+                  <SelectTrigger id="draft-article-type">
+                    <SelectValue placeholder="Select article type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ARTICLE_TYPE_UNSET_VALUE}>
+                      Not set
+                    </SelectItem>
+                    {ARTICLE_TYPE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </Field>
 
               <Field>

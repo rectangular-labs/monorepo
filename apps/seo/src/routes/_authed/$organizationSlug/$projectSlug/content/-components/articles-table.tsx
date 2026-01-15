@@ -1,5 +1,6 @@
 "use client";
 
+import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   Table,
   TableBody,
@@ -126,6 +127,7 @@ export function ArticlesTable({
               }
 
               const canSort = header.column.getCanSort();
+              const sortState = header.column.getIsSorted();
               return (
                 <TableHead key={header.id}>
                   <button
@@ -144,6 +146,15 @@ export function ArticlesTable({
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext(),
+                    )}
+                    {canSort && sortState === "asc" && (
+                      <Icons.FilterAscending className="size-3.5 text-muted-foreground" />
+                    )}
+                    {canSort && sortState === "desc" && (
+                      <Icons.FilterDescending className="size-3.5 text-muted-foreground" />
+                    )}
+                    {canSort && !sortState && (
+                      <Icons.ChevronsUpDown className="size-3.5 text-muted-foreground" />
                     )}
                   </button>
                 </TableHead>
