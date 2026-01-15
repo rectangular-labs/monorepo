@@ -62,8 +62,9 @@ function ContentLayout() {
             Scheduled & Published
           </NavLink>
           <NavLink
+            activeOptions={{ exact: false, includeSearch: false }}
             params={{ organizationSlug, projectSlug }}
-            to="/$organizationSlug/$projectSlug/content/review/outlines"
+            to="/$organizationSlug/$projectSlug/content/review"
           >
             Review
           </NavLink>
