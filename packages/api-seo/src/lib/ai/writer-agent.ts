@@ -142,7 +142,6 @@ export function createWriterAgent({
 
   const fileTools = createFileToolsWithMetadata({
     userId: undefined,
-    publishingSettings: project.publishingSettings,
     db: context.db,
     organizationId: context.organizationId,
     projectId: context.projectId,
