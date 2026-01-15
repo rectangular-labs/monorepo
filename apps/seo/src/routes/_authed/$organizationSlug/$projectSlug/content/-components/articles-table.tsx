@@ -1,5 +1,6 @@
 "use client";
 
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   Table,
@@ -20,13 +21,6 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 
-type ArticleTableRow = {
-  id: string;
-  slug: string;
-  title?: string;
-  primaryKeyword: string;
-};
-
 function compareMaybeString(a?: string, b?: string) {
   const aValue = (a ?? "").trim().toLowerCase();
   const bValue = (b ?? "").trim().toLowerCase();
@@ -35,6 +29,14 @@ function compareMaybeString(a?: string, b?: string) {
   if (!bValue) return -1;
   return aValue.localeCompare(bValue);
 }
+
+type ArticleTableRow = {
+  id: string;
+  primaryKeyword: string;
+  title: string;
+  slug: string;
+  status: SeoFileStatus;
+};
 
 export function ArticlesTable({
   rows,

@@ -110,6 +110,7 @@ function PageComponent() {
     const base = (liveQuery.data?.data ?? []).map((row) => ({
       id: row.id,
       slug: row.slug,
+      title: row.title,
       primaryKeyword: row.primaryKeyword,
       author: row.createdByUserId,
       scheduledFor: row.schedule.scheduledFor.toISOString(),
@@ -266,10 +267,7 @@ function PageComponent() {
             </div>
           ) : (
             <div className="rounded-md border">
-              <ArticlesTable
-                members={organizationMembers.members}
-                rows={liveRows}
-              />
+              <ArticlesTable rows={liveRows} />
             </div>
           )}
         </div>
