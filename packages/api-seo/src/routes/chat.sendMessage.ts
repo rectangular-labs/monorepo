@@ -1,3 +1,4 @@
+import { waitUntil } from "cloudflare:workers";
 import { ORPCError, os, streamToEventIterator, type } from "@orpc/server";
 import { asyncStorageMiddleware } from "@rectangular-labs/api-core/lib/context-storage";
 import type { Session } from "@rectangular-labs/auth";
@@ -251,7 +252,15 @@ export const sendMessage = withOrganizationIdBase
       ],
     });
     console.log("[chat.sendMessage] streamText result created");
-
+    waitUntil(
+      result.consumeStream({
+        onError: (error) => {
+          console.error("[chat.sendMessage] consumeStream onError", {
+            error,
+          });
+        },
+      }),
+    );
     const uiMessageStream = result.toUIMessageStream<SeoChatMessage>({
       sendSources: true,
       sendReasoning: true,
