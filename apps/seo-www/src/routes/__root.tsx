@@ -11,6 +11,8 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { seo } from "~/lib/seo";
 import appCss from "../styles.css?url";
+import { Footer } from "./-components/footer";
+import { Header } from "./-components/header";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -46,6 +48,12 @@ export const Route = createRootRouteWithContext<{
         as: "style",
         fetchPriority: "high",
       },
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        href: "/blog/rss.xml",
+        title: "Fluid Posts Blog RSS",
+      },
       { rel: "stylesheet", href: appCss },
       {
         rel: "apple-touch-icon",
@@ -69,7 +77,7 @@ export const Route = createRootRouteWithContext<{
         type: "image/x-icon",
         href: "/favicon.ico",
       },
-      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
+      { rel: "manifest", href: "/site.webmanifest", color: "#ffffff" },
     ],
   }),
   component: RootLayout,
@@ -83,7 +91,13 @@ function RootLayout() {
       </head>
       <body className="flex min-h-screen flex-col">
         <ThemeProvider attribute="class" enableSystem>
-          <Outlet />
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <div className="flex-1">
+              <Outlet />
+            </div>
+            <Footer />
+          </div>
           <Toaster />
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-left" />

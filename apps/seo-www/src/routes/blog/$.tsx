@@ -16,7 +16,7 @@ const getBlogData = createServerFn({ method: "GET" })
     };
   });
 
-export const Route = createFileRoute("/_marketing/blog/$")({
+export const Route = createFileRoute("/blog/$")({
   component: Page,
   loader: async ({ params }) => {
     const data = await getBlogData({ data: params._splat?.split("/") ?? [] });
