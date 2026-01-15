@@ -11,8 +11,7 @@ import type {
   seoPlanKeywordTaskInputSchema,
   seoPlanKeywordTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
-import type { schema } from "@rectangular-labs/db";
-import { writeToFile } from "@rectangular-labs/loro-file-system";
+import { createDb, type schema } from "@rectangular-labs/db";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import {
   generateText,
@@ -22,21 +21,20 @@ import {
   stepCountIs,
 } from "ai";
 import { type } from "arktype";
+import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
 } from "../lib/ai/tools/todo-tool";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
+import { getContentForSlug, normalizeContentSlug } from "../lib/content";
+import { writeContentDraft } from "../lib/content/write-content-draft";
 import {
   configureDataForSeoClient,
   fetchSerpWithCache,
   getLocationAndLanguage,
   getSerpCacheDetails,
 } from "../lib/dataforseo/utils";
-import {
-  loadWorkspaceForWorkflow,
-  persistWorkspaceSnapshot,
-} from "../lib/workspace/workflow";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -246,6 +244,9 @@ ${JSON.stringify(serp)}
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
   const webTools = createWebToolsWithMetadata(project, cache);
+  const internalLinksTools = createInternalLinksToolWithMetadata(
+    project.websiteUrl,
+  );
   const outputSchema = type({
     title: type("string").describe(
       "Meta title (max 60 characters): clear, enticing, includes the primary keyword once naturally, directly answers search intent.",
@@ -275,6 +276,7 @@ ${JSON.stringify(serp)}
       },
       tools: {
         ...webTools.tools,
+        ...internalLinksTools.tools,
         ...todoTool.tools,
       },
       system,
@@ -339,7 +341,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
       path: input.path,
       organizationId: input.organizationId,
       projectId: input.projectId,
-      campaignId: input.campaignId,
+      chatId: input.chatId,
       hasCallbackInstanceId: Boolean(input.callbackInstanceId),
     });
     configureDataForSeoClient();
@@ -353,22 +355,41 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         project,
         notes,
       } = await step.do("fetch SERP for keyword", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
+        const db = createDb();
+        const slug = normalizeContentSlug(input.path);
+        if (!slug) {
+          throw new NonRetryableError(`Invalid content path: ${input.path}`);
+        }
+        const contentResult = await getContentForSlug({
+          db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
+          originatingChatId: input.chatId ?? null,
+          slug,
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { node, project } = workspaceResult.value;
-
-        const { locationName, languageCode } = getLocationAndLanguage(project);
-        const primaryKeyword = node.data.get("primaryKeyword");
+        if (!contentResult.ok) {
+          throw new NonRetryableError(contentResult.error.message);
+        }
+        const content = contentResult.value.data.content;
+        const primaryKeyword = content.primaryKeyword;
         if (!primaryKeyword) {
           throw new NonRetryableError(
             `Primary keyword not found for ${input.path}`,
           );
         }
+
+        const project = await db.query.seoProject.findFirst({
+          where: (table, { and, eq }) =>
+            and(
+              eq(table.id, input.projectId),
+              eq(table.organizationId, input.organizationId),
+            ),
+        });
+        if (!project) {
+          throw new NonRetryableError(`Project (${input.projectId}) not found`);
+        }
+
+        const { locationName, languageCode } = getLocationAndLanguage(project);
         const serpCacheDetails = getSerpCacheDetails(
           primaryKeyword,
           locationName,
@@ -387,7 +408,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           locationName,
           languageCode,
           project,
-          notes: node.data.get("notes"),
+          notes: content.notes ?? undefined,
         };
       });
 
@@ -466,30 +487,25 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
       );
 
       await step.do("store outline in node", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
-          organizationId: input.organizationId,
-          projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
+        const db = createDb();
+        const writeResult = await writeContentDraft({
+          db,
+          chatId: input.chatId ?? null,
+          userId: input.userId ?? null,
+          project: {
+            id: input.projectId,
+            organizationId: input.organizationId,
+          },
+          createIfNotExists: true,
+          lookup: { type: "slug", slug: input.path },
+          draftNewValues: {
+            slug: input.path,
+            outline: outlineResult.outline,
+            title: outlineResult.title,
+            description: outlineResult.description,
+          },
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { loroDoc, workspaceBlobUri } = workspaceResult.value;
-
-        const writeResult = await writeToFile({
-          tree: loroDoc.getTree("fs"),
-          path: input.path,
-          metadata: [
-            { key: "outline", value: outlineResult.outline },
-            { key: "title", value: outlineResult.title },
-            { key: "description", value: outlineResult.description },
-          ],
-        });
-        if (!writeResult.success) throw new Error(writeResult.message);
-        const persistResult = await persistWorkspaceSnapshot({
-          loroDoc,
-          workspaceBlobUri,
-        });
-        if (!persistResult.ok) throw persistResult.error;
+        if (!writeResult.ok) throw new Error(writeResult.error.message);
       });
 
       logInfo("outline stored", {

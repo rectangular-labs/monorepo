@@ -12,31 +12,25 @@ import type {
 } from "@rectangular-labs/core/schemas/task-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
-import type { CrdtServerAdaptor } from "loro-adaptors";
-import type { DocUpdateFragmentHeader, HexString } from "loro-protocol";
+import type { Scheduler } from "partywhen";
 import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
 import type { createSkillTools } from "./lib/ai/tools/skill-tools";
-import type { createSuggestArticlesToolWithMetadata } from "./lib/ai/tools/suggest-articles-tool";
 import type { createTodoToolWithMetadata } from "./lib/ai/tools/todo-tool";
 import type {
   createPublicImagesBucket,
   createWorkspaceBucket,
 } from "./lib/bucket";
-import type { router, websocketRouter } from "./routes";
+import type { router } from "./routes";
 
 export type Router = UnlaziedRouter<typeof router>;
 export type RouterClient = ORPCRouterClient<Router>;
 export type RouterInputs = InferRouterInputs<Router>;
 export type RouterOutputs = InferRouterOutputs<Router>;
 
-export type WebsocketRouter = UnlaziedRouter<typeof websocketRouter>;
-export type WebsocketRouterClient = ORPCRouterClient<WebsocketRouter>;
-
 type AiTools = InferUITools<
   ReturnType<typeof createSkillTools> &
     ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
-    ReturnType<typeof createTodoToolWithMetadata>["tools"] &
-    ReturnType<typeof createSuggestArticlesToolWithMetadata>["tools"]
+    ReturnType<typeof createTodoToolWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
   typeof chatMessageMetadataSchema.infer,
@@ -66,14 +60,15 @@ export interface InitialContext extends BaseContextWithAuth {
   seoPlannerWorkflow: Workflow<typeof seoPlanKeywordTaskInputSchema.infer>;
   seoWriterWorkflow: Workflow<typeof seoWriteArticleTaskInputSchema.infer>;
   cacheKV: KVNamespace;
+  scheduler: DurableObjectStub<Scheduler>;
 }
 
 export interface ChatContext extends InitialContext {
   userId: string;
+  chatId: string;
   sessionId: string;
   projectId: string;
   organizationId: string;
-  roomDocumentMap: Map<string, RoomDocument>;
   cache: {
     messages?: Record<string, SeoChatMessage>;
     project?: typeof schema.seoProject.$inferSelect & {
@@ -82,38 +77,6 @@ export interface ChatContext extends InitialContext {
     gscProperty?: typeof schema.seoGscProperty.$inferSelect & {
       accessToken?: string;
     };
+    chat?: typeof schema.seoChat.$inferSelect;
   };
-}
-
-/**
- * This provides all the necessary context for the websocket server.
- * Today this handles all the chat messages between the user and the assistant.
- */
-export interface WebSocketContext extends ChatContext {
-  senderWebSocket: WebSocket;
-  allWebSockets: WebSocket[];
-  campaignId: string;
-  campaignTitle: string;
-  updateCampaignTitle: (title: string) => void;
-  userFragments: Map<HexString, UserFragment>;
-}
-
-/**
- * This handles the logic for the Loro sync server.
- */
-export interface RoomDocument {
-  data: Uint8Array;
-  dirty: boolean;
-  lastSaved: number;
-  descriptor: {
-    shouldPersist: boolean;
-    allowBackfillWhenNoOtherClients: boolean;
-    adaptor: CrdtServerAdaptor;
-  };
-}
-export interface UserFragment {
-  data: Uint8Array[];
-  totalSize: number;
-  received: number;
-  header: DocUpdateFragmentHeader;
 }

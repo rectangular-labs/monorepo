@@ -1,4 +1,4 @@
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
 import { type } from "arktype";
 import {
@@ -6,8 +6,8 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations } from "drizzle-orm";
-import { index, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { index, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
@@ -44,13 +44,11 @@ export const seoContentDraft = pgSeoTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    targetReleaseDate: timestamp({ mode: "date", withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    targetReleaseDate: timestamp({ mode: "date", withTimezone: true }),
 
     title: text().notNull().default(""),
     description: text().notNull().default(""),
-    slug: text().notNull().default(""),
+    slug: text().notNull(),
     primaryKeyword: text().notNull(),
     // we don't have published / scheduled statuses for drafts since they will be promoted to content-schema when they hit those statuses
     status: text({
@@ -58,9 +56,12 @@ export const seoContentDraft = pgSeoTable(
         "suggested",
         "suggestion-rejected",
         "queued",
-        "generating",
-        "generation-failed",
+        "planning",
+        "writing",
+        "reviewing-writing",
         "pending-review",
+        "scheduled",
+        "published",
         "review-denied",
         "deleted",
       ] as const satisfies SeoFileStatus[],
@@ -86,6 +87,19 @@ export const seoContentDraft = pgSeoTable(
   },
   (table) => [
     // note that the lack of unique constraints on the slug is intentional because we can have two drafts of the same content being worked on concurrently.
+    unique("seo_content_draft_org_project_chat_slug_unique").on(
+      table.organizationId,
+      table.projectId,
+      table.originatingChatId,
+      table.slug,
+    ),
+    index("seo_content_branch_org_project_chat_slug_prefix_idx").using(
+      "btree",
+      table.organizationId,
+      table.projectId,
+      table.originatingChatId,
+      sql`${table.slug} text_pattern_ops`,
+    ),
     index("seo_content_branch_org_idx").on(table.organizationId),
     index("seo_content_branch_project_idx").on(table.projectId),
     index("seo_content_branch_base_content_id_idx").on(table.baseContentId),
@@ -93,6 +107,7 @@ export const seoContentDraft = pgSeoTable(
       table.originatingChatId,
     ),
     index("seo_content_branch_status_idx").on(table.status),
+    index("seo_content_branch_deleted_at_idx").on(table.deletedAt),
   ],
 );
 
@@ -132,6 +147,5 @@ export const seoContentDraftUpdateSchema = createUpdateSchema(seoContentDraft)
     type({
       id: "string.uuid",
       projectId: "string.uuid",
-      organizationId: "string",
     }),
   );

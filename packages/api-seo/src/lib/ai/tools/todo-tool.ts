@@ -83,7 +83,7 @@ export function createTodoToolWithMetadata(args: {
 
   const manageTodo = tool({
     description:
-      "Manage todos for the SEO campaign. Todos are stored in chat history via tool results (not in the workspace filesystem).",
+      "Manage todos for the SEO chat. Todos are stored in chat history via tool results (not in the workspace filesystem).",
     inputSchema: jsonSchema<typeof manageTodoInputSchema.infer>(
       // Google api doesn't support const keyword in json schema for anyOf, only string.
       JSON.parse(
@@ -169,7 +169,7 @@ export function createTodoToolWithMetadata(args: {
   const toolDefinitions: AgentToolDefinition[] = [
     {
       toolName: "manage_todo",
-      toolDescription: "Create, list, and update campaign todos.",
+      toolDescription: "Create, list, and update chat todos.",
       toolInstruction:
         "Use action='list' to see current tasks. Use action='create' with todo.title (and optional notes/status/dependencies). Use action='update' with todo.id and updated fields; mark done by setting status='done'. Provide dependencies as a list of todo ids that must be completed before this todo can be started to help keep organize of what order things should be done in. Otherwise simply give them in order of execution. Keep todos atomic and execution-oriented.",
       tool: manageTodo,

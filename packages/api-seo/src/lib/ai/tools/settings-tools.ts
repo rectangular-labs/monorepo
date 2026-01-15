@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import {
   businessBackgroundSchema,
   imageSettingsSchema,
+  publishingSettingsSchema,
   writingSettingsSchema,
 } from "@rectangular-labs/core/schemas/project-parsers";
 import {
@@ -10,14 +11,16 @@ import {
 } from "@rectangular-labs/db/operations";
 import { generateObject, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
-import { getWebsocketContext } from "../../../context";
+import type { ChatContext } from "../../../types";
 import type { AgentToolDefinition } from "./utils";
 
-export function createSettingsToolsWithMetadata() {
+export function createSettingsToolsWithMetadata(args: {
+  context: Pick<ChatContext, "db" | "projectId" | "organizationId">;
+}) {
   const manageSettingsInputSchema = type({
     mode: "'update' | 'display'",
     settingToUpdate:
-      "'businessBackground' | 'imageSettings' | 'writingSettings'",
+      "'businessBackground' | 'imageSettings' | 'writingSettings' | 'publishingSettings'",
     "updateTask?": "string",
   });
 
@@ -31,11 +34,10 @@ export function createSettingsToolsWithMetadata() {
         return { success: true, message: "setting displayed to user" };
       }
 
-      const context = getWebsocketContext();
       const projectResult = await getSeoProjectByIdentifierAndOrgId(
-        context.db,
-        context.projectId,
-        context.organizationId,
+        args.context.db,
+        args.context.projectId,
+        args.context.organizationId,
         {
           [settingToUpdate]: true,
         },
@@ -53,12 +55,14 @@ export function createSettingsToolsWithMetadata() {
         | typeof businessBackgroundSchema.infer
         | typeof imageSettingsSchema.infer
         | typeof writingSettingsSchema.infer
+        | typeof publishingSettingsSchema.infer
         | null
         | undefined;
       let schemaToUse:
         | typeof businessBackgroundSchema
         | typeof imageSettingsSchema
-        | typeof writingSettingsSchema;
+        | typeof writingSettingsSchema
+        | typeof publishingSettingsSchema;
 
       switch (settingToUpdate) {
         case "businessBackground":
@@ -72,6 +76,10 @@ export function createSettingsToolsWithMetadata() {
         case "writingSettings":
           currentSettings = project.writingSettings;
           schemaToUse = writingSettingsSchema;
+          break;
+        case "publishingSettings":
+          currentSettings = project.publishingSettings;
+          schemaToUse = publishingSettingsSchema;
           break;
       }
 
@@ -92,9 +100,9 @@ Respond with the new object matching the schema.`;
         prompt: prompt,
       });
 
-      await updateSeoProject(context.db, {
-        id: context.projectId,
-        organizationId: context.organizationId,
+      await updateSeoProject(args.context.db, {
+        id: args.context.projectId,
+        organizationId: args.context.organizationId,
         [settingToUpdate]: object,
       });
 

@@ -1,4 +1,4 @@
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
+import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -40,8 +40,8 @@ export const seoContentSchedule = pgSeoTable(
     })
       .notNull()
       .default("scheduled"),
-    destination: text(),
-    scheduledFor: timestamp({ mode: "date", withTimezone: true }),
+    destination: text().notNull(),
+    scheduledFor: timestamp({ mode: "date", withTimezone: true }).notNull(),
     publishedAt: timestamp({ mode: "date", withTimezone: true }),
     publishedUrl: text(),
     ...timestamps,

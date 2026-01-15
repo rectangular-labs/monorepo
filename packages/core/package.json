@@ -15,14 +15,6 @@
     "./project/*": {
       "types": "./dist/project/*.d.ts",
       "default": "./src/project/*.ts"
-    },
-    "./workspace/*": {
-      "types": "./dist/workspace/*.d.ts",
-      "default": "./src/workspace/*.ts"
-    },
-    "./loro-file-system": {
-      "types": "./dist/loro-file-system/index.d.ts",
-      "default": "./src/loro-file-system/index.ts"
     }
   },
   "scripts": {
@@ -39,7 +31,6 @@
   },
   "dependencies": {
     "@rectangular-labs/loro-file-system": "workspace:*",
-    "arktype": "^2.1.27",
-    "loro-crdt": "^1.10.0"
+    "arktype": "^2.1.29"
   }
 }

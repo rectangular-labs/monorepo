@@ -71,7 +71,6 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
         }),
       });
     }
-    console.log("result", result);
     if (params.organizationSlug === AUTO_ROUTE_ORG) {
       throw redirect({
         from: "/$organizationSlug",

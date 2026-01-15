@@ -1,19 +1,15 @@
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { convertToModelMessages, type streamText } from "ai";
-import type {
-  InitialContext,
-  SeoChatMessage,
-  WebSocketContext,
-} from "../../types";
+import type { ChatContext, SeoChatMessage } from "../../types";
 import { formatBusinessBackground } from "./format-business-background";
+import { createCreateArticleToolWithMetadata } from "./tools/create-article-tool";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
 import { createGscToolWithMetadata } from "./tools/google-search-console-tool";
 import { createPlannerToolsWithMetadata } from "./tools/planner-tools";
 import { createSettingsToolsWithMetadata } from "./tools/settings-tools";
 import { createSkillTools } from "./tools/skill-tools";
-import { createSuggestArticlesToolWithMetadata } from "./tools/suggest-articles-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -81,16 +77,14 @@ export function createStrategistAgent({
   messages,
   gscProperty,
   project,
-  userId,
+  context,
   currentPage,
-  cacheKV,
 }: {
   messages: SeoChatMessage[];
-  gscProperty: WebSocketContext["cache"]["gscProperty"];
-  project: NonNullable<WebSocketContext["cache"]["project"]>;
-  userId: string;
+  gscProperty: ChatContext["cache"]["gscProperty"];
+  project: NonNullable<ChatContext["cache"]["project"]>;
+  context: ChatContext;
   currentPage: ProjectChatCurrentPage;
-  cacheKV: InitialContext["cacheKV"];
 }): Parameters<typeof streamText>[0] {
   const hasGsc = !!(
     gscProperty?.accessToken &&
@@ -108,33 +102,44 @@ export function createStrategistAgent({
   const plannerTools = createPlannerToolsWithMetadata();
   const todoTools = createTodoToolWithMetadata({ messages });
 
-  const settingsTools = createSettingsToolsWithMetadata();
-  const fileTools = createFileToolsWithMetadata({
-    userId,
-    publishingSettings: project.publishingSettings,
+  const settingsTools = createSettingsToolsWithMetadata({
+    context: {
+      db: context.db,
+      projectId: project.id,
+      organizationId: project.organizationId,
+    },
   });
-  const webTools = createWebToolsWithMetadata(project, cacheKV);
+  const fileTools = createFileToolsWithMetadata({
+    userId: context.userId,
+    publishingSettings: project.publishingSettings,
+    db: context.db,
+    organizationId: project.organizationId,
+    projectId: project.id,
+    chatId: context.chatId,
+  });
+  const readOnlyFileToolDefinitions = fileTools.toolDefinitions.filter(
+    (tool) => tool.toolName === "ls" || tool.toolName === "cat",
+  );
+
+  const webTools = createWebToolsWithMetadata(project, context.cacheKV);
   const gscTools = createGscToolWithMetadata({
     accessToken: gscProperty?.accessToken ?? null,
     siteUrl: gscProperty?.domain ?? null,
     siteType: gscProperty?.type ?? null,
   });
   const dataforseoTools = createDataforseoToolWithMetadata(project);
-  const makeArticleSuggestionsTool = createSuggestArticlesToolWithMetadata({
-    userId,
+  const createArticleTool = createCreateArticleToolWithMetadata({
+    userId: context.userId,
     project,
+    context,
   });
-
-  const readOnlyFileToolDefinitions = fileTools.toolDefinitions.filter(
-    (tool) => tool.toolName === "ls" || tool.toolName === "cat",
-  );
 
   const skillDefinitions: AgentToolDefinition[] = [
     ...settingsTools.toolDefinitions,
     ...webTools.toolDefinitions,
     ...gscTools.toolDefinitions,
     ...dataforseoTools.toolDefinitions,
-    ...makeArticleSuggestionsTool.toolDefinitions,
+    ...createArticleTool.toolDefinitions,
     ...readOnlyFileToolDefinitions,
   ];
   const skillsSection = formatToolSkillsSection(skillDefinitions);

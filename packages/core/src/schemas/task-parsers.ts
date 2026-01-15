@@ -12,7 +12,7 @@ export const seoPlanKeywordTaskInputSchema = type({
   type: "'seo-plan-keyword'",
   projectId: "string",
   organizationId: "string",
-  campaignId: "string|null",
+  chatId: "string|null",
   path: "string",
   "callbackInstanceId?": "string",
   "userId?": "string",
@@ -22,7 +22,7 @@ export const seoWriteArticleTaskInputSchema = type({
   type: "'seo-write-article'",
   projectId: "string",
   organizationId: "string",
-  campaignId: "string|null",
+  chatId: "string|null",
   path: "string",
   "userId?": "string",
 });

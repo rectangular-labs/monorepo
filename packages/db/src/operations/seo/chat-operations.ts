@@ -98,8 +98,12 @@ export async function updateChat({
   if (!result.ok) {
     return result;
   }
+  const updatedChat = result.value[0];
+  if (!updatedChat) {
+    return err(new Error("Failed to update chat"));
+  }
 
-  return ok(result.value[0]);
+  return ok(updatedChat);
 }
 
 export async function deleteChat({

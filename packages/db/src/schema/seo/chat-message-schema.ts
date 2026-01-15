@@ -50,15 +50,12 @@ export const seoChatMessage = pgSeoTable(
   ],
 );
 
-export const seoChatMessageRelations = relations(
-  seoChatMessage,
-  ({ one }) => ({
-    chat: one(seoChat, {
-      fields: [seoChatMessage.chatId],
-      references: [seoChat.id],
-    }),
+export const seoChatMessageRelations = relations(seoChatMessage, ({ one }) => ({
+  chat: one(seoChat, {
+    fields: [seoChatMessage.chatId],
+    references: [seoChat.id],
   }),
-);
+}));
 
 export const seoChatMessageInsertSchema = createInsertSchema(
   seoChatMessage,
