@@ -48,11 +48,11 @@ export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
       className="h-full max-h-[calc(100vh-100px)] min-h-0 flex-1"
       direction="horizontal"
     >
-      <ResizablePanel defaultSize={70} minSize={45}>
+      <ResizablePanel defaultSize={75} minSize={45}>
         {children}
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={30} maxSize={45} minSize={20}>
+      <ResizablePanel defaultSize={25} maxSize={45} minSize={15}>
         <ProjectChatPanel />
       </ResizablePanel>
     </ResizablePanelGroup>

@@ -428,6 +428,7 @@ export function ArticleEditorTakeover({
       </div>
 
       <LoadingError
+        className="p-6"
         error={draftError}
         errorDescription="Something went wrong while loading this article. Please try again."
         errorTitle="Error loading article"
