@@ -312,7 +312,6 @@ export function createFileToolsWithMetadata(args: {
         userId: args.userId ?? null,
         project: {
           id: args.projectId,
-          publishingSettings,
           organizationId: args.organizationId,
         },
         createIfNotExists: true,

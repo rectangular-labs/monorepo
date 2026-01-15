@@ -172,6 +172,51 @@ export async function listContentWithLatestSchedule(args: {
   });
 }
 
+export async function getScheduledItems(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+}) {
+  const scheduledRows = await args.db.query.seoContentSchedule.findMany({
+    columns: {
+      scheduledFor: true,
+    },
+    where: (table, { and, eq, isNull }) =>
+      and(
+        eq(table.organizationId, args.organizationId),
+        eq(table.projectId, args.projectId),
+        isNull(table.deletedAt),
+      ),
+  });
+
+  const draftRows = await args.db.query.seoContentDraft.findMany({
+    columns: {
+      targetReleaseDate: true,
+    },
+    where: (table, { and, eq, isNull, ne, isNotNull }) =>
+      and(
+        eq(table.organizationId, args.organizationId),
+        eq(table.projectId, args.projectId),
+        isNotNull(table.targetReleaseDate),
+        isNull(table.deletedAt),
+        ne(table.status, "deleted"),
+        ne(table.status, "review-denied"),
+        ne(table.status, "suggestion-rejected"),
+      ),
+  });
+
+  const scheduledItems = [
+    ...scheduledRows.map((row) => ({
+      scheduledFor: row.scheduledFor ?? null,
+    })),
+    ...draftRows.map((row) => ({
+      scheduledFor: row.targetReleaseDate ?? null,
+    })),
+  ];
+
+  return scheduledItems;
+}
+
 export async function createContentDraft(
   db: DB,
   values: typeof seoContentDraftInsertSchema.infer,
@@ -257,13 +302,13 @@ export async function getDraftBySlug(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, isNull }) =>
+      where: (table, { and, eq }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           args.originatingChatId
             ? eq(table.originatingChatId, args.originatingChatId)
-            : isNull(table.originatingChatId),
+            : undefined,
           eq(table.slug, args.slug),
         ),
       orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
@@ -290,8 +335,9 @@ export async function getDraftById(args: {
           eq(table.projectId, args.projectId),
           args.originatingChatId
             ? eq(table.originatingChatId, args.originatingChatId)
-            : isNull(table.originatingChatId),
+            : undefined,
           eq(table.id, args.id),
+          isNull(table.deletedAt),
         ),
     }),
   );
@@ -316,7 +362,7 @@ export async function getDraftsBySlug(args: {
           eq(table.projectId, args.projectId),
           args.originatingChatId
             ? eq(table.originatingChatId, args.originatingChatId)
-            : isNull(table.originatingChatId),
+            : undefined,
           or(eq(table.slug, args.slug), like(table.slug, `${args.slug}%`)),
           isNull(table.deletedAt),
         ),

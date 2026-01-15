@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import { schema } from "@rectangular-labs/db";
 import {
   createContent,
@@ -7,6 +8,7 @@ import {
   getContentBySlug,
   getContentScheduleById,
   getDraftById,
+  getScheduledItems,
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
   listContentWithLatestSchedule,
@@ -245,7 +247,6 @@ const getDraft = withOrganizationIdBase
       organizationId: context.organization.id,
       projectId: input.projectId,
       id: input.id,
-      originatingChatId: null,
       withContent: true,
     });
     if (!draftResult.ok) {
@@ -350,8 +351,7 @@ const markContent = withOrganizationIdBase
       organizationId: context.organization.id,
       projectId: input.projectId,
       id: input.id,
-      originatingChatId: null,
-      withContent: false,
+      withContent: true,
     });
     if (!draftResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -389,11 +389,17 @@ const markContent = withOrganizationIdBase
     }
 
     if (isSuggestion) {
-      const updatedResult = await updateContentDraft(context.db, {
-        id: draft.id,
-        projectId: input.projectId,
-        organizationId: context.organization.id,
-        status: "queued",
+      const updatedResult = await writeContentDraft({
+        db: context.db,
+        chatId: null,
+        userId: context.user.id,
+        project: {
+          id: input.projectId,
+          organizationId: context.organization.id,
+        },
+        createIfNotExists: false,
+        lookup: { type: "id", id: input.id },
+        draftNewValues: { status: "queued" },
       });
       if (!updatedResult.ok) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -401,12 +407,13 @@ const markContent = withOrganizationIdBase
           cause: updatedResult.error,
         });
       }
+
       const {
         contentMarkdown: _contentMarkdown,
         outline: _outline,
         notes: _notes,
         ...summary
-      } = updatedResult.value;
+      } = updatedResult.value.draft;
       return { success: true as const, draft: summary };
     }
 
@@ -471,14 +478,52 @@ const markContent = withOrganizationIdBase
       });
     }
 
-    const draftTarget = draft.targetReleaseDate;
-    const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);
-    const scheduledFor =
-      draftTarget.getTime() < earliestPossibleScheduledFor.getTime()
-        ? // If the target date is in the past, bump it into the future so our scheduler can pick it up reliably.
-          // This can happen when a draft is generated/held for review longer than its initially planned release time.
-          earliestPossibleScheduledFor
-        : draftTarget;
+    let scheduledFor = draft.targetReleaseDate;
+    if (!scheduledFor) {
+      const projectResult = await getSeoProjectByIdentifierAndOrgId(
+        context.db,
+        input.projectId,
+        context.organization.id,
+        {
+          publishingSettings: true,
+        },
+      );
+      if (!projectResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to get project.",
+          cause: projectResult.error,
+        });
+      }
+      if (!projectResult.value) {
+        throw new ORPCError("NOT_FOUND", { message: "Project not found." });
+      }
+      const project = projectResult.value;
+
+      const cadence = project.publishingSettings?.cadence;
+      if (cadence) {
+        const scheduledItems = await getScheduledItems({
+          db: context.db,
+          organizationId: draft.organizationId,
+          projectId: draft.projectId,
+        });
+        const scheduledIso = computeNextAvailableScheduleIso({
+          cadence,
+          scheduledItems: scheduledItems.filter(
+            (item): item is { scheduledFor: Date } =>
+              item.scheduledFor !== null,
+          ),
+        });
+        if (scheduledIso) {
+          scheduledFor = new Date(scheduledIso);
+        }
+      }
+    }
+
+    if (!scheduledFor) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to get scheduled for.",
+      });
+    }
 
     const createdScheduleResult = await createContentSchedule(context.db, {
       organizationId: context.organization.id,
@@ -519,11 +564,19 @@ const markContent = withOrganizationIdBase
       context.url.origin,
     ).toString();
 
+    const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);
+    const actualScheduledFor =
+      scheduledFor.getTime() < earliestPossibleScheduledFor.getTime()
+        ? // If the target date is in the past, bump it into the future so our scheduler can pick it up reliably.
+          // This can happen when a draft is generated/held for review longer than its initially planned release time.
+          earliestPossibleScheduledFor
+        : scheduledFor;
+
     await context.scheduler.scheduleTask({
       id: createdSchedule.id,
       description: `publish-content:${createdSchedule.id}`,
       type: "scheduled",
-      time: scheduledFor,
+      time: actualScheduledFor,
       payload: {
         scheduleId: createdSchedule.id,
         // TODO: add a signature that signs the scheduleId for verification
@@ -609,6 +662,7 @@ const publishContent = base
     const now = new Date();
     const fiveMinutesMs = 5 * 60 * 1000;
     if (now.getTime() < schedule.scheduledFor.getTime() - fiveMinutesMs) {
+      // too early to publish, schedule a task to publish later
       const publishWebhookUrl = new URL(
         `/api/rpc/organization/${input.organizationIdentifier}/project/${input.projectId}/content/${content.id}/publish`,
         context.url.origin,

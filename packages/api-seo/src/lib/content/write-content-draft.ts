@@ -1,4 +1,3 @@
-import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import type { DB, schema } from "@rectangular-labs/db";
 import {
   getDraftById,
@@ -13,51 +12,6 @@ import {
 } from "../workspace/constants";
 import { ensureDraftForSlug } from "./index";
 import { normalizeContentSlug } from "./normalize-content-slug";
-
-async function getScheduledItems(args: {
-  db: DB;
-  organizationId: string;
-  projectId: string;
-}) {
-  const scheduledRows = await args.db.query.seoContentSchedule.findMany({
-    columns: {
-      scheduledFor: true,
-    },
-    where: (table, { and, eq, isNull }) =>
-      and(
-        eq(table.organizationId, args.organizationId),
-        eq(table.projectId, args.projectId),
-        isNull(table.deletedAt),
-      ),
-  });
-
-  const draftRows = await args.db.query.seoContentDraft.findMany({
-    columns: {
-      targetReleaseDate: true,
-    },
-    where: (table, { and, eq, isNull, ne, isNotNull }) =>
-      and(
-        eq(table.organizationId, args.organizationId),
-        eq(table.projectId, args.projectId),
-        isNotNull(table.targetReleaseDate),
-        isNull(table.deletedAt),
-        ne(table.status, "deleted"),
-        ne(table.status, "review-denied"),
-        ne(table.status, "suggestion-rejected"),
-      ),
-  });
-
-  const scheduledItems = [
-    ...scheduledRows.map((row) => ({
-      scheduledFor: row.scheduledFor ?? null,
-    })),
-    ...draftRows.map((row) => ({
-      scheduledFor: row.targetReleaseDate ?? null,
-    })),
-  ];
-
-  return scheduledItems;
-}
 
 type DraftUpdates = Omit<
   typeof schema.seoContentDraftUpdateSchema.infer,
@@ -75,10 +29,7 @@ type WriteContentDraftArgsBase = {
   db: DB;
   chatId: string | null;
   userId: string | null;
-  project: Pick<
-    typeof schema.seoProject.$inferSelect,
-    "id" | "publishingSettings" | "organizationId"
-  >;
+  project: Pick<typeof schema.seoProject.$inferSelect, "id" | "organizationId">;
   createIfNotExists: boolean;
   draftNewValues: DraftUpdates;
 };
@@ -159,24 +110,6 @@ export async function writeContentDraft(
     }
   }
 
-  if (nextStatus !== "suggested" && !updates.targetReleaseDate) {
-    const cadence = args.project.publishingSettings?.cadence;
-    if (cadence) {
-      const scheduledItems = await getScheduledItems({
-        db: args.db,
-        organizationId: args.project.organizationId,
-        projectId: args.project.id,
-      });
-      const scheduledIso = computeNextAvailableScheduleIso({
-        cadence,
-        scheduledItems,
-      });
-      if (scheduledIso) {
-        updates.targetReleaseDate = new Date(scheduledIso);
-      }
-    }
-  }
-
   const updatedResult = await updateContentDraft(args.db, {
     id: draft.id,
     organizationId: args.project.organizationId,
@@ -189,11 +122,7 @@ export async function writeContentDraft(
   let updatedDraft = updatedResult.value;
 
   const path = nextSlug;
-  if (
-    isNew &&
-    nextStatus === "suggested" &&
-    !updatedDraft.outlineGeneratedByTaskRunId
-  ) {
+  if (nextStatus === "suggested" && !updatedDraft.outlineGeneratedByTaskRunId) {
     const taskResult = await createTask({
       db: args.db,
       userId: args.userId ?? undefined,
@@ -247,5 +176,5 @@ export async function writeContentDraft(
     }
   }
 
-  return ok({ draft: updatedDraft });
+  return ok({ draft: updatedDraft, isNew });
 }

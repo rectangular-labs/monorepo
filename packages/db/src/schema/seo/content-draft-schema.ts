@@ -44,9 +44,7 @@ export const seoContentDraft = pgSeoTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    targetReleaseDate: timestamp({ mode: "date", withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    targetReleaseDate: timestamp({ mode: "date", withTimezone: true }),
 
     title: text().notNull().default(""),
     description: text().notNull().default(""),

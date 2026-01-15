@@ -494,7 +494,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           userId: input.userId ?? null,
           project: {
             id: input.projectId,
-            publishingSettings: project.publishingSettings ?? null,
             organizationId: input.organizationId,
           },
           createIfNotExists: true,

@@ -221,7 +221,7 @@ function PageComponent() {
 
           {liveOverview.length > 0 && (
             <div className="rounded-md border bg-background p-4 text-sm">
-              <div className="mb-3 font-medium">Live content</div>
+              <div className="mb-3 font-medium">Scheduled & live content</div>
               <div className="space-y-3">
                 {liveOverview.map((row) => {
                   const status = row.schedule?.status ?? "scheduled";
