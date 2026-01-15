@@ -215,7 +215,7 @@
         },
         {
           "new_sqlite_classes": ["Scheduler"],
-          "tag": "v2"
+          "tag": "v1"
         }
       ],
       "r2_buckets": [
