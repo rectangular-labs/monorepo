@@ -15,7 +15,7 @@ export const Route = createFileRoute(
 });
 
 function ReviewNewArticlesPage() {
-  const { organizationSlug, projectSlug } = Route.useParams();
+  const { organizationSlug } = Route.useParams();
   const { projectId, organizationId } = useLoaderData({
     from: "/_authed/$organizationSlug/$projectSlug/content/review",
   });
@@ -81,8 +81,7 @@ function ReviewNewArticlesPage() {
                   members={organizationMembersQuery.data.members}
                   onRowClick={(row) => {
                     navigate({
-                      to: "/$organizationSlug/$projectSlug/content",
-                      params: { organizationSlug, projectSlug },
+                      to: ".",
                       search: { draftId: row.id },
                     });
                   }}
