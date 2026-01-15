@@ -1,5 +1,4 @@
 import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
-import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import type { DB } from "@rectangular-labs/db";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
@@ -99,7 +98,6 @@ const writeFileInputSchema = type({
 });
 
 export function createFileToolsWithMetadata(args: {
-  publishingSettings: typeof publishingSettingsSchema.infer | null;
   // TODO: pass userId through to draft writes when available.
   userId: string | undefined;
   db: DB;
@@ -107,7 +105,6 @@ export function createFileToolsWithMetadata(args: {
   projectId: string;
   chatId: string | null;
 }) {
-  const publishingSettings = args.publishingSettings || null;
   const ls = tool({
     description:
       "List files and directories in the virtual workspace filesystem, similar to `ls`.",

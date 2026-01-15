@@ -49,29 +49,27 @@ function ReviewOutlinesPage() {
       />
 
       {!outlinesQuery.isLoading && (
-          <div className="flex-1 space-y-4 p-6">
-            <section className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Icons.Sparkles className="size-4 text-muted-foreground" />
-                <h2 className="font-semibold text-base">
-                  New article outlines
-                </h2>
-              </div>
-              <div className="rounded-md border">
-                <ArticlesTable
-                  getRowActions={(row) => getRowActions(row)}
-                  onRowClick={(row) => {
-                    navigate({
-                      to: ".",
-                      search: { draftId: row.id },
-                    });
-                  }}
-                  rows={outlinesQuery.data?.data ?? []}
-                />
-              </div>
-            </section>
-          </div>
-        )}
+        <div className="flex-1 space-y-4 p-6">
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Icons.Sparkles className="size-4 text-muted-foreground" />
+              <h2 className="font-semibold text-base">New article outlines</h2>
+            </div>
+            <div className="rounded-md border">
+              <ArticlesTable
+                getRowActions={(row) => getRowActions(row)}
+                onRowClick={(row) => {
+                  navigate({
+                    to: ".",
+                    search: { draftId: row.id },
+                  });
+                }}
+                rows={outlinesQuery.data?.data ?? []}
+              />
+            </div>
+          </section>
+        </div>
+      )}
     </>
   );
 }

@@ -111,7 +111,6 @@ export function createStrategistAgent({
   });
   const fileTools = createFileToolsWithMetadata({
     userId: context.userId,
-    publishingSettings: project.publishingSettings,
     db: context.db,
     organizationId: project.organizationId,
     projectId: project.id,

@@ -19,4 +19,14 @@ describe("normalizeContentSlug", () => {
     expect(normalizeContentSlug("//foo/bar//")).toBe("/foo/bar");
     expect(normalizeContentSlug("//foo//bar//baz/")).toBe("/foo/bar/baz");
   });
+  it("removes leading slashes", () => {
+    expect(normalizeContentSlug("//foo/bar")).toBe("/foo/bar");
+    expect(normalizeContentSlug("///foo/bar")).toBe("/foo/bar");
+    expect(normalizeContentSlug("////foo/bar")).toBe("/foo/bar");
+  });
+  it("removes trailing slashes", () => {
+    expect(normalizeContentSlug("/foo/bar/")).toBe("/foo/bar");
+    expect(normalizeContentSlug("/foo/bar//")).toBe("/foo/bar");
+    expect(normalizeContentSlug("/foo/bar///")).toBe("/foo/bar");
+  });
 });
