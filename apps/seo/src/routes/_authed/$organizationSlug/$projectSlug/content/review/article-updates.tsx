@@ -16,19 +16,10 @@ export const Route = createFileRoute(
 
 function ReviewArticleUpdatesPage() {
   const { organizationSlug } = Route.useParams();
-  const { projectId, organizationId } = useLoaderData({
+  const { projectId } = useLoaderData({
     from: "/_authed/$organizationSlug/$projectSlug/content/review",
   });
   const navigate = Route.useNavigate();
-
-  const organizationMembersQuery = useQuery(
-    getApiClientRq().auth.organization.members.queryOptions({
-      input: {
-        organizationIdentifier: organizationId,
-      },
-      enabled: !!organizationId,
-    }),
-  );
 
   const updatesQuery = useQuery(
     getApiClientRq().content.listUpdateReviews.queryOptions({
@@ -50,45 +41,37 @@ function ReviewArticleUpdatesPage() {
     <>
       <LoadingError
         className="p-6"
-        error={updatesQuery.error ?? organizationMembersQuery.error}
+        error={updatesQuery.error}
         errorDescription="Something went wrong while loading updates. Please try again."
         errorTitle="Error loading updates"
-        isLoading={updatesQuery.isLoading || organizationMembersQuery.isLoading}
-        onRetry={async () => {
-          await Promise.all([
-            updatesQuery.refetch(),
-            organizationMembersQuery.refetch(),
-          ]);
-        }}
+        isLoading={updatesQuery.isLoading}
+        onRetry={updatesQuery.refetch}
       />
 
-      {!updatesQuery.isLoading &&
-        !organizationMembersQuery.isLoading &&
-        organizationMembersQuery.data && (
-          <div className="flex-1 space-y-4 p-6">
-            <section className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Icons.RefreshCcw className="size-4 text-muted-foreground" />
-                <h2 className="font-semibold text-base">
-                  Updated articles to review
-                </h2>
-              </div>
-              <div className="rounded-md border">
-                <ArticlesTable
-                  getRowActions={(row) => getRowActions(row)}
-                  members={organizationMembersQuery.data.members}
-                  onRowClick={(row) => {
-                    navigate({
-                      to: ".",
-                      search: { draftId: row.id },
-                    });
-                  }}
-                  rows={updatesQuery.data?.data ?? []}
-                />
-              </div>
-            </section>
-          </div>
-        )}
+      {!updatesQuery.isLoading && (
+        <div className="flex-1 space-y-4 p-6">
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Icons.RefreshCcw className="size-4 text-muted-foreground" />
+              <h2 className="font-semibold text-base">
+                Updated articles to review
+              </h2>
+            </div>
+            <div className="rounded-md border">
+              <ArticlesTable
+                getRowActions={(row) => getRowActions(row)}
+                onRowClick={(row) => {
+                  navigate({
+                    to: ".",
+                    search: { draftId: row.id },
+                  });
+                }}
+                rows={updatesQuery.data?.data ?? []}
+              />
+            </div>
+          </section>
+        </div>
+      )}
     </>
   );
 }

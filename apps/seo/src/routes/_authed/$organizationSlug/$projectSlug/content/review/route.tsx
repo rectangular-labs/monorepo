@@ -49,14 +49,9 @@ function ReviewLayout() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="border-b bg-background px-6 py-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="font-semibold text-lg">Review</h1>
-            <p className="text-muted-foreground text-sm">{projectSlug}</p>
-          </div>
-        </div>
-        <nav className="mt-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
+      <div className="space-y-1 border-b bg-background px-4 py-2 md:px-6">
+        <h1 className="font-semibold text-lg">Review</h1>
+        <nav className="flex flex-col gap-4 text-muted-foreground text-sm md:flex-row">
           <NavLink
             params={{ organizationSlug, projectSlug }}
             to="/$organizationSlug/$projectSlug/content/review/outlines"

@@ -16,19 +16,10 @@ export const Route = createFileRoute(
 
 function ReviewNewArticlesPage() {
   const { organizationSlug } = Route.useParams();
-  const { projectId, organizationId } = useLoaderData({
+  const { projectId } = useLoaderData({
     from: "/_authed/$organizationSlug/$projectSlug/content/review",
   });
   const navigate = Route.useNavigate();
-
-  const organizationMembersQuery = useQuery(
-    getApiClientRq().auth.organization.members.queryOptions({
-      input: {
-        organizationIdentifier: organizationId,
-      },
-      enabled: !!organizationId,
-    }),
-  );
 
   const newArticlesQuery = useQuery(
     getApiClientRq().content.listNewReviews.queryOptions({
@@ -50,23 +41,14 @@ function ReviewNewArticlesPage() {
     <>
       <LoadingError
         className="p-6"
-        error={newArticlesQuery.error ?? organizationMembersQuery.error}
+        error={newArticlesQuery.error}
         errorDescription="Something went wrong while loading new articles. Please try again."
         errorTitle="Error loading new articles"
-        isLoading={
-          newArticlesQuery.isLoading || organizationMembersQuery.isLoading
-        }
-        onRetry={async () => {
-          await Promise.all([
-            newArticlesQuery.refetch(),
-            organizationMembersQuery.refetch(),
-          ]);
-        }}
+        isLoading={newArticlesQuery.isLoading}
+        onRetry={newArticlesQuery.refetch}
       />
 
-      {!newArticlesQuery.isLoading &&
-        !organizationMembersQuery.isLoading &&
-        organizationMembersQuery.data && (
+      {!newArticlesQuery.isLoading && (
           <div className="flex-1 space-y-4 p-6">
             <section className="space-y-3">
               <div className="flex items-center gap-2">
@@ -78,7 +60,6 @@ function ReviewNewArticlesPage() {
               <div className="rounded-md border">
                 <ArticlesTable
                   getRowActions={(row) => getRowActions(row)}
-                  members={organizationMembersQuery.data.members}
                   onRowClick={(row) => {
                     navigate({
                       to: ".",

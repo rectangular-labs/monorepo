@@ -16,19 +16,10 @@ export const Route = createFileRoute(
 
 function ReviewOutlinesPage() {
   const { organizationSlug } = Route.useParams();
-  const { projectId, organizationId } = useLoaderData({
+  const { projectId } = useLoaderData({
     from: "/_authed/$organizationSlug/$projectSlug/content/review",
   });
   const navigate = Route.useNavigate();
-
-  const organizationMembersQuery = useQuery(
-    getApiClientRq().auth.organization.members.queryOptions({
-      input: {
-        organizationIdentifier: organizationId,
-      },
-      enabled: !!organizationId,
-    }),
-  );
 
   const outlinesQuery = useQuery(
     getApiClientRq().content.listSuggestions.queryOptions({
@@ -50,23 +41,14 @@ function ReviewOutlinesPage() {
     <>
       <LoadingError
         className="p-6"
-        error={outlinesQuery.error ?? organizationMembersQuery.error}
+        error={outlinesQuery.error}
         errorDescription="Something went wrong while loading outlines. Please try again."
         errorTitle="Error loading outlines"
-        isLoading={
-          outlinesQuery.isLoading || organizationMembersQuery.isLoading
-        }
-        onRetry={async () => {
-          await Promise.all([
-            outlinesQuery.refetch(),
-            organizationMembersQuery.refetch(),
-          ]);
-        }}
+        isLoading={outlinesQuery.isLoading}
+        onRetry={outlinesQuery.refetch}
       />
 
-      {!outlinesQuery.isLoading &&
-        !organizationMembersQuery.isLoading &&
-        organizationMembersQuery.data && (
+      {!outlinesQuery.isLoading && (
           <div className="flex-1 space-y-4 p-6">
             <section className="space-y-3">
               <div className="flex items-center gap-2">
@@ -78,7 +60,6 @@ function ReviewOutlinesPage() {
               <div className="rounded-md border">
                 <ArticlesTable
                   getRowActions={(row) => getRowActions(row)}
-                  members={organizationMembersQuery.data.members}
                   onRowClick={(row) => {
                     navigate({
                       to: ".",
