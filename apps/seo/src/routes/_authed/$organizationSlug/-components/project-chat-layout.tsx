@@ -9,83 +9,52 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@rectangular-labs/ui/components/ui/resizable";
-import { useEffect } from "react";
+import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import { ProjectChatPanel } from "./project-chat-panel";
 import { useProjectChat } from "./project-chat-provider";
 
 export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
-  const { isOpen, isDesktop, close, open } = useProjectChat();
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
-
-      const isMod = event.metaKey || event.ctrlKey;
-      if (!isMod) return;
-      if (event.altKey || event.shiftKey) return;
-      if (event.key.toLowerCase() !== "e") return;
-
-      event.preventDefault();
-
-      // Toggle the assistant panel.
-      if (isOpen) {
-        close();
-        return;
-      }
-
-      open();
-
-      // Try to focus the chat textarea once it mounts (best-effort).
-      requestAnimationFrame(() => {
-        const textarea = document.querySelector<HTMLTextAreaElement>(
-          'textarea[name="message"]',
-        );
-        textarea?.focus();
-      });
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [close, isOpen, open]);
+  const { isOpen, close, open } = useProjectChat();
+  const isMobile = useIsMobile();
 
   if (!isOpen) {
     return <>{children}</>;
   }
 
-  if (isDesktop) {
+  if (isMobile) {
     return (
-      <ResizablePanelGroup
-        className="h-full max-h-[calc(100vh-100px)] min-h-0 flex-1"
-        direction="horizontal"
-      >
-        <ResizablePanel defaultSize={70} minSize={45}>
-          {children}
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={30} maxSize={45} minSize={20}>
-          <ProjectChatPanel />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <>
+        {children}
+        <Drawer
+          direction="right"
+          onOpenChange={(next) => {
+            if (next) open();
+            else close();
+          }}
+          open={isOpen}
+        >
+          <DrawerContent className="p-0">
+            <div className="h-full min-h-0">
+              <ProjectChatPanel />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </>
     );
   }
 
   return (
-    <>
-      {children}
-      <Drawer
-        direction="right"
-        onOpenChange={(next) => {
-          if (next) open();
-          else close();
-        }}
-        open={isOpen}
-      >
-        <DrawerContent className="p-0">
-          <div className="h-full min-h-0">
-            <ProjectChatPanel />
-          </div>
-        </DrawerContent>
-      </Drawer>
-    </>
+    <ResizablePanelGroup
+      className="h-full max-h-[calc(100vh-100px)] min-h-0 flex-1"
+      direction="horizontal"
+    >
+      <ResizablePanel defaultSize={75} minSize={45}>
+        {children}
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={25} maxSize={45} minSize={15}>
+        <ProjectChatPanel />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }

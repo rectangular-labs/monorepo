@@ -961,7 +961,7 @@ function DropDrawerSubContent({
   return (
     <DropdownMenuSubContent
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-lg",
+        "z-50 min-w-32 overflow-hidden rounded-md border p-1 shadow-lg",
         className,
       )}
       data-slot="drop-drawer-sub-content"

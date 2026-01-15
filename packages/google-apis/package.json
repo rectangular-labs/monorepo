@@ -27,6 +27,6 @@
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
-    "arktype": "^2.1.27"
+    "arktype": "^2.1.29"
   }
 }

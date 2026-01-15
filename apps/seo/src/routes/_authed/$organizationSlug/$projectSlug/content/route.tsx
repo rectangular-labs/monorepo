@@ -1,3 +1,6 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClientRq } from "~/lib/api";
@@ -8,7 +11,7 @@ export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/content",
 )({
   validateSearch: type({
-    "file?": "string",
+    "draftId?": "string.uuid",
   }),
   loader: async ({ context, params }) => {
     const activeProject = await context.queryClient.ensureQueryData(
@@ -30,18 +33,26 @@ export const Route = createFileRoute(
 
 function ContentLayout() {
   const { organizationSlug, projectSlug } = Route.useParams();
-  const { file } = Route.useSearch();
+  const { draftId } = Route.useSearch();
   const { projectId, organizationId } = Route.useLoaderData();
+  const reviewCountsQuery = useQuery(
+    getApiClientRq().content.getReviewCounts.queryOptions({
+      input: {
+        organizationIdentifier: organizationSlug,
+        projectId,
+      },
+    }),
+  );
+  const reviewTotal = reviewCountsQuery.data?.total;
 
-  if (file) {
+  if (draftId) {
     return (
       <div className="min-h-[calc(100vh-100px)] w-full">
         <ArticleEditorTakeover
-          file={file}
+          draftId={draftId}
           organizationId={organizationId}
           organizationSlug={organizationSlug}
           projectId={projectId}
-          projectSlug={projectSlug}
         />
       </div>
     );
@@ -63,10 +74,18 @@ function ContentLayout() {
             Scheduled & Published
           </NavLink>
           <NavLink
+            activeOptions={{ exact: false, includeSearch: false }}
             params={{ organizationSlug, projectSlug }}
-            to="/$organizationSlug/$projectSlug/content/planner"
+            to="/$organizationSlug/$projectSlug/content/review"
           >
-            Planner
+            <span className="inline-flex items-center gap-2">
+              Review
+              {typeof reviewTotal === "number" && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-foreground text-xs">
+                  {reviewTotal}
+                </span>
+              )}
+            </span>
           </NavLink>
         </nav>
       </aside>

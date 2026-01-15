@@ -1,6 +1,14 @@
 import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { err, ok, safe } from "@rectangular-labs/result";
-import { and, type DB, eq, schema } from "../../client";
+import {
+  and,
+  type DB,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  schema,
+} from "../../client";
 import type {
   seoContentDraftInsertSchema,
   seoContentDraftUpdateSchema,
@@ -128,6 +136,95 @@ export async function updateContent(
   return ok(updatedContent);
 }
 
+export async function listContentWithLatestSchedule(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  cursor: string | undefined;
+  limit: number;
+}) {
+  return await safe(async () => {
+    const contentRows = await args.db.query.seoContent.findMany({
+      columns: { contentMarkdown: false, outline: false, notes: false },
+      where: (table, { and, eq, isNull, lt }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          eq(table.isLiveVersion, true),
+          isNull(table.deletedAt),
+          args.cursor ? lt(table.id, args.cursor) : undefined,
+        ),
+      with: {
+        schedules: {
+          where: (table, { isNull }) => isNull(table.deletedAt),
+          orderBy: (fields, { desc }) => [
+            desc(fields.scheduledFor),
+            desc(fields.id),
+          ],
+          limit: 1,
+        },
+      },
+      orderBy: (fields, { desc }) => [desc(fields.id)],
+      limit: args.limit,
+    });
+    return contentRows.map((content) => {
+      const schedule = content.schedules[0];
+      if (!schedule) {
+        throw new Error("No schedule found for content");
+      }
+      return {
+        ...content,
+        schedule,
+      };
+    });
+  });
+}
+
+export async function getScheduledItems(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+}) {
+  const scheduledRows = await args.db.query.seoContentSchedule.findMany({
+    columns: {
+      scheduledFor: true,
+    },
+    where: (table, { and, eq, isNull }) =>
+      and(
+        eq(table.organizationId, args.organizationId),
+        eq(table.projectId, args.projectId),
+        isNull(table.deletedAt),
+      ),
+  });
+
+  const draftRows = await args.db.query.seoContentDraft.findMany({
+    columns: {
+      targetReleaseDate: true,
+    },
+    where: (table, { and, eq, isNull, ne, isNotNull }) =>
+      and(
+        eq(table.organizationId, args.organizationId),
+        eq(table.projectId, args.projectId),
+        isNotNull(table.targetReleaseDate),
+        isNull(table.deletedAt),
+        ne(table.status, "deleted"),
+        ne(table.status, "review-denied"),
+        ne(table.status, "suggestion-rejected"),
+      ),
+  });
+
+  const scheduledItems = [
+    ...scheduledRows.map((row) => ({
+      scheduledFor: row.scheduledFor ?? null,
+    })),
+    ...draftRows.map((row) => ({
+      scheduledFor: row.targetReleaseDate ?? null,
+    })),
+  ];
+
+  return scheduledItems;
+}
+
 export async function createContentDraft(
   db: DB,
   values: typeof seoContentDraftInsertSchema.infer,
@@ -213,13 +310,13 @@ export async function getDraftBySlug(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, isNull }) =>
+      where: (table, { and, eq }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           args.originatingChatId
             ? eq(table.originatingChatId, args.originatingChatId)
-            : isNull(table.originatingChatId),
+            : undefined,
           eq(table.slug, args.slug),
         ),
       orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
@@ -246,8 +343,9 @@ export async function getDraftById(args: {
           eq(table.projectId, args.projectId),
           args.originatingChatId
             ? eq(table.originatingChatId, args.originatingChatId)
-            : isNull(table.originatingChatId),
+            : undefined,
           eq(table.id, args.id),
+          isNull(table.deletedAt),
         ),
     }),
   );
@@ -272,7 +370,7 @@ export async function getDraftsBySlug(args: {
           eq(table.projectId, args.projectId),
           args.originatingChatId
             ? eq(table.originatingChatId, args.originatingChatId)
-            : isNull(table.originatingChatId),
+            : undefined,
           or(eq(table.slug, args.slug), like(table.slug, `${args.slug}%`)),
           isNull(table.deletedAt),
         ),
@@ -310,6 +408,30 @@ export async function listDraftsByStatus(args: {
       limit: args.limit,
     }),
   );
+}
+
+export async function countDraftsByStatus(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  hasBaseContentId: boolean;
+  status: SeoFileStatus | readonly SeoFileStatus[];
+}) {
+  return await safe(async () => {
+    const where = and(
+      eq(schema.seoContentDraft.organizationId, args.organizationId),
+      eq(schema.seoContentDraft.projectId, args.projectId),
+      isNull(schema.seoContentDraft.deletedAt),
+      args.hasBaseContentId
+        ? isNotNull(schema.seoContentDraft.baseContentId)
+        : isNull(schema.seoContentDraft.baseContentId),
+      typeof args.status === "string"
+        ? eq(schema.seoContentDraft.status, args.status)
+        : inArray(schema.seoContentDraft.status, [...args.status]),
+    );
+
+    return await args.db.$count(schema.seoContentDraft, where);
+  });
 }
 
 export async function validateSlug(args: {

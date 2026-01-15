@@ -1,14 +1,18 @@
 import { ORPCError } from "@orpc/server";
+import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import { schema } from "@rectangular-labs/db";
 import {
+  countDraftsByStatus,
   createContent,
   createContentSchedule,
   getContentById,
   getContentBySlug,
   getContentScheduleById,
   getDraftById,
+  getScheduledItems,
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
+  listContentWithLatestSchedule,
   listDraftsByStatus,
   updateContentDraft,
   updateContentSchedule,
@@ -35,6 +39,7 @@ const contentDraftSummarySchema = schema.seoContentDraftSelectSchema.omit(
   "outline",
   "notes",
 );
+
 function prioritizeStatus<T extends { status: string }>(
   data: readonly T[],
   primary: string,
@@ -180,6 +185,158 @@ const listUpdateReviews = withOrganizationIdBase
     };
   });
 
+const getReviewCounts = withOrganizationIdBase
+  .route({ method: "GET", path: "/reviews/counts" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      outlines: "number",
+      newArticles: "number",
+      articleUpdates: "number",
+      total: "number",
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const [outlinesResult, newArticlesResult, articleUpdatesResult] =
+      await Promise.all([
+        countDraftsByStatus({
+          db: context.db,
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          hasBaseContentId: false,
+          status: "suggested",
+        }),
+        countDraftsByStatus({
+          db: context.db,
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          hasBaseContentId: false,
+          status: reviewStatuses,
+        }),
+        countDraftsByStatus({
+          db: context.db,
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          hasBaseContentId: true,
+          status: reviewStatuses,
+        }),
+      ]);
+
+    if (!outlinesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load outline review counts.",
+        cause: outlinesResult.error,
+      });
+    }
+    if (!newArticlesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load new article review counts.",
+        cause: newArticlesResult.error,
+      });
+    }
+    if (!articleUpdatesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load article update review counts.",
+        cause: articleUpdatesResult.error,
+      });
+    }
+
+    const outlines = outlinesResult.value;
+    const newArticles = newArticlesResult.value;
+    const articleUpdates = articleUpdatesResult.value;
+
+    return {
+      outlines,
+      newArticles,
+      articleUpdates,
+      total: outlines + newArticles + articleUpdates,
+    };
+  });
+
+const listLive = withOrganizationIdBase
+  .route({ method: "GET", path: "/" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+      limit: "1<=number<=100 = 20",
+      "cursor?": "string.uuid|undefined",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      data: schema.seoContentSelectSchema
+        .omit("contentMarkdown", "outline", "notes")
+        .merge(type({ schedule: schema.seoContentScheduleSelectSchema }))
+        .array(),
+      nextPageCursor: "string.uuid|undefined",
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const rowsResult = await listContentWithLatestSchedule({
+      db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
+      cursor: input.cursor,
+      limit: input.limit + 1,
+    });
+    if (!rowsResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load live content.",
+        cause: rowsResult.error,
+      });
+    }
+    const rows = rowsResult.value;
+
+    const page = rows.slice(0, input.limit);
+    const nextPageCursor =
+      rows.length > input.limit ? page.at(-1)?.id : undefined;
+
+    return {
+      data: page,
+      nextPageCursor,
+    };
+  });
+
+const getDraft = withOrganizationIdBase
+  .route({ method: "GET", path: "/draft/{id}" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+      id: "string.uuid",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(type({ draft: schema.seoContentDraftSelectSchema }))
+  .handler(async ({ context, input }) => {
+    const draftResult = await getDraftById({
+      db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
+      id: input.id,
+      withContent: true,
+    });
+    if (!draftResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to get content draft.",
+        cause: draftResult.error,
+      });
+    }
+    const draft = draftResult.value;
+    if (!draft) {
+      throw new ORPCError("NOT_FOUND", { message: "Content draft not found." });
+    }
+    return { draft };
+  });
+
 const updateContent = withOrganizationIdBase
   .route({ method: "PATCH", path: "/draft/{id}" })
   .input(
@@ -269,8 +426,7 @@ const markContent = withOrganizationIdBase
       organizationId: context.organization.id,
       projectId: input.projectId,
       id: input.id,
-      originatingChatId: null,
-      withContent: false,
+      withContent: true,
     });
     if (!draftResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -308,11 +464,17 @@ const markContent = withOrganizationIdBase
     }
 
     if (isSuggestion) {
-      const updatedResult = await updateContentDraft(context.db, {
-        id: draft.id,
-        projectId: input.projectId,
-        organizationId: context.organization.id,
-        status: "queued",
+      const updatedResult = await writeContentDraft({
+        db: context.db,
+        chatId: null,
+        userId: context.user.id,
+        project: {
+          id: input.projectId,
+          organizationId: context.organization.id,
+        },
+        createIfNotExists: false,
+        lookup: { type: "id", id: input.id },
+        draftNewValues: { status: "queued" },
       });
       if (!updatedResult.ok) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -320,12 +482,13 @@ const markContent = withOrganizationIdBase
           cause: updatedResult.error,
         });
       }
+
       const {
         contentMarkdown: _contentMarkdown,
         outline: _outline,
         notes: _notes,
         ...summary
-      } = updatedResult.value;
+      } = updatedResult.value.draft;
       return { success: true as const, draft: summary };
     }
 
@@ -372,9 +535,7 @@ const markContent = withOrganizationIdBase
       slug: draft.slug,
       primaryKeyword: draft.primaryKeyword,
       notes: draft.notes,
-      outlineGeneratedByTaskRunId: draft.outlineGeneratedByTaskRunId,
       outline: draft.outline,
-      generatedByTaskRunId: draft.generatedByTaskRunId,
       articleType: draft.articleType,
       contentMarkdown: draft.contentMarkdown,
       parentContentId: latestContentForSlug?.id,
@@ -392,14 +553,52 @@ const markContent = withOrganizationIdBase
       });
     }
 
-    const draftTarget = draft.targetReleaseDate;
-    const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);
-    const scheduledFor =
-      draftTarget.getTime() < earliestPossibleScheduledFor.getTime()
-        ? // If the target date is in the past, bump it into the future so our scheduler can pick it up reliably.
-          // This can happen when a draft is generated/held for review longer than its initially planned release time.
-          earliestPossibleScheduledFor
-        : draftTarget;
+    let scheduledFor = draft.targetReleaseDate;
+    if (!scheduledFor) {
+      const projectResult = await getSeoProjectByIdentifierAndOrgId(
+        context.db,
+        input.projectId,
+        context.organization.id,
+        {
+          publishingSettings: true,
+        },
+      );
+      if (!projectResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to get project.",
+          cause: projectResult.error,
+        });
+      }
+      if (!projectResult.value) {
+        throw new ORPCError("NOT_FOUND", { message: "Project not found." });
+      }
+      const project = projectResult.value;
+
+      const cadence = project.publishingSettings?.cadence;
+      if (cadence) {
+        const scheduledItems = await getScheduledItems({
+          db: context.db,
+          organizationId: draft.organizationId,
+          projectId: draft.projectId,
+        });
+        const scheduledIso = computeNextAvailableScheduleIso({
+          cadence,
+          scheduledItems: scheduledItems.filter(
+            (item): item is { scheduledFor: Date } =>
+              item.scheduledFor !== null,
+          ),
+        });
+        if (scheduledIso) {
+          scheduledFor = new Date(scheduledIso);
+        }
+      }
+    }
+
+    if (!scheduledFor) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to get scheduled for.",
+      });
+    }
 
     const createdScheduleResult = await createContentSchedule(context.db, {
       organizationId: context.organization.id,
@@ -440,11 +639,19 @@ const markContent = withOrganizationIdBase
       context.url.origin,
     ).toString();
 
+    const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);
+    const actualScheduledFor =
+      scheduledFor.getTime() < earliestPossibleScheduledFor.getTime()
+        ? // If the target date is in the past, bump it into the future so our scheduler can pick it up reliably.
+          // This can happen when a draft is generated/held for review longer than its initially planned release time.
+          earliestPossibleScheduledFor
+        : scheduledFor;
+
     await context.scheduler.scheduleTask({
       id: createdSchedule.id,
       description: `publish-content:${createdSchedule.id}`,
       type: "scheduled",
-      time: scheduledFor,
+      time: actualScheduledFor,
       payload: {
         scheduleId: createdSchedule.id,
         // TODO: add a signature that signs the scheduleId for verification
@@ -530,6 +737,7 @@ const publishContent = base
     const now = new Date();
     const fiveMinutesMs = 5 * 60 * 1000;
     if (now.getTime() < schedule.scheduledFor.getTime() - fiveMinutesMs) {
+      // too early to publish, schedule a task to publish later
       const publishWebhookUrl = new URL(
         `/api/rpc/organization/${input.organizationIdentifier}/project/${input.projectId}/content/${content.id}/publish`,
         context.url.origin,
@@ -615,6 +823,9 @@ export default base
     listSuggestions,
     listNewReviews,
     listUpdateReviews,
+    getReviewCounts,
+    listLive,
+    getDraft,
     updateContent,
     markContent,
     publishContent,

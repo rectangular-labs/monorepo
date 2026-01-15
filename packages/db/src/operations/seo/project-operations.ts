@@ -133,6 +133,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
         updatedAt: true,
         gscPropertyId: true,
         organizationId: true,
+        deletedAt: true,
         ...(includeSettings ?? {}),
       },
       where: (table, { eq, and }) =>

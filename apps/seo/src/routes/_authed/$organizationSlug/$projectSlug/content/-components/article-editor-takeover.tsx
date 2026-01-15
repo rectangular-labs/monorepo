@@ -1,12 +1,28 @@
 "use client";
 
-import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
+import {
+  ARTICLE_TYPES,
+  type ArticleType,
+} from "@rectangular-labs/core/schemas/content-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
 import {
   Button,
   buttonVariants,
 } from "@rectangular-labs/ui/components/ui/button";
+import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
+import {
+  DialogDrawer,
+  DialogDrawerDescription,
+  DialogDrawerFooter,
+  DialogDrawerHeader,
+  DialogDrawerTitle,
+} from "@rectangular-labs/ui/components/ui/dialog-drawer";
 import {
   Field,
   FieldContent,
@@ -15,6 +31,15 @@ import {
   FieldLabel,
 } from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@rectangular-labs/ui/components/ui/item";
+import { Label } from "@rectangular-labs/ui/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -33,36 +58,30 @@ import {
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
-import {
-  buildTree,
-  type TreeFile,
-  traverseTree,
-} from "~/lib/workspace/build-tree";
-import { moveFileToSlug, slugToFilePath } from "~/lib/workspace/slug";
-import {
-  createPullDocumentQueryOptions,
-  createPushDocumentQueryOptions,
-} from "~/lib/workspace/sync";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 
-function normalizeWorkspaceFilePath(file: string) {
-  const trimmed = file.trim();
-  if (!trimmed) return "";
-  const withLeadingSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  return withLeadingSlash.endsWith(".md")
-    ? withLeadingSlash
-    : `${withLeadingSlash}.md`;
-}
+const ARTICLE_TYPE_UNSET_VALUE = "__unset__";
+const ARTICLE_TYPE_OPTIONS = ARTICLE_TYPES.map((articleType) => ({
+  value: articleType,
+  label:
+    articleType === "faq"
+      ? "FAQ"
+      : articleType
+          .split("-")
+          .map((segment) =>
+            segment ? segment[0]?.toUpperCase() + segment.slice(1) : segment,
+          )
+          .join(" "),
+}));
 
 type SaveIndicatorState =
   | { status: "idle" }
   | { status: "saving" }
   | { status: "saved"; at: string }
-  | { status: "saved-offline"; at: string }
   | { status: "error"; message: string };
 
 async function fileToDataUrl(file: File): Promise<string> {
@@ -75,231 +94,124 @@ async function fileToDataUrl(file: File): Promise<string> {
 }
 
 export function ArticleEditorTakeover({
-  file,
+  draftId,
   organizationSlug,
-  projectSlug,
   organizationId,
   projectId,
 }: {
-  file: string;
+  draftId: string;
   organizationSlug: string;
-  projectSlug: string;
   organizationId: string;
   projectId: string;
 }) {
-  const navigate = useNavigate();
-  const [isOnline, setIsOnline] = useState(() =>
-    typeof navigator === "undefined" ? true : navigator.onLine,
-  );
   const [saveIndicator, setSaveIndicator] = useState<SaveIndicatorState>({
     status: "idle",
   });
-  const [isMetadataOpen, setIsMetadataOpen] = useState(false);
-  const [metadataDraft, setMetadataDraft] = useState<{
-    title: string;
-    description: string;
-    slug: string;
-    status: SeoFileStatus;
-    primaryKeyword: string;
-    notes: string;
-    scheduledFor: string;
-  }>({
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isRegenerateOutlineOpen, setIsRegenerateOutlineOpen] = useState(false);
+  const [isRegenerateArticleOpen, setIsRegenerateArticleOpen] = useState(false);
+  const [draftDetails, setDraftDetails] = useState({
     title: "",
     description: "",
     slug: "",
-    status: "queued",
     primaryKeyword: "",
+    articleType: null as ArticleType | null,
     notes: "",
-    scheduledFor: "",
+    targetReleaseDate: null as string | null,
   });
-  const markdownSaveTimeoutRef = useRef<number | null>(null);
-  const latestMarkdownRef = useRef<string>("");
-  const pendingSyncRef = useRef(false);
 
-  const workspaceFilePath = useMemo(
-    () => normalizeWorkspaceFilePath(file),
-    [file],
-  );
+  const markdownSaveTimeoutRef = useRef<number | null>(null);
+  const outlineSaveTimeoutRef = useRef<number | null>(null);
+  const latestMarkdownRef = useRef<string>("");
+  const latestOutlineRef = useRef<string>("");
 
   const {
-    data: loroDoc,
-    error: loroDocError,
-    isLoading: isLoadingLoroDoc,
-    refetch: refetchLoroDoc,
+    data: draftData,
+    isLoading: isLoadingDraft,
+    error: draftError,
+    refetch: refetchDraft,
   } = useQuery(
-    createPullDocumentQueryOptions({
-      organizationId,
-      projectId,
-      campaignId: null,
-    }),
-  );
-
-  const { data: publishingSettingsProject } = useQuery(
-    getApiClientRq().project.getPublishingSettings.queryOptions({
+    getApiClientRq().content.getDraft.queryOptions({
       input: {
         organizationIdentifier: organizationSlug,
-        identifier: projectSlug,
+        projectId,
+        id: draftId,
+      },
+      enabled: !!draftId,
+      refetchInterval: (context) => {
+        const draft = context.state.data?.draft;
+        if (
+          draft?.status === "writing" ||
+          draft?.status === "queued" ||
+          draft?.status === "planning" ||
+          draft?.status === "reviewing-writing"
+        ) {
+          return 8_000;
+        }
+        return false;
       },
     }),
   );
-  const publishingSettings =
-    publishingSettingsProject?.publishingSettings ?? null;
-
-  const { mutate: pushWorkspace, isPending: isPushing } = useMutation({
-    ...createPushDocumentQueryOptions({
-      organizationId,
-      projectId,
-      campaignId: null,
+  const draft = draftData?.draft;
+  const {
+    data: generatingOutlineStatusData,
+    isLoading: isLoadingGeneratingOutlineStatus,
+  } = useQuery(
+    getApiClientRq().task.getStatus.queryOptions({
+      input: { id: draft?.outlineGeneratedByTaskRunId ?? "" },
+      enabled: !!draft?.outlineGeneratedByTaskRunId,
     }),
-    onSuccess: () => {
-      pendingSyncRef.current = false;
-      setIsMetadataOpen(false);
-      setSaveIndicator({ status: "saved", at: new Date().toISOString() });
-    },
-    onError: (e) => {
-      // The mutation writes to IDB before network push; if the network fails, we still consider it saved locally.
-      pendingSyncRef.current = true;
-      if (isOnline) {
-        setSaveIndicator({
-          status: "error",
-          message: e instanceof Error ? e.message : "Failed to sync changes",
-        });
-      } else {
-        setSaveIndicator({
-          status: "saved-offline",
-          at: new Date().toISOString(),
-        });
-      }
-    },
-  });
+  );
+  const {
+    data: generatingArticleStatusData,
+    isLoading: isLoadingGeneratingArticleStatus,
+  } = useQuery(
+    getApiClientRq().task.getStatus.queryOptions({
+      input: { id: draft?.generatedByTaskRunId ?? "" },
+      enabled: !!draft?.generatedByTaskRunId,
+    }),
+  );
+  console.log("generatingArticleStatusData", generatingArticleStatusData);
+  const isGeneratingOutline =
+    !!draft?.outlineGeneratedByTaskRunId &&
+    !isLoadingGeneratingOutlineStatus &&
+    (generatingOutlineStatusData?.status === "pending" ||
+      generatingOutlineStatusData?.status === "running" ||
+      generatingOutlineStatusData?.status === "queued");
+  const isGeneratingArticle =
+    !!draft?.generatedByTaskRunId &&
+    !isLoadingGeneratingArticleStatus &&
+    (generatingArticleStatusData?.status === "pending" ||
+      generatingArticleStatusData?.status === "running" ||
+      generatingArticleStatusData?.status === "queued");
+  const isGenerating = !!isGeneratingArticle || isGeneratingOutline;
+  const isOutlineGenerationFailed =
+    generatingOutlineStatusData?.status === "failed" ||
+    generatingOutlineStatusData?.status === "cancelled";
+  const isArticleGenerationFailed =
+    generatingArticleStatusData?.status === "failed" ||
+    generatingArticleStatusData?.status === "cancelled";
+  const isGenerationFailed =
+    isOutlineGenerationFailed || isArticleGenerationFailed;
 
-  const seoStatuses = [
-    "suggested",
-    "queued",
-    "generating",
-    "generation-failed",
-    "pending-review",
-    "scheduled",
-    "published",
-    "suggestion-rejected",
-    "review-denied",
-  ] as const satisfies readonly SeoFileStatus[];
-
-  const fileNode = useMemo(() => {
-    if (!loroDoc) return;
-    const treeResult = buildTree(loroDoc);
-    if (!treeResult.ok) return treeResult;
-    let found: TreeFile | undefined;
-    traverseTree(treeResult.value, (node) => {
-      if (node.type === "file" && node.path === workspaceFilePath) {
-        found = node;
-        return { shouldContinue: false };
-      }
-      return { shouldContinue: true };
-    });
-    if (!found) {
-      return {
-        ok: false as const,
-        error: new Error(`File not found at ${workspaceFilePath}`),
-      };
-    }
-    return { ok: true as const, value: found };
-  }, [loroDoc, workspaceFilePath]);
-
-  const title = fileNode?.ok
-    ? fileNode.value.title?.trim() || fileNode.value.name.replace(/\.md$/, "")
-    : "Editor";
-  const status: SeoFileStatus | undefined = fileNode?.ok
-    ? fileNode.value.status
-    : undefined;
-
-  const isReadOnly = status === "generating";
-  const outlineText = fileNode?.ok
-    ? (fileNode.value.outline?.trim() ?? "")
-    : "";
-
-  const allFiles = useMemo(() => {
-    if (!loroDoc) return [];
-    const treeResult = buildTree(loroDoc);
-    if (!treeResult.ok) return [];
-    const files: TreeFile[] = [];
-    traverseTree(treeResult.value, (node) => {
-      if (node.type === "file") files.push(node);
-      return { shouldContinue: true };
-    });
-    return files;
-  }, [loroDoc]);
+  const canEditDetails = !isGenerating && draft;
 
   useEffect(() => {
-    const onOnline = () => setIsOnline(true);
-    const onOffline = () => setIsOnline(false);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    return () => {
-      window.removeEventListener("online", onOnline);
-      window.removeEventListener("offline", onOffline);
-    };
-  }, []);
-
-  // When we come back online, push any pending offline edits.
-  useEffect(() => {
-    if (!isOnline) return;
-    if (!loroDoc) return;
-    if (!pendingSyncRef.current) return;
-    if (isPushing) return;
-
-    pushWorkspace({
-      doc: loroDoc,
-      operations: [],
-      context: {
-        publishingSettings,
-      },
+    if (!draft) return;
+    setDraftDetails({
+      title: draft.title ?? "",
+      description: draft.description ?? "",
+      slug: draft.slug ?? "",
+      primaryKeyword: draft.primaryKeyword ?? "",
+      articleType: draft.articleType ?? null,
+      notes: draft.notes ?? "",
+      targetReleaseDate: draft.targetReleaseDate
+        ? isoToDatetimeLocalValue(draft.targetReleaseDate.toISOString())
+        : null,
     });
-  }, [isOnline, loroDoc, isPushing, pushWorkspace, publishingSettings]);
-
-  // Keep metadata draft in sync with the selected file.
-  useEffect(() => {
-    if (!loroDoc) return;
-    if (!fileNode?.ok) return;
-
-    setMetadataDraft({
-      title: fileNode.value.title ?? fileNode.value.name.replace(/\.md$/, ""),
-      description: fileNode.value.description ?? "",
-      slug: fileNode.value.slug ?? fileNode.value.path.replace(/\.md$/, ""),
-      status: fileNode.value.status,
-      primaryKeyword: fileNode.value.primaryKeyword,
-      notes: fileNode.value.notes ?? "",
-      scheduledFor: fileNode.value.scheduledFor
-        ? isoToDatetimeLocalValue(fileNode.value.scheduledFor)
-        : "",
-    });
-  }, [fileNode, loroDoc]);
-
-  const onMarkdownChange = (nextMarkdown: string) => {
-    latestMarkdownRef.current = nextMarkdown;
-    if (markdownSaveTimeoutRef.current) {
-      window.clearTimeout(markdownSaveTimeoutRef.current);
-    }
-    if (isReadOnly || !loroDoc || !fileNode?.ok) return;
-    setSaveIndicator({ status: "saving" });
-    markdownSaveTimeoutRef.current = window.setTimeout(() => {
-      const content = latestMarkdownRef.current;
-
-      pushWorkspace({
-        doc: loroDoc,
-        context: {
-          publishingSettings,
-        },
-        operations: [
-          {
-            path: fileNode.value.path,
-            content,
-            createIfMissing: true,
-          },
-        ],
-      });
-    }, 800); // 800ms delay to prevent excessive calls to server
-  };
+    latestMarkdownRef.current = draft.contentMarkdown ?? "";
+    latestOutlineRef.current = draft.outline ?? "";
+  }, [draft]);
 
   const onUploadImage = async (file: File) => {
     const dataUrl = await fileToDataUrl(file);
@@ -309,166 +221,149 @@ export function ArticleEditorTakeover({
       kind: "content-image",
       files: [{ name: file.name, url: dataUrl }],
     });
-    // The API returns a public URL for `content-image`.
     const uri = result.publicUris[0];
-    if (!uri) {
-      throw new Error("Upload succeeded but returned no image URL");
-    }
+    if (!uri) throw new Error("Upload succeeded but returned no image URL");
     return uri;
   };
 
-  const saveMetadata = () => {
-    if (!loroDoc) return;
-    if (!fileNode?.ok) return;
-
-    const nextScheduledIso = metadataDraft.scheduledFor
-      ? new Date(metadataDraft.scheduledFor).toISOString()
-      : "";
-
-    const currentSlug =
-      fileNode.value.slug ?? fileNode.value.path.replace(/\.md$/, "");
-    const nextSlug = metadataDraft.slug.trim();
-    const slugPathResult = slugToFilePath(nextSlug);
-    if (!slugPathResult.ok) {
-      toast.error(slugPathResult.error.message);
-      return;
-    }
-
-    let nextFilePath = fileNode.value.path;
-    if (nextSlug !== currentSlug) {
-      const collision = allFiles.find(
-        (f) =>
-          f.path === slugPathResult.value && f.treeId !== fileNode.value.treeId,
-      );
-      if (collision) {
-        toast.error("Slug already exists");
-        return;
-      }
-
-      const moveResult = moveFileToSlug({
-        tree: loroDoc.getTree("fs"),
-        fromFilePath: fileNode.value.path,
-        nextSlug,
-      });
-      if (!moveResult.ok) {
-        toast.error(moveResult.error.message);
-        return;
-      }
-      nextFilePath = moveResult.value.nextFilePath;
-      void navigate({
-        to: "/$organizationSlug/$projectSlug/content",
-        params: { organizationSlug, projectSlug },
-        search: (prev) => ({
-          ...prev,
-          file: nextFilePath,
-        }),
-      });
-    }
-
-    const metadata: { key: string; value: string }[] = [
-      { key: "status", value: metadataDraft.status },
-      { key: "title", value: metadataDraft.title.trim() },
-      { key: "description", value: metadataDraft.description.trim() },
-      { key: "primaryKeyword", value: metadataDraft.primaryKeyword.trim() },
-      { key: "notes", value: metadataDraft.notes.trim() },
-      ...(nextScheduledIso
-        ? [{ key: "scheduledFor", value: nextScheduledIso }]
-        : []),
-    ];
-
-    pushWorkspace({
-      doc: loroDoc,
-      context: {
-        publishingSettings,
+  const {
+    mutate: updateDraft,
+    mutateAsync: updateDraftAsync,
+    isPending: isUpdatingDraft,
+  } = useMutation(
+    getApiClientRq().content.updateContent.mutationOptions({
+      onError: (e) => {
+        setSaveIndicator({
+          status: "error",
+          message: e instanceof Error ? e.message : "Failed to save",
+        });
+        toast.error("Failed to save changes");
       },
-      operations: [{ path: nextFilePath, metadata, createIfMissing: true }],
-    });
-  };
+      onSuccess: async () => {
+        setSaveIndicator({ status: "saved", at: new Date().toISOString() });
+        setIsRegenerateOutlineOpen(false);
+        setIsRegenerateArticleOpen(false);
 
-  const { mutate: regenerateOutline, isPending: isRegeneratingOutline } =
-    useMutation(
-      getApiClientRq().task.create.mutationOptions({
-        onError: () => {
-          toast.error("Unable to regenerate outline");
-        },
-        onSuccess: () => {
-          toast.success("Outline regeneration queued");
-        },
-      }),
-    );
+        await refetchDraft();
+      },
+    }),
+  );
+  const { mutate: markContent, isPending: isMarking } = useMutation(
+    getApiClientRq().content.markContent.mutationOptions({
+      onError: () => toast.error("Failed to update status"),
+      onSuccess: async () => {
+        await refetchDraft();
+      },
+    }),
+  );
 
-  const { mutate: regenerateArticle, isPending: isRegeneratingArticle } =
-    useMutation(
-      getApiClientRq().task.create.mutationOptions({
-        onError: () => {
-          toast.error("Unable to regenerate article");
-        },
-        onSuccess: (result) => {
-          toast.success("Article regeneration queued");
-          if (!loroDoc) return;
-          if (!fileNode?.ok) return;
-          pushWorkspace({
-            doc: loroDoc,
-            context: {
-              publishingSettings,
-            },
-            operations: [
-              {
-                path: fileNode.value.path,
-                metadata: [
-                  { key: "status", value: "queued" },
-                  { key: "error", value: "" },
-                  { key: "workflowId", value: result.taskId },
-                ],
-                createIfMissing: true,
-              },
-            ],
-          });
-        },
-      }),
-    );
+  const saveDetails = () => {
+    if (!draft) return;
+    if (!canEditDetails) return;
 
-  const handleRegenerateOutline = () => {
-    if (!projectId || !organizationId) {
-      toast.error("Unable to regenerate outline");
-      return;
-    }
-    if (!fileNode?.ok) return;
-    regenerateOutline({
-      type: "seo-plan-keyword",
+    const nextTarget = (() => {
+      // use next earliest available slot if no target date is set
+      if (draftDetails.targetReleaseDate === null) return null;
+      // if date is set we verify that it's valid
+      const date = new Date(draftDetails.targetReleaseDate);
+      if (Number.isNaN(date.getTime())) {
+        toast.error("Invalid target scheduled date");
+        return undefined;
+      }
+      return date;
+    })();
+    // if the target date is invalid, we don't save
+    if (nextTarget === undefined) return;
+
+    setSaveIndicator({ status: "saving" });
+    updateDraft({
+      organizationIdentifier: organizationSlug,
       projectId,
-      organizationId,
-      campaignId: null,
-      path: fileNode.value.path,
+      id: draft.id,
+      title: draftDetails.title.trim(),
+      description: draftDetails.description.trim(),
+      slug: draftDetails.slug.trim(),
+      primaryKeyword: draftDetails.primaryKeyword.trim(),
+      articleType: draftDetails.articleType ?? null,
+      notes: draftDetails.notes.trim(),
+      targetReleaseDate: nextTarget,
     });
   };
 
-  const handleRegenerateArticle = () => {
-    if (!projectId || !organizationId) {
-      toast.error("Unable to regenerate article");
-      return;
+  const onMarkdownChange = (nextMarkdown: string) => {
+    if (markdownSaveTimeoutRef.current) {
+      window.clearTimeout(markdownSaveTimeoutRef.current);
     }
-    if (!fileNode?.ok) return;
-    regenerateArticle({
-      type: "seo-write-article",
-      projectId,
-      organizationId,
-      campaignId: null,
-      path: fileNode.value.path,
-    });
+    markdownSaveTimeoutRef.current = window.setTimeout(() => {
+      if (!draft) return;
+      setSaveIndicator({ status: "saving" });
+      updateDraft({
+        organizationIdentifier: organizationSlug,
+        projectId,
+        id: draft.id,
+        contentMarkdown: nextMarkdown,
+      });
+    }, 900);
   };
 
-  console.log("fileNode", fileNode);
+  const onOutlineChange = (nextOutline: string) => {
+    setDraftDetails((prev) => ({ ...prev, outline: nextOutline }));
+    if (outlineSaveTimeoutRef.current) {
+      window.clearTimeout(outlineSaveTimeoutRef.current);
+    }
+    outlineSaveTimeoutRef.current = window.setTimeout(() => {
+      if (!draft) return;
+      setSaveIndicator({ status: "saving" });
+      updateDraft({
+        organizationIdentifier: organizationSlug,
+        projectId,
+        id: draft.id,
+        outline: nextOutline.trim(),
+      });
+    }, 900);
+  };
+
+  const handleRegenerateOutline = async () => {
+    if (!draft) return;
+    try {
+      setSaveIndicator({ status: "saving" });
+      await updateDraftAsync({
+        organizationIdentifier: organizationSlug,
+        projectId,
+        id: draft.id,
+        notes: draftDetails.notes.trim(),
+        outlineGeneratedByTaskRunId: null,
+      });
+      toast.success("Outline regeneration started");
+    } catch {
+      // okay to ignore errors here since we handle it in the mutation
+    }
+  };
+
+  const handleRegenerateArticle = async () => {
+    if (!draft) return;
+    try {
+      setSaveIndicator({ status: "saving" });
+      await updateDraftAsync({
+        organizationIdentifier: organizationSlug,
+        projectId,
+        id: draft.id,
+        status: "queued",
+        generatedByTaskRunId: null,
+      });
+      toast.success("Article regeneration started");
+    } catch {
+      // okay to ignore errors here since we handle it in the mutation
+    }
+  };
+
   return (
-    <div className="flex h-full w-full flex-col">
-      <div className="flex items-center justify-between gap-3 border-b bg-background px-4 py-3">
-        <div className="flex min-w-0 items-center gap-2">
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
+        <div className="flex items-center gap-3">
           <Link
             className={buttonVariants({ variant: "ghost", size: "sm" })}
-            search={(prev) => ({
-              ...prev,
-              file: undefined,
-            })}
+            search={(prev) => ({ ...prev, draftId: undefined })}
             to="."
           >
             <Icons.X className="size-4" />
@@ -476,25 +371,67 @@ export function ArticleEditorTakeover({
           </Link>
 
           <div className="min-w-0">
-            <p className="truncate font-medium text-sm">{title}</p>
-            <p className="truncate text-muted-foreground text-xs">
-              {workspaceFilePath}
-              {isReadOnly ? " • Read-only (generating)" : ""}
+            <p className="truncate font-medium text-sm">
+              {draft?.title ?? "Draft"}
             </p>
+            {draft?.slug && (
+              <p className="truncate text-muted-foreground text-xs">
+                {draft.slug}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="flex items-center gap-3 text-muted-foreground text-xs">
-          {fileNode?.ok && (
-            <Button
-              onClick={() => setIsMetadataOpen(true)}
-              size="sm"
-              variant="outline"
-            >
-              <Icons.Settings className="size-4" />
-              Details
-            </Button>
+          {(draft?.status === "suggested" ||
+            draft?.status === "pending-review") && (
+            <>
+              <Button
+                disabled={
+                  (draft.status === "suggested" && !draft.outline) ||
+                  (draft.status === "pending-review" && !draft.contentMarkdown)
+                }
+                isLoading={isMarking}
+                onClick={() =>
+                  markContent({
+                    organizationIdentifier: organizationSlug,
+                    projectId,
+                    id: draft.id,
+                    mark: "yes",
+                  })
+                }
+                size="sm"
+              >
+                {draft.status === "suggested" && "Accept"}
+                {draft.status === "pending-review" && "Approve"}
+              </Button>
+              <Button
+                isLoading={isMarking}
+                onClick={() =>
+                  markContent({
+                    organizationIdentifier: organizationSlug,
+                    projectId,
+                    id: draft.id,
+                    mark: "no",
+                  })
+                }
+                size="sm"
+                variant="outline"
+              >
+                Reject
+              </Button>
+            </>
           )}
+
+          <Button
+            disabled={!canEditDetails}
+            onClick={() => setIsDetailsOpen(true)}
+            size="sm"
+            variant="outline"
+          >
+            <Icons.Settings className="size-4" />
+            Details
+          </Button>
 
           <span className="inline-flex items-center gap-1">
             {saveIndicator.status === "saving" && (
@@ -506,201 +443,259 @@ export function ArticleEditorTakeover({
             {saveIndicator.status === "saved" && (
               <>
                 <Icons.Check className="size-3.5" />
-                Synced {new Date(saveIndicator.at).toLocaleTimeString()}
-              </>
-            )}
-            {saveIndicator.status === "saved-offline" && (
-              <>
-                <Icons.Save className="size-3.5" />
-                Saved locally
+                Saved {new Date(saveIndicator.at).toLocaleTimeString()}
               </>
             )}
             {saveIndicator.status === "error" && (
               <>
                 <Icons.AlertTriangleIcon className="size-3.5" />
-                Sync failed
+                Save failed
               </>
             )}
           </span>
-
-          {!isOnline && (
-            <span className="inline-flex items-center gap-1">
-              <Icons.AlertTriangleIcon className="size-3.5" />
-              Offline
-            </span>
-          )}
         </div>
       </div>
 
       <LoadingError
         className="p-6"
-        error={
-          loroDocError || (!fileNode?.ok ? (fileNode?.error ?? null) : null)
-        }
-        errorDescription="Something went wrong while loading this document. Please try again."
-        errorTitle="Error loading document"
-        isLoading={isLoadingLoroDoc}
-        onRetry={refetchLoroDoc}
+        error={draftError}
+        errorDescription="Something went wrong while loading this article. Please try again."
+        errorTitle="Error loading article"
+        isLoading={isLoadingDraft}
+        onRetry={refetchDraft}
       />
 
-      {fileNode?.ok && (
-        <div className="flex flex-1 flex-col overflow-y-auto p-6">
+      {draft && (
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-6">
           <style>
-            {`
-              @media (max-width: 768px) {
+            {`@media (max-width: 768px) {
                 .milkdown .ProseMirror {
                   padding: 8px 8px 8px 90px;
                 }
               }
-            `}
+              .milkdown .ProseMirror {
+                overflow-y: auto;
+              }`}
           </style>
-          <div className="flex flex-1 flex-col gap-4">
+
+          {isGenerating && (
+            <Alert className="text-sm">
+              <Icons.Timer />
+              <AlertTitle>
+                {isGeneratingOutline
+                  ? "This outline is currently being generated"
+                  : "This draft is currently being generated"}
+              </AlertTitle>
+              <AlertDescription>
+                {isGeneratingOutline
+                  ? "We will show the outline once it is ready."
+                  : "We will show the article once it is ready."}
+              </AlertDescription>
+            </Alert>
+          )}
+          {isGenerationFailed && (
+            <Item className="text-sm" variant="outline">
+              <ItemMedia variant="icon">
+                <Icons.AlertTriangleIcon className="size-4" />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>Generation failed</ItemTitle>
+                <ItemDescription>
+                  {isOutlineGenerationFailed
+                    ? "Something went wrong while generating the outline. Please try again."
+                    : "Something went wrong while generating the article. Please try again."}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <Button
+                  isLoading={isUpdatingDraft}
+                  onClick={
+                    isOutlineGenerationFailed
+                      ? handleRegenerateOutline
+                      : handleRegenerateArticle
+                  }
+                  size="sm"
+                  variant="outline"
+                >
+                  {isOutlineGenerationFailed
+                    ? "Regenerate outline"
+                    : "Regenerate article"}
+                </Button>
+              </ItemActions>
+            </Item>
+          )}
+
+          {draft.status === "suggested" && (
             <Field>
               <div className="flex items-center justify-between gap-2">
                 <FieldLabel>Outline</FieldLabel>
-                <div className="flex items-center gap-2">
-                  <Button
-                    isLoading={isRegeneratingOutline}
-                    onClick={handleRegenerateOutline}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    Regenerate outline
-                  </Button>
-                  <Button
-                    isLoading={isRegeneratingArticle}
-                    onClick={handleRegenerateArticle}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    Regenerate article
-                  </Button>
-                </div>
+                <Button
+                  disabled={isUpdatingDraft || isGeneratingOutline}
+                  onClick={() => setIsRegenerateOutlineOpen(true)}
+                  size="sm"
+                  variant="outline"
+                >
+                  Regenerate outline
+                </Button>
               </div>
-              {outlineText ? (
-                <FieldContent className="p-0">
-                  <Textarea
-                    className="max-h-[28vh] min-h-[120px] resize-none"
-                    readOnly
-                    rows={8}
-                    value={outlineText}
-                  />
-                </FieldContent>
-              ) : (
-                <FieldDescription className="text-muted-foreground text-sm">
-                  No outline detected. Regenerate to populate with a plan.
+              {isGeneratingOutline && (
+                <FieldDescription>
+                  Outline editing is disabled while the outline is being
+                  generated.
                 </FieldDescription>
               )}
+              <FieldContent className="p-0">
+                <MarkdownEditor
+                  key={`outline-${draft.id}-${generatingOutlineStatusData?.status}-${draft.outlineGeneratedByTaskRunId}`}
+                  markdown={draft.outline || ""}
+                  onMarkdownChange={
+                    !isGeneratingOutline ? onOutlineChange : undefined
+                  }
+                  readOnly={isGeneratingOutline}
+                />
+              </FieldContent>
             </Field>
-            <div className="min-h-0 flex-1">
-              <MarkdownEditor
-                key={`${workspaceFilePath}:${isReadOnly}`}
-                markdown={fileNode.value.content.toString()}
-                onMarkdownChange={onMarkdownChange}
-                onUploadImage={onUploadImage}
-                readOnly={isReadOnly}
-              />
-            </div>
-          </div>
+          )}
+
+          {draft.status !== "suggested" && (
+            <Field className="h-full flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <FieldLabel>Article</FieldLabel>
+                <Button
+                  disabled={isUpdatingDraft || isGeneratingArticle}
+                  onClick={() => setIsRegenerateArticleOpen(true)}
+                  size="sm"
+                  variant="outline"
+                >
+                  Regenerate article
+                </Button>
+              </div>
+              {isGeneratingArticle && (
+                <FieldDescription>
+                  Content editing is disabled while the article is being
+                  generated.
+                </FieldDescription>
+              )}
+              <FieldContent className="p-0">
+                <MarkdownEditor
+                  key={`${draft.id}-${generatingArticleStatusData?.status}-${draft.generatedByTaskRunId}`}
+                  markdown={draft.contentMarkdown ?? ""}
+                  onMarkdownChange={onMarkdownChange}
+                  onUploadImage={onUploadImage}
+                  readOnly={isGeneratingArticle}
+                />
+              </FieldContent>
+            </Field>
+          )}
         </div>
       )}
 
-      <Sheet onOpenChange={setIsMetadataOpen} open={isMetadataOpen}>
+      <Sheet onOpenChange={setIsDetailsOpen} open={isDetailsOpen}>
         <SheetContent className="gap-0 p-0">
           <SheetHeader className="border-b">
-            <SheetTitle>Article settings</SheetTitle>
+            <SheetTitle>Draft settings</SheetTitle>
             <SheetDescription>
-              Edit metadata like slug, keyword, status, and schedule.
+              Edit title, slug, keyword, type, description, notes, and target
+              date.
             </SheetDescription>
           </SheetHeader>
 
           <div className="overflow-auto p-4">
             <FieldGroup className="gap-4">
               <Field>
-                <FieldLabel htmlFor="article-title">Title</FieldLabel>
+                <FieldLabel htmlFor="draft-title">Title</FieldLabel>
                 <Input
-                  id="article-title"
+                  disabled={!canEditDetails}
+                  id="draft-title"
                   onChange={(e) =>
-                    setMetadataDraft((prev) => ({
+                    setDraftDetails((prev) => ({
                       ...prev,
                       title: e.target.value,
                     }))
                   }
-                  placeholder="How to rank on Google"
-                  value={metadataDraft.title}
+                  placeholder="Article title..."
+                  value={draftDetails.title}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="article-description">
-                  Description
-                </FieldLabel>
+                <FieldLabel htmlFor="draft-description">Description</FieldLabel>
                 <Textarea
-                  id="article-description"
+                  disabled={!canEditDetails}
+                  id="draft-description"
                   onChange={(e) =>
-                    setMetadataDraft((prev) => ({
+                    setDraftDetails((prev) => ({
                       ...prev,
                       description: e.target.value,
                     }))
                   }
                   placeholder="Meta description..."
                   rows={3}
-                  value={metadataDraft.description}
+                  value={draftDetails.description}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="article-slug">Slug</FieldLabel>
+                <FieldLabel htmlFor="draft-slug">Slug</FieldLabel>
                 <Input
-                  id="article-slug"
+                  disabled={!canEditDetails}
+                  id="draft-slug"
                   onChange={(e) =>
-                    setMetadataDraft((prev) => ({
+                    setDraftDetails((prev) => ({
                       ...prev,
                       slug: e.target.value,
                     }))
                   }
                   placeholder="/how-to-rank-on-google"
-                  value={metadataDraft.slug}
+                  value={draftDetails.slug}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="article-primary-keyword">
+                <FieldLabel htmlFor="draft-primary-keyword">
                   Primary keyword
                 </FieldLabel>
                 <Input
-                  id="article-primary-keyword"
+                  disabled={!canEditDetails}
+                  id="draft-primary-keyword"
                   onChange={(e) =>
-                    setMetadataDraft((prev) => ({
+                    setDraftDetails((prev) => ({
                       ...prev,
                       primaryKeyword: e.target.value,
                     }))
                   }
                   placeholder="best crm for startups"
-                  value={metadataDraft.primaryKeyword}
+                  value={draftDetails.primaryKeyword}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="article-status">Status</FieldLabel>
+                <FieldLabel htmlFor="draft-article-type">
+                  Article type
+                </FieldLabel>
                 <Select
-                  onValueChange={(value: (typeof seoStatuses)[number]) =>
-                    setMetadataDraft((prev) => ({
+                  disabled={!canEditDetails}
+                  onValueChange={(value) =>
+                    setDraftDetails((prev) => ({
                       ...prev,
-                      status: value,
+                      articleType:
+                        value === ARTICLE_TYPE_UNSET_VALUE
+                          ? null
+                          : (value as ArticleType),
                     }))
                   }
-                  value={metadataDraft.status}
+                  value={draftDetails.articleType ?? ARTICLE_TYPE_UNSET_VALUE}
                 >
-                  <SelectTrigger id="article-status">
-                    <SelectValue placeholder="Select status" />
+                  <SelectTrigger id="draft-article-type">
+                    <SelectValue placeholder="Select article type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {seoStatuses.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
+                    <SelectItem value={ARTICLE_TYPE_UNSET_VALUE}>
+                      Not set
+                    </SelectItem>
+                    {ARTICLE_TYPE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -708,44 +703,157 @@ export function ArticleEditorTakeover({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="article-scheduled-for">
-                  Scheduled for
+                <FieldLabel htmlFor="draft-target-date">
+                  Target scheduled date
                 </FieldLabel>
-                <Input
-                  id="article-scheduled-for"
-                  onChange={(e) =>
-                    setMetadataDraft((prev) => ({
-                      ...prev,
-                      scheduledFor: e.target.value,
-                    }))
-                  }
-                  type="datetime-local"
-                  value={metadataDraft.scheduledFor}
-                />
-                <FieldDescription>Uses your local timezone.</FieldDescription>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={draftDetails.targetReleaseDate === null}
+                    disabled={!canEditDetails}
+                    id="draft-target-next-slot"
+                    onCheckedChange={(next) => {
+                      const isChecked = next === true;
+                      setDraftDetails((prev) => ({
+                        ...prev,
+                        targetReleaseDate: isChecked
+                          ? null
+                          : isoToDatetimeLocalValue(
+                              new Date(
+                                Date.now() + 24 * 60 * 60 * 1000,
+                              ).toISOString(),
+                            ),
+                      }));
+                    }}
+                  />
+                  <Label className="text-sm" htmlFor="draft-target-next-slot">
+                    Next earliest available slot
+                  </Label>
+                </div>
+                {draftDetails.targetReleaseDate !== null && (
+                  <>
+                    <Input
+                      disabled={!canEditDetails}
+                      id="draft-target-date"
+                      onChange={(e) =>
+                        setDraftDetails((prev) => ({
+                          ...prev,
+                          targetReleaseDate: e.target.value,
+                        }))
+                      }
+                      type="datetime-local"
+                      value={draftDetails.targetReleaseDate ?? ""}
+                    />
+                    <FieldDescription>
+                      Uses your local timezone.
+                    </FieldDescription>
+                  </>
+                )}
               </Field>
 
-              <Field>
-                <FieldLabel htmlFor="article-notes">Notes</FieldLabel>
-                <Textarea
-                  id="article-notes"
-                  onChange={(e) =>
-                    setMetadataDraft((prev) => ({
-                      ...prev,
-                      notes: e.target.value,
-                    }))
-                  }
-                  placeholder="Optional notes for this article..."
-                  rows={5}
-                  value={metadataDraft.notes}
-                />
-              </Field>
+              {isGenerating && (
+                <FieldDescription>
+                  Settings are read-only while the generator is running.
+                </FieldDescription>
+              )}
             </FieldGroup>
           </div>
 
           <SheetFooter className="border-t">
-            <Button disabled={isPushing} onClick={saveMetadata}>
+            <Button
+              disabled={!canEditDetails}
+              isLoading={isUpdatingDraft}
+              onClick={saveDetails}
+            >
               Save settings
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      <DialogDrawer
+        onOpenChange={setIsRegenerateOutlineOpen}
+        open={isRegenerateOutlineOpen}
+      >
+        <DialogDrawerHeader>
+          <DialogDrawerTitle>Regenerate outline</DialogDrawerTitle>
+          <DialogDrawerDescription>
+            Update the notes and kick off a fresh outline.
+          </DialogDrawerDescription>
+        </DialogDrawerHeader>
+
+        <Field>
+          <FieldLabel htmlFor="outline-notes">Notes</FieldLabel>
+          <Textarea
+            id="outline-notes"
+            onChange={(e) =>
+              setDraftDetails((prev) => ({ ...prev, notes: e.target.value }))
+            }
+            placeholder="Add any notes that you want reflected in the outline..."
+            rows={6}
+            value={draftDetails.notes}
+          />
+        </Field>
+
+        <DialogDrawerFooter className="gap-2">
+          <Button
+            disabled={isUpdatingDraft}
+            onClick={handleRegenerateOutline}
+            type="button"
+          >
+            Regenerate outline
+          </Button>
+          <Button
+            onClick={() => setIsRegenerateOutlineOpen(false)}
+            type="button"
+            variant="outline"
+          >
+            Cancel
+          </Button>
+        </DialogDrawerFooter>
+      </DialogDrawer>
+
+      <Sheet
+        onOpenChange={setIsRegenerateArticleOpen}
+        open={isRegenerateArticleOpen}
+      >
+        <SheetContent className="w-full gap-0 p-0 sm:max-w-xl">
+          <SheetHeader className="border-b">
+            <SheetTitle>Regenerate article</SheetTitle>
+            <SheetDescription>
+              Review the current outline or regenerate it before writing.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-4 overflow-auto p-4">
+            <Field>
+              <div className="flex items-center justify-between gap-2">
+                <FieldLabel>Outline</FieldLabel>
+                <Button
+                  disabled={isUpdatingDraft}
+                  onClick={() => setIsRegenerateOutlineOpen(true)}
+                  size="sm"
+                  variant="outline"
+                >
+                  Regenerate outline
+                </Button>
+              </div>
+              <FieldContent className="p-0">
+                <MarkdownEditor
+                  key={`outline-sheet-${draft?.id}-${draft?.outlineGeneratedByTaskRunId}`}
+                  markdown={draft?.outline || ""}
+                  onMarkdownChange={onOutlineChange}
+                  readOnly={isGeneratingOutline}
+                />
+              </FieldContent>
+            </Field>
+          </div>
+
+          <SheetFooter className="border-t">
+            <Button
+              disabled={isUpdatingDraft}
+              onClick={handleRegenerateArticle}
+            >
+              Regenerate article
             </Button>
           </SheetFooter>
         </SheetContent>

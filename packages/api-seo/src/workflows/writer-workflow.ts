@@ -290,7 +290,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
         userId: input.userId ?? null,
         project: {
           id: input.projectId,
-          publishingSettings: null,
           organizationId: input.organizationId,
         },
         createIfNotExists: true,
@@ -590,7 +589,6 @@ ${text}
           userId: input.userId ?? null,
           project: {
             id: input.projectId,
-            publishingSettings: project.publishingSettings ?? null,
             organizationId: input.organizationId,
           },
           createIfNotExists: true,

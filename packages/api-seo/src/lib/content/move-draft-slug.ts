@@ -114,9 +114,7 @@ export async function moveDraftSlug(args: {
       slug: args.toSlug,
       primaryKeyword: live.primaryKeyword,
       notes: live.notes,
-      outlineGeneratedByTaskRunId: live.outlineGeneratedByTaskRunId,
       outline: live.outline,
-      generatedByTaskRunId: live.generatedByTaskRunId,
       articleType: live.articleType,
       contentMarkdown: live.contentMarkdown,
     })

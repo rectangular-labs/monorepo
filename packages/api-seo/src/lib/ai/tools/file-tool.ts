@@ -55,10 +55,10 @@ const lsInputSchema = type({
 
 const catInputSchema = type({
   slug: type("string").describe("The slug of the file to read."),
-  "startLine?": type("number|undefined").describe(
+  "startLine?": type("number|null").describe(
     "The line number to start at. If not provided, startLine will default to 1.",
   ),
-  "endLine?": type("number|undefined").describe(
+  "endLine?": type("number|null").describe(
     "The line number to end at. If not provided, endLine will default to the last line of the file.",
   ),
 });
@@ -74,28 +74,26 @@ const _mvInputSchema = type({
 
 const writeFileInputSchema = type({
   slug: type("string").describe("The slug of the file to write."),
-  "primaryKeyword?": type("string")
-    .or(type.null)
-    .describe(
-      "The primary keyword for the file (required when creating a new file).",
-    ),
+  "primaryKeyword?": type("string").describe(
+    "The primary keyword for the file (required when creating a new file).",
+  ),
   "createIfMissing?": "boolean",
-  "content?": type("string|undefined").describe(
+  "content?": type("string|null").describe(
     "Deprecated alias for contentMarkdown.",
   ),
-  "contentMarkdown?": type("string|undefined").describe(
+  "contentMarkdown?": type("string|null").describe(
     "The Markdown content for the file.",
   ),
-  "title?": type("string|undefined").describe("The title of the file."),
-  "description?": type("string|undefined").describe(
+  "title?": type("string|null").describe("The title of the file."),
+  "description?": type("string|null").describe(
     "The meta description for the file.",
   ),
-  "notes?": type("string|undefined").describe("Internal notes about the file."),
-  "outline?": type("string|undefined").describe("The outline for the file."),
-  "articleType?": type("string|undefined").describe(
+  "notes?": type("string|null").describe("Internal notes about the file."),
+  "outline?": type("string|null").describe("The outline for the file."),
+  "articleType?": type("string|null").describe(
     "The article type (if setting).",
   ),
-  "status?": type("string|undefined").describe(
+  "status?": type("string|null").describe(
     "The draft status (e.g. 'writing', 'pending-review', etc.).",
   ),
 });
@@ -157,8 +155,8 @@ export function createFileToolsWithMetadata(args: {
       const content = result.value.data.content.contentMarkdown ?? "";
       const sliced = sliceContentLines({
         content,
-        startLine,
-        endLine,
+        startLine: startLine ?? undefined,
+        endLine: endLine ?? undefined,
       });
       if (!sliced.ok) {
         return { success: false, message: sliced.error.message };
@@ -314,7 +312,6 @@ export function createFileToolsWithMetadata(args: {
         userId: args.userId ?? null,
         project: {
           id: args.projectId,
-          publishingSettings,
           organizationId: args.organizationId,
         },
         createIfNotExists: true,

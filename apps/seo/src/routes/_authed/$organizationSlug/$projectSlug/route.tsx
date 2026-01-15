@@ -1,5 +1,5 @@
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
-import { getApiClient, getApiClientRq } from "~/lib/api";
+import { getApiClientRq } from "~/lib/api";
 import { NavLink } from "../../-components/nav-link";
 import { ProjectChatLayout } from "../-components/project-chat-layout";
 
@@ -25,23 +25,6 @@ export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
           throw error;
         });
       if (!activeProject) throw notFound();
-
-      if (!activeProject.workspaceBlobUri) {
-        // Note, there's technically a possibility of a race condition here if multiple users are trying to access the new project at the same time.
-        // Should be highly unlikely though, but just noting it here.
-        await getApiClient().project.setUpWorkspace({
-          projectId: activeProject.id,
-          organizationIdentifier: params.organizationSlug,
-        });
-        await context.queryClient.invalidateQueries({
-          queryKey: getApiClientRq().project.get.queryKey({
-            input: {
-              organizationIdentifier: params.organizationSlug,
-              identifier: params.projectSlug,
-            },
-          }),
-        });
-      }
     },
     component: RouteComponent,
   },

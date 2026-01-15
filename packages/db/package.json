@@ -41,7 +41,7 @@
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.112",
-    "arktype": "^2.1.27",
+    "arktype": "^2.1.29",
     "drizzle-arktype": "^0.1.3",
     "drizzle-orm": "^0.44.7",
     "postgres": "^3.4.7",

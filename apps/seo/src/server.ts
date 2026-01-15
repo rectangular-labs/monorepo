@@ -18,8 +18,8 @@ export default {
   },
 };
 
+export { Scheduler } from "@rectangular-labs/api-seo/scheduler-server";
 export { WebSocketServer } from "@rectangular-labs/api-seo/websocket-server";
-export { Scheduler } from "@rectangular-labs/api-seo/scheduler";
 export {
   SeoPlannerWorkflow,
   SeoWriterWorkflow,
