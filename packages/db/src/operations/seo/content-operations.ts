@@ -1,6 +1,14 @@
 import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { err, ok, safe } from "@rectangular-labs/result";
-import { and, type DB, eq, schema } from "../../client";
+import {
+  and,
+  type DB,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  schema,
+} from "../../client";
 import type {
   seoContentDraftInsertSchema,
   seoContentDraftUpdateSchema,
@@ -400,6 +408,30 @@ export async function listDraftsByStatus(args: {
       limit: args.limit,
     }),
   );
+}
+
+export async function countDraftsByStatus(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  hasBaseContentId: boolean;
+  status: SeoFileStatus | readonly SeoFileStatus[];
+}) {
+  return await safe(async () => {
+    const where = and(
+      eq(schema.seoContentDraft.organizationId, args.organizationId),
+      eq(schema.seoContentDraft.projectId, args.projectId),
+      isNull(schema.seoContentDraft.deletedAt),
+      args.hasBaseContentId
+        ? isNotNull(schema.seoContentDraft.baseContentId)
+        : isNull(schema.seoContentDraft.baseContentId),
+      typeof args.status === "string"
+        ? eq(schema.seoContentDraft.status, args.status)
+        : inArray(schema.seoContentDraft.status, [...args.status]),
+    );
+
+    return await args.db.$count(schema.seoContentDraft, where);
+  });
 }
 
 export async function validateSlug(args: {

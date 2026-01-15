@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import { schema } from "@rectangular-labs/db";
 import {
+  countDraftsByStatus,
   createContent,
   createContentSchedule,
   getContentById,
@@ -181,6 +182,80 @@ const listUpdateReviews = withOrganizationIdBase
     return {
       data: prioritizeStatus(page, "pending-review"),
       nextPageCursor,
+    };
+  });
+
+const getReviewCounts = withOrganizationIdBase
+  .route({ method: "GET", path: "/reviews/counts" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      outlines: "number",
+      newArticles: "number",
+      articleUpdates: "number",
+      total: "number",
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const [outlinesResult, newArticlesResult, articleUpdatesResult] =
+      await Promise.all([
+        countDraftsByStatus({
+          db: context.db,
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          hasBaseContentId: false,
+          status: "suggested",
+        }),
+        countDraftsByStatus({
+          db: context.db,
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          hasBaseContentId: false,
+          status: reviewStatuses,
+        }),
+        countDraftsByStatus({
+          db: context.db,
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          hasBaseContentId: true,
+          status: reviewStatuses,
+        }),
+      ]);
+
+    if (!outlinesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load outline review counts.",
+        cause: outlinesResult.error,
+      });
+    }
+    if (!newArticlesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load new article review counts.",
+        cause: newArticlesResult.error,
+      });
+    }
+    if (!articleUpdatesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load article update review counts.",
+        cause: articleUpdatesResult.error,
+      });
+    }
+
+    const outlines = outlinesResult.value;
+    const newArticles = newArticlesResult.value;
+    const articleUpdates = articleUpdatesResult.value;
+
+    return {
+      outlines,
+      newArticles,
+      articleUpdates,
+      total: outlines + newArticles + articleUpdates,
     };
   });
 
@@ -748,6 +823,7 @@ export default base
     listSuggestions,
     listNewReviews,
     listUpdateReviews,
+    getReviewCounts,
     listLive,
     getDraft,
     updateContent,

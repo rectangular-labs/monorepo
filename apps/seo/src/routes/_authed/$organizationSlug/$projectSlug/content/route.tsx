@@ -1,3 +1,6 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClientRq } from "~/lib/api";
@@ -32,6 +35,15 @@ function ContentLayout() {
   const { organizationSlug, projectSlug } = Route.useParams();
   const { draftId } = Route.useSearch();
   const { projectId, organizationId } = Route.useLoaderData();
+  const reviewCountsQuery = useQuery(
+    getApiClientRq().content.getReviewCounts.queryOptions({
+      input: {
+        organizationIdentifier: organizationSlug,
+        projectId,
+      },
+    }),
+  );
+  const reviewTotal = reviewCountsQuery.data?.total;
 
   if (draftId) {
     return (
@@ -66,7 +78,14 @@ function ContentLayout() {
             params={{ organizationSlug, projectSlug }}
             to="/$organizationSlug/$projectSlug/content/review"
           >
-            Review
+            <span className="inline-flex items-center gap-2">
+              Review
+              {typeof reviewTotal === "number" && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-foreground text-xs">
+                  {reviewTotal}
+                </span>
+              )}
+            </span>
           </NavLink>
         </nav>
       </aside>

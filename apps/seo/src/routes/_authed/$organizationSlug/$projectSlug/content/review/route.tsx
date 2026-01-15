@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
 import { NavLink } from "~/routes/_authed/-components/nav-link";
@@ -35,6 +36,16 @@ export const Route = createFileRoute(
 
 function ReviewLayout() {
   const { organizationSlug, projectSlug } = Route.useParams();
+  const { projectId } = Route.useLoaderData();
+  const reviewCountsQuery = useQuery(
+    getApiClientRq().content.getReviewCounts.queryOptions({
+      input: {
+        organizationIdentifier: organizationSlug,
+        projectId,
+      },
+    }),
+  );
+  const reviewCounts = reviewCountsQuery.data;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -50,19 +61,40 @@ function ReviewLayout() {
             params={{ organizationSlug, projectSlug }}
             to="/$organizationSlug/$projectSlug/content/review/outlines"
           >
-            Review outlines
+            <span className="inline-flex items-center gap-2">
+              Review outlines
+              {typeof reviewCounts?.outlines === "number" && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-foreground text-xs">
+                  {reviewCounts.outlines}
+                </span>
+              )}
+            </span>
           </NavLink>
           <NavLink
             params={{ organizationSlug, projectSlug }}
             to="/$organizationSlug/$projectSlug/content/review/new-articles"
           >
-            Review new articles
+            <span className="inline-flex items-center gap-2">
+              Review new articles
+              {typeof reviewCounts?.newArticles === "number" && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-foreground text-xs">
+                  {reviewCounts.newArticles}
+                </span>
+              )}
+            </span>
           </NavLink>
           <NavLink
             params={{ organizationSlug, projectSlug }}
             to="/$organizationSlug/$projectSlug/content/review/article-updates"
           >
-            Review article updates
+            <span className="inline-flex items-center gap-2">
+              Review article updates
+              {typeof reviewCounts?.articleUpdates === "number" && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-foreground text-xs">
+                  {reviewCounts.articleUpdates}
+                </span>
+              )}
+            </span>
           </NavLink>
         </nav>
       </div>
