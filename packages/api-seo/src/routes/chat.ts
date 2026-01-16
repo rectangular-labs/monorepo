@@ -225,20 +225,26 @@ const messages = withOrganizationIdBase
     if (data.length === 0) {
       return { data: [], nextPageCursor };
     }
+    console.log("result", result);
     // todo: maybe not validate / cache validation
     const uiMessageSchema = await validateUIMessages<SeoChatMessage>({
-      messages: data.map((row) => {
-        return {
-          id: row.id,
-          role: row.source,
-          parts: row.message,
-          metadata: {
-            sentAt: row.createdAt.toISOString(),
-            userId: row.userId,
-            chatId: input.id,
-          },
-        };
-      }),
+      messages: data
+        .map((row) => {
+          if (row.message.length === 0) {
+            return null;
+          }
+          return {
+            id: row.id,
+            role: row.source,
+            parts: row.message,
+            metadata: {
+              sentAt: row.createdAt.toISOString(),
+              userId: row.userId,
+              chatId: input.id,
+            },
+          };
+        })
+        .filter((message) => message !== null),
       metadataSchema: chatMessageMetadataSchema,
     });
     return { data: uiMessageSchema, nextPageCursor };

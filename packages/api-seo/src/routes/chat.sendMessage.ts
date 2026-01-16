@@ -12,6 +12,7 @@ import {
   updateChat,
 } from "@rectangular-labs/db/operations";
 import { hasToolCall, streamText } from "ai";
+import { type as arktype } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
 import { createWriterAgent } from "../lib/ai/writer-agent";
@@ -19,6 +20,7 @@ import { handleTitleGeneration } from "../lib/chat/handle-title-generation";
 import { getGSCPropertyById } from "../lib/database/gsc-property";
 import { getProjectInChat } from "../lib/database/project";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
+
 import type { InitialContext, SeoChatMessage } from "../types";
 
 const chatContextMiddleware = os
@@ -185,8 +187,12 @@ export const sendMessage = withOrganizationIdBase
       }
       return undefined;
     })();
+    // unsaved user message has a client generated ID
     const userMessageId = latestUserMessage?.id;
-    if (!userMessageId && latestUserMessage) {
+    if (
+      latestUserMessage &&
+      arktype("string.uuid")(userMessageId) instanceof arktype.errors
+    ) {
       const createdUserMessage = await createChatMessage({
         db: context.db,
         value: {

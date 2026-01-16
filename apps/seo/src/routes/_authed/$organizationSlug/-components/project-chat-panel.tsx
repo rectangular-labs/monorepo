@@ -464,6 +464,11 @@ function ChatConversation({
               type: "query",
             }),
           });
+          void queryClient.invalidateQueries({
+            queryKey: getApiClientRq().content.getReviewCounts.key({
+              type: "query",
+            }),
+          });
         }
 
         if (
@@ -512,20 +517,6 @@ function ChatConversation({
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
       <div className="flex min-h-0 flex-1 flex-col">
-        <button
-          onClick={() => {
-            // Bulk invalidate queries for all content.listDrafts queries
-            console.log("tesing");
-            void queryClient.invalidateQueries({
-              queryKey: getApiClientRq().content.listDrafts.key({
-                type: "query",
-              }),
-            });
-          }}
-          type="button"
-        >
-          test
-        </button>
         <Conversation className="h-full">
           <ConversationContent>
             {showMessagesLoading && <Shimmer>Loading messages…</Shimmer>}
