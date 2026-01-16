@@ -388,6 +388,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           throw new NonRetryableError(`Draft not found for ${input.draftId}`);
         }
         const content = contentResult.value;
+        const primaryKeyword = content.primaryKeyword;
 
         const projectResult = await getSeoProjectByIdentifierAndOrgId(
           db,
@@ -423,7 +424,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         if (!serpResult.ok) throw serpResult.error;
         return {
           serpKey: serpCacheOptions.key,
-          primaryKeyword: content.primaryKeyword,
+          primaryKeyword,
           locationName,
           languageCode,
           project,

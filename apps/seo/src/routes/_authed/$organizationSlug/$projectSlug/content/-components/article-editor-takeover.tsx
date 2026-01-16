@@ -511,8 +511,8 @@ export function ArticleEditorTakeover({
                   isLoading={isUpdatingDraft}
                   onClick={
                     isOutlineGenerationFailed
-                      ? handleRegenerateOutline
-                      : handleRegenerateArticle
+                      ? () => setIsRegenerateOutlineOpen(true)
+                      : () => setIsRegenerateArticleOpen(true)
                   }
                   size="sm"
                   variant="outline"

@@ -225,7 +225,6 @@ const messages = withOrganizationIdBase
     if (data.length === 0) {
       return { data: [], nextPageCursor };
     }
-    console.log("result", result);
     // todo: maybe not validate / cache validation
     const uiMessageSchema = await validateUIMessages<SeoChatMessage>({
       messages: data
