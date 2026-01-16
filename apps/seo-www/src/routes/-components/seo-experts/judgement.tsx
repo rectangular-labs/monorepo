@@ -4,49 +4,39 @@ import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
 
 export function Judgement() {
   return (
-    <Section className="max-w-none border-border border-t bg-background">
-      <div className="mx-auto grid w-full gap-16 px-4 md:px-12 lg:grid lg:grid-cols-[5fr,7fr] lg:items-center">
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
-              Limitless output, <br />
-              <span className="font-semibold text-primary">
-                anchored by your judgement
-              </span>
-            </h2>
-          </div>
+    <Section className="border-border border-t bg-background">
+      <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
+        <div className="mx-auto max-w-4xl space-y-6 text-center">
+          <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
+            Limitless output, <br />
+            <span className="font-semibold text-primary">
+              anchored by your judgement
+            </span>
+          </h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
             Fluid Posts is designed around the reality that automation works
             best when guided by an expert. You’re always in the loop - approving
             and defining the strategy, structure the thinking, and approving
             outlines and reviewing the final output.
           </p>
-          <p className="text-muted-foreground text-sm italic">
-            Fluid Posts handles the execution — reducing errors, avoiding drift,
-            and ensuring loyalty to your vision.
-          </p>
         </div>
 
         <div className="relative">
           <ChatMockup>
             <ChatMockupMessage delay={0.5} from="assistant">
-              I've drafted the outline for the "Enterprise SEO Strategy" piece.
-              I've focused on the technical requirements for multi-tenant
-              architectures as you requested.
+              I have 5 article outlines ready for your review.
             </ChatMockupMessage>
             <ChatMockupTool
               delay={1}
-              output="Section 1: The Multi-tenant Challenge. Section 2: Data Isolation & Crawling. Section 3: Performance at Scale."
-              title="Review Required: Content Outline"
+              output={[
+                "1) AI MVP Scope Checklist (Cost + Timeline)",
+                "2) AI App Builder vs Custom Build (Decision Guide)",
+                "3) MVP Tech Stack for SMBs (Pragmatic Defaults)",
+                "4) Internal Tools Examples for Service Businesses",
+                "5) Common SEO Reporting Mistakes (and Fixes)",
+              ].join("\n")}
+              title="Review Required: 5 Article Outlines"
             />
-            <ChatMockupMessage delay={1.5} from="user">
-              The structure is good, but let's lean more into the security
-              implications of shared data in Section 2.
-            </ChatMockupMessage>
-            <ChatMockupMessage delay={2} from="assistant">
-              Understood. Updating the Section 2 thinking to prioritize
-              security-first architecture. Ready for next step?
-            </ChatMockupMessage>
           </ChatMockup>
           {/* Decorative breakthrough elements */}
           <motion.div

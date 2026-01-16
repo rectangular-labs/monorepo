@@ -48,6 +48,7 @@ import {
   PanelLeftCloseIcon,
   PanelLeftIcon,
   PartyPopperIcon,
+  PenToolIcon,
   PencilIcon,
   PhoneCallIcon,
   PlusIcon,
@@ -56,6 +57,7 @@ import {
   SaveIcon,
   SearchIcon,
   SettingsIcon,
+  SendIcon,
   ShieldIcon,
   SparklesIcon,
   StarIcon,
@@ -119,6 +121,7 @@ export const MousePointer2 = MousePointer2Icon;
 export const PanelLeft = PanelLeftIcon;
 export const PanelLeftClose = PanelLeftCloseIcon;
 export const PartyPopper = PartyPopperIcon;
+export const PenTool = PenToolIcon;
 export const Pencil = PencilIcon;
 export const PhoneCall = PhoneCallIcon;
 export const Plus = PlusIcon;
@@ -126,6 +129,7 @@ export const RefreshCcw = RefreshCcwIcon;
 export const RotateCcw = RotateCcwIcon;
 export const Save = SaveIcon;
 export const Search = SearchIcon;
+export const Send = SendIcon;
 export const Settings = SettingsIcon;
 export const Shield = ShieldIcon;
 export const Sparkles = SparklesIcon;

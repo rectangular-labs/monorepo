@@ -17,12 +17,15 @@ import { useState } from "react";
 import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function FounderTransparency() {
-  const [expandedThesis, setExpandedThesis] = useState(false);
-  const [expandedAudit, setExpandedAudit] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const thesisValues = [
     { icon: Search, label: "Forms a clear thesis for organic growth" },
-    { icon: Zap, label: "Executes it end-to-end" },
+    {
+      icon: BarChart3,
+      label: "Explains what data informs its thesis and why",
+    },
+    { icon: Zap, label: "Executes it End-to-End" },
   ];
 
   const auditValues = [
@@ -32,7 +35,7 @@ export function FounderTransparency() {
   ];
 
   return (
-    <Section className="border-border border-t bg-muted/30">
+    <Section className="border-border border-t bg-background">
       <div className="mx-auto max-w-6xl space-y-16">
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <p className="font-bold text-primary text-xs uppercase tracking-[0.4em]">
@@ -49,21 +52,39 @@ export function FounderTransparency() {
           </p>
         </div>
 
-        <div className="mx-auto max-w-5xl space-y-12">
-          {/* Phase 1: Thesis */}
-          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
-            <div className="relative">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_72px_minmax(0,1fr)]">
+            {/* Left: Week 1 */}
+            <div className="min-w-0 space-y-6">
+              <div className="rounded-xl border border-border bg-background px-4 py-3 text-center">
+                <p className="font-bold text-[10px] text-muted-foreground uppercase tracking-[0.4em]">
+                  Strategy Formation
+                </p>
+              </div>
+              <ul className="grid gap-5">
+                {thesisValues.map((v) => (
+                  <li className="group flex items-start gap-4" key={v.label}>
+                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 transition-all group-hover:scale-110">
+                      <v.icon className="h-5 w-5" />
+                    </div>
+                    <span className="pt-1.5 font-medium text-lg leading-tight">
+                      {v.label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
               <button
                 className="group w-full text-left"
-                onClick={() => setExpandedThesis(!expandedThesis)}
+                onClick={() => setExpanded(!expanded)}
                 type="button"
               >
                 <div
                   className={cn(
-                    "relative overflow-hidden rounded-2xl border p-6 transition-all duration-300",
-                    expandedThesis
-                      ? "border-emerald-500/30 bg-emerald-500/6 shadow-emerald-500/5 shadow-lg"
-                      : "border-emerald-500/20 bg-emerald-500/2 hover:bg-emerald-500/4 hover:shadow-md",
+                    "relative overflow-hidden rounded-2xl border p-4 transition-all duration-300",
+                    expanded
+                      ? "border-emerald-500/45 bg-emerald-500/6 shadow-emerald-500/5 shadow-lg"
+                      : "border-emerald-500/35 bg-emerald-500/2 hover:bg-emerald-500/4 hover:shadow-md",
                   )}
                 >
                   <div className="flex items-center justify-between gap-4">
@@ -82,7 +103,7 @@ export function FounderTransparency() {
                     <ChevronRight
                       className={cn(
                         "h-4 w-4 shrink-0 text-emerald-500 transition-transform duration-300",
-                        expandedThesis
+                        expanded
                           ? "rotate-90"
                           : "opacity-30 group-hover:opacity-100",
                       )}
@@ -90,7 +111,7 @@ export function FounderTransparency() {
                   </div>
 
                   <AnimatePresence>
-                    {expandedThesis && (
+                    {expanded && (
                       <motion.div
                         animate={{ height: "auto", opacity: 1 }}
                         className="overflow-hidden"
@@ -98,14 +119,21 @@ export function FounderTransparency() {
                         initial={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <div className="mt-6 space-y-4 border-emerald-500/10 border-t pt-6">
-                          <ChatMockup className="border-emerald-500/10 bg-background/50 shadow-sm">
-                            <ChatMockupMessage from="assistant">
-                              <div className="space-y-4">
-                                <p className="font-bold text-sm">
+                        <div className="mt-2 space-y-2 border-emerald-500/20 border-t pt-2">
+                          <ChatMockup
+                            className="border-emerald-500/20 bg-background/50 p-2 shadow-sm"
+                            contentClassName="space-y-0"
+                          >
+                            <ChatMockupMessage
+                              density="compact"
+                              from="assistant"
+                              size="sm"
+                            >
+                              <div className="space-y-3">
+                                <p className="font-bold">
                                   Thesis: Establish Topical Authority
                                 </p>
-                                <p className="text-muted-foreground text-xs leading-relaxed">
+                                <p className="text-muted-foreground leading-relaxed">
                                   We&apos;ll win by owning the topic:{" "}
                                   <strong>
                                     AI-assisted custom software for small
@@ -114,226 +142,48 @@ export function FounderTransparency() {
                                   Building one parent hub + supporting child
                                   pages to answer pre-purchase questions.
                                 </p>
-                                <div className="rounded-lg bg-emerald-500/5 p-3 text-[11px]">
-                                  <p className="mb-2 font-bold text-emerald-700 uppercase tracking-tight">
+                                <div className="rounded-lg bg-emerald-500/5 p-3">
+                                  <p className="mb-2 font-bold text-emerald-700 text-xs uppercase tracking-tight">
                                     Suggested Clusters:
                                   </p>
-                                  <ul className="space-y-1 text-muted-foreground">
+                                  <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
                                     <li>
-                                      • <strong>Edu:</strong> ai-app-development
+                                      <strong>Education:</strong>{" "}
+                                      ai-app-development
                                     </li>
                                     <li>
-                                      • <strong>Solutions:</strong> custom ai
-                                      apps for SMBs
+                                      <strong>Solution:</strong> custom ai apps
+                                      for SMBs
                                     </li>
                                     <li>
-                                      • <strong>Templates:</strong> service ops
+                                      <strong>Templates:</strong> service ops
                                       templates
                                     </li>
                                   </ul>
                                 </div>
-                                <p className="text-[10px] text-muted-foreground italic">
+                                <p className="text-muted-foreground italic">
                                   Logic: Consistent entity coverage makes Google
                                   trust you on the category.
                                 </p>
                                 <div className="flex items-center justify-between border-emerald-500/10 border-t pt-3">
-                                  <span className="text-[10px] text-muted-foreground">
+                                  <span className="text-muted-foreground text-sm">
                                     Awaiting approval...
                                   </span>
-                                  <Button
-                                    className="h-8 bg-emerald-600 px-3 text-[11px] hover:bg-emerald-700"
-                                    size="sm"
-                                  >
-                                    <Check className="mr-1.5 h-3 w-3" /> Approve
-                                    Strategy
-                                  </Button>
-                                </div>
-                              </div>
-                            </ChatMockupMessage>
-                          </ChatMockup>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <ul className="grid gap-5">
-                {thesisValues.map((v) => (
-                  <li className="group flex items-start gap-4" key={v.label}>
-                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 transition-all group-hover:scale-110">
-                      <v.icon className="h-5 w-5" />
-                    </div>
-                    <span className="pt-1.5 font-medium text-lg leading-tight">
-                      {v.label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Time Divider */}
-          <div className="relative py-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-border border-t border-dashed" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="rounded-full border border-border bg-background px-6 py-1.5 font-bold text-[10px] text-muted-foreground uppercase tracking-widest shadow-sm">
-                2 Weeks of Data Collection
-              </span>
-            </div>
-          </div>
-
-          {/* Phase 2: Audit */}
-          <div className="grid gap-12 lg:grid-cols-[1fr,450px] lg:items-center">
-            <div className="relative">
-              <button
-                className="group w-full text-left"
-                onClick={() => setExpandedAudit(!expandedAudit)}
-                type="button"
-              >
-                <div
-                  className={cn(
-                    "relative overflow-hidden rounded-2xl border p-6 transition-all duration-300",
-                    expandedAudit
-                      ? "border-amber-500/30 bg-amber-500/6 shadow-amber-500/5 shadow-lg"
-                      : "border-amber-500/20 bg-amber-500/2 hover:bg-amber-500/4 hover:shadow-md",
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 font-bold text-[10px] text-amber-600 uppercase tracking-widest">
-                        <FileText className="h-3 w-3" /> Week 3: Self-Audit
-                      </div>
-                      <h3 className="font-bold text-foreground text-lg">
-                        Cluster Performance Audit
-                      </h3>
-                      <p className="text-[11px] text-muted-foreground">
-                        Winner: &quot;Examples&quot; vs underperforming
-                        &quot;Templates&quot;. Pivot detected.
-                      </p>
-                    </div>
-                    <ChevronRight
-                      className={cn(
-                        "h-4 w-4 shrink-0 text-amber-500 transition-transform duration-300",
-                        expandedAudit
-                          ? "rotate-90"
-                          : "opacity-30 group-hover:opacity-100",
-                      )}
-                    />
-                  </div>
-
-                  <AnimatePresence>
-                    {expandedAudit && (
-                      <motion.div
-                        animate={{ height: "auto", opacity: 1 }}
-                        className="overflow-hidden"
-                        exit={{ height: 0, opacity: 0 }}
-                        initial={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className="mt-6 space-y-4 border-amber-500/10 border-t pt-6">
-                          <ChatMockup className="border-amber-500/10 bg-background/50 shadow-sm">
-                            <ChatMockupMessage from="assistant">
-                              <div className="space-y-4">
-                                <p className="font-bold text-sm">
-                                  Self-Audit: First 8 Articles
-                                </p>
-                                <div className="overflow-hidden rounded-lg border border-amber-500/10 bg-background/50">
-                                  <table className="w-full text-left text-[9px]">
-                                    <thead className="bg-amber-500/5 text-amber-800">
-                                      <tr>
-                                        <th className="px-2 py-1.5 font-bold uppercase">
-                                          Slug
-                                        </th>
-                                        <th className="px-2 py-1.5 text-right font-bold">
-                                          Impr
-                                        </th>
-                                        <th className="px-2 py-1.5 text-right font-bold">
-                                          CTR
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-amber-500/5">
-                                      <tr>
-                                        <td className="px-2 py-1.5 font-medium">
-                                          /internal-tools-examples
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right">
-                                          18.4k
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right font-bold text-emerald-600">
-                                          2.7%
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td className="px-2 py-1.5 font-medium">
-                                          /hvac-portal-builder
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right">
-                                          4.6k
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right font-bold text-emerald-600">
-                                          4.6%
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td className="px-2 py-1.5 font-medium">
-                                          /saas-checklist
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right">
-                                          12.9k
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right font-bold text-emerald-600">
-                                          2.8%
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td className="px-2 py-1.5 font-medium opacity-50">
-                                          /ai-vs-no-code
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right opacity-50">
-                                          9.7k
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right font-bold text-amber-600">
-                                          0.8%
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td className="px-2 py-1.5 font-medium opacity-50">
-                                          /templates-starter
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right opacity-50">
-                                          2.1k
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right font-bold text-amber-600">
-                                          0.9%
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                                </div>
-                                <div className="space-y-2">
-                                  <div className="rounded-lg border-amber-500/20 border-l-2 bg-amber-500/5 p-3 text-[11px]">
-                                    <p className="mb-1 font-bold text-amber-800">
-                                      What didn&apos;t work:
-                                    </p>
-                                    <p className="text-muted-foreground leading-relaxed">
-                                      Templates underperformed because they
-                                      weren&apos;t presented as assets. They
-                                      won&apos;t lift until linked from the
-                                      &quot;Example&quot; winners.
-                                    </p>
-                                  </div>
-                                  <div className="flex items-center gap-2 rounded bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700">
-                                    <RotateCcw className="h-3 w-3" />
-                                    <span className="font-bold">
-                                      The Pivot:
-                                    </span>{" "}
-                                    Funneling winners into asset pages.
+                                  <div className="flex gap-2">
+                                    <Button
+                                      className="h-9 bg-emerald-600 px-4 text-sm hover:bg-emerald-700"
+                                      size="sm"
+                                    >
+                                      <Check className="mr-1.5 h-3 w-3" />{" "}
+                                      Approve Strategy
+                                    </Button>
+                                    <Button
+                                      className="h-9"
+                                      size="sm"
+                                      variant="outline"
+                                    >
+                                      Suggest changes
+                                    </Button>
                                   </div>
                                 </div>
                               </div>
@@ -347,7 +197,30 @@ export function FounderTransparency() {
               </button>
             </div>
 
-            <div className="space-y-6">
+            {/* Center: 2 weeks */}
+            <div className="hidden h-full flex-col items-center lg:flex">
+              <div className="h-10 w-px border-border border-l border-dashed" />
+              <div className="my-3 flex flex-col items-center gap-1 rounded-2xl border border-border bg-background px-3 py-2 text-center shadow-sm">
+                <span className="font-bold text-[10px] text-foreground uppercase tracking-widest">
+                  2 Weeks
+                </span>
+                <span className="font-bold text-[10px] text-foreground uppercase tracking-widest">
+                  of Data
+                </span>
+                <span className="font-bold text-[10px] text-foreground uppercase tracking-widest">
+                  Collection
+                </span>
+              </div>
+              <div className="h-full w-px border-border border-l border-dashed" />
+            </div>
+
+            {/* Right: Week 3 */}
+            <div className="min-w-0 space-y-6">
+              <div className="rounded-xl border border-border bg-background px-4 py-3 text-center">
+                <p className="font-bold text-[10px] text-muted-foreground uppercase tracking-[0.4em]">
+                  Self Auditing
+                </p>
+              </div>
               <ul className="grid gap-5">
                 {auditValues.map((v) => (
                   <li className="group flex items-start gap-4" key={v.label}>
@@ -360,17 +233,212 @@ export function FounderTransparency() {
                   </li>
                 ))}
               </ul>
+
+              <button
+                className="group w-full text-left"
+                onClick={() => setExpanded(!expanded)}
+                type="button"
+              >
+                <div
+                  className={cn(
+                    "relative overflow-hidden rounded-2xl border p-4 transition-all duration-300",
+                    expanded
+                      ? "border-amber-500/45 bg-amber-500/6 shadow-amber-500/5 shadow-lg"
+                      : "border-amber-500/35 bg-amber-500/2 hover:bg-amber-500/4 hover:shadow-md",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 font-bold text-[10px] text-amber-600 uppercase tracking-widest">
+                        <FileText className="h-3 w-3" /> Week 3: Self-Audit
+                      </div>
+                      <h3 className="font-bold text-foreground text-lg">
+                        Cluster performance audit
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground">
+                        Winner: &quot;Examples&quot; vs underperforming
+                        &quot;Templates&quot;. Pivot detected.
+                      </p>
+                    </div>
+                    <ChevronRight
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-amber-500 transition-transform duration-300",
+                        expanded
+                          ? "rotate-90"
+                          : "opacity-30 group-hover:opacity-100",
+                      )}
+                    />
+                  </div>
+
+                  <AnimatePresence>
+                    {expanded && (
+                      <motion.div
+                        animate={{ height: "auto", opacity: 1 }}
+                        className="overflow-hidden"
+                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="mt-2 space-y-2 border-amber-500/20 border-t pt-2">
+                          <ChatMockup
+                            className="border-amber-500/20 bg-background/50 p-2 shadow-sm"
+                            contentClassName="space-y-0"
+                          >
+                            <ChatMockupMessage
+                              density="compact"
+                              from="assistant"
+                              size="sm"
+                            >
+                              <div className="space-y-1">
+                                <p className="font-bold leading-tight">
+                                  Self-Audit: First 8 Articles
+                                </p>
+                                <div className="overflow-hidden rounded-lg border border-amber-500/20 bg-background/50">
+                                  <table className="w-full text-left text-[9px]">
+                                    <thead className="bg-amber-500/5 text-amber-800">
+                                      <tr>
+                                        <th className="px-2 py-1 font-bold uppercase">
+                                          Slug
+                                        </th>
+                                        <th className="px-2 py-1 text-right font-bold">
+                                          Impr
+                                        </th>
+                                        <th className="px-2 py-1 text-right font-bold">
+                                          CTR
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-amber-500/10">
+                                      <tr>
+                                        <td className="px-2 py-1 font-medium">
+                                          /internal-tools-examples
+                                        </td>
+                                        <td className="px-2 py-1 text-right">
+                                          18.4k
+                                        </td>
+                                        <td className="px-2 py-1 text-right font-bold text-emerald-600">
+                                          2.7%
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1 font-medium">
+                                          /hvac-portal-builder
+                                        </td>
+                                        <td className="px-2 py-1 text-right">
+                                          4.6k
+                                        </td>
+                                        <td className="px-2 py-1 text-right font-bold text-emerald-600">
+                                          4.6%
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1 font-medium">
+                                          /saas-checklist
+                                        </td>
+                                        <td className="px-2 py-1 text-right">
+                                          12.9k
+                                        </td>
+                                        <td className="px-2 py-1 text-right font-bold text-emerald-600">
+                                          2.8%
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1 font-medium opacity-50">
+                                          /ai-vs-no-code
+                                        </td>
+                                        <td className="px-2 py-1 text-right opacity-50">
+                                          9.7k
+                                        </td>
+                                        <td className="px-2 py-1 text-right font-bold text-amber-600">
+                                          0.8%
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1 font-medium opacity-50">
+                                          /templates-starter
+                                        </td>
+                                        <td className="px-2 py-1 text-right opacity-50">
+                                          2.1k
+                                        </td>
+                                        <td className="px-2 py-1 text-right font-bold text-amber-600">
+                                          0.9%
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div className="space-y-3 pt-1">
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 font-bold text-primary text-xs uppercase tracking-widest">
+                                      <TrendingUp className="h-3 w-3" />{" "}
+                                      Performance Thesis
+                                    </div>
+                                    <p className="border-primary/20 border-l-2 pl-3 text-muted-foreground italic leading-relaxed">
+                                      Comparison and decision-based content is
+                                      ranking faster and converting at 2x the
+                                      rate of generic definitions. Google is
+                                      rewarding our highly-structured,
+                                      actionable frameworks over surface-level
+                                      guides.
+                                    </p>
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 font-bold text-primary text-xs uppercase tracking-widest">
+                                      <Zap className="h-3 w-3" /> Actionables
+                                    </div>
+                                    <div className="grid gap-2 sm:grid-cols-2">
+                                      <div className="rounded-lg border border-emerald-500/10 bg-emerald-500/5 p-2.5">
+                                        <p className="mb-0.5 font-bold text-emerald-700">
+                                          Double Down
+                                        </p>
+                                        <p className="text-muted-foreground leading-relaxed">
+                                          Expand the &quot;Education&quot;
+                                          cluster with 3 new companion articles
+                                          targeting follow-up intent.
+                                        </p>
+                                      </div>
+                                      <div className="rounded-lg border border-amber-500/10 bg-amber-500/5 p-2.5">
+                                        <p className="mb-0.5 font-bold text-amber-700">
+                                          Quick Fix
+                                        </p>
+                                        <p className="text-muted-foreground leading-relaxed">
+                                          Rewrite meta titles for template
+                                          articles posts to be outcome-led,
+                                          targeting a 5% CTR lift.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ChatMockupMessage>
+                          </ChatMockup>
+
+                          <div className="mt-3 flex gap-2 border-amber-500/10 border-t pt-3">
+                            <Button
+                              className="h-9 flex-1 bg-amber-600 text-sm hover:bg-amber-700"
+                              size="sm"
+                            >
+                              <Check className="mr-1.5 h-3 w-3" />
+                              Approve
+                            </Button>
+                            <Button
+                              className="h-9 flex-1"
+                              size="sm"
+                              variant="outline"
+                            >
+                              Suggest changes
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </button>
             </div>
           </div>
-        </div>
-
-        <div className="mx-auto max-w-3xl border-border/50 border-t pt-12 text-center">
-          <p className="font-medium text-foreground text-xl italic">
-            Fluid Posts works like a co-founder:{" "}
-            <span className="font-bold text-primary not-italic">
-              no spinning, no hiding. Just clear objective diagnosis.
-            </span>
-          </p>
         </div>
       </div>
     </Section>

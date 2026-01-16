@@ -22,7 +22,7 @@ const faqs = [
   {
     id: "what-you-get",
     q: "What do I get to start?",
-    a: "Simply schedule a call with us and we'll onboard you in as little as 20 minutes.",
+    a: "Once you’re approved, onboarding is done online through our app and should take no more than 5 minutes.",
   },
   {
     id: "time-to-value",
@@ -32,12 +32,7 @@ const faqs = [
   {
     id: "collaboration",
     q: "Can you work with my team?",
-    a: "Yes. For select teams, we will personally collaborate and can provide high touch support.",
-  },
-  {
-    id: "cost",
-    q: "Is there a cost to start?",
-    a: "We have a 14 days free trial. Paid options start at $299/website/month.",
+    a: "Yes — for enterprise teams we can customize workflows, approvals, and integrations. Email aaron@fluidposts.com to discuss a tailored setup.",
   },
 ];
 

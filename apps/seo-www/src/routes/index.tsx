@@ -3,9 +3,9 @@ import { FounderCTA } from "~/routes/-components/founders/founder-cta";
 import { FounderGrowth } from "~/routes/-components/founders/founder-growth";
 import { FounderHero } from "~/routes/-components/founders/founder-hero";
 import { FounderIntervention } from "~/routes/-components/founders/founder-intervention";
-import { FounderLongGame } from "~/routes/-components/founders/founder-long-game";
 import { FounderStrategist } from "~/routes/-components/founders/founder-strategist";
 import { FounderTransparency } from "~/routes/-components/founders/founder-transparency";
+import { FounderWhatItIs } from "~/routes/-components/founders/founder-what-it-is";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -32,11 +32,11 @@ function App() {
   return (
     <main className="bg-background">
       <FounderHero />
+      <FounderWhatItIs />
       <FounderTransparency />
       <FounderStrategist />
       <FounderGrowth />
       <FounderIntervention />
-      <FounderLongGame />
       <FounderCTA />
     </main>
   );

@@ -48,6 +48,7 @@
     "@rectangular-labs/typescript": "workspace:*",
     "@turbo/gen": "^2.6.1",
     "knip": "^5.70.1",
+    "miniflare": "4.20251118.1",
     "tsx": "^4.20.6",
     "turbo": "^2.6.1",
     "typescript": "^5.9.3",

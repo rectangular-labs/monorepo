@@ -23,11 +23,11 @@ export function ChatMockup({ className, children }: ChatMockupProps) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-border bg-background/50 p-4 shadow-2xl backdrop-blur-xl md:p-6",
+        "relative overflow-hidden rounded-3xl border border-border bg-muted/30 p-4 shadow-2xl backdrop-blur-xl",
         className,
       )}
     >
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-3">{children}</div>
     </div>
   );
 }
@@ -51,8 +51,14 @@ export function ChatMockupMessage({
       whileInView={{ opacity: 1, y: 0 }}
     >
       <Message className="p-0" from={from}>
-        <MessageContent className="max-w-none">
-          <div className="prose prose-sm dark:prose-invert text-sm leading-relaxed">
+        <MessageContent
+          className={cn(
+            "max-w-none",
+            // Ensure mockup "user" bubbles remain readable regardless of theme tokens.
+            "group-[.is-user]:border group-[.is-user]:border-border group-[.is-user]:bg-muted group-[.is-user]:text-foreground",
+          )}
+        >
+          <div className="prose prose-base dark:prose-invert prose-p:text-foreground prose-strong:text-foreground text-base text-foreground leading-relaxed">
             {typeof children === "string" ? (
               <MarkdownContent content={children} id={id} />
             ) : (

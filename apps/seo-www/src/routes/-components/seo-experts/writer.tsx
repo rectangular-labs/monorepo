@@ -3,19 +3,22 @@ import {
   Check,
   ExternalLink,
   FileText,
+  Search,
+  Sparkles,
+  Target,
 } from "@rectangular-labs/ui/components/icon";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { ChatMockup, ChatMockupMessage, ChatMockupTool } from "./chat-mockup";
+import { ChatMockup, ChatMockupMessage } from "./chat-mockup";
 
 export function Writer() {
   const [showPreview, setShowPreview] = useState(false);
 
   return (
-    <Section className="max-w-none border-border border-t bg-muted/20">
-      <div className="mx-auto w-full space-y-12 px-4 md:px-12">
+    <Section className="border-border border-t bg-background">
+      <div className="mx-auto max-w-6xl space-y-12 px-4 py-12">
         <div className="mx-auto max-w-4xl space-y-6 text-center">
           <h2 className="font-regular text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
             Your Writing Team, <br />
@@ -29,22 +32,17 @@ export function Writer() {
           </p>
         </div>
 
-        <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
-          <div className="relative">
-            <ChatMockup className="shadow-2xl">
-              <ChatMockupMessage delay={0.5} from="user">
-                Approve the roadmap. Let's start with the "AI Workflow for
-                Enterprise" guide.
-              </ChatMockupMessage>
-              <ChatMockupTool
-                delay={1.5}
-                input="Cluster: Enterprise SEO, Voice: Professional, Goal: Lead Gen"
-                state="input-streaming"
-                title="Writing Content"
-              />
-              <ChatMockupMessage delay={2} from="assistant">
+        <div className="grid gap-16 lg:grid-cols-2 lg:items-stretch">
+          <div className="relative h-full">
+            <ChatMockup
+              className={cn(
+                "h-full shadow-2xl transition-[min-height] duration-300",
+                showPreview ? "min-h-[520px]" : "min-h-[280px]",
+              )}
+            >
+              <ChatMockupMessage delay={0.5} from="assistant">
                 <div className="space-y-4">
-                  <p className="text-sm">
+                  <p className="text-base">
                     The first draft is ready. I've focused on visibility across
                     traditional search and AI-driven discovery (GEO).
                   </p>
@@ -61,16 +59,16 @@ export function Writer() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg text-primary">
                           <FileText className="h-4 w-4" />
                         </div>
-                        <p className="font-bold text-[11px] italic">
+                        <p className="font-bold text-sm italic">
                           "AI App Builder for Small Business: What It Is and How
                           to Choose"
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="rounded bg-primary/10 px-1.5 py-0.5 font-bold text-[8px] text-primary uppercase tracking-widest">
+                        <span className="rounded bg-primary/10 px-2 py-0.5 font-bold text-[10px] text-primary uppercase tracking-widest">
                           Preview
                         </span>
                         <ArrowRight
@@ -92,7 +90,7 @@ export function Writer() {
                         >
                           <div className="mt-4 space-y-4 border-border/50 border-t pt-4">
                             <div className="max-h-[400px] overflow-y-auto rounded-lg border border-border/50 bg-background p-6 text-left shadow-inner">
-                              <div className="prose prose-sm max-w-none text-[11px] text-muted-foreground leading-relaxed">
+                              <div className="prose prose-base max-w-none text-muted-foreground text-sm leading-relaxed">
                                 <p>
                                   In accounts payable, one small slip can turn
                                   into a very real cash leak. A duplicate
@@ -157,13 +155,9 @@ export function Writer() {
                                 <p className="mt-4 opacity-50">...</p>
                               </div>
 
-                              <div className="mt-6 flex items-center justify-between border-border border-t pt-4">
-                                <p className="text-[9px] text-muted-foreground">
-                                  Structure: Answer-First | SEO Optimized |
-                                  Cluster Interlinked
-                                </p>
+                              <div className="mt-6 border-border border-t pt-4">
                                 <button
-                                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-bold text-[10px] text-white transition-colors hover:bg-primary/90"
+                                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 font-bold text-[10px] text-white transition-colors hover:bg-primary/90"
                                   type="button"
                                 >
                                   View Full Article{" "}
@@ -186,34 +180,45 @@ export function Writer() {
             />
           </div>
 
-          <div className="space-y-8">
-            <h3 className="font-regular text-2xl text-foreground leading-snug tracking-tight sm:text-3xl">
-              Focused, clearly structured writing that{" "}
-              <span className="font-semibold text-primary">
-                scales without a ceiling.
-              </span>
-            </h3>
-            <div className="space-y-4">
-              {[
-                "Search intent uncovered through analysis of top-ranking SERPs and AI overviews",
-                "Focused, clearly structured writing that prioritises usefulness and readability",
-                "SEO and GEO applied intentionally and effectively",
-                "Built for visibility across traditional search and AI-driven discovery",
-              ].map((item, index) => (
-                <motion.div
-                  className="flex items-start gap-4 rounded-2xl border border-border/50 bg-background/50 p-4 shadow-sm backdrop-blur-sm"
-                  initial={{ opacity: 0, x: 20 }}
-                  key={item}
-                  transition={{ delay: index * 0.1 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                >
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Check className="h-3.5 w-3.5" />
-                  </div>
-                  <span className="text-sm leading-relaxed">{item}</span>
-                </motion.div>
-              ))}
-            </div>
+          <div className="space-y-4">
+            {[
+              {
+                icon: Search,
+                lead: "Search Intent Uncovered",
+                rest: " through analysis of top-ranking SERPs and AI overviews",
+              },
+              {
+                icon: Target,
+                lead: "Focused, Clearly Structured Writing",
+                rest: " that prioritises usefulness and readability",
+              },
+              {
+                icon: Check,
+                lead: "SEO and GEO Applied",
+                rest: " intentionally and effectively",
+              },
+              {
+                icon: Sparkles,
+                lead: "Visibility Across Search",
+                rest: " and AI-driven discovery",
+              },
+            ].map((item, index) => (
+              <motion.div
+                className="flex items-start gap-3 rounded-2xl border border-border/50 bg-background/50 p-3 shadow-sm backdrop-blur-sm"
+                initial={{ opacity: 0, x: 20 }}
+                key={item.lead}
+                transition={{ delay: index * 0.1 }}
+                whileInView={{ opacity: 1, x: 0 }}
+              >
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <item.icon className="h-3 w-3" />
+                </div>
+                <span className="text-base leading-relaxed">
+                  <span className="font-semibold">{item.lead}</span>
+                  {item.rest}
+                </span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>

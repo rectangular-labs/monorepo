@@ -3,10 +3,10 @@ import { Link } from "@tanstack/react-router";
 
 export function Footer() {
   const links = [
+    { title: "Founders", href: "/" },
     { title: "SEO Experts", href: "/seo-experts" },
-    { title: "Benefits", href: "#benefits" },
-    { title: "Who we are", href: "#credentials" },
-    { title: "FAQ", href: "#faq" },
+    { title: "Referral", href: "/referral" },
+    { title: "About us", href: "/who-we-are" },
   ];
   return (
     <div className="border-t">

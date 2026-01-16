@@ -16,18 +16,23 @@ import { type ReactNode, useId } from "react";
 
 export interface ChatMockupProps {
   className?: string;
+  contentClassName?: string;
   children: ReactNode;
 }
 
-export function ChatMockup({ className, children }: ChatMockupProps) {
+export function ChatMockup({
+  className,
+  contentClassName,
+  children,
+}: ChatMockupProps) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-border bg-background/50 p-4 shadow-2xl backdrop-blur-xl md:p-6",
+        "relative overflow-hidden rounded-3xl border border-border bg-background/50 p-4 shadow-2xl backdrop-blur-xl",
         className,
       )}
     >
-      <div className="space-y-4">{children}</div>
+      <div className={cn("space-y-3", contentClassName)}>{children}</div>
     </div>
   );
 }
@@ -36,10 +41,14 @@ export function ChatMockupMessage({
   from,
   children,
   delay = 0,
+  density = "default",
+  size = "base",
 }: {
   from: "user" | "assistant";
   children: ReactNode;
   delay?: number;
+  density?: "default" | "compact";
+  size?: "sm" | "base";
 }) {
   const id = useId();
 
@@ -50,9 +59,23 @@ export function ChatMockupMessage({
       viewport={{ once: true }}
       whileInView={{ opacity: 1, y: 0 }}
     >
-      <Message className="p-0" from={from}>
-        <MessageContent className="max-w-none">
-          <div className="prose prose-sm dark:prose-invert text-sm leading-relaxed">
+      <Message
+        className={cn("p-0", density === "compact" && "gap-0 py-0")}
+        from={from}
+      >
+        <MessageContent
+          className={cn(
+            "max-w-none",
+            density === "compact" && "bg-transparent px-0 py-0",
+          )}
+          variant={density === "compact" ? "flat" : "contained"}
+        >
+          <div
+            className={cn(
+              "prose dark:prose-invert leading-relaxed",
+              size === "sm" ? "prose-sm text-sm" : "prose-base text-base",
+            )}
+          >
             {typeof children === "string" ? (
               <MarkdownContent content={children} id={id} />
             ) : (
