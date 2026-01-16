@@ -5,9 +5,13 @@ import {
 } from "@rectangular-labs/core/schemas/content-parsers";
 import { schema } from "@rectangular-labs/db";
 import {
+  addContentChatContribution,
+  addContentUserContribution,
   countDraftsByStatus,
   createContent,
   getDraftById,
+  getDraftContributingChats,
+  getDraftContributors,
   getNextVersionForSlug,
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
@@ -15,6 +19,7 @@ import {
   listPublishedContent,
   updateContentDraft,
 } from "@rectangular-labs/db/operations";
+
 import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
 import { writeContentDraft } from "../lib/content/write-content-draft";
@@ -45,7 +50,7 @@ const listDrafts = withOrganizationIdBase
       organizationIdentifier: "string",
       projectId: "string.uuid",
       status: contentStatusSchema.array(),
-      isNew: "boolean = true",
+      isNew: "boolean|null",
       limit: "1<=number<=100 = 20",
       "cursor?": "string.uuid|undefined",
     }),
@@ -58,11 +63,12 @@ const listDrafts = withOrganizationIdBase
     }),
   )
   .handler(async ({ context, input }) => {
+    const hasBaseContentId = input.isNew === null ? null : !input.isNew;
     const rowsResult = await listDraftsByStatus({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      hasBaseContentId: !input.isNew,
+      hasBaseContentId,
       status: input.status,
       cursor: input.cursor,
       limit: input.limit + 1,
@@ -549,6 +555,55 @@ const publishContent = base
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Failed to create published content.",
         cause: createdContentResult.error,
+      });
+    }
+    const createdContent = createdContentResult.value;
+
+    const [draftChatsResult, draftUsersResult] = await Promise.all([
+      getDraftContributingChats({
+        db: context.db,
+        draftId: draft.id,
+      }),
+      getDraftContributors({
+        db: context.db,
+        draftId: draft.id,
+      }),
+    ]);
+    if (!draftChatsResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load draft chat attribution.",
+        cause: draftChatsResult.error,
+      });
+    }
+    if (!draftUsersResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load draft contributor attribution.",
+        cause: draftUsersResult.error,
+      });
+    }
+
+    const [chatAttributionResult, userAttributionResult] = await Promise.all([
+      addContentChatContribution({
+        db: context.db,
+        contentId: createdContent.id,
+        chatIds: draftChatsResult.value.map((entry) => entry.chatId),
+      }),
+      addContentUserContribution({
+        db: context.db,
+        contentId: createdContent.id,
+        userIds: draftUsersResult.value.map((entry) => entry.userId),
+      }),
+    ]);
+    if (!chatAttributionResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to record published content chat attribution.",
+        cause: chatAttributionResult.error,
+      });
+    }
+    if (!userAttributionResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to record published content user attribution.",
+        cause: userAttributionResult.error,
       });
     }
 

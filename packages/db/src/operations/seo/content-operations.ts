@@ -388,7 +388,7 @@ export async function listDraftsByStatus(args: {
   db: DB;
   organizationId: string;
   projectId: string;
-  hasBaseContentId: boolean;
+  hasBaseContentId: boolean | null;
   status: SeoFileStatus | readonly SeoFileStatus[];
   cursor: string | undefined;
   limit: number;
@@ -401,9 +401,11 @@ export async function listDraftsByStatus(args: {
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           isNull(table.deletedAt),
-          args.hasBaseContentId
-            ? isNotNull(table.baseContentId)
-            : isNull(table.baseContentId),
+          args.hasBaseContentId === null
+            ? undefined
+            : args.hasBaseContentId
+              ? isNotNull(table.baseContentId)
+              : isNull(table.baseContentId),
           typeof args.status === "string"
             ? eq(table.status, args.status)
             : inArray(table.status, [...args.status]),

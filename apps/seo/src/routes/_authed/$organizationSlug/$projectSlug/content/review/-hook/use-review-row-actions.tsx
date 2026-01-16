@@ -21,7 +21,7 @@ export function useReviewRowActions({
   );
 
   const { mutate: markContent } = useMutation(
-    getApiClientRq().content.markContent.mutationOptions({
+    getApiClientRq().content.markDraft.mutationOptions({
       onError: () => toast.error("Failed to update review status"),
       onSuccess: async () => {
         await onMarked();
