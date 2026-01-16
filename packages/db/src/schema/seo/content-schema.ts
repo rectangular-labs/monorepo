@@ -52,6 +52,8 @@ export const seoContent = pgSeoTable(
     // Content fields
     title: text().notNull(),
     description: text().notNull(),
+    heroImage: text(),
+    heroImageCaption: text(),
     primaryKeyword: text().notNull(),
     articleType: text({ enum: ARTICLE_TYPES }).notNull(),
     contentMarkdown: text().notNull(),
