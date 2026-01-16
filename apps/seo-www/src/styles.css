@@ -4,4 +4,7 @@
 
 :root {
   --radius: 0.8rem;
+  /* Improve outline visibility in light mode across all cards/chats. */
+  --border: oklch(0.78 0 0);
+  --input: oklch(0.78 0 0);
 }

@@ -17,7 +17,11 @@ export const clientEnv = () =>
 export const serverEnv = () =>
   createEnv({
     extends: [clientEnv()],
-    server: {},
+    server: {
+      // optional
+      WAITLIST_WEBHOOK_URL: type("string|undefined"),
+      WAITLIST_ADMIN_TOKEN: type("string|undefined"),
+    },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
     skipValidation:

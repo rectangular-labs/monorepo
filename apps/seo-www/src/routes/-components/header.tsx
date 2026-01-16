@@ -6,9 +6,10 @@ import { useState } from "react";
 import { SeoLogo } from "./seo-logo";
 
 const menuItems = [
-  { name: "Benefits", href: "#benefits" },
-  { name: "Who we are", href: "#credentials" },
-  { name: "FAQ", href: "#faq" },
+  { name: "Founders", href: "/" },
+  { name: "SEO Experts", href: "/seo-experts" },
+  { name: "Referral", href: "/referral" },
+  { name: "About us", href: "/who-we-are" },
 ];
 
 function HeaderItems({ items }: { items: { name: string; href: string }[] }) {

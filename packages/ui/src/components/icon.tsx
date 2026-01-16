@@ -5,12 +5,15 @@ import {
   ArrowRightIcon,
   ArrowUpIcon,
   ArrowUpNarrowWideIcon,
+  BarChart3Icon,
+  ChartBarIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
   CircleSlashIcon,
   CircleXIcon,
+  ClockIcon,
   CopyIcon,
   DotIcon,
   ExternalLinkIcon,
@@ -37,6 +40,7 @@ import {
   MenuIcon,
   MoonIcon,
   MoreHorizontalIcon,
+  MousePointer2Icon,
   MoveDownLeftIcon,
   MoveRightIcon,
   MoveUpRightIcon,
@@ -45,12 +49,14 @@ import {
   PanelLeftIcon,
   PartyPopperIcon,
   PencilIcon,
+  PenToolIcon,
   PhoneCallIcon,
   PlusIcon,
   RefreshCcwIcon,
   RotateCcwIcon,
   SaveIcon,
   SearchIcon,
+  SendIcon,
   SettingsIcon,
   ShieldIcon,
   SparklesIcon,
@@ -111,9 +117,11 @@ export const MoreHorizontal = MoreHorizontalIcon;
 export const MoveDownLeft = MoveDownLeftIcon;
 export const MoveRight = MoveRightIcon;
 export const MoveUpRight = MoveUpRightIcon;
+export const MousePointer2 = MousePointer2Icon;
 export const PanelLeft = PanelLeftIcon;
 export const PanelLeftClose = PanelLeftCloseIcon;
 export const PartyPopper = PartyPopperIcon;
+export const PenTool = PenToolIcon;
 export const Pencil = PencilIcon;
 export const PhoneCall = PhoneCallIcon;
 export const Plus = PlusIcon;
@@ -121,6 +129,7 @@ export const RefreshCcw = RefreshCcwIcon;
 export const RotateCcw = RotateCcwIcon;
 export const Save = SaveIcon;
 export const Search = SearchIcon;
+export const Send = SendIcon;
 export const Settings = SettingsIcon;
 export const Shield = ShieldIcon;
 export const Sparkles = SparklesIcon;
@@ -130,6 +139,9 @@ export const Sun = SunIcon;
 export const Target = TargetIcon;
 export const Terminal = TerminalIcon;
 export const Timer = TimerIcon;
+export const Clock = ClockIcon;
+export const BarChart3 = BarChart3Icon;
+export const ChartBar = ChartBarIcon;
 export const Trash = TrashIcon;
 export const TrendingUp = TrendingUpIcon;
 export const User = UserIcon;
