@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { createDb, schema } from "@rectangular-labs/db";
+import { createFileRoute } from "@tanstack/react-router";
 import { serverEnv } from "~/lib/env";
 
 function isValidEmail(email: string) {

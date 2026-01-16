@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/referral")({
   component: ReferralPage,

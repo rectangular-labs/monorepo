@@ -2,8 +2,8 @@ import {
   Check,
   Globe,
   PenTool,
-  Send,
   Search,
+  Send,
   Sparkles,
 } from "@rectangular-labs/ui/components/icon";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
