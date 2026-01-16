@@ -1,6 +1,5 @@
 "use client";
 
-import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +9,6 @@ import { useEffect, useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "./-components/articles-table";
-import { FilterStatus } from "./-components/filter-status";
 import {
   TreeListDropDrawer,
   useTreeListMode,
@@ -65,9 +63,6 @@ function PageComponent() {
   const { projectId, organizationId } = Route.useLoaderData();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | Extract<SeoFileStatus, "scheduled" | "published">
-  >("all");
 
   const [layoutMode, setLayoutMode] = useTreeListMode();
   const activeView = view ?? layoutMode;
@@ -96,7 +91,7 @@ function PageComponent() {
   );
 
   const liveQuery = useQuery(
-    getApiClientRq().content.listLive.queryOptions({
+    getApiClientRq().content.listPublished.queryOptions({
       input: {
         organizationIdentifier: organizationSlug,
         projectId,
@@ -112,38 +107,21 @@ function PageComponent() {
       slug: row.slug,
       title: row.title,
       primaryKeyword: row.primaryKeyword,
-      author: row.createdByUserId,
-      scheduledFor: row.schedule.scheduledFor.toISOString(),
-      status: row.schedule.status,
+      publishedAt: row.publishedAt.toISOString(),
+      version: row.version,
     }));
 
-    const filteredByStatus =
-      statusFilter === "all"
-        ? base
-        : base.filter((r) => r.status === statusFilter);
-
     const filteredBySearch = normalizedSearch
-      ? filteredByStatus.filter((r) => {
+      ? base.filter((r) => {
           return (
             r.slug.toLowerCase().includes(normalizedSearch) ||
             r.primaryKeyword.toLowerCase().includes(normalizedSearch)
           );
         })
-      : filteredByStatus;
+      : base;
 
     return filteredBySearch;
-  }, [liveQuery.data?.data, normalizedSearch, statusFilter]);
-
-  const counts = useMemo(() => {
-    const data = liveQuery.data?.data ?? [];
-    let scheduled = 0;
-    let published = 0;
-    for (const row of data) {
-      if (row.schedule?.status === "scheduled") scheduled += 1;
-      if (row.schedule?.status === "published") published += 1;
-    }
-    return { scheduled, published, total: data.length };
-  }, [liveQuery.data?.data]);
+  }, [liveQuery.data?.data, normalizedSearch]);
 
   const liveOverview = useMemo(() => {
     return (liveQuery.data?.data ?? []).slice(0, 5);
@@ -192,45 +170,15 @@ function PageComponent() {
             </div>
 
             <div className="flex items-center gap-2">
-              <FilterStatus
-                label="Filter by status"
-                onChange={(next) => setStatusFilter(next)}
-                options={[
-                  { value: "all", label: "All", count: counts.total },
-                  {
-                    value: "scheduled",
-                    label: "Scheduled",
-                    count: counts.scheduled,
-                  },
-                  {
-                    value: "published",
-                    label: "Published",
-                    count: counts.published,
-                  },
-                ]}
-                value={statusFilter}
-              >
-                <Button size="sm" variant="outline">
-                  <Icons.Filter className="mr-2 size-4" />
-                  Filter
-                </Button>
-              </FilterStatus>
-
               <TreeListDropDrawer onChange={setViewMode} value={activeView} />
             </div>
           </div>
 
           {liveOverview.length > 0 && (
             <div className="rounded-md border bg-background p-4 text-sm">
-              <div className="mb-3 font-medium">Scheduled & live content</div>
+              <div className="mb-3 font-medium">Published content</div>
               <div className="space-y-3">
                 {liveOverview.map((row) => {
-                  const status = row.schedule?.status ?? "scheduled";
-                  const publishedAt = row.schedule?.publishedAt;
-                  const scheduledFor = row.schedule?.scheduledFor;
-                  const dateLabel = publishedAt
-                    ? `Published ${formatDate(publishedAt)}`
-                    : `Scheduled ${formatDate(scheduledFor)}`;
                   return (
                     <div
                       className="flex flex-wrap items-center justify-between gap-3"
@@ -241,18 +189,8 @@ function PageComponent() {
                         <div className="text-muted-foreground">{row.slug}</div>
                       </div>
                       <div className="text-right text-muted-foreground text-xs">
-                        <div className="capitalize">{status}</div>
-                        <div>{dateLabel}</div>
-                        {row.schedule?.publishedUrl && (
-                          <a
-                            className="text-primary underline"
-                            href={row.schedule.publishedUrl}
-                            rel="noreferrer"
-                            target="_blank"
-                          >
-                            View
-                          </a>
-                        )}
+                        <div>v{row.version}</div>
+                        <div>Published {formatDate(row.publishedAt)}</div>
                       </div>
                     </div>
                   );

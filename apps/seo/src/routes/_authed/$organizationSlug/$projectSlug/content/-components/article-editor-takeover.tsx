@@ -117,7 +117,7 @@ export function ArticleEditorTakeover({
     primaryKeyword: "",
     articleType: null as ArticleType | null,
     notes: "",
-    targetReleaseDate: null as string | null,
+    scheduledFor: null as string | null,
   });
 
   const markdownSaveTimeoutRef = useRef<number | null>(null);
@@ -205,8 +205,8 @@ export function ArticleEditorTakeover({
       primaryKeyword: draft.primaryKeyword ?? "",
       articleType: draft.articleType ?? null,
       notes: draft.notes ?? "",
-      targetReleaseDate: draft.targetReleaseDate
-        ? isoToDatetimeLocalValue(draft.targetReleaseDate.toISOString())
+      scheduledFor: draft.scheduledFor
+        ? isoToDatetimeLocalValue(draft.scheduledFor.toISOString())
         : null,
     });
     latestMarkdownRef.current = draft.contentMarkdown ?? "";
@@ -231,7 +231,7 @@ export function ArticleEditorTakeover({
     mutateAsync: updateDraftAsync,
     isPending: isUpdatingDraft,
   } = useMutation(
-    getApiClientRq().content.updateContent.mutationOptions({
+    getApiClientRq().content.updateDraft.mutationOptions({
       onError: (e) => {
         setSaveIndicator({
           status: "error",
@@ -249,7 +249,7 @@ export function ArticleEditorTakeover({
     }),
   );
   const { mutate: markContent, isPending: isMarking } = useMutation(
-    getApiClientRq().content.markContent.mutationOptions({
+    getApiClientRq().content.markDraft.mutationOptions({
       onError: () => toast.error("Failed to update status"),
       onSuccess: async () => {
         await refetchDraft();
@@ -263,9 +263,9 @@ export function ArticleEditorTakeover({
 
     const nextTarget = (() => {
       // use next earliest available slot if no target date is set
-      if (draftDetails.targetReleaseDate === null) return null;
+      if (draftDetails.scheduledFor === null) return null;
       // if date is set we verify that it's valid
-      const date = new Date(draftDetails.targetReleaseDate);
+      const date = new Date(draftDetails.scheduledFor);
       if (Number.isNaN(date.getTime())) {
         toast.error("Invalid target scheduled date");
         return undefined;
@@ -286,7 +286,7 @@ export function ArticleEditorTakeover({
       primaryKeyword: draftDetails.primaryKeyword.trim(),
       articleType: draftDetails.articleType ?? null,
       notes: draftDetails.notes.trim(),
-      targetReleaseDate: nextTarget,
+      scheduledFor: nextTarget,
     });
   };
 
@@ -708,14 +708,14 @@ export function ArticleEditorTakeover({
                 </FieldLabel>
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    checked={draftDetails.targetReleaseDate === null}
+                    checked={draftDetails.scheduledFor === null}
                     disabled={!canEditDetails}
                     id="draft-target-next-slot"
                     onCheckedChange={(next) => {
                       const isChecked = next === true;
                       setDraftDetails((prev) => ({
                         ...prev,
-                        targetReleaseDate: isChecked
+                        scheduledFor: isChecked
                           ? null
                           : isoToDatetimeLocalValue(
                               new Date(
@@ -729,7 +729,7 @@ export function ArticleEditorTakeover({
                     Next earliest available slot
                   </Label>
                 </div>
-                {draftDetails.targetReleaseDate !== null && (
+                {draftDetails.scheduledFor !== null && (
                   <>
                     <Input
                       disabled={!canEditDetails}
@@ -737,11 +737,11 @@ export function ArticleEditorTakeover({
                       onChange={(e) =>
                         setDraftDetails((prev) => ({
                           ...prev,
-                          targetReleaseDate: e.target.value,
+                          scheduledFor: e.target.value,
                         }))
                       }
                       type="datetime-local"
-                      value={draftDetails.targetReleaseDate ?? ""}
+                      value={draftDetails.scheduledFor ?? ""}
                     />
                     <FieldDescription>
                       Uses your local timezone.
