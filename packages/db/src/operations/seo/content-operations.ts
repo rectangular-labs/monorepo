@@ -207,15 +207,16 @@ export async function getScheduledItems(args: {
   projectId: string;
 }) {
   return await safe(async () => {
+    const now = new Date();
     const draftRows = await args.db.query.seoContentDraft.findMany({
       columns: {
         scheduledFor: true,
       },
-      where: (table, { and, eq, isNull, ne, isNotNull }) =>
+      where: (table, { and, eq, isNull, ne, gt }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
-          isNotNull(table.scheduledFor),
+          gt(table.scheduledFor, now),
           isNull(table.deletedAt),
           ne(table.status, "review-denied"),
           ne(table.status, "suggestion-rejected"),

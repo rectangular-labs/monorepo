@@ -25,7 +25,6 @@ import {
 } from "ai";
 import { type } from "arktype";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
-import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -319,9 +318,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             imageSettings: project.imageSettings ?? null,
             publicImagesBucket: createPublicImagesBucket(),
           });
-          const internalLinksTools = createInternalLinksToolWithMetadata(
-            project.websiteUrl,
-          );
           const todoTool = createTodoToolWithMetadata({ messages: [] });
 
           logInfo("writer tools ready", {
@@ -334,11 +330,13 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           const outline = draft.outline;
           const primaryKeyword = draft.primaryKeyword;
           const notes = draft.notes;
-          const articleType = await inferArticleType({
-            primaryKeyword,
-            notes,
-            outline,
-          });
+          const articleType =
+            draft.articleType ??
+            (await inferArticleType({
+              primaryKeyword,
+              notes,
+              outline,
+            }));
           const systemPrompt = buildWriterSystemPrompt({
             project,
             skillsSection: "",
@@ -373,7 +371,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               tools: {
                 ...webTools.tools,
                 ...imageTools.tools,
-                ...internalLinksTools.tools,
                 ...todoTool.tools,
               },
               system: systemPrompt,
@@ -441,7 +438,12 @@ ${changes.join("\n")}
               websiteUrl: project.websiteUrl,
               outline,
             });
-
+            const utcDate = new Intl.DateTimeFormat("en-US", {
+              timeZone: "UTC",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }).format(new Date());
             const { experimental_output: reviewResult } = await generateText({
               model: google("gemini-3-flash-preview"),
               providerOptions: {
@@ -494,6 +496,7 @@ If not approved, changes must be a prioritized, actionable edit list (include ob
 </output>
 
 <project-context>
+- Today's date: ${utcDate} (UTC timezone)
 - Website URL: ${project.websiteUrl}
 - Article type: ${articleType ?? "(missing)"}
 - Primary keyword: ${primaryKeyword ?? "(missing)"}

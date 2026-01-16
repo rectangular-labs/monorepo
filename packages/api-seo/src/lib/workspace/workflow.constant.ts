@@ -23,7 +23,7 @@ export const ARTICLE_TYPE_TO_WRITER_RULE: Partial<Record<ArticleType, string>> =
 3. Include screenshots, diagrams, or pictures for key steps that benefit from visuals.
 4. Opinions can be given but should be clearly labelled as opinions`,
     listicle: `## Listicle (generically)
-1. Include screenshots, diagrams, for every listed item. The images should come right after the heading introducing the item on the list.
+1. Include screenshots, diagrams, for EVERY listed item. The images should come right after the heading introducing the item on the list.
 2. Maximum of 20 total items.
 3. Word light - each listicle item should be a maximum of 50 words.
 4. Always include an external link to each item on the list organically (for e.g. wrapping the link around the anchor text of the item/service being linked to).

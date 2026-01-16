@@ -102,8 +102,33 @@ ${args.skillsSection}
 - For Tables:
   - use tables when comparing (pricing, specs, rankings), as a summary for long listicle, and for any structured content that might have too many entries. 
   - Bold the headings for the tables (first row, and if applicable, first column)
+- External links rules
+  - Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
+  - Statistics rules (strict)
+    - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
+    -Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
+    - If a number cannot be verified exactly, remove the number and rewrite the claim qualitatively.
+    - The statistic must match the source exactly — no rounding, no reinterpretation.
+  - Source quality rules
+    - Prefer research, standards bodies, reputable publications, or industry reports.
+    - Vendor pages are acceptable only for definitions or explanations — not performance claims.
+    - If the page does not clearly support the statement being made, do not use it.
+  <example>
+    Duplicate invoices typically represent a small but real portion of AP leakage, often cited as [well under 1% of annual spend](https://www.example.com/well+under+annual+spend).
+  </example>
+  <example>
+    According to the [Harvard Business Review](https://www.example.com/link-here), the most successful companies of the future will be those that can innovate fast.
+  </example>
+  <example>
+    Up to [20% of companies](https://www.example.com/link-here) will be disrupted by AI in the next 5 years.
+  </example>
+- Internal links rules
+  - Use web_search as needed to find and propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax if there are non suggested in the outline.
+  <example>
+    When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
+  </example>
 - You must follow the brand voice and user instructions provided in the context section below.
-- Output must be the FULL final Markdown article only (no commentary).
+- Output must be the JSON of the FULL final Markdown article, the heroImage, and heroImageCaption (if any).
 ${articleTypeRule ? `- Article-type rule for ${args.articleType}: ${articleTypeRule}` : ""}
 </writing-requirements>
 

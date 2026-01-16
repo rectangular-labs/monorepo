@@ -25,7 +25,6 @@ import {
   stepCountIs,
 } from "ai";
 import { type } from "arktype";
-import { createInternalLinksToolWithMetadata } from "../lib/ai/tools/internal-links-tool";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -150,6 +149,12 @@ async function generateOutline({
     Error
   >
 > {
+  const utcDate = new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
   const haveAiOverview = serp.some((s) => s.type === "ai_overview");
   const havePeopleAlsoAsk = serp.some((s) => s.type === "people_also_ask");
   const system = `<role>
@@ -219,21 +224,34 @@ ${
     : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Include any relevant stats that we should cite or internal links to relevant articles that we should link to. Make sure that all links have either been validated via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links.
+- Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
+  - Propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
+    <example>
+      When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
+    </example>
+  - Statistics rules (strict)
+    - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
+    -Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
+    - If a number cannot be verified exactly, remove the number and rewrite the claim qualitatively.
+    - The statistic must match the source exactly — no rounding, no reinterpretation.
+  - Source quality rules
+    - Prefer research, standards bodies, reputable publications, or industry reports.
+    - Vendor pages are acceptable only for definitions or explanations — not performance claims.
+    - If the page does not clearly support the statement being made, do not use it.
+  <example>
+    Duplicate invoices typically represent a small but real portion of AP leakage, [often cited as well under 1% of annual spend](/path/to/industry overview).
+  </example>
   <example>
     According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
   </example>
   <example>
     Up to [20% of companies](url_link) will be disrupted by AI in the next 5 years.
   </example>
-  - Use internal_links to propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
-  <example>
-    When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
-  </example>
 </critical-plan-requirements>
 
 
 <project context>
+- Today's date: ${utcDate} (UTC timezone)
 - Website: ${project.websiteUrl}
 - Primary keyword: ${primaryKeyword}
 - Target country: ${locationName}
@@ -247,9 +265,7 @@ ${JSON.stringify(serp)}
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
   const webTools = createWebToolsWithMetadata(project, cache);
-  const internalLinksTools = createInternalLinksToolWithMetadata(
-    project.websiteUrl,
-  );
+
   const outputSchema = type({
     title: type("string").describe(
       "Meta title (max 60 characters): clear, enticing, includes the primary keyword once naturally, directly answers search intent.",
@@ -279,7 +295,6 @@ ${JSON.stringify(serp)}
       },
       tools: {
         ...webTools.tools,
-        ...internalLinksTools.tools,
         ...todoTool.tools,
       },
       system,
