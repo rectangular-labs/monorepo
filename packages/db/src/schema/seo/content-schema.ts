@@ -5,7 +5,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations, sql } from "drizzle-orm";
+import { isNull, relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
@@ -69,13 +69,15 @@ export const seoContent = pgSeoTable(
       table.version,
     ),
     // For finding latest version of a slug within a project/org
-    index("seo_content_org_project_slug_version_desc_idx").using(
-      "btree",
-      table.organizationId,
-      table.projectId,
-      table.slug,
-      sql`${table.version} DESC`,
-    ),
+    index("seo_content_org_project_slug_version_desc_idx")
+      .using(
+        "btree",
+        table.organizationId,
+        table.projectId,
+        table.slug,
+        sql`${table.version} DESC`,
+      )
+      .where(isNull(table.deletedAt)),
   ],
 );
 

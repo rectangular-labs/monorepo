@@ -12,6 +12,10 @@ import type {
   seoPlanKeywordTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
 import { createDb, type schema } from "@rectangular-labs/db";
+import {
+  getDraftById,
+  getSeoProjectByIdentifierAndOrgId,
+} from "@rectangular-labs/db/operations";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import {
   generateText,
@@ -27,13 +31,12 @@ import {
   formatTodoFocusReminder,
 } from "../lib/ai/tools/todo-tool";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
-import { getContentForSlug, normalizeContentSlug } from "../lib/content";
 import { writeContentDraft } from "../lib/content/write-content-draft";
 import {
   configureDataForSeoClient,
   fetchSerpWithCache,
   getLocationAndLanguage,
-  getSerpCacheDetails,
+  getSerpCacheOptions,
 } from "../lib/dataforseo/utils";
 import type { InitialContext } from "../types";
 
@@ -338,7 +341,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
     logInfo("start", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
       organizationId: input.organizationId,
       projectId: input.projectId,
       chatId: input.chatId,
@@ -356,41 +359,42 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         notes,
       } = await step.do("fetch SERP for keyword", async () => {
         const db = createDb();
-        const slug = normalizeContentSlug(input.path);
-        if (!slug) {
-          throw new NonRetryableError(`Invalid content path: ${input.path}`);
-        }
-        const contentResult = await getContentForSlug({
+
+        const contentResult = await getDraftById({
           db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          originatingChatId: input.chatId ?? null,
-          slug,
+          id: input.draftId,
         });
         if (!contentResult.ok) {
           throw new NonRetryableError(contentResult.error.message);
         }
-        const content = contentResult.value.data.content;
-        const primaryKeyword = content.primaryKeyword;
-        if (!primaryKeyword) {
-          throw new NonRetryableError(
-            `Primary keyword not found for ${input.path}`,
-          );
+        if (!contentResult.value) {
+          throw new NonRetryableError(`Draft not found for ${input.draftId}`);
         }
+        const content = contentResult.value;
 
-        const project = await db.query.seoProject.findFirst({
-          where: (table, { and, eq }) =>
-            and(
-              eq(table.id, input.projectId),
-              eq(table.organizationId, input.organizationId),
-            ),
-        });
-        if (!project) {
+        const projectResult = await getSeoProjectByIdentifierAndOrgId(
+          db,
+          input.projectId,
+          input.organizationId,
+          {
+            publishingSettings: true,
+            writingSettings: true,
+            imageSettings: true,
+            businessBackground: true,
+          },
+        );
+        if (!projectResult.ok) {
+          throw new NonRetryableError(projectResult.error.message);
+        }
+        if (!projectResult.value) {
           throw new NonRetryableError(`Project (${input.projectId}) not found`);
         }
+        const project = projectResult.value;
 
         const { locationName, languageCode } = getLocationAndLanguage(project);
-        const serpCacheDetails = getSerpCacheDetails(
+        const serpCacheOptions = getSerpCacheOptions(
           primaryKeyword,
           locationName,
           languageCode,
@@ -403,8 +407,8 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         });
         if (!serpResult.ok) throw serpResult.error;
         return {
-          serpKey: serpCacheDetails.key,
-          primaryKeyword,
+          serpKey: serpCacheOptions.key,
+          primaryKeyword: content.primaryKeyword,
           locationName,
           languageCode,
           project,
@@ -414,7 +418,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
       logInfo("inputs ready", {
         instanceId: event.instanceId,
-        path: input.path,
         serpKey,
         primaryKeyword,
         locationName,
@@ -430,6 +433,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         async () => {
           logInfo("fetching SERP (cached) for outline", {
             instanceId: event.instanceId,
+            draftId: input.draftId,
             serpKey,
             primaryKeyword,
             locationName,
@@ -448,7 +452,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
           logInfo("Getting SERP outlines", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             primaryKeyword,
             serpItems: serp.value,
           });
@@ -459,7 +463,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
           logInfo("generating outline", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             primaryKeyword,
             serpItems: serp.value,
           });
@@ -477,7 +481,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           const { outline, title, description } = result.value;
           logInfo("outline generated", {
             instanceId: event.instanceId,
-            path: input.path,
             outlineChars: outline.length,
             titleChars: title.length,
             descriptionChars: description.length,
@@ -492,14 +495,10 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           db,
           chatId: input.chatId ?? null,
           userId: input.userId ?? null,
-          project: {
-            id: input.projectId,
-            organizationId: input.organizationId,
-          },
-          createIfNotExists: true,
-          lookup: { type: "slug", slug: input.path },
+          projectId: input.projectId,
+          organizationId: input.organizationId,
+          lookup: { type: "id", id: input.draftId },
           draftNewValues: {
-            slug: input.path,
             outline: outlineResult.outline,
             title: outlineResult.title,
             description: outlineResult.description,
@@ -510,7 +509,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
       logInfo("outline stored", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
 
       const { callbackInstanceId } = input;
@@ -520,36 +519,36 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             await this.env.SEO_WRITER_WORKFLOW.get(callbackInstanceId);
           await instance.sendEvent({
             type: "planner_complete",
-            payload: { path: input.path },
+            payload: { draftId: input.draftId },
           });
         });
         logInfo("callback notified", {
           instanceId: event.instanceId,
-          path: input.path,
+          draftId: input.draftId,
           callbackInstanceId,
         });
       } else {
         logInfo("no callbackInstanceId, skipping notify", {
           instanceId: event.instanceId,
-          path: input.path,
+          draftId: input.draftId,
         });
       }
 
       logInfo("complete", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
 
       return {
         type: "seo-plan-keyword",
-        path: input.path,
+        draftId: input.draftId,
         outline: outlineResult.outline,
       } satisfies typeof seoPlanKeywordTaskOutputSchema.infer;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logError("failed", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
         message,
       });
       throw error;

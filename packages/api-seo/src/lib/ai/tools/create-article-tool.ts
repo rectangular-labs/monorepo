@@ -77,10 +77,10 @@ export function createCreateArticleToolWithMetadata({
       const writeResult = await writeContentDraft({
         db: context.db,
         userId,
-        project,
+        projectId: project.id,
+        organizationId: project.organizationId,
         chatId: context.chatId,
         lookup: { type: "slug", slug, primaryKeyword: keyword },
-        createIfNotExists: true,
         draftNewValues: {
           slug,
           status,

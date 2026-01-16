@@ -1,5 +1,4 @@
 import { ORPCError } from "@orpc/server";
-import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import {
   contentStatusSchema,
   type SeoFileStatus,
@@ -10,7 +9,6 @@ import {
   createContent,
   getDraftById,
   getNextVersionForSlug,
-  getScheduledItems,
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
   listDraftsByStatus,
@@ -272,8 +270,8 @@ const updateDraft = withOrganizationIdBase
       db: context.db,
       chatId: null,
       userId: context.user.id,
-      project: project.value,
-      createIfNotExists: false,
+      projectId: project.value.id,
+      organizationId: project.value.organizationId,
       lookup: { type: "id", id: input.id },
       draftNewValues: input,
     });
@@ -368,11 +366,8 @@ const markDraft = withOrganizationIdBase
         db: context.db,
         chatId: null,
         userId: context.user.id,
-        project: {
-          id: input.projectId,
-          organizationId: context.organization.id,
-        },
-        createIfNotExists: false,
+        projectId: input.projectId,
+        organizationId: context.organization.id,
         lookup: { type: "id", id: input.id },
         draftNewValues: { status: "queued" },
       });
@@ -392,90 +387,14 @@ const markDraft = withOrganizationIdBase
       return { draft: summary };
     }
 
-    if (
-      draft.status !== "pending-review" ||
-      !draft.articleType ||
-      !draft.contentMarkdown
-    ) {
-      throw new ORPCError("BAD_REQUEST", {
-        message:
-          "Cannot approve review: missing articleType or contentMarkdown or status is not pending-review.",
-      });
-    }
-
-    // Get next version number for this slug
-    const nextVersionResult = await getNextVersionForSlug({
+    const updatedDraftResult = await writeContentDraft({
       db: context.db,
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      slug: draft.slug,
-    });
-    if (!nextVersionResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get next version number.",
-        cause: nextVersionResult.error,
-      });
-    }
-    const nextVersion = nextVersionResult.value;
-
-    // Determine scheduled publish time
-    let scheduledFor = draft.scheduledFor;
-    // new content should be scheduled
-    if (!scheduledFor && !draft.baseContentId) {
-      const projectResult = await getSeoProjectByIdentifierAndOrgId(
-        context.db,
-        input.projectId,
-        context.organization.id,
-        {
-          publishingSettings: true,
-        },
-      );
-      if (!projectResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to get project.",
-          cause: projectResult.error,
-        });
-      }
-      if (!projectResult.value) {
-        throw new ORPCError("NOT_FOUND", { message: "Project not found." });
-      }
-      const project = projectResult.value;
-
-      const cadence = project.publishingSettings?.cadence;
-      if (cadence) {
-        const scheduledItemsResult = await getScheduledItems({
-          db: context.db,
-          organizationId: draft.organizationId,
-          projectId: draft.projectId,
-        });
-        if (scheduledItemsResult.ok) {
-          const scheduledItems = scheduledItemsResult.value;
-          const scheduledIso = computeNextAvailableScheduleIso({
-            cadence,
-            scheduledItems: scheduledItems.filter(
-              (item): item is { scheduledFor: Date } =>
-                item.scheduledFor !== null,
-            ),
-          });
-          if (scheduledIso) {
-            scheduledFor = new Date(scheduledIso);
-          }
-        }
-      }
-    }
-
-    if (!scheduledFor) {
-      // Default to now if no cadence configured.
-      // this mostly happens for updates to existing content or if we cannot find a suitable schedule.
-      scheduledFor = new Date();
-    }
-
-    const updatedDraftResult = await updateContentDraft(context.db, {
-      id: draft.id,
+      chatId: null,
+      userId: context.user.id,
       projectId: input.projectId,
       organizationId: context.organization.id,
-      status: "scheduled",
-      scheduledFor,
+      lookup: { type: "id", id: input.id },
+      draftNewValues: { status: "scheduled" },
     });
     if (!updatedDraftResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -483,36 +402,7 @@ const markDraft = withOrganizationIdBase
         cause: updatedDraftResult.error,
       });
     }
-    const updatedDraft = updatedDraftResult.value;
-
-    const publishWebhookUrl = new URL(
-      `/api/rpc/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
-      context.url.origin,
-    ).toString();
-
-    const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);
-    const actualScheduledFor =
-      scheduledFor.getTime() < earliestPossibleScheduledFor.getTime()
-        ? // If the target date is in the past, bump it into the future so our scheduler can pick it up reliably.
-          // This can happen when a draft is generated/held for review longer than its initially planned release time.
-          earliestPossibleScheduledFor
-        : scheduledFor;
-
-    await context.scheduler.scheduleTask({
-      id: draft.id,
-      description: `publish-draft:${draft.id}`,
-      type: "scheduled",
-      time: actualScheduledFor,
-      payload: {
-        draftId: draft.id,
-        // TODO: add a signature that signs the draftId for verification
-        signature: "string",
-      },
-      callback: {
-        type: "webhook",
-        url: publishWebhookUrl,
-      },
-    });
+    const updatedDraft = updatedDraftResult.value.draft;
 
     const {
       contentMarkdown: _contentMarkdown,

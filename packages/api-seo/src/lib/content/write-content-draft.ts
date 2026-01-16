@@ -1,40 +1,41 @@
+import { ORPCError } from "@orpc/client";
+import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import type { DB, schema } from "@rectangular-labs/db";
 import {
+  addChatContribution,
+  addUserContribution,
   getDraftById,
+  getScheduledItems,
+  getSeoProjectByIdentifierAndOrgId,
   updateContentDraft,
   validateSlug,
 } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
+import { apiEnv } from "../../env";
+import { createScheduler } from "../scheduler";
 import { createTask } from "../task";
 import {
   DRAFT_NOT_FOUND_ERROR_MESSAGE,
   SLUG_NOT_AVAILABLE_ERROR_MESSAGE,
 } from "../workspace/constants";
-import { ensureDraftForSlug } from "./index";
+import { ensureDraftForSlug } from "./ensure-draft-for-slug";
 import { normalizeContentSlug } from "./normalize-content-slug";
 
 type DraftUpdates = Omit<
   typeof schema.seoContentDraftUpdateSchema.infer,
-  | "id"
-  | "projectId"
-  | "organizationId"
-  | "originatingChatId"
-  | "createdByUserId"
-  | "baseContentId"
-  | "createdAt"
-  | "updatedAt"
+  "id" | "projectId" | "organizationId" | "createdAt" | "updatedAt"
 >;
 
 type WriteContentDraftArgsBase = {
   db: DB;
   chatId: string | null;
   userId: string | null;
-  project: Pick<typeof schema.seoProject.$inferSelect, "id" | "organizationId">;
-  createIfNotExists: boolean;
+  projectId: string;
+  organizationId: string;
   draftNewValues: DraftUpdates;
 };
 
-type WriteContentDraftArgs =
+export type WriteContentDraftArgs =
   | (WriteContentDraftArgsBase & { lookup: { type: "id"; id: string } })
   | (WriteContentDraftArgsBase & {
       lookup: { type: "slug"; slug: string; primaryKeyword?: string };
@@ -58,10 +59,9 @@ export async function writeContentDraft(
   if (args.lookup.type === "id") {
     const draftResult = await getDraftById({
       db: args.db,
-      organizationId: args.project.organizationId,
-      projectId: args.project.id,
+      organizationId: args.organizationId,
+      projectId: args.projectId,
       id: args.lookup.id,
-      originatingChatId: args.chatId,
       withContent: true,
     });
     if (!draftResult.ok) return draftResult;
@@ -71,18 +71,31 @@ export async function writeContentDraft(
   } else {
     const draftResult = await ensureDraftForSlug({
       db: args.db,
-      userId: args.userId,
-      projectId: args.project.id,
-      originatingChatId: args.chatId,
-      organizationId: args.project.organizationId,
+      projectId: args.projectId,
+      organizationId: args.organizationId,
       slug: normalizeContentSlug(args.lookup.slug),
       primaryKeyword:
         args.lookup.primaryKeyword ?? args.draftNewValues.primaryKeyword,
-      createIfNotExists: args.createIfNotExists,
     });
     if (!draftResult.ok) return draftResult;
     draft = draftResult.value.draft;
     isNew = draftResult.value.isNew;
+  }
+
+  // Record attribution
+  if (args.chatId) {
+    await addChatContribution({
+      db: args.db,
+      draftId: draft.id,
+      chatId: args.chatId,
+    });
+  }
+  if (args.userId) {
+    await addUserContribution({
+      db: args.db,
+      draftId: draft.id,
+      userId: args.userId,
+    });
   }
 
   const nextSlug = normalizedSlugFromInput ?? draft.slug;
@@ -94,11 +107,11 @@ export async function writeContentDraft(
   if (nextSlug !== draft.slug) {
     const slugValidation = await validateSlug({
       db: args.db,
-      organizationId: args.project.organizationId,
-      projectId: args.project.id,
+      organizationId: args.organizationId,
+      projectId: args.projectId,
       slug: nextSlug,
       ignoreDraftId: draft.id,
-      ignoreLiveContentId: draft.baseContentId ?? undefined,
+      ignoreContentId: draft.baseContentId ?? undefined,
     });
     if (!slugValidation.ok) return slugValidation;
     if (!slugValidation.value.valid) {
@@ -109,11 +122,23 @@ export async function writeContentDraft(
       );
     }
   }
+  if (
+    nextStatus === "scheduled" &&
+    (draft.status !== "pending-review" ||
+      !draft.articleType ||
+      !draft.contentMarkdown)
+  ) {
+    return err(
+      new Error(
+        "Cannot schedule content: missing articleType or contentMarkdown or status is not pending-review.",
+      ),
+    );
+  }
 
   const updatedResult = await updateContentDraft(args.db, {
     id: draft.id,
-    organizationId: args.project.organizationId,
-    projectId: args.project.id,
+    organizationId: args.organizationId,
+    projectId: args.projectId,
     ...updates,
   });
   if (!updatedResult.ok) {
@@ -121,7 +146,6 @@ export async function writeContentDraft(
   }
   let updatedDraft = updatedResult.value;
 
-  const path = nextSlug;
   if (nextStatus === "suggested" && !updatedDraft.outlineGeneratedByTaskRunId) {
     const taskResult = await createTask({
       db: args.db,
@@ -129,17 +153,17 @@ export async function writeContentDraft(
       input: {
         type: "seo-plan-keyword",
         userId: args.userId ?? undefined,
-        projectId: args.project.id,
-        organizationId: args.project.organizationId,
+        projectId: args.projectId,
+        organizationId: args.organizationId,
         chatId: args.chatId ?? null,
-        path,
+        draftId: draft.id,
       },
     });
     if (taskResult.ok) {
       const updatedResult = await updateContentDraft(args.db, {
         id: updatedDraft.id,
-        projectId: args.project.id,
-        organizationId: args.project.organizationId,
+        projectId: args.projectId,
+        organizationId: args.organizationId,
         outlineGeneratedByTaskRunId: taskResult.value.id,
       });
       if (!updatedResult.ok) {
@@ -156,17 +180,17 @@ export async function writeContentDraft(
       input: {
         type: "seo-write-article",
         userId: args.userId ?? undefined,
-        projectId: args.project.id,
-        organizationId: args.project.organizationId,
+        projectId: args.projectId,
+        organizationId: args.organizationId,
         chatId: args.chatId ?? null,
-        path,
+        draftId: draft.id,
       },
     });
     if (taskResult.ok) {
       const updatedResult = await updateContentDraft(args.db, {
         id: updatedDraft.id,
-        projectId: args.project.id,
-        organizationId: args.project.organizationId,
+        projectId: args.projectId,
+        organizationId: args.organizationId,
         generatedByTaskRunId: taskResult.value.id,
       });
       if (!updatedResult.ok) {
@@ -174,6 +198,103 @@ export async function writeContentDraft(
       }
       updatedDraft = updatedResult.value;
     }
+  }
+
+  if (nextStatus === "scheduled") {
+    // Determine scheduled publish time
+    let scheduledFor = updatedDraft.scheduledFor;
+
+    // new content should be scheduled
+    if (!scheduledFor && !draft.baseContentId) {
+      const projectResult = await getSeoProjectByIdentifierAndOrgId(
+        args.db,
+        args.projectId,
+        args.organizationId,
+        {
+          publishingSettings: true,
+        },
+      );
+      if (!projectResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to get project.",
+          cause: projectResult.error,
+        });
+      }
+      if (!projectResult.value) {
+        throw new ORPCError("NOT_FOUND", { message: "Project not found." });
+      }
+      const project = projectResult.value;
+
+      const cadence = project.publishingSettings?.cadence;
+      if (cadence) {
+        const scheduledItemsResult = await getScheduledItems({
+          db: args.db,
+          organizationId: draft.organizationId,
+          projectId: draft.projectId,
+        });
+        if (scheduledItemsResult.ok) {
+          const scheduledItems = scheduledItemsResult.value;
+          const scheduledIso = computeNextAvailableScheduleIso({
+            cadence,
+            scheduledItems: scheduledItems.filter(
+              (item): item is { scheduledFor: Date } =>
+                item.scheduledFor !== null,
+            ),
+          });
+          if (scheduledIso) {
+            scheduledFor = new Date(scheduledIso);
+          }
+        }
+      }
+    }
+
+    if (!scheduledFor) {
+      // Default to now if no cadence configured.
+      // this mostly happens for updates to existing content or if we cannot find a suitable schedule.
+      scheduledFor = new Date();
+    }
+
+    if (!updatedDraft.scheduledFor) {
+      const updatedResult = await updateContentDraft(args.db, {
+        id: updatedDraft.id,
+        projectId: args.projectId,
+        organizationId: args.organizationId,
+        scheduledFor,
+      });
+      if (!updatedResult.ok) {
+        return updatedResult;
+      }
+      updatedDraft = updatedResult.value;
+    }
+
+    const publishWebhookUrl = new URL(
+      `/api/rpc/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
+      apiEnv().VITE_SEO_URL,
+    ).toString();
+
+    const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);
+    const actualScheduledFor =
+      scheduledFor.getTime() < earliestPossibleScheduledFor.getTime()
+        ? // If the target date is in the past, bump it into the future so our scheduler can pick it up reliably.
+          // This can happen when a draft is generated/held for review longer than its initially planned release time.
+          earliestPossibleScheduledFor
+        : scheduledFor;
+
+    await createScheduler().scheduleTask({
+      id: draft.id,
+      description: `publish-draft:${draft.id}`,
+      type: "scheduled",
+      time: actualScheduledFor,
+      payload: {
+        draftId: draft.id,
+        // TODO: add a signature that signs the draftId for verification
+        signature: "string",
+      },
+      callback: {
+        type: "webhook",
+        url: publishWebhookUrl,
+      },
+    });
   }
 
   return ok({ draft: updatedDraft, isNew });

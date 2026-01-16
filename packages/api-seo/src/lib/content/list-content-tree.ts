@@ -9,8 +9,7 @@ import { normalizeContentSlug } from "./normalize-content-slug";
 function formatSlugPath(slug: string): string {
   const normalized = normalizeContentSlug(slug);
   if (!normalized) return "/";
-  const needsLeadingSlash = !normalized.startsWith("/");
-  return `${needsLeadingSlash ? "/" : ""}${normalized}${normalized.includes(".") ? "" : ".md"}`;
+  return normalized;
 }
 
 function formatFolderPath(slug: string): string {
@@ -32,7 +31,7 @@ function buildDirectoryListing(args: {
     .filter((entry) => entry.slug.startsWith(basePrefix));
 
   const folders = new Set<string>();
-  const files = new Map<string, string>();
+  const files = new Map<string, { status: string; contentId?: string }>();
 
   for (const entry of descendants) {
     const remainder = entry.slug.slice(basePrefix.length);
@@ -40,7 +39,10 @@ function buildDirectoryListing(args: {
     const [first, ...rest] = remainder.split("/").filter(Boolean);
     if (!first) continue;
     if (rest.length === 0) {
-      files.set(entry.slug, entry.status);
+      files.set(entry.slug, {
+        status: entry.status,
+        contentId: entry.contentId ?? undefined,
+      });
     } else {
       const folderSlug = `${basePrefix}${first}`.replace(/\/+/g, "/");
       folders.add(folderSlug);
@@ -53,9 +55,10 @@ function buildDirectoryListing(args: {
 
   const fileLines = [...files.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(
-      ([slug, status]) => `${formatSlugPath(slug)} (file, status: ${status})`,
-    );
+    .map(([slug, { status, contentId }]) => {
+      const contentSuffix = contentId ? `, contentId: ${contentId}` : "";
+      return `${formatSlugPath(slug)} (file, status: ${status}${contentSuffix})`;
+    });
 
   return [...folderLines, ...fileLines].join("\n");
 }
@@ -72,7 +75,6 @@ export async function listContentTree(args: {
     db: args.db,
     organizationId: args.organizationId,
     projectId: args.projectId,
-    originatingChatId: args.originatingChatId,
     slugPrefix: args.slug,
   });
   if (!results.ok) return results;
@@ -92,7 +94,10 @@ export async function listContentTree(args: {
           (entry) => entry.slug === normalizedSlug,
         );
         if (!exact) return "";
-        return `${formatSlugPath(exact.slug)} (file, status: ${exact.status})`;
+        const contentSuffix = exact.contentId
+          ? `, contentId: ${exact.contentId}`
+          : "";
+        return `${formatSlugPath(exact.slug)} (file, status: ${exact.status}${contentSuffix})`;
       })();
 
   return ok({ data: listing });

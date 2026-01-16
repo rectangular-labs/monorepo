@@ -5,24 +5,30 @@ import {
   getDraftBySlug,
 } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
-import { DRAFT_NOT_FOUND_ERROR_MESSAGE } from "../workspace/constants";
 
+/**
+ * Ensure a draft exists for a given slug.
+ * With the new schema, there's only one draft per slug.
+ */
 export async function ensureDraftForSlug(args: {
   db: DB;
-  organizationId: string;
-  projectId: string;
   slug: string;
   primaryKeyword?: string | undefined;
-  originatingChatId: string | null;
-  userId: string | null;
-  createIfNotExists?: boolean;
+  projectId: string;
+  organizationId: string;
 }): Promise<
   Result<
     { draft: typeof schema.seoContentDraft.$inferSelect; isNew: boolean },
     Error
   >
 > {
-  const existingDraftResult = await getDraftBySlug(args);
+  const existingDraftResult = await getDraftBySlug({
+    db: args.db,
+    organizationId: args.organizationId,
+    projectId: args.projectId,
+    slug: args.slug,
+    withContent: true,
+  });
   if (!existingDraftResult.ok) {
     return existingDraftResult;
   }
@@ -30,30 +36,24 @@ export async function ensureDraftForSlug(args: {
     return ok({ draft: existingDraftResult.value, isNew: false });
   }
 
-  if (!args.createIfNotExists) {
-    return err(new Error(DRAFT_NOT_FOUND_ERROR_MESSAGE));
-  }
-
+  // Check if there's existing live content for this slug
   const liveResult = await getContentBySlug({
     db: args.db,
     organizationId: args.organizationId,
     projectId: args.projectId,
     slug: args.slug,
-    contentType: "live",
     withContent: true,
   });
   if (!liveResult.ok) {
     return liveResult;
   }
   const live = liveResult.value;
+
   if (live) {
-    // TODO: some status for updated content?
+    // Create draft from live content (for editing existing published content)
     const draftResult = await createContentDraft(args.db, {
       organizationId: args.organizationId,
       projectId: args.projectId,
-      baseContentId: live.id,
-      originatingChatId: args.originatingChatId,
-      createdByUserId: args.userId,
       title: live.title,
       description: live.description,
       slug: args.slug,
@@ -62,30 +62,31 @@ export async function ensureDraftForSlug(args: {
       outline: live.outline,
       articleType: live.articleType,
       contentMarkdown: live.contentMarkdown,
-      // set to now, but really it'll be in the past once the draft eventually gets approved/published. which means it'll go live ASAP.
-      // Makes sense since it's an update to existing content.
-      targetReleaseDate: new Date(),
+      baseContentId: live.id,
+      // Schedule for now - it's an update to existing content
+      scheduledFor: new Date(),
     });
     if (!draftResult.ok) {
       return draftResult;
     }
+
     return ok({ draft: draftResult.value, isNew: true });
   }
 
+  // No live content - create brand new draft
   if (!args.primaryKeyword) {
     return err(new Error("Primary keyword is required to create a new draft."));
   }
 
   const draftResult = await createContentDraft(args.db, {
     projectId: args.projectId,
-    createdByUserId: args.userId,
     organizationId: args.organizationId,
-    originatingChatId: args.originatingChatId,
     slug: args.slug,
     primaryKeyword: args.primaryKeyword,
   });
   if (!draftResult.ok) {
     return draftResult;
   }
+
   return ok({ draft: draftResult.value, isNew: true });
 }

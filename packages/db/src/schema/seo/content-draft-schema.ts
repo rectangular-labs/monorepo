@@ -8,7 +8,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations, sql } from "drizzle-orm";
+import { isNull, relations, sql } from "drizzle-orm";
 import { index, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
@@ -86,7 +86,7 @@ export const seoContentDraft = pgSeoTable(
         table.projectId,
         sql`${table.slug} text_pattern_ops`,
       )
-      .where(sql`${table.deletedAt} is null`),
+      .where(isNull(table.deletedAt)),
     index("seo_content_draft_org_project_status_base_id_idx")
       .on(
         table.organizationId,
@@ -95,7 +95,7 @@ export const seoContentDraft = pgSeoTable(
         table.baseContentId,
         table.id,
       )
-      .where(sql`${table.deletedAt} is null`),
+      .where(isNull(table.deletedAt)),
   ],
 );
 

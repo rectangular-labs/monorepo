@@ -1,59 +1,48 @@
 import type { DB } from "@rectangular-labs/db";
-import { updateContentDraft } from "@rectangular-labs/db/operations";
+import {
+  getDraftBySlug,
+  hardDeleteDraft,
+} from "@rectangular-labs/db/operations";
 import { ok, type Result } from "@rectangular-labs/result";
-import { ensureDraftForSlug } from "./ensure-draft-for-slug";
-import { getContentForSlug } from "./get-content-for-slug";
 
+/**
+ * Delete a draft for a given slug.
+ * With the new schema, there's only one draft per slug (no per-chat drafts).
+ */
 export async function deleteDraftForSlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
   slug: string;
-  originatingChatId: string | null;
-  userId: string | null;
 }): Promise<Result<{ success: true }, Error>> {
-  const contentResult = await getContentForSlug({
+  const draftResult = await getDraftBySlug({
     db: args.db,
     organizationId: args.organizationId,
     projectId: args.projectId,
     slug: args.slug,
-    originatingChatId: args.originatingChatId,
     withContent: false,
   });
 
-  if (!contentResult.ok) {
-    return contentResult;
+  if (!draftResult.ok) {
+    return draftResult;
   }
 
-  const { data } = contentResult.value;
-
-  let draftContentId = data.content.id;
-  if (data.source === "live") {
-    const draftResult = await ensureDraftForSlug({
-      db: args.db,
-      organizationId: args.organizationId,
-      projectId: args.projectId,
-      slug: args.slug,
-      originatingChatId: args.originatingChatId,
-      userId: args.userId,
-      primaryKeyword: data.content.primaryKeyword,
-      createIfNotExists: true,
-    });
-    if (!draftResult.ok) {
-      return draftResult;
-    }
-    draftContentId = draftResult.value.draft.id;
+  const draft = draftResult.value;
+  if (!draft) {
+    // No draft exists, nothing to delete
+    return ok({ success: true });
   }
 
-  // data.source must be "draft"
-  const updated = await updateContentDraft(args.db, {
-    id: draftContentId,
+  const deleted = await hardDeleteDraft({
+    db: args.db,
+    id: draft.id,
     projectId: args.projectId,
     organizationId: args.organizationId,
-    status: "deleted",
   });
-  if (!updated.ok) {
-    return updated;
+
+  if (!deleted.ok) {
+    return deleted;
   }
+
   return ok({ success: true });
 }

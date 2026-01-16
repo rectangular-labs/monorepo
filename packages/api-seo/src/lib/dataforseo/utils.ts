@@ -34,7 +34,7 @@ export function configureDataForSeoClient() {
   });
 }
 
-export function getSerpCacheDetails(
+export function getSerpCacheOptions(
   primaryKeyword: string,
   locationName: string,
   languageCode: string,
@@ -59,7 +59,7 @@ export function fetchSerpWithCache({
   cacheKV: InitialContext["cacheKV"];
 }) {
   return fetchWithCache({
-    ...getSerpCacheDetails(keyword, locationName, languageCode),
+    ...getSerpCacheOptions(keyword, locationName, languageCode),
     fn: async () => {
       const result = await fetchSerp({
         keyword,

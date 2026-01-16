@@ -13,7 +13,7 @@ export const seoPlanKeywordTaskInputSchema = type({
   projectId: "string",
   organizationId: "string",
   chatId: "string|null",
-  path: "string",
+  draftId: "string.uuid",
   "callbackInstanceId?": "string",
   "userId?": "string",
 });
@@ -23,7 +23,7 @@ export const seoWriteArticleTaskInputSchema = type({
   projectId: "string",
   organizationId: "string",
   chatId: "string|null",
-  path: "string",
+  draftId: "string.uuid",
   "userId?": "string",
 });
 
@@ -40,13 +40,13 @@ export const understandSiteTaskOutputSchema = type({
 
 export const seoPlanKeywordTaskOutputSchema = type({
   type: "'seo-plan-keyword'",
-  path: "string",
+  draftId: "string.uuid",
   outline: "string",
 });
 
 export const seoWriteArticleTaskOutputSchema = type({
   type: "'seo-write-article'",
-  path: "string",
+  draftId: "string.uuid",
   content: "string",
   articleType: articleTypeSchema,
 });

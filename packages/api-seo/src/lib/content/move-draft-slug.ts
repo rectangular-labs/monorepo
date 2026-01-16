@@ -5,68 +5,69 @@ import {
   getDraftBySlug,
 } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
-import { getContentForSlug } from "./get-content-for-slug";
 
-// TODO(review): figure out if this implementation makes sense
+/**
+ * Move a draft from one slug to another.
+ * With the new schema, there's only one draft per slug.
+ */
 export async function moveDraftSlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
   fromSlug: string;
   toSlug: string;
-  originatingChatId: string | null;
   userId: string | null;
 }): Promise<Result<{ success: true }, Error>> {
-  const existingDestinationResult = await getContentForSlug({
+  // Check if destination already has a draft
+  const existingDestDraftResult = await getDraftBySlug({
     db: args.db,
     organizationId: args.organizationId,
     projectId: args.projectId,
     slug: args.toSlug,
-    originatingChatId: args.originatingChatId,
     withContent: false,
   });
-  if (!existingDestinationResult.ok) {
-    return existingDestinationResult;
+  if (!existingDestDraftResult.ok) {
+    return existingDestDraftResult;
   }
-  const existingDestination = existingDestinationResult.value;
-  if (existingDestination) {
-    if (
-      existingDestination.data.source === "draft" &&
-      existingDestination.data.content.status === "deleted"
-    ) {
-      return err(
-        new Error("Destination draft exists but is marked as deleted."),
-      );
-    }
-    await args.db
-      .delete(schema.seoContentDraft)
-      .where(
-        and(
-          eq(schema.seoContentDraft.id, existingDestination.data.content.id),
-          eq(schema.seoContentDraft.organizationId, args.organizationId),
-          eq(schema.seoContentDraft.projectId, args.projectId),
-        ),
-      );
+  if (existingDestDraftResult.value) {
+    return err(new Error("Destination slug already has a draft."));
   }
 
+  // Check if destination has published content
+  const existingDestLiveResult = await getContentBySlug({
+    db: args.db,
+    organizationId: args.organizationId,
+    projectId: args.projectId,
+    slug: args.toSlug,
+    withContent: false,
+  });
+  if (!existingDestLiveResult.ok) {
+    return existingDestLiveResult;
+  }
+  if (existingDestLiveResult.value) {
+    return err(new Error("Destination slug has published content."));
+  }
+
+  // Get source draft
   const existingSourceResult = await getDraftBySlug({
     db: args.db,
     organizationId: args.organizationId,
     projectId: args.projectId,
     slug: args.fromSlug,
-    originatingChatId: args.originatingChatId,
+    withContent: false,
   });
   if (!existingSourceResult.ok) {
     return existingSourceResult;
   }
   const existingSource = existingSourceResult.value;
+
   if (existingSource) {
-    if (existingSource.status === "deleted") {
-      return err(new Error("Source draft is marked as deleted."));
-    }
+    // Move the draft
     const [updated] = await args.db
       .update(schema.seoContentDraft)
-      .set({ slug: args.toSlug })
+      .set({
+        slug: args.toSlug,
+      })
       .where(
         and(
           eq(schema.seoContentDraft.id, existingSource.id),
@@ -81,34 +82,28 @@ export async function moveDraftSlug(args: {
     return ok({ success: true });
   }
 
+  // No draft exists - check for published content to create draft from
   const liveResult = await getContentBySlug({
     db: args.db,
     organizationId: args.organizationId,
     projectId: args.projectId,
     slug: args.fromSlug,
-    contentType: "live",
     withContent: true,
   });
   if (!liveResult.ok) {
-    return err(
-      liveResult.error instanceof Error
-        ? liveResult.error
-        : new Error("Failed to load source content."),
-    );
+    return liveResult;
   }
   const live = liveResult.value;
   if (!live) {
     return err(new Error("Source content not found."));
   }
 
+  // Create draft at new slug from live content
   const [draft] = await args.db
     .insert(schema.seoContentDraft)
     .values({
       organizationId: args.organizationId,
       projectId: args.projectId,
-      baseContentId: live.id,
-      originatingChatId: args.originatingChatId ?? null,
-      createdByUserId: args.userId ?? null,
       title: live.title,
       description: live.description,
       slug: args.toSlug,
@@ -117,6 +112,7 @@ export async function moveDraftSlug(args: {
       outline: live.outline,
       articleType: live.articleType,
       contentMarkdown: live.contentMarkdown,
+      status: "pending-review",
     })
     .returning();
   if (!draft) {

@@ -32,11 +32,12 @@ export async function getContentBySlug(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq }) =>
+      where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           eq(table.slug, args.slug),
+          isNull(table.deletedAt),
         ),
       orderBy: (fields, { desc }) => [desc(fields.version)],
     }),
@@ -58,11 +59,12 @@ export async function getContentById(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq }) =>
+      where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           eq(table.id, args.id),
+          isNull(table.deletedAt),
         ),
     }),
   );
@@ -83,11 +85,12 @@ export async function getContentVersionsBySlug(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq }) =>
+      where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           eq(table.slug, args.slug),
+          isNull(table.deletedAt),
         ),
       orderBy: (fields, { desc }) => [desc(fields.version)],
     }),
@@ -127,6 +130,7 @@ export async function listPublishedContent(args: {
         and(
           eq(schema.seoContent.organizationId, args.organizationId),
           eq(schema.seoContent.projectId, args.projectId),
+          isNull(schema.seoContent.deletedAt),
         ),
       )
       .orderBy(schema.seoContent.slug, desc(schema.seoContent.version))
@@ -445,18 +449,22 @@ export async function validateSlug(args: {
   organizationId: string;
   projectId: string;
   slug: string;
-  ignoreDraftId?: string;
+  ignoreContentId: string | undefined;
+  ignoreDraftId: string | undefined;
 }) {
   const [publishedResult, draftResult] = await Promise.all([
     // Check if published content exists with this slug
     safe(() =>
       args.db.query.seoContent.findFirst({
         columns: { id: true },
-        where: (table, { and, eq }) =>
+        where: (table, { and, eq, ne }) =>
           and(
             eq(table.organizationId, args.organizationId),
             eq(table.projectId, args.projectId),
             eq(table.slug, args.slug),
+            args.ignoreContentId
+              ? ne(table.id, args.ignoreContentId)
+              : undefined,
           ),
       }),
     ),

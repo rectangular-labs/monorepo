@@ -5,12 +5,15 @@ import {
 } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
 
+/**
+ * Get content for a slug, checking draft first then published content.
+ * With the new schema, there's only one draft per slug.
+ */
 export async function getContentForSlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
   slug: string;
-  originatingChatId: string | null;
   withContent?: boolean;
 }): Promise<
   Result<
@@ -21,11 +24,11 @@ export async function getContentForSlug(args: {
             content: typeof schema.seoContentDraft.$inferSelect;
           }
         | { source: "live"; content: typeof schema.seoContent.$inferSelect };
-      deleted: boolean;
     },
     Error
   >
 > {
+  // Check for draft first
   const draftResult = await getDraftBySlug(args);
   if (!draftResult.ok) {
     return draftResult;
@@ -34,14 +37,11 @@ export async function getContentForSlug(args: {
   if (draft) {
     return ok({
       data: { source: "draft", content: draft },
-      deleted: draft.status === "deleted",
     });
   }
 
-  const liveResult = await getContentBySlug({
-    ...args,
-    contentType: "live",
-  });
+  // Fall back to published content
+  const liveResult = await getContentBySlug(args);
   if (!liveResult.ok) {
     return liveResult;
   }
@@ -51,6 +51,5 @@ export async function getContentForSlug(args: {
   }
   return ok({
     data: { source: "live", content: live },
-    deleted: false,
   });
 }

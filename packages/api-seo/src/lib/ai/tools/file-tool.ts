@@ -1,4 +1,7 @@
-import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
+import {
+  articleTypeSchema,
+  contentStatusSchema,
+} from "@rectangular-labs/core/schemas/content-parsers";
 import type { DB } from "@rectangular-labs/db";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
@@ -9,42 +12,11 @@ import {
   normalizeContentSlug,
   sliceContentLines,
 } from "../../content";
-import { writeContentDraft } from "../../content/write-content-draft";
+import {
+  type WriteContentDraftArgs,
+  writeContentDraft,
+} from "../../content/write-content-draft";
 import type { AgentToolDefinition } from "./utils";
-
-const allowedDraftStatuses = [
-  "suggested",
-  "suggestion-rejected",
-  "queued",
-  "planning",
-  "writing",
-  "reviewing-writing",
-  "pending-review",
-  "scheduled",
-  "published",
-  "review-denied",
-  "deleted",
-] as const;
-type DraftStatus = (typeof allowedDraftStatuses)[number];
-
-function parseDraftStatus(
-  value: string | null | undefined,
-): DraftStatus | undefined {
-  if (!value) return undefined;
-  return allowedDraftStatuses.includes(value as DraftStatus)
-    ? (value as DraftStatus)
-    : undefined;
-}
-
-type ArticleType = (typeof ARTICLE_TYPES)[number];
-function parseArticleType(
-  value: string | null | undefined,
-): ArticleType | undefined {
-  if (!value) return undefined;
-  return (ARTICLE_TYPES as readonly string[]).includes(value)
-    ? (value as ArticleType)
-    : undefined;
-}
 
 const lsInputSchema = type({
   slug: type("string").describe(
@@ -72,13 +44,12 @@ const _mvInputSchema = type({
 });
 
 const writeFileInputSchema = type({
-  slug: type("string").describe("The slug of the file to write."),
+  "id?": type("string|null").describe("The ID of the draft to update."),
+  "slug?": type("string|null").describe(
+    "The slug of the file to update (required when creating a new file).",
+  ),
   "primaryKeyword?": type("string").describe(
     "The primary keyword for the file (required when creating a new file).",
-  ),
-  "createIfMissing?": "boolean",
-  "content?": type("string|null").describe(
-    "Deprecated alias for contentMarkdown.",
   ),
   "contentMarkdown?": type("string|null").describe(
     "The Markdown content for the file.",
@@ -89,20 +60,19 @@ const writeFileInputSchema = type({
   ),
   "notes?": type("string|null").describe("Internal notes about the file."),
   "outline?": type("string|null").describe("The outline for the file."),
-  "articleType?": type("string|null").describe(
-    "The article type (if setting).",
-  ),
-  "status?": type("string|null").describe(
-    "The draft status (e.g. 'writing', 'pending-review', etc.).",
-  ),
+  "articleType?": articleTypeSchema
+    .or(type.null)
+    .describe("The article type (if setting)."),
+  "status?": contentStatusSchema
+    .or(type.null)
+    .describe("The draft status (e.g. 'writing', 'pending-review', etc.)."),
 });
 
 export function createFileToolsWithMetadata(args: {
-  // TODO: pass userId through to draft writes when available.
-  userId: string | undefined;
   db: DB;
   organizationId: string;
   projectId: string;
+  userId: string | undefined;
   chatId: string | null;
 }) {
   const ls = tool({
@@ -133,7 +103,6 @@ export function createFileToolsWithMetadata(args: {
         db: args.db,
         organizationId: args.organizationId,
         projectId: args.projectId,
-        originatingChatId: args.chatId ?? null,
         slug: normalizeContentSlug(slug),
         withContent: true,
       });
@@ -143,12 +112,7 @@ export function createFileToolsWithMetadata(args: {
           message: result.error.message,
         };
       }
-      if (result.value.deleted) {
-        return {
-          success: false,
-          message: "This file has been deleted recently.",
-        };
-      }
+
       const content = result.value.data.content.contentMarkdown ?? "";
       const sliced = sliceContentLines({
         content,
@@ -174,8 +138,6 @@ export function createFileToolsWithMetadata(args: {
         organizationId: args.organizationId,
         projectId: args.projectId,
         slug: normalizeContentSlug(slug),
-        originatingChatId: args.chatId ?? null,
-        userId: args.userId ?? null,
       });
       if (!result.ok) {
         return { success: false, message: result.error.message };
@@ -215,11 +177,10 @@ export function createFileToolsWithMetadata(args: {
       writeFileInputSchema.toJsonSchema() as JSONSchema7,
     ),
     async execute({
+      id,
       slug,
-      content,
       contentMarkdown,
       primaryKeyword,
-      createIfMissing,
       title,
       description,
       notes,
@@ -227,110 +188,42 @@ export function createFileToolsWithMetadata(args: {
       articleType,
       status,
     }) {
-      const normalizedSlug = normalizeContentSlug(slug);
-      if (!normalizedSlug) {
-        return { success: false, message: "Invalid slug." };
-      }
-
-      const existingContent = await getContentForSlug({
-        db: args.db,
-        organizationId: args.organizationId,
-        projectId: args.projectId,
-        originatingChatId: args.chatId,
-        slug: normalizedSlug,
-        withContent: false,
-      });
-
-      const allowCreate =
-        createIfMissing === true &&
-        (!existingContent.ok
-          ? existingContent.error.message.toLowerCase().includes("not found")
-          : false);
-
-      if (!existingContent.ok && !allowCreate) {
-        return { success: false, message: existingContent.error.message };
-      }
-
-      if (existingContent.ok && existingContent.value.deleted) {
-        return {
-          success: false,
-          message: "This file has been deleted recently.",
-        };
-      }
-
-      const existingRow = existingContent.ok
-        ? existingContent.value.data.content
-        : null;
-      const shouldBackfillFromLive =
-        existingContent.ok && existingContent.value.data.source === "live";
-
-      const existingPrimaryKeyword = existingRow
-        ? (existingRow.primaryKeyword ?? "")
-        : "";
-
-      const nextPrimaryKeyword = primaryKeyword ?? existingPrimaryKeyword;
-      if (!nextPrimaryKeyword) {
+      if (!id && !slug && !primaryKeyword) {
         return {
           success: false,
           message:
-            "primaryKeyword is required when creating a new file (or when the existing file has no primary keyword).",
+            "slug or primaryKeyword is required to create a new file. If trying to update an existing file, provide the file ID.",
         };
       }
-
-      const nextContentMarkdown = contentMarkdown ?? content ?? undefined;
-      const nextTitle =
-        title === undefined && shouldBackfillFromLive
-          ? existingRow?.title
-          : title;
-      const nextDescription =
-        description === undefined && shouldBackfillFromLive
-          ? existingRow?.description
-          : description;
-      const requestedStatus = parseDraftStatus(status);
-      if (status != null && !requestedStatus) {
-        return { success: false, message: `Invalid status: ${status}` };
-      }
-
-      const requestedArticleTypeRaw =
-        articleType === undefined && shouldBackfillFromLive
-          ? (existingRow?.articleType ?? undefined)
-          : articleType;
-      const requestedArticleType = parseArticleType(requestedArticleTypeRaw);
-      if (articleType != null && !requestedArticleType) {
-        return {
-          success: false,
-          message: `Invalid articleType: ${articleType}`,
-        };
-      }
+      const lookup = id
+        ? { type: "id" as const, id }
+        : {
+            type: "slug" as const,
+            slug: slug ?? "",
+            primaryKeyword: primaryKeyword ?? undefined,
+          };
 
       const result = await writeContentDraft({
         db: args.db,
         chatId: args.chatId ?? null,
         userId: args.userId ?? null,
-        project: {
-          id: args.projectId,
-          organizationId: args.organizationId,
-        },
-        createIfNotExists: true,
-        lookup: {
-          type: "slug",
-          slug: normalizedSlug,
-          primaryKeyword: nextPrimaryKeyword,
-        },
+        projectId: args.projectId,
+        organizationId: args.organizationId,
+        // cast to keep ts happy
+        lookup: lookup as Extract<
+          WriteContentDraftArgs["lookup"],
+          { type: "slug" }
+        >,
         draftNewValues: {
-          slug: normalizedSlug,
-          primaryKeyword: nextPrimaryKeyword,
-          ...(nextContentMarkdown
-            ? { contentMarkdown: nextContentMarkdown }
-            : {}),
-          ...(nextTitle != null ? { title: nextTitle } : {}),
-          ...(nextDescription != null ? { description: nextDescription } : {}),
+          slug: slug ?? undefined,
+          ...(primaryKeyword != null ? { primaryKeyword } : {}),
+          ...(contentMarkdown != null ? { contentMarkdown } : {}),
+          ...(title != null ? { title } : {}),
+          ...(description != null ? { description } : {}),
           ...(notes != null ? { notes } : {}),
           ...(outline != null ? { outline } : {}),
-          ...(requestedArticleType != null
-            ? { articleType: requestedArticleType }
-            : {}),
-          ...(requestedStatus != null ? { status: requestedStatus } : {}),
+          ...(articleType != null ? { articleType } : {}),
+          ...(status != null ? { status } : {}),
         },
       });
       if (!result.ok) {
@@ -386,7 +279,7 @@ export function createFileToolsWithMetadata(args: {
       toolDescription:
         "Create or overwrite various parts of a file in the chat workspace.",
       toolInstruction:
-        "Provide slug + the fields to set (contentMarkdown/title/description/notes/outline/etc.). Set createIfMissing=true when creating new files; include primaryKeyword when creating.",
+        "Provide id to update an existing file or slug + primaryKeyword to create a new file. Provide the fields to set (contentMarkdown/title/description/notes/outline/slug/primaryKeyword/articleType/status/etc.).",
       tool: writeFile,
     },
   ];

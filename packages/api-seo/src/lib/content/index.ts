@@ -1,5 +1,4 @@
 export { deleteDraftForSlug } from "./delete-draft-for-slug";
-export { ensureDraftForSlug } from "./ensure-draft-for-slug";
 export { getContentForSlug } from "./get-content-for-slug";
 export { listContentTree } from "./list-content-tree";
 export { moveDraftSlug } from "./move-draft-slug";

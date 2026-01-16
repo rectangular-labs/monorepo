@@ -3,6 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep,
 } from "cloudflare:workers";
+import { NonRetryableError } from "cloudflare:workflows";
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
@@ -11,6 +12,10 @@ import type {
   seoWriteArticleTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
 import { createDb, type schema } from "@rectangular-labs/db";
+import {
+  getDraftById,
+  getSeoProjectByIdentifierAndOrgId,
+} from "@rectangular-labs/db/operations";
 import {
   generateText,
   type JSONSchema7,
@@ -28,7 +33,6 @@ import {
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { buildWriterSystemPrompt } from "../lib/ai/writer-agent";
 import { createPublicImagesBucket } from "../lib/bucket";
-import { ensureDraftForSlug, normalizeContentSlug } from "../lib/content";
 import {
   analyzeArticleMarkdownForReview,
   repairPublicBucketImageLinks,
@@ -134,56 +138,49 @@ ${outline ?? ""}
   }
 }
 
-type DraftRecord = typeof schema.seoContentDraft.$inferSelect;
-type ProjectRecord = Omit<
-  typeof schema.seoProject.$inferSelect,
-  "serpSnapshot"
->;
-
 async function loadDraftAndProject(args: {
   db: ReturnType<typeof createDb>;
   organizationId: string;
   projectId: string;
-  chatId?: string | null;
-  path: string;
-  userId?: string | null;
+  draftId: string;
 }): Promise<{
-  draft: DraftRecord;
-  project: ProjectRecord;
-  slug: string;
+  draft: typeof schema.seoContentDraft.$inferSelect;
+  project: typeof schema.seoProject.$inferSelect;
 }> {
-  const slug = normalizeContentSlug(args.path);
-  if (!slug) {
-    throw new Error(`Invalid content path: ${args.path}`);
-  }
-
-  const draftResult = await ensureDraftForSlug({
+  const draftResult = await getDraftById({
     db: args.db,
     organizationId: args.organizationId,
     projectId: args.projectId,
-    slug,
-    originatingChatId: args.chatId ?? null,
-    userId: args.userId ?? null,
+    id: args.draftId,
   });
   if (!draftResult.ok) {
-    throw new Error(draftResult.error.message);
+    throw new NonRetryableError(draftResult.error.message);
   }
-  if (draftResult.value.draft.status === "deleted") {
-    throw new Error(`Draft (${slug}) is marked as deleted.`);
+  if (!draftResult.value) {
+    throw new NonRetryableError(`Draft not found for ${args.draftId}`);
   }
+  const draft = draftResult.value;
 
-  const project = await args.db.query.seoProject.findFirst({
-    where: (table, { and, eq }) =>
-      and(
-        eq(table.id, args.projectId),
-        eq(table.organizationId, args.organizationId),
-      ),
-  });
-  if (!project) {
-    throw new Error(`Project (${args.projectId}) not found`);
+  const projectResult = await getSeoProjectByIdentifierAndOrgId(
+    args.db,
+    args.projectId,
+    args.organizationId,
+    {
+      publishingSettings: true,
+      writingSettings: true,
+      imageSettings: true,
+      businessBackground: true,
+    },
+  );
+  if (!projectResult.ok) {
+    throw new NonRetryableError(projectResult.error.message);
   }
+  if (!projectResult.value) {
+    throw new NonRetryableError(`Project (${args.projectId}) not found`);
+  }
+  const project = projectResult.value;
 
-  return { draft: draftResult.value.draft, project, slug };
+  return { draft, project };
 }
 
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
@@ -199,7 +196,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
 
     logInfo("start", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
       organizationId: input.organizationId,
       projectId: input.projectId,
       chatId: input.chatId,
@@ -215,9 +212,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          chatId: input.chatId,
-          path: input.path,
-          userId: input.userId ?? null,
+          draftId: input.draftId,
         });
         const outline = draft.outline;
         if (outline) {
@@ -230,7 +225,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             projectId: input.projectId,
             organizationId: input.organizationId,
             chatId: input.chatId,
-            path: input.path,
+            draftId: input.draftId,
             callbackInstanceId: event.instanceId,
             userId: input.userId,
           },
@@ -240,7 +235,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
         if (!result.ok) {
           logError("failed to create planner task", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             error: result.error,
           });
           throw result.error;
@@ -250,15 +245,15 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
     );
     logInfo("outline check", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
       isOutlinePresent,
     });
     if (!isOutlinePresent) {
       logInfo("waiting for planner callback", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
-      const plannerEvent = await step.waitForEvent<{ path: string }>(
+      const plannerEvent = await step.waitForEvent<{ draftId: string }>(
         "wait for planner callback",
         {
           type: "planner_complete",
@@ -267,17 +262,17 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       );
       logInfo("received planner callback", {
         instanceId: event.instanceId,
-        expectedPath: input.path,
-        receivedPath: plannerEvent.payload.path,
+        expectedDraftId: input.draftId,
+        receivedDraftId: plannerEvent.payload.draftId,
       });
-      if (plannerEvent.payload.path !== input.path) {
-        logError("planner callback path mismatch", {
+      if (plannerEvent.payload.draftId !== input.draftId) {
+        logError("planner callback draftId mismatch", {
           instanceId: event.instanceId,
-          expectedPath: input.path,
-          receivedPath: plannerEvent.payload.path,
+          expectedDraftId: input.draftId,
+          receivedDraftId: plannerEvent.payload.draftId,
         });
         throw new Error(
-          `Planner callback path mismatch: expected ${input.path}, got ${plannerEvent.payload.path}`,
+          `Planner callback draftId mismatch: expected ${input.draftId}, got ${plannerEvent.payload.draftId}`,
         );
       }
     }
@@ -288,14 +283,10 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
         db,
         chatId: input.chatId ?? null,
         userId: input.userId ?? null,
-        project: {
-          id: input.projectId,
-          organizationId: input.organizationId,
-        },
-        createIfNotExists: true,
-        lookup: { type: "slug", slug: input.path },
+        projectId: input.projectId,
+        organizationId: input.organizationId,
+        lookup: { type: "id", id: input.draftId },
         draftNewValues: {
-          slug: input.path,
           status: "writing",
         },
       });
@@ -303,7 +294,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
     });
     logInfo("status set to writing", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
     });
     try {
       const { text: articleMarkdown, articleType } = await step.do(
@@ -317,9 +308,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             db,
             organizationId: input.organizationId,
             projectId: input.projectId,
-            chatId: input.chatId,
-            path: input.path,
-            userId: input.userId ?? null,
+            draftId: input.draftId,
           });
 
           const webTools = createWebToolsWithMetadata(project, this.env.CACHE);
@@ -337,7 +326,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
 
           logInfo("writer tools ready", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             webToolCount: Object.keys(webTools.tools).length,
             imageToolCount: Object.keys(imageTools.tools).length,
           });
@@ -361,7 +350,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
 
           logInfo("starting article generation", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
           });
           let approved = false;
           let changes: string[] = [];
@@ -437,7 +426,7 @@ ${changes.join("\n")}
             if (!text) throw new Error("Empty article returned by model");
             logInfo("article generated. Going through review process.", {
               instanceId: event.instanceId,
-              path: input.path,
+              draftId: input.draftId,
               articleChars: text.length,
               usage: result.usage ?? null,
               replacedCount: repairedLinks.replacedCount,
@@ -538,7 +527,7 @@ ${text}
               onStepFinish: (step) => {
                 logInfo("review step completed", {
                   instanceId: event.instanceId,
-                  path: input.path,
+                  draftId: input.draftId,
                   text: step.text,
                   toolResults: JSON.stringify(step.toolResults, null, 2),
                   usage: step.usage,
@@ -564,7 +553,7 @@ ${text}
             ({ approved, changes } = reviewResult);
             logInfo("review result", {
               instanceId: event.instanceId,
-              path: input.path,
+              draftId: input.draftId,
               approved,
               changes,
             });
@@ -579,22 +568,16 @@ ${text}
           db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          chatId: input.chatId,
-          path: input.path,
-          userId: input.userId ?? null,
+          draftId: input.draftId,
         });
         const writeResult = await writeContentDraft({
           db,
-          chatId: input.chatId ?? null,
+          chatId: input.chatId,
           userId: input.userId ?? null,
-          project: {
-            id: input.projectId,
-            organizationId: input.organizationId,
-          },
-          createIfNotExists: true,
-          lookup: { type: "slug", slug: input.path },
+          projectId: input.projectId,
+          organizationId: input.organizationId,
+          lookup: { type: "id", id: input.draftId },
           draftNewValues: {
-            slug: input.path,
             contentMarkdown: articleMarkdown,
             status: project.publishingSettings?.requireContentReview
               ? "pending-review"
@@ -606,11 +589,11 @@ ${text}
       });
       logInfo("article saved", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
       return {
         type: "seo-write-article",
-        path: input.path,
+        draftId: input.draftId,
         content: articleMarkdown,
         articleType,
       } satisfies typeof seoWriteArticleTaskOutputSchema.infer;
@@ -618,7 +601,7 @@ ${text}
       const message = e instanceof Error ? e.message : "Unknown error";
       logError("generation failed", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
         message,
       });
 
