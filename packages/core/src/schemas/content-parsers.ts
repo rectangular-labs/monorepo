@@ -1,21 +1,34 @@
 import { type } from "arktype";
 
+/**
+ * Draft statuses for the content workflow.
+ *
+ * - suggested: AI/system proposed this content
+ * - suggestion-rejected: User declined the suggestion
+ * - queued: Accepted, waiting in backlog
+ * - planning: Working on outline
+ * - writing: Content being written
+ * - reviewing-writing: AI reviewing the content
+ * - pending-review: Ready for human review
+ * - review-denied: Reviewer requested changes
+ * - scheduled: Approved, ready to be published at specified date
+ */
 export const contentStatusSchema = type(
-  "'suggested'|'queued'|'planning'|'writing'|'reviewing-writing'|'pending-review'|'scheduled'|'published'|'suggestion-rejected'|'review-denied'|'deleted'",
-).describe("The status of the content");
+  "'suggested'|'suggestion-rejected'|'queued'|'planning'|'writing'|'reviewing-writing'|'pending-review'|'review-denied'|'scheduled'",
+).describe("The status of the content draft");
+
 export const CONTENT_STATUSES = [
   "suggested",
+  "suggestion-rejected",
   "queued",
   "planning",
   "writing",
   "reviewing-writing",
   "pending-review",
-  "scheduled",
-  "published",
-  "suggestion-rejected",
   "review-denied",
-  "deleted",
+  "scheduled",
 ] as const satisfies (typeof contentStatusSchema.infer)[];
+
 export type SeoFileStatus = (typeof CONTENT_STATUSES)[number];
 
 export const articleTypeSchema = type(

@@ -1,22 +1,21 @@
 import { ORPCError } from "@orpc/server";
 import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
+import {
+  contentStatusSchema,
+  type SeoFileStatus,
+} from "@rectangular-labs/core/schemas/content-parsers";
 import { schema } from "@rectangular-labs/db";
 import {
   countDraftsByStatus,
   createContent,
-  createContentSchedule,
-  getContentById,
-  getContentBySlug,
-  getContentScheduleById,
   getDraftById,
+  getNextVersionForSlug,
   getScheduledItems,
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
-  listContentWithLatestSchedule,
   listDraftsByStatus,
+  listPublishedContent,
   updateContentDraft,
-  updateContentSchedule,
-  updateContent as updateSeoContent,
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
@@ -27,35 +26,28 @@ import {
   SLUG_NOT_AVAILABLE_ERROR_MESSAGE,
 } from "../lib/workspace/constants";
 
-const reviewStatuses = [
+const reviewStatuses: SeoFileStatus[] = [
   "pending-review",
   "queued",
   "planning",
   "writing",
   "reviewing-writing",
-] as const;
+] as const satisfies SeoFileStatus[];
+
 const contentDraftSummarySchema = schema.seoContentDraftSelectSchema.omit(
   "contentMarkdown",
   "outline",
   "notes",
 );
 
-function prioritizeStatus<T extends { status: string }>(
-  data: readonly T[],
-  primary: string,
-): T[] {
-  return [
-    ...data.filter((row) => row.status === primary),
-    ...data.filter((row) => row.status !== primary),
-  ];
-}
-
-const listSuggestions = withOrganizationIdBase
-  .route({ method: "GET", path: "/suggestions" })
+const listDrafts = withOrganizationIdBase
+  .route({ method: "GET", path: "/drafts" })
   .input(
     type({
       organizationIdentifier: "string",
       projectId: "string.uuid",
+      status: contentStatusSchema.array(),
+      isNew: "boolean = true",
       limit: "1<=number<=100 = 20",
       "cursor?": "string.uuid|undefined",
     }),
@@ -72,14 +64,14 @@ const listSuggestions = withOrganizationIdBase
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      hasBaseContentId: false,
-      status: "suggested",
+      hasBaseContentId: !input.isNew,
+      status: input.status,
       cursor: input.cursor,
       limit: input.limit + 1,
     });
     if (!rowsResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load suggestions.",
+        message: "Failed to load drafts.",
         cause: rowsResult.error,
       });
     }
@@ -95,36 +87,36 @@ const listSuggestions = withOrganizationIdBase
     };
   });
 
-const listNewReviews = withOrganizationIdBase
-  .route({ method: "GET", path: "/reviews/new" })
+const listPublished = withOrganizationIdBase
+  .route({ method: "GET", path: "/" })
   .input(
     type({
       organizationIdentifier: "string",
       projectId: "string.uuid",
       limit: "1<=number<=100 = 20",
-      "cursor?": "string.uuid|undefined",
+      "cursor?": "string|undefined",
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      data: contentDraftSummarySchema.array(),
-      nextPageCursor: "string.uuid|undefined",
+      data: schema.seoContentSelectSchema
+        .omit("contentMarkdown", "outline", "notes")
+        .array(),
+      nextPageCursor: "string|undefined",
     }),
   )
   .handler(async ({ context, input }) => {
-    const rowsResult = await listDraftsByStatus({
+    const rowsResult = await listPublishedContent({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      hasBaseContentId: false,
-      status: reviewStatuses,
       cursor: input.cursor,
       limit: input.limit + 1,
     });
     if (!rowsResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load new reviews.",
+        message: "Failed to load published content.",
         cause: rowsResult.error,
       });
     }
@@ -132,55 +124,12 @@ const listNewReviews = withOrganizationIdBase
 
     const page = rows.slice(0, input.limit);
     const nextPageCursor =
-      rows.length > input.limit ? page.at(-1)?.id : undefined;
+      rows.length > input.limit
+        ? page.at(-1)?.publishedAt.getTime().toString()
+        : undefined;
 
     return {
-      data: prioritizeStatus(page, "pending-review"),
-      nextPageCursor,
-    };
-  });
-
-const listUpdateReviews = withOrganizationIdBase
-  .route({ method: "GET", path: "/reviews/updates" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-      limit: "1<=number<=100 = 20",
-      "cursor?": "string.uuid|undefined",
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      data: contentDraftSummarySchema.array(),
-      nextPageCursor: "string.uuid|undefined",
-    }),
-  )
-  .handler(async ({ context, input }) => {
-    const rowsResult = await listDraftsByStatus({
-      db: context.db,
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      hasBaseContentId: true,
-      status: reviewStatuses,
-      cursor: input.cursor,
-      limit: input.limit + 1,
-    });
-    if (!rowsResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load review updates.",
-        cause: rowsResult.error,
-      });
-    }
-    const rows = rowsResult.value;
-
-    const page = rows.slice(0, input.limit);
-    const nextPageCursor =
-      rows.length > input.limit ? page.at(-1)?.id : undefined;
-
-    return {
-      data: prioritizeStatus(page, "pending-review"),
+      data: page,
       nextPageCursor,
     };
   });
@@ -259,52 +208,6 @@ const getReviewCounts = withOrganizationIdBase
     };
   });
 
-const listLive = withOrganizationIdBase
-  .route({ method: "GET", path: "/" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-      limit: "1<=number<=100 = 20",
-      "cursor?": "string.uuid|undefined",
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      data: schema.seoContentSelectSchema
-        .omit("contentMarkdown", "outline", "notes")
-        .merge(type({ schedule: schema.seoContentScheduleSelectSchema }))
-        .array(),
-      nextPageCursor: "string.uuid|undefined",
-    }),
-  )
-  .handler(async ({ context, input }) => {
-    const rowsResult = await listContentWithLatestSchedule({
-      db: context.db,
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      cursor: input.cursor,
-      limit: input.limit + 1,
-    });
-    if (!rowsResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load live content.",
-        cause: rowsResult.error,
-      });
-    }
-    const rows = rowsResult.value;
-
-    const page = rows.slice(0, input.limit);
-    const nextPageCursor =
-      rows.length > input.limit ? page.at(-1)?.id : undefined;
-
-    return {
-      data: page,
-      nextPageCursor,
-    };
-  });
-
 const getDraft = withOrganizationIdBase
   .route({ method: "GET", path: "/draft/{id}" })
   .input(
@@ -337,7 +240,7 @@ const getDraft = withOrganizationIdBase
     return { draft };
   });
 
-const updateContent = withOrganizationIdBase
+const updateDraft = withOrganizationIdBase
   .route({ method: "PATCH", path: "/draft/{id}" })
   .input(
     schema.seoContentDraftUpdateSchema.merge(
@@ -401,7 +304,7 @@ const updateContent = withOrganizationIdBase
     return { draft };
   });
 
-const markContent = withOrganizationIdBase
+const markDraft = withOrganizationIdBase
   .route({ method: "POST", path: "/draft/{id}/mark" })
   .input(
     type({
@@ -414,10 +317,7 @@ const markContent = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      success: "true",
-      "draft?": contentDraftSummarySchema.or(type.undefined),
-      "contentId?": "string.uuid|undefined",
-      "scheduleId?": "string.uuid|undefined",
+      draft: contentDraftSummarySchema,
     }),
   )
   .handler(async ({ context, input }) => {
@@ -460,7 +360,7 @@ const markContent = withOrganizationIdBase
         notes: _notes,
         ...summary
       } = updatedResult.value;
-      return { success: true as const, draft: summary };
+      return { draft: summary };
     }
 
     if (isSuggestion) {
@@ -489,72 +389,39 @@ const markContent = withOrganizationIdBase
         notes: _notes,
         ...summary
       } = updatedResult.value.draft;
-      return { success: true as const, draft: summary };
+      return { draft: summary };
     }
 
-    if (draft.status !== "pending-review") {
+    if (
+      draft.status !== "pending-review" ||
+      !draft.articleType ||
+      !draft.contentMarkdown
+    ) {
       throw new ORPCError("BAD_REQUEST", {
-        message: "Only pending-review drafts can be approved for publishing.",
-      });
-    }
-    if (!draft.articleType) {
-      throw new ORPCError("BAD_REQUEST", {
-        message: "Cannot approve review: missing articleType.",
-      });
-    }
-    if (!draft.contentMarkdown) {
-      throw new ORPCError("BAD_REQUEST", {
-        message: "Cannot approve review: missing contentMarkdown.",
+        message:
+          "Cannot approve review: missing articleType or contentMarkdown or status is not pending-review.",
       });
     }
 
-    const latestContentForSlugResult = await getContentBySlug({
+    // Get next version number for this slug
+    const nextVersionResult = await getNextVersionForSlug({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
       slug: draft.slug,
-      contentType: "latest",
     });
-    if (!latestContentForSlugResult.ok) {
+    if (!nextVersionResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get latest content for slug.",
-        cause: latestContentForSlugResult.error,
+        message: "Failed to get next version number.",
+        cause: nextVersionResult.error,
       });
     }
-    const latestContentForSlug = latestContentForSlugResult.value;
-    const nextVersion = (latestContentForSlug?.version ?? 0) + 1;
+    const nextVersion = nextVersionResult.value;
 
-    const createdContentResult = await createContent(context.db, {
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      createdByUserId: context.user.id,
-      version: nextVersion,
-      isLiveVersion: false,
-      title: draft.title,
-      description: draft.description,
-      slug: draft.slug,
-      primaryKeyword: draft.primaryKeyword,
-      notes: draft.notes,
-      outline: draft.outline,
-      articleType: draft.articleType,
-      contentMarkdown: draft.contentMarkdown,
-      parentContentId: latestContentForSlug?.id,
-    });
-    if (!createdContentResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to promote draft to content.",
-        cause: createdContentResult.error,
-      });
-    }
-    const createdContent = createdContentResult.value;
-    if (!createdContent) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to promote draft to content.",
-      });
-    }
-
-    let scheduledFor = draft.targetReleaseDate;
-    if (!scheduledFor) {
+    // Determine scheduled publish time
+    let scheduledFor = draft.scheduledFor;
+    // new content should be scheduled
+    if (!scheduledFor && !draft.baseContentId) {
       const projectResult = await getSeoProjectByIdentifierAndOrgId(
         context.db,
         input.projectId,
@@ -576,66 +443,50 @@ const markContent = withOrganizationIdBase
 
       const cadence = project.publishingSettings?.cadence;
       if (cadence) {
-        const scheduledItems = await getScheduledItems({
+        const scheduledItemsResult = await getScheduledItems({
           db: context.db,
           organizationId: draft.organizationId,
           projectId: draft.projectId,
         });
-        const scheduledIso = computeNextAvailableScheduleIso({
-          cadence,
-          scheduledItems: scheduledItems.filter(
-            (item): item is { scheduledFor: Date } =>
-              item.scheduledFor !== null,
-          ),
-        });
-        if (scheduledIso) {
-          scheduledFor = new Date(scheduledIso);
+        if (scheduledItemsResult.ok) {
+          const scheduledItems = scheduledItemsResult.value;
+          const scheduledIso = computeNextAvailableScheduleIso({
+            cadence,
+            scheduledItems: scheduledItems.filter(
+              (item): item is { scheduledFor: Date } =>
+                item.scheduledFor !== null,
+            ),
+          });
+          if (scheduledIso) {
+            scheduledFor = new Date(scheduledIso);
+          }
         }
       }
     }
 
     if (!scheduledFor) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get scheduled for.",
-      });
+      // Default to now if no cadence configured.
+      // this mostly happens for updates to existing content or if we cannot find a suitable schedule.
+      scheduledFor = new Date();
     }
 
-    const createdScheduleResult = await createContentSchedule(context.db, {
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      contentId: createdContent.id,
-      destination: "website",
-      scheduledFor,
-      status: "scheduled",
-    });
-    if (!createdScheduleResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to create schedule.",
-        cause: createdScheduleResult.error,
-      });
-    }
-    const createdSchedule = createdScheduleResult.value;
-    if (!createdSchedule) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to create schedule.",
-      });
-    }
-
-    const deletedDraftResult = await hardDeleteDraft({
-      db: context.db,
+    const updatedDraftResult = await updateContentDraft(context.db, {
       id: draft.id,
       projectId: input.projectId,
       organizationId: context.organization.id,
+      status: "scheduled",
+      scheduledFor,
     });
-    if (!deletedDraftResult.ok) {
+    if (!updatedDraftResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to delete draft after promotion.",
-        cause: deletedDraftResult.error,
+        message: "Failed to update draft.",
+        cause: updatedDraftResult.error,
       });
     }
+    const updatedDraft = updatedDraftResult.value;
 
     const publishWebhookUrl = new URL(
-      `/api/rpc/organization/${input.organizationIdentifier}/project/${input.projectId}/content/${createdContent.id}/publish`,
+      `/api/rpc/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
       context.url.origin,
     ).toString();
 
@@ -648,13 +499,13 @@ const markContent = withOrganizationIdBase
         : scheduledFor;
 
     await context.scheduler.scheduleTask({
-      id: createdSchedule.id,
-      description: `publish-content:${createdSchedule.id}`,
+      id: draft.id,
+      description: `publish-draft:${draft.id}`,
       type: "scheduled",
       time: actualScheduledFor,
       payload: {
-        scheduleId: createdSchedule.id,
-        // TODO: add a signature that signs the scheduleId for verification
+        draftId: draft.id,
+        // TODO: add a signature that signs the draftId for verification
         signature: "string",
       },
       callback: {
@@ -663,21 +514,25 @@ const markContent = withOrganizationIdBase
       },
     });
 
+    const {
+      contentMarkdown: _contentMarkdown,
+      outline: _outline,
+      notes: _notes,
+      ...summary
+    } = updatedDraft;
     return {
-      success: true as const,
-      contentId: createdContent.id,
-      scheduleId: createdSchedule.id,
+      draft: summary,
     };
   });
 
 const publishContent = base
-  .route({ method: "POST", path: "/{id}/publish" })
+  .route({ method: "POST", path: "/draft/{id}/publish" })
   .input(
     type({
       organizationIdentifier: "string",
       projectId: "string.uuid",
       id: "string.uuid",
-      scheduleId: "string.uuid",
+      draftId: "string.uuid",
       signature: "string",
     }),
   )
@@ -688,69 +543,63 @@ const publishContent = base
       throw new ORPCError("BAD_REQUEST", { message: "Invalid signature." });
     }
 
-    const scheduleResult = await getContentScheduleById({
-      db: context.db,
-      id: input.scheduleId,
-      projectId: input.projectId,
-      contentId: input.id,
-    });
-    if (!scheduleResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get schedule.",
-        cause: scheduleResult.error,
+    if (input.draftId !== input.id) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Draft ID does not match route ID.",
       });
     }
-    const schedule = scheduleResult.value;
-    if (!schedule) {
-      throw new ORPCError("NOT_FOUND", { message: "Schedule not found." });
+
+    const draftResult = await getDraftById({
+      db: context.db,
+      organizationId: input.organizationIdentifier,
+      projectId: input.projectId,
+      id: input.draftId,
+      withContent: true,
+    });
+    if (!draftResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to get content draft.",
+        cause: draftResult.error,
+      });
     }
-    if (schedule.status !== "scheduled") {
-      console.warn("[publishContent] schedule is already published", {
-        scheduleId: schedule.id,
-        contentId: schedule.contentId,
-        organizationId: schedule.organizationId,
-        projectId: schedule.projectId,
-        scheduledFor: schedule.scheduledFor,
-        status: schedule.status,
+    if (!draftResult.value) {
+      throw new ORPCError("NOT_FOUND", { message: "Content draft not found." });
+    }
+
+    const draft = draftResult.value;
+    if (draft.status !== "scheduled") {
+      console.warn("[publishContent] draft is not scheduled", {
+        draftId: draft.id,
+        organizationId: draft.organizationId,
+        projectId: draft.projectId,
+        scheduledFor: draft.scheduledFor,
+        status: draft.status,
       });
       return { success: true } as const;
     }
-
-    const contentResult = await getContentById({
-      db: context.db,
-      id: input.id,
-      projectId: input.projectId,
-      organizationId: schedule.organizationId,
-      withContent: false,
-    });
-    if (!contentResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get content.",
-        cause: contentResult.error,
+    if (!draft.scheduledFor) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Draft is missing scheduled publish time.",
       });
-    }
-    const content = contentResult.value;
-    if (!content) {
-      throw new ORPCError("NOT_FOUND", { message: "Content not found." });
     }
 
     const now = new Date();
     const fiveMinutesMs = 5 * 60 * 1000;
-    if (now.getTime() < schedule.scheduledFor.getTime() - fiveMinutesMs) {
+    if (now.getTime() < draft.scheduledFor.getTime() - fiveMinutesMs) {
       // too early to publish, schedule a task to publish later
       const publishWebhookUrl = new URL(
-        `/api/rpc/organization/${input.organizationIdentifier}/project/${input.projectId}/content/${content.id}/publish`,
+        `/api/rpc/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
         context.url.origin,
       ).toString();
 
       await context.scheduler.scheduleTask({
-        id: schedule.id,
-        description: `publish-content:${schedule.id}`,
+        id: draft.id,
+        description: `publish-draft:${draft.id}`,
         type: "scheduled",
-        time: schedule.scheduledFor,
+        time: draft.scheduledFor,
         payload: {
-          scheduleId: schedule.id,
-          // TODO: add a signature that signs the scheduleId for verification
+          draftId: draft.id,
+          // TODO: add a signature that signs the draftId for verification
           signature: "string",
         },
         callback: {
@@ -763,54 +612,66 @@ const publishContent = base
     }
 
     console.info("[publishContent] publishing", {
-      scheduleId: schedule.id,
-      contentId: content.id,
-      organizationId: schedule.organizationId,
-      projectId: schedule.projectId,
-      scheduledFor: schedule.scheduledFor,
+      draftId: draft.id,
+      organizationId: draft.organizationId,
+      projectId: draft.projectId,
+      scheduledFor: draft.scheduledFor,
       now,
     });
     // TODO(publication): send a webhook to the publish destination
 
-    const updatedScheduleResult = await updateContentSchedule(context.db, {
-      id: schedule.id,
-      projectId: schedule.projectId,
-      contentId: schedule.contentId,
-      organizationId: schedule.organizationId,
-      status: "published",
-      publishedAt: now,
+    // Get next version number for this slug
+    const nextVersionResult = await getNextVersionForSlug({
+      db: context.db,
+      organizationId: draft.organizationId,
+      projectId: input.projectId,
+      slug: draft.slug,
     });
-    if (!updatedScheduleResult.ok) {
+    if (!nextVersionResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to update schedule status.",
-        cause: updatedScheduleResult.error,
+        message: "Failed to get next version number.",
+        cause: nextVersionResult.error,
+      });
+    }
+    const nextVersion = nextVersionResult.value;
+
+    if (!draft.articleType || !draft.contentMarkdown) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Draft is missing articleType or contentMarkdown.",
       });
     }
 
-    if (content.parentContentId) {
-      const parentUpdateResult = await updateSeoContent(context.db, {
-        id: content.parentContentId,
-        projectId: schedule.projectId,
-        organizationId: schedule.organizationId,
-        isLiveVersion: false,
-      });
-      if (!parentUpdateResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to mark parent content not live.",
-          cause: parentUpdateResult.error,
-        });
-      }
-    }
-    const updatedContentResult = await updateSeoContent(context.db, {
-      id: content.id,
-      projectId: schedule.projectId,
-      organizationId: schedule.organizationId,
-      isLiveVersion: true,
+    const createdContentResult = await createContent(context.db, {
+      organizationId: draft.organizationId,
+      projectId: draft.projectId,
+      slug: draft.slug,
+      version: nextVersion,
+      title: draft.title,
+      description: draft.description,
+      primaryKeyword: draft.primaryKeyword,
+      articleType: draft.articleType,
+      contentMarkdown: draft.contentMarkdown,
+      outline: draft.outline,
+      notes: draft.notes,
+      publishedAt: draft.scheduledFor,
     });
-    if (!updatedContentResult.ok) {
+    if (!createdContentResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to mark content live.",
-        cause: updatedContentResult.error,
+        message: "Failed to create published content.",
+        cause: createdContentResult.error,
+      });
+    }
+
+    const deletedDraftResult = await hardDeleteDraft({
+      db: context.db,
+      organizationId: draft.organizationId,
+      projectId: draft.projectId,
+      id: draft.id,
+    });
+    if (!deletedDraftResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to delete draft after publishing.",
+        cause: deletedDraftResult.error,
       });
     }
 
@@ -820,13 +681,11 @@ const publishContent = base
 export default base
   .prefix("/organization/{organizationIdentifier}/project/{projectId}/content")
   .router({
-    listSuggestions,
-    listNewReviews,
-    listUpdateReviews,
+    listDrafts,
+    listPublished,
     getReviewCounts,
-    listLive,
     getDraft,
-    updateContent,
-    markContent,
+    updateDraft,
+    markDraft,
     publishContent,
   });
