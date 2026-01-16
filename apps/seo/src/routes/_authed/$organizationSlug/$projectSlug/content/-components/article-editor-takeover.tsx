@@ -160,6 +160,17 @@ export function ArticleEditorTakeover({
     getApiClientRq().task.getStatus.queryOptions({
       input: { id: draft?.outlineGeneratedByTaskRunId ?? "" },
       enabled: !!draft?.outlineGeneratedByTaskRunId,
+      refetchInterval: (context) => {
+        const task = context.state.data;
+        if (
+          task?.status === "pending" ||
+          task?.status === "queued" ||
+          task?.status === "running"
+        ) {
+          return 8_000;
+        }
+        return false;
+      },
     }),
   );
   const {
@@ -169,6 +180,17 @@ export function ArticleEditorTakeover({
     getApiClientRq().task.getStatus.queryOptions({
       input: { id: draft?.generatedByTaskRunId ?? "" },
       enabled: !!draft?.generatedByTaskRunId,
+      refetchInterval: (context) => {
+        const task = context.state.data;
+        if (
+          task?.status === "pending" ||
+          task?.status === "queued" ||
+          task?.status === "running"
+        ) {
+          return 8_000;
+        }
+        return false;
+      },
     }),
   );
   console.log("generatingArticleStatusData", generatingArticleStatusData);
@@ -557,34 +579,50 @@ export function ArticleEditorTakeover({
           )}
 
           {draft.status !== "suggested" && (
-            <Field className="h-full flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <FieldLabel>Article</FieldLabel>
-                <Button
-                  disabled={isUpdatingDraft || isGeneratingArticle}
-                  onClick={() => setIsRegenerateArticleOpen(true)}
-                  size="sm"
-                  variant="outline"
-                >
-                  Regenerate article
-                </Button>
-              </div>
-              {isGeneratingArticle && (
-                <FieldDescription>
-                  Content editing is disabled while the article is being
-                  generated.
-                </FieldDescription>
+            <>
+              {draft.heroImage && (
+                <div className="overflow-hidden rounded-lg border bg-muted/30">
+                  <img
+                    alt={`Hero for ${draft.title}`}
+                    className="h-auto w-full"
+                    src={draft.heroImage}
+                  />
+                  {draft.heroImageCaption && (
+                    <div className="border-t bg-muted/40 px-3 py-2 text-muted-foreground text-xs">
+                      {draft.heroImageCaption}
+                    </div>
+                  )}
+                </div>
               )}
-              <FieldContent className="p-0">
-                <MarkdownEditor
-                  key={`${draft.id}-${generatingArticleStatusData?.status}-${draft.generatedByTaskRunId}`}
-                  markdown={draft.contentMarkdown ?? ""}
-                  onMarkdownChange={onMarkdownChange}
-                  onUploadImage={onUploadImage}
-                  readOnly={isGeneratingArticle}
-                />
-              </FieldContent>
-            </Field>
+              <Field className="h-full flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Article</FieldLabel>
+                  <Button
+                    disabled={isUpdatingDraft || isGeneratingArticle}
+                    onClick={() => setIsRegenerateArticleOpen(true)}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Regenerate article
+                  </Button>
+                </div>
+                {isGeneratingArticle && (
+                  <FieldDescription>
+                    Content editing is disabled while the article is being
+                    generated.
+                  </FieldDescription>
+                )}
+                <FieldContent className="p-0">
+                  <MarkdownEditor
+                    key={`${draft.id}-${generatingArticleStatusData?.status}-${draft.generatedByTaskRunId}`}
+                    markdown={draft.contentMarkdown ?? ""}
+                    onMarkdownChange={onMarkdownChange}
+                    onUploadImage={onUploadImage}
+                    readOnly={isGeneratingArticle}
+                  />
+                </FieldContent>
+              </Field>
+            </>
           )}
         </div>
       )}
