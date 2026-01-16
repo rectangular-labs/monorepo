@@ -52,7 +52,7 @@ export const seoContentDraft = pgSeoTable(
     // Content fields (all optional during drafting)
     title: text().notNull().default(""),
     description: text().notNull().default(""),
-    primaryKeyword: text().notNull(),
+    primaryKeyword: text().notNull().default(""),
     articleType: text({ enum: ARTICLE_TYPES }),
     outline: text(),
     contentMarkdown: text(),

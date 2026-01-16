@@ -3,10 +3,12 @@ import { err, ok, safe } from "@rectangular-labs/result";
 import {
   and,
   type DB,
+  desc,
   eq,
   inArray,
   isNotNull,
   isNull,
+  lt,
   schema,
 } from "../../client";
 import type {
@@ -104,34 +106,44 @@ export async function listPublishedContent(args: {
   limit: number;
 }) {
   return await safe(async () => {
-    // Get latest version of each slug
-    // Since Content is immutable and versions increment, we can order by version DESC
-    // and use DISTINCT ON in raw SQL, or just fetch and dedupe in app
-    const allContent = await args.db.query.seoContent.findMany({
-      columns: { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, lt }) =>
+    const latestPerSlug = args.db
+      .selectDistinctOn([schema.seoContent.slug], {
+        id: schema.seoContent.id,
+        organizationId: schema.seoContent.organizationId,
+        projectId: schema.seoContent.projectId,
+        slug: schema.seoContent.slug,
+        version: schema.seoContent.version,
+        title: schema.seoContent.title,
+        description: schema.seoContent.description,
+        primaryKeyword: schema.seoContent.primaryKeyword,
+        articleType: schema.seoContent.articleType,
+        publishedAt: schema.seoContent.publishedAt,
+        createdAt: schema.seoContent.createdAt,
+        updatedAt: schema.seoContent.updatedAt,
+        deletedAt: schema.seoContent.deletedAt,
+      })
+      .from(schema.seoContent)
+      .where(
         and(
-          eq(table.organizationId, args.organizationId),
-          eq(table.projectId, args.projectId),
-          args.cursor ? lt(table.id, args.cursor) : undefined,
+          eq(schema.seoContent.organizationId, args.organizationId),
+          eq(schema.seoContent.projectId, args.projectId),
         ),
-      orderBy: (fields, { desc }) => [
-        desc(fields.publishedAt),
-        desc(fields.id),
-      ],
-    });
+      )
+      .orderBy(schema.seoContent.slug, desc(schema.seoContent.version))
+      .as("latest_content");
 
-    // Dedupe to get latest version per slug
-    const seenSlugs = new Set<string>();
-    const latestContent = allContent.filter((content) => {
-      if (seenSlugs.has(content.slug)) {
-        return false;
-      }
-      seenSlugs.add(content.slug);
-      return true;
-    });
+    const rows = await args.db
+      .select()
+      .from(latestPerSlug)
+      .where(
+        args.cursor
+          ? lt(latestPerSlug.publishedAt, new Date(args.cursor))
+          : undefined,
+      )
+      .orderBy(desc(latestPerSlug.publishedAt))
+      .limit(args.limit);
 
-    return latestContent.slice(0, args.limit);
+    return rows;
   });
 }
 
@@ -328,9 +340,9 @@ export async function getDraftById(args: {
         : { contentMarkdown: false, outline: false, notes: false },
       where: (table, { and, eq, isNull }) =>
         and(
-          eq(table.organizationId, args.organizationId),
-          eq(table.projectId, args.projectId),
           eq(table.id, args.id),
+          eq(table.projectId, args.projectId),
+          eq(table.organizationId, args.organizationId),
           isNull(table.deletedAt),
         ),
     }),
