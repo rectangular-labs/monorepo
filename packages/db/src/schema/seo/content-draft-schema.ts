@@ -79,15 +79,23 @@ export const seoContentDraft = pgSeoTable(
       table.projectId,
       table.slug,
     ),
-    index("seo_content_draft_org_idx").on(table.organizationId),
-    index("seo_content_draft_project_idx").on(table.projectId),
-    index("seo_content_draft_slug_idx").using(
-      "btree",
-      sql`${table.slug} text_pattern_ops`,
-    ),
-    index("seo_content_draft_status_idx").on(table.status),
-    index("seo_content_draft_scheduled_for_idx").on(table.scheduledFor),
-    index("seo_content_draft_deleted_at_idx").on(table.deletedAt),
+    index("seo_content_draft_org_project_slug_idx")
+      .using(
+        "btree",
+        table.organizationId,
+        table.projectId,
+        sql`${table.slug} text_pattern_ops`,
+      )
+      .where(sql`${table.deletedAt} is null`),
+    index("seo_content_draft_org_project_status_base_id_idx")
+      .on(
+        table.organizationId,
+        table.projectId,
+        table.status,
+        table.baseContentId,
+        table.id,
+      )
+      .where(sql`${table.deletedAt} is null`),
   ],
 );
 
