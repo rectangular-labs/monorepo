@@ -68,19 +68,14 @@ export const seoContent = pgSeoTable(
       table.slug,
       table.version,
     ),
-    index("seo_content_project_idx").on(table.projectId),
-    index("seo_content_organization_idx").on(table.organizationId),
-    index("seo_content_slug_idx").on(table.slug),
-    index("seo_content_version_idx").on(table.version),
-    // For finding latest version of a slug
-    index("seo_content_project_slug_version_desc_idx").using(
+    // For finding latest version of a slug within a project/org
+    index("seo_content_org_project_slug_version_desc_idx").using(
       "btree",
+      table.organizationId,
       table.projectId,
       table.slug,
       sql`${table.version} DESC`,
     ),
-    index("seo_content_primary_keyword_idx").on(table.primaryKeyword),
-    index("seo_content_published_at_idx").on(table.publishedAt),
   ],
 );
 
