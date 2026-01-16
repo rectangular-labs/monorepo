@@ -77,7 +77,7 @@ ${args.skillsSection}
     : ""
 }
 <writing-requirements>
-- Use the primary keyword naturally in the title, opening paragraph, and key headings.
+- Use the primary keyword naturally in the opening paragraph and key headings.
 - Provide clear, direct answers that AI systems can extract.
 - Use structured formatting (lists/tables) for scannability when helpful.
 - Use semantic variations and LSI keywords where they fit naturally.
@@ -91,11 +91,12 @@ ${args.skillsSection}
 - If a "Frequently Asked Questions" section is present, it must come after the wrap-up section and use the heading "Frequently Asked Questions"
 - Expand abbreviations on first use.
 - Keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (")
-- For images: 
-  - Have one hero image which visually represents the topic of the search intent of the user. Objective of the hero image is to have a visual representation of the topic. Avoid images which are purely re-telling the details of the articles, and images that are too data/word heavy.
+- For images:
+  - Select a hero image that visually represents the topic; return it in the heroImage field and include heroImageCaption if needed.
+  - Do not embed the hero image or its caption in the Markdown output.
   - Outside of screenshots/stock photos/generated images required based on the article type rule, have at least one image for one of the H2 section in the article. Identify which section has the potential to have the best visual. Sections which describe a process, concept, or system are the best candidates for image generation.
   - Use the markdown syntax to embed the image in the article along with relevant descriptive alt text and caption (if applicable).
-  - Place images immediately after the section title they belong to. Place the hero image immediately after the H1 title.
+  - Place images immediately after the section title they belong to.
 - For Bullet points:
   - Bold the heading of the bullet point, and use a colon after that before the explanation of the bullet point 
   - Always substantiate the bullet point by explaining what it means, what it entails, or how to use it.
@@ -128,7 +129,7 @@ ${args.skillsSection}
     When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
   </example>
 - You must follow the brand voice and user instructions provided in the context section below.
-- Output must be the JSON of the FULL final Markdown article, the heroImage, and heroImageCaption (if any).
+- Output must be JSON with the full final Markdown article (no title, no hero image, no hero image caption), plus heroImage and heroImageCaption (if any).
 ${articleTypeRule ? `- Article-type rule for ${args.articleType}: ${articleTypeRule}` : ""}
 </writing-requirements>
 

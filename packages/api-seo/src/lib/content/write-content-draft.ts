@@ -124,13 +124,11 @@ export async function writeContentDraft(
   }
   if (
     nextStatus === "scheduled" &&
-    (draft.status !== "pending-review" ||
-      !draft.articleType ||
-      !draft.contentMarkdown)
+    (!draft.articleType || !draft.contentMarkdown)
   ) {
     return err(
       new Error(
-        "Cannot schedule content: missing articleType or contentMarkdown or status is not pending-review.",
+        "Cannot schedule content: missing articleType or contentMarkdown review.",
       ),
     );
   }

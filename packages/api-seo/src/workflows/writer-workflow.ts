@@ -63,12 +63,103 @@ const inferArticleTypeSchema = type({
 }).describe("Chosen article type for the content");
 
 async function inferArticleType(args: {
+  title?: string | null;
   primaryKeyword?: string | null;
   notes?: string | null;
   outline?: string | null;
 }): Promise<ArticleType> {
-  const { primaryKeyword, notes, outline } = args;
-  if (!primaryKeyword && !outline && !notes) return "other";
+  const { title, primaryKeyword, notes, outline } = args;
+  if (!title && !primaryKeyword && !outline && !notes) {
+    logInfo("inferred article type defaulted", {
+      articleType: "other",
+      title,
+      primaryKeyword,
+    });
+    return "other";
+  }
+
+  const titleText = title?.toLowerCase() ?? "";
+  const keywordText = primaryKeyword?.toLowerCase() ?? "";
+  const notesText = notes?.toLowerCase() ?? "";
+  const outlineText = outline?.toLowerCase() ?? "";
+  const combinedText = [titleText, keywordText].filter(Boolean).join("\n");
+
+  const heuristicMatch = (() => {
+    if (
+      /\b(press release|press-release|press statement)\b/.test(combinedText)
+    ) {
+      return "press-release";
+    }
+    if (/\b(interview|q&a|q & a)\b/.test(combinedText)) {
+      return "interview";
+    }
+    if (/\b(case study|case-study)\b/.test(combinedText)) {
+      return "case-study";
+    }
+    if (/\b(whitepaper|white paper)\b/.test(combinedText)) {
+      return "whitepaper";
+    }
+    if (/\b(infographic)\b/.test(combinedText)) {
+      return "infographic";
+    }
+    if (/\b(product update|release notes|changelog)\b/.test(combinedText)) {
+      return "product-update";
+    }
+    if (/\b(event recap|recap|conference recap)\b/.test(combinedText)) {
+      return "event-recap";
+    }
+    if (/\b(research summary|research roundup)\b/.test(combinedText)) {
+      return "research-summary";
+    }
+    if (/\b(contest|giveaway)\b/.test(combinedText)) {
+      return "contest-giveaway";
+    }
+    if (
+      /\b(best|top|must-read|must read|ranking|ranked|top \d+|top-\d+)\b/.test(
+        combinedText,
+      )
+    ) {
+      return "best-of-list";
+    }
+    if (
+      /\b(vs\.?|versus|comparison|compare|alternatives?)\b/.test(combinedText)
+    ) {
+      return "comparison";
+    }
+    if (/\b(pricing|price|cost|rates|fees|plans)\b/.test(combinedText)) {
+      return "comparison";
+    }
+    if (
+      /\b(how to|step-by-step|step by step|tutorial|guide)\b/.test(combinedText)
+    ) {
+      return "how-to";
+    }
+    if (
+      /\b(faq|frequently asked questions|frequently asked question|frequently ask questions|frequently ask question)\b/.test(
+        combinedText,
+      )
+    ) {
+      return "faq";
+    }
+    if (/\b(news|announcement|breaking)\b/.test(combinedText)) {
+      return "news";
+    }
+    if (/\b(best practice|best-practice)\b/.test(combinedText)) {
+      return "best-practices";
+    }
+    if (/\b(list of|checklist|tips|ideas)\b/.test(combinedText)) {
+      return "listicle";
+    }
+    return null;
+  })();
+  if (heuristicMatch) {
+    logInfo("inferred article type via heuristic", {
+      articleType: heuristicMatch,
+      title,
+      primaryKeyword,
+    });
+    return heuristicMatch;
+  }
 
   const prompt = `Choose the single best article type for the intended content.
 
@@ -98,18 +189,23 @@ Decision rules:
 - If notes clearly specify a format (e.g. "press release", "interview", "case study"), prioritize notes over outline.
 - If the outline structure signals a format (steps, Q&A headings, comparisons, rankings), match it.
 - Use "best-of-list" only for explicit "best/top" ranking intent; otherwise use "listicle" for general lists.
-- Use "other" if none apply.
+- Pricing, cost, or rate-focused titles usually map to "comparison".
+- Use your reasoning and judgement to discern between the other article types. use "other" if none of the article types apply.
+
+<title>
+${titleText ?? ""}
+</title>
 
 <primary_keyword>
-${primaryKeyword ?? ""}
+${primaryKeywordText ?? ""}
 </primary_keyword>
 
 <notes>
-${notes ?? ""}
+${notesText ?? ""}
 </notes>
 
 <outline>
-${outline ?? ""}
+${outlineText ?? ""}
 </outline>`;
 
   try {
@@ -128,10 +224,21 @@ ${outline ?? ""}
       }),
       prompt,
     });
-    return result.experimental_output.articleType;
+    const inferred = result.experimental_output.articleType;
+    logInfo("inferred article type via model", {
+      articleType: inferred,
+      title,
+      primaryKeyword,
+    });
+    return inferred;
   } catch (error) {
     logError("failed to infer article type; defaulting to other", {
       error,
+    });
+    logInfo("inferred article type defaulted", {
+      articleType: "other",
+      title,
+      primaryKeyword,
     });
     return "other";
   }
@@ -296,7 +403,12 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       draftId: input.draftId,
     });
     try {
-      const { text: articleMarkdown, articleType } = await step.do(
+      const {
+        text: articleMarkdown,
+        articleType,
+        heroImage,
+        heroImageCaption,
+      } = await step.do(
         "generate article markdown",
         {
           timeout: "30 minutes",
@@ -333,10 +445,17 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           const articleType =
             draft.articleType ??
             (await inferArticleType({
+              title: draft.title,
               primaryKeyword,
               notes,
               outline,
             }));
+          logInfo("article type resolved", {
+            instanceId: event.instanceId,
+            draftId: input.draftId,
+            articleType,
+            source: draft.articleType ? "draft" : "inferred",
+          });
           const systemPrompt = buildWriterSystemPrompt({
             project,
             skillsSection: "",
@@ -354,6 +473,8 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           let changes: string[] = [];
           let attempts = 0;
           let text = "";
+          let heroImage = "";
+          let heroImageCaption: string | null = null;
           while (!approved && attempts < 3) {
             const result = await generateText({
               model: openai("gpt-5.2"),
@@ -389,6 +510,19 @@ ${changes.join("\n")}
                     : "Write the full article now.",
                 },
               ],
+              experimental_output: Output.object({
+                schema: jsonSchema<{
+                  heroImage: string;
+                  heroImageCaption: string | null;
+                  markdown: string;
+                }>(
+                  type({
+                    heroImage: "string",
+                    heroImageCaption: "string|null",
+                    markdown: "string",
+                  }).toJsonSchema() as JSONSchema7,
+                ),
+              }),
               onStepFinish: (step) => {
                 logInfo(`[generateArticle] Step completed:`, {
                   text: step.text,
@@ -413,18 +547,23 @@ ${changes.join("\n")}
               stopWhen: [stepCountIs(40)],
             });
 
+            const outputMarkdown = result.experimental_output.markdown.trim();
             const repairedLinks = repairPublicBucketImageLinks({
-              markdown: result.text.trim(),
+              markdown: outputMarkdown,
               orgId: input.organizationId,
               projectId: input.projectId,
               kind: "content-image",
             });
             text = repairedLinks.markdown;
+            heroImage = result.experimental_output.heroImage.trim();
+            heroImageCaption =
+              result.experimental_output.heroImageCaption?.trim() || null;
             if (!text) throw new Error("Empty article returned by model");
             logInfo("article generated. Going through review process.", {
               instanceId: event.instanceId,
               draftId: input.draftId,
               articleChars: text.length,
+              heroImagePresent: !!heroImage,
               usage: result.usage ?? null,
               replacedCount: repairedLinks.replacedCount,
             });
@@ -473,11 +612,7 @@ You are a strict SEO content QA reviewer. Your job is to verify the writer follo
 - Internal links: at least 3 internal links (relative URLs and URLs whose host matches the website host count as internal).
 - External links: at least 2 external links whose host is NOT the website host.
 - Images:
-  - Exactly 1 hero image.
-    - There should be no placeholder blockquote line that mentions "Hero image".
-    - If no marker exists, treat the only image before the first H2 as hero (if exactly one exists).
-    - Otherwise, treat the first image in the document as hero.
-  - At least 1 non-hero image inside an H2 section (an H2 section that contains an image other than the hero image).
+  - At least 1 image inside an H2 section (an H2 section that contains an image).
   - All images must have non-empty, descriptive alt text.
 - Formatting:
   - No em dashes (—) anywhere.
@@ -561,7 +696,7 @@ ${text}
               changes,
             });
           }
-          return { text, articleType };
+          return { text, articleType, heroImage, heroImageCaption };
         },
       );
 
@@ -582,6 +717,8 @@ ${text}
           lookup: { type: "id", id: input.draftId },
           draftNewValues: {
             contentMarkdown: articleMarkdown,
+            heroImage,
+            heroImageCaption,
             status: project.publishingSettings?.requireContentReview
               ? "pending-review"
               : "scheduled",
@@ -599,6 +736,8 @@ ${text}
         draftId: input.draftId,
         content: articleMarkdown,
         articleType,
+        heroImage,
+        heroImageCaption,
       } satisfies typeof seoWriteArticleTaskOutputSchema.infer;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unknown error";

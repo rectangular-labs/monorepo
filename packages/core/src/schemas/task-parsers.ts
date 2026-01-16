@@ -49,6 +49,8 @@ export const seoWriteArticleTaskOutputSchema = type({
   draftId: "string.uuid",
   content: "string",
   articleType: articleTypeSchema,
+  heroImage: "string",
+  heroImageCaption: "string|null",
 });
 
 export const taskOutputSchema = type.or(
