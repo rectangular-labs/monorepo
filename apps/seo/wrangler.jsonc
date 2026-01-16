@@ -60,7 +60,7 @@
     },
     {
       "new_sqlite_classes": ["Scheduler"],
-      "tag": "v2"
+      "tag": "v1"
     }
   ],
   // local R2 buckets point to .wrangler/state/r2/ and don't affect remote buckets by default
@@ -136,7 +136,7 @@
         },
         {
           "new_sqlite_classes": ["Scheduler"],
-          "tag": "v2"
+          "tag": "v1"
         }
       ],
       "r2_buckets": [
@@ -169,7 +169,7 @@
       ],
       "routes": [
         {
-          "pattern": "app.fluidposts.com",
+          "pattern": "www.fluidposts.com",
           "custom_domain": true
         }
       ]
@@ -215,7 +215,7 @@
         },
         {
           "new_sqlite_classes": ["Scheduler"],
-          "tag": "v2"
+          "tag": "v1"
         }
       ],
       "r2_buckets": [
