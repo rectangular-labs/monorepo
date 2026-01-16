@@ -458,32 +458,10 @@ function ChatConversation({
           (part.input.skill === "create_articles" ||
             part.input.skill === "write_file")
         ) {
-          // Bulk invalidate queries for all content.list* queries
+          // Bulk invalidate queries for all content.listDrafts queries
           void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.listNewReviews.queryKey({
-              input: {
-                organizationIdentifier: organizationId,
-                projectId,
-                limit: 20,
-              },
-            }),
-          });
-          void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.listSuggestions.queryKey({
-              input: {
-                organizationIdentifier: organizationId,
-                projectId,
-                limit: 20,
-              },
-            }),
-          });
-          void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.listUpdateReviews.queryKey({
-              input: {
-                organizationIdentifier: organizationId,
-                projectId,
-                limit: 20,
-              },
+            queryKey: getApiClientRq().content.listDrafts.key({
+              type: "query",
             }),
           });
         }
@@ -500,7 +478,7 @@ function ChatConversation({
         }
       }
     }
-  }, [messages, queryClient, organizationId, projectId]);
+  }, [messages, queryClient]);
 
   const rejectPlanPrefill = () => {
     setInput("Let's change the following:\n1. ");
@@ -534,6 +512,20 @@ function ChatConversation({
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
       <div className="flex min-h-0 flex-1 flex-col">
+        <button
+          onClick={() => {
+            // Bulk invalidate queries for all content.listDrafts queries
+            console.log("tesing");
+            void queryClient.invalidateQueries({
+              queryKey: getApiClientRq().content.listDrafts.key({
+                type: "query",
+              }),
+            });
+          }}
+          type="button"
+        >
+          test
+        </button>
         <Conversation className="h-full">
           <ConversationContent>
             {showMessagesLoading && <Shimmer>Loading messages…</Shimmer>}
