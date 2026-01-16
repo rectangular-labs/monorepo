@@ -13,15 +13,16 @@ import type {
   seoContentDraftInsertSchema,
   seoContentDraftUpdateSchema,
   seoContentInsertSchema,
-  seoContentUpdateSchema,
 } from "../../schema/seo";
 
+/**
+ * Get the latest published version of content by slug.
+ */
 export async function getContentBySlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
   slug: string;
-  contentType: "live" | "latest";
   withContent?: boolean;
 }) {
   return await safe(() =>
@@ -29,21 +30,20 @@ export async function getContentBySlug(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, isNull }) =>
+      where: (table, { and, eq }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           eq(table.slug, args.slug),
-          args.contentType === "live"
-            ? eq(table.isLiveVersion, true)
-            : undefined,
-          isNull(table.deletedAt),
         ),
       orderBy: (fields, { desc }) => [desc(fields.version)],
     }),
   );
 }
 
+/**
+ * Get a specific published content version by ID.
+ */
 export async function getContentById(args: {
   db: DB;
   organizationId: string;
@@ -56,18 +56,20 @@ export async function getContentById(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, isNull }) =>
+      where: (table, { and, eq }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           eq(table.id, args.id),
-          isNull(table.deletedAt),
         ),
     }),
   );
 }
 
-export async function getContentsBySlug(args: {
+/**
+ * Get all versions of content by slug (for version history).
+ */
+export async function getContentVersionsBySlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
@@ -79,19 +81,64 @@ export async function getContentsBySlug(args: {
       columns: args.withContent
         ? undefined
         : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, or, like, isNull }) =>
+      where: (table, { and, eq }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
-          or(eq(table.slug, args.slug), like(table.slug, `${args.slug}%`)),
-          eq(table.isLiveVersion, true),
-          isNull(table.deletedAt),
+          eq(table.slug, args.slug),
         ),
-      orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
+      orderBy: (fields, { desc }) => [desc(fields.version)],
     }),
   );
 }
 
+/**
+ * List all published content (latest version of each slug).
+ * Uses a subquery to get the max version for each slug.
+ */
+export async function listPublishedContent(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  cursor: string | undefined;
+  limit: number;
+}) {
+  return await safe(async () => {
+    // Get latest version of each slug
+    // Since Content is immutable and versions increment, we can order by version DESC
+    // and use DISTINCT ON in raw SQL, or just fetch and dedupe in app
+    const allContent = await args.db.query.seoContent.findMany({
+      columns: { contentMarkdown: false, outline: false, notes: false },
+      where: (table, { and, eq, lt }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          args.cursor ? lt(table.id, args.cursor) : undefined,
+        ),
+      orderBy: (fields, { desc }) => [
+        desc(fields.publishedAt),
+        desc(fields.id),
+      ],
+    });
+
+    // Dedupe to get latest version per slug
+    const seenSlugs = new Set<string>();
+    const latestContent = allContent.filter((content) => {
+      if (seenSlugs.has(content.slug)) {
+        return false;
+      }
+      seenSlugs.add(content.slug);
+      return true;
+    });
+
+    return latestContent.slice(0, args.limit);
+  });
+}
+
+/**
+ * Create a new published content version.
+ * This should be called when publishing a draft.
+ */
 export async function createContent(
   db: DB,
   values: typeof seoContentInsertSchema.infer,
@@ -109,121 +156,65 @@ export async function createContent(
   return ok(content);
 }
 
-export async function updateContent(
-  db: DB,
-  values: typeof seoContentUpdateSchema.infer,
-) {
-  const result = await safe(() =>
-    db
-      .update(schema.seoContent)
-      .set(values)
-      .where(
-        and(
-          eq(schema.seoContent.id, values.id),
-          eq(schema.seoContent.projectId, values.projectId),
-          eq(schema.seoContent.organizationId, values.organizationId),
-        ),
-      )
-      .returning(),
-  );
-  if (!result.ok) {
-    return result;
-  }
-  const updatedContent = result.value[0];
-  if (!updatedContent) {
-    return err(new Error("Failed to update content"));
-  }
-  return ok(updatedContent);
-}
-
-export async function listContentWithLatestSchedule(args: {
+/**
+ * Get the next version number for a slug.
+ */
+export async function getNextVersionForSlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
-  cursor: string | undefined;
-  limit: number;
+  slug: string;
 }) {
-  return await safe(async () => {
-    const contentRows = await args.db.query.seoContent.findMany({
-      columns: { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, isNull, lt }) =>
+  const result = await safe(() =>
+    args.db.query.seoContent.findFirst({
+      columns: { version: true },
+      where: (table, { and, eq }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
-          eq(table.isLiveVersion, true),
-          isNull(table.deletedAt),
-          args.cursor ? lt(table.id, args.cursor) : undefined,
+          eq(table.slug, args.slug),
         ),
-      with: {
-        schedules: {
-          where: (table, { isNull }) => isNull(table.deletedAt),
-          orderBy: (fields, { desc }) => [
-            desc(fields.scheduledFor),
-            desc(fields.id),
-          ],
-          limit: 1,
-        },
-      },
-      orderBy: (fields, { desc }) => [desc(fields.id)],
-      limit: args.limit,
-    });
-    return contentRows.map((content) => {
-      const schedule = content.schedules[0];
-      if (!schedule) {
-        throw new Error("No schedule found for content");
-      }
-      return {
-        ...content,
-        schedule,
-      };
-    });
-  });
+      orderBy: (fields, { desc }) => [desc(fields.version)],
+    }),
+  );
+
+  if (!result.ok) return result;
+  return ok((result.value?.version ?? 0) + 1);
 }
 
+/**
+ * Get all scheduled items (drafts with scheduledFor set).
+ */
 export async function getScheduledItems(args: {
   db: DB;
   organizationId: string;
   projectId: string;
 }) {
-  const scheduledRows = await args.db.query.seoContentSchedule.findMany({
-    columns: {
-      scheduledFor: true,
-    },
-    where: (table, { and, eq, isNull }) =>
-      and(
-        eq(table.organizationId, args.organizationId),
-        eq(table.projectId, args.projectId),
-        isNull(table.deletedAt),
-      ),
-  });
+  return await safe(async () => {
+    const draftRows = await args.db.query.seoContentDraft.findMany({
+      columns: {
+        scheduledFor: true,
+      },
+      where: (table, { and, eq, isNull, ne, isNotNull }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          isNotNull(table.scheduledFor),
+          isNull(table.deletedAt),
+          ne(table.status, "review-denied"),
+          ne(table.status, "suggestion-rejected"),
+        ),
+    });
 
-  const draftRows = await args.db.query.seoContentDraft.findMany({
-    columns: {
-      targetReleaseDate: true,
-    },
-    where: (table, { and, eq, isNull, ne, isNotNull }) =>
-      and(
-        eq(table.organizationId, args.organizationId),
-        eq(table.projectId, args.projectId),
-        isNotNull(table.targetReleaseDate),
-        isNull(table.deletedAt),
-        ne(table.status, "deleted"),
-        ne(table.status, "review-denied"),
-        ne(table.status, "suggestion-rejected"),
-      ),
-  });
-
-  const scheduledItems = [
-    ...scheduledRows.map((row) => ({
+    return draftRows.map((row) => ({
       scheduledFor: row.scheduledFor ?? null,
-    })),
-    ...draftRows.map((row) => ({
-      scheduledFor: row.targetReleaseDate ?? null,
-    })),
-  ];
-
-  return scheduledItems;
+    }));
+  });
 }
+
+// =============================================================================
+// Draft Operations
+// =============================================================================
 
 export async function createContentDraft(
   db: DB,
@@ -297,39 +288,14 @@ export async function hardDeleteDraft(args: {
   return ok(deletedDraft);
 }
 
+/**
+ * Get draft by slug. Since there's only one draft per slug, no need for originatingChatId.
+ */
 export async function getDraftBySlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
   slug: string;
-  originatingChatId?: string | null;
-  withContent?: boolean;
-}) {
-  return await safe(() =>
-    args.db.query.seoContentDraft.findFirst({
-      columns: args.withContent
-        ? undefined
-        : { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq }) =>
-        and(
-          eq(table.organizationId, args.organizationId),
-          eq(table.projectId, args.projectId),
-          args.originatingChatId
-            ? eq(table.originatingChatId, args.originatingChatId)
-            : undefined,
-          eq(table.slug, args.slug),
-        ),
-      orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
-    }),
-  );
-}
-
-export async function getDraftById(args: {
-  db: DB;
-  organizationId: string;
-  projectId: string;
-  id: string;
-  originatingChatId?: string | null;
   withContent?: boolean;
 }) {
   return await safe(() =>
@@ -341,9 +307,29 @@ export async function getDraftById(args: {
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
-          args.originatingChatId
-            ? eq(table.originatingChatId, args.originatingChatId)
-            : undefined,
+          eq(table.slug, args.slug),
+          isNull(table.deletedAt),
+        ),
+    }),
+  );
+}
+
+export async function getDraftById(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  id: string;
+  withContent?: boolean;
+}) {
+  return await safe(() =>
+    args.db.query.seoContentDraft.findFirst({
+      columns: args.withContent
+        ? undefined
+        : { contentMarkdown: false, outline: false, notes: false },
+      where: (table, { and, eq, isNull }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
           eq(table.id, args.id),
           isNull(table.deletedAt),
         ),
@@ -351,12 +337,14 @@ export async function getDraftById(args: {
   );
 }
 
-export async function getDraftsBySlug(args: {
+/**
+ * Get all drafts matching a slug prefix.
+ */
+export async function getDraftsBySlugPrefix(args: {
   db: DB;
   organizationId: string;
   projectId: string;
-  slug: string;
-  originatingChatId: string | null;
+  slugPrefix: string;
   withContent?: boolean;
 }) {
   return await safe(() =>
@@ -368,10 +356,10 @@ export async function getDraftsBySlug(args: {
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
-          args.originatingChatId
-            ? eq(table.originatingChatId, args.originatingChatId)
-            : undefined,
-          or(eq(table.slug, args.slug), like(table.slug, `${args.slug}%`)),
+          or(
+            eq(table.slug, args.slugPrefix),
+            like(table.slug, `${args.slugPrefix}%`),
+          ),
           isNull(table.deletedAt),
         ),
       orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
@@ -391,7 +379,7 @@ export async function listDraftsByStatus(args: {
   return await safe(() =>
     args.db.query.seoContentDraft.findMany({
       columns: { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, inArray, isNotNull, isNull, lt }) =>
+      where: (table, { and, eq, inArray, isNull, lt, isNotNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
@@ -434,33 +422,33 @@ export async function countDraftsByStatus(args: {
   });
 }
 
+/**
+ * Check if a slug is available for use.
+ * A slug is unavailable if:
+ * - There's published content with that slug
+ * - There's an active draft (not rejected/denied) with that slug
+ */
 export async function validateSlug(args: {
   db: DB;
   organizationId: string;
   projectId: string;
   slug: string;
   ignoreDraftId?: string;
-  ignoreLiveContentId?: string;
 }) {
-  // for live query we want to see if the slug matches any of the live content that we are not branching off from.
-  // for draft query we want to see if the slug matches any of the drafts that is for new content (draft for updates to existing content will be covered by the live query).
-  const [liveResult, draftResult] = await Promise.all([
+  const [publishedResult, draftResult] = await Promise.all([
+    // Check if published content exists with this slug
     safe(() =>
       args.db.query.seoContent.findFirst({
         columns: { id: true },
-        where: (table, { and, eq, isNull, ne }) =>
+        where: (table, { and, eq }) =>
           and(
             eq(table.organizationId, args.organizationId),
             eq(table.projectId, args.projectId),
             eq(table.slug, args.slug),
-            eq(table.isLiveVersion, true),
-            isNull(table.deletedAt),
-            args.ignoreLiveContentId
-              ? ne(table.id, args.ignoreLiveContentId)
-              : undefined,
           ),
       }),
     ),
+    // Check if active draft exists with this slug
     safe(() =>
       args.db.query.seoContentDraft.findFirst({
         columns: { id: true },
@@ -470,26 +458,21 @@ export async function validateSlug(args: {
             eq(table.projectId, args.projectId),
             eq(table.slug, args.slug),
             isNull(table.deletedAt),
-            isNull(table.baseContentId),
-            notInArray(table.status, [
-              "deleted",
-              "suggestion-rejected",
-              "review-denied",
-            ]),
+            notInArray(table.status, ["suggestion-rejected", "review-denied"]),
             args.ignoreDraftId ? ne(table.id, args.ignoreDraftId) : undefined,
           ),
       }),
     ),
   ]);
 
-  if (!liveResult.ok) return liveResult;
+  if (!publishedResult.ok) return publishedResult;
   if (!draftResult.ok) return draftResult;
 
-  if (liveResult.value) {
+  if (publishedResult.value) {
     return ok({
       valid: false as const,
       slug: args.slug,
-      reason: "conflicts-with-live-content" as const,
+      reason: "conflicts-with-published-content" as const,
     });
   }
 

@@ -7,21 +7,25 @@ import {
 } from "drizzle-arktype";
 import { relations, sql } from "drizzle-orm";
 import {
-  type AnyPgColumn,
-  boolean,
   index,
   integer,
   text,
+  timestamp,
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
-import { organization, user } from "../auth-schema";
-import { seoContentDraft } from "./content-draft-schema";
-import { seoContentSchedule } from "./content-schedule-schema";
+import { organization } from "../auth-schema";
 import { seoProject } from "./project-schema";
 
+/**
+ * Published content versions (immutable).
+ *
+ * Each row is a snapshot of content at the time of publishing.
+ * To edit published content: create a draft, modify it, publish → creates new version.
+ * To rollback: duplicate the old version with a larger version number.
+ */
 export const seoContent = pgSeoTable(
   "content",
   {
@@ -38,59 +42,49 @@ export const seoContent = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    createdByUserId: text().references(() => user.id, {
-      onDelete: "set null",
-      onUpdate: "cascade",
-    }),
-    parentContentId: uuid().references((): AnyPgColumn => seoContent.id, {
-      onDelete: "set null",
-      onUpdate: "cascade",
-    }),
 
+    // Versioning - each publish increments version for the same slug
+    slug: text().notNull(),
     version: integer().notNull().default(1),
-    isLiveVersion: boolean().notNull().default(false),
 
+    // Content fields
     title: text().notNull(),
     description: text().notNull(),
-    slug: text().notNull(),
     primaryKeyword: text().notNull(),
-
-    notes: text(),
-    outline: text(),
-
     articleType: text({ enum: ARTICLE_TYPES }).notNull(),
     contentMarkdown: text().notNull(),
+    outline: text(),
+    notes: text(),
+
+    // Publishing metadata
+    publishedAt: timestamp({ mode: "date", withTimezone: true }).notNull(),
 
     ...timestamps,
   },
   (table) => [
+    // Each slug can have multiple versions, but (project, slug, version) is unique
     unique("seo_content_project_slug_version_unique").on(
       table.projectId,
       table.slug,
       table.version,
     ),
-    unique("seo_content_project_title_version_unique").on(
-      table.projectId,
-      table.title,
-      table.version,
-    ),
     index("seo_content_project_idx").on(table.projectId),
     index("seo_content_organization_idx").on(table.organizationId),
-    index("seo_content_created_by_user_idx").on(table.createdByUserId),
-    index("seo_content_org_project_slug_live_idx").using(
+    index("seo_content_slug_idx").on(table.slug),
+    index("seo_content_version_idx").on(table.version),
+    // For finding latest version of a slug
+    index("seo_content_project_slug_version_desc_idx").using(
       "btree",
-      table.organizationId,
       table.projectId,
-      sql`${table.slug} text_pattern_ops`,
-      table.isLiveVersion,
+      table.slug,
+      sql`${table.version} DESC`,
     ),
     index("seo_content_primary_keyword_idx").on(table.primaryKeyword),
-    index("seo_content_version_idx").on(table.version),
-    index("seo_content_is_live_version_idx").on(table.isLiveVersion),
+    index("seo_content_published_at_idx").on(table.publishedAt),
   ],
 );
 
-export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
+export const seoContentRelations = relations(seoContent, ({ one }) => ({
   project: one(seoProject, {
     fields: [seoContent.projectId],
     references: [seoProject.id],
@@ -99,22 +93,13 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
     fields: [seoContent.organizationId],
     references: [organization.id],
   }),
-  createdByUser: one(user, {
-    fields: [seoContent.createdByUserId],
-    references: [user.id],
-  }),
-  parentContent: one(seoContent, {
-    fields: [seoContent.parentContentId],
-    references: [seoContent.id],
-  }),
-  schedules: many(seoContentSchedule),
-  drafts: many(seoContentDraft),
 }));
 
 export const seoContentInsertSchema = createInsertSchema(seoContent).omit(
   "id",
   "createdAt",
   "updatedAt",
+  "deletedAt",
 );
 export const seoContentSelectSchema = createSelectSchema(seoContent);
 export const seoContentUpdateSchema = createUpdateSchema(seoContent)
