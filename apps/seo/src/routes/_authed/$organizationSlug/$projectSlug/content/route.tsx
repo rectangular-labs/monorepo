@@ -71,7 +71,21 @@ function ContentLayout() {
             params={{ organizationSlug, projectSlug }}
             to="/$organizationSlug/$projectSlug/content"
           >
-            Scheduled & Published
+            Overview
+          </NavLink>
+          <NavLink
+            activeOptions={{ exact: true, includeSearch: false }}
+            params={{ organizationSlug, projectSlug }}
+            to="/$organizationSlug/$projectSlug/content/published"
+          >
+            Published
+          </NavLink>
+          <NavLink
+            activeOptions={{ exact: true, includeSearch: false }}
+            params={{ organizationSlug, projectSlug }}
+            to="/$organizationSlug/$projectSlug/content/scheduled"
+          >
+            Scheduled
           </NavLink>
           <NavLink
             activeOptions={{ exact: false, includeSearch: false }}
