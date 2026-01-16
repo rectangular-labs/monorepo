@@ -4,6 +4,7 @@ import * as Icons from "@rectangular-labs/ui/components/icon";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
+import { REVIEW_STATUSES } from "~/lib/workspace/review-statuses";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "../-components/articles-table";
 import { useReviewRowActions } from "./-hook/use-review-row-actions";
@@ -22,10 +23,12 @@ function ReviewArticleUpdatesPage() {
   const navigate = Route.useNavigate();
 
   const updatesQuery = useQuery(
-    getApiClientRq().content.listUpdateReviews.queryOptions({
+    getApiClientRq().content.listDrafts.queryOptions({
       input: {
         organizationIdentifier: organizationSlug,
         projectId,
+        status: REVIEW_STATUSES,
+        isNew: false,
         limit: 50,
       },
     }),

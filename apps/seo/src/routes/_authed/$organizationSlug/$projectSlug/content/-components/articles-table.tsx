@@ -35,7 +35,7 @@ type ArticleTableRow = {
   primaryKeyword: string;
   title: string;
   slug: string;
-  status: SeoFileStatus;
+  status: SeoFileStatus | "published";
 };
 
 export function ArticlesTable({

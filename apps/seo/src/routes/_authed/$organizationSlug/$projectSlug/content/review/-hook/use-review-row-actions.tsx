@@ -30,7 +30,7 @@ export function useReviewRowActions({
   );
 
   const getRowActions = useCallback(
-    (row: { id: string; status: SeoFileStatus }) => {
+    (row: { id: string; status: SeoFileStatus | "published" }) => {
       const isMarking = markingDraftIds.has(row.id);
 
       const triggerMark = (mark: "yes" | "no") => {

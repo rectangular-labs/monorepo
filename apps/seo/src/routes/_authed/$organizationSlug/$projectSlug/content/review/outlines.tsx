@@ -22,10 +22,12 @@ function ReviewOutlinesPage() {
   const navigate = Route.useNavigate();
 
   const outlinesQuery = useQuery(
-    getApiClientRq().content.listSuggestions.queryOptions({
+    getApiClientRq().content.listDrafts.queryOptions({
       input: {
         organizationIdentifier: organizationSlug,
         projectId,
+        status: ["suggested"],
+        isNew: true,
         limit: 50,
       },
     }),
