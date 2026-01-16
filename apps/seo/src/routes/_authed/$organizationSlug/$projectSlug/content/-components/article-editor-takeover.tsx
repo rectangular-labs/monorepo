@@ -424,7 +424,6 @@ export function ArticleEditorTakeover({
           )}
 
           <Button
-            disabled={!canEditDetails}
             onClick={() => setIsDetailsOpen(true)}
             size="sm"
             variant="outline"
@@ -595,8 +594,8 @@ export function ArticleEditorTakeover({
           <SheetHeader className="border-b">
             <SheetTitle>Draft settings</SheetTitle>
             <SheetDescription>
-              Edit title, slug, keyword, type, description, notes, and target
-              date.
+              Edit title, slug, keyword, article type, description, notes, and
+              release date.
             </SheetDescription>
           </SheetHeader>
 
@@ -704,7 +703,7 @@ export function ArticleEditorTakeover({
 
               <Field>
                 <FieldLabel htmlFor="draft-target-date">
-                  Target scheduled date
+                  Target release date
                 </FieldLabel>
                 <div className="flex items-center gap-2">
                   <Checkbox
