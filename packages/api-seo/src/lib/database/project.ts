@@ -4,7 +4,8 @@ import {
   getSeoProjectByIdentifierAndOrgId,
 } from "@rectangular-labs/db/operations";
 import { err, ok, safe } from "@rectangular-labs/result";
-import { getContext, getWebsocketContext } from "../../context";
+import { getContext } from "../../context";
+import type { ChatContext } from "../../types";
 
 export async function upsertProject(
   values: typeof schema.seoProjectInsertSchema.infer & {
@@ -48,32 +49,32 @@ export async function upsertProject(
   return ok(existingProject);
 }
 
-export async function getProjectInWebsocketChat(args?: {
+export async function getProjectInChat(args: {
+  context: ChatContext;
   includeAuthors?: boolean;
 }) {
-  const websocketContext = getWebsocketContext();
-  if (websocketContext.cache.project) {
-    if (args?.includeAuthors && !websocketContext.cache.project?.authors) {
+  const { context, includeAuthors } = args;
+  if (context.cache.project) {
+    if (includeAuthors && !context.cache.project?.authors) {
       const authorsResult = await getSeoProjectAuthorsByProjectId(
-        websocketContext.db,
-        websocketContext.projectId,
+        context.db,
+        context.projectId,
       );
       if (!authorsResult.ok) {
         return authorsResult;
       }
-      websocketContext.cache.project.authors = authorsResult.value;
+      context.cache.project.authors = authorsResult.value;
     }
-    return ok(websocketContext.cache.project);
+    return ok(context.cache.project);
   }
   const projectResult = await getSeoProjectByIdentifierAndOrgId(
-    websocketContext.db,
-    websocketContext.projectId,
-    websocketContext.organizationId,
+    context.db,
+    context.projectId,
+    context.organizationId,
     {
       businessBackground: true,
       imageSettings: true,
       writingSettings: true,
-      serpSnapshot: true,
       publishingSettings: true,
     },
   );
@@ -84,16 +85,16 @@ export async function getProjectInWebsocketChat(args?: {
     return ok(null);
   }
 
-  websocketContext.cache.project = projectResult.value;
-  if (args?.includeAuthors && !websocketContext.cache.project?.authors) {
+  context.cache.project = projectResult.value;
+  if (includeAuthors && !context.cache.project?.authors) {
     const authorsResult = await getSeoProjectAuthorsByProjectId(
-      websocketContext.db,
-      websocketContext.projectId,
+      context.db,
+      context.projectId,
     );
     if (!authorsResult.ok) {
       return authorsResult;
     }
-    websocketContext.cache.project.authors = authorsResult.value;
+    context.cache.project.authors = authorsResult.value;
   }
-  return ok(websocketContext.cache.project);
+  return ok(context.cache.project);
 }

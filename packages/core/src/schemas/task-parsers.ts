@@ -12,8 +12,8 @@ export const seoPlanKeywordTaskInputSchema = type({
   type: "'seo-plan-keyword'",
   projectId: "string",
   organizationId: "string",
-  campaignId: "string|null",
-  path: "string",
+  chatId: "string|null",
+  draftId: "string.uuid",
   "callbackInstanceId?": "string",
   "userId?": "string",
 });
@@ -22,8 +22,8 @@ export const seoWriteArticleTaskInputSchema = type({
   type: "'seo-write-article'",
   projectId: "string",
   organizationId: "string",
-  campaignId: "string|null",
-  path: "string",
+  chatId: "string|null",
+  draftId: "string.uuid",
   "userId?": "string",
 });
 
@@ -40,15 +40,17 @@ export const understandSiteTaskOutputSchema = type({
 
 export const seoPlanKeywordTaskOutputSchema = type({
   type: "'seo-plan-keyword'",
-  path: "string",
+  draftId: "string.uuid",
   outline: "string",
 });
 
 export const seoWriteArticleTaskOutputSchema = type({
   type: "'seo-write-article'",
-  path: "string",
+  draftId: "string.uuid",
   content: "string",
   articleType: articleTypeSchema,
+  heroImage: "string",
+  heroImageCaption: "string|null",
 });
 
 export const taskOutputSchema = type.or(

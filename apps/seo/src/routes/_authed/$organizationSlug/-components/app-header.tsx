@@ -10,6 +10,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@rectangular-labs/ui/components/ui/tooltip";
+import { useIsApple } from "@rectangular-labs/ui/hooks/use-apple";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -19,17 +20,10 @@ import { useProjectChat } from "./project-chat-provider";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserDropdown } from "./user-dropdown";
 
-function isApplePlatform() {
-  if (typeof navigator === "undefined") return false;
-  const platform =
-    // @ts-expect-error - userAgentData is not shipped a property in typescript
-    navigator.userAgentData?.platform ?? navigator.platform ?? "";
-  return /mac|iphone|ipad|ipod/i.test(platform);
-}
-
 export function AppHeader() {
   const navigate = useNavigate();
   const projectChat = useProjectChat();
+  const isApple = useIsApple();
   const [modKeyLabel, setModKeyLabel] = useState<"⌘" | "Ctrl">("Ctrl");
   const matcher = useMatchRoute();
   const projectParams = matcher({
@@ -98,8 +92,8 @@ export function AppHeader() {
   };
 
   useEffect(() => {
-    setModKeyLabel(isApplePlatform() ? "⌘" : "Ctrl");
-  }, []);
+    setModKeyLabel(isApple ? "⌘" : "Ctrl");
+  }, [isApple]);
 
   return (
     <header
@@ -176,9 +170,7 @@ export function AppHeader() {
             <TooltipTrigger asChild>
               <Button
                 aria-label="Open assistant"
-                disabled={
-                  !projectChat.organizationIdentifier || !projectChat.projectId
-                }
+                disabled={!projectChat.organizationId || !projectChat.projectId}
                 onClick={() => projectChat.toggle()}
                 size="icon"
                 variant="ghost"

@@ -1,11 +1,7 @@
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { schema } from "@rectangular-labs/db";
 import { convertToModelMessages, type streamText } from "ai";
-import type {
-  InitialContext,
-  SeoChatMessage,
-  WebSocketContext,
-} from "../../types";
+import type { ChatContext, SeoChatMessage } from "../../types";
 import {
   ARTICLE_TYPE_TO_WRITER_RULE,
   type ArticleType,
@@ -13,9 +9,8 @@ import {
   DEFAULT_USER_INSTRUCTIONS,
 } from "../workspace/workflow.constant";
 import { formatBusinessBackground } from "./format-business-background";
-import { createArticleResearchToolWithMetadata } from "./tools/article-research-tool";
-import { createArticleWritingToolWithMetadata } from "./tools/article-writing-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
+import { createInternalLinksToolWithMetadata } from "./tools/internal-links-tool";
 import { createPlannerToolsWithMetadata } from "./tools/planner-tools";
 import { createSkillTools } from "./tools/skill-tools";
 import {
@@ -82,6 +77,10 @@ ${args.skillsSection}
     : ""
 }
 <writing-requirements>
+- Use the primary keyword naturally in the opening paragraph and key headings.
+- Provide clear, direct answers that AI systems can extract.
+- Use structured formatting (lists/tables) for scannability when helpful.
+- Use semantic variations and LSI keywords where they fit naturally.
 - Follow the outline in outline tags closely; expand each section into helpful, grounded prose.
 - Include 3-5 internal links (use internal_links if outline lacks them).
 - Include 2-4 authoritative external links (use web_search if outline lacks them).
@@ -90,20 +89,47 @@ ${args.skillsSection}
 - Avoid "Introduction" as a section heading
 - Always end with a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion"
 - If a "Frequently Asked Questions" section is present, it must come after the wrap-up section and use the heading "Frequently Asked Questions"
+- Expand abbreviations on first use.
 - Keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (")
-- For images: 
-  - Have one hero image which visually represents the topic of the search intent of the user. Objective of the hero image is to have a visual representation of the topic. Avoid images which are purely re-telling the details of the articles, and images that are too data/word heavy.
+- For images:
+  - Select a hero image that visually represents the topic; return it in the heroImage field and include heroImageCaption if needed.
+  - Do not embed the hero image or its caption in the Markdown output.
   - Outside of screenshots/stock photos/generated images required based on the article type rule, have at least one image for one of the H2 section in the article. Identify which section has the potential to have the best visual. Sections which describe a process, concept, or system are the best candidates for image generation.
   - Use the markdown syntax to embed the image in the article along with relevant descriptive alt text and caption (if applicable).
-  - Place images immediately after the section title they belong to. Place the hero image immediately after the H1 title.
+  - Place images immediately after the section title they belong to.
 - For Bullet points:
   - Bold the heading of the bullet point, and use a colon after that before the explanation of the bullet point 
   - Always substantiate the bullet point by explaining what it means, what it entails, or how to use it.
 - For Tables:
   - use tables when comparing (pricing, specs, rankings), as a summary for long listicle, and for any structured content that might have too many entries. 
   - Bold the headings for the tables (first row, and if applicable, first column)
+- External links rules
+  - Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
+  - Statistics rules (strict)
+    - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
+    - Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
+    - If a number cannot be verified exactly, remove the number and rewrite the claim qualitatively.
+    - The statistic must match the source exactly — no rounding, no reinterpretation.
+  - Source quality rules
+    - Prefer research, standards bodies, reputable publications, or industry reports.
+    - Vendor pages are acceptable only for definitions or explanations — not performance claims.
+    - If the page does not clearly support the statement being made, do not use it.
+  <example>
+    Duplicate invoices typically represent a small but real portion of AP leakage, often cited as [well under 1% of annual spend](https://www.example.com/well+under+annual+spend).
+  </example>
+  <example>
+    According to the [Harvard Business Review](https://www.example.com/link-here), the most successful companies of the future will be those that can innovate fast.
+  </example>
+  <example>
+    Up to [20% of companies](https://www.example.com/link-here) will be disrupted by AI in the next 5 years.
+  </example>
+- Internal links rules
+  - Use web_search as needed to find and propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax if there are non suggested in the outline.
+  <example>
+    When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
+  </example>
 - You must follow the brand voice and user instructions provided in the context section below.
-- Output must be the FULL final Markdown article only (no commentary).
+- Output must be JSON with the full final Markdown article (no title, no hero image, no hero image caption), plus heroImage and heroImageCaption (if any).
 ${articleTypeRule ? `- Article-type rule for ${args.articleType}: ${articleTypeRule}` : ""}
 </writing-requirements>
 
@@ -131,37 +157,31 @@ ${args.outline ?? "(missing)"}
 export function createWriterAgent({
   messages,
   project,
-  publicImagesBucket,
-  cacheKV,
+  context,
 }: {
   messages: SeoChatMessage[];
-  project: NonNullable<WebSocketContext["cache"]["project"]>;
-  publicImagesBucket: InitialContext["publicImagesBucket"];
-  cacheKV: InitialContext["cacheKV"];
+  project: NonNullable<ChatContext["cache"]["project"]>;
+  context: ChatContext;
 }): Parameters<typeof streamText>[0] {
   const plannerTools = createPlannerToolsWithMetadata();
   const todoTools = createTodoToolWithMetadata({ messages });
 
   const fileTools = createFileToolsWithMetadata({
     userId: undefined,
-    publishingSettings: project.publishingSettings,
+    db: context.db,
+    organizationId: context.organizationId,
+    projectId: context.projectId,
+    chatId: context.chatId,
   });
-  const webTools = createWebToolsWithMetadata(project, cacheKV);
-  const researchTools = createArticleResearchToolWithMetadata({
-    project,
-    cacheKV,
-  });
-  const writingTools = createArticleWritingToolWithMetadata({
-    project,
-    publicImagesBucket,
-    cacheKV,
-  });
+  const webTools = createWebToolsWithMetadata(project, context.cacheKV);
+  const internalLinksTools = createInternalLinksToolWithMetadata(
+    project.websiteUrl,
+  );
 
   const skillDefinitions: AgentToolDefinition[] = [
     ...fileTools.toolDefinitions,
     ...webTools.toolDefinitions,
-    ...researchTools.toolDefinitions,
-    ...writingTools.toolDefinitions,
+    ...internalLinksTools.toolDefinitions,
   ];
   const skillsSection = formatToolSkillsSection(skillDefinitions);
 

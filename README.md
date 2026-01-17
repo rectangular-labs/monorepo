@@ -39,8 +39,7 @@ You'll need Docker to be running.
 
 Run `pnpm dev` to start up the frontend and server.
 
-Finally visit `https://localhost:6969` to see your dev
- server
+Finally visit `https://localhost:6969` to see your dev server
 
 ### First time set-up
 
@@ -63,3 +62,7 @@ This command will walk you through the process of scaffolding a new package dire
 ## Credits
 
 This repository was originally inspired by via [create t3 turbo](https://github.com/t3-oss/create-t3-turbo) and wouldn't be possible without all the other open source tooling.
+
+## Some notes
+
+331ecf293930266015ff0538b433076d7b0eaa29 is the commit for the websocket items

@@ -42,6 +42,10 @@
       {
         "class_name": "WebSocketServer",
         "name": "WEBSOCKET_SERVER"
+      },
+      {
+        "class_name": "Scheduler",
+        "name": "SCHEDULER"
       }
     ]
   },
@@ -51,7 +55,7 @@
     //   "tag": "v1"
     // },
     {
-      "new_sqlite_classes": ["WebSocketServer"],
+      "new_sqlite_classes": ["WebSocketServer", "Scheduler"],
       "tag": "v1"
     }
   ],
@@ -110,6 +114,10 @@
           {
             "class_name": "WebSocketServer",
             "name": "WEBSOCKET_SERVER"
+          },
+          {
+            "class_name": "Scheduler",
+            "name": "SCHEDULER"
           }
         ]
       },
@@ -119,7 +127,7 @@
         //   "tag": "v1"
         // },
         {
-          "new_sqlite_classes": ["WebSocketServer"],
+          "new_sqlite_classes": ["WebSocketServer", "Scheduler"],
           "tag": "v1"
         }
       ],
@@ -153,7 +161,7 @@
       ],
       "routes": [
         {
-          "pattern": "app.fluidposts.com",
+          "pattern": "www.fluidposts.com",
           "custom_domain": true
         }
       ]
@@ -181,6 +189,10 @@
           {
             "class_name": "WebSocketServer",
             "name": "WEBSOCKET_SERVER"
+          },
+          {
+            "class_name": "Scheduler",
+            "name": "SCHEDULER"
           }
         ]
       },
@@ -190,7 +202,7 @@
         //   "tag": "v1"
         // },
         {
-          "new_sqlite_classes": ["WebSocketServer"],
+          "new_sqlite_classes": ["WebSocketServer", "Scheduler"],
           "tag": "v1"
         }
       ],

@@ -16,6 +16,10 @@
       "types": "./dist/server.websocket.d.ts",
       "default": "./src/server.websocket.ts"
     },
+    "./scheduler-server": {
+      "types": "./dist/server.scheduler.d.ts",
+      "default": "./src/server.scheduler.ts"
+    },
     "./context": {
       "types": "./dist/context.d.ts",
       "default": "./src/context.ts"
@@ -53,10 +57,10 @@
     "@ai-sdk/openai": "^2.0.85",
     "@jimp/core": "^1.6.0",
     "@jimp/wasm-webp": "^1.6.0",
-    "@orpc/client": "^1.11.3",
-    "@orpc/contract": "^1.11.3",
-    "@orpc/server": "^1.11.3",
-    "@orpc/tanstack-query": "^1.11.3",
+    "@orpc/client": "^1.13.4",
+    "@orpc/contract": "^1.13.4",
+    "@orpc/server": "^1.13.4",
+    "@orpc/tanstack-query": "^1.13.4",
     "@rectangular-labs/api-core": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
     "@rectangular-labs/core": "workspace:*",
@@ -68,12 +72,10 @@
     "@rectangular-labs/task": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "ai": "^5.0.112",
-    "arktype": "^2.1.27",
+    "arktype": "^2.1.29",
     "aws4fetch": "^1.0.20",
     "cloudflare": "^5.2.0",
     "jimp": "^1.6.0",
-    "loro-adaptors": "0.4.0",
-    "loro-crdt": "^1.10.0",
-    "loro-protocol": "^0.2.0"
+    "partywhen": "^0.1.0"
   }
 }

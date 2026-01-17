@@ -1,18 +1,33 @@
+import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-arktype";
-import { relations } from "drizzle-orm";
-import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
+import { isNull, relations, sql } from "drizzle-orm";
+import {
+  index,
+  integer,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
-import { organization, user } from "../auth-schema";
-import { seoContentSchedule } from "./content-schedule-schema";
-import { seoContentSearchKeyword } from "./content-search-keywords-schema";
+import { organization } from "../auth-schema";
+import { seoContentChat } from "./content-chat-schema";
+import { seoContentUser } from "./content-user-schema";
 import { seoProject } from "./project-schema";
 
+/**
+ * Published content versions (immutable).
+ *
+ * Each row is a snapshot of content at the time of publishing.
+ * To edit published content: create a draft, modify it, publish → creates new version.
+ * To rollback: duplicate the old version with a larger version number.
+ */
 export const seoContent = pgSeoTable(
   "content",
   {
@@ -30,28 +45,43 @@ export const seoContent = pgSeoTable(
         onUpdate: "cascade",
       }),
 
+    // Versioning - each publish increments version for the same slug
     slug: text().notNull(),
+    version: integer().notNull().default(1),
+
+    // Content fields
     title: text().notNull(),
-    createdByUserId: text()
-      .notNull()
-      .references(() => user.id, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
-      }),
-    tags: jsonb()
-      .$type<string[]>()
-      .$defaultFn(() => []),
-    publishDestinations: jsonb()
-      .$type<string[]>()
-      .$defaultFn(() => []),
+    description: text().notNull(),
+    heroImage: text(),
+    heroImageCaption: text(),
+    primaryKeyword: text().notNull(),
+    articleType: text({ enum: ARTICLE_TYPES }).notNull(),
+    contentMarkdown: text().notNull(),
+    outline: text(),
+    notes: text(),
+
+    // Publishing metadata
+    publishedAt: timestamp({ mode: "date", withTimezone: true }).notNull(),
 
     ...timestamps,
   },
   (table) => [
-    index("seo_content_organization_idx").on(table.organizationId),
-    index("seo_content_project_idx").on(table.projectId),
-    index("seo_content_created_by_user_idx").on(table.createdByUserId),
-    unique("seo_content_project_slug_idx").on(table.projectId, table.slug),
+    // Each slug can have multiple versions, but (project, slug, version) is unique
+    unique("seo_content_project_slug_version_unique").on(
+      table.projectId,
+      table.slug,
+      table.version,
+    ),
+    // For finding latest version of a slug within a project/org
+    index("seo_content_org_project_slug_version_desc_idx")
+      .using(
+        "btree",
+        table.organizationId,
+        table.projectId,
+        table.slug,
+        sql`${table.version} DESC`,
+      )
+      .where(isNull(table.deletedAt)),
   ],
 );
 
@@ -64,20 +94,23 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
     fields: [seoContent.organizationId],
     references: [organization.id],
   }),
-  createdByUser: one(user, {
-    fields: [seoContent.createdByUserId],
-    references: [user.id],
-  }),
-  searchKeywordsMap: many(seoContentSearchKeyword),
-  schedules: many(seoContentSchedule),
+  contributingChatsMap: many(seoContentChat),
+  contributorsMap: many(seoContentUser),
 }));
 
 export const seoContentInsertSchema = createInsertSchema(seoContent).omit(
   "id",
   "createdAt",
   "updatedAt",
+  "deletedAt",
 );
 export const seoContentSelectSchema = createSelectSchema(seoContent);
 export const seoContentUpdateSchema = createUpdateSchema(seoContent)
   .omit("createdAt", "updatedAt")
-  .merge(type({ id: "string.uuid" }));
+  .merge(
+    type({
+      id: "string.uuid",
+      projectId: "string.uuid",
+      organizationId: "string",
+    }),
+  );

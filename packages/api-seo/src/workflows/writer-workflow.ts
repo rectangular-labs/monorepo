@@ -3,16 +3,19 @@ import {
   type WorkflowEvent,
   type WorkflowStep,
 } from "cloudflare:workers";
+import { NonRetryableError } from "cloudflare:workflows";
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
-import type { SeoFileStatus } from "@rectangular-labs/core/loro-file-system";
 import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type {
   seoWriteArticleTaskInputSchema,
   seoWriteArticleTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
-import { createDb } from "@rectangular-labs/db";
-import { writeToFile } from "@rectangular-labs/loro-file-system";
+import { createDb, type schema } from "@rectangular-labs/db";
+import {
+  getDraftById,
+  getSeoProjectByIdentifierAndOrgId,
+} from "@rectangular-labs/db/operations";
 import {
   generateText,
   type JSONSchema7,
@@ -29,14 +32,13 @@ import {
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { buildWriterSystemPrompt } from "../lib/ai/writer-agent";
 import { createPublicImagesBucket } from "../lib/bucket";
-import { configureDataForSeoClient } from "../lib/dataforseo/utils";
-import { createTask } from "../lib/task";
 import {
   analyzeArticleMarkdownForReview,
-  loadWorkspaceForWorkflow,
-  persistWorkspaceSnapshot,
   repairPublicBucketImageLinks,
-} from "../lib/workspace/workflow";
+} from "../lib/content/review-utils";
+import { writeContentDraft } from "../lib/content/write-content-draft";
+import { configureDataForSeoClient } from "../lib/dataforseo/utils";
+import { createTask } from "../lib/task";
 import {
   ARTICLE_TYPE_TO_WRITER_RULE,
   type ArticleType,
@@ -61,12 +63,103 @@ const inferArticleTypeSchema = type({
 }).describe("Chosen article type for the content");
 
 async function inferArticleType(args: {
+  title?: string | null;
   primaryKeyword?: string | null;
   notes?: string | null;
   outline?: string | null;
 }): Promise<ArticleType> {
-  const { primaryKeyword, notes, outline } = args;
-  if (!primaryKeyword && !outline && !notes) return "other";
+  const { title, primaryKeyword, notes, outline } = args;
+  if (!title && !primaryKeyword && !outline && !notes) {
+    logInfo("inferred article type defaulted", {
+      articleType: "other",
+      title,
+      primaryKeyword,
+    });
+    return "other";
+  }
+
+  const titleText = title?.toLowerCase() ?? "";
+  const keywordText = primaryKeyword?.toLowerCase() ?? "";
+  const notesText = notes?.toLowerCase() ?? "";
+  const outlineText = outline?.toLowerCase() ?? "";
+  const combinedText = [titleText, keywordText].filter(Boolean).join("\n");
+
+  const heuristicMatch = (() => {
+    if (
+      /\b(press release|press-release|press statement)\b/.test(combinedText)
+    ) {
+      return "press-release";
+    }
+    if (/\b(interview|q&a|q & a)\b/.test(combinedText)) {
+      return "interview";
+    }
+    if (/\b(case study|case-study)\b/.test(combinedText)) {
+      return "case-study";
+    }
+    if (/\b(whitepaper|white paper)\b/.test(combinedText)) {
+      return "whitepaper";
+    }
+    if (/\b(infographic)\b/.test(combinedText)) {
+      return "infographic";
+    }
+    if (/\b(product update|release notes|changelog)\b/.test(combinedText)) {
+      return "product-update";
+    }
+    if (/\b(event recap|recap|conference recap)\b/.test(combinedText)) {
+      return "event-recap";
+    }
+    if (/\b(research summary|research roundup)\b/.test(combinedText)) {
+      return "research-summary";
+    }
+    if (/\b(contest|giveaway)\b/.test(combinedText)) {
+      return "contest-giveaway";
+    }
+    if (
+      /\b(best|top|must-read|must read|ranking|ranked|top \d+|top-\d+)\b/.test(
+        combinedText,
+      )
+    ) {
+      return "best-of-list";
+    }
+    if (
+      /\b(vs\.?|versus|comparison|compare|alternatives?)\b/.test(combinedText)
+    ) {
+      return "comparison";
+    }
+    if (/\b(pricing|price|cost|rates|fees|plans)\b/.test(combinedText)) {
+      return "comparison";
+    }
+    if (
+      /\b(how to|step-by-step|step by step|tutorial|guide)\b/.test(combinedText)
+    ) {
+      return "how-to";
+    }
+    if (
+      /\b(faq|frequently asked questions|frequently asked question|frequently ask questions|frequently ask question)\b/.test(
+        combinedText,
+      )
+    ) {
+      return "faq";
+    }
+    if (/\b(news|announcement|breaking)\b/.test(combinedText)) {
+      return "news";
+    }
+    if (/\b(best practice|best-practice)\b/.test(combinedText)) {
+      return "best-practices";
+    }
+    if (/\b(list of|checklist|tips|ideas)\b/.test(combinedText)) {
+      return "listicle";
+    }
+    return null;
+  })();
+  if (heuristicMatch) {
+    logInfo("inferred article type via heuristic", {
+      articleType: heuristicMatch,
+      title,
+      primaryKeyword,
+    });
+    return heuristicMatch;
+  }
 
   const prompt = `Choose the single best article type for the intended content.
 
@@ -96,18 +189,23 @@ Decision rules:
 - If notes clearly specify a format (e.g. "press release", "interview", "case study"), prioritize notes over outline.
 - If the outline structure signals a format (steps, Q&A headings, comparisons, rankings), match it.
 - Use "best-of-list" only for explicit "best/top" ranking intent; otherwise use "listicle" for general lists.
-- Use "other" if none apply.
+- Pricing, cost, or rate-focused titles usually map to "comparison".
+- Use your reasoning and judgement to discern between the other article types. use "other" if none of the article types apply.
+
+<title>
+${titleText ?? ""}
+</title>
 
 <primary_keyword>
-${primaryKeyword ?? ""}
+${keywordText ?? ""}
 </primary_keyword>
 
 <notes>
-${notes ?? ""}
+${notesText ?? ""}
 </notes>
 
 <outline>
-${outline ?? ""}
+${outlineText ?? ""}
 </outline>`;
 
   try {
@@ -126,13 +224,69 @@ ${outline ?? ""}
       }),
       prompt,
     });
-    return result.experimental_output.articleType;
+    const inferred = result.experimental_output.articleType;
+    logInfo("inferred article type via model", {
+      articleType: inferred,
+      title,
+      primaryKeyword,
+    });
+    return inferred;
   } catch (error) {
     logError("failed to infer article type; defaulting to other", {
       error,
     });
+    logInfo("inferred article type defaulted", {
+      articleType: "other",
+      title,
+      primaryKeyword,
+    });
     return "other";
   }
+}
+
+async function loadDraftAndProject(args: {
+  db: ReturnType<typeof createDb>;
+  organizationId: string;
+  projectId: string;
+  draftId: string;
+}): Promise<{
+  draft: typeof schema.seoContentDraft.$inferSelect;
+  project: typeof schema.seoProject.$inferSelect;
+}> {
+  const draftResult = await getDraftById({
+    db: args.db,
+    organizationId: args.organizationId,
+    projectId: args.projectId,
+    id: args.draftId,
+  });
+  if (!draftResult.ok) {
+    throw new NonRetryableError(draftResult.error.message);
+  }
+  if (!draftResult.value) {
+    throw new NonRetryableError(`Draft not found for ${args.draftId}`);
+  }
+  const draft = draftResult.value;
+
+  const projectResult = await getSeoProjectByIdentifierAndOrgId(
+    args.db,
+    args.projectId,
+    args.organizationId,
+    {
+      publishingSettings: true,
+      writingSettings: true,
+      imageSettings: true,
+      businessBackground: true,
+    },
+  );
+  if (!projectResult.ok) {
+    throw new NonRetryableError(projectResult.error.message);
+  }
+  if (!projectResult.value) {
+    throw new NonRetryableError(`Project (${args.projectId}) not found`);
+  }
+  const project = projectResult.value;
+
+  return { draft, project };
 }
 
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
@@ -148,10 +302,10 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
 
     logInfo("start", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
       organizationId: input.organizationId,
       projectId: input.projectId,
-      campaignId: input.campaignId,
+      chatId: input.chatId,
       userId: input.userId,
     });
     configureDataForSeoClient();
@@ -159,25 +313,25 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
     const isOutlinePresent = await step.do(
       "Ensure outline is present",
       async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
+        const db = createDb();
+        const { draft } = await loadDraftAndProject({
+          db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
+          draftId: input.draftId,
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const outline = workspaceResult.value.node.data.get("outline");
+        const outline = draft.outline;
         if (outline) {
           return true;
         }
         const result = await createTask({
-          db: createDb(),
+          db,
           input: {
             type: "seo-plan-keyword",
             projectId: input.projectId,
             organizationId: input.organizationId,
-            campaignId: input.campaignId,
-            path: input.path,
+            chatId: input.chatId,
+            draftId: input.draftId,
             callbackInstanceId: event.instanceId,
             userId: input.userId,
           },
@@ -187,7 +341,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
         if (!result.ok) {
           logError("failed to create planner task", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             error: result.error,
           });
           throw result.error;
@@ -197,15 +351,15 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
     );
     logInfo("outline check", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
       isOutlinePresent,
     });
     if (!isOutlinePresent) {
       logInfo("waiting for planner callback", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
-      const plannerEvent = await step.waitForEvent<{ path: string }>(
+      const plannerEvent = await step.waitForEvent<{ draftId: string }>(
         "wait for planner callback",
         {
           type: "planner_complete",
@@ -214,63 +368,59 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       );
       logInfo("received planner callback", {
         instanceId: event.instanceId,
-        expectedPath: input.path,
-        receivedPath: plannerEvent.payload.path,
+        expectedDraftId: input.draftId,
+        receivedDraftId: plannerEvent.payload.draftId,
       });
-      if (plannerEvent.payload.path !== input.path) {
-        logError("planner callback path mismatch", {
+      if (plannerEvent.payload.draftId !== input.draftId) {
+        logError("planner callback draftId mismatch", {
           instanceId: event.instanceId,
-          expectedPath: input.path,
-          receivedPath: plannerEvent.payload.path,
+          expectedDraftId: input.draftId,
+          receivedDraftId: plannerEvent.payload.draftId,
         });
         throw new Error(
-          `Planner callback path mismatch: expected ${input.path}, got ${plannerEvent.payload.path}`,
+          `Planner callback draftId mismatch: expected ${input.draftId}, got ${plannerEvent.payload.draftId}`,
         );
       }
     }
 
-    await step.do("mark generating", async () => {
-      const workspaceResult = await loadWorkspaceForWorkflow({
-        organizationId: input.organizationId,
+    await step.do("mark writing", async () => {
+      const db = createDb();
+      const writeResult = await writeContentDraft({
+        db,
+        chatId: input.chatId ?? null,
+        userId: input.userId ?? null,
         projectId: input.projectId,
-        campaignId: input.campaignId,
-        path: input.path,
+        organizationId: input.organizationId,
+        lookup: { type: "id", id: input.draftId },
+        draftNewValues: {
+          status: "writing",
+        },
       });
-      if (!workspaceResult.ok) throw workspaceResult.error;
-      const { loroDoc, workspaceBlobUri } = workspaceResult.value;
-      const writeResult = await writeToFile({
-        tree: loroDoc.getTree("fs"),
-        path: input.path,
-        metadata: [
-          { key: "status", value: "generating" satisfies SeoFileStatus },
-        ],
-      });
-      if (!writeResult.success) throw new Error(writeResult.message);
-      const persistResult = await persistWorkspaceSnapshot({
-        workspaceBlobUri,
-        loroDoc,
-      });
-      if (!persistResult.ok) throw persistResult.error;
+      if (!writeResult.ok) throw new Error(writeResult.error.message);
     });
-    logInfo("status set to generating", {
+    logInfo("status set to writing", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
     });
     try {
-      const { text: articleMarkdown, articleType } = await step.do(
+      const {
+        text: articleMarkdown,
+        articleType,
+        heroImage,
+        heroImageCaption,
+      } = await step.do(
         "generate article markdown",
         {
           timeout: "30 minutes",
         },
         async () => {
-          const workspaceResult = await loadWorkspaceForWorkflow({
+          const db = createDb();
+          const { project, draft } = await loadDraftAndProject({
+            db,
             organizationId: input.organizationId,
             projectId: input.projectId,
-            campaignId: input.campaignId,
-            path: input.path,
+            draftId: input.draftId,
           });
-          if (!workspaceResult.ok) throw workspaceResult.error;
-          const { project, node } = workspaceResult.value;
 
           const webTools = createWebToolsWithMetadata(project, this.env.CACHE);
 
@@ -284,18 +434,27 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
 
           logInfo("writer tools ready", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             webToolCount: Object.keys(webTools.tools).length,
             imageToolCount: Object.keys(imageTools.tools).length,
           });
 
-          const outline = node.data.get("outline");
-          const primaryKeyword = node.data.get("primaryKeyword");
-          const notes = node.data.get("notes");
-          const articleType = await inferArticleType({
-            primaryKeyword,
-            notes,
-            outline,
+          const outline = draft.outline;
+          const primaryKeyword = draft.primaryKeyword;
+          const notes = draft.notes;
+          const articleType =
+            draft.articleType ??
+            (await inferArticleType({
+              title: draft.title,
+              primaryKeyword,
+              notes,
+              outline,
+            }));
+          logInfo("article type resolved", {
+            instanceId: event.instanceId,
+            draftId: input.draftId,
+            articleType,
+            source: draft.articleType ? "draft" : "inferred",
           });
           const systemPrompt = buildWriterSystemPrompt({
             project,
@@ -303,17 +462,19 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             mode: "workflow",
             articleType,
             primaryKeyword,
-            outline,
+            outline: outline ?? undefined,
           });
 
           logInfo("starting article generation", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
           });
           let approved = false;
           let changes: string[] = [];
           let attempts = 0;
           let text = "";
+          let heroImage = "";
+          let heroImageCaption: string | null = null;
           while (!approved && attempts < 3) {
             const result = await generateText({
               model: openai("gpt-5.2"),
@@ -349,6 +510,19 @@ ${changes.join("\n")}
                     : "Write the full article now.",
                 },
               ],
+              experimental_output: Output.object({
+                schema: jsonSchema<{
+                  heroImage: string;
+                  heroImageCaption: string | null;
+                  markdown: string;
+                }>(
+                  type({
+                    heroImage: "string",
+                    heroImageCaption: "string|null",
+                    markdown: "string",
+                  }).toJsonSchema() as JSONSchema7,
+                ),
+              }),
               onStepFinish: (step) => {
                 logInfo(`[generateArticle] Step completed:`, {
                   text: step.text,
@@ -373,18 +547,23 @@ ${changes.join("\n")}
               stopWhen: [stepCountIs(40)],
             });
 
+            const outputMarkdown = result.experimental_output.markdown.trim();
             const repairedLinks = repairPublicBucketImageLinks({
-              markdown: result.text.trim(),
+              markdown: outputMarkdown,
               orgId: input.organizationId,
               projectId: input.projectId,
               kind: "content-image",
             });
             text = repairedLinks.markdown;
+            heroImage = result.experimental_output.heroImage.trim();
+            heroImageCaption =
+              result.experimental_output.heroImageCaption?.trim() || null;
             if (!text) throw new Error("Empty article returned by model");
             logInfo("article generated. Going through review process.", {
               instanceId: event.instanceId,
-              path: input.path,
+              draftId: input.draftId,
               articleChars: text.length,
+              heroImagePresent: !!heroImage,
               usage: result.usage ?? null,
               replacedCount: repairedLinks.replacedCount,
             });
@@ -398,7 +577,12 @@ ${changes.join("\n")}
               websiteUrl: project.websiteUrl,
               outline,
             });
-
+            const utcDate = new Intl.DateTimeFormat("en-US", {
+              timeZone: "UTC",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }).format(new Date());
             const { experimental_output: reviewResult } = await generateText({
               model: google("gemini-3-flash-preview"),
               providerOptions: {
@@ -428,11 +612,7 @@ You are a strict SEO content QA reviewer. Your job is to verify the writer follo
 - Internal links: at least 3 internal links (relative URLs and URLs whose host matches the website host count as internal).
 - External links: at least 2 external links whose host is NOT the website host.
 - Images:
-  - Exactly 1 hero image.
-    - There should be no placeholder blockquote line that mentions "Hero image".
-    - If no marker exists, treat the only image before the first H2 as hero (if exactly one exists).
-    - Otherwise, treat the first image in the document as hero.
-  - At least 1 non-hero image inside an H2 section (an H2 section that contains an image other than the hero image).
+  - At least 1 image inside an H2 section (an H2 section that contains an image).
   - All images must have non-empty, descriptive alt text.
 - Formatting:
   - No em dashes (—) anywhere.
@@ -451,6 +631,7 @@ If not approved, changes must be a prioritized, actionable edit list (include ob
 </output>
 
 <project-context>
+- Today's date: ${utcDate} (UTC timezone)
 - Website URL: ${project.websiteUrl}
 - Article type: ${articleType ?? "(missing)"}
 - Primary keyword: ${primaryKeyword ?? "(missing)"}
@@ -484,7 +665,7 @@ ${text}
               onStepFinish: (step) => {
                 logInfo("review step completed", {
                   instanceId: event.instanceId,
-                  path: input.path,
+                  draftId: input.draftId,
                   text: step.text,
                   toolResults: JSON.stringify(step.toolResults, null, 2),
                   usage: step.usage,
@@ -510,89 +691,62 @@ ${text}
             ({ approved, changes } = reviewResult);
             logInfo("review result", {
               instanceId: event.instanceId,
-              path: input.path,
+              draftId: input.draftId,
               approved,
               changes,
             });
           }
-          return { text, articleType };
+          return { text, articleType, heroImage, heroImageCaption };
         },
       );
 
       await step.do("Save article to file and update status", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
+        const db = createDb();
+        const { project } = await loadDraftAndProject({
+          db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
+          draftId: input.draftId,
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { loroDoc, workspaceBlobUri, project } = workspaceResult.value;
-        const writeResult = await writeToFile({
-          tree: loroDoc.getTree("fs"),
-          path: input.path,
-          content: articleMarkdown,
-          metadata: [
-            {
-              key: "status",
-              value: project.publishingSettings?.requireContentReview
-                ? ("pending-review" satisfies SeoFileStatus)
-                : ("scheduled" satisfies SeoFileStatus),
-            },
-            { key: "articleType", value: articleType },
-          ],
+        const writeResult = await writeContentDraft({
+          db,
+          chatId: input.chatId,
+          userId: input.userId ?? null,
+          projectId: input.projectId,
+          organizationId: input.organizationId,
+          lookup: { type: "id", id: input.draftId },
+          draftNewValues: {
+            contentMarkdown: articleMarkdown,
+            heroImage,
+            heroImageCaption,
+            status: project.publishingSettings?.requireContentReview
+              ? "pending-review"
+              : "scheduled",
+            articleType,
+          },
         });
-        if (!writeResult.success) throw new Error(writeResult.message);
-        const persistResult = await persistWorkspaceSnapshot({
-          workspaceBlobUri,
-          loroDoc,
-        });
-        if (!persistResult.ok) throw persistResult.error;
+        if (!writeResult.ok) throw new Error(writeResult.error.message);
       });
       logInfo("article saved", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
       return {
         type: "seo-write-article",
-        path: input.path,
+        draftId: input.draftId,
         content: articleMarkdown,
         articleType,
+        heroImage,
+        heroImageCaption,
       } satisfies typeof seoWriteArticleTaskOutputSchema.infer;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unknown error";
       logError("generation failed", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
         message,
       });
-      await step.do("mark generation failed", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
-          organizationId: input.organizationId,
-          projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
-        });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { loroDoc, workspaceBlobUri } = workspaceResult.value;
-        await writeToFile({
-          tree: loroDoc.getTree("fs"),
-          path: input.path,
-          metadata: [
-            {
-              key: "status",
-              value: "generation-failed" satisfies SeoFileStatus,
-            },
-            { key: "error", value: `Generation failed: ${message}` },
-            { key: "workflowId", value: event.instanceId },
-          ],
-        });
-        const persistResult = await persistWorkspaceSnapshot({
-          workspaceBlobUri,
-          loroDoc,
-        });
-        if (!persistResult.ok) throw persistResult.error;
-      });
+
       throw e;
     }
   }

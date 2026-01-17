@@ -11,8 +11,11 @@ import type {
   seoPlanKeywordTaskInputSchema,
   seoPlanKeywordTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
-import type { schema } from "@rectangular-labs/db";
-import { writeToFile } from "@rectangular-labs/loro-file-system";
+import { createDb, type schema } from "@rectangular-labs/db";
+import {
+  getDraftById,
+  getSeoProjectByIdentifierAndOrgId,
+} from "@rectangular-labs/db/operations";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import {
   generateText,
@@ -27,16 +30,13 @@ import {
   formatTodoFocusReminder,
 } from "../lib/ai/tools/todo-tool";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
+import { writeContentDraft } from "../lib/content/write-content-draft";
 import {
   configureDataForSeoClient,
   fetchSerpWithCache,
   getLocationAndLanguage,
-  getSerpCacheDetails,
+  getSerpCacheOptions,
 } from "../lib/dataforseo/utils";
-import {
-  loadWorkspaceForWorkflow,
-  persistWorkspaceSnapshot,
-} from "../lib/workspace/workflow";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -149,6 +149,12 @@ async function generateOutline({
     Error
   >
 > {
+  const utcDate = new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
   const haveAiOverview = serp.some((s) => s.type === "ai_overview");
   const havePeopleAlsoAsk = serp.some((s) => s.type === "people_also_ask");
   const system = `<role>
@@ -218,21 +224,34 @@ ${
     : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Include any relevant stats that we should cite or internal links to relevant articles that we should link to. Make sure that all links have either been validated via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links.
+- Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
+  - Propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
+    <example>
+      When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
+    </example>
+  - Statistics rules (strict)
+    - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
+    - Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
+    - If a number cannot be verified exactly, remove the number and rewrite the claim qualitatively.
+    - The statistic must match the source exactly — no rounding, no reinterpretation.
+  - Source quality rules
+    - Prefer research, standards bodies, reputable publications, or industry reports.
+    - Vendor pages are acceptable only for definitions or explanations — not performance claims.
+    - If the page does not clearly support the statement being made, do not use it.
+  <example>
+    Duplicate invoices typically represent a small but real portion of AP leakage, [often cited as well under 1% of annual spend](/path/to/industry overview).
+  </example>
   <example>
     According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
   </example>
   <example>
     Up to [20% of companies](url_link) will be disrupted by AI in the next 5 years.
   </example>
-  - Use internal_links to propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
-  <example>
-    When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
-  </example>
 </critical-plan-requirements>
 
 
 <project context>
+- Today's date: ${utcDate} (UTC timezone)
 - Website: ${project.websiteUrl}
 - Primary keyword: ${primaryKeyword}
 - Target country: ${locationName}
@@ -246,6 +265,7 @@ ${JSON.stringify(serp)}
 
   const todoTool = createTodoToolWithMetadata({ messages: [] });
   const webTools = createWebToolsWithMetadata(project, cache);
+
   const outputSchema = type({
     title: type("string").describe(
       "Meta title (max 60 characters): clear, enticing, includes the primary keyword once naturally, directly answers search intent.",
@@ -336,10 +356,10 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
     logInfo("start", {
       instanceId: event.instanceId,
-      path: input.path,
+      draftId: input.draftId,
       organizationId: input.organizationId,
       projectId: input.projectId,
-      campaignId: input.campaignId,
+      chatId: input.chatId,
       hasCallbackInstanceId: Boolean(input.callbackInstanceId),
     });
     configureDataForSeoClient();
@@ -353,23 +373,44 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         project,
         notes,
       } = await step.do("fetch SERP for keyword", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
+        const db = createDb();
+
+        const contentResult = await getDraftById({
+          db,
           organizationId: input.organizationId,
           projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
+          id: input.draftId,
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { node, project } = workspaceResult.value;
+        if (!contentResult.ok) {
+          throw new NonRetryableError(contentResult.error.message);
+        }
+        if (!contentResult.value) {
+          throw new NonRetryableError(`Draft not found for ${input.draftId}`);
+        }
+        const content = contentResult.value;
+        const primaryKeyword = content.primaryKeyword;
+
+        const projectResult = await getSeoProjectByIdentifierAndOrgId(
+          db,
+          input.projectId,
+          input.organizationId,
+          {
+            publishingSettings: true,
+            writingSettings: true,
+            imageSettings: true,
+            businessBackground: true,
+          },
+        );
+        if (!projectResult.ok) {
+          throw new NonRetryableError(projectResult.error.message);
+        }
+        if (!projectResult.value) {
+          throw new NonRetryableError(`Project (${input.projectId}) not found`);
+        }
+        const project = projectResult.value;
 
         const { locationName, languageCode } = getLocationAndLanguage(project);
-        const primaryKeyword = node.data.get("primaryKeyword");
-        if (!primaryKeyword) {
-          throw new NonRetryableError(
-            `Primary keyword not found for ${input.path}`,
-          );
-        }
-        const serpCacheDetails = getSerpCacheDetails(
+        const serpCacheOptions = getSerpCacheOptions(
           primaryKeyword,
           locationName,
           languageCode,
@@ -382,18 +423,17 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         });
         if (!serpResult.ok) throw serpResult.error;
         return {
-          serpKey: serpCacheDetails.key,
+          serpKey: serpCacheOptions.key,
           primaryKeyword,
           locationName,
           languageCode,
           project,
-          notes: node.data.get("notes"),
+          notes: content.notes ?? undefined,
         };
       });
 
       logInfo("inputs ready", {
         instanceId: event.instanceId,
-        path: input.path,
         serpKey,
         primaryKeyword,
         locationName,
@@ -409,6 +449,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
         async () => {
           logInfo("fetching SERP (cached) for outline", {
             instanceId: event.instanceId,
+            draftId: input.draftId,
             serpKey,
             primaryKeyword,
             locationName,
@@ -427,7 +468,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
           logInfo("Getting SERP outlines", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             primaryKeyword,
             serpItems: serp.value,
           });
@@ -438,7 +479,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
 
           logInfo("generating outline", {
             instanceId: event.instanceId,
-            path: input.path,
+            draftId: input.draftId,
             primaryKeyword,
             serpItems: serp.value,
           });
@@ -456,7 +497,6 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           const { outline, title, description } = result.value;
           logInfo("outline generated", {
             instanceId: event.instanceId,
-            path: input.path,
             outlineChars: outline.length,
             titleChars: title.length,
             descriptionChars: description.length,
@@ -466,35 +506,26 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
       );
 
       await step.do("store outline in node", async () => {
-        const workspaceResult = await loadWorkspaceForWorkflow({
-          organizationId: input.organizationId,
+        const db = createDb();
+        const writeResult = await writeContentDraft({
+          db,
+          chatId: input.chatId ?? null,
+          userId: input.userId ?? null,
           projectId: input.projectId,
-          campaignId: input.campaignId,
-          path: input.path,
+          organizationId: input.organizationId,
+          lookup: { type: "id", id: input.draftId },
+          draftNewValues: {
+            outline: outlineResult.outline,
+            title: outlineResult.title,
+            description: outlineResult.description,
+          },
         });
-        if (!workspaceResult.ok) throw workspaceResult.error;
-        const { loroDoc, workspaceBlobUri } = workspaceResult.value;
-
-        const writeResult = await writeToFile({
-          tree: loroDoc.getTree("fs"),
-          path: input.path,
-          metadata: [
-            { key: "outline", value: outlineResult.outline },
-            { key: "title", value: outlineResult.title },
-            { key: "description", value: outlineResult.description },
-          ],
-        });
-        if (!writeResult.success) throw new Error(writeResult.message);
-        const persistResult = await persistWorkspaceSnapshot({
-          loroDoc,
-          workspaceBlobUri,
-        });
-        if (!persistResult.ok) throw persistResult.error;
+        if (!writeResult.ok) throw new Error(writeResult.error.message);
       });
 
       logInfo("outline stored", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
 
       const { callbackInstanceId } = input;
@@ -504,36 +535,36 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
             await this.env.SEO_WRITER_WORKFLOW.get(callbackInstanceId);
           await instance.sendEvent({
             type: "planner_complete",
-            payload: { path: input.path },
+            payload: { draftId: input.draftId },
           });
         });
         logInfo("callback notified", {
           instanceId: event.instanceId,
-          path: input.path,
+          draftId: input.draftId,
           callbackInstanceId,
         });
       } else {
         logInfo("no callbackInstanceId, skipping notify", {
           instanceId: event.instanceId,
-          path: input.path,
+          draftId: input.draftId,
         });
       }
 
       logInfo("complete", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
       });
 
       return {
         type: "seo-plan-keyword",
-        path: input.path,
+        draftId: input.draftId,
         outline: outlineResult.outline,
       } satisfies typeof seoPlanKeywordTaskOutputSchema.infer;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logError("failed", {
         instanceId: event.instanceId,
-        path: input.path,
+        draftId: input.draftId,
         message,
       });
       throw error;
