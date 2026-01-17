@@ -448,7 +448,6 @@ export function ArticleEditorTakeover({
     });
     return null;
   }
-  console.log("draft.heroImage", draft.heroImage);
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
