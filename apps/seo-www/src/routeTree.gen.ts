@@ -17,7 +17,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogRssDotxmlRouteImport } from './routes/blog/rss[.]xml'
 import { Route as BlogSplatRouteImport } from './routes/blog/$'
-import { Route as ApiWaitlistRouteImport } from './routes/api/waitlist'
 import { Route as ApiBlogSearchRouteImport } from './routes/api/blog/search'
 
 const WhoWeAreRoute = WhoWeAreRouteImport.update({
@@ -60,11 +59,6 @@ const BlogSplatRoute = BlogSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => BlogRouteRoute,
 } as any)
-const ApiWaitlistRoute = ApiWaitlistRouteImport.update({
-  id: '/api/waitlist',
-  path: '/api/waitlist',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiBlogSearchRoute = ApiBlogSearchRouteImport.update({
   id: '/api/blog/search',
   path: '/api/blog/search',
@@ -77,7 +71,6 @@ export interface FileRoutesByFullPath {
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/blog/': typeof BlogIndexRoute
@@ -88,7 +81,6 @@ export interface FileRoutesByTo {
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/blog': typeof BlogIndexRoute
@@ -101,7 +93,6 @@ export interface FileRoutesById {
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/blog/': typeof BlogIndexRoute
@@ -115,7 +106,6 @@ export interface FileRouteTypes {
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
-    | '/api/waitlist'
     | '/blog/$'
     | '/blog/rss.xml'
     | '/blog/'
@@ -126,7 +116,6 @@ export interface FileRouteTypes {
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
-    | '/api/waitlist'
     | '/blog/$'
     | '/blog/rss.xml'
     | '/blog'
@@ -138,7 +127,6 @@ export interface FileRouteTypes {
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
-    | '/api/waitlist'
     | '/blog/$'
     | '/blog/rss.xml'
     | '/blog/'
@@ -151,7 +139,6 @@ export interface RootRouteChildren {
   ReferralRoute: typeof ReferralRoute
   SeoExpertsRoute: typeof SeoExpertsRoute
   WhoWeAreRoute: typeof WhoWeAreRoute
-  ApiWaitlistRoute: typeof ApiWaitlistRoute
   ApiBlogSearchRoute: typeof ApiBlogSearchRoute
 }
 
@@ -213,13 +200,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSplatRouteImport
       parentRoute: typeof BlogRouteRoute
     }
-    '/api/waitlist': {
-      id: '/api/waitlist'
-      path: '/api/waitlist'
-      fullPath: '/api/waitlist'
-      preLoaderRoute: typeof ApiWaitlistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/blog/search': {
       id: '/api/blog/search'
       path: '/api/blog/search'
@@ -252,7 +232,6 @@ const rootRouteChildren: RootRouteChildren = {
   ReferralRoute: ReferralRoute,
   SeoExpertsRoute: SeoExpertsRoute,
   WhoWeAreRoute: WhoWeAreRoute,
-  ApiWaitlistRoute: ApiWaitlistRoute,
   ApiBlogSearchRoute: ApiBlogSearchRoute,
 }
 export const routeTree = rootRouteImport

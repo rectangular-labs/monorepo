@@ -15,15 +15,15 @@ function WhoWeArePage() {
             About us
           </p>
           <h1 className="font-regular text-4xl text-foreground tracking-tight sm:text-5xl lg:text-6xl">
-            We’re Winston and Aaron.
+            We&apos;re Winston and Aaron.
             <br />
             <span className="font-semibold text-primary">
               An engineer and a strategist.
             </span>
           </h1>
           <p className="max-w-3xl text-lg text-muted-foreground leading-relaxed sm:text-xl">
-            We actually build and rank sites ourselves — and we’re productizing
-            the system that works.
+            We actually build and rank sites ourselves — and we&apos;re
+            productizing the system that works.
           </p>
         </div>
       </Section>
@@ -55,9 +55,9 @@ function WhoWeArePage() {
 
           <div className="rounded-3xl border border-primary/15 bg-primary/5 p-8">
             <p className="font-semibold text-foreground text-lg leading-relaxed">
-              We know what we’re doing in SEO — and we’re productizing that
-              knowledge so it’s accessible to everyone, not just teams with time
-              and budget.
+              We know what we&apos;re doing in SEO — and we&apos;re productizing
+              that knowledge so it&apos;s accessible to everyone, not just teams
+              with time and budget.
             </p>
           </div>
         </div>

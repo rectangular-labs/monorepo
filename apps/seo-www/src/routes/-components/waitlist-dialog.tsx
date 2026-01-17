@@ -8,48 +8,123 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@rectangular-labs/ui/components/ui/dialog";
+import {
+  arktypeResolver,
+  Field,
+  FieldError,
+  FieldLabel,
+  useForm,
+} from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { cn } from "@rectangular-labs/ui/utils/cn";
-import { useMemo, useState } from "react";
+import { createServerFn } from "@tanstack/react-start";
+import { type } from "arktype";
+import { useState } from "react";
+import { serverEnv } from "~/lib/env";
 import { ONBOARD_LINK } from "./constants";
+
+const contactSchema = type({
+  name: "string > 0",
+  email: "string.email",
+});
+
+type ContactInput = typeof contactSchema.infer;
+
+/**
+ * Server function to create a contact in Apollo.io.
+ * Uses the Apollo Contact API to add the email to the CRM.
+ * @see https://docs.apollo.io/reference/create-a-contact
+ */
+const createApolloContact = createServerFn({ method: "POST" })
+  .inputValidator((input: ContactInput) => {
+    const result = contactSchema(input);
+    if (result instanceof type.errors) {
+      throw new Error("Invalid input");
+    }
+    return result;
+  })
+  .handler(async ({ data }: { data: ContactInput }) => {
+    const env = serverEnv();
+    const apiKey = env.APOLLO_CONTACT_API_KEY;
+
+    // Split name into first and last name for Apollo
+    const nameParts = data.name.trim().split(/\s+/);
+    const firstName = nameParts[0] ?? "";
+    const lastName = nameParts.slice(1).join(" ") || undefined;
+
+    const response = await fetch("https://api.apollo.io/v1/contacts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "Cache-Control": "no-cache",
+      },
+      body: JSON.stringify({
+        email: data.email.trim(),
+        first_name: firstName,
+        last_name: lastName,
+        // Enable deduplication to prevent duplicate contacts
+        run_dedupe: true,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = (await response.json().catch(() => null)) as {
+        error?: string;
+        message?: string;
+      } | null;
+      const message =
+        errorData?.error || errorData?.message || "Unable to submit";
+      throw new Error(message);
+    }
+
+    // Send Telegram notification
+    const telegramMessage = `🎉 New waitlist signup!\n\n👤 Name: ${data.name}\n📧 Email: ${data.email}`;
+    try {
+      await fetch(
+        `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: env.TELEGRAM_CHAT_ID,
+            text: telegramMessage,
+            parse_mode: "HTML",
+          }),
+        },
+      );
+    } catch {
+      // Don't fail the signup if Telegram notification fails
+    }
+
+    return { ok: true };
+  });
 
 type Props = {
   trigger: React.ReactElement;
   className?: string;
 };
 
-export function WaitlistDialog({ trigger, className }: Props) {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [error, setError] = useState<string | null>(null);
+export function WaitListDialog({ trigger, className }: Props) {
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const canSubmit = useMemo(() => {
-    const trimmed = email.trim();
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-  }, [email]);
+  const form = useForm({
+    resolver: arktypeResolver(contactSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+    },
+  });
 
-  async function submit() {
-    setStatus("loading");
-    setError(null);
+  async function onSubmit(data: ContactInput) {
+    setSubmitError(null);
     try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
-        throw new Error(data?.error ?? "Unable to submit");
-      }
-      // Both "registered" and "already_registered" are treated as success UX.
+      await createApolloContact({ data });
       setStatus("success");
     } catch (e) {
       setStatus("error");
-      setError(e instanceof Error ? e.message : "Unable to submit");
+      setSubmitError(e instanceof Error ? e.message : "Unable to submit");
     }
   }
 
@@ -66,55 +141,59 @@ export function WaitlistDialog({ trigger, className }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
-          <div className="grid gap-2">
-            <label className="font-medium text-sm" htmlFor="waitlist-email">
-              Email
-            </label>
+        <form className="space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
+          <Field data-invalid={!!form.formState.errors.name}>
+            <FieldLabel htmlFor="waitlist-name">Name</FieldLabel>
+            <Input
+              autoComplete="name"
+              id="waitlist-name"
+              placeholder="Jane Doe"
+              type="text"
+              {...form.register("name")}
+            />
+            <FieldError errors={[form.formState.errors.name]} />
+          </Field>
+
+          <Field data-invalid={!!form.formState.errors.email}>
+            <FieldLabel htmlFor="waitlist-email">Email</FieldLabel>
             <Input
               autoComplete="email"
               id="waitlist-email"
               inputMode="email"
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               type="email"
-              value={email}
+              {...form.register("email")}
             />
-          </div>
+            <FieldError errors={[form.formState.errors.email]} />
+          </Field>
 
           {status === "success" ? (
             <p className="font-medium text-emerald-600 text-sm">
-              Email registered.
+              You're on the list!
             </p>
           ) : null}
           {status === "error" ? (
-            <p className="font-medium text-destructive text-sm">{error}</p>
+            <p className="font-medium text-destructive text-sm">
+              {submitError}
+            </p>
           ) : null}
 
           <div className="flex gap-2 pt-1">
-            <Button
-              className="h-10 flex-1 gap-2"
-              disabled={
-                !canSubmit || status === "loading" || status === "success"
-              }
-              isLoading={status === "loading"}
-              onClick={submit}
-              type="button"
-            >
-              Join waitlist <MoveRight className="h-4 w-4" />
-            </Button>
             <Button asChild className="h-10" type="button" variant="outline">
               <a href={ONBOARD_LINK} rel="noopener" target="_blank">
                 Book a call
               </a>
             </Button>
+            <Button
+              className="h-10 flex-1 gap-2"
+              disabled={status === "success"}
+              isLoading={form.formState.isSubmitting}
+              type="submit"
+            >
+              Join waitlist <MoveRight className="h-4 w-4" />
+            </Button>
           </div>
-
-          <p className="text-muted-foreground text-xs leading-relaxed">
-            Tip: set <code className="font-mono">WAITLIST_WEBHOOK_URL</code> in
-            your env to forward signups to Apollo/Zapier/Make.
-          </p>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -17,7 +17,7 @@ function ReferralPage() {
             Help anyone win their SEO Co-Founder. Get rewarded.
           </h1>
           <p className="mx-auto max-w-3xl text-lg text-muted-foreground leading-relaxed sm:text-xl">
-            Word of mouth matters a lot to us — and we’d love to show our
+            Word of mouth matters a lot to us — and we&apos;d love to show our
             appreciation to anyone who refers customers our way.
           </p>
         </div>
@@ -56,8 +56,9 @@ function ReferralPage() {
               Reward unlocked after month 2
             </p>
             <p className="mt-2 text-muted-foreground leading-relaxed">
-              Once your referral completes their first 2 months with us, you’ll
-              receive a reward worth the full value of their first two months.
+              Once your referral completes their first 2 months with us,
+              you&apos;ll receive a reward worth the full value of their first
+              two months.
             </p>
           </div>
         </div>
@@ -71,7 +72,7 @@ function ReferralPage() {
                 Referral rewards
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Here’s how we’ll say thanks.
+                Here&apos;s how we&apos;ll say thanks.
               </p>
             </div>
 
@@ -85,8 +86,9 @@ function ReferralPage() {
                     Reward = 2 months of their plan
                   </p>
                   <p className="mt-1 leading-relaxed">
-                    After they complete their first 2 months with us, you’ll get
-                    a reward worth the full price of those first two months.
+                    After they complete their first 2 months with us,
+                    you&apos;ll get a reward worth the full price of those first
+                    two months.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border/50 bg-background/60 p-5">
@@ -94,13 +96,13 @@ function ReferralPage() {
                     Super-referrer perks (coming soon)
                   </p>
                   <p className="mt-1 leading-relaxed">
-                    Refer more than 5 businesses and we’ll unlock additional
-                    rewards and priority perks.
+                    Refer more than 5 businesses and we&apos;ll unlock
+                    additional rewards and priority perks.
                   </p>
                 </div>
                 <p className="text-sm leading-relaxed">
-                  Terms may evolve as we scale the program. We’ll always confirm
-                  the current terms before onboarding your referral.
+                  Terms may evolve as we scale the program. We&apos;ll always
+                  confirm the current terms before onboarding your referral.
                 </p>
               </div>
             </div>
@@ -113,8 +115,9 @@ function ReferralPage() {
               <a className="underline" href="mailto:aaron@fluidposts.com">
                 aaron@fluidposts.com
               </a>{" "}
-              with the subject “Referral” and we’ll send you a referral link.
-              (We’re keeping it lightweight while the program is in beta.)
+              with the subject “Referral” and we&apos;ll send you a referral
+              link. (We&apos;re keeping it lightweight while the program is in
+              beta.)
             </p>
           </div>
         </div>
