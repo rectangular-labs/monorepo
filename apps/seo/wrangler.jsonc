@@ -55,11 +55,7 @@
     //   "tag": "v1"
     // },
     {
-      "new_sqlite_classes": ["WebSocketServer"],
-      "tag": "v1"
-    },
-    {
-      "new_sqlite_classes": ["Scheduler"],
+      "new_sqlite_classes": ["WebSocketServer", "Scheduler"],
       "tag": "v1"
     }
   ],
@@ -131,11 +127,7 @@
         //   "tag": "v1"
         // },
         {
-          "new_sqlite_classes": ["WebSocketServer"],
-          "tag": "v1"
-        },
-        {
-          "new_sqlite_classes": ["Scheduler"],
+          "new_sqlite_classes": ["WebSocketServer", "Scheduler"],
           "tag": "v1"
         }
       ],
@@ -210,11 +202,7 @@
         //   "tag": "v1"
         // },
         {
-          "new_sqlite_classes": ["WebSocketServer"],
-          "tag": "v1"
-        },
-        {
-          "new_sqlite_classes": ["Scheduler"],
+          "new_sqlite_classes": ["WebSocketServer", "Scheduler"],
           "tag": "v1"
         }
       ],
