@@ -23,6 +23,7 @@ import {
 import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
 import { writeContentDraft } from "../lib/content/write-content-draft";
+import { createSignature } from "../lib/create-signature";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import {
   DRAFT_NOT_FOUND_ERROR_MESSAGE,
@@ -428,18 +429,20 @@ const publishContent = base
       organizationIdentifier: "string",
       projectId: "string.uuid",
       id: "string.uuid",
-      draftId: "string.uuid",
-      signature: "string",
+      payload: type({
+        draftId: "string.uuid",
+        signature: "string",
+      }),
     }),
   )
   .output(type({ success: "true" }))
   .handler(async ({ context, input }) => {
-    // TODO: verify the signature
-    if (input.signature !== "string") {
+    // todo use timing safe comparison
+    if (input.payload.signature !== createSignature(input.payload.draftId)) {
       throw new ORPCError("BAD_REQUEST", { message: "Invalid signature." });
     }
 
-    if (input.draftId !== input.id) {
+    if (input.payload.draftId !== input.id) {
       throw new ORPCError("BAD_REQUEST", {
         message: "Draft ID does not match route ID.",
       });
@@ -449,7 +452,7 @@ const publishContent = base
       db: context.db,
       organizationId: input.organizationIdentifier,
       projectId: input.projectId,
-      id: input.draftId,
+      id: input.id,
       withContent: true,
     });
     if (!draftResult.ok) {
@@ -484,7 +487,7 @@ const publishContent = base
     if (now.getTime() < draft.scheduledFor.getTime() - fiveMinutesMs) {
       // too early to publish, schedule a task to publish later
       const publishWebhookUrl = new URL(
-        `/api/rpc/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
+        `/api/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
         context.url.origin,
       ).toString();
 
@@ -495,8 +498,7 @@ const publishContent = base
         time: draft.scheduledFor,
         payload: {
           draftId: draft.id,
-          // TODO: add a signature that signs the draftId for verification
-          signature: "string",
+          signature: createSignature(draft.id),
         },
         callback: {
           type: "webhook",

@@ -139,10 +139,10 @@ export function ProjectChatProvider({
   const openChat = useCallback(() => {
     setIsOpen(true);
     if (activeChatId) {
+      void chatQuery.refetch();
       return;
     }
     setHistoryOpen(true);
-    void chatQuery.refetch();
     void chatsQuery.refetch();
   }, [activeChatId, chatsQuery.refetch, chatQuery.refetch]);
 

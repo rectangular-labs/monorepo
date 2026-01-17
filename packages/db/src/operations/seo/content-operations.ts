@@ -118,6 +118,8 @@ export async function listPublishedContent(args: {
         version: schema.seoContent.version,
         title: schema.seoContent.title,
         description: schema.seoContent.description,
+        heroImage: schema.seoContent.heroImage,
+        heroImageCaption: schema.seoContent.heroImageCaption,
         primaryKeyword: schema.seoContent.primaryKeyword,
         articleType: schema.seoContent.articleType,
         publishedAt: schema.seoContent.publishedAt,

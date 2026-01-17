@@ -12,6 +12,7 @@ import {
 } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
 import { apiEnv } from "../../env";
+import { createSignature } from "../create-signature";
 import { createScheduler } from "../scheduler";
 import { createTask } from "../task";
 import {
@@ -266,9 +267,9 @@ export async function writeContentDraft(
     }
 
     const publishWebhookUrl = new URL(
-      `/api/rpc/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
+      `/api/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
       apiEnv().VITE_SEO_URL,
-    ).toString();
+    ).href;
 
     const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);
     const actualScheduledFor =
@@ -278,15 +279,19 @@ export async function writeContentDraft(
           earliestPossibleScheduledFor
         : scheduledFor;
 
-    await createScheduler().scheduleTask({
+    const scheduler = createScheduler();
+    console.log("target url_link", publishWebhookUrl);
+    // const cancelled = await scheduler.cancelTask(draft.id);
+    // console.log("cancelled", cancelled);
+    const signature = createSignature(draft.id);
+    await scheduler.scheduleTask({
       id: draft.id,
       description: `publish-draft:${draft.id}`,
       type: "scheduled",
       time: actualScheduledFor,
       payload: {
         draftId: draft.id,
-        // TODO: add a signature that signs the draftId for verification
-        signature: "string",
+        signature,
       },
       callback: {
         type: "webhook",

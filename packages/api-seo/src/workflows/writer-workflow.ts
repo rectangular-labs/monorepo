@@ -197,7 +197,7 @@ ${titleText ?? ""}
 </title>
 
 <primary_keyword>
-${primaryKeywordText ?? ""}
+${keywordText ?? ""}
 </primary_keyword>
 
 <notes>
