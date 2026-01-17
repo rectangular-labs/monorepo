@@ -107,7 +107,7 @@ ${args.skillsSection}
   - Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
   - Statistics rules (strict)
     - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
-    -Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
+    - Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
     - If a number cannot be verified exactly, remove the number and rewrite the claim qualitatively.
     - The statistic must match the source exactly — no rounding, no reinterpretation.
   - Source quality rules
