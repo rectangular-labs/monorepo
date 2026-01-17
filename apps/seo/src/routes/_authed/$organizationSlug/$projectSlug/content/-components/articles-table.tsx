@@ -30,12 +30,25 @@ function compareMaybeString(a?: string, b?: string) {
   return aValue.localeCompare(bValue);
 }
 
+function formatDate(value?: Date | null) {
+  if (!value) return null;
+  if (Number.isNaN(value.getTime())) return null;
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(value);
+}
+
 type ArticleTableRow = {
   id: string;
   primaryKeyword: string;
   title: string;
   slug: string;
   status: SeoFileStatus | "published";
+  publishedAt?: Date | null;
+  scheduledFor?: Date | null;
 };
 
 export function ArticlesTable({
@@ -50,6 +63,15 @@ export function ArticlesTable({
   const [sorting, setSorting] = useState<SortingState>([
     { id: "primaryKeyword", desc: false },
   ]);
+
+  const hasPublishedDate = rows.some((row) => row.status === "published");
+  const hasScheduledDate = rows.some((row) => row.status === "scheduled");
+  const hasDateColumn = hasPublishedDate || hasScheduledDate;
+  const dateColumnHeader = hasPublishedDate
+    ? "Published"
+    : hasScheduledDate
+      ? "Scheduled"
+      : "Date";
 
   const columns = useMemo<ColumnDef<ArticleTableRow>[]>(() => {
     const base: ColumnDef<ArticleTableRow>[] = [
@@ -90,6 +112,35 @@ export function ArticlesTable({
         },
       },
     ];
+    if (hasDateColumn) {
+      base.push({
+        id: "publishDate",
+        header: dateColumnHeader,
+        cell: ({ row }) => {
+          const dateValue =
+            row.original.status === "published"
+              ? row.original.publishedAt
+              : row.original.scheduledFor;
+          return formatDate(dateValue);
+        },
+        sortingFn: (rowA, rowB) => {
+          const aDate =
+            rowA.original.status === "published"
+              ? rowA.original.publishedAt
+              : rowA.original.scheduledFor;
+          const bDate =
+            rowB.original.status === "published"
+              ? rowB.original.publishedAt
+              : rowB.original.scheduledFor;
+          const aValue = aDate ?? null;
+          const bValue = bDate ?? null;
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          return aValue.getTime() - bValue.getTime();
+        },
+      });
+    }
     if (getRowActions) {
       base.push({
         id: "actions",
@@ -103,7 +154,7 @@ export function ArticlesTable({
       });
     }
     return base;
-  }, [getRowActions]);
+  }, [dateColumnHeader, getRowActions, hasDateColumn]);
 
   const table = useReactTable({
     columns,

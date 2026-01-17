@@ -92,7 +92,7 @@ function PageComponent() {
       slug: row.slug,
       title: row.title,
       primaryKeyword: row.primaryKeyword,
-      scheduledFor: row.scheduledFor?.toISOString(),
+      scheduledFor: row.scheduledFor,
       status: row.status,
     }));
 

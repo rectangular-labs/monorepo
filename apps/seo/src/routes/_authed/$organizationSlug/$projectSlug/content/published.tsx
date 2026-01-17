@@ -86,6 +86,7 @@ function PageComponent() {
       slug: row.slug,
       title: row.title,
       primaryKeyword: row.primaryKeyword,
+      publishedAt: row.publishedAt,
       status: "published" as const,
     }));
 

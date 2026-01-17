@@ -58,7 +58,7 @@ import {
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
@@ -93,16 +93,66 @@ async function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+function formatDateTime(value?: Date | null) {
+  if (!value) return "—";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function getArticleGenerationStage(status?: string | null) {
+  switch (status) {
+    case "queued":
+      return {
+        title: "Your draft is queued for writing",
+        description: "We will start writing as soon as capacity is available.",
+        header: "Queued for writing",
+      };
+    case "planning":
+      return {
+        title: "Planning the article",
+        description: "We are organizing the outline and structure.",
+        header: "Planning the article",
+      };
+    case "writing":
+      return {
+        title: "Writing the article",
+        description: "Draft content is being generated now.",
+        header: "Writing in progress",
+      };
+    case "reviewing-writing":
+      return {
+        title: "Reviewing the draft",
+        description: "We are refining and checking the writing.",
+        header: "Reviewing the draft",
+      };
+    default:
+      return {
+        title: "This draft is currently being generated",
+        description: "We will show the article once it is ready.",
+        header: "Generating article",
+      };
+  }
+}
+
 export function ArticleEditorTakeover({
   draftId,
   organizationSlug,
   organizationId,
   projectId,
+  projectSlug,
 }: {
   draftId: string;
   organizationSlug: string;
   organizationId: string;
   projectId: string;
+  projectSlug: string;
 }) {
   const [saveIndicator, setSaveIndicator] = useState<SaveIndicatorState>({
     status: "idle",
@@ -124,6 +174,7 @@ export function ArticleEditorTakeover({
   const outlineSaveTimeoutRef = useRef<number | null>(null);
   const latestMarkdownRef = useRef<string>("");
   const latestOutlineRef = useRef<string>("");
+  const navigate = useNavigate();
 
   const {
     data: draftData,
@@ -217,6 +268,13 @@ export function ArticleEditorTakeover({
     isOutlineGenerationFailed || isArticleGenerationFailed;
 
   const canEditDetails = !isGenerating && draft;
+  const articleGenerationStage = isGeneratingArticle
+    ? getArticleGenerationStage(draft?.status)
+    : null;
+  const headerStatusLabel =
+    draft?.status === "scheduled"
+      ? "Scheduled for publishing"
+      : (articleGenerationStage?.header ?? null);
 
   useEffect(() => {
     if (!draft) return;
@@ -274,6 +332,7 @@ export function ArticleEditorTakeover({
     getApiClientRq().content.markDraft.mutationOptions({
       onError: () => toast.error("Failed to update status"),
       onSuccess: async () => {
+        toast.success("Status updated.");
         await refetchDraft();
       },
     }),
@@ -379,6 +438,17 @@ export function ArticleEditorTakeover({
     }
   };
 
+  if (draftError?.message.includes("Content draft not found")) {
+    void navigate({
+      to: "/$organizationSlug/$projectSlug/content/published",
+      params: {
+        organizationSlug,
+        projectSlug,
+      },
+    });
+    return null;
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
@@ -405,6 +475,11 @@ export function ArticleEditorTakeover({
         </div>
 
         <div className="flex items-center gap-3 text-muted-foreground text-xs">
+          {headerStatusLabel && (
+            <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-foreground">
+              {headerStatusLabel}
+            </span>
+          )}
           {(draft?.status === "suggested" ||
             draft?.status === "pending-review") && (
             <>
@@ -505,12 +580,12 @@ export function ArticleEditorTakeover({
               <AlertTitle>
                 {isGeneratingOutline
                   ? "This outline is currently being generated"
-                  : "This draft is currently being generated"}
+                  : articleGenerationStage?.title}
               </AlertTitle>
               <AlertDescription>
                 {isGeneratingOutline
                   ? "We will show the outline once it is ready."
-                  : "We will show the article once it is ready."}
+                  : articleGenerationStage?.description}
               </AlertDescription>
             </Alert>
           )}

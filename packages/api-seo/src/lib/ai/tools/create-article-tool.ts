@@ -24,7 +24,7 @@ const createArticleInputSchema = type({
   "articleType?": articleTypeSchema
     .or(type.null)
     .describe(
-      "Article type should only be present if explicitly provided by the user or confirmed by the user in response to your suggestion.",
+      "Article type should only be present IF explicitly provided by the user or confirmed by the user in response to your suggestion. pick only a SINGLE category and conform to the schema",
     ),
   "notes?": type("string|null").describe(
     "Notes or guidance on what the user wants to focus on in the article/section/topic. No need to be provided if we already received/worked on an outline together with the user.",
@@ -74,6 +74,13 @@ export function createCreateArticleToolWithMetadata({
         ? "suggested"
         : "queued";
 
+      const validArticleType = articleType
+        ? articleTypeSchema(articleType)
+        : null;
+      if (validArticleType instanceof type.errors) {
+        return { success: false, message: validArticleType.summary };
+      }
+
       const writeResult = await writeContentDraft({
         db: context.db,
         userId,
@@ -103,6 +110,7 @@ export function createCreateArticleToolWithMetadata({
         slug,
         status,
         primaryKeyword,
+        articleType,
       };
     },
   });

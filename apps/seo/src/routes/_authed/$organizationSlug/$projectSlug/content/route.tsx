@@ -53,6 +53,7 @@ function ContentLayout() {
           organizationId={organizationId}
           organizationSlug={organizationSlug}
           projectId={projectId}
+          projectSlug={projectSlug}
         />
       </div>
     );
