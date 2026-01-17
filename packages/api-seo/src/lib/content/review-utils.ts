@@ -212,6 +212,7 @@ function countMarkdownTables(markdown: string): number {
     );
     if (looksLikeHeader && looksLikeDivider) {
       count++;
+      // skip divider
       i++;
     }
   }
