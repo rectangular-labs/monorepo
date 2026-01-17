@@ -1,9 +1,8 @@
 "use client";
 
 import * as Icons from "@rectangular-labs/ui/components/icon";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { type } from "arktype";
 import { useEffect, useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
@@ -115,22 +114,8 @@ function PageComponent() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="border-b bg-background px-6 py-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="font-semibold text-lg">Scheduled content</h1>
-            <p className="text-muted-foreground text-sm">{projectSlug}</p>
-          </div>
-          <Button asChild size="sm" variant="outline">
-            <Link
-              params={{ organizationSlug, projectSlug }}
-              to="/$organizationSlug/$projectSlug/content/review/outlines"
-            >
-              Review drafts
-              <Icons.ArrowRight aria-hidden="true" className="ml-1 size-4" />
-            </Link>
-          </Button>
-        </div>
+      <div className="border-b px-4 py-2 md:px-6">
+        <h1 className="font-semibold text-lg">Scheduled content</h1>
       </div>
 
       <LoadingError
