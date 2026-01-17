@@ -78,6 +78,25 @@ const createApolloContact = createServerFn({ method: "POST" })
       throw new Error(message);
     }
 
+    // Send Telegram notification
+    const telegramMessage = `🎉 New waitlist signup!\n\n👤 Name: ${data.name}\n📧 Email: ${data.email}`;
+    try {
+      await fetch(
+        `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: env.TELEGRAM_CHAT_ID,
+            text: telegramMessage,
+            parse_mode: "HTML",
+          }),
+        },
+      );
+    } catch {
+      // Don't fail the signup if Telegram notification fails
+    }
+
     return { ok: true };
   });
 
