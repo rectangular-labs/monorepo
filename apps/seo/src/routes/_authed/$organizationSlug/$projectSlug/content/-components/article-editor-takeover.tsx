@@ -93,19 +93,6 @@ async function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-function formatDateTime(value?: Date | null) {
-  if (!value) return "—";
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
-
 function getArticleGenerationStage(status?: string | null) {
   switch (status) {
     case "queued":

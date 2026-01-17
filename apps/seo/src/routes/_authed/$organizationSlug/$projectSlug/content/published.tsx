@@ -49,7 +49,7 @@ export const Route = createFileRoute(
 });
 
 function PageComponent() {
-  const { organizationSlug, projectSlug } = Route.useParams();
+  const { organizationSlug } = Route.useParams();
   const { view } = Route.useSearch();
   const { projectId } = Route.useLoaderData();
 
