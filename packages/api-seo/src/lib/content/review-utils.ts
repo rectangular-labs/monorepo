@@ -160,6 +160,7 @@ function extractMarkdownLinks(markdown: string): MarkdownLink[] {
   const regex = /\[(?<text>[^\]]+)\]\((?<url>[^)\s]+)(?:\s+"[^"]*")?\)/g;
   for (const match of markdown.matchAll(regex)) {
     const index = match.index;
+    // If the "[" is preceded by "!", this is an image (e.g. ![alt](url)), not a standard link.
     if (index > 0 && markdown[index - 1] === "!") continue;
     const text = match.groups?.text?.trim();
     const url = match.groups?.url?.trim();
