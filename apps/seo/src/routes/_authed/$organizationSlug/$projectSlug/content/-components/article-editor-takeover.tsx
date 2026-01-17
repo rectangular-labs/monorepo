@@ -448,7 +448,7 @@ export function ArticleEditorTakeover({
     });
     return null;
   }
-
+  console.log("draft.heroImage", draft.heroImage);
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
@@ -654,16 +654,16 @@ export function ArticleEditorTakeover({
           )}
 
           {draft.status !== "suggested" && (
-            <>
+            <div className="space-y-4">
               {draft.heroImage && (
-                <div className="overflow-hidden rounded-lg border bg-muted/30">
+                <div className="h-72 w-full space-y-2">
                   <img
                     alt={`Hero for ${draft.title}`}
-                    className="h-auto w-full"
+                    className="h-full w-full object-contain object-center"
                     src={draft.heroImage}
                   />
                   {draft.heroImageCaption && (
-                    <div className="border-t bg-muted/40 px-3 py-2 text-muted-foreground text-xs">
+                    <div className="text-center text-muted-foreground text-xs">
                       {draft.heroImageCaption}
                     </div>
                   )}
@@ -697,7 +697,7 @@ export function ArticleEditorTakeover({
                   />
                 </FieldContent>
               </Field>
-            </>
+            </div>
           )}
         </div>
       )}
