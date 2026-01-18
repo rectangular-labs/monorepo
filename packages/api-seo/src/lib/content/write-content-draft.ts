@@ -268,7 +268,7 @@ export async function writeContentDraft(
 
     const publishWebhookUrl = new URL(
       `/api/organization/${draft.organizationId}/project/${draft.projectId}/content/draft/${draft.id}/publish`,
-      apiEnv().VITE_SEO_URL,
+      apiEnv().SEO_URL,
     ).href;
 
     const earliestPossibleScheduledFor = new Date(Date.now() + 30_000);

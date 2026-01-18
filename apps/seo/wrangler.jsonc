@@ -161,7 +161,7 @@
       ],
       "routes": [
         {
-          "pattern": "www.fluidposts.com",
+          "pattern": "app.fluidposts.com",
           "custom_domain": true
         }
       ]
