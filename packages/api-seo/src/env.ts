@@ -9,7 +9,7 @@ export const apiEnv = () =>
     extends: [dbEnv(), taskEnv()],
     server: {
       ...authEnvSchema,
-      VITE_SEO_URL: type("string.url"),
+      SEO_URL: type("string.url"),
       SEO_PUBLIC_BUCKET_URL: type("string"),
       CLOUDFLARE_ACCOUNT_ID: type("string"),
       CLOUDFLARE_R2_ACCESS_KEY_ID: type("string"),
