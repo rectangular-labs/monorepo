@@ -24,14 +24,6 @@ export const Route = createRootRouteWithContext<{
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      {
-        name: "apple-mobile-web-app-title",
-        content: "Fluid Posts",
-      },
-      {
-        name: "application-name",
-        content: "Fluid Posts",
-      },
       ...seo({
         title:
           "Fluid Posts — AI SEO employee that Understands, Plans, Forecasts, and Ships",
@@ -77,7 +69,7 @@ export const Route = createRootRouteWithContext<{
         type: "image/x-icon",
         href: "/favicon.ico",
       },
-      { rel: "manifest", href: "/site.webmanifest", color: "#ffffff" },
+      { rel: "manifest", href: "/site.webmanifest", color: "#000000" },
     ],
   }),
   component: RootLayout,

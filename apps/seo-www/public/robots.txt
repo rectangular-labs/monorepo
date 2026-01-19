@@ -1,23 +1,4 @@
-# Robots policy: Only homepage and blog allowed for all crawlers
-# Keep rendering intact by allowing assets and essential files.
 User-agent: *
-Disallow: /
+Allow: /
 
-# Allow homepage (use both $ and index.html for broader bot support)
-Allow: /$
-Allow: /index.html
-
-# Allow blog and all posts under it
-Allow: /blog
-
-# Allow essential assets and metadata
-Allow: /assets/
-Allow: /favicon.ico
-Allow: /robots.txt
-Allow: /*.svg
-Allow: /*.png
-Allow: /site.webmanifest
-Allow: /sitemap.xml
-
-# Sitemap
-Sitemap: /sitemap.xml
+Sitemap: https://www.fluidposts.com/sitemap.xml
