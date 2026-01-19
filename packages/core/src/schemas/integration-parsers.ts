@@ -49,17 +49,11 @@ export const shopifyConfigSchema = type({
   // Store identification
   shopDomain: "string", // "cool-store.myshopify.com"
   adminUrl: "string", // "https://admin.shopify.com/store/cool-store"
-  // OAuth credentials (from user's custom app)
-  clientId: "string",
-  accessToken: "string", // Obtained after OAuth
   // Publish settings
   "blogId?": "string | null",
   "blogTitle?": "string | null",
   "authorId?": "string | null",
   "publishAsHtml?": "boolean",
-  // OAuth state (temporary, removed after setup)
-  "_pendingClientSecret?": "string",
-  "_oauthState?": "string",
 });
 export type ShopifyConfig = typeof shopifyConfigSchema.infer;
 
@@ -68,9 +62,6 @@ export const webhookConfigSchema = type({
   url: "string.url",
   method: "'POST' | 'PUT'",
   "headers?": "Record<string, string>",
-  // HMAC signature for verification
-  "secretHeaderName?": "string", // default "X-Webhook-Signature"
-  "secret?": "string", // HMAC secret string that will be included in the request
 });
 export type WebhookConfig = typeof webhookConfigSchema.infer;
 
@@ -91,6 +82,35 @@ export const integrationConfigSchema = githubConfigSchema
   .or(gscConfigSchema);
 export type IntegrationConfig = typeof integrationConfigSchema.infer;
 
+// ═══════════════════════════════════════════════════════════════════════
+// CREDENTIAL SCHEMAS
+// ═══════════════════════════════════════════════════════════════════════
+export const shopifyCredentialsSchema = type({
+  provider: "'shopify'",
+  clientId: "string",
+  clientSecret: "string",
+  "accessToken?": "string",
+  "refreshToken?": "string",
+  // OAuth state (temporary, removed after setup)
+  "_oauthState?": "string",
+});
+export type ShopifyCredentials = typeof shopifyCredentialsSchema.infer;
+
+export const webhookCredentialsSchema = type({
+  provider: "'webhook'",
+  "secretHeaderName?": "string", // default "X-Webhook-Signature"
+  "secret?": "string", // secret string that will be included in the request
+});
+export type WebhookCredentials = typeof webhookCredentialsSchema.infer;
+
+export const integrationCredentialsSchema = shopifyCredentialsSchema.or(
+  webhookCredentialsSchema,
+);
+export type IntegrationCredentials = typeof integrationCredentialsSchema.infer;
+
+// ═══════════════════════════════════════════════════════════════════════
+// ADAPTER INTERFACES
+// ═══════════════════════════════════════════════════════════════════════
 export interface ContentPayload {
   slug: string;
   title: string;
@@ -104,7 +124,10 @@ export interface ContentPayload {
 }
 export interface PublishAdapter {
   provider: IntegrationProvider;
-  healthCheck(config: WebhookConfig): Promise<
+  healthCheck(
+    config: IntegrationConfig,
+    credentials?: IntegrationCredentials,
+  ): Promise<
     Result<{
       ok: true;
     }>
@@ -112,6 +135,7 @@ export interface PublishAdapter {
   publish(
     config: IntegrationConfig,
     content: ContentPayload,
+    credentials?: IntegrationCredentials,
   ): Promise<
     Result<{
       externalId: string;

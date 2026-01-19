@@ -1,9 +1,10 @@
-import { err, ok } from "@rectangular-labs/result";
 import type {
   ContentPayload,
   PublishAdapter,
   WebhookConfig,
-} from "../../schemas/integration-parsers";
+  WebhookCredentials,
+} from "@rectangular-labs/core/schemas/integration-parsers";
+import { err, ok } from "@rectangular-labs/result";
 
 export const webhookAdapter = (
   createSignature: (payload: string, secret: string) => string,
@@ -21,7 +22,12 @@ export const webhookAdapter = (
         return err(error instanceof Error ? error : new Error(String(error)));
       }
     },
-    async publish(config: WebhookConfig, content) {
+
+    async publish(
+      config: WebhookConfig,
+      content: ContentPayload,
+      credentials?: WebhookCredentials,
+    ) {
       const payload = JSON.stringify({
         event: "content.published",
         timestamp: new Date().toISOString(),
@@ -45,9 +51,11 @@ export const webhookAdapter = (
         ...config.headers,
       };
 
-      if (config.secret) {
-        const headerName = config.secretHeaderName ?? "X-Webhook-Signature";
-        headers[headerName] = createSignature(payload, config.secret);
+      if (credentials?.secret) {
+        const headerName =
+          credentials.secretHeaderName ?? "X-Webhook-Signature";
+        headers[headerName] =
+          `sha256=${createSignature(payload, credentials.secret)}`;
       }
 
       try {

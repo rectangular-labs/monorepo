@@ -1,6 +1,7 @@
 import {
   INTEGRATION_PROVIDERS,
   INTEGRATION_STATUSES,
+  type integrationConfigSchema,
 } from "@rectangular-labs/core/schemas/integration-parsers";
 import { type } from "arktype";
 import {
@@ -12,6 +13,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  jsonb,
   text,
   timestamp,
   unique,
@@ -51,8 +53,8 @@ export const seoIntegration = pgSeoTable(
       .default("pending_setup"),
     lastError: text(),
     lastUsedAt: timestamp({ mode: "date", withTimezone: true }),
-    // Encrypted JSON corresponding to integrationConfigSchema - application layer encrypts/decrypts
-    encryptedConfig: text().notNull(),
+    config: jsonb().$type<typeof integrationConfigSchema.infer>().notNull(),
+    encryptedCredentials: text(),
     ...timestamps,
   },
   (table) => [
