@@ -1,6 +1,9 @@
-import { LinkedInIcon, TikTokIcon } from "@rectangular-labs/ui/components/icon";
+import {
+  LinkedInIcon,
+  Logo,
+  TikTokIcon,
+} from "@rectangular-labs/ui/components/icon";
 import { Link } from "@tanstack/react-router";
-import { SeoLogo } from "./seo-logo";
 
 const links = [
   {
@@ -59,7 +62,7 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-5">
           <div className="md:col-span-2">
             <Link aria-label="go home" className="block size-fit" to="/">
-              <SeoLogo />
+              <Logo className="size-12" />
             </Link>
           </div>
 

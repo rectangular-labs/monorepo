@@ -1,9 +1,8 @@
-import { Menu, X } from "@rectangular-labs/ui/components/icon";
+import { Logo, Menu, X } from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { SeoLogo } from "./seo-logo";
 
 const menuItems = [
   { name: "Founders", href: "/" },
@@ -62,7 +61,7 @@ export function Header() {
               className="flex items-center gap-2 text-muted-foreground"
               to="/"
             >
-              <SeoLogo /> Fluid Posts
+              <Logo className="size-10" /> Fluid Posts
             </Link>
 
             <button
