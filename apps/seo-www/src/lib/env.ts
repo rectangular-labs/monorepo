@@ -18,9 +18,9 @@ export const serverEnv = () =>
   createEnv({
     extends: [clientEnv()],
     server: {
-      // optional
-      WAITLIST_WEBHOOK_URL: type("string|undefined"),
-      WAITLIST_ADMIN_TOKEN: type("string|undefined"),
+      APOLLO_CONTACT_API_KEY: type("string"),
+      TELEGRAM_BOT_TOKEN: type("string"),
+      TELEGRAM_CHAT_ID: type("string"),
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,

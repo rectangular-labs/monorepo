@@ -2,7 +2,7 @@ import { MoveRight, Search } from "@rectangular-labs/ui/components/icon";
 import { buttonVariants } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
 import { useState } from "react";
-import { WaitlistDialog } from "../waitlist-dialog";
+import { WaitListDialog } from "../waitlist-dialog";
 
 export const FounderHero = () => {
   const [dnOk, setDnOk] = useState(true);
@@ -74,7 +74,7 @@ export const FounderHero = () => {
           owner: self-critical, data-driven, and focused on growth.
         </p>
         <div className="flex flex-col items-center gap-3 sm:justify-center">
-          <WaitlistDialog
+          <WaitListDialog
             trigger={
               <button
                 className={buttonVariants({

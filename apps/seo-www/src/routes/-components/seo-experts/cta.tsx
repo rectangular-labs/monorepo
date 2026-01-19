@@ -1,7 +1,7 @@
 import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Section } from "@rectangular-labs/ui/components/ui/section";
-import { WaitlistDialog } from "../waitlist-dialog";
+import { WaitListDialog } from "../waitlist-dialog";
 
 export function CTA() {
   return (
@@ -16,7 +16,7 @@ export function CTA() {
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-6">
-          <WaitlistDialog
+          <WaitListDialog
             trigger={
               <Button
                 className="h-14 gap-3 px-10 text-lg"

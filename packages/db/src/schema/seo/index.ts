@@ -10,4 +10,3 @@ export * from "./gsc-property-schema";
 export * from "./project-author-schema";
 export * from "./project-schema";
 export * from "./task-run-schema";
-export * from "./waitlist-signup-schema";

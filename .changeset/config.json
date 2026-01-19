@@ -24,6 +24,7 @@
     "@rectangular-labs/task",
     "@rectangular-labs/ui",
     "www", 
-    "seo"
+    "seo",
+    "seo-www"
   ]
 }

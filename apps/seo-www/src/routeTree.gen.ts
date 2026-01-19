@@ -15,9 +15,11 @@ import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as BlogRouteRouteImport } from './routes/blog/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as LegalServiceAgreementRouteImport } from './routes/legal/service-agreement'
+import { Route as LegalPrivacyPolicyRouteImport } from './routes/legal/privacy-policy'
+import { Route as LegalDataProcessingAgreementRouteImport } from './routes/legal/data-processing-agreement'
 import { Route as BlogRssDotxmlRouteImport } from './routes/blog/rss[.]xml'
 import { Route as BlogSplatRouteImport } from './routes/blog/$'
-import { Route as ApiWaitlistRouteImport } from './routes/api/waitlist'
 import { Route as ApiBlogSearchRouteImport } from './routes/api/blog/search'
 
 const WhoWeAreRoute = WhoWeAreRouteImport.update({
@@ -50,6 +52,22 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/',
   getParentRoute: () => BlogRouteRoute,
 } as any)
+const LegalServiceAgreementRoute = LegalServiceAgreementRouteImport.update({
+  id: '/legal/service-agreement',
+  path: '/legal/service-agreement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyPolicyRoute = LegalPrivacyPolicyRouteImport.update({
+  id: '/legal/privacy-policy',
+  path: '/legal/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalDataProcessingAgreementRoute =
+  LegalDataProcessingAgreementRouteImport.update({
+    id: '/legal/data-processing-agreement',
+    path: '/legal/data-processing-agreement',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogRssDotxmlRoute = BlogRssDotxmlRouteImport.update({
   id: '/rss.xml',
   path: '/rss.xml',
@@ -59,11 +77,6 @@ const BlogSplatRoute = BlogSplatRouteImport.update({
   id: '/$',
   path: '/$',
   getParentRoute: () => BlogRouteRoute,
-} as any)
-const ApiWaitlistRoute = ApiWaitlistRouteImport.update({
-  id: '/api/waitlist',
-  path: '/api/waitlist',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBlogSearchRoute = ApiBlogSearchRouteImport.update({
   id: '/api/blog/search',
@@ -77,9 +90,11 @@ export interface FileRoutesByFullPath {
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
+  '/legal/data-processing-agreement': typeof LegalDataProcessingAgreementRoute
+  '/legal/privacy-policy': typeof LegalPrivacyPolicyRoute
+  '/legal/service-agreement': typeof LegalServiceAgreementRoute
   '/blog/': typeof BlogIndexRoute
   '/api/blog/search': typeof ApiBlogSearchRoute
 }
@@ -88,9 +103,11 @@ export interface FileRoutesByTo {
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
+  '/legal/data-processing-agreement': typeof LegalDataProcessingAgreementRoute
+  '/legal/privacy-policy': typeof LegalPrivacyPolicyRoute
+  '/legal/service-agreement': typeof LegalServiceAgreementRoute
   '/blog': typeof BlogIndexRoute
   '/api/blog/search': typeof ApiBlogSearchRoute
 }
@@ -101,9 +118,11 @@ export interface FileRoutesById {
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
+  '/legal/data-processing-agreement': typeof LegalDataProcessingAgreementRoute
+  '/legal/privacy-policy': typeof LegalPrivacyPolicyRoute
+  '/legal/service-agreement': typeof LegalServiceAgreementRoute
   '/blog/': typeof BlogIndexRoute
   '/api/blog/search': typeof ApiBlogSearchRoute
 }
@@ -115,9 +134,11 @@ export interface FileRouteTypes {
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
-    | '/api/waitlist'
     | '/blog/$'
     | '/blog/rss.xml'
+    | '/legal/data-processing-agreement'
+    | '/legal/privacy-policy'
+    | '/legal/service-agreement'
     | '/blog/'
     | '/api/blog/search'
   fileRoutesByTo: FileRoutesByTo
@@ -126,9 +147,11 @@ export interface FileRouteTypes {
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
-    | '/api/waitlist'
     | '/blog/$'
     | '/blog/rss.xml'
+    | '/legal/data-processing-agreement'
+    | '/legal/privacy-policy'
+    | '/legal/service-agreement'
     | '/blog'
     | '/api/blog/search'
   id:
@@ -138,9 +161,11 @@ export interface FileRouteTypes {
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
-    | '/api/waitlist'
     | '/blog/$'
     | '/blog/rss.xml'
+    | '/legal/data-processing-agreement'
+    | '/legal/privacy-policy'
+    | '/legal/service-agreement'
     | '/blog/'
     | '/api/blog/search'
   fileRoutesById: FileRoutesById
@@ -151,7 +176,9 @@ export interface RootRouteChildren {
   ReferralRoute: typeof ReferralRoute
   SeoExpertsRoute: typeof SeoExpertsRoute
   WhoWeAreRoute: typeof WhoWeAreRoute
-  ApiWaitlistRoute: typeof ApiWaitlistRoute
+  LegalDataProcessingAgreementRoute: typeof LegalDataProcessingAgreementRoute
+  LegalPrivacyPolicyRoute: typeof LegalPrivacyPolicyRoute
+  LegalServiceAgreementRoute: typeof LegalServiceAgreementRoute
   ApiBlogSearchRoute: typeof ApiBlogSearchRoute
 }
 
@@ -199,6 +226,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof BlogRouteRoute
     }
+    '/legal/service-agreement': {
+      id: '/legal/service-agreement'
+      path: '/legal/service-agreement'
+      fullPath: '/legal/service-agreement'
+      preLoaderRoute: typeof LegalServiceAgreementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy-policy': {
+      id: '/legal/privacy-policy'
+      path: '/legal/privacy-policy'
+      fullPath: '/legal/privacy-policy'
+      preLoaderRoute: typeof LegalPrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/data-processing-agreement': {
+      id: '/legal/data-processing-agreement'
+      path: '/legal/data-processing-agreement'
+      fullPath: '/legal/data-processing-agreement'
+      preLoaderRoute: typeof LegalDataProcessingAgreementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/rss.xml': {
       id: '/blog/rss.xml'
       path: '/rss.xml'
@@ -212,13 +260,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/blog/$'
       preLoaderRoute: typeof BlogSplatRouteImport
       parentRoute: typeof BlogRouteRoute
-    }
-    '/api/waitlist': {
-      id: '/api/waitlist'
-      path: '/api/waitlist'
-      fullPath: '/api/waitlist'
-      preLoaderRoute: typeof ApiWaitlistRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/blog/search': {
       id: '/api/blog/search'
@@ -252,7 +293,9 @@ const rootRouteChildren: RootRouteChildren = {
   ReferralRoute: ReferralRoute,
   SeoExpertsRoute: SeoExpertsRoute,
   WhoWeAreRoute: WhoWeAreRoute,
-  ApiWaitlistRoute: ApiWaitlistRoute,
+  LegalDataProcessingAgreementRoute: LegalDataProcessingAgreementRoute,
+  LegalPrivacyPolicyRoute: LegalPrivacyPolicyRoute,
+  LegalServiceAgreementRoute: LegalServiceAgreementRoute,
   ApiBlogSearchRoute: ApiBlogSearchRoute,
 }
 export const routeTree = rootRouteImport
