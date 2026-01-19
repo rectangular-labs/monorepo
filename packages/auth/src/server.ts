@@ -2,8 +2,8 @@ import { expo } from "@better-auth/expo";
 import { createEmailClient } from "@rectangular-labs/emails";
 import { inboundDriver } from "@rectangular-labs/emails/drivers/inbound";
 import type { BetterAuthOptions } from "better-auth";
-import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { betterAuth } from "better-auth/minimal";
 import {
   emailOTP,
   magicLink,
@@ -11,7 +11,7 @@ import {
   organization,
   twoFactor,
 } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
+import { v7 as uuidv7 } from "uuid";
 
 interface DB {
   // biome-ignore lint/suspicious/noExplicitAny: better-auth types
@@ -58,7 +58,7 @@ export function initAuthHandler({
   const isPreview =
     baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.");
 
-  const productionUrl = isPreview
+  const redirectUrl = isPreview
     ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
     : baseURL; // prod / localhost domains
   const emailDriver = createEmailClient({
@@ -76,6 +76,17 @@ export function initAuthHandler({
       },
     },
     user: {
+      changeEmail: {
+        enabled: true,
+        sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+          await emailDriver.send({
+            from: fromEmail,
+            to: user.email,
+            subject: "Approve email change",
+            text: `Click the link to approve the change to ${newEmail}: ${url}`,
+          });
+        },
+      },
       additionalFields: {
         source: {
           type: "string",
@@ -131,8 +142,9 @@ export function initAuthHandler({
           ? // this is so that the preview server will proxy request without state checks.
             // under the hood better auth doesn't allow proxying if the baseUrl === productionUrl.
             // https://github.com/better-auth/better-auth/commit/2d64fe38#diff-b1ff58ed51c13c92048fae09d3623dcdac496968932823c956661cd81f292cbb
-            productionUrl.replace("preview.", "")
-          : productionUrl,
+            // also technically the "production url" is the one below and not preview.{base_domain}
+            redirectUrl.replace("preview.", "")
+          : redirectUrl,
       }),
       emailOTP({
         overrideDefaultEmailVerification: credentialVerificationType === "code",
@@ -155,7 +167,6 @@ export function initAuthHandler({
           });
         },
       }),
-      passkey(),
       twoFactor(),
       organization({
         sendInvitationEmail: async ({ email, id, organization, inviter }) => {
@@ -188,38 +199,44 @@ export function initAuthHandler({
         discord: {
           clientId: discordClientId,
           clientSecret: discordClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/discord`,
+          redirectURI: `${redirectUrl}/api/auth/callback/discord`,
         },
       }),
       ...(useGithub && {
         github: {
           clientId: githubClientId,
           clientSecret: githubClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/github`,
+          redirectURI: `${redirectUrl}/api/auth/callback/github`,
         },
       }),
       ...(useReddit && {
         reddit: {
           clientId: redditClientId,
           clientSecret: redditClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/reddit`,
+          redirectURI: `${redirectUrl}/api/auth/callback/reddit`,
         },
       }),
       ...(useGoogle && {
         google: {
           clientId: googleClientId,
           clientSecret: googleClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/google`,
+          redirectURI: `${redirectUrl}/api/auth/callback/google`,
           accessType: "offline",
           prompt: "select_account consent",
         },
       }),
     },
+    experimental: {
+      joins: true,
+    },
     advanced: {
       cookiePrefix: domain.split(".").at(0) ?? "",
       useSecureCookies: true,
+      database: {
+        generateId: () => uuidv7(),
+      },
     },
-    trustedOrigins: ["expo://", productionUrl, baseURL],
+    trustedOrigins: ["expo://", redirectUrl, baseURL],
   } as const satisfies BetterAuthOptions;
 
   return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;

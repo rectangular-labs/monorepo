@@ -18,7 +18,7 @@ export function OneTap() {
           throw: true,
         },
       })
-      .catch((e) => {
+      .catch((e: Error) => {
         if (e instanceof Error && e.message.includes("Not Found")) {
           console.warn("Route not found. Did you enable the `oneTap` plugin?");
         }

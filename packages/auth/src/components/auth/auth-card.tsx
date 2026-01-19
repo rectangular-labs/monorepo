@@ -25,7 +25,6 @@ import type {
   VerificationMode,
 } from "./forms/verification-form";
 import { OneTap } from "./one-tap";
-import { PasskeyButton } from "./passkey-button";
 import { ProviderButton } from "./provider-button";
 import { SignInEmailCodeButton } from "./sign-in-email-code-button";
 import { SignInMagicLinkButton } from "./sign-in-magic-link-button";
@@ -82,7 +81,6 @@ export function AuthCard({
     defaultFormView,
     hasMagicLink,
     hasEmailOTP,
-    hasPasskey,
     hasOneTap,
     hasPhoneOTP,
     credentials,
@@ -141,7 +139,6 @@ export function AuthCard({
     viewPaths.PHONE_OTP,
   ];
   const signUpViews: AuthViewPath[] = [viewPaths.SIGN_UP_PASSWORD];
-  const showPasskey = hasPasskey && signInViews.includes(view);
 
   const { title, description } = useMemo(() => {
     if (view === viewPaths.IDENTITY_VERIFICATION) {
@@ -216,48 +213,39 @@ export function AuthCard({
           </div>
         )}
 
-        {loginViews.includes(view) &&
-          (showPasskey || socialProviders.length > 0) && (
-            <>
-              {hasForm && (
-                <div className={"flex items-center gap-2"}>
-                  <Separator className={"w-auto! grow"} />
-                  <span className="shrink-0 text-muted-foreground text-sm">
-                    Or continue with
-                  </span>
-                  <Separator className={"w-auto! grow"} />
-                </div>
-              )}
-              <div className="grid gap-4">
-                {socialProviders.length > 0 && (
-                  <div
-                    className={cn(
-                      "flex w-full items-center justify-between gap-4",
-                      socialLayout === "horizontal" && "flex-wrap",
-                      socialLayout === "vertical" && "flex-col",
-                      socialLayout === "grid" && "grid grid-cols-2",
-                    )}
-                  >
-                    {socialProviders.map((socialProvider) => (
-                      <ProviderButton
-                        key={socialProvider.name}
-                        provider={socialProvider}
-                        setShouldDisable={setShouldDisable}
-                        shouldDisable={shouldDisable}
-                        socialLayout={socialLayout || "vertical"}
-                      />
-                    ))}
-                  </div>
+        {loginViews.includes(view) && socialProviders.length > 0 && (
+          <>
+            {hasForm && (
+              <div className={"flex items-center gap-2"}>
+                <Separator className={"w-auto! grow"} />
+                <span className="shrink-0 text-muted-foreground text-sm">
+                  Or continue with
+                </span>
+                <Separator className={"w-auto! grow"} />
+              </div>
+            )}
+            <div className="grid gap-4">
+              <div
+                className={cn(
+                  "flex w-full items-center justify-between gap-4",
+                  socialLayout === "horizontal" && "flex-wrap",
+                  socialLayout === "vertical" && "flex-col",
+                  socialLayout === "grid" && "grid grid-cols-2",
                 )}
-                {showPasskey && (
-                  <PasskeyButton
+              >
+                {socialProviders.map((socialProvider) => (
+                  <ProviderButton
+                    key={socialProvider.name}
+                    provider={socialProvider}
                     setShouldDisable={setShouldDisable}
                     shouldDisable={shouldDisable}
+                    socialLayout={socialLayout || "vertical"}
                   />
-                )}
+                ))}
               </div>
-            </>
-          )}
+            </div>
+          </>
+        )}
         {queryError && loginViews.includes(view) && (
           <Alert variant="destructive">
             <AlertTitle>Error</AlertTitle>

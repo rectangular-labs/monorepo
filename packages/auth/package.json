@@ -41,13 +41,14 @@
     "react-dom": "^19.2.0"
   },
   "dependencies": {
-    "@better-auth/expo": "1.4.0-beta.27",
+    "@better-auth/expo": "1.4.13",
     "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/emails": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "arktype": "^2.1.29",
-    "better-auth": "1.3.34",
-    "lucide-react": "^0.556.0"
+    "better-auth": "1.4.13",
+    "lucide-react": "^0.556.0",
+    "uuid": "^13.0.0"
   }
 }
