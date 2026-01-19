@@ -24,7 +24,6 @@ const config = defineConfig({
       prerender: {
         enabled: true,
         crawlLinks: true,
-        filter: ({ path }) => path === "/" || path.startsWith("/blog"),
         concurrency: 14,
         // Number of times to retry a failed prerender job
         retryCount: 2,
