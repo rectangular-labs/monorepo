@@ -30,9 +30,14 @@ const setActive = protectedBase
   )
   .output(schema.organizationSelectSchema.or(type.null))
   .handler(async ({ context, input }) => {
+    if (!context.reqHeaders) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Missing request headers",
+      });
+    }
     const organization = await context.auth.api
       .setActiveOrganization({
-        ...(context.reqHeaders ? { headers: context.reqHeaders } : {}),
+        headers: context.reqHeaders,
         body: {
           organizationId: input.organizationId ?? undefined,
           organizationSlug: input.organizationSlug ?? undefined,
@@ -64,8 +69,13 @@ const list = protectedBase
   .input(type.undefined)
   .output(schema.organizationSelectSchema.array())
   .handler(async ({ context }) => {
+    if (!context.reqHeaders) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Missing request headers",
+      });
+    }
     const organizations = await context.auth.api.listOrganizations({
-      ...(context.reqHeaders ? { headers: context.reqHeaders } : {}),
+      headers: context.reqHeaders,
     });
     if (!organizations) {
       return [];
