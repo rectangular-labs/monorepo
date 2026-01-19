@@ -10,10 +10,8 @@ import {
   oidcClient,
   oneTapClient,
   organizationClient,
-  passkeyClient,
   phoneNumberClient,
   siweClient,
-  ssoClient,
   usernameClient,
 } from "better-auth/client/plugins";
 import { twoFactorClient } from "better-auth/plugins";
@@ -32,7 +30,6 @@ const _authClient = createAuthClient({
     phoneNumberClient(),
     magicLinkClient(),
     emailOTPClient(),
-    passkeyClient(),
     genericOAuthClient(),
     oneTapClient({
       clientId: "",
@@ -44,7 +41,6 @@ const _authClient = createAuthClient({
     // enterprise
     organizationClient(),
     oidcClient(),
-    ssoClient(),
     // utility
     multiSessionClient(),
   ],
@@ -174,7 +170,6 @@ type AuthContextValue = {
   socialProviders: SocialProvider[];
   hasMagicLink: boolean;
   hasEmailOTP: boolean;
-  hasPasskey: boolean;
   hasOneTap: boolean;
   hasUsername: boolean;
   hasPhoneOTP: boolean;
@@ -199,14 +194,7 @@ export function AuthProvider<T extends BaseAuthClient>({
   authClient: T;
   credentials?: CredentialsOptions | undefined;
   socialProviders?: SocialProvider[];
-  plugins?: (
-    | "magicLink"
-    | "emailOTP"
-    | "passkey"
-    | "oneTap"
-    | "username"
-    | "phoneOTP"
-  )[];
+  plugins?: ("magicLink" | "emailOTP" | "oneTap" | "username" | "phoneOTP")[];
 }>) {
   const hasUsername = plugins?.includes("username");
   const hasMagicLink = plugins?.includes("magicLink");
@@ -285,7 +273,6 @@ export function AuthProvider<T extends BaseAuthClient>({
         hasEmailOTP,
         hasPhoneOTP,
         hasUsername,
-        hasPasskey: plugins?.includes("passkey"),
         hasOneTap: plugins?.includes("oneTap"),
       }}
     >

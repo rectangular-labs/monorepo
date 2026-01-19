@@ -19,8 +19,8 @@ import { type Auth, initAuthHandler } from "./server";
  */
 
 export const auth: Auth = initAuthHandler({
-  baseURL: "",
-  encryptionKey: "",
+  baseURL: "https://localhost:3000",
+  encryptionKey: "dummy-key-for-schema-generation",
   db: {},
-  fromEmail: "",
+  fromEmail: "noreply@example.com",
 });

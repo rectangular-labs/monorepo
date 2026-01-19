@@ -2,8 +2,8 @@ import { expo } from "@better-auth/expo";
 import { createEmailClient } from "@rectangular-labs/emails";
 import { inboundDriver } from "@rectangular-labs/emails/drivers/inbound";
 import type { BetterAuthOptions } from "better-auth";
-import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { betterAuth } from "better-auth/minimal";
 import {
   emailOTP,
   magicLink,
@@ -11,7 +11,7 @@ import {
   organization,
   twoFactor,
 } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
+import { v7 as uuidv7 } from "uuid";
 
 interface DB {
   // biome-ignore lint/suspicious/noExplicitAny: better-auth types
@@ -76,6 +76,17 @@ export function initAuthHandler({
       },
     },
     user: {
+      changeEmail: {
+        enabled: true,
+        sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+          await emailDriver.send({
+            from: fromEmail,
+            to: user.email,
+            subject: "Approve email change",
+            text: `Click the link to approve the change to ${newEmail}: ${url}`,
+          });
+        },
+      },
       additionalFields: {
         source: {
           type: "string",
@@ -155,7 +166,6 @@ export function initAuthHandler({
           });
         },
       }),
-      passkey(),
       twoFactor(),
       organization({
         sendInvitationEmail: async ({ email, id, organization, inviter }) => {
@@ -215,9 +225,15 @@ export function initAuthHandler({
         },
       }),
     },
+    experimental: {
+      joins: true,
+    },
     advanced: {
       cookiePrefix: domain.split(".").at(0) ?? "",
       useSecureCookies: true,
+      database: {
+        generateId: () => uuidv7(),
+      },
     },
     trustedOrigins: ["expo://", productionUrl, baseURL],
   } as const satisfies BetterAuthOptions;
