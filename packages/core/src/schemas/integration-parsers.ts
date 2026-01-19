@@ -1,4 +1,6 @@
+import type { Result } from "@rectangular-labs/result";
 import { type } from "arktype";
+import type { ArticleType } from "./content-parsers";
 
 // Provider enum - single source of truth
 const PUBLISH_DESTINATION_PROVIDERS = ["shopify", "github", "webhook"] as const;
@@ -88,6 +90,36 @@ export const integrationConfigSchema = githubConfigSchema
   .or(webhookConfigSchema)
   .or(gscConfigSchema);
 export type IntegrationConfig = typeof integrationConfigSchema.infer;
+
+export interface ContentPayload {
+  slug: string;
+  title: string;
+  description: string;
+  primaryKeyword: string;
+  heroImage?: string | null;
+  heroImageCaption?: string | null;
+  contentMarkdown: string;
+  publishedAt: Date;
+  articleType: ArticleType;
+}
+export interface PublishAdapter {
+  provider: IntegrationProvider;
+  healthCheck(config: WebhookConfig): Promise<
+    Result<{
+      ok: true;
+    }>
+  >;
+  publish(
+    config: IntegrationConfig,
+    content: ContentPayload,
+  ): Promise<
+    Result<{
+      externalId: string;
+      externalUrl: string | undefined;
+      handle: string | undefined;
+    }>
+  >;
+}
 
 // Type guard helpers
 export function isGitHubConfig(

@@ -1,7 +1,7 @@
 import {
   INTEGRATION_PROVIDERS,
   INTEGRATION_STATUSES,
-} from "@rectangular-labs/core/schemas/integration-config";
+} from "@rectangular-labs/core/schemas/integration-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
