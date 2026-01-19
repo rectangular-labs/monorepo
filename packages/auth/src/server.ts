@@ -58,7 +58,7 @@ export function initAuthHandler({
   const isPreview =
     baseURL.startsWith("https://pr-") || baseURL.startsWith("https://preview.");
 
-  const productionUrl = isPreview
+  const redirectUrl = isPreview
     ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
     : baseURL; // prod / localhost domains
   const emailDriver = createEmailClient({
@@ -142,8 +142,9 @@ export function initAuthHandler({
           ? // this is so that the preview server will proxy request without state checks.
             // under the hood better auth doesn't allow proxying if the baseUrl === productionUrl.
             // https://github.com/better-auth/better-auth/commit/2d64fe38#diff-b1ff58ed51c13c92048fae09d3623dcdac496968932823c956661cd81f292cbb
-            productionUrl.replace("preview.", "")
-          : productionUrl,
+            // also technically the "production url" is the one below and not preview.{base_domain}
+            redirectUrl.replace("preview.", "")
+          : redirectUrl,
       }),
       emailOTP({
         overrideDefaultEmailVerification: credentialVerificationType === "code",
@@ -198,28 +199,28 @@ export function initAuthHandler({
         discord: {
           clientId: discordClientId,
           clientSecret: discordClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/discord`,
+          redirectURI: `${redirectUrl}/api/auth/callback/discord`,
         },
       }),
       ...(useGithub && {
         github: {
           clientId: githubClientId,
           clientSecret: githubClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/github`,
+          redirectURI: `${redirectUrl}/api/auth/callback/github`,
         },
       }),
       ...(useReddit && {
         reddit: {
           clientId: redditClientId,
           clientSecret: redditClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/reddit`,
+          redirectURI: `${redirectUrl}/api/auth/callback/reddit`,
         },
       }),
       ...(useGoogle && {
         google: {
           clientId: googleClientId,
           clientSecret: googleClientSecret,
-          redirectURI: `${productionUrl}/api/auth/callback/google`,
+          redirectURI: `${redirectUrl}/api/auth/callback/google`,
           accessType: "offline",
           prompt: "select_account consent",
         },
@@ -235,7 +236,7 @@ export function initAuthHandler({
         generateId: () => uuidv7(),
       },
     },
-    trustedOrigins: ["expo://", productionUrl, baseURL],
+    trustedOrigins: ["expo://", redirectUrl, baseURL],
   } as const satisfies BetterAuthOptions;
 
   return betterAuth(config) as ReturnType<typeof betterAuth<typeof config>>;
