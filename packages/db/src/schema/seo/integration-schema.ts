@@ -1,7 +1,7 @@
 import {
   INTEGRATION_PROVIDERS,
   INTEGRATION_STATUSES,
-  type integrationConfigSchema,
+  integrationConfigSchema,
 } from "@rectangular-labs/core/schemas/integration-parsers";
 import { type } from "arktype";
 import {
@@ -90,14 +90,30 @@ export const seoIntegrationRelations = relations(seoIntegration, ({ one }) => ({
 
 export const seoIntegrationInsertSchema = createInsertSchema(
   seoIntegration,
-).omit("id", "createdAt", "updatedAt", "deletedAt");
+).omit(
+  "id",
+  "createdAt",
+  "updatedAt",
+  "deletedAt",
+  "organizationId",
+  "encryptedCredentials",
+  "provider",
+);
 export const seoIntegrationSelectSchema = createSelectSchema(seoIntegration);
 export const seoIntegrationUpdateSchema = createUpdateSchema(seoIntegration)
-  .omit("createdAt", "updatedAt", "organizationId", "projectId")
+  .omit(
+    "createdAt",
+    "updatedAt",
+    "organizationId",
+    "projectId",
+    "encryptedCredentials",
+    "provider",
+  )
   .merge(
     type({
       id: "string.uuid",
-      organizationId: "string",
       projectId: "string.uuid",
+      organizationIdentifier: "string",
+      config: integrationConfigSchema,
     }),
   );
