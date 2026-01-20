@@ -131,7 +131,6 @@ export async function getSeoProjectByIdentifierAndOrgId<
         websiteUrl: true,
         createdAt: true,
         updatedAt: true,
-        gscPropertyId: true,
         organizationId: true,
         deletedAt: true,
         ...(includeSettings ?? {}),

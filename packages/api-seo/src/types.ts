@@ -6,6 +6,7 @@ import type {
 } from "@orpc/server";
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { chatMessageMetadataSchema } from "@rectangular-labs/core/schemas/chat-message-parser";
+import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
 import type {
   seoPlanKeywordTaskInputSchema,
   seoWriteArticleTaskInputSchema,
@@ -74,7 +75,10 @@ export interface ChatContext extends InitialContext {
     project?: typeof schema.seoProject.$inferSelect & {
       authors?: (typeof schema.seoProjectAuthor.$inferSelect)[];
     };
-    gscProperty?: typeof schema.seoGscProperty.$inferSelect & {
+    gscProperty?: {
+      id: string;
+      accountId: string;
+      config: GscConfig;
       accessToken?: string;
     };
     chat?: typeof schema.seoChat.$inferSelect;

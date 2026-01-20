@@ -17,7 +17,7 @@ import { withOrganizationIdBase } from "../context";
 import { createStrategistAgent } from "../lib/ai/strategist-agent";
 import { createWriterAgent } from "../lib/ai/writer-agent";
 import { handleTitleGeneration } from "../lib/chat/handle-title-generation";
-import { getGSCPropertyById } from "../lib/database/gsc-property";
+import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import { getProjectInChat } from "../lib/database/project";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
@@ -145,21 +145,18 @@ export const sendMessage = withOrganizationIdBase
     }
     const project = projectResult.value;
 
-    const gscProperty = await (async () => {
-      if (!project.gscPropertyId) {
-        console.log("[chat.sendMessage] No GSC property ID, skipping");
-        return null;
-      }
-
-      const result = await getGSCPropertyById(project.gscPropertyId);
-      if (!result.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to load GSC property",
-          cause: result.error,
-        });
-      }
-      return result.value;
-    })();
+    const gscIntegrationResult = await getGscIntegrationForProject({
+      db: context.db,
+      projectId: project.id,
+      organizationId: context.organization.id,
+    });
+    if (!gscIntegrationResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load GSC integration",
+        cause: gscIntegrationResult.error,
+      });
+    }
+    const gscIntegration = gscIntegrationResult.value;
 
     if (context.cache.chat?.title === CHAT_DEFAULT_TITLE) {
       const firstMessage = input.messages.at(0);
@@ -226,7 +223,7 @@ export const sendMessage = withOrganizationIdBase
         context,
         messages: input.messages,
         currentPage: input.currentPage,
-        gscProperty: gscProperty ?? undefined,
+        gscProperty: gscIntegration ?? undefined,
       });
       return strategistAgent;
     })();

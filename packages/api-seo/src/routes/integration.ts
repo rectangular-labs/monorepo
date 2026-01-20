@@ -15,9 +15,11 @@ import {
 import { type } from "arktype";
 import { protectedBase } from "../context";
 import { apiEnv } from "../env";
+import { getPublishingScopes } from "../lib/project/get-publishing-scopes";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import type { InitialContext } from "../types";
 import { github } from "./integration.github";
+import { gsc } from "./integration.gsc";
 import { shopify } from "./integration.shopify";
 import { webhook } from "./integration.webhook";
 
@@ -35,12 +37,6 @@ const integrationSummarySchema = schema.seoIntegrationSelectSchema.pick(
 function getProviderId(provider: IntegrationProvider) {
   if (provider === "github") return "github";
   if (provider === "google-search-console") return "google";
-  return null;
-}
-
-function getRequiredScope(provider: IntegrationProvider) {
-  if (provider === "github") return "repo";
-  if (provider === "google-search-console") return "webmasters";
   return null;
 }
 
@@ -72,7 +68,7 @@ async function assertAccountConnected(params: {
     });
   }
 
-  const requiredScope = getRequiredScope(params.provider);
+  const requiredScope = getPublishingScopes(params.provider);
   if (requiredScope && !account.scope?.includes(requiredScope)) {
     throw new ORPCError("BAD_REQUEST", {
       message: `Missing required ${requiredScope} scope.`,
@@ -356,6 +352,7 @@ export default protectedBase
     update,
     remove,
     github,
+    gsc,
     shopify,
     webhook,
   });

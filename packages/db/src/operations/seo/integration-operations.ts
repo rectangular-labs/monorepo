@@ -1,3 +1,8 @@
+import {
+  type IntegrationProvider,
+  type IntegrationStatus,
+  PUBLISH_DESTINATION_PROVIDERS,
+} from "@rectangular-labs/core/schemas/integration-parsers";
 import { err, ok, safe } from "@rectangular-labs/result";
 import { and, eq } from "drizzle-orm";
 import { type DB, schema } from "../../client";
@@ -85,4 +90,63 @@ export async function updateIntegration(
     return err(new Error("Failed to update integration"));
   }
   return ok(updated);
+}
+
+/**
+ * Get an integration for a specific provider (regardless of status).
+ * Returns the first integration found for the given provider.
+ */
+export function getProviderIntegration(
+  db: DB,
+  params: {
+    projectId: string;
+    organizationId: string;
+    provider: IntegrationProvider;
+    status?: IntegrationStatus;
+    includeAccount?: boolean;
+  },
+) {
+  return safe(() =>
+    db.query.seoIntegration.findFirst({
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.projectId, params.projectId),
+          eq(table.organizationId, params.organizationId),
+          eq(table.provider, params.provider),
+          params.status ? eq(table.status, params.status) : undefined,
+        ),
+      with: {
+        account: params.includeAccount ? true : undefined,
+      },
+    }),
+  );
+}
+
+/**
+ * Get all default publishing integrations for a project.
+ * Returns integrations where isDefault=true and status=active,
+ * filtered to the specified providers.
+ */
+export function getDefaultPublishingIntegrations(
+  db: DB,
+  params: {
+    organizationId: string;
+    projectId: string;
+  },
+) {
+  return safe(() =>
+    db.query.seoIntegration.findMany({
+      where: (table, { and, eq, inArray }) =>
+        and(
+          eq(table.organizationId, params.organizationId),
+          eq(table.projectId, params.projectId),
+          inArray(table.provider, PUBLISH_DESTINATION_PROVIDERS),
+          eq(table.status, "active"),
+          eq(table.isDefault, true),
+        ),
+      with: {
+        account: true,
+      },
+    }),
+  );
 }

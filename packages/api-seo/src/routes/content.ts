@@ -19,9 +19,9 @@ import {
   listPublishedContent,
   updateContentDraft,
 } from "@rectangular-labs/db/operations";
-
 import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
+import { publishToIntegrations } from "../lib/content/publish-to-integrations";
 import { writeContentDraft } from "../lib/content/write-content-draft";
 import { createSignature } from "../lib/create-signature";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
@@ -560,6 +560,19 @@ const publishContent = base
       });
     }
     const createdContent = createdContentResult.value;
+
+    const publishResult = await publishToIntegrations({
+      db: context.db,
+      content: createdContent,
+      projectId: draft.projectId,
+      organizationId: draft.organizationId,
+    });
+    if (!publishResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to publish content to integrations.",
+        cause: publishResult.error,
+      });
+    }
 
     const [draftChatsResult, draftUsersResult] = await Promise.all([
       getDraftContributingChats({

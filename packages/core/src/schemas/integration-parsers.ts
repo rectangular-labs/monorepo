@@ -3,8 +3,12 @@ import { type } from "arktype";
 import type { ArticleType } from "./content-parsers";
 
 // Provider enum - single source of truth
-const PUBLISH_DESTINATION_PROVIDERS = ["shopify", "github", "webhook"] as const;
-const DATA_SOURCE_PROVIDERS = ["google-search-console"] as const;
+export const PUBLISH_DESTINATION_PROVIDERS = [
+  "shopify",
+  "github",
+  "webhook",
+] as const;
+export const DATA_SOURCE_PROVIDERS = ["google-search-console"] as const;
 
 export const INTEGRATION_PROVIDERS = [
   ...PUBLISH_DESTINATION_PROVIDERS,

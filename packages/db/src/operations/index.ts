@@ -3,7 +3,6 @@ export * from "./seo/chat-operations";
 export * from "./seo/content-attribution";
 export * from "./seo/content-draft-attribution";
 export * from "./seo/content-operations";
-export * from "./seo/gsc-property-operations";
 export * from "./seo/integration-operations";
 export * from "./seo/organization-operations";
 export * from "./seo/project-author-operations";

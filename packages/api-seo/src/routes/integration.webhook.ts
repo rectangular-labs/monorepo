@@ -1,4 +1,3 @@
-import { createHmac } from "node:crypto";
 import { ORPCError } from "@orpc/server";
 import { decrypt } from "@orpc/server/helpers";
 import { webhookAdapter } from "@rectangular-labs/core/integrations/adapters/webhook-adapter";
@@ -10,6 +9,7 @@ import { getIntegration } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { protectedBase } from "../context";
 import { apiEnv } from "../env";
+import { createSignature } from "../lib/create-signature";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
 const testIntegration = protectedBase
@@ -24,21 +24,22 @@ const testIntegration = protectedBase
   .output(type({ success: "true" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .handler(async ({ context, input }) => {
-    const integration = await getIntegration(context.db, {
+    const integrationResult = await getIntegration(context.db, {
       id: input.id,
       projectId: input.projectId,
       organizationId: context.organization.id,
     });
-    if (!integration.ok) {
+    if (!integrationResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integration.error.message,
+        message: integrationResult.error.message,
       });
     }
-    if (!integration.value) {
+    if (!integrationResult.value) {
       throw new ORPCError("NOT_FOUND", { message: "Integration not found." });
     }
 
-    const config = integration.value.config;
+    const integration = integrationResult.value;
+    const config = integration.config;
     if (config.provider !== "webhook") {
       throw new ORPCError("BAD_REQUEST", {
         message: "Integration provider is not webhook.",
@@ -46,10 +47,10 @@ const testIntegration = protectedBase
     }
 
     let credentials: WebhookCredentials | undefined;
-    if (integration.value.encryptedCredentials) {
+    if (integration.encryptedCredentials) {
       try {
         const decryptedString = await decrypt(
-          integration.value.encryptedCredentials,
+          integration.encryptedCredentials,
           apiEnv().AUTH_SEO_ENCRYPTION_KEY,
         );
         if (!decryptedString) {
@@ -76,9 +77,7 @@ const testIntegration = protectedBase
       }
     }
 
-    const result = await webhookAdapter((payload, secret) =>
-      createHmac("sha256", secret).update(payload).digest("hex"),
-    ).publish(
+    const result = await webhookAdapter(createSignature).publish(
       config,
       {
         title: "Webhook Test",
