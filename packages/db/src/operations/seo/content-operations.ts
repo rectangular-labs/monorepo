@@ -1,20 +1,20 @@
 import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { err, ok, safe } from "@rectangular-labs/result";
 import {
-    and,
-    type DB,
-    desc,
-    eq,
-    inArray,
-    isNotNull,
-    isNull,
-    lt,
-    schema,
+  and,
+  type DB,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  schema,
 } from "../../client";
 import type {
-    seoContentDraftInsertSchema,
-    seoContentDraftUpdateSchema,
-    seoContentInsertSchema,
+  seoContentDraftInsertSchema,
+  seoContentDraftUpdateSchema,
+  seoContentInsertSchema,
 } from "../../schema/seo";
 
 /**

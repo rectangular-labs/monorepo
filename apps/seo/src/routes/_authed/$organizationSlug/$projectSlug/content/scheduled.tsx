@@ -10,8 +10,8 @@ import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "./-components/articles-table";
 import { DownloadContentButton } from "./-components/download-content-button";
 import {
-    TreeListDropDrawer,
-    useTreeListMode,
+  TreeListDropDrawer,
+  useTreeListMode,
 } from "./-components/tree-list-drop-drawer";
 
 const formatDate = (value?: string | Date | null) => {
