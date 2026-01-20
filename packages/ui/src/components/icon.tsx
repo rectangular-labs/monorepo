@@ -16,6 +16,7 @@ import {
   ClockIcon,
   CopyIcon,
   DotIcon,
+  DownloadIcon,
   ExternalLinkIcon,
   EyeIcon,
   EyeOffIcon,
@@ -91,6 +92,7 @@ export const Copy = CopyIcon;
 export const Dot = DotIcon;
 export const EyeOff = EyeOffIcon;
 export const EyeOn = EyeIcon;
+export const Download = DownloadIcon;
 export const ExternalLink = ExternalLinkIcon;
 export const File = FileIcon;
 export const Files = FilesIcon;

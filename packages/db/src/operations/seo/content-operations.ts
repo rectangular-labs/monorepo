@@ -419,6 +419,82 @@ export async function listDraftsByStatus(args: {
   );
 }
 
+/**
+ * List drafts with full content for export (includes contentMarkdown).
+ * Does not paginate - returns all matching drafts.
+ */
+export async function listDraftsForExport(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+  status: SeoFileStatus | readonly SeoFileStatus[];
+}) {
+  return await safe(() =>
+    args.db.query.seoContentDraft.findMany({
+      columns: { outline: false, notes: false },
+      where: (table, { and, eq, inArray, isNull }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          isNull(table.deletedAt),
+          typeof args.status === "string"
+            ? eq(table.status, args.status)
+            : inArray(table.status, [...args.status]),
+        ),
+      orderBy: (fields, { desc }) => [desc(fields.id)],
+    }),
+  );
+}
+
+/**
+ * List all published content with full content for export (includes contentMarkdown).
+ * Does not paginate - returns all published content for the project.
+ */
+export async function listPublishedContentForExport(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+}) {
+  return await safe(async () => {
+    const latestPerSlug = args.db
+      .selectDistinctOn([schema.seoContent.slug], {
+        id: schema.seoContent.id,
+        organizationId: schema.seoContent.organizationId,
+        projectId: schema.seoContent.projectId,
+        slug: schema.seoContent.slug,
+        version: schema.seoContent.version,
+        title: schema.seoContent.title,
+        description: schema.seoContent.description,
+        heroImage: schema.seoContent.heroImage,
+        heroImageCaption: schema.seoContent.heroImageCaption,
+        primaryKeyword: schema.seoContent.primaryKeyword,
+        articleType: schema.seoContent.articleType,
+        contentMarkdown: schema.seoContent.contentMarkdown,
+        publishedAt: schema.seoContent.publishedAt,
+        createdAt: schema.seoContent.createdAt,
+        updatedAt: schema.seoContent.updatedAt,
+        deletedAt: schema.seoContent.deletedAt,
+      })
+      .from(schema.seoContent)
+      .where(
+        and(
+          eq(schema.seoContent.organizationId, args.organizationId),
+          eq(schema.seoContent.projectId, args.projectId),
+          isNull(schema.seoContent.deletedAt),
+        ),
+      )
+      .orderBy(schema.seoContent.slug, desc(schema.seoContent.version))
+      .as("latest_content");
+
+    const rows = await args.db
+      .select()
+      .from(latestPerSlug)
+      .orderBy(desc(latestPerSlug.publishedAt));
+
+    return rows;
+  });
+}
+
 export async function countDraftsByStatus(args: {
   db: DB;
   organizationId: string;
