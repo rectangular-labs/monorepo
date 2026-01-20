@@ -16,7 +16,9 @@ import {
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
   listDraftsByStatus,
+  listDraftsForExport,
   listPublishedContent,
+  listPublishedContentForExport,
   updateContentDraft,
 } from "@rectangular-labs/db/operations";
 
@@ -625,6 +627,65 @@ const publishContent = base
     return { success: true } as const;
   });
 
+const exportScheduled = withOrganizationIdBase
+  .route({ method: "GET", path: "/export/scheduled" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      data: schema.seoContentDraftSelectSchema.omit("outline", "notes").array(),
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const rowsResult = await listDraftsForExport({
+      db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
+      status: "scheduled",
+    });
+    if (!rowsResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load scheduled content for export.",
+        cause: rowsResult.error,
+      });
+    }
+    return { data: rowsResult.value };
+  });
+
+const exportPublished = withOrganizationIdBase
+  .route({ method: "GET", path: "/export/published" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      data: schema.seoContentSelectSchema.omit("outline", "notes").array(),
+    }),
+  )
+  .handler(async ({ context, input }) => {
+    const rowsResult = await listPublishedContentForExport({
+      db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
+    });
+    if (!rowsResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load published content for export.",
+        cause: rowsResult.error,
+      });
+    }
+    return { data: rowsResult.value };
+  });
+
 export default base
   .prefix("/organization/{organizationIdentifier}/project/{projectId}/content")
   .router({
@@ -635,4 +696,6 @@ export default base
     updateDraft,
     markDraft,
     publishContent,
+    exportScheduled,
+    exportPublished,
   });

@@ -8,9 +8,10 @@ import { useEffect, useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ArticlesTable } from "./-components/articles-table";
+import { DownloadContentButton } from "./-components/download-content-button";
 import {
-  TreeListDropDrawer,
-  useTreeListMode,
+    TreeListDropDrawer,
+    useTreeListMode,
 } from "./-components/tree-list-drop-drawer";
 
 const formatDate = (value?: string | Date | null) => {
@@ -49,7 +50,7 @@ export const Route = createFileRoute(
 });
 
 function PageComponent() {
-  const { organizationSlug } = Route.useParams();
+  const { organizationSlug, projectSlug } = Route.useParams();
   const { view } = Route.useSearch();
   const { projectId } = Route.useLoaderData();
 
@@ -135,6 +136,12 @@ function PageComponent() {
             </div>
 
             <div className="flex items-center gap-2">
+              <DownloadContentButton
+                contentType="published"
+                organizationSlug={organizationSlug}
+                projectId={projectId}
+                projectSlug={projectSlug}
+              />
               <TreeListDropDrawer onChange={setViewMode} value={activeView} />
             </div>
           </div>
