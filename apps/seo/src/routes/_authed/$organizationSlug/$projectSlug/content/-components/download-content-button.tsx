@@ -68,7 +68,7 @@ export function DownloadContentButton({
 
       const zipFilename = generateZipFilename(projectSlug, contentType);
 
-      await downloadContentZip({
+      downloadContentZip({
         contents,
         zipFilename,
       });

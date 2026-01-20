@@ -42,8 +42,7 @@ function generateFrontmatter(content: ContentItem): string {
 
   if (content.publishedAt) {
     lines.push(`datePublished: "${content.publishedAt.toISOString()}"`);
-  }
-  if (content.scheduledFor) {
+  } else if (content.scheduledFor) {
     lines.push(`datePublished: "${content.scheduledFor.toISOString()}"`);
   }
 
