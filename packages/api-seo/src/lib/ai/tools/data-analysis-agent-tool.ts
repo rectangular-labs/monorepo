@@ -17,12 +17,10 @@ export function createDataAnalysisAgentToolWithMetadata({
   gscProperty,
 }: {
   project: typeof schema.seoProject.$inferSelect;
-  gscProperty:
-    | {
-        config: GscConfig;
-        accessToken?: string | null;
-      }
-    | null;
+  gscProperty: {
+    config: GscConfig;
+    accessToken?: string | null;
+  } | null;
 }) {
   const hasGsc = !!(
     gscProperty?.accessToken &&
@@ -163,12 +161,10 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
 
 export function createDataAnalysisAgentTool(args: {
   project: typeof schema.seoProject.$inferSelect;
-  gscProperty:
-    | {
-        config: GscConfig;
-        accessToken?: string | null;
-      }
-    | null;
+  gscProperty: {
+    config: GscConfig;
+    accessToken?: string | null;
+  } | null;
 }): ReturnType<typeof createDataAnalysisAgentToolWithMetadata>["tools"] {
   return createDataAnalysisAgentToolWithMetadata(args).tools;
 }
