@@ -63,10 +63,14 @@ const listProperties = protectedBase
       };
     }
 
+    const gscPublishingScopes = getPublishingScopes("google-search-console");
+    if (!gscPublishingScopes) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "GSC publishing scopes not found.",
+      });
+    }
     const accountsWithScopes = accounts.filter((account) =>
-      account.scope?.includes(
-        getPublishingScopes("google-search-console") ?? "",
-      ),
+      gscPublishingScopes.every((scope) => account.scope?.includes(scope)),
     );
     if (accountsWithScopes.length === 0) {
       return {

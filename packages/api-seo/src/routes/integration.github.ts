@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { githubAdapter } from "@rectangular-labs/core/integrations/adapters/github-adapter";
 import { type } from "arktype";
 import { protectedBase } from "../context";
+import { getPublishingScopes } from "../lib/project/get-publishing-scopes";
 
 const listRepositories = protectedBase
   .route({ method: "GET", path: "/repositories" })
@@ -31,8 +32,14 @@ const listRepositories = protectedBase
       };
     }
 
+    const githubPublishingScopes = getPublishingScopes("github");
+    if (!githubPublishingScopes) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "GitHub publishing scopes not found.",
+      });
+    }
     const accountsWithScopes = accounts.filter((account) =>
-      account.scope?.includes("repo"),
+      githubPublishingScopes.every((scope) => account.scope?.includes(scope)),
     );
     if (accountsWithScopes.length === 0) {
       return {

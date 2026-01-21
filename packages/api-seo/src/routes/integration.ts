@@ -69,7 +69,10 @@ async function assertAccountConnected(params: {
   }
 
   const requiredScope = getPublishingScopes(params.provider);
-  if (requiredScope && !account.scope?.includes(requiredScope)) {
+  if (
+    requiredScope &&
+    !requiredScope.every((scope) => account.scope?.includes(scope))
+  ) {
     throw new ORPCError("BAD_REQUEST", {
       message: `Missing required ${requiredScope} scope.`,
     });
