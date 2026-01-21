@@ -64,7 +64,7 @@ export const shopifyAdapter = () => {
         const client = createClient(config, credentials);
         const publishAsHtml = config.publishAsHtml ?? true;
         const bodyHtml = publishAsHtml
-          ? content.contentMarkdown // TODO: convert markdown to HTML
+          ? content.contentMarkdown // TODO (shopify): convert markdown to HTML
           : `<div data-markdown="true">${content.contentMarkdown}</div>`;
 
         try {
