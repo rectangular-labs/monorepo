@@ -1,5 +1,4 @@
 import { getContext } from "@rectangular-labs/api-core/lib/context-storage";
-import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
 import type { DB } from "@rectangular-labs/db";
 import { getProviderIntegration } from "@rectangular-labs/db/operations";
 import { ok, safe } from "@rectangular-labs/result";
@@ -36,11 +35,14 @@ export async function getGscIntegrationForProject(params: {
   if (!accessTokenResult.ok) {
     return accessTokenResult;
   }
+  if (integration.config.provider !== "google-search-console") {
+    return ok(null);
+  }
 
   return ok({
     ...integration,
     accountId: integration.account.id,
-    config: integration.config as GscConfig,
+    config: integration.config,
     accessToken: accessTokenResult.value.accessToken,
   });
 }

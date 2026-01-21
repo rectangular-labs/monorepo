@@ -27,18 +27,6 @@ export const INTEGRATION_STATUSES = [
 ] as const;
 export type IntegrationStatus = (typeof INTEGRATION_STATUSES)[number];
 
-export function isPublishDestination(provider: IntegrationProvider): boolean {
-  return PUBLISH_DESTINATION_PROVIDERS.includes(
-    provider as (typeof PUBLISH_DESTINATION_PROVIDERS)[number],
-  );
-}
-
-export function isDataSource(provider: IntegrationProvider): boolean {
-  return DATA_SOURCE_PROVIDERS.includes(
-    provider as (typeof DATA_SOURCE_PROVIDERS)[number],
-  );
-}
-
 // ═══════════════════════════════════════════════════════════════════════
 // PUBLISH DESTINATIONS CONFIGURATIONS
 // ═══════════════════════════════════════════════════════════════════════
@@ -150,24 +138,4 @@ export interface PublishAdapter {
       handle: string | undefined;
     }>
   >;
-}
-
-// Type guard helpers
-export function isGitHubConfig(
-  config: IntegrationConfig,
-): config is GitHubConfig {
-  return config.provider === "github";
-}
-export function isShopifyConfig(
-  config: IntegrationConfig,
-): config is ShopifyConfig {
-  return config.provider === "shopify";
-}
-export function isWebhookConfig(
-  config: IntegrationConfig,
-): config is WebhookConfig {
-  return config.provider === "webhook";
-}
-export function isGscConfig(config: IntegrationConfig): config is GscConfig {
-  return config.provider === "google-search-console";
 }
