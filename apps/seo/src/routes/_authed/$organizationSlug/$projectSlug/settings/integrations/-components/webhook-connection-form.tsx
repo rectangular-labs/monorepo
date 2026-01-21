@@ -1,6 +1,11 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
+import {
   arktypeResolver,
   Controller,
   Field,
@@ -195,6 +200,12 @@ export function WebhookConnectionForm({
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+      {existingIntegration?.lastError && (
+        <Alert variant="destructive">
+          <AlertTitle>Last publish error</AlertTitle>
+          <AlertDescription>{existingIntegration.lastError}</AlertDescription>
+        </Alert>
+      )}
       <FieldGroup>
         <Controller
           control={form.control}

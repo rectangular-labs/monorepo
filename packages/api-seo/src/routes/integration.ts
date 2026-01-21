@@ -32,6 +32,7 @@ const integrationSummarySchema = schema.seoIntegrationSelectSchema.pick(
   "lastError",
   "isDefault",
   "updatedAt",
+  "config",
 );
 
 function getProviderId(provider: IntegrationProvider) {
@@ -161,6 +162,7 @@ const list = protectedBase
         lastError: integration.lastError,
         isDefault: integration.isDefault,
         updatedAt: integration.updatedAt,
+        config: integration.config,
       })),
     };
   });
@@ -200,6 +202,7 @@ const get = protectedBase
         lastError: integration.value.lastError,
         isDefault: integration.value.isDefault,
         updatedAt: integration.value.updatedAt,
+        config: integration.value.config,
       },
     };
   });
@@ -299,6 +302,8 @@ const update = protectedBase
         accountId: input.accountId,
         isDefault: input.isDefault,
         config: input.config,
+        status: "active",
+        lastError: null,
         encryptedCredentials: input.credentials
           ? await encrypt(
               JSON.stringify(input.credentials),

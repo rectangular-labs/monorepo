@@ -36,6 +36,17 @@ export const githubConfigSchema = type({
   branch: "string", // "main"
   basePath: "string", // "content/blog/"
   mode: "'pull_request' | 'commit'",
+  "frontmatterMapping?": type({
+    "title?": "string",
+    "description?": "string",
+    "slug?": "string",
+    "primaryKeyword?": "string",
+    "date?": "string",
+    "image?": "string",
+    "imageCaption?": "string",
+    "keywords?": "string",
+    "articleType?": "string",
+  }),
 });
 export type GitHubConfig = typeof githubConfigSchema.infer;
 

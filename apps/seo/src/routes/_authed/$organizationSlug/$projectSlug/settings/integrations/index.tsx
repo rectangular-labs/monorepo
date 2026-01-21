@@ -169,7 +169,11 @@ function RouteComponent() {
             const integration = integrationsByProvider.get(
               provider as IntegrationProvider,
             );
-            const isConnected = integration?.status === "active";
+            const isConnected =
+              integration?.status === "active" ||
+              integration?.status === "error";
+            const hasError =
+              integration?.status === "error" || !!integration?.lastError;
 
             return (
               <Card className="flex flex-col" key={provider}>
@@ -191,9 +195,12 @@ function RouteComponent() {
                   </div>
                   {/* Title with category badge on same row */}
                   <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3">
                     <CardTitle className="font-semibold text-base">
                       {meta.name}
                     </CardTitle>
+                      {hasError && <Badge variant="destructive">Error</Badge>}
+                    </div>
                     <Badge variant="secondary">
                       {meta.category === "publishing"
                         ? "Publishing"

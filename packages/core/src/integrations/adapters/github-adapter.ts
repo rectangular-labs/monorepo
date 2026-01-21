@@ -6,7 +6,10 @@ import type {
 } from "@rectangular-labs/core/schemas/integration-parsers";
 import { err, ok, type Result } from "@rectangular-labs/result";
 
-function generateFrontmatter(content: ContentPayload): string {
+function generateFrontmatter(
+  content: ContentPayload,
+  frontmatterMapping?: GitHubConfig["frontmatterMapping"],
+): string {
   const data = {
     title: content.title,
     description: content.description,
@@ -19,8 +22,13 @@ function generateFrontmatter(content: ContentPayload): string {
     ...(content.articleType && { articleType: content.articleType }),
   };
 
+  const mapping = frontmatterMapping ?? {};
+
   return `---\n${Object.entries(data)
-    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+    .map(([key, value]) => {
+      const mappedKey = mapping[key as keyof typeof mapping] || key;
+      return `${mappedKey}: ${JSON.stringify(value)}`;
+    })
     .join("\n")}\n---\n\n`;
 }
 
@@ -49,7 +57,10 @@ export const githubAdapter = (accessToken: string) => {
           return err(new Error("Invalid repository format."));
         }
 
-        const frontmatter = generateFrontmatter(content);
+        const frontmatter = generateFrontmatter(
+          content,
+          config.frontmatterMapping,
+        );
         const markdownContent = frontmatter + content.contentMarkdown;
 
         const basePath = config.basePath.replace(/^\/|\/$/g, "");

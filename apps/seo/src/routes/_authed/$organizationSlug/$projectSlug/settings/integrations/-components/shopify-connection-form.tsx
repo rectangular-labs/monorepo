@@ -1,5 +1,10 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import { ShoppingBag } from "@rectangular-labs/ui/components/icon";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,
@@ -199,11 +204,18 @@ export function ShopifyConnectionForm({
   };
 
   const isPending = isInitiating || isSelectingBlog || isRemoving;
+  const errorAlert = existingIntegration?.lastError ? (
+    <Alert variant="destructive">
+      <AlertTitle>Last publish error</AlertTitle>
+      <AlertDescription>{existingIntegration.lastError}</AlertDescription>
+    </Alert>
+  ) : null;
 
   // If we already have an active Shopify integration, show the blog selection form
   if (existingIntegration?.status === "active") {
     return (
       <div className="space-y-4">
+        {errorAlert}
         <div className="rounded-lg border bg-muted/50 p-4">
           <div className="flex items-center gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background">
@@ -249,6 +261,7 @@ export function ShopifyConnectionForm({
         className="space-y-4"
         onSubmit={blogSelectForm.handleSubmit(handleSelectBlog)}
       >
+        {errorAlert}
         <p className="text-muted-foreground text-sm">
           Select a blog to publish your articles to.
         </p>
@@ -354,6 +367,7 @@ export function ShopifyConnectionForm({
       className="space-y-4"
       onSubmit={initiateForm.handleSubmit(handleInitiate)}
     >
+      {errorAlert}
       <div className="rounded-lg border-yellow-500 border-l-4 bg-yellow-500/10 p-4">
         <p className="text-sm">
           <strong>Note:</strong> This requires creating a custom app in your

@@ -16,7 +16,7 @@ function SettingsLayout() {
         organizationSlug={organizationSlug}
         projectSlug={projectSlug}
       />
-      <main className="mx-auto h-full max-w-4xl flex-1 px-6 py-4">
+      <main className="mx-auto h-full w-full max-w-4xl flex-1 px-6 py-4">
         <Outlet />
       </main>
     </div>

@@ -1,5 +1,16 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import { GitHubIcon } from "@rectangular-labs/ui/components/icon";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@rectangular-labs/ui/components/ui/accordion";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@rectangular-labs/ui/components/ui/alert";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Empty,
@@ -53,6 +64,17 @@ const formSchema = type({
   basePath: type("string"),
   mode: "'commit' | 'pull_request'",
   isDefault: "boolean",
+  "frontmatterMapping?": type({
+    "title?": "string",
+    "description?": "string",
+    "slug?": "string",
+    "primaryKeyword?": "string",
+    "date?": "string",
+    "image?": "string",
+    "imageCaption?": "string",
+    "keywords?": "string",
+    "articleType?": "string",
+  }),
 });
 
 type FormValues = typeof formSchema.infer;
@@ -66,6 +88,24 @@ export function GithubConnectionForm({
 }: GithubConnectionFormProps) {
   const queryClient = useQueryClient();
   const api = getApiClientRq();
+
+  const existingConfig =
+    existingIntegration?.config &&
+    existingIntegration.config.provider === "github"
+      ? existingIntegration.config
+      : null;
+
+  const frontmatterMappingDefaults = {
+    title: "",
+    description: "",
+    slug: "",
+    primaryKeyword: "",
+    date: "",
+    image: "",
+    imageCaption: "",
+    keywords: "",
+    articleType: "",
+  };
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
     null,
@@ -87,11 +127,15 @@ export function GithubConnectionForm({
   const form = useForm<FormValues>({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
-      repository: "",
-      branch: "",
-      basePath: "/src/blog/",
-      mode: "commit",
-      isDefault: !existingIntegration,
+      repository: existingConfig?.repository ?? "",
+      branch: existingConfig?.branch ?? "",
+      basePath: existingConfig?.basePath ?? "",
+      mode: existingConfig?.mode ?? "commit",
+      isDefault: existingIntegration?.isDefault ?? true,
+      frontmatterMapping: {
+        ...frontmatterMappingDefaults,
+        ...existingConfig?.frontmatterMapping,
+      },
     },
   });
 
@@ -115,10 +159,25 @@ export function GithubConnectionForm({
       );
       if (repo) {
         setSelectedAccountId(repo.accountId);
-        form.setValue("branch", repo.defaultBranch);
+        const currentBranch = form.getValues("branch");
+        const shouldUseDefault =
+          !currentBranch || selectedRepo !== existingConfig?.repository;
+        if (shouldUseDefault) {
+          form.setValue("branch", repo.defaultBranch);
+        }
       }
     }
-  }, [selectedRepo, reposData, form]);
+  }, [selectedRepo, reposData, form, existingConfig?.repository]);
+
+  useEffect(() => {
+    if (!reposData?.repositories?.length || !existingConfig?.repository) return;
+    const repo = reposData.repositories.find(
+      (item) => item.fullName === existingConfig.repository,
+    );
+    if (repo) {
+      setSelectedAccountId(repo.accountId);
+    }
+  }, [reposData, existingConfig?.repository]);
 
   // Create integration
   const { mutate: createIntegration, isPending: isCreating } = useMutation(
@@ -191,12 +250,22 @@ export function GithubConnectionForm({
       return;
     }
 
+    const frontmatterMapping = Object.fromEntries(
+      Object.entries(values.frontmatterMapping ?? {}).filter(
+        ([, value]) => typeof value === "string" && value.trim().length > 0,
+      ),
+    );
+
     const config = {
       provider: "github" as const,
       repository: values.repository,
       branch: values.branch,
       basePath: values.basePath,
       mode: values.mode,
+      frontmatterMapping:
+        Object.keys(frontmatterMapping).length > 0
+          ? frontmatterMapping
+          : undefined,
     };
 
     if (existingIntegration) {
@@ -304,7 +373,16 @@ export function GithubConnectionForm({
   const repositories = reposData?.repositories ?? [];
 
   return (
-    <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+    <form
+      className="max-h-[65vh] space-y-4 overflow-y-auto"
+      onSubmit={form.handleSubmit(handleSubmit)}
+    >
+      {existingIntegration?.lastError && (
+        <Alert variant="destructive">
+          <AlertTitle>Last publish error</AlertTitle>
+          <AlertDescription>{existingIntegration.lastError}</AlertDescription>
+        </Alert>
+      )}
       <FieldGroup>
         <Controller
           control={form.control}
@@ -396,6 +474,45 @@ export function GithubConnectionForm({
             </Field>
           )}
         />
+
+        <Accordion collapsible type="single">
+          <AccordionItem value="frontmatter-mapping">
+            <AccordionTrigger>Advanced frontmatter mapping</AccordionTrigger>
+            <AccordionContent>
+              <FieldGroup>
+                {(
+                  [
+                    ["title", "Title"],
+                    ["description", "Description"],
+                    ["slug", "Slug"],
+                    ["primaryKeyword", "Primary Keyword"],
+                    ["date", "Date"],
+                    ["image", "Image URL"],
+                    ["imageCaption", "Image Caption"],
+                    ["keywords", "Keywords"],
+                    ["articleType", "Article Type"],
+                  ] as const
+                ).map(([key, label]) => (
+                  <Controller
+                    control={form.control}
+                    key={key}
+                    name={`frontmatterMapping.${key}`}
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>{label}</FieldLabel>
+                        <FieldDescription>
+                          Override the frontmatter key for {label.toLowerCase()}
+                          .
+                        </FieldDescription>
+                        <Input placeholder={label.toLowerCase()} {...field} />
+                      </Field>
+                    )}
+                  />
+                ))}
+              </FieldGroup>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <Controller
           control={form.control}
