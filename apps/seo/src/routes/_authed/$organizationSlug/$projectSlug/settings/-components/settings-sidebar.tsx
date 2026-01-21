@@ -23,6 +23,12 @@ export function SettingsSidebar(params: {
           Publishing
         </NavLink>
         <NavLink
+          params={params}
+          to="/$organizationSlug/$projectSlug/settings/integrations"
+        >
+          Integrations
+        </NavLink>
+        <NavLink
           activeOptions={{
             exact: true,
           }}

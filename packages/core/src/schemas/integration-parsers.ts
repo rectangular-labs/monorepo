@@ -14,6 +14,9 @@ export const INTEGRATION_PROVIDERS = [
   ...PUBLISH_DESTINATION_PROVIDERS,
   ...DATA_SOURCE_PROVIDERS,
 ] as const;
+export const integrationProvidersSchema = type.enumerated(
+  ...INTEGRATION_PROVIDERS,
+);
 export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
 
 export const INTEGRATION_STATUSES = [

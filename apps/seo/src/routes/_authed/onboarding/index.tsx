@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authed/onboarding/")({
 
     const [gscProperties, project] = await Promise.all([
       context.queryClient.fetchQuery(
-        api.googleSearchConsole.listProperties.queryOptions(),
+        api.integrations.gsc.listProperties.queryOptions(),
       ),
       ...(deps.projectId && deps.organizationId
         ? [

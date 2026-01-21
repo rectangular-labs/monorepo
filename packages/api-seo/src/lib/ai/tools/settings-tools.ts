@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { integrationProvidersSchema } from "@rectangular-labs/core/schemas/integration-parsers";
 import {
   businessBackgroundSchema,
   imageSettingsSchema,
@@ -111,17 +112,19 @@ Respond with the new object matching the schema.`;
   });
 
   const manageIntegrationsInputSchema = type({
-    integrationName: "'googleSearchConsole'",
+    provider: integrationProvidersSchema,
   });
   const manageIntegrations = tool({
-    description: "Manage integrations.",
+    description:
+      "Help the user view, connect, or manage integrations for publishing content or tracking performance.",
     inputSchema: jsonSchema<typeof manageIntegrationsInputSchema.infer>(
       manageIntegrationsInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute() {
+    async execute({ provider }) {
       return await Promise.resolve({
         success: true,
-        message: "integration settings shown to user",
+        message: `Integration settings for ${provider} shown to user`,
+        provider,
       });
     },
   });
@@ -143,9 +146,9 @@ Respond with the new object matching the schema.`;
     {
       toolName: "manage_integrations",
       toolDescription:
-        "Help the user view/connect integrations (currently Google Search Console).",
+        "Help the user view/connect integrations. Available integrations: github (push content to repo), shopify (publish to store blog), webhook (send to any HTTP endpoint), google-search-console (track search performance).",
       toolInstruction:
-        "Use when the user asks about connecting/troubleshooting GSC, or when performance analysis is requested but GSC is not connected. Provide integrationName='googleSearchConsole'.",
+        "Use when user asks about: connecting GitHub for publishing, setting up Shopify blog, configuring webhooks, connecting GSC, or when performance analysis is requested but GSC is not connected. Always provide the provider parameter.",
       tool: manageIntegrations,
     },
   ];

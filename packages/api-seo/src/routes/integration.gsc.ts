@@ -18,7 +18,6 @@ import {
 } from "@rectangular-labs/google-apis/google-search-console";
 import { type } from "arktype";
 import { protectedBase } from "../context";
-import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import { getPublishingScopes } from "../lib/project/get-publishing-scopes";
 import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
@@ -116,7 +115,7 @@ const listProperties = protectedBase
       .flat();
 
     return {
-      properties: result,
+      properties: result.sort((a, b) => a.domain.localeCompare(b.domain)),
       hasGoogleAccount: true,
       hasGscScopes: true,
     };
@@ -197,24 +196,32 @@ const connectToProject = protectedBase
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .handler(async ({ context, input }) => {
-    const gscIntegrationResult = await getGscIntegrationForProject({
-      db: context.db,
-      projectId: input.projectId,
-      organizationId: context.organization.id,
+    // Get the account to verify it exists and belongs to the user
+    const account = await context.db.query.account.findFirst({
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.id, input.accountId),
+          eq(table.userId, context.user.id),
+          eq(table.providerId, "google"),
+        ),
     });
-    if (!gscIntegrationResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: gscIntegrationResult.error.message,
-      });
-    }
-    const integration = gscIntegrationResult.value;
-    if (!integration) {
+    if (!account) {
       throw new ORPCError("NOT_FOUND", {
-        message: "GSC integration not found",
+        message: "Google account not found",
       });
     }
 
-    const properties = await listGscProperties(integration.accessToken);
+    // Get access token from the account
+    const accessTokenResult = await context.auth.api.getAccessToken({
+      body: {
+        accountId: account.id,
+        userId: account.userId,
+        providerId: "google",
+      },
+    });
+
+    // Verify the property exists in GSC
+    const properties = await listGscProperties(accessTokenResult.accessToken);
     if (!properties.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Failed to get GSC properties",
@@ -234,6 +241,7 @@ const connectToProject = protectedBase
       permissionLevel: input.permissionLevel,
     };
 
+    // Check if there's an existing GSC integration for this project
     const existingIntegrationResult = await getProviderIntegration(context.db, {
       projectId: input.projectId,
       organizationId: context.organization.id,
@@ -247,6 +255,7 @@ const connectToProject = protectedBase
     const existingIntegration = existingIntegrationResult.value;
 
     if (existingIntegration) {
+      // Update existing integration
       const updated = await updateIntegration(context.db, {
         id: existingIntegration.id,
         organizationId: context.organization.id,
@@ -308,10 +317,10 @@ const disconnectFromProject = protectedBase
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .handler(async ({ context, input }) => {
-    const integrationResult = await getGscIntegrationForProject({
-      db: context.db,
+    const integrationResult = await getProviderIntegration(context.db, {
       projectId: input.projectId,
       organizationId: context.organization.id,
+      provider: "google-search-console",
     });
     if (!integrationResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
