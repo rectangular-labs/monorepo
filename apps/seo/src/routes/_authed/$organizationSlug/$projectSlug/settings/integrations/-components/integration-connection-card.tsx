@@ -16,6 +16,7 @@ export interface IntegrationConnectionCardProps {
   organizationSlug: string;
   existingIntegration?: IntegrationSummary;
   onClose: () => void;
+  hasIntegrations: boolean;
   /** If true, renders in a more compact inline mode (for chat panel) */
   inline?: boolean;
 }
@@ -30,6 +31,7 @@ export function IntegrationConnectionCard({
   organizationSlug,
   existingIntegration,
   onClose,
+  hasIntegrations,
   inline = false,
 }: IntegrationConnectionCardProps) {
   switch (provider) {
@@ -37,6 +39,7 @@ export function IntegrationConnectionCard({
       return (
         <GithubConnectionForm
           existingIntegration={existingIntegration}
+          hasIntegrations={hasIntegrations}
           inline={inline}
           onClose={onClose}
           organizationSlug={organizationSlug}
@@ -47,6 +50,7 @@ export function IntegrationConnectionCard({
       return (
         <ShopifyConnectionForm
           existingIntegration={existingIntegration}
+          hasIntegrations={hasIntegrations}
           onClose={onClose}
           organizationSlug={organizationSlug}
           projectId={projectId}
@@ -56,6 +60,7 @@ export function IntegrationConnectionCard({
       return (
         <WebhookConnectionForm
           existingIntegration={existingIntegration}
+          hasIntegrations={hasIntegrations}
           onClose={onClose}
           organizationSlug={organizationSlug}
           projectId={projectId}

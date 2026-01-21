@@ -7,6 +7,7 @@ import {
 } from "@rectangular-labs/core/schemas/integration-parsers";
 import { and, type DB, eq, schema } from "@rectangular-labs/db";
 import {
+  clearDefaultIntegrations,
   createIntegration,
   getIntegration,
   listIntegrations,
@@ -232,6 +233,19 @@ const create = protectedBase
       });
     }
 
+    // Clear existing default integrations if this one is being set as default
+    if (input.isDefault) {
+      const clearResult = await clearDefaultIntegrations(context.db, {
+        organizationId: context.organization.id,
+        projectId: input.projectId,
+      });
+      if (!clearResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: clearResult.error.message,
+        });
+      }
+    }
+
     const result = await createIntegration(context.db, {
       organizationId: context.organization.id,
       projectId: input.projectId,
@@ -291,6 +305,19 @@ const update = protectedBase
       throw new ORPCError("BAD_REQUEST", {
         message: "Config doesn't match integration provider.",
       });
+    }
+
+    // Clear existing default integrations if this one is being set as default
+    if (input.isDefault) {
+      const clearResult = await clearDefaultIntegrations(context.db, {
+        organizationId: context.organization.id,
+        projectId: input.projectId,
+      });
+      if (!clearResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: clearResult.error.message,
+        });
+      }
     }
 
     const result = await updateIntegration(context.db, {

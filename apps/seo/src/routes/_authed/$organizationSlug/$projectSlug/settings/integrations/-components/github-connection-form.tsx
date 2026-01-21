@@ -56,12 +56,13 @@ interface GithubConnectionFormProps {
   existingIntegration?: IntegrationSummary;
   onClose: () => void;
   inline?: boolean;
+  hasIntegrations?: boolean;
 }
 
 const formSchema = type({
-  repository: "string",
-  branch: "string",
-  basePath: type("string"),
+  repository: type("string").atLeastLength(1),
+  branch: type("string").atLeastLength(1),
+  basePath: type("string").atLeastLength(1),
   mode: "'commit' | 'pull_request'",
   isDefault: "boolean",
   "frontmatterMapping?": type({
@@ -85,6 +86,7 @@ export function GithubConnectionForm({
   existingIntegration,
   onClose,
   inline = false,
+  hasIntegrations = false,
 }: GithubConnectionFormProps) {
   const queryClient = useQueryClient();
   const api = getApiClientRq();
@@ -131,7 +133,7 @@ export function GithubConnectionForm({
       branch: existingConfig?.branch ?? "",
       basePath: existingConfig?.basePath ?? "",
       mode: existingConfig?.mode ?? "commit",
-      isDefault: existingIntegration?.isDefault ?? true,
+      isDefault: existingIntegration?.isDefault ?? !hasIntegrations,
       frontmatterMapping: {
         ...frontmatterMappingDefaults,
         ...existingConfig?.frontmatterMapping,

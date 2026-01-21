@@ -150,3 +150,29 @@ export function getDefaultPublishingIntegrations(
     }),
   );
 }
+
+/**
+ * Clear the isDefault flag for all integrations in a project.
+ * Used before setting a new default integration to ensure only one default exists.
+ */
+export function clearDefaultIntegrations(
+  db: DB,
+  params: {
+    organizationId: string;
+    projectId: string;
+  },
+) {
+  return safe(() =>
+    db
+      .update(schema.seoIntegration)
+      .set({ isDefault: false })
+      .where(
+        and(
+          eq(schema.seoIntegration.organizationId, params.organizationId),
+          eq(schema.seoIntegration.projectId, params.projectId),
+          eq(schema.seoIntegration.isDefault, true),
+        ),
+      )
+      .returning(),
+  );
+}

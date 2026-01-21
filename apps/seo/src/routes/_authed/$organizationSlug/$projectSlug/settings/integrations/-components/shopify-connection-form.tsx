@@ -40,6 +40,7 @@ interface ShopifyConnectionFormProps {
   organizationSlug: string;
   existingIntegration?: IntegrationSummary;
   onClose: () => void;
+  hasIntegrations?: boolean;
 }
 
 const initiateFormSchema = type({
@@ -65,6 +66,7 @@ export function ShopifyConnectionForm({
   organizationSlug,
   existingIntegration,
   onClose,
+  hasIntegrations = false,
 }: ShopifyConnectionFormProps) {
   const queryClient = useQueryClient();
   const api = getApiClientRq();
@@ -88,7 +90,7 @@ export function ShopifyConnectionForm({
       adminUrl: "",
       clientId: "",
       clientSecret: "",
-      isDefault: !existingIntegration,
+      isDefault: existingIntegration?.isDefault ?? !hasIntegrations,
     },
   });
 
@@ -98,7 +100,7 @@ export function ShopifyConnectionForm({
     defaultValues: {
       blogId: "",
       publishAsHtml: true,
-      isDefault: existingIntegration?.isDefault ?? true,
+      isDefault: existingIntegration?.isDefault ?? !hasIntegrations,
     },
   });
 

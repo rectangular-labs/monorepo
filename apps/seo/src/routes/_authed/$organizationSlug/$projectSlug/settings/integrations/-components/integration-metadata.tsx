@@ -3,7 +3,6 @@ import {
   GitHubIcon,
   GoogleSearchConsoleIcon,
   Link,
-  ShopifyIcon,
 } from "@rectangular-labs/ui/components/icon";
 
 export type IntegrationCategory = "publishing" | "data-source";
@@ -18,7 +17,7 @@ interface IntegrationMetadata {
 }
 
 export const INTEGRATION_METADATA: Record<
-  IntegrationProvider,
+  Exclude<IntegrationProvider, "shopify">,
   IntegrationMetadata
 > = {
   github: {
@@ -29,14 +28,14 @@ export const INTEGRATION_METADATA: Record<
     category: "publishing",
     icon: <GitHubIcon className="size-6" />,
   },
-  shopify: {
-    provider: "shopify",
-    name: "Shopify",
-    description:
-      "Publish articles directly to your Shopify store's blog. Requires a custom Shopify app with Content API access.",
-    category: "publishing",
-    icon: <ShopifyIcon className="size-6" />,
-  },
+  // shopify: {
+  //   provider: "shopify",
+  //   name: "Shopify",
+  //   description:
+  //     "Publish articles directly to your Shopify store's blog. Requires a custom Shopify app with Content API access.",
+  //   category: "publishing",
+  //   icon: <ShopifyIcon className="size-6" />,
+  // },
   webhook: {
     provider: "webhook",
     name: "Webhook",
@@ -58,5 +57,8 @@ export const INTEGRATION_METADATA: Record<
 export function getIntegrationMetadata(
   provider: IntegrationProvider,
 ): IntegrationMetadata {
+  if (provider === "shopify") {
+    throw new Error("Shopify integration is not supported");
+  }
   return INTEGRATION_METADATA[provider];
 }

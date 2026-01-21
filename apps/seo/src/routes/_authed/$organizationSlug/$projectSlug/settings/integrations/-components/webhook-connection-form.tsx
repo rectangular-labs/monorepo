@@ -1,10 +1,10 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
-import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@rectangular-labs/ui/components/ui/alert";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   arktypeResolver,
   Controller,
@@ -38,11 +38,12 @@ interface WebhookConnectionFormProps {
   organizationSlug: string;
   existingIntegration?: IntegrationSummary;
   onClose: () => void;
+  hasIntegrations?: boolean;
 }
 
 const formSchema = type({
   name: "string",
-  url: "string.url",
+  url: type("string.url").atLeastLength(1),
   method: "'POST' | 'PUT'",
   secret: "string",
   secretHeaderName: "string",
@@ -56,6 +57,7 @@ export function WebhookConnectionForm({
   organizationSlug,
   existingIntegration,
   onClose,
+  hasIntegrations = false,
 }: WebhookConnectionFormProps) {
   const queryClient = useQueryClient();
   const api = getApiClientRq();
@@ -68,7 +70,7 @@ export function WebhookConnectionForm({
       method: "POST",
       secret: "",
       secretHeaderName: "X-Webhook-Signature",
-      isDefault: !existingIntegration,
+      isDefault: existingIntegration?.isDefault ?? !hasIntegrations,
     },
   });
 
@@ -209,21 +211,6 @@ export function WebhookConnectionForm({
       <FieldGroup>
         <Controller
           control={form.control}
-          name="name"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Name</FieldLabel>
-              <FieldDescription>
-                A friendly name to identify this webhook
-              </FieldDescription>
-              <Input placeholder="My Webhook" {...field} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-
-        <Controller
-          control={form.control}
           name="url"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
@@ -268,8 +255,8 @@ export function WebhookConnectionForm({
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Signature Secret (optional)</FieldLabel>
               <FieldDescription>
-                If provided, we'll sign the payload with HMAC-SHA256 so you can
-                verify it came from us
+                If provided, we'll sign the payload with HMAC-SHA256 with this
+                secret so you can verify that it came from us
               </FieldDescription>
               <Input
                 placeholder="Enter a secret key"
@@ -288,7 +275,7 @@ export function WebhookConnectionForm({
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Signature Header Name</FieldLabel>
               <FieldDescription>
-                The header name for the signature (default: X-Webhook-Signature)
+                The header name for the signature
               </FieldDescription>
               <Input placeholder="X-Webhook-Signature" {...field} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

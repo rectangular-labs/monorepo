@@ -1,6 +1,7 @@
 import {
   type IntegrationProvider,
   integrationProvidersSchema,
+  PUBLISH_DESTINATION_PROVIDERS,
 } from "@rectangular-labs/core/schemas/integration-parsers";
 import { Filter, Search } from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
@@ -70,19 +71,12 @@ function RouteComponent() {
       },
     }),
   );
-
   const integrations = integrationsData?.integrations ?? [];
-
-  // Map integrations by provider for easy lookup
-  const integrationsByProvider = useMemo(() => {
-    const map = new Map<IntegrationProvider, (typeof integrations)[number]>();
-    for (const integration of integrations) {
-      if (!map.has(integration.provider)) {
-        map.set(integration.provider, integration);
-      }
-    }
-    return map;
-  }, [integrations]);
+  const hasPublishingIntegrations = integrations.some((integration) =>
+    PUBLISH_DESTINATION_PROVIDERS.includes(
+      integration.provider as (typeof PUBLISH_DESTINATION_PROVIDERS)[number],
+    ),
+  );
 
   // Filter providers by search query and category
   const filteredProviders = useMemo(() => {
@@ -166,8 +160,8 @@ function RouteComponent() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {filteredProviders.map(([provider, meta]) => {
-            const integration = integrationsByProvider.get(
-              provider as IntegrationProvider,
+            const integration = integrations.find(
+              (integration) => integration.provider === provider,
             );
             const isConnected =
               integration?.status === "active" ||
@@ -247,9 +241,10 @@ function RouteComponent() {
               </DialogDrawerDescription>
             </DialogDrawerHeader>
             <IntegrationConnectionCard
-              existingIntegration={integrationsByProvider.get(
-                selectedMeta.provider,
+              existingIntegration={integrations.find(
+                (integration) => integration.provider === selectedMeta.provider,
               )}
+              hasIntegrations={hasPublishingIntegrations}
               onClose={handleCloseModal}
               organizationId={project.organizationId}
               organizationSlug={project.organizationId}
