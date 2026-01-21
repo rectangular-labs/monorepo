@@ -43,9 +43,7 @@ export const githubAdapter = (accessToken: string) => {
       },
 
       async publish(config: GitHubConfig, content: ContentPayload) {
-        if (config.mode !== "commit") {
-          return err(new Error("Pull request mode is not supported yet."));
-        }
+        console.log("publishing content", content.articleType);
         const [owner, repo] = config.repository.split("/");
         if (!owner || !repo) {
           return err(new Error("Invalid repository format."));
@@ -54,15 +52,82 @@ export const githubAdapter = (accessToken: string) => {
         const frontmatter = generateFrontmatter(content);
         const markdownContent = frontmatter + content.contentMarkdown;
 
-        const basePath = config.basePath.endsWith("/")
-          ? config.basePath
-          : `${config.basePath}/`;
-
-        const filePath = `${basePath}${content.slug}.md`;
-
+        const basePath = config.basePath.replace(/^\/|\/$/g, "");
+        const contentSlug = `/${content.slug.replace(/^\/|\/$/g, "")}`;
+        const filePath = `${basePath}${contentSlug}.md`;
+        console.log("filePath", filePath);
         const commitMessage = `docs: add ${content.title}`;
 
         try {
+          if (config.mode === "pull_request") {
+            // Get the SHA of the target branch
+            const { data: refData } = await octokit.git.getRef({
+              owner,
+              repo,
+              ref: `heads/${config.branch}`,
+            });
+            const baseSha = refData.object.sha;
+
+            // Create a new branch for the PR
+            const timestamp = Date.now();
+            const prBranchName = `content${contentSlug}-${timestamp}`;
+
+            await octokit.git.createRef({
+              owner,
+              repo,
+              ref: `refs/heads/${prBranchName}`,
+              sha: baseSha,
+            });
+
+            // Check if file exists on the new branch (inherited from base)
+            let existingSha: string | undefined;
+            try {
+              const { data } = await octokit.repos.getContent({
+                owner,
+                repo,
+                path: filePath,
+                ref: prBranchName,
+              });
+              if (!Array.isArray(data) && data.type === "file") {
+                existingSha = data.sha;
+              }
+            } catch {
+              // File doesn't exist
+            }
+
+            // Commit the file to the new branch
+            await octokit.repos.createOrUpdateFileContents({
+              owner,
+              repo,
+              path: filePath,
+              message: commitMessage,
+              content: btoa(
+                String.fromCharCode(
+                  ...new TextEncoder().encode(markdownContent),
+                ),
+              ),
+              branch: prBranchName,
+              ...(existingSha && { sha: existingSha }),
+            });
+
+            // Create the pull request
+            const { data: prData } = await octokit.pulls.create({
+              owner,
+              repo,
+              title: `Add content: ${content.title}`,
+              body: `This PR adds a new content file: **${content.title}**\n\n- Slug: \`${contentSlug}\`\n- Primary Keyword: ${content.primaryKeyword}\n- Article Type: ${content.articleType}`,
+              head: prBranchName,
+              base: config.branch,
+            });
+
+            return ok({
+              externalId: String(prData.number),
+              externalUrl: prData.html_url,
+              handle: filePath,
+            });
+          }
+
+          // Commit mode - direct commit to branch
           let existingSha: string | undefined;
           try {
             const { data } = await octokit.repos.getContent({
@@ -112,6 +177,7 @@ export const githubAdapter = (accessToken: string) => {
             affiliation: "owner,collaborator,organization_member",
           },
         );
+
         return ok(
           repos
             .filter((repo) => repo.permissions?.push)
