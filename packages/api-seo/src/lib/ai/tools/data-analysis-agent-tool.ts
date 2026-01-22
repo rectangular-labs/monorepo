@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/core/schemas/gsc-property-parsers";
+import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
 import type { schema } from "@rectangular-labs/db";
 import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
@@ -16,16 +17,15 @@ export function createDataAnalysisAgentToolWithMetadata({
   gscProperty,
 }: {
   project: typeof schema.seoProject.$inferSelect;
-  gscProperty:
-    | (typeof schema.seoGscProperty.$inferSelect & {
-        accessToken?: string | null;
-      })
-    | null;
+  gscProperty: {
+    config: GscConfig;
+    accessToken?: string | null;
+  } | null;
 }) {
   const hasGsc = !!(
     gscProperty?.accessToken &&
-    gscProperty?.domain &&
-    gscProperty?.type
+    gscProperty?.config.domain &&
+    gscProperty?.config.propertyType
   );
 
   const systemPrompt = `You are a specialized SEO data analysis agent. Your role is to analyze SEO performance data using Google Search Console and DataForSEO tools to provide actionable insights.
@@ -34,7 +34,7 @@ ${
   hasGsc
     ? `## Google Search Console Available
 
-You have access to Google Search Console data for ${gscProperty.domain}.
+You have access to Google Search Console data for ${gscProperty.config.domain}.
 
 ### Required Analysis Workflow:
 
@@ -117,8 +117,8 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
         tools: {
           ...createGscToolWithMetadata({
             accessToken: gscProperty?.accessToken ?? null,
-            siteUrl: gscProperty?.domain ?? null,
-            siteType: gscProperty?.type ?? null,
+            siteUrl: gscProperty?.config.domain ?? null,
+            siteType: gscProperty?.config.propertyType ?? null,
           }).tools,
           ...createDataforseoToolWithMetadata(project).tools,
           web_search: openai.tools.webSearch({
@@ -161,11 +161,10 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
 
 export function createDataAnalysisAgentTool(args: {
   project: typeof schema.seoProject.$inferSelect;
-  gscProperty:
-    | (typeof schema.seoGscProperty.$inferSelect & {
-        accessToken?: string | null;
-      })
-    | null;
+  gscProperty: {
+    config: GscConfig;
+    accessToken?: string | null;
+  } | null;
 }): ReturnType<typeof createDataAnalysisAgentToolWithMetadata>["tools"] {
   return createDataAnalysisAgentToolWithMetadata(args).tools;
 }

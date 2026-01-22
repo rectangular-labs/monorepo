@@ -225,7 +225,7 @@ export function ArticlesTable({
           >
             {row.getVisibleCells().map((cell) => {
               return (
-                <TableCell className={"truncate"} key={cell.id}>
+                <TableCell className={"max-w-90 truncate"} key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               );

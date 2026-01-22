@@ -88,8 +88,8 @@ export function createStrategistAgent({
 }): Parameters<typeof streamText>[0] {
   const hasGsc = !!(
     gscProperty?.accessToken &&
-    gscProperty?.domain &&
-    gscProperty?.type
+    gscProperty?.config.domain &&
+    gscProperty?.config.propertyType
   );
 
   const utcDate = new Intl.DateTimeFormat("en-US", {
@@ -123,8 +123,8 @@ export function createStrategistAgent({
   const webTools = createWebToolsWithMetadata(project, context.cacheKV);
   const gscTools = createGscToolWithMetadata({
     accessToken: gscProperty?.accessToken ?? null,
-    siteUrl: gscProperty?.domain ?? null,
-    siteType: gscProperty?.type ?? null,
+    siteUrl: gscProperty?.config.domain ?? null,
+    siteType: gscProperty?.config.propertyType ?? null,
   });
   const dataforseoTools = createDataforseoToolWithMetadata(project);
   const createArticleTool = createCreateArticleToolWithMetadata({
@@ -176,7 +176,7 @@ ${skillsSection}
 - Website: ${project.websiteUrl}${formatBusinessBackground(project.businessBackground)}
 - Project name: ${project.name ?? "(none)"}
 - Google Search Console: ${
-    hasGsc ? `Connected (${gscProperty?.domain})` : "Not connected"
+    hasGsc ? `Connected (${gscProperty?.config.domain})` : "Not connected"
   }
 - Guidance:
   - If GSC is not connected and the user asks for performance/decay/CTR, prioritize connecting via manage_integrations.

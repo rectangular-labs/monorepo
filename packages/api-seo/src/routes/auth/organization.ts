@@ -3,7 +3,7 @@ import { schema } from "@rectangular-labs/db";
 import { getMembersByOrganizationId } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { protectedBase } from "../../context";
-import { validateOrganizationMiddleware } from "../../lib/validate-organization";
+import { validateOrganizationMiddleware } from "../../lib/middleware/validate-organization";
 
 const active = protectedBase
   .route({ method: "GET", path: "/active" })

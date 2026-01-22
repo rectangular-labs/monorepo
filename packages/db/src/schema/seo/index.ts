@@ -6,7 +6,7 @@ export * from "./content-draft-schema";
 export * from "./content-draft-user-schema";
 export * from "./content-schema";
 export * from "./content-user-schema";
-export * from "./gsc-property-schema";
+export * from "./integration-schema";
 export * from "./project-author-schema";
 export * from "./project-schema";
 export * from "./task-run-schema";

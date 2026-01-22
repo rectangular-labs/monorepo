@@ -121,12 +121,6 @@ export const writingSettingsSchema = type({
   customInstructions: type("string").describe(
     "Extra instructions to steer generated articles (e.g., formatting, calls to action, do/don'ts).",
   ),
-  metadata: type({
-    name: "string",
-    description: "string",
-  })
-    .array()
-    .describe("Named metadata presets used for content generation."),
 });
 
 export const publishingSettingsSchema = type({

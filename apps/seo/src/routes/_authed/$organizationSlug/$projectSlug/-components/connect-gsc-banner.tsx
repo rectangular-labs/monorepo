@@ -22,7 +22,8 @@ export function ConnectGscBanner() {
           <Link
             className="underline"
             from="/$organizationSlug/$projectSlug"
-            to="/$organizationSlug/$projectSlug/settings"
+            search={{ provider: "google-search-console" }}
+            to="/$organizationSlug/$projectSlug/settings/integrations"
           >
             Connect
           </Link>{" "}

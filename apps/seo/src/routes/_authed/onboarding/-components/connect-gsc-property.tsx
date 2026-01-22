@@ -40,7 +40,7 @@ export function OnboardingConnectGscProperty({
   const api = getApiClientRq();
 
   const [selectedProperty, setSelectedProperty] = useState<
-    | RouterOutputs["googleSearchConsole"]["listProperties"]["properties"][0]
+    | RouterOutputs["integrations"]["gsc"]["listProperties"]["properties"][0]
     | null
   >(null);
   const [
@@ -51,7 +51,7 @@ export function OnboardingConnectGscProperty({
     data: propertiesData,
     isLoading,
     error,
-  } = useQuery(api.googleSearchConsole.listProperties.queryOptions({}));
+  } = useQuery(api.integrations.gsc.listProperties.queryOptions({}));
   const { data: projectData } = useQuery(
     api.project.get.queryOptions({
       input: {
@@ -63,24 +63,29 @@ export function OnboardingConnectGscProperty({
   );
 
   const { mutateAsync: connectProperty, isPending } = useMutation(
-    api.googleSearchConsole.connectToProject.mutationOptions({
+    api.integrations.gsc.connectToProject.mutationOptions({
       onSuccess: () => {
         toast.success("Google Search Console connected successfully!");
         stepper.next();
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         toast.error(`Failed to connect: ${error.message}`);
       },
     }),
   );
 
   const handleConnect = async () => {
-    if (!selectedProperty || !searchParams.projectId) {
+    if (
+      !selectedProperty ||
+      !searchParams.projectId ||
+      !searchParams.organizationId
+    ) {
       toast.error("Missing project or property information");
       return;
     }
 
     await connectProperty({
+      organizationIdentifier: searchParams.organizationId,
       projectId: searchParams.projectId,
       accountId: selectedProperty.accountId,
       domain: selectedProperty.domain,

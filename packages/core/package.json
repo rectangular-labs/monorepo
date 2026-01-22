@@ -4,17 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "exports": {
-    "./format/*": {
-      "types": "./dist/format/*.d.ts",
-      "default": "./src/format/*.ts"
-    },
-    "./schemas/*": {
-      "types": "./dist/schemas/*.d.ts",
-      "default": "./src/schemas/*.ts"
-    },
-    "./project/*": {
-      "types": "./dist/project/*.d.ts",
-      "default": "./src/project/*.ts"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./src/*.ts"
     }
   },
   "scripts": {
@@ -30,7 +22,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@rectangular-labs/loro-file-system": "workspace:*",
+    "@octokit/rest": "^22.0.1",
+    "@rectangular-labs/result": "workspace:*",
+    "@shopify/admin-api-client": "^1.1.1",
     "arktype": "^2.1.29"
   }
 }

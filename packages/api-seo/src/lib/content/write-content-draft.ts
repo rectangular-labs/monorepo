@@ -280,9 +280,7 @@ export async function writeContentDraft(
         : scheduledFor;
 
     const scheduler = createScheduler();
-    console.log("target url_link", publishWebhookUrl);
-    // const cancelled = await scheduler.cancelTask(draft.id);
-    // console.log("cancelled", cancelled);
+
     const signature = createSignature(draft.id);
     await scheduler.scheduleTask({
       id: draft.id,

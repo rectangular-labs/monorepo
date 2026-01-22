@@ -32,8 +32,6 @@ import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { AuthorProfileCard } from "./-components/author-profile-card";
 import { AuthorProfileModal } from "./-components/author-profile-modal";
 import { FloatingToolbar } from "./-components/floating-toolbar";
-import { MetadataCard } from "./-components/metadata-card";
-import { MetadataModal } from "./-components/metadata-modal";
 import { WritingSettingFormSchema } from "./-lib/writing-settings";
 
 export const Route = createFileRoute(
@@ -100,7 +98,6 @@ function WritingSettingsPage() {
       brandVoice: activeProject?.writingSettings?.brandVoice ?? "",
       customInstructions:
         activeProject?.writingSettings?.customInstructions ?? "",
-      metadata: activeProject?.writingSettings?.metadata ?? [],
       authors:
         activeProject?.authors.map((author) => ({
           ...author,
@@ -110,30 +107,6 @@ function WritingSettingsPage() {
         })) ?? [],
     },
   });
-  const {
-    fields: metadataFields,
-    append: appendMetadata,
-    remove: removeMetadata,
-    update: updateMetadata,
-  } = useFieldArray({
-    control: form.control,
-    name: "metadata",
-  });
-  const [metadataIndex, setMetadataIndex] = useState<number | null>(null);
-  const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
-  const addMetadata = () => {
-    setMetadataIndex(metadataFields.length);
-    appendMetadata({ name: "", description: "" });
-    setIsMetadataModalOpen(true);
-  };
-  const editMetadata = (index: number) => {
-    setMetadataIndex(index);
-    setIsMetadataModalOpen(true);
-  };
-  const removeMetadataDetails = (index: number | number[] | undefined) => {
-    removeMetadata(index);
-    setMetadataIndex(null);
-  };
 
   const {
     fields: authorFields,
@@ -180,7 +153,6 @@ function WritingSettingsPage() {
       brandVoice: activeProject?.writingSettings?.brandVoice ?? "",
       customInstructions:
         activeProject?.writingSettings?.customInstructions ?? "",
-      metadata: activeProject?.writingSettings?.metadata ?? [],
       authors:
         activeProject?.authors.map((author) => ({
           ...author,
@@ -403,48 +375,6 @@ function WritingSettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between gap-2">
-              <div className="space-y-1">
-                <CardTitle>Metadata</CardTitle>
-                <CardDescription>
-                  Configure structured information that you&apos;ll like to be
-                  included in the generated content.
-                </CardDescription>
-              </div>
-              <Button
-                onClick={addMetadata}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
-                <Icons.Plus className="size-4" />
-                <span className="hidden sm:block">Add metadata</span>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {metadataFields.length === 0 && (
-              <p className="rounded-md border border-dashed p-4 text-muted-foreground text-sm">
-                No metadata presets yet. Add a few to capture key facts or
-                recurring scenarios.
-              </p>
-            )}
-
-            {metadataFields.length > 0 && (
-              <div className="grid gap-3 md:grid-cols-2">
-                {metadataFields.map((metadata, index) => (
-                  <MetadataCard
-                    key={metadata.id}
-                    metadata={metadata}
-                    onClick={() => editMetadata(index)}
-                  />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
         <FloatingToolbar
           errors={form.formState.errors.root?.message}
           isSaving={
@@ -464,15 +394,6 @@ function WritingSettingsPage() {
         removeAuthor={removeAuthorDetails}
         setOpen={setIsAuthorProfileModalOpen}
         updateAuthor={updateAuthor}
-      />
-
-      <MetadataModal
-        form={form}
-        metadataIndex={metadataIndex}
-        open={isMetadataModalOpen}
-        removeMetadata={removeMetadataDetails}
-        setOpen={setIsMetadataModalOpen}
-        updateMetadata={updateMetadata}
       />
     </>
   );

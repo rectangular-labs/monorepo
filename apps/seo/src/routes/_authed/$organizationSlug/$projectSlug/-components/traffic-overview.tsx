@@ -146,7 +146,10 @@ export function TrafficOverview({
                 <Button asChild variant="outline">
                   <Link
                     from="/$organizationSlug/$projectSlug"
-                    to="/$organizationSlug/$projectSlug/settings"
+                    search={{
+                      provider: "google-search-console",
+                    }}
+                    to="/$organizationSlug/$projectSlug/settings/integrations"
                   >
                     <Icons.GoogleIcon className="h-4 w-4" />
                     Connect Google Search Console

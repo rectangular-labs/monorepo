@@ -4,7 +4,7 @@ import { getSeoProjectByIdentifierAndOrgId } from "@rectangular-labs/db/operatio
 import { getLastNDaysRange } from "@rectangular-labs/google-apis/google-search-console";
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
-import { getGSCPropertyById } from "../lib/database/gsc-property";
+import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import {
   configureDataForSeoClient,
   getHostnameFromUrl,
@@ -24,7 +24,7 @@ import {
   getDataForSeoQueryAnalytics,
   getGSCQueryAnalytics,
 } from "../lib/metrics/get-query.analytics";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 
 const metricsOutputSchema = type({
   source: "'gsc'|'dfs'",
@@ -119,22 +119,21 @@ export const metrics = withOrganizationIdBase
     previousDateRange.endDate = currentDateRange.startDate;
 
     // Configure our data sources
-    const gscProperty = await (async () => {
-      if (!project.gscPropertyId) {
-        return null;
-      }
-      const gscPropertyResult = await getGSCPropertyById(project.gscPropertyId);
-      if (!gscPropertyResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: gscPropertyResult.error.message,
-          cause: gscPropertyResult.error,
-        });
-      }
-      return gscPropertyResult.value;
-    })();
+    const gscIntegrationResult = await getGscIntegrationForProject({
+      db: context.db,
+      projectId: project.id,
+      organizationId: context.organization.id,
+    });
+    if (!gscIntegrationResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: gscIntegrationResult.error.message,
+        cause: gscIntegrationResult.error,
+      });
+    }
+    const gscIntegration = gscIntegrationResult.value;
 
     const dataForSeoData = await (async () => {
-      if (project.gscPropertyId) {
+      if (gscIntegration) {
         return null;
       }
       configureDataForSeoClient();
@@ -159,15 +158,15 @@ export const metrics = withOrganizationIdBase
 
     // Get the overview data
     let finalResult: typeof metricsOutputSchema.infer = {
-      source: gscProperty ? ("gsc" as const) : ("dfs" as const),
+      source: gscIntegration ? ("gsc" as const) : ("dfs" as const),
     };
 
     if (dimensions.includes("overview")) {
-      if (gscProperty) {
+      if (gscIntegration) {
         const gscOverviewResult = await getGSCEngagementOverview({
-          accessToken: gscProperty.accessToken,
-          siteUrl: gscProperty.domain,
-          siteType: gscProperty.type,
+          accessToken: gscIntegration.accessToken,
+          siteUrl: gscIntegration.config.domain,
+          siteType: gscIntegration.config.propertyType,
           startDate: previousDateRange.startDate,
           endDate: currentDateRange.endDate,
           previousEndDate: previousDateRange.endDate,
@@ -195,11 +194,11 @@ export const metrics = withOrganizationIdBase
     }
 
     if (dimensions.includes("page")) {
-      if (gscProperty) {
+      if (gscIntegration) {
         const pageAnalyticsResult = await getGSCPageAnalytics({
-          accessToken: gscProperty.accessToken,
-          siteUrl: gscProperty.domain,
-          siteType: gscProperty.type,
+          accessToken: gscIntegration.accessToken,
+          siteUrl: gscIntegration.config.domain,
+          siteType: gscIntegration.config.propertyType,
           startDate: currentDateRange.startDate,
           endDate: currentDateRange.endDate,
         });
@@ -226,11 +225,11 @@ export const metrics = withOrganizationIdBase
       }
     }
     if (dimensions.includes("query")) {
-      if (gscProperty) {
+      if (gscIntegration) {
         const queryAnalyticsResult = await getGSCQueryAnalytics({
-          accessToken: gscProperty.accessToken,
-          siteUrl: gscProperty.domain,
-          siteType: gscProperty.type,
+          accessToken: gscIntegration.accessToken,
+          siteUrl: gscIntegration.config.domain,
+          siteType: gscIntegration.config.propertyType,
           startDate: currentDateRange.startDate,
           endDate: currentDateRange.endDate,
         });
@@ -257,11 +256,11 @@ export const metrics = withOrganizationIdBase
       }
     }
     // we don't show country analytics for dfs, bc it's expensive
-    if (dimensions.includes("country") && gscProperty) {
+    if (dimensions.includes("country") && gscIntegration) {
       const countryAnalyticsResult = await getGSCCountryAnalytics({
-        accessToken: gscProperty.accessToken,
-        siteUrl: gscProperty.domain,
-        siteType: gscProperty.type,
+        accessToken: gscIntegration.accessToken,
+        siteUrl: gscIntegration.config.domain,
+        siteType: gscIntegration.config.propertyType,
         startDate: currentDateRange.startDate,
         endDate: currentDateRange.endDate,
       });
@@ -278,11 +277,11 @@ export const metrics = withOrganizationIdBase
     }
 
     // we don't show device analytics for dfs, bc it isn't supported.
-    if (dimensions.includes("device") && gscProperty) {
+    if (dimensions.includes("device") && gscIntegration) {
       const deviceAnalyticsResult = await getGSCDeviceAnalytics({
-        accessToken: gscProperty.accessToken,
-        siteUrl: gscProperty.domain,
-        siteType: gscProperty.type,
+        accessToken: gscIntegration.accessToken,
+        siteUrl: gscIntegration.config.domain,
+        siteType: gscIntegration.config.propertyType,
         startDate: currentDateRange.startDate,
         endDate: currentDateRange.endDate,
       });

@@ -18,6 +18,12 @@ export function SettingsSidebar(params: {
         </NavLink>
         <NavLink
           params={params}
+          to="/$organizationSlug/$projectSlug/settings/integrations"
+        >
+          Integrations
+        </NavLink>
+        <NavLink
+          params={params}
           to="/$organizationSlug/$projectSlug/settings/publishing-settings"
         >
           Publishing
@@ -27,7 +33,7 @@ export function SettingsSidebar(params: {
             exact: true,
           }}
           params={params}
-          to="/$organizationSlug/$projectSlug/settings"
+          to="/$organizationSlug/$projectSlug/settings/business-background"
         >
           Business Background
         </NavLink>
