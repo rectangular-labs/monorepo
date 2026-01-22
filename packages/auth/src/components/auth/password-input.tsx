@@ -12,7 +12,8 @@ export function PasswordInput({
   onChange,
   ...props
 }: ComponentProps<typeof Input> & { enableToggle?: boolean }) {
-  const [disabled, setDisabled] = useState(true);
+  console.log("props.value", props.value);
+  const [disabled, setDisabled] = useState(!props.value);
   const [isVisible, setIsVisible] = useState(false);
 
   return (
@@ -30,7 +31,7 @@ export function PasswordInput({
       {enableToggle && (
         <>
           <Button
-            className="!bg-transparent absolute top-0 right-0"
+            className="absolute top-0 right-0 bg-transparent!"
             disabled={disabled}
             onClick={() => setIsVisible(!isVisible)}
             size="icon"

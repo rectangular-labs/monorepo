@@ -1,5 +1,5 @@
 import { ORPCError, os } from "@orpc/server";
-import { encrypt } from "@orpc/server/helpers";
+import { decrypt, encrypt } from "@orpc/server/helpers";
 import type { Session } from "@rectangular-labs/auth";
 import {
   type IntegrationProvider,
@@ -24,17 +24,21 @@ import { gsc } from "./integration.gsc";
 import { shopify } from "./integration.shopify";
 import { webhook } from "./integration.webhook";
 
-const integrationSummarySchema = schema.seoIntegrationSelectSchema.pick(
-  "id",
-  "provider",
-  "name",
-  "status",
-  "lastUsedAt",
-  "lastError",
-  "isDefault",
-  "updatedAt",
-  "config",
-);
+const integrationSummarySchema = schema.seoIntegrationSelectSchema
+  .pick(
+    "id",
+    "provider",
+    "name",
+    "status",
+    "lastUsedAt",
+    "lastError",
+    "isDefault",
+    "updatedAt",
+    "config",
+  )
+  .merge({
+    credential: integrationCredentialsSchema.or(type.null),
+  });
 
 function getProviderId(provider: IntegrationProvider) {
   if (provider === "github") return "github";
@@ -153,18 +157,38 @@ const list = protectedBase
         message: integrations.error.message,
       });
     }
+    const parsedIntegrations = await Promise.all(
+      integrations.value.map(async (integration) => {
+        const credential = integration.encryptedCredentials
+          ? await decrypt(
+              integration.encryptedCredentials,
+              apiEnv().AUTH_SEO_ENCRYPTION_KEY,
+            )
+          : null;
+        const parsedCredential = credential
+          ? integrationCredentialsSchema(JSON.parse(credential))
+          : null;
+        if (parsedCredential instanceof type.errors) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Invalid integration credentials.",
+          });
+        }
+        return {
+          id: integration.id,
+          provider: integration.provider,
+          name: integration.name,
+          status: integration.status,
+          lastUsedAt: integration.lastUsedAt,
+          lastError: integration.lastError,
+          isDefault: integration.isDefault,
+          updatedAt: integration.updatedAt,
+          config: integration.config,
+          credential: parsedCredential,
+        };
+      }),
+    );
     return {
-      integrations: integrations.value.map((integration) => ({
-        id: integration.id,
-        provider: integration.provider,
-        name: integration.name,
-        status: integration.status,
-        lastUsedAt: integration.lastUsedAt,
-        lastError: integration.lastError,
-        isDefault: integration.isDefault,
-        updatedAt: integration.updatedAt,
-        config: integration.config,
-      })),
+      integrations: parsedIntegrations,
     };
   });
 
@@ -183,8 +207,23 @@ const get = protectedBase
     id: input.id,
     projectId: input.projectId,
   }))
-  .handler(({ context }) => {
+  .handler(async ({ context }) => {
     const integration = context.integration;
+    const credential = integration.encryptedCredentials
+      ? await decrypt(
+          integration.encryptedCredentials,
+          apiEnv().AUTH_SEO_ENCRYPTION_KEY,
+        )
+      : null;
+    const parsedCredential = credential
+      ? integrationCredentialsSchema(JSON.parse(credential))
+      : null;
+    if (parsedCredential instanceof type.errors) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Invalid integration credentials.",
+      });
+    }
+
     return {
       integration: {
         id: integration.id,
@@ -196,6 +235,7 @@ const get = protectedBase
         isDefault: integration.isDefault,
         updatedAt: integration.updatedAt,
         config: integration.config,
+        credential: parsedCredential,
       },
     };
   });
@@ -260,7 +300,9 @@ const create = protectedBase
       });
     }
 
-    return { integration: result.value };
+    return {
+      integration: { ...result.value, credential: input.credentials ?? null },
+    };
   });
 
 const update = protectedBase

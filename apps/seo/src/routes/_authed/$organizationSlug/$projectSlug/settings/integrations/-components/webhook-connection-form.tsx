@@ -1,4 +1,6 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import { PasswordInput } from "@rectangular-labs/auth/components/auth/password-input";
+import { webhookConfigSchema } from "@rectangular-labs/core/schemas/integration-parsers";
 import {
   Alert,
   AlertDescription,
@@ -43,7 +45,7 @@ interface WebhookConnectionFormProps {
 
 const formSchema = type({
   name: "string",
-  url: type("string.url").atLeastLength(1),
+  url: webhookConfigSchema.get("url"),
   method: "'POST' | 'PUT'",
   secret: "string",
   secretHeaderName: "string",
@@ -61,16 +63,27 @@ export function WebhookConnectionForm({
 }: WebhookConnectionFormProps) {
   const queryClient = useQueryClient();
   const api = getApiClientRq();
+  const existingConfig =
+    existingIntegration?.config &&
+    existingIntegration.config.provider === "webhook"
+      ? existingIntegration.config
+      : undefined;
+  const existingCredential =
+    existingIntegration?.credential &&
+    existingIntegration.credential.provider === "webhook"
+      ? existingIntegration.credential
+      : undefined;
 
   const form = useForm<FormValues>({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
       name: "Webhook",
-      url: "",
-      method: "POST",
-      secret: "",
-      secretHeaderName: "X-Webhook-Signature",
+      method: existingConfig?.method ?? "POST",
+      secret: existingCredential?.secret ?? "",
+      secretHeaderName:
+        existingCredential?.secretHeaderName ?? "X-Webhook-Signature",
       isDefault: existingIntegration?.isDefault ?? !hasIntegrations,
+      url: existingConfig?.url,
     },
   });
 
@@ -258,9 +271,9 @@ export function WebhookConnectionForm({
                 If provided, we'll sign the payload with HMAC-SHA256 with this
                 secret so you can verify that it came from us
               </FieldDescription>
-              <Input
+              <PasswordInput
+                enableToggle
                 placeholder="Enter a secret key"
-                type="password"
                 {...field}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
