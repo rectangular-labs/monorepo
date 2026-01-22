@@ -402,22 +402,13 @@ const selectBlog = protectedBase
   )
   .output(type({ success: "true" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .use(validateIntegrationMiddleware, (input) => ({
+    id: input.id,
+    projectId: input.projectId,
+  }))
   .handler(async ({ context, input }) => {
-    const integration = await getIntegration(context.db, {
-      id: input.id,
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-    });
-    if (!integration.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integration.error.message,
-      });
-    }
-    if (!integration.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Integration not found." });
-    }
-
-    const config = integration.value.config as ShopifyConfig;
+    const integration = context.integration;
+    const config = integration.config as ShopifyConfig;
 
     const updatedConfig: ShopifyConfig = {
       ...config,
@@ -428,7 +419,7 @@ const selectBlog = protectedBase
     };
 
     const updated = await updateIntegration(context.db, {
-      id: integration.value.id,
+      id: integration.id,
       organizationId: context.organization.id,
       projectId: input.projectId,
       values: { config: updatedConfig, status: "active" },
