@@ -1,4 +1,5 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import { shopifyConfigSchema } from "@rectangular-labs/core/schemas/integration-parsers";
 import { ShoppingBag } from "@rectangular-labs/ui/components/icon";
 import {
   Alert,
@@ -46,7 +47,7 @@ interface ShopifyConnectionFormProps {
 const initiateFormSchema = type({
   name: "string",
   shopDomain: "string",
-  adminUrl: "string",
+  adminUrl: shopifyConfigSchema.get("adminUrl"),
   clientId: "string",
   clientSecret: "string",
   isDefault: "boolean",
@@ -87,7 +88,6 @@ export function ShopifyConnectionForm({
     defaultValues: {
       name: "Shopify Blog",
       shopDomain: "",
-      adminUrl: "",
       clientId: "",
       clientSecret: "",
       isDefault: existingIntegration?.isDefault ?? !hasIntegrations,
