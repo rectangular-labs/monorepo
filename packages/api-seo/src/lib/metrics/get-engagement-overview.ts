@@ -47,8 +47,9 @@ export async function getGSCEngagementOverview({
   };
   const timeseries: { date: string; clicks: number; impressions: number }[] =
     [];
+
   for (const row of rows) {
-    if (row.keys[0] === previousEndDate) {
+    if ((row.keys[0] ?? "") > previousEndDate) {
       isPreviousData = false;
     }
     if (isPreviousData) {
