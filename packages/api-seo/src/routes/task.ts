@@ -144,11 +144,7 @@ const status = protectedBase
         }
       }
 
-      const output = taskOutputSchema({
-        name: "WorkflowFatalError",
-        message:
-          "The execution of the Workflow instance was terminated, as a step threw an NonRetryableError and it was not handled",
-      });
+      const output = taskOutputSchema(details.output);
 
       return {
         progress,
