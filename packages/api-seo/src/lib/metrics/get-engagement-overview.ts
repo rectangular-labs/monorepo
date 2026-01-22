@@ -49,7 +49,7 @@ export async function getGSCEngagementOverview({
     [];
 
   for (const row of rows) {
-    if ((row.keys[0] ?? "") > previousEndDate) {
+    if ((row.keys[0] ?? "") >= previousEndDate) {
       isPreviousData = false;
     }
     if (isPreviousData) {
