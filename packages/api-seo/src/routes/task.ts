@@ -40,7 +40,7 @@ const outputSchema = type({
   status:
     "'pending' | 'queued' | 'running' | 'completed' | 'cancelled' | 'failed'",
   statusMessage: "string",
-  "output?": taskOutputSchema.or(type.undefined),
+  output: taskOutputSchema.or(type.null),
 });
 
 const status = protectedBase
@@ -89,7 +89,7 @@ const status = protectedBase
         progress,
         status,
         statusMessage,
-        output: task.output,
+        output: task.output ?? null,
       };
     }
 
@@ -109,7 +109,6 @@ const status = protectedBase
       }
 
       const details = await instance.status();
-      console.info("[TaskStatus] task details", details);
       switch (details.status) {
         case "queued": {
           status = "queued";
@@ -151,11 +150,11 @@ const status = protectedBase
         progress,
         status,
         statusMessage,
-        output: output instanceof type.errors ? undefined : output,
+        output: output instanceof type.errors ? null : output,
       };
     }
 
-    return { progress, status, statusMessage };
+    return { progress, status, statusMessage, output: null };
   });
 
 export default protectedBase
