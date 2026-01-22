@@ -109,6 +109,7 @@ const status = protectedBase
       }
 
       const details = await instance.status();
+      console.info("[TaskStatus] task details", details);
       switch (details.status) {
         case "queued": {
           status = "queued";
