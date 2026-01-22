@@ -13,6 +13,7 @@ export async function getGscIntegrationForProject(params: {
     organizationId: params.organizationId,
     provider: "google-search-console",
     status: "active",
+    includeAccount: true,
   });
   if (!integrationResult.ok) {
     return integrationResult;
