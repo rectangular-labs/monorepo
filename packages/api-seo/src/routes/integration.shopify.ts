@@ -16,7 +16,8 @@ import {
 import { type } from "arktype";
 import { protectedBase } from "../context";
 import { apiEnv } from "../env";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { validateIntegrationMiddleware } from "../lib/middleware/validate-integration";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 
 const SHOPIFY_SCOPES = ["read_content", "write_content"].join(",");
 
@@ -24,6 +25,7 @@ function normalizeShopDomain(shopDomain: string) {
   return shopDomain.replace(/^https?:\/\//, "");
 }
 
+// todo (shopify): simplify this
 const initiate = protectedBase
   .route({ method: "POST", path: "/initiate" })
   .input(
@@ -245,26 +247,17 @@ const listBlogs = protectedBase
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .handler(async ({ context, input }) => {
-    const integration = await getIntegration(context.db, {
-      id: input.id,
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-    });
-    if (!integration.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integration.error.message,
-      });
-    }
-    if (!integration.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Integration not found." });
-    }
-
-    const config = integration.value.config as ShopifyConfig;
+  .use(validateIntegrationMiddleware, (input) => ({
+    id: input.id,
+    projectId: input.projectId,
+  }))
+  .handler(async ({ context }) => {
+    const integration = context.integration;
+    const config = integration.config as ShopifyConfig;
     let credentials: ShopifyCredentials;
     try {
       const decryptedString = await decrypt(
-        integration.value.encryptedCredentials ?? "",
+        integration.encryptedCredentials ?? "",
         apiEnv().AUTH_SEO_ENCRYPTION_KEY,
       );
       if (!decryptedString) {
@@ -272,7 +265,16 @@ const listBlogs = protectedBase
           message: "Failed to decrypt integration credentials.",
         });
       }
-      credentials = JSON.parse(decryptedString) as ShopifyCredentials;
+      const parsedCredentials = shopifyCredentialsSchema(
+        JSON.parse(decryptedString),
+      );
+      if (parsedCredentials instanceof type.errors) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to parse integration credentials.",
+          cause: parsedCredentials,
+        });
+      }
+      credentials = parsedCredentials;
     } catch (error) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message:
@@ -290,6 +292,7 @@ const listBlogs = protectedBase
     }
 
     let blogs = blogsResult.value;
+    // TODO(shopify): we probably don't want the side effect of creating a blog on a GET endpoint.
     if (blogs.length === 0) {
       const createResult = await shopifyAdapter().createBlog(
         config,
@@ -330,26 +333,17 @@ const createBlog = protectedBase
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .use(validateIntegrationMiddleware, (input) => ({
+    id: input.id,
+    projectId: input.projectId,
+  }))
   .handler(async ({ context, input }) => {
-    const integration = await getIntegration(context.db, {
-      id: input.id,
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-    });
-    if (!integration.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integration.error.message,
-      });
-    }
-    if (!integration.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Integration not found." });
-    }
-
-    const config = integration.value.config as ShopifyConfig;
+    const integration = context.integration;
+    const config = integration.config as ShopifyConfig;
     let credentials: ShopifyCredentials;
     try {
       const decryptedString = await decrypt(
-        integration.value.encryptedCredentials ?? "",
+        integration.encryptedCredentials ?? "",
         apiEnv().AUTH_SEO_ENCRYPTION_KEY,
       );
       if (!decryptedString) {
@@ -357,7 +351,16 @@ const createBlog = protectedBase
           message: "Failed to decrypt integration credentials.",
         });
       }
-      credentials = JSON.parse(decryptedString) as ShopifyCredentials;
+      const parsedCredentials = shopifyCredentialsSchema(
+        JSON.parse(decryptedString),
+      );
+      if (parsedCredentials instanceof type.errors) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to parse integration credentials.",
+          cause: parsedCredentials,
+        });
+      }
+      credentials = parsedCredentials;
     } catch (error) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message:

@@ -5,12 +5,12 @@ import {
   type WebhookCredentials,
   webhookCredentialsSchema,
 } from "@rectangular-labs/core/schemas/integration-parsers";
-import { getIntegration } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { protectedBase } from "../context";
 import { apiEnv } from "../env";
 import { createSignature } from "../lib/create-signature";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { validateIntegrationMiddleware } from "../lib/middleware/validate-integration";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 
 const testIntegration = protectedBase
   .route({ method: "POST", path: "/{id}/test" })
@@ -23,22 +23,12 @@ const testIntegration = protectedBase
   )
   .output(type({ success: "true" }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .handler(async ({ context, input }) => {
-    const integrationResult = await getIntegration(context.db, {
-      id: input.id,
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-    });
-    if (!integrationResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integrationResult.error.message,
-      });
-    }
-    if (!integrationResult.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Integration not found." });
-    }
-
-    const integration = integrationResult.value;
+  .use(validateIntegrationMiddleware, (input) => ({
+    id: input.id,
+    projectId: input.projectId,
+  }))
+  .handler(async ({ context }) => {
+    const integration = context.integration;
     const config = integration.config;
     if (config.provider !== "webhook") {
       throw new ORPCError("BAD_REQUEST", {

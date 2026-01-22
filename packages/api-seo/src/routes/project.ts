@@ -8,8 +8,8 @@ import {
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { upsertProject } from "../lib/database/project";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import { createTask } from "../lib/task";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import { metrics } from "./project.metrics";
 import {
   getBusinessBackground,

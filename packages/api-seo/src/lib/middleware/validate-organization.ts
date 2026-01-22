@@ -1,6 +1,6 @@
 import { ORPCError, os } from "@orpc/server";
 import type { Session } from "@rectangular-labs/auth";
-import type { InitialContext } from "../types";
+import type { InitialContext } from "../../types";
 
 export const validateOrganizationMiddleware = os
   .$context<InitialContext & Session>()

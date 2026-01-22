@@ -24,7 +24,7 @@ import { base, withOrganizationIdBase } from "../context";
 import { publishToIntegrations } from "../lib/content/publish-to-integrations";
 import { writeContentDraft } from "../lib/content/write-content-draft";
 import { createSignature } from "../lib/create-signature";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import {
   DRAFT_NOT_FOUND_ERROR_MESSAGE,
   SLUG_NOT_AVAILABLE_ERROR_MESSAGE,

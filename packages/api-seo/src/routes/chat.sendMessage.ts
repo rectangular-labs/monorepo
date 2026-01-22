@@ -19,7 +19,7 @@ import { createWriterAgent } from "../lib/ai/writer-agent";
 import { handleTitleGeneration } from "../lib/chat/handle-title-generation";
 import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import { getProjectInChat } from "../lib/database/project";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 
 import type { InitialContext, SeoChatMessage } from "../types";
 

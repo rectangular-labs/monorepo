@@ -24,7 +24,7 @@ import {
   getDataForSeoQueryAnalytics,
   getGSCQueryAnalytics,
 } from "../lib/metrics/get-query.analytics";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 
 const metricsOutputSchema = type({
   source: "'gsc'|'dfs'",

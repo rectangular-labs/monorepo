@@ -15,13 +15,13 @@ import {
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
 import { apiEnv } from "../env";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import { getImageSettingImages } from "../lib/project/get-image-setting-images";
 import {
   getPrivateImageUri,
   getPublicImageUri,
   ProjectImageKindSchema,
 } from "../lib/project/get-project-image-uri";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
 export const getBusinessBackground = withOrganizationIdBase
   .route({ method: "GET", path: "/{identifier}/business-background" })

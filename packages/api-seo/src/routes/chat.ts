@@ -16,7 +16,7 @@ import {
 import { validateUIMessages } from "ai";
 import { type } from "arktype";
 import { withOrganizationIdBase } from "../context";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import type { SeoChatMessage } from "../types";
 import { sendMessage } from "./chat.sendMessage";
 

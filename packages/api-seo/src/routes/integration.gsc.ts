@@ -18,8 +18,8 @@ import {
 } from "@rectangular-labs/google-apis/google-search-console";
 import { type } from "arktype";
 import { protectedBase } from "../context";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import { getPublishingScopes } from "../lib/project/get-publishing-scopes";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
 
 function getPermissionLevel(
   permissionLevel: GscProperty["permissionLevel"],
@@ -33,6 +33,7 @@ function getPermissionLevel(
   return "needs-verification";
 }
 
+// todo (gsc): we should be able to consolidate the connectToProject and disconnectFromProject endpoints into integration.ts.
 const listProperties = protectedBase
   .route({ method: "GET", path: "/property" })
   .input(type.undefined)

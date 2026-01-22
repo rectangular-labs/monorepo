@@ -54,7 +54,14 @@ export const shopifyConfigSchema = type({
   provider: "'shopify'",
   // Store identification
   shopDomain: "string", // "cool-store.myshopify.com"
-  adminUrl: "string", // "https://admin.shopify.com/store/cool-store"
+  adminUrl: type("string.url").narrow(
+    (data, ctx): data is `https://admin.shopify.com${string}` => {
+      return (
+        data.startsWith("https://admin.shopify.com") ||
+        ctx.reject("a string starting with 'https://'")
+      );
+    },
+  ), // "https://admin.shopify.com/store/cool-store"
   // Publish settings
   "blogId?": "string | null",
   "blogTitle?": "string | null",
@@ -65,7 +72,16 @@ export type ShopifyConfig = typeof shopifyConfigSchema.infer;
 
 export const webhookConfigSchema = type({
   provider: "'webhook'",
-  url: "string.url",
+  url: type("string.url").narrow((data, ctx): data is `https://${string}` => {
+    if (!data.startsWith("https://")) {
+      return ctx.reject("a string starting with 'https://'");
+    }
+    const parsed = new URL(data);
+    if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
+      return ctx.reject("a string starting with 'https://'");
+    }
+    return true;
+  }),
   method: "'POST' | 'PUT'",
   "headers?": "Record<string, string>",
 });

@@ -17,6 +17,7 @@ function createClient(config: ShopifyConfig, credentials: ShopifyCredentials) {
   });
 }
 
+// TODO (shopify): test all the flows and make sure it works
 export const shopifyAdapter = () => {
   const listBlogs = async (
     config: ShopifyConfig,

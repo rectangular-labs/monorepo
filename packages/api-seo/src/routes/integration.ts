@@ -9,15 +9,15 @@ import { and, type DB, eq, schema } from "@rectangular-labs/db";
 import {
   clearDefaultIntegrations,
   createIntegration,
-  getIntegration,
   listIntegrations,
   updateIntegration,
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { protectedBase } from "../context";
 import { apiEnv } from "../env";
+import { validateIntegrationMiddleware } from "../lib/middleware/validate-integration";
+import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import { getPublishingScopes } from "../lib/project/get-publishing-scopes";
-import { validateOrganizationMiddleware } from "../lib/validate-organization";
 import type { InitialContext } from "../types";
 import { github } from "./integration.github";
 import { gsc } from "./integration.gsc";
@@ -179,31 +179,23 @@ const get = protectedBase
   )
   .output(type({ integration: integrationSummarySchema }))
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .handler(async ({ context, input }) => {
-    const integration = await getIntegration(context.db, {
-      id: input.id,
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-    });
-    if (!integration.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integration.error.message,
-      });
-    }
-    if (!integration.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Integration not found" });
-    }
+  .use(validateIntegrationMiddleware, (input) => ({
+    id: input.id,
+    projectId: input.projectId,
+  }))
+  .handler(({ context }) => {
+    const integration = context.integration;
     return {
       integration: {
-        id: integration.value.id,
-        provider: integration.value.provider,
-        name: integration.value.name,
-        status: integration.value.status,
-        lastUsedAt: integration.value.lastUsedAt,
-        lastError: integration.value.lastError,
-        isDefault: integration.value.isDefault,
-        updatedAt: integration.value.updatedAt,
-        config: integration.value.config,
+        id: integration.id,
+        provider: integration.provider,
+        name: integration.name,
+        status: integration.status,
+        lastUsedAt: integration.lastUsedAt,
+        lastError: integration.lastError,
+        isDefault: integration.isDefault,
+        updatedAt: integration.updatedAt,
+        config: integration.config,
       },
     };
   });
@@ -286,22 +278,14 @@ const update = protectedBase
     provider: input.config.provider,
     accountId: input.accountId,
   }))
+  .use(validateIntegrationMiddleware, (input) => ({
+    id: input.id,
+    projectId: input.projectId,
+  }))
   .handler(async ({ context, input }) => {
-    const integration = await getIntegration(context.db, {
-      id: input.id,
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-    });
-    if (!integration.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integration.error.message,
-      });
-    }
-    if (!integration.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Integration not found" });
-    }
+    const integration = context.integration;
 
-    if (input.config && input.config.provider !== integration.value.provider) {
+    if (input.config && input.config.provider !== integration.provider) {
       throw new ORPCError("BAD_REQUEST", {
         message: "Config doesn't match integration provider.",
       });
@@ -321,7 +305,7 @@ const update = protectedBase
     }
 
     const result = await updateIntegration(context.db, {
-      id: integration.value.id,
+      id: integration.id,
       organizationId: context.organization.id,
       projectId: input.projectId,
       values: {
@@ -336,7 +320,7 @@ const update = protectedBase
               JSON.stringify(input.credentials),
               apiEnv().AUTH_SEO_ENCRYPTION_KEY,
             )
-          : null,
+          : undefined,
       },
     });
     if (!result.ok) {
