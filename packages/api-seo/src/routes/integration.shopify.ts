@@ -5,6 +5,7 @@ import { shopifyAdapter } from "@rectangular-labs/core/integrations/adapters/sho
 import {
   type ShopifyConfig,
   type ShopifyCredentials,
+  shopifyConfigSchema,
   shopifyCredentialsSchema,
 } from "@rectangular-labs/core/schemas/integration-parsers";
 import {
@@ -34,7 +35,7 @@ const initiate = protectedBase
       projectId: "string.uuid",
       name: "string",
       shopDomain: "string",
-      adminUrl: "string",
+      adminUrl: shopifyConfigSchema.get("adminUrl"),
       clientId: "string",
       clientSecret: "string",
       "isDefault?": "boolean",
