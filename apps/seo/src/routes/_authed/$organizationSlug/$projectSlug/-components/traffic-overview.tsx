@@ -63,8 +63,6 @@ export function TrafficOverview({
   error: Error | null;
   retry: () => void;
 }) {
-  console.log(metrics?.clicks);
-  console.log(metrics?.impressions);
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -81,7 +79,7 @@ export function TrafficOverview({
                 <span className="font-bold text-2xl">
                   {formatNumber(metrics.clicks.current)}
                 </span>
-                {metrics.clicks.changePercentage && (
+                {typeof metrics.clicks.changePercentage === "number" && (
                   <span
                     className={
                       metrics.clicks.changePercentage > 0
@@ -114,7 +112,7 @@ export function TrafficOverview({
                 <span className="font-bold text-2xl">
                   {formatNumber(metrics.impressions.current)}
                 </span>
-                {metrics.impressions.changePercentage && (
+                {typeof metrics.impressions.changePercentage === "number" && (
                   <span
                     className={
                       metrics.impressions.changePercentage > 0
