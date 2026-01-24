@@ -31,6 +31,13 @@ export async function createTask({
         const { id } = await triggerTask(input);
         return { provider: "trigger.dev" as const, taskId: id };
       }
+      case "seo-understand-site": {
+        const instance = await workflows.seoOnboardingWorkflow.create({
+          id: workflowInstanceId ?? `onboarding_${crypto.randomUUID()}`,
+          params: input,
+        });
+        return { provider: "cloudflare" as const, taskId: instance.id };
+      }
       case "seo-plan-keyword": {
         const instance = await workflows.seoPlannerWorkflow.create({
           id: workflowInstanceId ?? `plan_${crypto.randomUUID()}`,
