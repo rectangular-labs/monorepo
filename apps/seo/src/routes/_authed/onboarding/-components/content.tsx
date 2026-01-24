@@ -4,11 +4,10 @@ import { OnboardingWelcome } from "./0-welcome";
 import { OnboardingUserBackground } from "./1-user-background";
 import { OnboardingCreateOrganization } from "./2-create-organization";
 import { OnboardingWebsiteInfo } from "./3-website-info";
-import { OnboardingUnderstandingSite } from "./4-understanding-site";
-import { OnboardingReviewProject } from "./5-review-project";
 import { OnboardingAllSet } from "./6-all-set";
 import { OnboardingConnectGsc } from "./connect-gsc";
 import { OnboardingConnectGscProperty } from "./connect-gsc-property";
+import { OnboardingConnectPublishing } from "./connect-publishing";
 import { OnboardingProgress } from "./onboarding-progress";
 
 export function OnboardingContent() {
@@ -57,13 +56,12 @@ export function OnboardingContent() {
               title={step.title}
             />
           ),
-          "understanding-site": (step) => (
-            <OnboardingUnderstandingSite
+          "connect-publishing": (step) => (
+            <OnboardingConnectPublishing
               description={step.description}
               title={step.title}
             />
           ),
-          "review-project": () => <OnboardingReviewProject />,
           "all-set": (step) => (
             <OnboardingAllSet
               description={step.description}

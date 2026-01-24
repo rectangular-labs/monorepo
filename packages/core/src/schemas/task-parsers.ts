@@ -8,6 +8,11 @@ export const understandSiteTaskInputSchema = type({
   websiteUrl: "string",
 });
 
+export const seoUnderstandSiteTaskInputSchema = type({
+  type: "'seo-understand-site'",
+  projectId: "string",
+});
+
 export const seoPlanKeywordTaskInputSchema = type({
   type: "'seo-plan-keyword'",
   projectId: "string",
@@ -31,6 +36,7 @@ export const taskInputSchema = type.or(
   understandSiteTaskInputSchema,
   seoPlanKeywordTaskInputSchema,
   seoWriteArticleTaskInputSchema,
+  seoUnderstandSiteTaskInputSchema,
 );
 
 export const understandSiteTaskOutputSchema = type({
@@ -53,8 +59,16 @@ export const seoWriteArticleTaskOutputSchema = type({
   heroImageCaption: "string|null",
 });
 
+export const seoUnderstandSiteTaskOutputSchema = type({
+  type: "'seo-understand-site'",
+  name: type("string"),
+  businessBackground: businessBackgroundSchema.omit("version"),
+  brandVoice: type("string"),
+});
+
 export const taskOutputSchema = type.or(
   understandSiteTaskOutputSchema,
   seoPlanKeywordTaskOutputSchema,
   seoWriteArticleTaskOutputSchema,
+  seoUnderstandSiteTaskOutputSchema,
 );

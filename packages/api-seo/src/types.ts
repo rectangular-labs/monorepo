@@ -7,10 +7,6 @@ import type {
 import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { chatMessageMetadataSchema } from "@rectangular-labs/core/schemas/chat-message-parser";
 import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
-import type {
-  seoPlanKeywordTaskInputSchema,
-  seoWriteArticleTaskInputSchema,
-} from "@rectangular-labs/core/schemas/task-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { Scheduler } from "partywhen";
@@ -22,6 +18,9 @@ import type {
   createWorkspaceBucket,
 } from "./lib/bucket";
 import type { router } from "./routes";
+import type { SeoOnboardingWorkflowBinding } from "./workflows/onboarding-workflow";
+import type { SeoPlannerWorkflowBinding } from "./workflows/planner-workflow";
+import type { SeoWriterWorkflowBinding } from "./workflows/writer-workflow";
 
 export type Router = UnlaziedRouter<typeof router>;
 export type RouterClient = ORPCRouterClient<Router>;
@@ -58,8 +57,9 @@ export interface InitialContext extends BaseContextWithAuth {
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
   publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
-  seoPlannerWorkflow: Workflow<typeof seoPlanKeywordTaskInputSchema.infer>;
-  seoWriterWorkflow: Workflow<typeof seoWriteArticleTaskInputSchema.infer>;
+  seoPlannerWorkflow: SeoPlannerWorkflowBinding;
+  seoWriterWorkflow: SeoWriterWorkflowBinding;
+  seoOnboardingWorkflow: SeoOnboardingWorkflowBinding;
   cacheKV: KVNamespace;
   scheduler: DurableObjectStub<Scheduler>;
 }

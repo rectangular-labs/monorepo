@@ -5,8 +5,6 @@ import type { ChatContext, SeoChatMessage } from "../../types";
 import {
   ARTICLE_TYPE_TO_WRITER_RULE,
   type ArticleType,
-  DEFAULT_BRAND_VOICE,
-  DEFAULT_USER_INSTRUCTIONS,
 } from "../workspace/workflow.constant";
 import { formatBusinessBackground } from "./format-business-background";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
@@ -142,11 +140,11 @@ ${articleTypeRule ? `- Article-type rule for ${args.articleType}: ${articleTypeR
 </context>
 
 <brand-voice>
-${args.project.writingSettings?.brandVoice || DEFAULT_BRAND_VOICE}
+${args.project.writingSettings?.brandVoice}
 </brand-voice>
 
 <user-instructions>
-${args.project.writingSettings?.customInstructions || DEFAULT_USER_INSTRUCTIONS}
+${args.project.writingSettings?.customInstructions}
 </user-instructions>
 
 <outline>

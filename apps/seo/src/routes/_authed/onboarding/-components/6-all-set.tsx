@@ -27,6 +27,7 @@ export function OnboardingAllSet({
         organizationIdentifier: searchParams.organizationId ?? "",
       },
       enabled: !!searchParams.projectId && !!searchParams.organizationId,
+      refetchOnMount: "always",
     }),
   );
   const { slug, name } = project ?? { name: "dashboard", slug: "" };
@@ -47,7 +48,7 @@ export function OnboardingAllSet({
               organizationSlug: AUTO_ROUTE_ORG,
               projectSlug: slug ?? "",
             }}
-            to="/$organizationSlug/$projectSlug"
+            to="/$organizationSlug/$projectSlug/content"
           >
             Go to {name}
           </Link>

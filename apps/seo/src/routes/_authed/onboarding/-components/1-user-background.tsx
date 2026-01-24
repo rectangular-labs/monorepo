@@ -28,13 +28,12 @@ import { useMutation } from "@tanstack/react-query";
 import { type } from "arktype";
 import { authClient } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
-import { useMetadata } from "../-lib/use-metadata";
 
 const sourceOptions = [
   { value: "x", label: "X" },
   { value: "reddit", label: "Reddit" },
-  { value: "hacker-news", label: "Hacker News" },
   { value: "google", label: "Google" },
+  { value: "hacker-news", label: "Hacker News" },
   { value: "ai-conversations", label: "AI conversations" },
   { value: "other", label: "Other" },
 ];
@@ -78,8 +77,10 @@ export function OnboardingUserBackground({
   title: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-  const { data: savedMetadata, set: setMetadata } =
-    useMetadata("user-background");
+  const savedMetadata =
+    matcher.getMetadata<Partial<typeof backgroundSchema.infer>>(
+      "user-background",
+    );
 
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
@@ -108,7 +109,7 @@ export function OnboardingUserBackground({
       return values;
     },
     onSuccess: (data) => {
-      setMetadata(data);
+      matcher.setMetadata("user-background", data);
       matcher.next();
     },
   });

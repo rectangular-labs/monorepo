@@ -23,6 +23,7 @@ export const createApiContext = (
     | "publicImagesBucket"
     | "seoPlannerWorkflow"
     | "seoWriterWorkflow"
+    | "seoOnboardingWorkflow"
     | "cacheKV"
     | "scheduler"
   >,

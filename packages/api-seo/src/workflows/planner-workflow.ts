@@ -344,6 +344,7 @@ ${JSON.stringify(serp)}
 }
 
 type PlannerInput = type.infer<typeof seoPlanKeywordTaskInputSchema>;
+export type SeoPlannerWorkflowBinding = Workflow<PlannerInput>;
 export class SeoPlannerWorkflow extends WorkflowEntrypoint<
   {
     SEO_WRITER_WORKFLOW: InitialContext["seoWriterWorkflow"];

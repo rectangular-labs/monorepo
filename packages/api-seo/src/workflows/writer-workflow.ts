@@ -290,6 +290,7 @@ async function loadDraftAndProject(args: {
 }
 
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
+export type SeoWriterWorkflowBinding = Workflow<WriterInput>;
 export class SeoWriterWorkflow extends WorkflowEntrypoint<
   {
     SEO_PLANNER_WORKFLOW: InitialContext["seoPlannerWorkflow"];

@@ -4,20 +4,7 @@ import {
   PUBLISH_DESTINATION_PROVIDERS,
 } from "@rectangular-labs/core/schemas/integration-parsers";
 import { Filter, Search } from "@rectangular-labs/ui/components/icon";
-import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@rectangular-labs/ui/components/ui/card";
-import {
-  DialogDrawer,
-  DialogDrawerDescription,
-  DialogDrawerHeader,
-  DialogDrawerTitle,
-} from "@rectangular-labs/ui/components/ui/dialog-drawer";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -25,11 +12,11 @@ import { type } from "arktype";
 import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { FilterStatus } from "../../-components/filter-status";
-import { IntegrationConnectionCard } from "./-components/integration-connection-card";
+import { IntegrationCardGrid } from "./-components/integration-card-grid";
 import {
-  getIntegrationMetadata,
   INTEGRATION_METADATA,
   type IntegrationCategory,
+  type IntegrationMetadata,
 } from "./-components/integration-metadata";
 
 export const Route = createFileRoute(
@@ -55,8 +42,6 @@ function RouteComponent() {
     }),
   );
 
-  const [selectedProvider, setSelectedProvider] =
-    useState<IntegrationProvider | null>(search.provider ?? null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<
     "all" | IntegrationCategory
@@ -80,7 +65,10 @@ function RouteComponent() {
 
   // Filter providers by search query and category
   const filteredProviders = useMemo(() => {
-    let providers = Object.entries(INTEGRATION_METADATA);
+    let providers = Object.entries(INTEGRATION_METADATA) as [
+      IntegrationProvider,
+      IntegrationMetadata,
+    ][];
 
     // Filter by category
     if (categoryFilter !== "all") {
@@ -102,19 +90,10 @@ function RouteComponent() {
     return providers;
   }, [searchQuery, categoryFilter]);
 
-  const handleOpenModal = (provider: IntegrationProvider) => {
-    setSelectedProvider(provider);
-  };
-
   const handleCloseModal = () => {
-    setSelectedProvider(null);
     // Update URL to remove provider param
     window.history.replaceState(null, "", window.location.pathname);
   };
-
-  const selectedMeta = selectedProvider
-    ? getIntegrationMetadata(selectedProvider)
-    : null;
 
   return (
     <div className="space-y-6">
@@ -159,56 +138,15 @@ function RouteComponent() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {filteredProviders.map(([provider, meta]) => {
-            const integration = integrations.find(
-              (integration) => integration.provider === provider,
-            );
-            const isConnected =
-              integration?.status === "active" ||
-              integration?.status === "error";
-            const hasError =
-              integration?.status === "error" || !!integration?.lastError;
-
-            return (
-              <Card className="flex flex-col" key={provider}>
-                <CardHeader className="flex-1 space-y-4 pb-4">
-                  {/* Top row: Icon and Button */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border bg-muted/50">
-                      {meta.icon}
-                    </div>
-                    <Button
-                      onClick={() =>
-                        handleOpenModal(provider as IntegrationProvider)
-                      }
-                      size="sm"
-                      variant={isConnected ? "default" : "outline"}
-                    >
-                      {isConnected ? "Manage Connection" : "+ Connect"}
-                    </Button>
-                  </div>
-                  {/* Title with category badge on same row */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <CardTitle className="font-semibold text-base">
-                        {meta.name}
-                      </CardTitle>
-                      {hasError && <Badge variant="destructive">Error</Badge>}
-                    </div>
-                    <Badge variant="secondary">
-                      {meta.category === "publishing"
-                        ? "Publishing"
-                        : "Data Source"}
-                    </Badge>
-                  </div>
-                  {/* Description */}
-                  <CardDescription className="line-clamp-2 text-sm">
-                    {meta.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            );
-          })}
+          <IntegrationCardGrid
+            hasIntegrations={hasPublishingIntegrations}
+            initialProvider={search.provider ?? null}
+            integrations={integrations}
+            onDialogClose={handleCloseModal}
+            organizationId={project.organizationId}
+            projectId={project.id}
+            providers={filteredProviders}
+          />
         </div>
       )}
 
@@ -220,41 +158,6 @@ function RouteComponent() {
           </p>
         </div>
       )}
-
-      {/* Connection Modal */}
-      <DialogDrawer
-        className="max-w-lg"
-        onOpenChange={(open) => {
-          if (!open) handleCloseModal();
-        }}
-        open={!!selectedProvider}
-      >
-        {selectedMeta && (
-          <>
-            <DialogDrawerHeader>
-              <DialogDrawerTitle className="flex items-center gap-2">
-                {selectedMeta.icon}
-                {selectedMeta.name}
-              </DialogDrawerTitle>
-              <DialogDrawerDescription>
-                {selectedMeta.description}
-              </DialogDrawerDescription>
-            </DialogDrawerHeader>
-            <IntegrationConnectionCard
-              existingIntegration={integrations.find(
-                (integration) => integration.provider === selectedMeta.provider,
-              )}
-              hasIntegrations={hasPublishingIntegrations}
-              onClose={handleCloseModal}
-              organizationId={project.organizationId}
-              organizationSlug={project.organizationId}
-              projectId={project.id}
-              projectSlug={project.slug ?? ""}
-              provider={selectedMeta.provider}
-            />
-          </>
-        )}
-      </DialogDrawer>
     </div>
   );
 }

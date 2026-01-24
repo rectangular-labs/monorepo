@@ -11,7 +11,14 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import { index, jsonb, text, unique, uuid } from "drizzle-orm/pg-core";
+import {
+  type AnyPgColumn,
+  index,
+  jsonb,
+  text,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
@@ -33,9 +40,20 @@ export const seoProject = pgSeoTable(
       }),
     websiteUrl: text().notNull(),
     businessBackground: jsonb().$type<typeof businessBackgroundSchema.infer>(),
-    imageSettings: jsonb().$type<typeof imageSettingsSchema.infer>(),
-    writingSettings: jsonb().$type<typeof writingSettingsSchema.infer>(),
-    publishingSettings: jsonb().$type<typeof publishingSettingsSchema.infer>(),
+    imageSettings: jsonb().$type<typeof imageSettingsSchema.infer>().notNull(),
+    writingSettings: jsonb()
+      .$type<typeof writingSettingsSchema.infer>()
+      .notNull(),
+    publishingSettings: jsonb()
+      .$type<typeof publishingSettingsSchema.infer>()
+      .notNull(),
+    projectResearchWorkflowId: uuid().references(
+      (): AnyPgColumn => seoTaskRun.id,
+      {
+        onDelete: "set null",
+        onUpdate: "cascade",
+      },
+    ),
     ...timestamps,
   },
   (table) => [
@@ -46,6 +64,9 @@ export const seoProject = pgSeoTable(
     ),
     index("seo_project_org_idx").on(table.organizationId),
     index("seo_project_website_url_idx").on(table.websiteUrl),
+    index("seo_project_research_workflow_idx").on(
+      table.projectResearchWorkflowId,
+    ),
   ],
 );
 

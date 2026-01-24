@@ -101,6 +101,9 @@ const status = protectedBase
         if (taskRun.inputData.type === "seo-write-article") {
           return context.seoWriterWorkflow.get(taskRun.taskId);
         }
+        if (taskRun.inputData.type === "seo-understand-site") {
+          return context.seoOnboardingWorkflow.get(taskRun.taskId);
+        }
         return null;
       })();
 
@@ -109,6 +112,7 @@ const status = protectedBase
       }
 
       const details = await instance.status();
+      console.log("details", details);
       switch (details.status) {
         case "queued": {
           status = "queued";

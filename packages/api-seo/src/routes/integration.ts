@@ -21,7 +21,6 @@ import { getPublishingScopes } from "../lib/project/get-publishing-scopes";
 import type { InitialContext } from "../types";
 import { github } from "./integration.github";
 import { gsc } from "./integration.gsc";
-import { shopify } from "./integration.shopify";
 import { webhook } from "./integration.webhook";
 
 const integrationSummarySchema = schema.seoIntegrationSelectSchema
@@ -108,8 +107,9 @@ const validateIntegrationAccountMiddleware = os
     ) => {
       if (
         params.credentials &&
-        params.credentials.provider !== "webhook" &&
-        params.credentials.provider !== "shopify"
+        params.credentials.provider !== "webhook"
+        // &&
+        // params.credentials.provider !== "shopify"
       ) {
         throw new ORPCError("BAD_REQUEST", {
           message: "Credentials provider invalid.",
@@ -258,12 +258,12 @@ const create = protectedBase
   }))
   .handler(async ({ context, input }) => {
     const provider = input.config.provider;
-    if (provider === "shopify") {
-      throw new ORPCError("BAD_REQUEST", {
-        message:
-          "Shopify integrations should not be created via this endpoint.",
-      });
-    }
+    // if (provider === "shopify") {
+    //   throw new ORPCError("BAD_REQUEST", {
+    //     message:
+    //       "Shopify integrations should not be created via this endpoint.",
+    //   });
+    // }
 
     // Clear existing default integrations if this one is being set as default
     if (input.isDefault) {
@@ -414,6 +414,6 @@ export default protectedBase
     remove,
     github,
     gsc,
-    shopify,
+    // shopify,
     webhook,
   });

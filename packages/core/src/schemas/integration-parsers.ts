@@ -4,7 +4,7 @@ import type { ArticleType } from "./content-parsers";
 
 // Provider enum - single source of truth
 export const PUBLISH_DESTINATION_PROVIDERS = [
-  "shopify",
+  // "shopify",
   "github",
   "webhook",
 ] as const;
@@ -99,7 +99,7 @@ export const gscConfigSchema = type({
 export type GscConfig = typeof gscConfigSchema.infer;
 
 export const integrationConfigSchema = githubConfigSchema
-  .or(shopifyConfigSchema)
+  // .or(shopifyConfigSchema)
   .or(webhookConfigSchema)
   .or(gscConfigSchema);
 export type IntegrationConfig = typeof integrationConfigSchema.infer;
@@ -125,9 +125,7 @@ export const webhookCredentialsSchema = type({
 });
 export type WebhookCredentials = typeof webhookCredentialsSchema.infer;
 
-export const integrationCredentialsSchema = shopifyCredentialsSchema.or(
-  webhookCredentialsSchema,
-);
+export const integrationCredentialsSchema = webhookCredentialsSchema;
 export type IntegrationCredentials = typeof integrationCredentialsSchema.infer;
 
 // ═══════════════════════════════════════════════════════════════════════

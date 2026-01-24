@@ -4,15 +4,6 @@ import {
   seoGscPropertyTypeSchema,
 } from "@rectangular-labs/core/schemas/gsc-property-parsers";
 import {
-  type GscConfig,
-  gscConfigSchema,
-} from "@rectangular-labs/core/schemas/integration-parsers";
-import {
-  createIntegration,
-  getProviderIntegration,
-  updateIntegration,
-} from "@rectangular-labs/db/operations";
-import {
   type GscProperty,
   listProperties as listGscProperties,
 } from "@rectangular-labs/google-apis/google-search-console";
@@ -33,10 +24,14 @@ function getPermissionLevel(
   return "needs-verification";
 }
 
-// todo (gsc): we should be able to consolidate the connectToProject and disconnectFromProject endpoints into integration.ts.
 const listProperties = protectedBase
   .route({ method: "GET", path: "/property" })
-  .input(type.undefined)
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+    }),
+  )
   .output(
     type({
       properties: type({
@@ -49,6 +44,7 @@ const listProperties = protectedBase
       hasGscScopes: "boolean",
     }),
   )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .handler(async ({ context }) => {
     // 1. Check if user has connected Google accounts
     const accounts = await context.db.query.account.findMany({
@@ -126,241 +122,6 @@ const listProperties = protectedBase
     };
   });
 
-/**
- * Get the connected GSC property for a project (if any)
- */
-const getConnectedPropertyForProject = protectedBase
-  .route({ method: "GET", path: "/project/{projectId}" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-    }),
-  )
-  .output(
-    type({
-      integration: type({
-        id: "string.uuid",
-        status: "string",
-        config: gscConfigSchema,
-      }).or(type.null),
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .handler(async ({ context, input }) => {
-    const integrationResult = await getProviderIntegration(context.db, {
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-      provider: "google-search-console",
-      status: "active",
-    });
-    if (!integrationResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integrationResult.error.message,
-      });
-    }
-    const integration = integrationResult.value;
-    if (!integration) {
-      return { integration: null };
-    }
-    const config = integration.config;
-    if (config.provider !== "google-search-console") {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Invalid provider",
-      });
-    }
-    return {
-      integration: {
-        id: integration.id,
-        status: integration.status,
-        config,
-      },
-    };
-  });
-
-/**
- * Connect a GSC property to a project
- */
-const connectToProject = protectedBase
-  .route({ method: "POST", path: "/connect-to-project" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-      accountId: "string",
-      domain: "string",
-      propertyType: seoGscPropertyTypeSchema,
-      permissionLevel: seoGscPermissionLevelSchema,
-    }),
-  )
-  .output(
-    type({
-      integrationId: "string.uuid",
-      projectId: "string.uuid",
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .handler(async ({ context, input }) => {
-    // Get the account to verify it exists and belongs to the user
-    const account = await context.db.query.account.findFirst({
-      where: (table, { and, eq }) =>
-        and(
-          eq(table.id, input.accountId),
-          eq(table.userId, context.user.id),
-          eq(table.providerId, "google"),
-        ),
-    });
-    if (!account) {
-      throw new ORPCError("NOT_FOUND", {
-        message: "Google account not found",
-      });
-    }
-
-    // Get access token from the account
-    const accessTokenResult = await context.auth.api.getAccessToken({
-      body: {
-        accountId: account.id,
-        userId: account.userId,
-        providerId: "google",
-      },
-    });
-
-    // Verify the property exists in GSC
-    const properties = await listGscProperties(accessTokenResult.accessToken);
-    if (!properties.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get GSC properties",
-      });
-    }
-    const existingProperty = properties.value.find(
-      (property) => property.domain === input.domain,
-    );
-    if (!existingProperty) {
-      throw new ORPCError("NOT_FOUND", { message: "GSC property not found" });
-    }
-
-    const config: GscConfig = {
-      provider: "google-search-console",
-      domain: input.domain,
-      propertyType: input.propertyType,
-      permissionLevel: input.permissionLevel,
-    };
-
-    // Check if there's an existing GSC integration for this project
-    const existingIntegrationResult = await getProviderIntegration(context.db, {
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-      provider: "google-search-console",
-    });
-    if (!existingIntegrationResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: existingIntegrationResult.error.message,
-      });
-    }
-    const existingIntegration = existingIntegrationResult.value;
-
-    if (existingIntegration) {
-      // Update existing integration
-      const updated = await updateIntegration(context.db, {
-        id: existingIntegration.id,
-        organizationId: context.organization.id,
-        projectId: input.projectId,
-        values: {
-          accountId: input.accountId,
-          config,
-          status: "active",
-          isDefault: true,
-        },
-      });
-      if (!updated.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: updated.error.message,
-        });
-      }
-      return {
-        integrationId: updated.value.id,
-        projectId: input.projectId,
-      };
-    }
-
-    const created = await createIntegration(context.db, {
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      accountId: input.accountId,
-      isDefault: true,
-      provider: "google-search-console",
-      name: input.domain,
-      status: "active",
-      config,
-      encryptedCredentials: null,
-    });
-    if (!created.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: created.error.message,
-      });
-    }
-
-    return {
-      integrationId: created.value.id,
-      projectId: input.projectId,
-    };
-  });
-
-const disconnectFromProject = protectedBase
-  .route({ method: "DELETE", path: "/project/{projectId}" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-    }),
-  )
-  .output(
-    type({
-      projectId: "string.uuid",
-      success: "true",
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .handler(async ({ context, input }) => {
-    const integrationResult = await getProviderIntegration(context.db, {
-      projectId: input.projectId,
-      organizationId: context.organization.id,
-      provider: "google-search-console",
-    });
-    if (!integrationResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: integrationResult.error.message,
-      });
-    }
-    const integration = integrationResult.value;
-    if (!integration) {
-      throw new ORPCError("NOT_FOUND", {
-        message: "GSC integration not found",
-      });
-    }
-
-    const updated = await updateIntegration(context.db, {
-      id: integration.id,
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      values: {
-        status: "disconnected",
-        isDefault: false,
-        accountId: null,
-      },
-    });
-    if (!updated.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: updated.error.message,
-      });
-    }
-
-    return { projectId: input.projectId, success: true as const };
-  });
-
 export const gsc = protectedBase.prefix("/gsc").router({
   listProperties,
-  getConnectedPropertyForProject,
-  connectToProject,
-  disconnectFromProject,
 });

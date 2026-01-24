@@ -7,7 +7,7 @@ import {
 
 export type IntegrationCategory = "publishing" | "data-source";
 
-interface IntegrationMetadata {
+export interface IntegrationMetadata {
   provider: IntegrationProvider;
   name: string;
   description: string;
@@ -57,8 +57,8 @@ export const INTEGRATION_METADATA: Record<
 export function getIntegrationMetadata(
   provider: IntegrationProvider,
 ): IntegrationMetadata {
-  if (provider === "shopify") {
-    throw new Error("Shopify integration is not supported");
-  }
+  // if (provider === "shopify") {
+  //   throw new Error("Shopify integration is not supported");
+  // }
   return INTEGRATION_METADATA[provider];
 }

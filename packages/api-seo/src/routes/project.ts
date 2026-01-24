@@ -10,6 +10,11 @@ import { withOrganizationIdBase } from "../context";
 import { upsertProject } from "../lib/database/project";
 import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import { createTask } from "../lib/task";
+import {
+  DEFAULT_IMAGE_SETTINGS,
+  DEFAULT_PUBLISHING_SETTINGS,
+  DEFAULT_WRITING_SETTINGS,
+} from "../lib/workspace/constants";
 import { metrics } from "./project.metrics";
 import {
   getBusinessBackground,
@@ -114,29 +119,42 @@ const create = withOrganizationIdBase
     ),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(schema.seoProjectSelectSchema.merge(type({ taskId: "string" })))
+  .output(schema.seoProjectSelectSchema)
   .handler(async ({ context, input }) => {
     // TODO(txn): revisit when we can support transactions
     const upsertProjectResult = await upsertProject({
       organizationId: context.organization.id,
       websiteUrl: input.websiteUrl,
+      imageSettings: DEFAULT_IMAGE_SETTINGS,
+      writingSettings: DEFAULT_WRITING_SETTINGS,
+      publishingSettings: DEFAULT_PUBLISHING_SETTINGS,
     });
     if (!upsertProjectResult.ok) {
       throw upsertProjectResult.error;
     }
+
     const createTaskResult = await createTask({
       db: context.db,
       userId: context.user.id,
       input: {
-        type: "understand-site",
+        type: "seo-understand-site",
         projectId: upsertProjectResult.value.id,
-        websiteUrl: input.websiteUrl,
       },
     });
     if (!createTaskResult.ok) {
       throw createTaskResult.error;
     }
-    return { ...upsertProjectResult.value, taskId: createTaskResult.value.id };
+
+    await updateSeoProject(context.db, {
+      id: upsertProjectResult.value.id,
+      organizationId: context.organization.id,
+      projectResearchWorkflowId: createTaskResult.value.id,
+    });
+
+    return {
+      ...upsertProjectResult.value,
+      projectResearchWorkflowId: createTaskResult.value.id,
+    };
   });
 
 const update = withOrganizationIdBase

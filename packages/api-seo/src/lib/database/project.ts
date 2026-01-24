@@ -17,10 +17,7 @@ export async function upsertProject(
   const projectResult = await safe(() =>
     db
       .insert(schema.seoProject)
-      .values({
-        organizationId: values.organizationId,
-        websiteUrl: values.websiteUrl,
-      })
+      .values(values)
       .onConflictDoNothing({
         target: [
           schema.seoProject.organizationId,

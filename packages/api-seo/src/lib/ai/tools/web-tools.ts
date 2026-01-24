@@ -50,7 +50,7 @@ const webSearchOutputSchema = type({
 });
 
 export function createWebToolsWithMetadata(
-  project: Omit<typeof schema.seoProject.$inferSelect, "serpSnapshot">,
+  project: typeof schema.seoProject.$inferSelect,
   cacheKV: InitialContext["cacheKV"],
 ) {
   configureDataForSeoClient();

@@ -89,6 +89,11 @@
       "name": "seo-writer",
       "binding": "SEO_WRITER_WORKFLOW",
       "class_name": "SeoWriterWorkflow"
+    },
+    {
+      "name": "seo-onboarding",
+      "binding": "SEO_ONBOARDING_WORKFLOW",
+      "class_name": "SeoOnboardingWorkflow"
     }
   ],
   "env": {
@@ -157,6 +162,11 @@
           "name": "seo-writer-production",
           "binding": "SEO_WRITER_WORKFLOW",
           "class_name": "SeoWriterWorkflow"
+        },
+        {
+          "name": "seo-onboarding-production",
+          "binding": "SEO_ONBOARDING_WORKFLOW",
+          "class_name": "SeoOnboardingWorkflow"
         }
       ],
       "routes": [
@@ -232,6 +242,11 @@
           "name": "seo-writer",
           "binding": "SEO_WRITER_WORKFLOW",
           "class_name": "SeoWriterWorkflow"
+        },
+        {
+          "name": "seo-onboarding",
+          "binding": "SEO_ONBOARDING_WORKFLOW",
+          "class_name": "SeoOnboardingWorkflow"
         }
       ],
       "routes": [

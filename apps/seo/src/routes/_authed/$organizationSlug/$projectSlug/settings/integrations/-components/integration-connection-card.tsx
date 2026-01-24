@@ -1,8 +1,7 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import type { IntegrationProvider } from "@rectangular-labs/core/schemas/integration-parsers";
 import { GithubConnectionForm } from "./github-connection-form";
-import { GscConnectionForm } from "./gsc-connection-form";
-import { ShopifyConnectionForm } from "./shopify-connection-form";
+import { GscConnectionContainer } from "./gsc/gsc-connection-container";
 import { WebhookConnectionForm } from "./webhook-connection-form";
 
 type IntegrationSummary =
@@ -11,14 +10,10 @@ type IntegrationSummary =
 export interface IntegrationConnectionCardProps {
   provider: IntegrationProvider;
   projectId: string;
-  projectSlug: string;
   organizationId: string;
-  organizationSlug: string;
   existingIntegration?: IntegrationSummary;
-  onClose: () => void;
+  onComplete: () => void;
   hasIntegrations: boolean;
-  /** If true, renders in a more compact inline mode (for chat panel) */
-  inline?: boolean;
 }
 
 /**
@@ -28,11 +23,10 @@ export interface IntegrationConnectionCardProps {
 export function IntegrationConnectionCard({
   provider,
   projectId,
-  organizationSlug,
+  organizationId,
   existingIntegration,
-  onClose,
+  onComplete,
   hasIntegrations,
-  inline = false,
 }: IntegrationConnectionCardProps) {
   switch (provider) {
     case "github":
@@ -40,38 +34,37 @@ export function IntegrationConnectionCard({
         <GithubConnectionForm
           existingIntegration={existingIntegration}
           hasIntegrations={hasIntegrations}
-          inline={inline}
-          onClose={onClose}
-          organizationSlug={organizationSlug}
+          onComplete={onComplete}
+          organizationId={organizationId}
           projectId={projectId}
         />
       );
-    case "shopify":
-      return (
-        <ShopifyConnectionForm
-          existingIntegration={existingIntegration}
-          hasIntegrations={hasIntegrations}
-          onClose={onClose}
-          organizationSlug={organizationSlug}
-          projectId={projectId}
-        />
-      );
+    // case "shopify":
+    //   return (
+    //     <ShopifyConnectionForm
+    //       existingIntegration={existingIntegration}
+    //       hasIntegrations={hasIntegrations}
+    //       onComplete={onComplete}
+    //       organizationId={organizationId}
+    //       projectId={projectId}
+    //     />
+    //   );
     case "webhook":
       return (
         <WebhookConnectionForm
           existingIntegration={existingIntegration}
           hasIntegrations={hasIntegrations}
-          onClose={onClose}
-          organizationSlug={organizationSlug}
+          onComplete={onComplete}
+          organizationId={organizationId}
           projectId={projectId}
         />
       );
     case "google-search-console":
       return (
-        <GscConnectionForm
-          inline={inline}
-          onClose={onClose}
-          organizationSlug={organizationSlug}
+        <GscConnectionContainer
+          existingIntegration={existingIntegration}
+          onComplete={onComplete}
+          organizationId={organizationId}
           projectId={projectId}
         />
       );
