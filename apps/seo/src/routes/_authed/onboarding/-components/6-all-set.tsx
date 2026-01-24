@@ -47,7 +47,7 @@ export function OnboardingAllSet({
               organizationSlug: AUTO_ROUTE_ORG,
               projectSlug: slug ?? "",
             }}
-            to="/$organizationSlug/$projectSlug"
+            to="/$organizationSlug/$projectSlug/content"
           >
             Go to {name}
           </Link>

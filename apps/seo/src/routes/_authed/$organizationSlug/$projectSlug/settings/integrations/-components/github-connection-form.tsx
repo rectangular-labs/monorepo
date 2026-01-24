@@ -55,7 +55,6 @@ interface GithubConnectionFormProps {
   organizationSlug: string;
   existingIntegration?: IntegrationSummary;
   onClose: () => void;
-  inline?: boolean;
   hasIntegrations?: boolean;
 }
 
@@ -85,7 +84,6 @@ export function GithubConnectionForm({
   organizationSlug,
   existingIntegration,
   onClose,
-  inline = false,
   hasIntegrations = false,
 }: GithubConnectionFormProps) {
   const queryClient = useQueryClient();
@@ -306,7 +304,7 @@ export function GithubConnectionForm({
   // Show empty state if no GitHub account or no repo scopes
   if (!reposLoading && reposData && !reposData.hasGithubAccount) {
     return (
-      <Empty className={inline ? "border-0 p-4" : ""}>
+      <Empty >
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <GitHubIcon />
@@ -329,7 +327,7 @@ export function GithubConnectionForm({
 
   if (!reposLoading && reposData && !reposData.hasRepoScopes) {
     return (
-      <Empty className={inline ? "border-0 p-4" : ""}>
+      <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <GitHubIcon />

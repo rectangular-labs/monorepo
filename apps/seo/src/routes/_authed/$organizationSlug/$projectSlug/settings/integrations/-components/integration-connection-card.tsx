@@ -1,7 +1,7 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import type { IntegrationProvider } from "@rectangular-labs/core/schemas/integration-parsers";
 import { GithubConnectionForm } from "./github-connection-form";
-import { GscConnectionForm } from "./gsc-connection-form";
+import { GscConnectionContainer } from "./gsc/gsc-connection-container";
 import { ShopifyConnectionForm } from "./shopify-connection-form";
 import { WebhookConnectionForm } from "./webhook-connection-form";
 
@@ -17,8 +17,6 @@ export interface IntegrationConnectionCardProps {
   existingIntegration?: IntegrationSummary;
   onClose: () => void;
   hasIntegrations: boolean;
-  /** If true, renders in a more compact inline mode (for chat panel) */
-  inline?: boolean;
 }
 
 /**
@@ -32,7 +30,6 @@ export function IntegrationConnectionCard({
   existingIntegration,
   onClose,
   hasIntegrations,
-  inline = false,
 }: IntegrationConnectionCardProps) {
   switch (provider) {
     case "github":
@@ -40,7 +37,6 @@ export function IntegrationConnectionCard({
         <GithubConnectionForm
           existingIntegration={existingIntegration}
           hasIntegrations={hasIntegrations}
-          inline={inline}
           onClose={onClose}
           organizationSlug={organizationSlug}
           projectId={projectId}
@@ -68,8 +64,8 @@ export function IntegrationConnectionCard({
       );
     case "google-search-console":
       return (
-        <GscConnectionForm
-          inline={inline}
+        <GscConnectionContainer
+          existingIntegration={existingIntegration}
           onClose={onClose}
           organizationSlug={organizationSlug}
           projectId={projectId}

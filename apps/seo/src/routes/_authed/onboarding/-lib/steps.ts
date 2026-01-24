@@ -4,7 +4,7 @@ const steps = [
   {
     id: "welcome",
     title: "Welcome",
-    description: "We'll set up your workspace in 4 quick steps (~3 minutes)",
+    description: "We'll set up your workspace in 4 quick steps (~4 minutes)",
   },
   {
     id: "user-background",
@@ -24,17 +24,6 @@ const steps = [
       "We'll use your website's homepage to understand what your business does.",
   },
   {
-    id: "understanding-site",
-    title: "Understanding your site",
-    description:
-      "Hang tight while we synthesize everything! This typically takes 1 to 3 minutes.",
-  },
-  {
-    id: "review-project",
-    title: "Review Project",
-    description: "Let's make sure everything looks good.",
-  },
-  {
     id: "connect-gsc",
     title: "Connect Search Console",
     description:
@@ -45,6 +34,11 @@ const steps = [
     title: "Select Property",
     description:
       "Choose which Google Search Console property to connect to your project.",
+  },
+  {
+    id: "connect-publishing",
+    title: "Connect Publishing",
+    description: "Connect a destination to publish your content.",
   },
   {
     id: "all-set",

@@ -31,12 +31,17 @@ export const Route = createFileRoute("/_authed/onboarding/")({
       };
     }
 
-    const [gscProperties, project] = await Promise.all([
-      context.queryClient.fetchQuery(
-        api.integrations.gsc.listProperties.queryOptions(),
-      ),
-      ...(deps.projectId && deps.organizationId
+    const [gscProperties, project] = await Promise.all(
+      deps.projectId && deps.organizationId
         ? [
+            context.queryClient.fetchQuery(
+              api.integrations.gsc.listProperties.queryOptions({
+                input: {
+                  organizationIdentifier: deps.organizationId,
+                  projectId: deps.projectId,
+                },
+              }),
+            ),
             context.queryClient.fetchQuery(
               api.project.get.queryOptions({
                 input: {
@@ -46,13 +51,16 @@ export const Route = createFileRoute("/_authed/onboarding/")({
               }),
             ),
           ]
-        : [new Promise<null>((resolve) => resolve(null))]),
-    ]);
+        : [
+            new Promise<null>((resolve) => resolve(null)),
+            new Promise<null>((resolve) => resolve(null)),
+          ],
+    );
 
     return {
       organizations,
       gscConnectionStatus: {
-        hasGscScopes: gscProperties.hasGscScopes,
+        hasGscScopes: gscProperties?.hasGscScopes ?? false,
       },
       project: project ?? null,
     };
@@ -70,9 +78,6 @@ function getInitialStep(
 ): OnboardingStep {
   // project ID exists which means we already have a project
   if (project) {
-    if (!project.name) {
-      return "website-info";
-    }
     if (gscConnectionStatus?.hasGscScopes) {
       return "connect-gsc-property";
     }

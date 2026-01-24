@@ -19,6 +19,7 @@ import {
   useForm,
 } from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { useNavigate } from "@tanstack/react-router";
 import { type } from "arktype";
 import { useState } from "react";
 import { getApiClient } from "~/lib/api";
@@ -31,6 +32,7 @@ const backgroundSchema = type({
 
 export function OnboardingCreateOrganization() {
   const matcher = OnboardingSteps.useStepper();
+  const navigate = useNavigate();
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
   });
@@ -78,7 +80,12 @@ export function OnboardingCreateOrganization() {
       organizationId: organizationResult.data.id,
       organizationSlug: organizationResult.data.slug,
     });
-
+    await navigate({
+      to: "/onboarding",
+      search: {
+        organizationId: organizationResult.data.id,
+      },
+    });
     matcher.next();
   };
 

@@ -18,11 +18,10 @@ import {
 } from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { OnboardingSteps } from "../-lib/steps";
-import { useMetadata } from "../-lib/use-metadata";
 
 const backgroundSchema = type({
   url: type("string.url").configure({ message: () => "Must be a valid URL" }),
@@ -36,10 +35,10 @@ export function OnboardingWebsiteInfo({
   title: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
+  const navigate = useNavigate();
   const { type, projectId, organizationId } = useSearch({
     from: "/_authed/onboarding/",
   });
-  const { data, set: setMetadata } = useMetadata("website-info");
   const { data: project } = useQuery(
     getApiClientRq().project.get.queryOptions({
       input: {
@@ -49,22 +48,23 @@ export function OnboardingWebsiteInfo({
       enabled: !!projectId && !!organizationId,
     }),
   );
-
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
     defaultValues: {
-      url: data?.websiteUrl ?? project?.websiteUrl ?? "",
+      url: project?.websiteUrl ?? "",
     },
   });
 
   const { mutate: createProject, isPending } = useMutation(
     getApiClientRq().project.create.mutationOptions({
-      onSuccess: (data, { websiteUrl }) => {
-        setMetadata({
-          websiteUrl,
-          taskId: data.taskId,
-          projectId: data.id,
-          organizationId: data.organizationId,
+      onSuccess: async (data) => {
+        await navigate({
+          to: "/onboarding",
+          search: (prev) => ({
+            ...prev,
+            projectId: data.id,
+            organizationId: data.organizationId,
+          }),
         });
         matcher.next();
       },

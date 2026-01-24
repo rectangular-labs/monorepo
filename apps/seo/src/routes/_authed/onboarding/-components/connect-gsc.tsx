@@ -8,8 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getApiClientRq } from "~/lib/api";
 import { linkGoogleAccountForGsc } from "~/lib/auth";
 import { OnboardingSteps } from "../-lib/steps";
 
@@ -23,14 +25,26 @@ export function OnboardingConnectGsc({
   const stepper = OnboardingSteps.useStepper();
   const searchParams = useSearch({ from: "/_authed/onboarding/" });
   const [isLinking, setIsLinking] = useState(false);
+  const { data: gscProperties } = useQuery(
+    getApiClientRq().integrations.gsc.listProperties.queryOptions({
+      input: {
+        organizationIdentifier: searchParams.organizationId ?? "",
+        projectId: searchParams.projectId ?? "",
+      },
+      enabled: !!searchParams.organizationId && !!searchParams.projectId,
+    }),
+  );
+
+  useEffect(() => {
+    if (gscProperties?.hasGscScopes) {
+      stepper.goTo("connect-gsc-property");
+    }
+  }, [gscProperties?.hasGscScopes, stepper]);
 
   const handleConnect = async () => {
     try {
       setIsLinking(true);
-      const params = new URLSearchParams(searchParams);
-      const callbackURL = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-
-      await linkGoogleAccountForGsc({ callbackURL });
+      await linkGoogleAccountForGsc({ callbackURL: window.location.href });
     } finally {
       setIsLinking(false);
     }
@@ -61,7 +75,7 @@ export function OnboardingConnectGsc({
           <div className="flex gap-2">
             <Button
               disabled={isLinking}
-              onClick={() => stepper.goTo("all-set")}
+              onClick={() => stepper.goTo("connect-publishing")}
               variant="ghost"
             >
               Skip for now
