@@ -154,7 +154,7 @@ const create = withOrganizationIdBase
 
     return {
       ...upsertProjectResult.value,
-      projectWorkflowId: createTaskResult.value.id,
+      projectResearchWorkflowId: createTaskResult.value.id,
     };
   });
 
