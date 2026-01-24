@@ -94,16 +94,16 @@ export async function getSeoProjectByIdentifierAndOrgId<
         | "publishingSettings"
       > &
         (B extends true
-          ? { businessBackground: typeof businessBackgroundSchema.infer | null }
+          ? { businessBackground: typeof businessBackgroundSchema.infer }
           : Record<string, never>) &
         (I extends true
-          ? { imageSettings: typeof imageSettingsSchema.infer | null }
+          ? { imageSettings: typeof imageSettingsSchema.infer }
           : Record<string, never>) &
         (A extends true
-          ? { writingSettings: typeof writingSettingsSchema.infer | null }
+          ? { writingSettings: typeof writingSettingsSchema.infer }
           : Record<string, never>) &
         (P extends true
-          ? { publishingSettings: typeof publishingSettingsSchema.infer | null }
+          ? { publishingSettings: typeof publishingSettingsSchema.infer }
           : Record<string, never>))
     | null,
     Error
@@ -133,6 +133,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
         updatedAt: true,
         organizationId: true,
         deletedAt: true,
+        projectResearchWorkflowId: true,
         ...(includeSettings ?? {}),
       },
       where: (table, { eq, and }) =>

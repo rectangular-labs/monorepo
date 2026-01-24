@@ -6,6 +6,7 @@ import {
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   index,
   integer,
   jsonb,
@@ -24,7 +25,7 @@ export const seoTaskRun = pgSeoTable(
     id: uuid().primaryKey().$defaultFn(uuidv7),
     projectId: uuid()
       .notNull()
-      .references(() => seoProject.id, {
+      .references((): AnyPgColumn => seoProject.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
