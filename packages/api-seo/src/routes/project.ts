@@ -137,9 +137,8 @@ const create = withOrganizationIdBase
       db: context.db,
       userId: context.user.id,
       input: {
-        type: "understand-site",
+        type: "seo-understand-site",
         projectId: upsertProjectResult.value.id,
-        websiteUrl: input.websiteUrl,
       },
     });
     if (!createTaskResult.ok) {

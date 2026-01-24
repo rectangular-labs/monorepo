@@ -51,7 +51,8 @@ export const businessBackgroundSchema = type({
   })
     .array()
     .describe("Case studies that demonstrate results or credibility."),
-  competitorsWebsites: type({ url: "string.url" })
+  // TODO: re-enforce .url when ArkType fixes toJsonSchema for url https://github.com/arktypeio/arktype/issues/1475
+  competitorsWebsites: type({ url: "string" })
     .array()
     .describe("List of URLs of direct competitors. Leave blank if none."),
   industry: type("string")

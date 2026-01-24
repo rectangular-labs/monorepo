@@ -5,11 +5,13 @@ import {
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
 import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import type { seoUnderstandSiteTaskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { seoUnderstandSiteTaskOutputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { createDb } from "@rectangular-labs/db";
 import { updateSeoProject } from "@rectangular-labs/db/operations";
+import { safe } from "@rectangular-labs/result";
 import {
   generateText,
   type JSONSchema7,
@@ -17,7 +19,7 @@ import {
   Output,
   stepCountIs,
 } from "ai";
-import type { type } from "arktype";
+import { type } from "arktype";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { DEFAULT_BRAND_VOICE } from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
@@ -57,6 +59,100 @@ export class SeoOnboardingWorkflow extends WorkflowEntrypoint<
       return projectResult;
     });
 
+    const { name } = await step.do(
+      "extract project name from homepage title",
+      {
+        timeout: "10 minutes",
+      },
+      async () => {
+        let homepageTitle = "";
+        try {
+          const response = await fetch(project.websiteUrl, {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            },
+          });
+          if (response.ok) {
+            const html = await response.text();
+            const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            homepageTitle = match?.[1]?.trim() ?? "";
+          }
+        } catch (error) {
+          logError("failed to fetch homepage", {
+            url: project.websiteUrl,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+
+        logInfo("homepage title", { homepageTitle });
+        const system = `You extract a company or product name from a homepage title.
+
+## Task
+- Analyze the provided homepage title and URL to derive the entity name.
+
+## Guidelines
+- Return the homepage title exactly as provided in the input.
+- Extract the brand or product name from the title; if unclear, return an empty string.
+
+## Expectations
+- Provide concise, exact values without extra commentary.`;
+
+        const { experimental_output } = await generateText({
+          model: google("gemini-3-flash-preview"),
+          system,
+          prompt: `Context:
+URL: ${project.websiteUrl}
+Homepage Title: ${homepageTitle}
+
+Extract the name from the above context.`,
+
+          experimental_output: Output.object({
+            schema: jsonSchema<{ name: string }>(
+              type({
+                name: "string",
+              }).toJsonSchema() as JSONSchema7,
+            ),
+          }),
+        });
+
+        return experimental_output;
+      },
+    );
+
+    await step.do("update project name/slug from homepage title", async () => {
+      const extractedName = name.trim();
+      const nextName = extractedName || project.name;
+      const nextSlug = extractedName ? toSlug(extractedName) : project.slug;
+
+      if (!extractedName) {
+        return { name: nextName, slug: nextSlug, updated: false };
+      }
+
+      logInfo("updating project name", {
+        projectId: project.id,
+        name: nextName,
+        slug: nextSlug,
+      });
+      const db = createDb();
+      const updateResult = await updateSeoProject(db, {
+        id: project.id,
+        organizationId: project.organizationId,
+        name: nextName,
+        slug: nextSlug ?? project.slug,
+      });
+
+      if (!updateResult.ok) {
+        logError("failed to update project name", {
+          projectId: project.id,
+          error: updateResult.error,
+        });
+        throw updateResult.error;
+      }
+
+      return { name: nextName, slug: nextSlug, updated: true };
+    });
+
     const researchResult = await step.do(
       "research business background",
       {
@@ -82,20 +178,42 @@ export class SeoOnboardingWorkflow extends WorkflowEntrypoint<
 - Provide clear and concise, high-signal insights rather than verbose descriptions.
 - Summarize the writing tone based on actual blog samples found.`;
 
-        const { experimental_output } = await generateText({
-          model: google("gemini-3-flash-preview"),
-          system,
-          tools,
-          prompt: `Extract business background and blog tone from: ${project.websiteUrl}`,
-          stopWhen: [stepCountIs(35)],
-          experimental_output: Output.object({
-            schema: jsonSchema<
-              type.infer<typeof seoUnderstandSiteTaskOutputSchema>
-            >(seoUnderstandSiteTaskOutputSchema.toJsonSchema() as JSONSchema7),
-          }),
+        logInfo("researching business background", {
+          projectId: project.id,
+          websiteUrl: project.websiteUrl,
         });
+        // biome-ignore lint/suspicious/noExplicitAny: lazy
+        const outputResult = await safe<any>(() =>
+          generateText({
+            model: openai("gpt-5.2"),
+            system,
+            tools,
+            prompt: `Extract business background and blog tone from: ${project.websiteUrl}`,
+            stopWhen: [stepCountIs(35)],
+            onStepFinish: (step) => {
+              logInfo("step finished", {
+                toolCalls: step.toolCalls,
+                toolResults: step.toolResults,
+              });
+            },
+            experimental_output: Output.object({
+              schema: jsonSchema<
+                type.infer<typeof seoUnderstandSiteTaskOutputSchema>
+              >(
+                seoUnderstandSiteTaskOutputSchema.toJsonSchema() as JSONSchema7,
+              ),
+            }),
+          }),
+        );
+        if (!outputResult.ok) {
+          logError("failed to research business background", {
+            projectId: project.id,
+            error: outputResult.error,
+          });
+          throw outputResult.error;
+        }
 
-        return experimental_output;
+        return outputResult.value;
       },
     );
 
@@ -108,15 +226,15 @@ ${brandVoiceFromSamples}
 ## Writing Guidelines
 ${DEFAULT_BRAND_VOICE}`;
 
-      const nextName = researchResult.name.trim();
-      const nextSlug = nextName ? toSlug(nextName) : undefined;
-
+      logInfo("updating project with research results", {
+        projectId: project.id,
+        businessBackground: researchResult.businessBackground,
+        brandVoice: nextBrandVoice,
+      });
       const db = createDb();
       const updateResult = await updateSeoProject(db, {
         id: project.id,
         organizationId: project.organizationId,
-        name: nextName || project.name,
-        slug: nextSlug ?? project.slug,
         businessBackground: {
           ...researchResult.businessBackground,
           version: "v1",
@@ -134,10 +252,11 @@ ${DEFAULT_BRAND_VOICE}`;
         });
         throw updateResult.error;
       }
-
-      return { nextName };
     });
 
-    return researchResult satisfies typeof seoUnderstandSiteTaskOutputSchema.infer;
+    return {
+      ...researchResult,
+      name,
+    } satisfies typeof seoUnderstandSiteTaskOutputSchema.infer;
   }
 }
