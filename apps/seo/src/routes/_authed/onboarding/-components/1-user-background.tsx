@@ -77,7 +77,10 @@ export function OnboardingUserBackground({
   title: string;
 }) {
   const matcher = OnboardingSteps.useStepper();
-  const savedMetadata = matcher.getMetadata<Partial<typeof backgroundSchema.infer>>("user-background");
+  const savedMetadata =
+    matcher.getMetadata<Partial<typeof backgroundSchema.infer>>(
+      "user-background",
+    );
 
   const form = useForm({
     resolver: arktypeResolver(backgroundSchema),
@@ -106,7 +109,7 @@ export function OnboardingUserBackground({
       return values;
     },
     onSuccess: (data) => {
-      matcher.setMetadata("user-background", data)
+      matcher.setMetadata("user-background", data);
       matcher.next();
     },
   });

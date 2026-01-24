@@ -304,7 +304,7 @@ export function GithubConnectionForm({
   // Show empty state if no GitHub account or no repo scopes
   if (!reposLoading && reposData && !reposData.hasGithubAccount) {
     return (
-      <Empty >
+      <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <GitHubIcon />
