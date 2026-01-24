@@ -37,9 +37,9 @@ type IntegrationSummary =
 
 interface WebhookConnectionFormProps {
   projectId: string;
-  organizationSlug: string;
+  organizationId: string;
   existingIntegration?: IntegrationSummary;
-  onClose: () => void;
+  onComplete: () => void;
   hasIntegrations?: boolean;
 }
 
@@ -56,9 +56,9 @@ type FormValues = typeof formSchema.infer;
 
 export function WebhookConnectionForm({
   projectId,
-  organizationSlug,
+  organizationId,
   existingIntegration,
-  onClose,
+  onComplete,
   hasIntegrations = false,
 }: WebhookConnectionFormProps) {
   const queryClient = useQueryClient();
@@ -94,10 +94,10 @@ export function WebhookConnectionForm({
         toast.success("Webhook integration connected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to connect: ${error.message}`);
@@ -112,10 +112,10 @@ export function WebhookConnectionForm({
         toast.success("Webhook integration updated!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to update: ${error.message}`);
@@ -130,10 +130,10 @@ export function WebhookConnectionForm({
         toast.success("Webhook integration disconnected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to disconnect: ${error.message}`);
@@ -172,7 +172,7 @@ export function WebhookConnectionForm({
       updateIntegration({
         id: existingIntegration.id,
         projectId,
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         name: values.name,
         isDefault: values.isDefault,
         config,
@@ -181,7 +181,7 @@ export function WebhookConnectionForm({
     } else {
       createIntegration({
         projectId,
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         name: values.name,
         isDefault: values.isDefault,
         config,
@@ -196,7 +196,7 @@ export function WebhookConnectionForm({
       return;
     }
     testWebhook({
-      organizationIdentifier: organizationSlug,
+      organizationIdentifier: organizationId,
       projectId,
       id: existingIntegration.id,
     });
@@ -207,7 +207,7 @@ export function WebhookConnectionForm({
     removeIntegration({
       id: existingIntegration.id,
       projectId,
-      organizationIdentifier: organizationSlug,
+      organizationIdentifier: organizationId,
     });
   };
 

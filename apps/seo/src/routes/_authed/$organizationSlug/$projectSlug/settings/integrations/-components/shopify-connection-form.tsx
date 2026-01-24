@@ -38,9 +38,9 @@ type IntegrationSummary =
 
 interface ShopifyConnectionFormProps {
   projectId: string;
-  organizationSlug: string;
+  organizationId: string;
   existingIntegration?: IntegrationSummary;
-  onClose: () => void;
+  onComplete: () => void;
   hasIntegrations?: boolean;
 }
 
@@ -64,9 +64,9 @@ type BlogSelectFormValues = typeof blogSelectFormSchema.infer;
 
 export function ShopifyConnectionForm({
   projectId,
-  organizationSlug,
+  organizationId,
   existingIntegration,
-  onClose,
+  onComplete,
   hasIntegrations = false,
 }: ShopifyConnectionFormProps) {
   const queryClient = useQueryClient();
@@ -108,7 +108,7 @@ export function ShopifyConnectionForm({
   const { data: blogsData, isLoading: blogsLoading } = useQuery(
     api.integrations.shopify.listBlogs.queryOptions({
       input: {
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         projectId,
         id: integrationId ?? "",
       },
@@ -136,10 +136,10 @@ export function ShopifyConnectionForm({
         toast.success("Shopify integration connected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to complete setup: ${error.message}`);
@@ -154,10 +154,10 @@ export function ShopifyConnectionForm({
         toast.success("Shopify integration disconnected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to disconnect: ${error.message}`);
@@ -167,7 +167,7 @@ export function ShopifyConnectionForm({
 
   const handleInitiate = (values: InitiateFormValues) => {
     initiateOAuth({
-      organizationIdentifier: organizationSlug,
+      organizationIdentifier: organizationId,
       projectId,
       name: values.name,
       shopDomain: values.shopDomain,
@@ -187,7 +187,7 @@ export function ShopifyConnectionForm({
     const selectedBlog = blogsData?.blogs.find((b) => b.id === values.blogId);
 
     selectBlog({
-      organizationIdentifier: organizationSlug,
+      organizationIdentifier: organizationId,
       projectId,
       id: integrationId,
       blogId: values.blogId,
@@ -201,7 +201,7 @@ export function ShopifyConnectionForm({
     removeIntegration({
       id: existingIntegration.id,
       projectId,
-      organizationIdentifier: organizationSlug,
+      organizationIdentifier: organizationId,
     });
   };
 

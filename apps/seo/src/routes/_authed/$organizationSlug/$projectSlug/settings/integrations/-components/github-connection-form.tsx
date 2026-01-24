@@ -52,9 +52,9 @@ type IntegrationSummary =
 
 interface GithubConnectionFormProps {
   projectId: string;
-  organizationSlug: string;
+  organizationId: string;
   existingIntegration?: IntegrationSummary;
-  onClose: () => void;
+  onComplete: () => void;
   hasIntegrations?: boolean;
 }
 
@@ -81,9 +81,9 @@ type FormValues = typeof formSchema.infer;
 
 export function GithubConnectionForm({
   projectId,
-  organizationSlug,
+  organizationId,
   existingIntegration,
-  onClose,
+  onComplete,
   hasIntegrations = false,
 }: GithubConnectionFormProps) {
   const queryClient = useQueryClient();
@@ -186,10 +186,10 @@ export function GithubConnectionForm({
         toast.success("GitHub integration connected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to connect: ${error.message}`);
@@ -204,10 +204,10 @@ export function GithubConnectionForm({
         toast.success("GitHub integration updated!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to update: ${error.message}`);
@@ -222,10 +222,10 @@ export function GithubConnectionForm({
         toast.success("GitHub integration disconnected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to disconnect: ${error.message}`);
@@ -272,7 +272,7 @@ export function GithubConnectionForm({
       updateIntegration({
         id: existingIntegration.id,
         projectId,
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         accountId: selectedAccountId,
         name: values.repository,
         isDefault: values.isDefault,
@@ -281,7 +281,7 @@ export function GithubConnectionForm({
     } else {
       createIntegration({
         projectId,
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         accountId: selectedAccountId,
         name: values.repository,
         isDefault: values.isDefault,
@@ -295,7 +295,7 @@ export function GithubConnectionForm({
     removeIntegration({
       id: existingIntegration.id,
       projectId,
-      organizationIdentifier: organizationSlug,
+      organizationIdentifier: organizationId,
     });
   };
 

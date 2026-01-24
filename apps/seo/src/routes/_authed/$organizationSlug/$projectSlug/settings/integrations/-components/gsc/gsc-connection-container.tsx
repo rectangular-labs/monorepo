@@ -14,14 +14,14 @@ type IntegrationSummary =
 
 export function GscConnectionContainer({
   projectId,
-  organizationSlug,
+  organizationId,
   existingIntegration,
-  onClose,
+  onComplete,
 }: {
   projectId: string;
-  organizationSlug: string;
+  organizationId: string;
   existingIntegration?: IntegrationSummary;
-  onClose: () => void;
+  onComplete: () => void;
 }) {
   const queryClient = useQueryClient();
   const api = getApiClientRq();
@@ -39,7 +39,7 @@ export function GscConnectionContainer({
   } = useQuery(
     api.integrations.gsc.listProperties.queryOptions({
       input: {
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         projectId,
       },
       refetchOnMount: true,
@@ -50,7 +50,7 @@ export function GscConnectionContainer({
     api.project.get.queryOptions({
       input: {
         identifier: projectId,
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
       },
     }),
   );
@@ -71,10 +71,10 @@ export function GscConnectionContainer({
         toast.success("Google Search Console connected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to connect: ${error.message}`);
@@ -88,10 +88,10 @@ export function GscConnectionContainer({
         toast.success("Google Search Console updated!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to update: ${error.message}`);
@@ -105,10 +105,10 @@ export function GscConnectionContainer({
         toast.success("Google Search Console disconnected!");
         void queryClient.invalidateQueries({
           queryKey: api.integrations.list.queryKey({
-            input: { organizationIdentifier: organizationSlug, projectId },
+            input: { organizationIdentifier: organizationId, projectId },
           }),
         });
-        onClose();
+        onComplete();
       },
       onError: (error) => {
         toast.error(`Failed to disconnect: ${error.message}`);
@@ -133,7 +133,7 @@ export function GscConnectionContainer({
       updateIntegration({
         id: existingIntegration.id,
         projectId,
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         accountId: selectedProperty.accountId,
         name: selectedProperty.domain,
         config,
@@ -141,7 +141,7 @@ export function GscConnectionContainer({
     } else {
       createIntegration({
         projectId,
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: organizationId,
         accountId: selectedProperty.accountId,
         name: selectedProperty.domain,
         config,
@@ -154,7 +154,7 @@ export function GscConnectionContainer({
     removeIntegration({
       id: existingIntegration.id,
       projectId,
-      organizationIdentifier: organizationSlug,
+      organizationIdentifier: organizationId,
     });
   };
   const isInserting = isCreating || isUpdating;
