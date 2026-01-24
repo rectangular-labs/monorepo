@@ -205,6 +205,7 @@ Extract the name from the above context.`,
             }),
           }),
         );
+        logInfo("research result", { outputResult });
         if (!outputResult.ok) {
           logError("failed to research business background", {
             projectId: project.id,
