@@ -1,6 +1,4 @@
 import type {
-  ContentPayload,
-  PublishAdapter,
   ShopifyConfig,
   ShopifyCredentials,
 } from "@rectangular-labs/core/schemas/integration-parsers";
@@ -42,73 +40,73 @@ export const shopifyAdapter = () => {
   };
 
   return {
-    ...({
-      provider: "shopify" as const,
-      async healthCheck(
-        config: ShopifyConfig,
-        credentials: ShopifyCredentials,
-      ) {
-        const result = await listBlogs(config, credentials);
-        if (!result.ok) return result;
-        return ok({ ok: true });
-      },
+    // ...({
+    //   provider: "shopify" as const,
+    //   async healthCheck(
+    //     config: ShopifyConfig,
+    //     credentials: ShopifyCredentials,
+    //   ) {
+    //     const result = await listBlogs(config, credentials);
+    //     if (!result.ok) return result;
+    //     return ok({ ok: true });
+    //   },
 
-      async publish(
-        config: ShopifyConfig,
-        content: ContentPayload,
-        credentials: ShopifyCredentials,
-      ) {
-        if (!config.blogId) {
-          return err(new Error("Blog not configured"));
-        }
+    //   async publish(
+    //     config: ShopifyConfig,
+    //     content: ContentPayload,
+    //     credentials: ShopifyCredentials,
+    //   ) {
+    //     if (!config.blogId) {
+    //       return err(new Error("Blog not configured"));
+    //     }
 
-        const client = createClient(config, credentials);
-        const publishAsHtml = config.publishAsHtml ?? true;
-        const bodyHtml = publishAsHtml
-          ? content.contentMarkdown // TODO (shopify): convert markdown to HTML
-          : `<div data-markdown="true">${content.contentMarkdown}</div>`;
+    //     const client = createClient(config, credentials);
+    //     const publishAsHtml = config.publishAsHtml ?? true;
+    //     const bodyHtml = publishAsHtml
+    //       ? content.contentMarkdown // TODO (shopify): convert markdown to HTML
+    //       : `<div data-markdown="true">${content.contentMarkdown}</div>`;
 
-        try {
-          const response = await client.request(
-            `
-        mutation ArticleCreate($article: ArticleCreateInput!) {
-          articleCreate(article: $article) {
-            article { id handle onlineStoreUrl }
-            userErrors { field message }
-          }
-        }
-      `,
-            {
-              variables: {
-                article: {
-                  blogId: config.blogId,
-                  title: content.title,
-                  handle: content.slug,
-                  body: bodyHtml,
-                  summary: content.description,
-                  published: true,
-                  publishedAt: content.publishedAt?.toISOString(),
-                },
-              },
-            },
-          );
+    //     try {
+    //       const response = await client.request(
+    //         `
+    //     mutation ArticleCreate($article: ArticleCreateInput!) {
+    //       articleCreate(article: $article) {
+    //         article { id handle onlineStoreUrl }
+    //         userErrors { field message }
+    //       }
+    //     }
+    //   `,
+    //         {
+    //           variables: {
+    //             article: {
+    //               blogId: config.blogId,
+    //               title: content.title,
+    //               handle: content.slug,
+    //               body: bodyHtml,
+    //               summary: content.description,
+    //               published: true,
+    //               publishedAt: content.publishedAt?.toISOString(),
+    //             },
+    //           },
+    //         },
+    //       );
 
-          const errors = response.data?.articleCreate?.userErrors ?? [];
-          if (errors.length > 0) {
-            return err(new Error("Something went wrong creating an article."));
-          }
+    //       const errors = response.data?.articleCreate?.userErrors ?? [];
+    //       if (errors.length > 0) {
+    //         return err(new Error("Something went wrong creating an article."));
+    //       }
 
-          const article = response.data.articleCreate.article;
-          return ok({
-            externalId: article.id,
-            externalUrl: article.onlineStoreUrl,
-            handle: article.handle,
-          });
-        } catch (error) {
-          return err(error instanceof Error ? error : new Error(String(error)));
-        }
-      },
-    } satisfies PublishAdapter),
+    //       const article = response.data.articleCreate.article;
+    //       return ok({
+    //         externalId: article.id,
+    //         externalUrl: article.onlineStoreUrl,
+    //         handle: article.handle,
+    //       });
+    //     } catch (error) {
+    //       return err(error instanceof Error ? error : new Error(String(error)));
+    //     }
+    //   },
+    // } satisfies PublishAdapter),
     async exchangeCodeForToken(params: {
       code: string;
       shop: string;
