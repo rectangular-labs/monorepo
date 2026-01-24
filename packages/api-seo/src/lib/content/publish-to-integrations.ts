@@ -1,7 +1,6 @@
 import { decrypt } from "@orpc/server/helpers";
 import { getContext } from "@rectangular-labs/api-core/lib/context-storage";
 import { githubAdapter } from "@rectangular-labs/core/integrations/adapters/github-adapter";
-import { shopifyAdapter } from "@rectangular-labs/core/integrations/adapters/shopify-adapter";
 import { webhookAdapter } from "@rectangular-labs/core/integrations/adapters/webhook-adapter";
 import {
   type ContentPayload,
@@ -87,15 +86,15 @@ export async function publishToIntegrations(
           });
           return githubAdapter(accessToken).publish(config, content);
         }
-        case "shopify": {
-          if (
-            credentials?.provider !== "shopify" ||
-            config.provider !== "shopify"
-          ) {
-            throw new Error("Invalid Shopify config.");
-          }
-          return shopifyAdapter().publish(config, content, credentials);
-        }
+        // case "shopify": {
+        //   if (
+        //     credentials?.provider !== "shopify" ||
+        //     config.provider !== "shopify"
+        //   ) {
+        //     throw new Error("Invalid Shopify config.");
+        //   }
+        //   return shopifyAdapter().publish(config, content, credentials);
+        // }
         case "webhook": {
           if (
             (credentials && credentials?.provider !== "webhook") ||

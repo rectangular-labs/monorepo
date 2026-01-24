@@ -99,7 +99,7 @@ export const gscConfigSchema = type({
 export type GscConfig = typeof gscConfigSchema.infer;
 
 export const integrationConfigSchema = githubConfigSchema
-  .or(shopifyConfigSchema)
+  // .or(shopifyConfigSchema)
   .or(webhookConfigSchema)
   .or(gscConfigSchema);
 export type IntegrationConfig = typeof integrationConfigSchema.infer;
@@ -125,9 +125,7 @@ export const webhookCredentialsSchema = type({
 });
 export type WebhookCredentials = typeof webhookCredentialsSchema.infer;
 
-export const integrationCredentialsSchema = shopifyCredentialsSchema.or(
-  webhookCredentialsSchema,
-);
+export const integrationCredentialsSchema = webhookCredentialsSchema;
 export type IntegrationCredentials = typeof integrationCredentialsSchema.infer;
 
 // ═══════════════════════════════════════════════════════════════════════
