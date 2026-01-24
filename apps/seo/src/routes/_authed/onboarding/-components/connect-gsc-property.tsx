@@ -14,7 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
-import { GscConnectionForm as GscPropertyPicker } from "~/routes/_authed/$organizationSlug/$projectSlug/settings/integrations/-components/gsc/gsc-connection-form";
+import { GscPropertyPicker } from "../../$organizationSlug/$projectSlug/settings/integrations/-components/gsc/gsc-property-picker";
 import { OnboardingSteps } from "../-lib/steps";
 
 export function OnboardingConnectGscProperty({

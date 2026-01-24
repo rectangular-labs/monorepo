@@ -5,7 +5,7 @@ import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
-import { GscConnectionForm as GscPropertyPicker } from "~/routes/_authed/$organizationSlug/$projectSlug/settings/integrations/-components/gsc/gsc-connection-form";
+import { GscPropertyPicker } from "~/routes/_authed/$organizationSlug/$projectSlug/settings/integrations/-components/gsc/gsc-property-picker";
 
 type GscProperty =
   RouterOutputs["integrations"]["gsc"]["listProperties"]["properties"][number];

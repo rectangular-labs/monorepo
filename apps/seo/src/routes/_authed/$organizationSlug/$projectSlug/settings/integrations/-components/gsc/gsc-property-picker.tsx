@@ -51,7 +51,7 @@ function PropertyLoadingSkeleton({ count }: { count: number }) {
         // biome-ignore lint/suspicious/noArrayIndexKey: Loading skeleton
         <div className="rounded-md border p-3" key={index}>
           <div className="space-y-3">
-              <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
             <Skeleton className="h-4 w-3/5" />
           </div>
         </div>
@@ -66,7 +66,7 @@ type GscPropertiesResponse =
   RouterOutputs["integrations"]["gsc"]["listProperties"];
 type IntegrationSummary =
   RouterOutputs["integrations"]["list"]["integrations"][number];
-export function GscConnectionForm({
+export function GscPropertyPicker({
   existingIntegration,
   propertiesData,
   isLoading,
@@ -160,7 +160,7 @@ export function GscConnectionForm({
 
   if (propertiesData && !propertiesData.hasGoogleAccount) {
     return (
-      <Empty >
+      <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <GoogleIcon />
@@ -183,7 +183,7 @@ export function GscConnectionForm({
 
   if (propertiesData && !propertiesData.hasGscScopes) {
     return (
-      <Empty >
+      <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <GoogleIcon />
@@ -230,7 +230,7 @@ export function GscConnectionForm({
                     ? "cursor-not-allowed opacity-60"
                     : "hover:bg-accent/50"
                 } ${
-                  isSelected 
+                  isSelected
                     ? "border-primary bg-accent/30 ring-1 ring-primary"
                     : isDisabled
                       ? ""
@@ -272,7 +272,7 @@ export function GscConnectionForm({
                       </p>
                     )}
                   </div>
-                  {(isSelected) && (
+                  {isSelected && (
                     <Check aria-hidden="true" className="size-4 text-primary" />
                   )}
                 </div>
