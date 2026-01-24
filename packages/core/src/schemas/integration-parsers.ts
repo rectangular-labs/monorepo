@@ -4,7 +4,7 @@ import type { ArticleType } from "./content-parsers";
 
 // Provider enum - single source of truth
 export const PUBLISH_DESTINATION_PROVIDERS = [
-  "shopify",
+  // "shopify",
   "github",
   "webhook",
 ] as const;

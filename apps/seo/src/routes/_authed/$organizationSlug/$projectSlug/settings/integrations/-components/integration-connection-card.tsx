@@ -42,16 +42,16 @@ export function IntegrationConnectionCard({
           projectId={projectId}
         />
       );
-    case "shopify":
-      return (
-        <ShopifyConnectionForm
-          existingIntegration={existingIntegration}
-          hasIntegrations={hasIntegrations}
-          onClose={onClose}
-          organizationSlug={organizationSlug}
-          projectId={projectId}
-        />
-      );
+    // case "shopify":
+    //   return (
+    //     <ShopifyConnectionForm
+    //       existingIntegration={existingIntegration}
+    //       hasIntegrations={hasIntegrations}
+    //       onComplete={onComplete}
+    //       organizationId={organizationId}
+    //       projectId={projectId}
+    //     />
+    //   );
     case "webhook":
       return (
         <WebhookConnectionForm
