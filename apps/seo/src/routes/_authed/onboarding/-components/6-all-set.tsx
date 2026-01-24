@@ -27,6 +27,7 @@ export function OnboardingAllSet({
         organizationIdentifier: searchParams.organizationId ?? "",
       },
       enabled: !!searchParams.projectId && !!searchParams.organizationId,
+      refetchOnMount: "always",
     }),
   );
   const { slug, name } = project ?? { name: "dashboard", slug: "" };
