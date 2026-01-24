@@ -11,7 +11,6 @@ import type { seoUnderstandSiteTaskInputSchema } from "@rectangular-labs/core/sc
 import { seoUnderstandSiteTaskOutputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { createDb } from "@rectangular-labs/db";
 import { updateSeoProject } from "@rectangular-labs/db/operations";
-import { safe } from "@rectangular-labs/result";
 import {
   generateText,
   type JSONSchema7,
@@ -182,78 +181,65 @@ Extract the name from the above context.`,
           projectId: project.id,
           websiteUrl: project.websiteUrl,
         });
-        // biome-ignore lint/suspicious/noExplicitAny: lazy
-        const outputResult = await safe<any>(() =>
-          generateText({
-            model: openai("gpt-5.2"),
-            system,
-            tools,
-            prompt: `Extract business background and blog tone from: ${project.websiteUrl}`,
-            stopWhen: [stepCountIs(35)],
-            onStepFinish: (step) => {
-              logInfo("step finished", {
-                toolCalls: step.toolCalls,
-                toolResults: step.toolResults,
-              });
-            },
-            experimental_output: Output.object({
-              schema: jsonSchema<
-                type.infer<typeof seoUnderstandSiteTaskOutputSchema>
-              >(
-                seoUnderstandSiteTaskOutputSchema.toJsonSchema() as JSONSchema7,
-              ),
-            }),
+        const outputResult = await generateText({
+          model: openai("gpt-5.2"),
+          system,
+          tools,
+          prompt: `Extract business background and blog tone from: ${project.websiteUrl}`,
+          stopWhen: [stepCountIs(35)],
+          onStepFinish: (step) => {
+            logInfo("step finished", {
+              toolCalls: step.toolCalls,
+              toolResults: step.toolResults,
+            });
+          },
+          experimental_output: Output.object({
+            schema: jsonSchema<
+              type.infer<typeof seoUnderstandSiteTaskOutputSchema>
+            >(seoUnderstandSiteTaskOutputSchema.toJsonSchema() as JSONSchema7),
           }),
-        );
-        logInfo("research result", { outputResult });
-        if (!outputResult.ok) {
-          logError("failed to research business background", {
-            projectId: project.id,
-            error: outputResult.error,
-          });
-          throw outputResult.error;
-        }
+        });
 
-        return outputResult.value;
-      },
-    );
+        const researchResult = outputResult.experimental_output;
 
-    await step.do("update project with research results", async () => {
-      const brandVoiceFromSamples = researchResult.brandVoice.trim() || "";
+        const brandVoiceFromSamples = researchResult.brandVoice.trim() || "";
+        const nextBrandVoice = `## Writing Tone
 
-      const nextBrandVoice = `## Writing Tone
 ${brandVoiceFromSamples}
 
 ## Writing Guidelines
+
 ${DEFAULT_BRAND_VOICE}`;
 
-      logInfo("updating project with research results", {
-        projectId: project.id,
-        businessBackground: researchResult.businessBackground,
-        brandVoice: nextBrandVoice,
-      });
-      const db = createDb();
-      const updateResult = await updateSeoProject(db, {
-        id: project.id,
-        organizationId: project.organizationId,
-        businessBackground: {
-          ...researchResult.businessBackground,
-          version: "v1",
-        },
-        writingSettings: {
-          ...project.writingSettings,
-          brandVoice: nextBrandVoice,
-        },
-      });
-
-      if (!updateResult.ok) {
-        logError("failed to update project", {
+        logInfo("updating project with research results", {
           projectId: project.id,
-          error: updateResult.error,
+          businessBackground: researchResult.businessBackground,
+          brandVoice: nextBrandVoice,
         });
-        throw updateResult.error;
-      }
-    });
+        const db = createDb();
+        const updateResult = await updateSeoProject(db, {
+          id: project.id,
+          organizationId: project.organizationId,
+          businessBackground: {
+            ...researchResult.businessBackground,
+            version: "v1",
+          },
+          writingSettings: {
+            ...project.writingSettings,
+            brandVoice: nextBrandVoice,
+          },
+        });
+
+        if (!updateResult.ok) {
+          logError("failed to update project", {
+            projectId: project.id,
+            error: updateResult.error,
+          });
+          throw updateResult.error;
+        }
+        return researchResult;
+      },
+    );
 
     return {
       ...researchResult,
