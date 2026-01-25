@@ -89,6 +89,7 @@ import {
   DropDrawerSeparator,
   DropDrawerTrigger,
 } from "@rectangular-labs/ui/components/ui/dropdrawer";
+import { Input } from "@rectangular-labs/ui/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -125,16 +126,17 @@ function AskQuestionsToolPart({
   onSubmitAnswers: (text: string) => void;
 }) {
   const [answers, setAnswers] = useState<
-    Record<string, { selected: string[] }>
+    Record<string, { selected: string[]; otherText: string }>
   >(() => {
-    const initial: Record<string, { selected: string[] }> = {};
+    const initial: Record<string, { selected: string[]; otherText: string }> =
+      {};
     const questions =
       part.input && "questions" in part.input
         ? (part.input.questions ?? [])
         : [];
     for (const q of questions) {
       if (!q?.id) continue;
-      initial[q.id] = { selected: [] };
+      initial[q.id] = { selected: [], otherText: "" };
     }
     return initial;
   });
@@ -148,13 +150,23 @@ function AskQuestionsToolPart({
 
   const canSubmit =
     questions.length > 0 &&
-    questions.every((q) => (answers[q.id]?.selected?.length ?? 0) > 0);
+    questions.every((q) => {
+      const answer = answers[q.id];
+      if (!answer || (answer.selected?.length ?? 0) === 0) return false;
+      if (answer.selected.includes("other") && !answer.otherText.trim())
+        return false;
+      return true;
+    });
 
   const submit = () => {
     const lines: string[] = [];
-    lines.push("Answers to ask_questions:");
+    lines.push("Answers to the questions proposed:");
     for (const q of questions) {
-      const selected = answers[q.id]?.selected ?? [];
+      const selectedIds = answers[q.id]?.selected ?? [];
+      const otherText = answers[q.id]?.otherText ?? "";
+      const selected = selectedIds.map((id) =>
+        id === "other" ? otherText : id,
+      );
       lines.push(`- ${q.id}: ${selected.join(", ")}`);
     }
     onSubmitAnswers(lines.join("\n"));
@@ -175,11 +187,15 @@ function AskQuestionsToolPart({
 
               {allowMultiple ? (
                 <div className="space-y-2">
-                  {q.options.map((opt) => {
+                  {[...q.options, { id: "other", label: "Other" }].map(
+                    (opt) => {
                     const checked = selected.includes(opt.id);
                     const checkboxId = `${q.id}:${opt.id}`;
+                      const isOther = opt.id === "other";
+
                     return (
-                      <div className="flex items-center gap-2" key={opt.id}>
+                        <div key={opt.id}>
+                          <div className="flex items-center gap-2">
                         <Checkbox
                           checked={checked}
                           id={checkboxId}
@@ -192,31 +208,68 @@ function AskQuestionsToolPart({
                                 : current.filter((id) => id !== opt.id);
                               return {
                                 ...prev,
-                                [q.id]: { selected: nextSelected },
+                                    [q.id]: {
+                                      selected: nextSelected,
+                                      otherText: prev[q.id]?.otherText ?? "",
+                                    },
                               };
                             });
                           }}
                         />
-                        <Label className="cursor-pointer" htmlFor={checkboxId}>
+                            <Label
+                              className="cursor-pointer"
+                              htmlFor={checkboxId}
+                            >
                           {opt.label}
                         </Label>
+                          </div>
+                          {isOther && checked && (
+                            <div className="mt-2 ml-6">
+                              <Input
+                                onChange={(e) => {
+                                  setAnswers((prev) => ({
+                                    ...prev,
+                                    [q.id]: {
+                                      selected: prev[q.id]?.selected ?? [],
+                                      otherText: e.target.value,
+                                    },
+                                  }));
+                                }}
+                                placeholder="Please specify..."
+                                value={answers[q.id]?.otherText ?? ""}
+                              />
+                            </div>
+                          )}
                       </div>
                     );
-                  })}
+                    },
+                  )}
                 </div>
               ) : (
                 <RadioGroup
                   onValueChange={(value) => {
                     setAnswers((prev) => ({
                       ...prev,
-                      [q.id]: { selected: value ? [value] : [] },
+                      [q.id]: {
+                        selected: value ? [value] : [],
+                        otherText: prev[q.id]?.otherText ?? "",
+                      },
                     }));
                   }}
                   value={selected[0] ?? ""}
                 >
-                  {q.options.map((opt) => (
-                    <div className="flex items-center gap-2" key={opt.id}>
-                      <RadioGroupItem id={`${q.id}:${opt.id}`} value={opt.id} />
+                  {[...q.options, { id: "other", label: "Other" }].map(
+                    (opt) => {
+                      const isOther = opt.id === "other";
+                      const isSelected = selected.includes(opt.id);
+
+                      return (
+                        <div className="space-y-2" key={opt.id}>
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem
+                              id={`${q.id}:${opt.id}`}
+                              value={opt.id}
+                            />
                       <Label
                         className="cursor-pointer"
                         htmlFor={`${q.id}:${opt.id}`}
@@ -224,7 +277,27 @@ function AskQuestionsToolPart({
                         {opt.label}
                       </Label>
                     </div>
-                  ))}
+                          {isOther && isSelected && (
+                            <div className="ml-6">
+                              <Input
+                                onChange={(e) => {
+                                  setAnswers((prev) => ({
+                                    ...prev,
+                                    [q.id]: {
+                                      selected: prev[q.id]?.selected ?? [],
+                                      otherText: e.target.value,
+                                    },
+                                  }));
+                                }}
+                                placeholder="Please specify..."
+                                value={answers[q.id]?.otherText ?? ""}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    },
+                  )}
                 </RadioGroup>
               )}
             </div>
