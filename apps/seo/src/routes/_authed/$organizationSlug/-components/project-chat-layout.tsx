@@ -13,11 +13,17 @@ import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import { ProjectChatPanel } from "./project-chat-panel";
 import { useProjectChat } from "./project-chat-provider";
 
-export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
+export function ProjectChatLayout({
+  children,
+  disable,
+}: {
+  children: React.ReactNode;
+  disable: boolean;
+}) {
   const { isOpen, close, open } = useProjectChat();
   const isMobile = useIsMobile();
 
-  if (!isOpen) {
+  if (!isOpen || disable) {
     return <>{children}</>;
   }
 
