@@ -196,7 +196,7 @@ export const sendMessage = withOrganizationIdBase
       });
       if (!createdMessage.ok) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to create user chat message",
+          message: "Failed to create chat message",
           cause: createdMessage.error,
         });
       }
