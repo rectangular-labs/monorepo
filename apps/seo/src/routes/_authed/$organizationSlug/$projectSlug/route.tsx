@@ -74,7 +74,17 @@ function RouteComponent() {
     api.task.getStatus.queryOptions({
       input: { id: workflowId ?? "" },
       enabled: !!workflowId,
-      refetchInterval: 8_000,
+      refetchInterval: (context) => {
+        const task = context.state.data;
+        if (
+          task?.status === "pending" ||
+          task?.status === "queued" ||
+          task?.status === "running"
+        ) {
+          return 8_000;
+        }
+        return false;
+      },
     }),
   );
   const isBlocked =
