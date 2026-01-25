@@ -926,14 +926,14 @@ export function ProjectChatPanel() {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2">
+      <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3">
         <div className="truncate font-medium text-sm">
           {activeChat?.title ?? "New chat"}
         </div>
         <div className="flex items-center gap-1">
           <DropDrawer onOpenChange={onHistoryOpenChange} open={historyOpen}>
             <DropDrawerTrigger asChild>
-              <Button aria-label="Chat history" size="icon" variant="ghost">
+              <Button aria-label="Chat history" size="icon-sm" variant="ghost">
                 <History className="size-4" />
               </Button>
             </DropDrawerTrigger>
@@ -989,7 +989,7 @@ export function ProjectChatPanel() {
               <Button
                 aria-label="New chat"
                 onClick={startNewChat}
-                size="icon"
+                size="icon-sm"
                 variant="ghost"
               >
                 <Pencil className="size-4" />
@@ -1007,7 +1007,7 @@ export function ProjectChatPanel() {
           <Button
             aria-label="Close chat"
             onClick={() => close()}
-            size="icon"
+            size="icon-sm"
             variant="ghost"
           >
             <X className="size-4" />
