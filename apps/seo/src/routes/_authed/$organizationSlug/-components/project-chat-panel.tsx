@@ -1126,7 +1126,7 @@ export function ProjectChatPanel() {
 
       <ChatConversation
         chatId={activeChatId}
-        hasChat={chatList.length > 0}
+        hasChat={isChatListLoading || chatList.length > 0}
         initialMessages={chatMessages}
         input={input}
         isMessagesLoading={
