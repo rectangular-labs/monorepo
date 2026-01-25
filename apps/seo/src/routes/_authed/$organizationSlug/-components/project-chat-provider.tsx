@@ -142,7 +142,6 @@ export function ProjectChatProvider({
       void chatQuery.refetch();
       return;
     }
-    setHistoryOpen(true);
     void chatsQuery.refetch();
   }, [activeChatId, chatsQuery.refetch, chatQuery.refetch]);
 

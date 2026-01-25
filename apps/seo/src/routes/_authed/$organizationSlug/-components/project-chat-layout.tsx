@@ -13,11 +13,17 @@ import { useIsMobile } from "@rectangular-labs/ui/hooks/use-mobile";
 import { ProjectChatPanel } from "./project-chat-panel";
 import { useProjectChat } from "./project-chat-provider";
 
-export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
+export function ProjectChatLayout({
+  children,
+  disable,
+}: {
+  children: React.ReactNode;
+  disable: boolean;
+}) {
   const { isOpen, close, open } = useProjectChat();
   const isMobile = useIsMobile();
 
-  if (!isOpen) {
+  if (!isOpen || disable) {
     return <>{children}</>;
   }
 
@@ -45,7 +51,7 @@ export function ProjectChatLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <ResizablePanelGroup
-      className="h-full max-h-[calc(100vh-100px)] min-h-0 flex-1"
+      className="h-full max-h-[calc(100vh-64px)] min-h-0 flex-1"
       direction="horizontal"
     >
       <ResizablePanel defaultSize={75} minSize={45}>
