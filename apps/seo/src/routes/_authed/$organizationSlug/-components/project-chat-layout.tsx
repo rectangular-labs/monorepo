@@ -51,7 +51,7 @@ export function ProjectChatLayout({
 
   return (
     <ResizablePanelGroup
-      className="h-full max-h-[calc(100vh-100px)] min-h-0 flex-1"
+      className="h-full max-h-[calc(100vh-64px)] min-h-0 flex-1"
       direction="horizontal"
     >
       <ResizablePanel defaultSize={75} minSize={45}>

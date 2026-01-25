@@ -34,7 +34,7 @@ const createPlanInputSchema = type({
 export function createPlannerToolsWithMetadata() {
   const askQuestions = tool({
     description:
-      "Ask the user clarification questions to help provide clarity to the request. Returns immediately while waiting for the user's response.",
+      'Ask the user clarification questions to help provide clarity to the request. Returns immediately while waiting for the user\'s response. By default the "other" option is always added to each question so you can omit that option from the options array.',
     inputSchema: jsonSchema<typeof askQuestionInputSchema.infer>(
       askQuestionInputSchema.toJsonSchema() as JSONSchema7,
     ),

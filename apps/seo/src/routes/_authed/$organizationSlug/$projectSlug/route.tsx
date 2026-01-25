@@ -10,6 +10,7 @@ import {
 } from "@rectangular-labs/ui/components/ui/empty";
 import {
   useMutation,
+  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -70,7 +71,7 @@ function RouteComponent() {
     }),
   );
 
-  const { data: status, error: statusError } = useSuspenseQuery(
+  const { data: status, error: statusError } = useQuery(
     api.task.getStatus.queryOptions({
       input: { id: workflowId ?? "" },
       enabled: !!workflowId,
