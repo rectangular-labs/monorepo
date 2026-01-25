@@ -189,39 +189,39 @@ function AskQuestionsToolPart({
                 <div className="space-y-2">
                   {[...q.options, { id: "other", label: "Other" }].map(
                     (opt) => {
-                    const checked = selected.includes(opt.id);
-                    const checkboxId = `${q.id}:${opt.id}`;
+                      const checked = selected.includes(opt.id);
+                      const checkboxId = `${q.id}:${opt.id}`;
                       const isOther = opt.id === "other";
 
-                    return (
+                      return (
                         <div key={opt.id}>
                           <div className="flex items-center gap-2">
-                        <Checkbox
-                          checked={checked}
-                          id={checkboxId}
-                          onCheckedChange={(next) => {
-                            const isChecked = next === true;
-                            setAnswers((prev) => {
-                              const current = prev[q.id]?.selected ?? [];
-                              const nextSelected = isChecked
-                                ? Array.from(new Set([...current, opt.id]))
-                                : current.filter((id) => id !== opt.id);
-                              return {
-                                ...prev,
+                            <Checkbox
+                              checked={checked}
+                              id={checkboxId}
+                              onCheckedChange={(next) => {
+                                const isChecked = next === true;
+                                setAnswers((prev) => {
+                                  const current = prev[q.id]?.selected ?? [];
+                                  const nextSelected = isChecked
+                                    ? Array.from(new Set([...current, opt.id]))
+                                    : current.filter((id) => id !== opt.id);
+                                  return {
+                                    ...prev,
                                     [q.id]: {
                                       selected: nextSelected,
                                       otherText: prev[q.id]?.otherText ?? "",
                                     },
-                              };
-                            });
-                          }}
-                        />
+                                  };
+                                });
+                              }}
+                            />
                             <Label
                               className="cursor-pointer"
                               htmlFor={checkboxId}
                             >
-                          {opt.label}
-                        </Label>
+                              {opt.label}
+                            </Label>
                           </div>
                           {isOther && checked && (
                             <div className="mt-2 ml-6">
@@ -240,8 +240,8 @@ function AskQuestionsToolPart({
                               />
                             </div>
                           )}
-                      </div>
-                    );
+                        </div>
+                      );
                     },
                   )}
                 </div>
@@ -270,13 +270,13 @@ function AskQuestionsToolPart({
                               id={`${q.id}:${opt.id}`}
                               value={opt.id}
                             />
-                      <Label
-                        className="cursor-pointer"
-                        htmlFor={`${q.id}:${opt.id}`}
-                      >
-                        {opt.label}
-                      </Label>
-                    </div>
+                            <Label
+                              className="cursor-pointer"
+                              htmlFor={`${q.id}:${opt.id}`}
+                            >
+                              {opt.label}
+                            </Label>
+                          </div>
                           {isOther && isSelected && (
                             <div className="ml-6">
                               <Input
@@ -452,6 +452,7 @@ function ChatConversation({
   input,
   setInput,
   isMessagesLoading,
+  hasChat,
 }: {
   organizationId: string;
   projectId: string;
@@ -461,6 +462,7 @@ function ChatConversation({
   input: string;
   setInput: (input: string) => void;
   isMessagesLoading: boolean;
+  hasChat: boolean;
 }) {
   const { pathname } = useLocation();
   const currentPage = inferCurrentPage(pathname);
@@ -557,6 +559,40 @@ function ChatConversation({
       }
     }
   }, [messages, queryClient]);
+
+  useEffect(() => {
+    // If there are no chats, the assistant should introduce itself.
+    if (!hasChat && messages.length === 0 && !isMessagesLoading && !input) {
+      setMessages([
+        {
+          id: "intro",
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text: `Hi! I'm Fluid, your SEO specialist. Looks like this project just got started. 
+              
+Hang tight, because I'm going to do a few things to kick things off!
+
+Specifically:
+
+1. Analyzing what you currently have.
+2. Figuring out good new topics to cover
+3. Proposing a content plan for the next thirty days along with expectations`,
+            },
+          ],
+        },
+      ]);
+      sendMessage();
+    }
+  }, [
+    hasChat,
+    messages.length,
+    isMessagesLoading,
+    input,
+    setMessages,
+    sendMessage,
+  ]);
 
   const rejectPlanPrefill = () => {
     setInput("Let's change the following:\n1. ");
@@ -1090,6 +1126,7 @@ export function ProjectChatPanel() {
 
       <ChatConversation
         chatId={activeChatId}
+        hasChat={chatList.length > 0}
         initialMessages={chatMessages}
         input={input}
         isMessagesLoading={
