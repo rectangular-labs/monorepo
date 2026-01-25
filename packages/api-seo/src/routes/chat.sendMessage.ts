@@ -176,35 +176,28 @@ export const sendMessage = withOrganizationIdBase
       console.log("[chat.sendMessage] Title generation completed");
     }
 
-    const latestUserMessage = (() => {
-      for (let i = input.messages.length - 1; i >= 0; i -= 1) {
-        if (input.messages[i]?.role === "user") {
-          return input.messages[i];
-        }
-      }
-      return undefined;
-    })();
-    // unsaved user message has a client generated ID
-    const userMessageId = latestUserMessage?.id;
+    const latestMessage = input.messages.at(-1);
+    // unsaved message has a client generated ID
+    const messageId = latestMessage?.id;
     if (
-      latestUserMessage &&
-      arktype("string.uuid")(userMessageId) instanceof arktype.errors
+      latestMessage &&
+      arktype("string.uuid")(messageId) instanceof arktype.errors
     ) {
-      const createdUserMessage = await createChatMessage({
+      const createdMessage = await createChatMessage({
         db: context.db,
         value: {
           organizationId: context.organization.id,
           projectId: context.projectId,
           chatId: context.chatId,
-          source: "user",
+          source: latestMessage.role,
           userId: context.user.id,
-          message: latestUserMessage.parts,
+          message: latestMessage.parts,
         },
       });
-      if (!createdUserMessage.ok) {
+      if (!createdMessage.ok) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Failed to create user chat message",
-          cause: createdUserMessage.error,
+          cause: createdMessage.error,
         });
       }
     }
