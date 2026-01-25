@@ -871,10 +871,18 @@ export const PromptInputTextarea = ({
 
   return (
     <InputGroupTextarea
-      className={cn("field-sizing-content max-h-48 min-h-16", className)}
+      className={cn(
+        "field-sizing-content max-h-96 min-h-16 flex-auto",
+        className,
+      )}
       name="message"
       onCompositionEnd={() => setIsComposing(false)}
       onCompositionStart={() => setIsComposing(true)}
+      onInput={(e) => {
+        const target = e.target as HTMLTextAreaElement;
+        target.style.height = "0px";
+        target.style.height = `${target.scrollHeight}px`;
+      }}
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       placeholder={placeholder}
