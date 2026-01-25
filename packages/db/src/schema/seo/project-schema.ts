@@ -78,6 +78,10 @@ export const seoProjectRelations = relations(seoProject, ({ one, many }) => ({
   campaigns: many(seoContent),
   authors: many(seoProjectAuthor),
   tasks: many(seoTaskRun),
+  projectResearchWorkflow: one(seoTaskRun, {
+    fields: [seoProject.projectResearchWorkflowId],
+    references: [seoTaskRun.id],
+  }),
 }));
 
 export const seoProjectInsertSchema = createInsertSchema(seoProject).omit(
