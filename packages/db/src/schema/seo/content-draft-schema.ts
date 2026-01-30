@@ -19,7 +19,7 @@ import { seoContent } from "./content-schema";
 import { seoProject } from "./project-schema";
 import { seoStrategyPhaseContent } from "./strategy-phase-content-schema";
 import { seoStrategy } from "./strategy-schema";
-import { seoStrategySnapshot } from "./strategy-snapshot-schema";
+import { seoStrategySnapshotContent } from "./strategy-snapshot-content-schema";
 import { seoTaskRun } from "./task-run-schema";
 
 /**
@@ -135,7 +135,7 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.generatedByTaskRunId],
       references: [seoTaskRun.id],
     }),
-    snapshots: many(seoStrategySnapshot),
+    metricSnapshot: many(seoStrategySnapshotContent),
     phaseContent: many(seoStrategyPhaseContent),
     // Attribution join tables
     contributingChatsMap: many(seoContentDraftChat),

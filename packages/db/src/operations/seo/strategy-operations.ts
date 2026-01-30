@@ -5,6 +5,7 @@ import type {
   seoStrategyPhaseContentInsertSchema,
   seoStrategyPhaseInsertSchema,
   seoStrategyPhaseUpdateSchema,
+  seoStrategyUpdateSchema,
 } from "../../schema/seo";
 
 export async function listStrategiesByProjectId(args: {
@@ -77,6 +78,32 @@ export async function createStrategy(
   const strategy = result.value[0];
   if (!strategy) {
     return err(new Error("Failed to create strategy"));
+  }
+  return ok(strategy);
+}
+
+export async function updateStrategy(
+  db: DB | DBTransaction,
+  values: typeof seoStrategyUpdateSchema.infer,
+) {
+  const result = await safe(() =>
+    db
+      .update(schema.seoStrategy)
+      .set(values)
+      .where(
+        and(
+          eq(schema.seoStrategy.id, values.id),
+          eq(schema.seoStrategy.projectId, values.projectId),
+        ),
+      )
+      .returning(),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  const strategy = result.value[0];
+  if (!strategy) {
+    return err(new Error("Failed to update strategy"));
   }
   return ok(strategy);
 }
