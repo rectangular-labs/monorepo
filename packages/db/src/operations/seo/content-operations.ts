@@ -3,6 +3,7 @@ import { err, ok, safe } from "@rectangular-labs/result";
 import {
   and,
   type DB,
+  type DBTransaction,
   desc,
   eq,
   inArray,
@@ -236,7 +237,7 @@ export async function getScheduledItems(args: {
 // =============================================================================
 
 export async function createContentDraft(
-  db: DB,
+  db: DB | DBTransaction,
   values: typeof seoContentDraftInsertSchema.infer,
 ) {
   const result = await safe(() =>

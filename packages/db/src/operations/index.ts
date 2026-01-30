@@ -7,3 +7,4 @@ export * from "./seo/integration-operations";
 export * from "./seo/organization-operations";
 export * from "./seo/project-author-operations";
 export * from "./seo/project-operations";
+export * from "./seo/strategy-operations";

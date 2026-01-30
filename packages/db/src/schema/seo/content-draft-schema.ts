@@ -17,6 +17,9 @@ import { seoContentDraftChat } from "./content-draft-chat-schema";
 import { seoContentDraftUser } from "./content-draft-user-schema";
 import { seoContent } from "./content-schema";
 import { seoProject } from "./project-schema";
+import { seoStrategyPhaseContent } from "./strategy-phase-content-schema";
+import { seoStrategy } from "./strategy-schema";
+import { seoStrategySnapshot } from "./strategy-snapshot-schema";
 import { seoTaskRun } from "./task-run-schema";
 
 /**
@@ -43,6 +46,10 @@ export const seoContentDraft = pgSeoTable(
       }),
     baseContentId: uuid().references(() => seoContent.id, {
       onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+    strategyId: uuid().references(() => seoStrategy.id, {
+      onDelete: "set null",
       onUpdate: "cascade",
     }),
 
@@ -116,6 +123,10 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.baseContentId],
       references: [seoContent.id],
     }),
+    strategy: one(seoStrategy, {
+      fields: [seoContentDraft.strategyId],
+      references: [seoStrategy.id],
+    }),
     outlineTask: one(seoTaskRun, {
       fields: [seoContentDraft.outlineGeneratedByTaskRunId],
       references: [seoTaskRun.id],
@@ -124,6 +135,8 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.generatedByTaskRunId],
       references: [seoTaskRun.id],
     }),
+    snapshots: many(seoStrategySnapshot),
+    phaseContent: many(seoStrategyPhaseContent),
     // Attribution join tables
     contributingChatsMap: many(seoContentDraftChat),
     contributorsMap: many(seoContentDraftUser),
