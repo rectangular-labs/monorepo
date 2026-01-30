@@ -383,15 +383,14 @@ export function createDataforseoToolWithMetadata(
   const toolDefinitions: AgentToolDefinition[] = [
     {
       toolName: "get_ranked_keywords_for_site",
-      toolDescription:
-        "Fetch keywords a site currently ranks for (DataForSEO).",
+      toolDescription: "Fetch keywords a site currently ranks for.",
       toolInstruction:
         "Provide hostname without protocol. Use for profiling your site or competitors, and to discover ranking keyword clusters. Tune positionFrom/positionTo and limit/offset.",
       tool: getRankedKeywordsForSite,
     },
     {
       toolName: "get_ranked_pages_for_site",
-      toolDescription: "Fetch ranked pages for a site (DataForSEO).",
+      toolDescription: "Fetch ranked pages for a site.",
       toolInstruction:
         "Provide hostname without protocol. Use to find top pages and infer content strategy and templates.",
       tool: getRankedPagesForSite,
