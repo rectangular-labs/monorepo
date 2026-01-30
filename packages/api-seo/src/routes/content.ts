@@ -5,13 +5,9 @@ import {
 } from "@rectangular-labs/core/schemas/content-parsers";
 import { schema } from "@rectangular-labs/db";
 import {
-  addContentChatContribution,
-  addContentUserContribution,
   countDraftsByStatus,
   createContent,
   getDraftById,
-  getDraftContributingChats,
-  getDraftContributors,
   getNextVersionForSlug,
   getSeoProjectByIdentifierAndOrgId,
   hardDeleteDraft,
@@ -573,54 +569,6 @@ const publishContent = base
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Failed to publish content to integrations.",
         cause: publishResult.error,
-      });
-    }
-
-    const [draftChatsResult, draftUsersResult] = await Promise.all([
-      getDraftContributingChats({
-        db: context.db,
-        draftId: draft.id,
-      }),
-      getDraftContributors({
-        db: context.db,
-        draftId: draft.id,
-      }),
-    ]);
-    if (!draftChatsResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load draft chat attribution.",
-        cause: draftChatsResult.error,
-      });
-    }
-    if (!draftUsersResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load draft contributor attribution.",
-        cause: draftUsersResult.error,
-      });
-    }
-
-    const [chatAttributionResult, userAttributionResult] = await Promise.all([
-      addContentChatContribution({
-        db: context.db,
-        contentId: createdContent.id,
-        chatIds: draftChatsResult.value.map((entry) => entry.chatId),
-      }),
-      addContentUserContribution({
-        db: context.db,
-        contentId: createdContent.id,
-        userIds: draftUsersResult.value.map((entry) => entry.userId),
-      }),
-    ]);
-    if (!chatAttributionResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to record published content chat attribution.",
-        cause: chatAttributionResult.error,
-      });
-    }
-    if (!userAttributionResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to record published content user attribution.",
-        cause: userAttributionResult.error,
       });
     }
 

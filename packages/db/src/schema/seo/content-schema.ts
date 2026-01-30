@@ -17,8 +17,6 @@ import {
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
-import { seoContentChat } from "./content-chat-schema";
-import { seoContentUser } from "./content-user-schema";
 import { seoProject } from "./project-schema";
 
 /**
@@ -85,7 +83,7 @@ export const seoContent = pgSeoTable(
   ],
 );
 
-export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
+export const seoContentRelations = relations(seoContent, ({ one }) => ({
   project: one(seoProject, {
     fields: [seoContent.projectId],
     references: [seoProject.id],
@@ -94,8 +92,6 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
     fields: [seoContent.organizationId],
     references: [organization.id],
   }),
-  contributingChatsMap: many(seoContentChat),
-  contributorsMap: many(seoContentUser),
 }));
 
 export const seoContentInsertSchema = createInsertSchema(seoContent).omit(

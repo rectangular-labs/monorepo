@@ -14,7 +14,6 @@ import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization, user } from "../auth-schema";
 import { seoChatMessage } from "./chat-message-schema";
-import { seoContentChat } from "./content-chat-schema";
 import { seoContentDraftChat } from "./content-draft-chat-schema";
 import { seoProject } from "./project-schema";
 
@@ -76,7 +75,6 @@ export const seoChatRelations = relations(seoChat, ({ one, many }) => ({
   }),
   messages: many(seoChatMessage),
   contentDraftMap: many(seoContentDraftChat),
-  contentMap: many(seoContentChat),
 }));
 
 export const seoChatInsertSchema = createInsertSchema(seoChat).omit(
