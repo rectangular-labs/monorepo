@@ -1,7 +1,7 @@
 import {
   type SnapshotAggregate,
   type SnapshotDelta,
-  strategySnapshotTriggers,
+  STRATEGY_SNAPSHOT_TRIGGERS,
 } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
@@ -32,7 +32,7 @@ export const seoStrategySnapshot = pgSeoTable(
       onUpdate: "cascade",
     }),
     takenAt: timestamp({ mode: "date", withTimezone: true }).notNull(),
-    triggerType: text({ enum: strategySnapshotTriggers }).notNull(),
+    triggerType: text({ enum: STRATEGY_SNAPSHOT_TRIGGERS }).notNull(),
     aggregate: jsonb().$type<SnapshotAggregate>().notNull(),
     delta: jsonb().$type<SnapshotDelta>(),
     aiInsight: text(),

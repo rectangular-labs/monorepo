@@ -1,7 +1,7 @@
-import type { publishingSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import {
-  strategyPhaseStatuses,
-  strategyPhaseTypes,
+  type cadenceSchema,
+  STRATEGY_PHASE_STATUSES,
+  STRATEGY_PHASE_TYPE,
 } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
@@ -34,17 +34,15 @@ export const seoStrategyPhase = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    type: text({ enum: strategyPhaseTypes }).notNull(),
+    type: text({ enum: STRATEGY_PHASE_TYPE }).notNull(),
     name: text().notNull(),
     observationWeeks: integer().notNull().default(0),
     successCriteria: text().notNull(),
-    cadence: jsonb()
-      .$type<(typeof publishingSettingsSchema.infer)["cadence"]>()
-      .notNull(),
-    targetCompletionDate: timestamp({ mode: "date", withTimezone: true }),
-    status: text({ enum: strategyPhaseStatuses })
+    cadence: jsonb().$type<typeof cadenceSchema.infer>().notNull(),
+    status: text({ enum: STRATEGY_PHASE_STATUSES })
       .notNull()
       .default("suggestion"),
+    targetCompletionDate: timestamp({ mode: "date", withTimezone: true }),
     startedAt: timestamp({ mode: "date", withTimezone: true }),
     completedAt: timestamp({ mode: "date", withTimezone: true }),
     observationEndsAt: timestamp({ mode: "date", withTimezone: true }),

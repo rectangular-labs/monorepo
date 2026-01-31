@@ -1,6 +1,6 @@
 import {
-  contentStrategyPhaseActions,
-  contentStrategyPhaseRoles,
+  CONTENT_ROLES,
+  CONTENT_STRATEGY_ACTION,
 } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
@@ -29,10 +29,10 @@ export const seoStrategyPhaseContent = pgSeoTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    action: text({ enum: contentStrategyPhaseActions }).notNull(),
+    action: text({ enum: CONTENT_STRATEGY_ACTION }).notNull(),
     plannedTitle: text(),
     plannedPrimaryKeyword: text(),
-    role: text({ enum: contentStrategyPhaseRoles }),
+    role: text({ enum: CONTENT_ROLES }),
     notes: text(),
     ...timestamps,
   },
