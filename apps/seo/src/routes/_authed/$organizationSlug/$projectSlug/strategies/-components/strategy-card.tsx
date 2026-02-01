@@ -25,6 +25,7 @@ import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { StrategyModifyDialog } from "./strategy-modify-dialog";
@@ -40,14 +41,14 @@ function formatGoal(goal: StrategySummary["goal"]) {
 
 function formatStatus(status: StrategySummary["status"]) {
   switch (status) {
-    case "planned":
-      return "Planned";
-    case "in_progress":
-      return "In progress";
+    case "active":
+      return "Active";
     case "observing":
       return "Observing";
-    case "completed":
-      return "Completed";
+    case "stable":
+      return "Stable";
+    case "archived":
+      return "Archived";
     case "dismissed":
       return "Dismissed";
     case "suggestion":
@@ -60,18 +61,60 @@ function formatStatus(status: StrategySummary["status"]) {
 }
 
 const STATUS_SUMMARIES: Partial<Record<StrategySummary["status"], string>> = {
-  in_progress: "In progress and tracking outcomes.",
+  active: "In progress and tracking outcomes.",
   observing: "Waiting for data to mature.",
-  completed: "Goal met. No new phase recommended.",
+  stable: "Goal met. No new phase recommended.",
 };
+
+function formatNumber(value: number | null | undefined, digits = 0) {
+  if (value === null || value === undefined || Number.isNaN(value)) return null;
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
+function getLatestMetricValue(strategy: StrategySummary) {
+  const aggregate = strategy.latestSnapshot?.aggregate;
+  if (!aggregate) return null;
+  switch (strategy.goal.metric) {
+    case "conversions":
+      return aggregate.conversions ?? null;
+    case "clicks":
+      return aggregate.clicks;
+    case "impressions":
+      return aggregate.impressions;
+    case "avgPosition":
+      return aggregate.avgPosition;
+    default:
+      return null;
+  }
+}
+
+function getProgressPercent(strategy: StrategySummary, current: number | null) {
+  if (current === null || current === undefined) return null;
+  const target = strategy.goal.target;
+  if (!Number.isFinite(target) || target <= 0) return null;
+
+  if (strategy.goal.metric === "avgPosition") {
+    if (current <= 0) return null;
+    if (current <= target) return 100;
+    return Math.max(0, Math.min(100, Math.round((target / current) * 100)));
+  }
+
+  return Math.max(0, Math.min(100, Math.round((current / target) * 100)));
+}
 
 export function StrategyCard({
   strategy,
+  organizationSlug,
+  projectSlug,
   organizationId,
   projectId,
   className,
 }: {
   strategy: StrategySummary;
+  organizationSlug?: string;
+  projectSlug?: string;
   organizationId?: string;
   projectId?: string;
   className?: string;
@@ -82,6 +125,7 @@ export function StrategyCard({
   const phase = strategy.phases?.[0] ?? null;
   const statusSummary = STATUS_SUMMARIES[strategy.status];
   const isSuggestion = strategy.status === "suggestion";
+  const [modifyOpen, setModifyOpen] = useState(false);
 
   const [pendingAction, setPendingAction] = useState<
     "adopt" | "dismiss" | null
@@ -107,7 +151,7 @@ export function StrategyCard({
       onSuccess: async (data) => {
         setPendingAction(null);
         toast.success(
-          `Successfully ${data.status === "planned" ? "adopted" : "dismissed"} strategy "${data.name}"`,
+          `Successfully ${data.status === "active" ? "adopted" : "dismissed"} strategy "${data.name}"`,
         );
         if (data.status === "dismissed") {
           setDismissalOpen(false);
@@ -129,7 +173,7 @@ export function StrategyCard({
   );
 
   const handleStatusChange = (
-    status: "planned" | "dismissed",
+    status: "active" | "dismissed",
     reason?: string,
   ) => {
     if (
@@ -141,7 +185,7 @@ export function StrategyCard({
     ) {
       return;
     }
-    setPendingAction(status === "planned" ? "adopt" : "dismiss");
+    setPendingAction(status === "active" ? "adopt" : "dismiss");
     updateStrategy({
       id: strategy.id,
       projectId,
@@ -166,15 +210,48 @@ export function StrategyCard({
 
   const isAdopting = isPending && pendingAction === "adopt";
   const isDismissing = isPending && pendingAction === "dismiss";
+  const latestValue = getLatestMetricValue(strategy);
+  const progressPercent = getProgressPercent(strategy, latestValue);
+  const hasProgress =
+    typeof progressPercent === "number" &&
+    !Number.isNaN(progressPercent) &&
+    strategy.status !== "suggestion";
+  const formattedLatest = formatNumber(
+    latestValue,
+    strategy.goal.metric === "avgPosition" ? 1 : 0,
+  );
+  const formattedTarget = formatNumber(strategy.goal.target, 0);
+
+  const detailHref =
+    !isSuggestion && organizationSlug && projectSlug && strategy.id
+      ? {
+          to: "/$organizationSlug/$projectSlug/strategies/$strategyId",
+          params: {
+            organizationSlug,
+            projectSlug,
+            strategyId: strategy.id,
+          },
+        }
+      : null;
 
   return (
     <Card
       className={cn(
-        "border-muted/60",
+        "relative border-muted/60",
         isPending && isSuggestion ? "opacity-70" : "",
+        isSuggestion ? "cursor-pointer transition hover:border-muted" : "",
         className,
       )}
+      onClick={(event) => {
+        if (!isSuggestion || event.defaultPrevented) return;
+        setModifyOpen(true);
+      }}
     >
+      {detailHref && (
+        <Link className="absolute inset-0" {...detailHref}>
+          <span className="sr-only">Open strategy details</span>
+        </Link>
+      )}
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between">
           <Badge variant={isSuggestion ? "secondary" : "outline"}>
@@ -198,6 +275,44 @@ export function StrategyCard({
           Goal:{" "}
           <span className="text-foreground">{formatGoal(strategy.goal)}</span>
         </div>
+        {!isSuggestion && (
+          <div className="space-y-2">
+            {formattedLatest ? (
+              <div className="text-muted-foreground text-sm">
+                Current:{" "}
+                <span className="text-foreground">
+                  {strategy.goal.metric === "avgPosition"
+                    ? `#${formattedLatest}`
+                    : formattedLatest}
+                </span>{" "}
+                {formattedTarget ? (
+                  <span className="text-muted-foreground">
+                    (Target {strategy.goal.metric === "avgPosition" ? "#" : ""}
+                    {formattedTarget})
+                  </span>
+                ) : null}
+              </div>
+            ) : (
+              <div className="text-muted-foreground text-sm">
+                No snapshots yet.
+              </div>
+            )}
+            {hasProgress && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground text-xs">
+                  <span>Progress</span>
+                  <span>{progressPercent}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width]"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         {phase && (
           <div className="text-muted-foreground text-sm">
             Phase: <span className="text-foreground">{phase.name}</span>
@@ -216,6 +331,7 @@ export function StrategyCard({
             trigger={
               <Button
                 disabled={isAdopting || !organizationId || !projectId}
+                onClick={(event) => event.stopPropagation()}
                 size="sm"
                 type="button"
                 variant="ghost"
@@ -278,12 +394,27 @@ export function StrategyCard({
           <div className="ml-auto flex items-center gap-2">
             <StrategyModifyDialog
               organizationId={organizationId ?? ""}
+              onOpenChange={setModifyOpen}
+              open={modifyOpen}
               projectId={projectId ?? ""}
               strategy={strategy}
+              trigger={
+                <Button
+                  onClick={(event) => event.stopPropagation()}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  Modify
+                </Button>
+              }
             />
             <Button
               isLoading={isAdopting}
-              onClick={() => handleStatusChange("planned")}
+              onClick={(event) => {
+                event.stopPropagation();
+                handleStatusChange("active");
+              }}
               size="sm"
               type="button"
             >

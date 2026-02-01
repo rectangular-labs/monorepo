@@ -53,12 +53,20 @@ export function StrategyModifyDialog({
   strategy,
   organizationId,
   projectId,
+  open: controlledOpen,
+  onOpenChange,
+  trigger,
 }: {
   strategy: StrategySummary;
   organizationId: string;
   projectId: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const [openInternal, setOpenInternal] = useState(false);
+  const open = controlledOpen ?? openInternal;
+  const setOpen = onOpenChange ?? setOpenInternal;
   const api = getApiClientRq();
   const queryClient = useQueryClient();
 
@@ -137,9 +145,11 @@ export function StrategyModifyDialog({
       onOpenChange={setOpen}
       open={open}
       trigger={
-        <Button size="sm" type="button" variant="outline">
-          Modify
-        </Button>
+        trigger ?? (
+          <Button size="sm" type="button" variant="outline">
+            Modify
+          </Button>
+        )
       }
     >
       <DialogDrawerHeader>
