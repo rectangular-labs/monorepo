@@ -20,11 +20,6 @@ export const DEFAULT_WRITING_SETTINGS: typeof writingSettingsSchema.infer = {
 export const DEFAULT_PUBLISHING_SETTINGS: typeof publishingSettingsSchema.infer =
   {
     version: "v1",
-    cadence: {
-      period: "daily",
-      frequency: 1,
-      allowedDays: ["mon", "tue", "wed", "thu", "fri"],
-    },
     requireContentReview: true,
     requireSuggestionReview: true,
   };
