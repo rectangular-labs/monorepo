@@ -94,6 +94,11 @@
       "name": "seo-onboarding",
       "binding": "SEO_ONBOARDING_WORKFLOW",
       "class_name": "SeoOnboardingWorkflow"
+    },
+    {
+      "name": "seo-strategy-suggestions",
+      "binding": "SEO_STRATEGY_SUGGESTIONS_WORKFLOW",
+      "class_name": "SeoStrategySuggestionsWorkflow"
     }
   ],
   "env": {
@@ -167,6 +172,11 @@
           "name": "seo-onboarding-production",
           "binding": "SEO_ONBOARDING_WORKFLOW",
           "class_name": "SeoOnboardingWorkflow"
+        },
+        {
+          "name": "seo-strategy-suggestions-production",
+          "binding": "SEO_STRATEGY_SUGGESTIONS_WORKFLOW",
+          "class_name": "SeoStrategySuggestionsWorkflow"
         }
       ],
       "routes": [
@@ -247,6 +257,11 @@
           "name": "seo-onboarding",
           "binding": "SEO_ONBOARDING_WORKFLOW",
           "class_name": "SeoOnboardingWorkflow"
+        },
+        {
+          "name": "seo-strategy-suggestions",
+          "binding": "SEO_STRATEGY_SUGGESTIONS_WORKFLOW",
+          "class_name": "SeoStrategySuggestionsWorkflow"
         }
       ],
       "routes": [

@@ -4,18 +4,23 @@ import { businessBackgroundSchema } from "./project-parsers";
 
 export const understandSiteTaskInputSchema = type({
   type: "'understand-site'",
-  projectId: "string",
+  projectId: "string.uuid",
   websiteUrl: "string",
 });
 
 export const seoUnderstandSiteTaskInputSchema = type({
   type: "'seo-understand-site'",
-  projectId: "string",
+  projectId: "string.uuid",
+});
+
+export const seoStrategySuggestionsTaskInputSchema = type({
+  type: "'seo-generate-strategy-suggestions'",
+  projectId: "string.uuid",
 });
 
 export const seoPlanKeywordTaskInputSchema = type({
   type: "'seo-plan-keyword'",
-  projectId: "string",
+  projectId: "string.uuid",
   organizationId: "string",
   chatId: "string|null",
   draftId: "string.uuid",
@@ -37,6 +42,7 @@ export const taskInputSchema = type.or(
   seoPlanKeywordTaskInputSchema,
   seoWriteArticleTaskInputSchema,
   seoUnderstandSiteTaskInputSchema,
+  seoStrategySuggestionsTaskInputSchema,
 );
 
 export const understandSiteTaskOutputSchema = type({
@@ -66,9 +72,16 @@ export const seoUnderstandSiteTaskOutputSchema = type({
   brandVoice: type("string"),
 });
 
+export const seoStrategySuggestionsTaskOutputSchema = type({
+  type: "'seo-generate-strategy-suggestions'",
+  projectId: "string",
+  strategyIds: type("string.uuid").array(),
+});
+
 export const taskOutputSchema = type.or(
   understandSiteTaskOutputSchema,
   seoPlanKeywordTaskOutputSchema,
   seoWriteArticleTaskOutputSchema,
   seoUnderstandSiteTaskOutputSchema,
+  seoStrategySuggestionsTaskOutputSchema,
 );

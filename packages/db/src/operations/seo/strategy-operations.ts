@@ -65,21 +65,23 @@ export async function getStrategyDetails(args: {
   );
 }
 
-export async function createStrategy(
+export async function createStrategies(
   db: DB | DBTransaction,
-  values: typeof seoStrategyInsertSchema.infer,
+  values: (typeof seoStrategyInsertSchema.infer)[],
 ) {
+  if (values.length === 0) {
+    return ok([]);
+  }
   const result = await safe(() =>
     db.insert(schema.seoStrategy).values(values).returning(),
   );
   if (!result.ok) {
     return result;
   }
-  const strategy = result.value[0];
-  if (!strategy) {
+  if (result.value.length !== values.length) {
     return err(new Error("Failed to create strategy"));
   }
-  return ok(strategy);
+  return ok(result.value);
 }
 
 export async function updateStrategy(
