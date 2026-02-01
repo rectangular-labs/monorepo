@@ -6,6 +6,7 @@ import {
 import { NonRetryableError } from "cloudflare:workflows";
 import { google } from "@ai-sdk/google";
 import { openai } from "@ai-sdk/openai";
+import { ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS } from "@rectangular-labs/core/ai/onboarding-strategy-suggestion-instructions";
 import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import {
   type seoUnderstandSiteTaskInputSchema,
@@ -21,7 +22,6 @@ import {
   stepCountIs,
 } from "ai";
 import { type } from "arktype";
-import { ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS } from "../../../core/dist/ai/onboarding-strategy-suggestion-instructions";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { createTask } from "../lib/task";
 import { DEFAULT_BRAND_VOICE } from "../lib/workspace/workflow.constant";
