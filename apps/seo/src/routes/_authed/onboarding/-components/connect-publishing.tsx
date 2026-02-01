@@ -70,7 +70,7 @@ export function OnboardingConnectPublishing({
   );
 
   return (
-    <Card>
+    <Card className="rounded-none border-none bg-transparent sm:rounded-lg">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
