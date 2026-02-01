@@ -85,6 +85,7 @@ This is a TypeScript monorepo using Turborepo:
 - React hooks must be at component top level.
 - Avoid enums; prefer union types.
 - Do not use `as any` or casting generally. Prefer `satisfies` or explicit types.
+- When combining ArkType schemas, prefer attached shapes (e.g. `type({ "...": otherSchema })`) over `.merge()`.
 - When using the database object, prefer `.query` over `.select().from()`.
 - Create DB helpers in `packages/db/src/operations` and consume those helpers from API/routes or apps.
 
