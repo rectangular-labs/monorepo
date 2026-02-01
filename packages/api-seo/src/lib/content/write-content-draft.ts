@@ -1,12 +1,11 @@
-import { ORPCError } from "@orpc/client";
 import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import type { DB, schema } from "@rectangular-labs/db";
 import {
   addChatContribution,
   addUserContribution,
+  getCurrentStrategyPhase,
   getDraftById,
   getScheduledItems,
-  getSeoProjectByIdentifierAndOrgId,
   hasPublishedSnapshotForDraft,
   updateContentDraft,
   validateSlug,
@@ -210,46 +209,32 @@ export async function writeContentDraft(
     // Determine scheduled publish time
     let scheduledFor = updatedDraft.scheduledFor;
 
-    // new content should be scheduled
-    if (!scheduledFor && !hasPublishedSnapshot) {
-      const projectResult = await getSeoProjectByIdentifierAndOrgId(
-        args.db,
-        args.projectId,
-        args.organizationId,
-        {
-          publishingSettings: true,
-        },
-      );
-      if (!projectResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to get project.",
-          cause: projectResult.error,
-        });
+    // new content should be scheduled if it's part of a strategy phase
+    if (!scheduledFor && !hasPublishedSnapshot && updatedDraft.strategyId) {
+      const currentPhase = await getCurrentStrategyPhase({
+        db: args.db,
+        strategyId: updatedDraft.strategyId,
+      });
+      if (!currentPhase.ok) {
+        return currentPhase;
       }
-      if (!projectResult.value) {
-        throw new ORPCError("NOT_FOUND", { message: "Project not found." });
-      }
-      const project = projectResult.value;
-
-      const cadence = project.publishingSettings?.cadence;
-      if (cadence) {
-        const scheduledItemsResult = await getScheduledItems({
-          db: args.db,
-          organizationId: draft.organizationId,
-          projectId: draft.projectId,
+      const { cadence } = currentPhase.value;
+      const scheduledItemsResult = await getScheduledItems({
+        db: args.db,
+        organizationId: draft.organizationId,
+        projectId: draft.projectId,
+      });
+      if (scheduledItemsResult.ok) {
+        const scheduledItems = scheduledItemsResult.value;
+        const scheduledIso = computeNextAvailableScheduleIso({
+          cadence,
+          scheduledItems: scheduledItems.filter(
+            (item): item is { scheduledFor: Date } =>
+              item.scheduledFor !== null,
+          ),
         });
-        if (scheduledItemsResult.ok) {
-          const scheduledItems = scheduledItemsResult.value;
-          const scheduledIso = computeNextAvailableScheduleIso({
-            cadence,
-            scheduledItems: scheduledItems.filter(
-              (item): item is { scheduledFor: Date } =>
-                item.scheduledFor !== null,
-            ),
-          });
-          if (scheduledIso) {
-            scheduledFor = new Date(scheduledIso);
-          }
+        if (scheduledIso) {
+          scheduledFor = new Date(scheduledIso);
         }
       }
     }

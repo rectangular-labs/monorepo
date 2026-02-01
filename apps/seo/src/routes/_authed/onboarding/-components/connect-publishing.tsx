@@ -70,45 +70,43 @@ export function OnboardingConnectPublishing({
   );
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {(projectLoading || integrationsLoading) && (
-            <div className="text-muted-foreground text-sm">
-              Loading publishing options...
-            </div>
-          )}
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {(projectLoading || integrationsLoading) && (
+          <div className="text-muted-foreground text-sm">
+            Loading publishing options...
+          </div>
+        )}
 
-          {!projectLoading && !integrationsLoading && !project && (
-            <div className="text-muted-foreground text-sm">
-              Missing project details. Please go back and try again.
-            </div>
-          )}
+        {!projectLoading && !integrationsLoading && !project && (
+          <div className="text-muted-foreground text-sm">
+            Missing project details. Please go back and try again.
+          </div>
+        )}
 
-          {!projectLoading && !integrationsLoading && project && (
-            <IntegrationCardGrid
-              hasIntegrations={hasPublishingIntegrations}
-              integrations={integrations}
-              onConnectionComplete={() => stepper.next()}
-              organizationId={project.organizationId ?? ""}
-              projectId={project.id}
-              providers={publishingProviders}
-            />
-          )}
-        </CardContent>
-        <CardFooter className="flex w-full justify-between">
-          <Button onClick={() => stepper.prev()} type="button" variant="ghost">
-            Back
-          </Button>
-          <Button onClick={() => stepper.next()} type="button" variant="ghost">
-            Skip for now
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+        {!projectLoading && !integrationsLoading && project && (
+          <IntegrationCardGrid
+            hasIntegrations={hasPublishingIntegrations}
+            integrations={integrations}
+            onConnectionComplete={() => stepper.next()}
+            organizationId={project.organizationId ?? ""}
+            projectId={project.id}
+            providers={publishingProviders}
+          />
+        )}
+      </CardContent>
+      <CardFooter className="flex w-full justify-between">
+        <Button onClick={() => stepper.prev()} type="button" variant="ghost">
+          Back
+        </Button>
+        <Button onClick={() => stepper.next()} type="button" variant="ghost">
+          Skip for now
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

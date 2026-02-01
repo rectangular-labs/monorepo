@@ -9,7 +9,7 @@ import type {
 } from "../../schema/seo";
 
 export async function listStrategiesByProjectId(args: {
-  db: DB | DBTransaction;
+  db: DB;
   projectId: string;
 }) {
   return await safe(() =>
@@ -166,6 +166,27 @@ export async function updateStrategyPhase(
   const phase = result.value[0];
   if (!phase) {
     return err(new Error("Failed to update strategy phase"));
+  }
+  return ok(phase);
+}
+
+export async function getCurrentStrategyPhase(args: {
+  db: DB;
+  strategyId: string;
+}) {
+  const result = await safe(() =>
+    args.db.query.seoStrategyPhase.findFirst({
+      where: (table, { eq, isNull, and }) =>
+        and(eq(table.strategyId, args.strategyId), isNull(table.deletedAt)),
+      orderBy: (fields, { desc }) => [desc(fields.createdAt)],
+    }),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  const phase = result.value;
+  if (!phase) {
+    return err(new Error("Failed to find strategy phase"));
   }
   return ok(phase);
 }
