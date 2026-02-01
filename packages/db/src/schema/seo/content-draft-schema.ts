@@ -44,10 +44,6 @@ export const seoContentDraft = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    baseContentId: uuid().references(() => seoContent.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
-    }),
     strategyId: uuid().references(() => seoStrategy.id, {
       onDelete: "set null",
       onUpdate: "cascade",
@@ -63,8 +59,8 @@ export const seoContentDraft = pgSeoTable(
     heroImageCaption: text(),
     primaryKeyword: text().notNull().default(""),
     articleType: text({ enum: ARTICLE_TYPES }),
-    outline: text(),
     contentMarkdown: text(),
+    outline: text(),
     notes: text(),
 
     status: text({ enum: CONTENT_STATUSES }).notNull().default("suggested"),
@@ -96,14 +92,8 @@ export const seoContentDraft = pgSeoTable(
         sql`${table.slug} text_pattern_ops`,
       )
       .where(isNull(table.deletedAt)),
-    index("seo_content_draft_org_project_status_base_id_idx")
-      .on(
-        table.organizationId,
-        table.projectId,
-        table.status,
-        table.baseContentId,
-        table.id,
-      )
+    index("seo_content_draft_org_project_status_idx")
+      .on(table.organizationId, table.projectId, table.status, table.id)
       .where(isNull(table.deletedAt)),
   ],
 );
@@ -119,10 +109,6 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.organizationId],
       references: [organization.id],
     }),
-    baseContent: one(seoContent, {
-      fields: [seoContentDraft.baseContentId],
-      references: [seoContent.id],
-    }),
     strategy: one(seoStrategy, {
       fields: [seoContentDraft.strategyId],
       references: [seoStrategy.id],
@@ -135,6 +121,7 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.generatedByTaskRunId],
       references: [seoTaskRun.id],
     }),
+    contentSnapshot: many(seoContent),
     metricSnapshot: many(seoStrategySnapshotContent),
     phaseContent: many(seoStrategyPhaseContent),
     // Attribution join tables

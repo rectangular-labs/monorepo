@@ -7,6 +7,7 @@ import {
   getDraftById,
   getScheduledItems,
   getSeoProjectByIdentifierAndOrgId,
+  hasPublishedSnapshotForDraft,
   updateContentDraft,
   validateSlug,
 } from "@rectangular-labs/db/operations";
@@ -55,8 +56,6 @@ export async function writeContentDraft(
   }
 
   let draft: typeof schema.seoContentDraft.$inferSelect;
-  let isNew = false;
-
   if (args.lookup.type === "id") {
     const draftResult = await getDraftById({
       db: args.db,
@@ -80,7 +79,6 @@ export async function writeContentDraft(
     });
     if (!draftResult.ok) return draftResult;
     draft = draftResult.value.draft;
-    isNew = draftResult.value.isNew;
   }
 
   // Record attribution
@@ -112,7 +110,7 @@ export async function writeContentDraft(
       projectId: args.projectId,
       slug: nextSlug,
       ignoreDraftId: draft.id,
-      ignoreContentId: draft.baseContentId ?? undefined,
+      ignoreOriginatingDraftId: draft.id,
     });
     if (!slugValidation.ok) return slugValidation;
     if (!slugValidation.value.valid) {
@@ -199,12 +197,21 @@ export async function writeContentDraft(
     }
   }
 
+  const hasPublishedSnapshotResult = await hasPublishedSnapshotForDraft({
+    db: args.db,
+    draftId: draft.id,
+  });
+  if (!hasPublishedSnapshotResult.ok) {
+    return hasPublishedSnapshotResult;
+  }
+  const hasPublishedSnapshot = hasPublishedSnapshotResult.value;
+
   if (nextStatus === "scheduled") {
     // Determine scheduled publish time
     let scheduledFor = updatedDraft.scheduledFor;
 
     // new content should be scheduled
-    if (!scheduledFor && !draft.baseContentId) {
+    if (!scheduledFor && !hasPublishedSnapshot) {
       const projectResult = await getSeoProjectByIdentifierAndOrgId(
         args.db,
         args.projectId,
@@ -298,5 +305,5 @@ export async function writeContentDraft(
     });
   }
 
-  return ok({ draft: updatedDraft, isNew });
+  return ok({ draft: updatedDraft, isNew: !hasPublishedSnapshot });
 }

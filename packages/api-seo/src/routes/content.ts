@@ -10,7 +10,6 @@ import {
   getDraftById,
   getNextVersionForSlug,
   getSeoProjectByIdentifierAndOrgId,
-  hardDeleteDraft,
   listDraftsByStatus,
   listDraftsForExport,
   listPublishedContent,
@@ -62,12 +61,12 @@ const listDrafts = withOrganizationIdBase
     }),
   )
   .handler(async ({ context, input }) => {
-    const hasBaseContentId = input.isNew === null ? null : !input.isNew;
+    const hasPublishedSnapshot = input.isNew === null ? null : !input.isNew;
     const rowsResult = await listDraftsByStatus({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      hasBaseContentId,
+      hasPublishedSnapshot,
       status: input.status,
       cursor: input.cursor,
       limit: input.limit + 1,
@@ -161,21 +160,21 @@ const getReviewCounts = withOrganizationIdBase
           db: context.db,
           organizationId: context.organization.id,
           projectId: input.projectId,
-          hasBaseContentId: false,
+          hasPublishedSnapshot: false,
           status: "suggested",
         }),
         countDraftsByStatus({
           db: context.db,
           organizationId: context.organization.id,
           projectId: input.projectId,
-          hasBaseContentId: false,
+          hasPublishedSnapshot: false,
           status: reviewStatuses,
         }),
         countDraftsByStatus({
           db: context.db,
           organizationId: context.organization.id,
           projectId: input.projectId,
-          hasBaseContentId: true,
+          hasPublishedSnapshot: true,
           status: reviewStatuses,
         }),
       ]);
@@ -514,7 +513,6 @@ const publishContent = base
       scheduledFor: draft.scheduledFor,
       now,
     });
-    // TODO(publication): send a webhook to the publish destination
 
     // Get next version number for this slug
     const nextVersionResult = await getNextVersionForSlug({
@@ -540,6 +538,7 @@ const publishContent = base
     const createdContentResult = await createContent(context.db, {
       organizationId: draft.organizationId,
       projectId: draft.projectId,
+      originatingDraftId: draft.id,
       slug: draft.slug,
       version: nextVersion,
       title: draft.title,
@@ -572,16 +571,16 @@ const publishContent = base
       });
     }
 
-    const deletedDraftResult = await hardDeleteDraft({
-      db: context.db,
-      organizationId: draft.organizationId,
-      projectId: draft.projectId,
+    const updatedDraftResult = await updateContentDraft(context.db, {
       id: draft.id,
+      projectId: draft.projectId,
+      organizationId: draft.organizationId,
+      status: "published",
     });
-    if (!deletedDraftResult.ok) {
+    if (!updatedDraftResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to delete draft after publishing.",
-        cause: deletedDraftResult.error,
+        message: "Failed to update draft after publishing.",
+        cause: updatedDraftResult.error,
       });
     }
 

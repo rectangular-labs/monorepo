@@ -6,10 +6,11 @@ import {
   type DBTransaction,
   desc,
   eq,
+  exists,
   inArray,
-  isNotNull,
   isNull,
   lt,
+  notExists,
   schema,
 } from "../../client";
 import type {
@@ -124,6 +125,7 @@ export async function listPublishedContent(args: {
         primaryKeyword: schema.seoContent.primaryKeyword,
         articleType: schema.seoContent.articleType,
         publishedAt: schema.seoContent.publishedAt,
+        originatingDraftId: schema.seoContent.originatingDraftId,
         createdAt: schema.seoContent.createdAt,
         updatedAt: schema.seoContent.updatedAt,
         deletedAt: schema.seoContent.deletedAt,
@@ -280,6 +282,24 @@ export async function updateContentDraft(
   return ok(updatedDraft);
 }
 
+export async function hasPublishedSnapshotForDraft(args: {
+  db: DB;
+  draftId: string;
+}) {
+  const result = await safe(() =>
+    args.db.query.seoContent.findFirst({
+      columns: { id: true },
+      where: (table, { and, eq, isNull }) =>
+        and(
+          eq(table.originatingDraftId, args.draftId),
+          isNull(table.deletedAt),
+        ),
+    }),
+  );
+  if (!result.ok) return result;
+  return ok(Boolean(result.value));
+}
+
 export async function hardDeleteDraft(args: {
   db: DB;
   organizationId: string;
@@ -391,7 +411,7 @@ export async function listDraftsByStatus(args: {
   db: DB;
   organizationId: string;
   projectId: string;
-  hasBaseContentId: boolean | null;
+  hasPublishedSnapshot: boolean | null;
   status: SeoFileStatus | readonly SeoFileStatus[];
   cursor: string | undefined;
   limit: number;
@@ -399,16 +419,27 @@ export async function listDraftsByStatus(args: {
   return await safe(() =>
     args.db.query.seoContentDraft.findMany({
       columns: { contentMarkdown: false, outline: false, notes: false },
-      where: (table, { and, eq, inArray, isNull, lt, isNotNull }) =>
+      where: (table, { and, eq, inArray, isNull, lt }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           isNull(table.deletedAt),
-          args.hasBaseContentId === null
+          args.hasPublishedSnapshot === null
             ? undefined
-            : args.hasBaseContentId
-              ? isNotNull(table.baseContentId)
-              : isNull(table.baseContentId),
+            : (() => {
+                const publishedSnapshotQuery = args.db
+                  .select({ id: schema.seoContent.id })
+                  .from(schema.seoContent)
+                  .where(
+                    and(
+                      eq(schema.seoContent.originatingDraftId, table.id),
+                      isNull(schema.seoContent.deletedAt),
+                    ),
+                  );
+                return args.hasPublishedSnapshot
+                  ? exists(publishedSnapshotQuery)
+                  : notExists(publishedSnapshotQuery);
+              })(),
           typeof args.status === "string"
             ? eq(table.status, args.status)
             : inArray(table.status, [...args.status]),
@@ -472,6 +503,7 @@ export async function listPublishedContentForExport(args: {
         articleType: schema.seoContent.articleType,
         contentMarkdown: schema.seoContent.contentMarkdown,
         publishedAt: schema.seoContent.publishedAt,
+        originatingDraftId: schema.seoContent.originatingDraftId,
         createdAt: schema.seoContent.createdAt,
         updatedAt: schema.seoContent.updatedAt,
         deletedAt: schema.seoContent.deletedAt,
@@ -500,17 +532,26 @@ export async function countDraftsByStatus(args: {
   db: DB;
   organizationId: string;
   projectId: string;
-  hasBaseContentId: boolean;
+  hasPublishedSnapshot: boolean;
   status: SeoFileStatus | readonly SeoFileStatus[];
 }) {
   return await safe(async () => {
+    const publishedSnapshotQuery = args.db
+      .select({ id: schema.seoContent.id })
+      .from(schema.seoContent)
+      .where(
+        and(
+          eq(schema.seoContent.originatingDraftId, schema.seoContentDraft.id),
+          isNull(schema.seoContent.deletedAt),
+        ),
+      );
     const where = and(
       eq(schema.seoContentDraft.organizationId, args.organizationId),
       eq(schema.seoContentDraft.projectId, args.projectId),
       isNull(schema.seoContentDraft.deletedAt),
-      args.hasBaseContentId
-        ? isNotNull(schema.seoContentDraft.baseContentId)
-        : isNull(schema.seoContentDraft.baseContentId),
+      args.hasPublishedSnapshot
+        ? exists(publishedSnapshotQuery)
+        : notExists(publishedSnapshotQuery),
       typeof args.status === "string"
         ? eq(schema.seoContentDraft.status, args.status)
         : inArray(schema.seoContentDraft.status, [...args.status]),
@@ -531,7 +572,7 @@ export async function validateSlug(args: {
   organizationId: string;
   projectId: string;
   slug: string;
-  ignoreContentId: string | undefined;
+  ignoreOriginatingDraftId: string | undefined;
   ignoreDraftId: string | undefined;
 }) {
   const [publishedResult, draftResult] = await Promise.all([
@@ -539,13 +580,14 @@ export async function validateSlug(args: {
     safe(() =>
       args.db.query.seoContent.findFirst({
         columns: { id: true },
-        where: (table, { and, eq, ne }) =>
+        where: (table, { and, eq, ne, isNull }) =>
           and(
             eq(table.organizationId, args.organizationId),
             eq(table.projectId, args.projectId),
             eq(table.slug, args.slug),
-            args.ignoreContentId
-              ? ne(table.id, args.ignoreContentId)
+            isNull(table.deletedAt),
+            args.ignoreOriginatingDraftId
+              ? ne(table.originatingDraftId, args.ignoreOriginatingDraftId)
               : undefined,
           ),
       }),

@@ -17,6 +17,7 @@ import {
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
+import { seoContentDraft } from "./content-draft-schema";
 import { seoProject } from "./project-schema";
 
 /**
@@ -39,6 +40,12 @@ export const seoContent = pgSeoTable(
     projectId: uuid()
       .notNull()
       .references(() => seoProject.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    originatingDraftId: uuid()
+      .notNull()
+      .references(() => seoContentDraft.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
@@ -84,6 +91,10 @@ export const seoContent = pgSeoTable(
 );
 
 export const seoContentRelations = relations(seoContent, ({ one }) => ({
+  originatingDraft: one(seoContentDraft, {
+    fields: [seoContent.originatingDraftId],
+    references: [seoContentDraft.id],
+  }),
   project: one(seoProject, {
     fields: [seoContent.projectId],
     references: [seoProject.id],
