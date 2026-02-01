@@ -16,6 +16,7 @@ export const seoUnderstandSiteTaskInputSchema = type({
 export const seoStrategySuggestionsTaskInputSchema = type({
   type: "'seo-generate-strategy-suggestions'",
   projectId: "string.uuid",
+  instructions: "string",
 });
 
 export const seoPlanKeywordTaskInputSchema = type({

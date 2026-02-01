@@ -21,6 +21,7 @@ import {
   stepCountIs,
 } from "ai";
 import { type } from "arktype";
+import { ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS } from "../../../core/dist/ai/onboarding-strategy-suggestion-instructions";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { createTask } from "../lib/task";
 import { DEFAULT_BRAND_VOICE } from "../lib/workspace/workflow.constant";
@@ -220,6 +221,7 @@ Extract the name from the above context.`,
         input: {
           type: "seo-generate-strategy-suggestions",
           projectId: project.id,
+          instructions: ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS,
         },
         workflowInstanceId: `strategy_${event.instanceId}_${crypto.randomUUID().slice(0, 5)}`,
       });
@@ -227,6 +229,19 @@ Extract the name from the above context.`,
         logError("failed to trigger strategy suggestions workflow", {
           projectId: project.id,
           error: taskResult.error,
+        });
+        return;
+      }
+
+      const updateResult = await updateSeoProject(db, {
+        id: project.id,
+        organizationId: project.organizationId,
+        strategySuggestionsWorkflowId: taskResult.value.id,
+      });
+      if (!updateResult.ok) {
+        logError("failed to save strategy suggestions workflow id", {
+          projectId: project.id,
+          error: updateResult.error,
         });
       }
     });

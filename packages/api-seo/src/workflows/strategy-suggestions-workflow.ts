@@ -15,6 +15,7 @@ import { createDb } from "@rectangular-labs/db";
 import {
   createStrategies,
   getSeoProjectById,
+  listStrategiesByProjectId,
 } from "@rectangular-labs/db/operations";
 import {
   generateText,
@@ -131,21 +132,57 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
           siteType: gscIntegrationResult.value?.config?.propertyType ?? null,
         });
 
-        const system = `You are an SEO strategist generating onboarding strategy suggestions.
+        const existingStrategiesResult = await listStrategiesByProjectId({
+          db,
+          projectId: project.id,
+        });
+        if (!existingStrategiesResult.ok) {
+          throw existingStrategiesResult.error;
+        }
 
-## Task
-- Generate exactly 2 strategy suggestions for the project.
-- Each suggestion must include: name, motivation, description, goal.
+        const existingStrategies =
+          existingStrategiesResult.value.length > 0
+            ? existingStrategiesResult.value
+                .map((strategy) => {
+                  const goal = strategy.goal
+                    ? `${strategy.goal.target} ${strategy.goal.metric} ${strategy.goal.timeframe}`
+                    : "none";
+                  const updatedAt = strategy.updatedAt
+                    ?.toISOString?.()
+                    ?.slice(0, 10);
+                  const dismissalReason = strategy.dismissalReason
+                    ? `dismissal reason: ${strategy.dismissalReason}`
+                    : "";
+                  return [
+                    `- [${strategy.status}] "${strategy.name}"`,
+                    `id: ${strategy.id}`,
+                    `goal: ${goal}`,
+                    `phases:${strategy.phases?.length ?? 0}`,
+                    `updated:${updatedAt ?? "unknown"}`,
+                    dismissalReason,
+                  ]
+                    .filter(Boolean)
+                    .join("|");
+                })
+                .join("\n")
+            : "- none";
+
+        const system = `You are an SEO strategist generating strategy suggestions.
+
+## Objective
+- Propose strategy suggestions that fit the project's context and current work.
+- Avoid duplicates by name and intent. Learn from dismissed strategies and their reasons.
+
+## Instructions
+${input.instructions}
 
 ## Data Usage
 - Use available tools (Google Search Console, DataForSEO, web search) directly to ground recommendations.
-- Always check existing strategies via list_strategies and avoid duplicating active strategies.
-- If you need more context, use get_strategy_details for relevant strategies.
+- If you need more context about a specific strategy, use get_strategy_details.
 - If Google Search Console is not available, rely on competitor and keyword tools plus public site info.
 
-## Suggestion Mix Rules
-- If GSC data is available, include at least one "improve existing content" strategy.
-- Always include one "create new content cluster" strategy.
+## Existing Strategies (compact)
+${existingStrategies}
 
 ## Output Requirements
 - Keep each strategy concise and actionable.

@@ -135,6 +135,7 @@ export async function getSeoProjectByIdentifierAndOrgId<
         organizationId: true,
         deletedAt: true,
         projectResearchWorkflowId: true,
+        strategySuggestionsWorkflowId: true,
         ...(includeSettings ?? {}),
       },
       where: (table, { eq, and, isNull }) =>
