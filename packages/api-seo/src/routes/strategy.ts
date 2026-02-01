@@ -1,7 +1,9 @@
 import { ORPCError } from "@orpc/server";
 import { schema } from "@rectangular-labs/db";
 import {
+  createStrategy,
   createStrategyPhase,
+  getSeoProjectByIdentifierAndOrgId,
   getStrategyDetails,
   listStrategiesByProjectId,
   updateStrategy,
@@ -10,6 +12,7 @@ import {
 import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
+import { createTask } from "../lib/task";
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -106,6 +109,66 @@ const update = withOrganizationIdBase
       });
     }
     return updateResult.value;
+  });
+
+const create = withOrganizationIdBase
+  .route({ method: "POST", path: "/" })
+  .input(
+      type({
+      "...": schema.seoStrategyInsertSchema,
+        organizationIdentifier: "string",
+      }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(schema.seoStrategySelectSchema)
+  .handler(async ({ context, input }) => {
+    const projectResult = await getSeoProjectByIdentifierAndOrgId(
+      context.db,
+      input.projectId,
+      context.organization.id,
+    );
+    if (!projectResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Something went wrong retrieving project",
+        cause: projectResult.error,
+      });
+    }
+    if (!projectResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "Invalid project ID",
+      });
+    }
+    const createResult = await createStrategy(context.db, {
+      projectId: input.projectId,
+      name: input.name,
+      motivation: input.motivation,
+      description: input.description ?? null,
+      goal: input.goal,
+      status: "active",
+    });
+    if (!createResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to create strategy.",
+        cause: createResult.error,
+      });
+    }
+    const taskResult = await createTask({
+      db: context.db,
+      userId: context.user?.id,
+      input: {
+        type: "seo-start-strategy",
+        projectId: input.projectId,
+        organizationId: context.organization.id,
+        strategyId: createResult.value.id,
+        userId: context.user?.id,
+      },
+      workflowInstanceId: `strategy_start_${createResult.value.id}_${crypto.randomUUID().slice(0, 6)}`,
+    });
+
+    if (!taskResult.ok) {
+      console.error("Failed to start strategy workflow", taskResult.error);
+    }
+    return createResult.value;
   });
 
 const createPhase = withOrganizationIdBase

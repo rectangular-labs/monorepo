@@ -84,6 +84,23 @@ export async function createStrategies(
   return ok(result.value);
 }
 
+export async function createStrategy(
+  db: DB | DBTransaction,
+  values: typeof seoStrategyInsertSchema.infer,
+) {
+  const result = await safe(() =>
+    db.insert(schema.seoStrategy).values(values).returning(),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  const strategy = result.value[0];
+  if (!strategy) {
+    return err(new Error("Failed to create strategy"));
+  }
+  return ok(strategy);
+}
+
 export async function updateStrategy(
   db: DB | DBTransaction,
   values: typeof seoStrategyUpdateSchema.infer,

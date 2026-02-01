@@ -28,7 +28,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
-import { StrategyModifyDialog } from "./strategy-modify-dialog";
+import { ManageStrategyDialog } from "./manage-strategy-dialog";
 
 type StrategySummary = RouterOutputs["strategy"]["list"]["strategies"][number];
 
@@ -392,10 +392,10 @@ export function StrategyCard({
             </DialogDrawerFooter>
           </DialogDrawer>
           <div className="ml-auto flex items-center gap-2">
-            <StrategyModifyDialog
-              organizationId={organizationId ?? ""}
+            <ManageStrategyDialog
               onOpenChange={setModifyOpen}
               open={modifyOpen}
+              organizationId={organizationId ?? ""}
               projectId={projectId ?? ""}
               strategy={strategy}
               trigger={

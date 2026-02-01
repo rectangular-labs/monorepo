@@ -29,6 +29,7 @@ import {
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 
@@ -49,7 +50,7 @@ const goalTimeframeOptions = [
   { value: "total", label: "Total" },
 ] as const;
 
-export function StrategyModifyDialog({
+export function ManageStrategyDialog({
   strategy,
   organizationId,
   projectId,
@@ -57,7 +58,7 @@ export function StrategyModifyDialog({
   onOpenChange,
   trigger,
 }: {
-  strategy: StrategySummary;
+  strategy?: StrategySummary | null;
   organizationId: string;
   projectId: string;
   open?: boolean;
@@ -69,16 +70,22 @@ export function StrategyModifyDialog({
   const setOpen = onOpenChange ?? setOpenInternal;
   const api = getApiClientRq();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const matcher = useMatchRoute();
+  const slugParams = matcher({
+    to: "/$organizationSlug/$projectSlug",
+    fuzzy: true,
+  });
 
   const defaultValues = useMemo<StrategyFormValues>(
     () => ({
-      name: strategy.name ?? "",
-      description: strategy.description ?? "",
-      motivation: strategy.motivation ?? "",
+      name: strategy?.name ?? "",
+      description: strategy?.description ?? "",
+      motivation: strategy?.motivation ?? "",
       goal: {
-        metric: strategy.goal.metric,
-        target: strategy.goal.target,
-        timeframe: strategy.goal.timeframe,
+        metric: strategy?.goal?.metric ?? "clicks",
+        target: strategy?.goal?.target ?? 0,
+        timeframe: strategy?.goal?.timeframe ?? "monthly",
       },
     }),
     [strategy],
@@ -95,7 +102,7 @@ export function StrategyModifyDialog({
     }
   }, [defaultValues, form, open]);
 
-  const { mutate: updateStrategy, isPending } = useMutation(
+  const { mutate: updateStrategy, isPending: isUpdating } = useMutation(
     api.strategy.update.mutationOptions({
       onError: (error) => {
         form.setError("root", { message: error.message });
@@ -113,6 +120,36 @@ export function StrategyModifyDialog({
     }),
   );
 
+  const { mutate: createStrategy, isPending: isCreating } = useMutation(
+    api.strategy.create.mutationOptions({
+      onError: (error) => {
+        form.setError("root", { message: error.message });
+      },
+      onSuccess: async (data) => {
+        toast.success("Strategy created");
+        setOpen(false);
+        if (organizationId && projectId) {
+          await queryClient.invalidateQueries({
+            queryKey: api.strategy.list.queryKey({
+              input: { organizationIdentifier: organizationId, projectId },
+            }),
+          });
+        }
+
+        if (slugParams && data.id) {
+          await navigate({
+            to: "/$organizationSlug/$projectSlug/strategies/$strategyId",
+            params: {
+              organizationSlug: slugParams.organizationSlug,
+              projectSlug: slugParams.projectSlug,
+              strategyId: data.id,
+            },
+          });
+        }
+      },
+    }),
+  );
+
   const submitForm = (values: StrategyFormValues) => {
     if (!organizationId || !projectId) {
       form.setError("root", {
@@ -121,8 +158,7 @@ export function StrategyModifyDialog({
       return;
     }
 
-    updateStrategy({
-      id: strategy.id,
+    const payload = {
       projectId,
       organizationIdentifier: organizationId,
       name: values.name.trim(),
@@ -133,11 +169,29 @@ export function StrategyModifyDialog({
         target: values.goal.target,
         timeframe: values.goal.timeframe,
       },
+    };
+
+    if (strategy) {
+      updateStrategy({
+        ...payload,
+        id: strategy.id,
+      });
+      return;
+    }
+
+    createStrategy({
+      ...payload,
+      status: "suggestion",
     });
   };
 
-  const fieldPrefix = `strategy-modify-${strategy.id}`;
+  const fieldPrefix = strategy
+    ? `strategy-manage-${strategy.id}`
+    : "strategy-manage-new";
   const formError = form.formState.errors.root?.message;
+  const isPending = isUpdating || isCreating;
+  const title = strategy ? "Edit strategy" : "New strategy";
+  const submitLabel = strategy ? "Save changes" : "Create strategy";
 
   return (
     <DialogDrawer
@@ -147,18 +201,18 @@ export function StrategyModifyDialog({
       trigger={
         trigger ?? (
           <Button size="sm" type="button" variant="outline">
-            Modify
+            Manage
           </Button>
         )
       }
     >
       <DialogDrawerHeader>
-        <DialogDrawerTitle>Edit strategy</DialogDrawerTitle>
+        <DialogDrawerTitle>{title}</DialogDrawerTitle>
       </DialogDrawerHeader>
 
       <form
         className="grid max-h-[70vh] gap-6 overflow-y-auto"
-        id="strategy-modify-form"
+        id="strategy-manage-form"
         onSubmit={form.handleSubmit(submitForm)}
       >
         <FieldGroup>
@@ -312,11 +366,11 @@ export function StrategyModifyDialog({
         </Button>
         <Button
           disabled={!organizationId || !projectId}
-          form="strategy-modify-form"
+          form="strategy-manage-form"
           isLoading={isPending}
           type="submit"
         >
-          Save changes
+          {submitLabel}
         </Button>
       </DialogDrawerFooter>
     </DialogDrawer>
