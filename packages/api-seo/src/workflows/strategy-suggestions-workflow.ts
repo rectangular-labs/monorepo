@@ -26,11 +26,12 @@ import {
 } from "ai";
 import { type } from "arktype";
 import { apiEnv } from "../env";
-import { formatBusinessBackground } from "../lib/ai/format-business-background";
 import { createDataforseoToolWithMetadata } from "../lib/ai/tools/dataforseo-tool";
 import { createGscToolWithMetadata } from "../lib/ai/tools/google-search-console-tool";
 import { createStrategyToolsWithMetadata } from "../lib/ai/tools/strategy-tools";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
+import { formatBusinessBackground } from "../lib/ai/utils/format-business-background";
+import { logAgentStep } from "../lib/ai/utils/log-agent-step";
 import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import type { InitialContext } from "../types";
 
@@ -207,10 +208,7 @@ Business background:${formatBusinessBackground(project.businessBackground)}
 Generate strategy suggestions now.`,
           stopWhen: [stepCountIs(40)],
           onStepFinish: (step) => {
-            logInfo("step to generate suggestion finished", {
-              toolCalls: step.toolCalls,
-              toolResults: step.toolResults,
-            });
+            logAgentStep(logInfo, "step to generate suggestion finished", step);
           },
           experimental_output: Output.object({
             schema: jsonSchema<{

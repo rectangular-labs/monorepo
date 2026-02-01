@@ -2,7 +2,6 @@ import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { convertToModelMessages, type streamText } from "ai";
 import type { ChatContext, SeoChatMessage } from "../../types";
-import { formatBusinessBackground } from "./format-business-background";
 import { createCreateArticleToolWithMetadata } from "./tools/create-article-tool";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
@@ -20,6 +19,7 @@ import {
   formatToolSkillsSection,
 } from "./tools/utils";
 import { createWebToolsWithMetadata } from "./tools/web-tools";
+import { formatBusinessBackground } from "./utils/format-business-background";
 
 function formatCurrentPageFocusReminder(
   currentPage: ProjectChatCurrentPage,
