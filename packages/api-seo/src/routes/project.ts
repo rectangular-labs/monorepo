@@ -133,6 +133,10 @@ const create = withOrganizationIdBase
       throw upsertProjectResult.error;
     }
 
+    if (upsertProjectResult.value.projectResearchWorkflowId) {
+      return upsertProjectResult.value;
+    }
+
     const createTaskResult = await createTask({
       db: context.db,
       userId: context.user.id,
