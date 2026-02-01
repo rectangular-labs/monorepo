@@ -12,6 +12,7 @@ import { isNull, relations } from "drizzle-orm";
 import { index, jsonb, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
+import { organization } from "../auth-schema";
 import { seoProject } from "./project-schema";
 import { seoStrategyPhase } from "./strategy-phase-schema";
 import { seoStrategySnapshot } from "./strategy-snapshot-schema";
@@ -26,6 +27,12 @@ export const seoStrategy = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    organizationId: text()
+      .notNull()
+      .references(() => organization.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     name: text().notNull(),
     description: text(),
     motivation: text().notNull(),
@@ -35,14 +42,18 @@ export const seoStrategy = pgSeoTable(
     ...timestamps,
   },
   (table) => [
-    index("seo_strategy_project_updated_at_idx")
-      .on(table.projectId, table.updatedAt)
+    index("seo_strategy_org_project_updated_at_idx")
+      .on(table.organizationId, table.projectId, table.updatedAt)
       .where(isNull(table.deletedAt)),
     index("seo_strategy_status_idx").on(table.status),
   ],
 );
 
 export const seoStrategyRelations = relations(seoStrategy, ({ one, many }) => ({
+  organization: one(organization, {
+    fields: [seoStrategy.organizationId],
+    references: [organization.id],
+  }),
   project: one(seoProject, {
     fields: [seoStrategy.projectId],
     references: [seoProject.id],
@@ -56,6 +67,9 @@ export const seoStrategyInsertSchema = createInsertSchema(seoStrategy).omit(
   "createdAt",
   "updatedAt",
   "deletedAt",
+  "dismissalReason",
+  "status",
+  "organizationId",
 );
 export const seoStrategySelectSchema = createSelectSchema(seoStrategy);
 export const seoStrategyUpdateSchema = createUpdateSchema(seoStrategy)
@@ -64,5 +78,6 @@ export const seoStrategyUpdateSchema = createUpdateSchema(seoStrategy)
     type({
       id: "string.uuid",
       projectId: "string.uuid",
+      organizationId: "string",
     }),
   );

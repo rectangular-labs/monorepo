@@ -136,6 +136,7 @@ export function createStrategistAgent({
   const strategyTools = createStrategyToolsWithMetadata({
     db: context.db,
     projectId: project.id,
+    organizationId: project.organizationId,
   });
 
   const skillDefinitions: AgentToolDefinition[] = [

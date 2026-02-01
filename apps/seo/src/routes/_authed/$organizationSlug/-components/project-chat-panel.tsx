@@ -456,7 +456,6 @@ function ChatConversation({
   input,
   setInput,
   isMessagesLoading,
-  hasChat,
 }: {
   organizationId: string;
   projectId: string;

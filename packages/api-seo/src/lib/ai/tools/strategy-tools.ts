@@ -12,6 +12,7 @@ const strategyDetailsInputSchema = type({
 export function createStrategyToolsWithMetadata(args: {
   db: DB;
   projectId: string;
+  organizationId: string;
 }) {
   const getStrategyDetailsTool = tool({
     description:
@@ -24,6 +25,7 @@ export function createStrategyToolsWithMetadata(args: {
         db: args.db,
         projectId: args.projectId,
         strategyId,
+        organizationId: args.organizationId,
       });
       if (!detailResult.ok) {
         return { success: false, message: detailResult.error.message };

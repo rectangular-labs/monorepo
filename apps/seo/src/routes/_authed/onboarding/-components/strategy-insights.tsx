@@ -12,7 +12,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
-import { StrategyCard } from "../../$organizationSlug/$projectSlug/-components/strategy-card";
+import { StrategyCard } from "../../$organizationSlug/$projectSlug/strategies/-components/strategy-card";
 import { OnboardingSteps } from "../-lib/steps";
 
 export function OnboardingStrategyInsights({

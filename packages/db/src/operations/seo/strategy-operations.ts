@@ -23,6 +23,22 @@ export async function listStrategiesByProjectId(args: {
           orderBy: (fields, { desc }) => [desc(fields.createdAt)],
         },
       },
+export async function getStrategy(args: {
+  db: DB;
+  projectId: string;
+  strategyId: string;
+  organizationId: string;
+}) {
+  return await safe(() =>
+    args.db.query.seoStrategy.findFirst({
+      columns: { status: true },
+      where: (table, { and, eq, isNull }) =>
+        and(
+          eq(table.id, args.strategyId),
+          eq(table.projectId, args.projectId),
+          eq(table.organizationId, args.organizationId),
+          isNull(table.deletedAt),
+        ),
     }),
   );
 }
@@ -31,6 +47,7 @@ export async function getStrategyDetails(args: {
   db: DB | DBTransaction;
   projectId: string;
   strategyId: string;
+  organizationId: string;
 }) {
   return await safe(() =>
     args.db.query.seoStrategy.findFirst({
@@ -38,6 +55,7 @@ export async function getStrategyDetails(args: {
         and(
           eq(table.id, args.strategyId),
           eq(table.projectId, args.projectId),
+          eq(table.organizationId, args.organizationId),
           isNull(table.deletedAt),
         ),
       with: {
@@ -67,7 +85,7 @@ export async function getStrategyDetails(args: {
 
 export async function createStrategies(
   db: DB | DBTransaction,
-  values: (typeof seoStrategyInsertSchema.infer)[],
+  values: (typeof schema.seoStrategy.$inferInsert)[],
 ) {
   if (values.length === 0) {
     return ok([]);
@@ -84,23 +102,6 @@ export async function createStrategies(
   return ok(result.value);
 }
 
-export async function createStrategy(
-  db: DB | DBTransaction,
-  values: typeof seoStrategyInsertSchema.infer,
-) {
-  const result = await safe(() =>
-    db.insert(schema.seoStrategy).values(values).returning(),
-  );
-  if (!result.ok) {
-    return result;
-  }
-  const strategy = result.value[0];
-  if (!strategy) {
-    return err(new Error("Failed to create strategy"));
-  }
-  return ok(strategy);
-}
-
 export async function updateStrategy(
   db: DB | DBTransaction,
   values: typeof seoStrategyUpdateSchema.infer,
@@ -113,6 +114,7 @@ export async function updateStrategy(
         and(
           eq(schema.seoStrategy.id, values.id),
           eq(schema.seoStrategy.projectId, values.projectId),
+          eq(schema.seoStrategy.organizationId, values.organizationId),
         ),
       )
       .returning(),

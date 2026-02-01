@@ -96,6 +96,7 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
         const strategyTools = createStrategyToolsWithMetadata({
           db,
           projectId: project.id,
+          organizationId: project.organizationId,
         });
         const env = apiEnv();
         const auth = initAuthHandler({
@@ -136,6 +137,7 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
         const existingStrategiesResult = await listStrategiesByProjectId({
           db,
           projectId: project.id,
+          organizationId: project.organizationId,
         });
         if (!existingStrategiesResult.ok) {
           throw existingStrategiesResult.error;
@@ -234,6 +236,7 @@ Generate strategy suggestions now.`,
           suggestionResult.suggestions.map((suggestion) => {
             return {
               ...suggestion,
+              organizationId: project.organizationId,
               projectId: project.id,
               status: "suggestion",
             };

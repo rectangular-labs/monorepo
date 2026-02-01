@@ -1,9 +1,10 @@
 import { ORPCError } from "@orpc/server";
 import { schema } from "@rectangular-labs/db";
 import {
-  createStrategy,
+  createStrategies,
   createStrategyPhase,
   getSeoProjectByIdentifierAndOrgId,
+  getStrategy,
   getStrategyDetails,
   listStrategiesByProjectId,
   updateStrategy,
@@ -35,6 +36,7 @@ const list = withOrganizationIdBase
     const strategiesResult = await listStrategiesByProjectId({
       db: context.db,
       projectId: input.projectId,
+      organizationId: context.organization.id,
     });
     if (!strategiesResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -75,6 +77,7 @@ const get = withOrganizationIdBase
       db: context.db,
       projectId: input.projectId,
       strategyId: input.id,
+      organizationId: context.organization.id,
     });
     if (!strategyResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -94,14 +97,32 @@ const update = withOrganizationIdBase
   .route({ method: "PATCH", path: "/{id}" })
   .input(
     type({
-      "...": schema.seoStrategyUpdateSchema,
+      "...": schema.seoStrategyUpdateSchema.omit("organizationId"),
       organizationIdentifier: "string",
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoStrategySelectSchema)
   .handler(async ({ context, input }) => {
-    const updateResult = await updateStrategy(context.db, input);
+    const existingStrategyResult = await getStrategy({
+      db: context.db,
+      projectId: input.projectId,
+      strategyId: input.id,
+      organizationId: context.organization.id,
+    });
+
+    if (!existingStrategyResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Something went wrong updating strategy",
+        cause: existingStrategyResult.error,
+      });
+    }
+    const existingStrategy = existingStrategyResult.value;
+
+    const updateResult = await updateStrategy(context.db, {
+      ...input,
+      organizationId: context.organization.id,
+    });
     if (!updateResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Failed to update strategy.",
@@ -138,18 +159,27 @@ const create = withOrganizationIdBase
         message: "Invalid project ID",
       });
     }
-    const createResult = await createStrategy(context.db, {
+    const createResult = await createStrategies(context.db, [
+      {
       projectId: input.projectId,
+        organizationId: context.organization.id,
       name: input.name,
       motivation: input.motivation,
       description: input.description ?? null,
       goal: input.goal,
       status: "active",
-    });
+      },
+    ]);
     if (!createResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "Failed to create strategy.",
         cause: createResult.error,
+      });
+    }
+    const createdStrategy = createResult.value[0];
+    if (!createdStrategy) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "BAD STATE: Missing created strategy",
       });
     }
     const taskResult = await createTask({
@@ -159,16 +189,16 @@ const create = withOrganizationIdBase
         type: "seo-start-strategy",
         projectId: input.projectId,
         organizationId: context.organization.id,
-        strategyId: createResult.value.id,
+        strategyId: createdStrategy.id,
         userId: context.user?.id,
       },
-      workflowInstanceId: `strategy_start_${createResult.value.id}_${crypto.randomUUID().slice(0, 6)}`,
+      workflowInstanceId: `strategy_start_${createdStrategy.id}_${crypto.randomUUID().slice(0, 6)}`,
     });
 
     if (!taskResult.ok) {
       console.error("Failed to start strategy workflow", taskResult.error);
     }
-    return createResult.value;
+    return createdStrategy;
   });
 
 const createPhase = withOrganizationIdBase
@@ -225,6 +255,7 @@ export default base
   .router({
     list,
     get,
+    create,
     update,
     phases: {
       create: createPhase,
