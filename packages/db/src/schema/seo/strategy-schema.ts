@@ -30,6 +30,7 @@ export const seoStrategy = pgSeoTable(
     description: text(),
     motivation: text().notNull(),
     goal: jsonb().$type<typeof strategyGoalSchema.infer>().notNull(),
+    dismissalReason: text(),
     status: text({ enum: STRATEGY_PHASE_STATUSES })
       .notNull()
       .default("suggestion"),
