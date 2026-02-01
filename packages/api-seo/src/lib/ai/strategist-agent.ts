@@ -10,6 +10,7 @@ import { createGscToolWithMetadata } from "./tools/google-search-console-tool";
 import { createPlannerToolsWithMetadata } from "./tools/planner-tools";
 import { createSettingsToolsWithMetadata } from "./tools/settings-tools";
 import { createSkillTools } from "./tools/skill-tools";
+import { createStrategyToolsWithMetadata } from "./tools/strategy-tools";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -132,6 +133,10 @@ export function createStrategistAgent({
     project,
     context,
   });
+  const strategyTools = createStrategyToolsWithMetadata({
+    db: context.db,
+    projectId: project.id,
+  });
 
   const skillDefinitions: AgentToolDefinition[] = [
     ...settingsTools.toolDefinitions,
@@ -139,6 +144,7 @@ export function createStrategistAgent({
     ...gscTools.toolDefinitions,
     ...dataforseoTools.toolDefinitions,
     ...createArticleTool.toolDefinitions,
+    ...strategyTools.toolDefinitions,
     ...readOnlyFileToolDefinitions,
   ];
   const skillsSection = formatToolSkillsSection(skillDefinitions);
