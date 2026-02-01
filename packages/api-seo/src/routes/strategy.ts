@@ -1,33 +1,15 @@
 import { ORPCError } from "@orpc/server";
 import { schema } from "@rectangular-labs/db";
 import {
-  createContentDraft,
-  createStrategy,
   createStrategyPhase,
-  createStrategyPhaseContent,
   getStrategyDetails,
   listStrategiesByProjectId,
+  updateStrategy,
   updateStrategyPhase,
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
-
-const contentDraftInputSchema = schema.seoContentDraftInsertSchema.omit(
-  "organizationId",
-  "projectId",
-  "strategyId",
-);
-
-const phaseContentInputSchema = type({
-  action: "'create'|'improve'|'expand'",
-  "contentDraftId?": "string.uuid|undefined",
-  "contentDraft?": contentDraftInputSchema.or(type.undefined),
-  "plannedTitle?": "string|undefined",
-  "plannedPrimaryKeyword?": "string|undefined",
-  "role?": "'pillar'|'supporting'|undefined",
-  "notes?": "string|undefined",
-});
 
 const list = withOrganizationIdBase
   .route({ method: "GET", path: "/" })
@@ -40,7 +22,7 @@ const list = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      data: type({
+      strategies: type({
         "...": schema.seoStrategySelectSchema,
         phases: schema.seoStrategyPhaseSelectSchema.array(),
       }).array(),
@@ -58,21 +40,7 @@ const list = withOrganizationIdBase
       });
     }
 
-    const data = strategiesResult.value.map((strategy) => {
-      const phases = strategy.phases ?? [];
-      const currentPhase =
-        phases.find((phase) => phase.status === "in_progress") ??
-        phases.find((phase) => phase.status === "planned") ??
-        phases.find((phase) => phase.status === "observing") ??
-        phases.at(0) ??
-        null;
-      return {
-        ...strategy,
-        currentPhase,
-      };
-    });
-
-    return { data };
+    return { strategies: strategiesResult.value };
   });
 
 const get = withOrganizationIdBase
@@ -119,105 +87,25 @@ const get = withOrganizationIdBase
     return strategyResult.value;
   });
 
-const create = withOrganizationIdBase
-  .route({ method: "POST", path: "/" })
+const update = withOrganizationIdBase
+  .route({ method: "PATCH", path: "/{id}" })
   .input(
     type({
+      "...": schema.seoStrategyUpdateSchema,
       organizationIdentifier: "string",
-      projectId: "string.uuid",
-      strategy: schema.seoStrategyInsertSchema.omit("projectId"),
-      phase: schema.seoStrategyPhaseInsertSchema.omit("strategyId"),
-      "contents?": phaseContentInputSchema.array(),
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      message: "string",
-    }),
-  )
+  .output(schema.seoStrategySelectSchema)
   .handler(async ({ context, input }) => {
-    const contents = input.contents ?? [];
-    const strategyId = await context.db.transaction(async (tx) => {
-      const strategyResult = await createStrategy(tx, {
-        ...input.strategy,
-        projectId: input.projectId,
-      });
-      if (!strategyResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to create strategy.",
-          cause: strategyResult.error,
-        });
-      }
-
-      const phaseResult = await createStrategyPhase(tx, {
-        ...input.phase,
-        strategyId: strategyResult.value.id,
-      });
-      if (!phaseResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to create strategy phase.",
-          cause: phaseResult.error,
-        });
-      }
-
-      for (const content of contents) {
-        let contentDraftId = content.contentDraftId;
-        if (!contentDraftId && content.contentDraft) {
-          const draftResult = await createContentDraft(tx, {
-            ...content.contentDraft,
-            organizationId: context.organization.id,
-            projectId: input.projectId,
-            strategyId: strategyResult.value.id,
-          });
-          if (!draftResult.ok) {
-            throw new ORPCError("INTERNAL_SERVER_ERROR", {
-              message: "Failed to create content draft.",
-              cause: draftResult.error,
-            });
-          }
-          contentDraftId = draftResult.value.id;
-        }
-
-        const phaseContentResult = await createStrategyPhaseContent(tx, {
-          phaseId: phaseResult.value.id,
-          contentDraftId,
-          action: content.action,
-          plannedTitle: content.plannedTitle ?? content.contentDraft?.title,
-          plannedPrimaryKeyword:
-            content.plannedPrimaryKeyword ??
-            content.contentDraft?.primaryKeyword,
-          role: content.role,
-          notes: content.notes,
-        });
-        if (!phaseContentResult.ok) {
-          throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: "Failed to create strategy phase content.",
-            cause: phaseContentResult.error,
-          });
-        }
-      }
-
-      return strategyResult.value.id;
-    });
-
-    const strategyResult = await getStrategyDetails({
-      db: context.db,
-      projectId: input.projectId,
-      strategyId,
-    });
-    if (!strategyResult.ok) {
+    const updateResult = await updateStrategy(context.db, input);
+    if (!updateResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load strategy.",
-        cause: strategyResult.error,
+        message: "Failed to update strategy.",
+        cause: updateResult.error,
       });
     }
-    if (!strategyResult.value) {
-      throw new ORPCError("NOT_FOUND", {
-        message: "No strategy found after creation.",
-      });
-    }
-    return strategyResult.value;
+    return updateResult.value;
   });
 
 const createPhase = withOrganizationIdBase
@@ -274,7 +162,7 @@ export default base
   .router({
     list,
     get,
-    create,
+    update,
     phases: {
       create: createPhase,
       update: updatePhase,

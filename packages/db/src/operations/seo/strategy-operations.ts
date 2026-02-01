@@ -36,8 +36,8 @@ export async function getStrategyDetails(args: {
     args.db.query.seoStrategy.findFirst({
       where: (table, { eq, isNull, and }) =>
         and(
-          eq(table.projectId, args.projectId),
           eq(table.id, args.strategyId),
+          eq(table.projectId, args.projectId),
           isNull(table.deletedAt),
         ),
       with: {
