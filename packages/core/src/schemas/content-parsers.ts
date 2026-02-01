@@ -14,7 +14,7 @@ import { type } from "arktype";
  * - scheduled: Approved, ready to be published at specified date
  */
 export const contentStatusSchema = type(
-  "'suggested'|'suggestion-rejected'|'queued'|'planning'|'writing'|'reviewing-writing'|'pending-review'|'review-denied'|'scheduled'",
+  "'suggested'|'suggestion-rejected'|'queued'|'planning'|'writing'|'reviewing-writing'|'pending-review'|'review-denied'|'scheduled'|'published'",
 ).describe("The status of the content draft");
 
 export const CONTENT_STATUSES = [
@@ -27,6 +27,7 @@ export const CONTENT_STATUSES = [
   "pending-review",
   "review-denied",
   "scheduled",
+  "published",
 ] as const satisfies (typeof contentStatusSchema.infer)[];
 
 export type SeoFileStatus = (typeof CONTENT_STATUSES)[number];

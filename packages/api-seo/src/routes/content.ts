@@ -5,16 +5,11 @@ import {
 } from "@rectangular-labs/core/schemas/content-parsers";
 import { schema } from "@rectangular-labs/db";
 import {
-  addContentChatContribution,
-  addContentUserContribution,
   countDraftsByStatus,
   createContent,
   getDraftById,
-  getDraftContributingChats,
-  getDraftContributors,
   getNextVersionForSlug,
   getSeoProjectByIdentifierAndOrgId,
-  hardDeleteDraft,
   listDraftsByStatus,
   listDraftsForExport,
   listPublishedContent,
@@ -66,12 +61,12 @@ const listDrafts = withOrganizationIdBase
     }),
   )
   .handler(async ({ context, input }) => {
-    const hasBaseContentId = input.isNew === null ? null : !input.isNew;
+    const hasPublishedSnapshot = input.isNew === null ? null : !input.isNew;
     const rowsResult = await listDraftsByStatus({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      hasBaseContentId,
+      hasPublishedSnapshot,
       status: input.status,
       cursor: input.cursor,
       limit: input.limit + 1,
@@ -165,21 +160,21 @@ const getReviewCounts = withOrganizationIdBase
           db: context.db,
           organizationId: context.organization.id,
           projectId: input.projectId,
-          hasBaseContentId: false,
+          hasPublishedSnapshot: false,
           status: "suggested",
         }),
         countDraftsByStatus({
           db: context.db,
           organizationId: context.organization.id,
           projectId: input.projectId,
-          hasBaseContentId: false,
+          hasPublishedSnapshot: false,
           status: reviewStatuses,
         }),
         countDraftsByStatus({
           db: context.db,
           organizationId: context.organization.id,
           projectId: input.projectId,
-          hasBaseContentId: true,
+          hasPublishedSnapshot: true,
           status: reviewStatuses,
         }),
       ]);
@@ -518,7 +513,6 @@ const publishContent = base
       scheduledFor: draft.scheduledFor,
       now,
     });
-    // TODO(publication): send a webhook to the publish destination
 
     // Get next version number for this slug
     const nextVersionResult = await getNextVersionForSlug({
@@ -544,6 +538,7 @@ const publishContent = base
     const createdContentResult = await createContent(context.db, {
       organizationId: draft.organizationId,
       projectId: draft.projectId,
+      originatingDraftId: draft.id,
       slug: draft.slug,
       version: nextVersion,
       title: draft.title,
@@ -576,64 +571,16 @@ const publishContent = base
       });
     }
 
-    const [draftChatsResult, draftUsersResult] = await Promise.all([
-      getDraftContributingChats({
-        db: context.db,
-        draftId: draft.id,
-      }),
-      getDraftContributors({
-        db: context.db,
-        draftId: draft.id,
-      }),
-    ]);
-    if (!draftChatsResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load draft chat attribution.",
-        cause: draftChatsResult.error,
-      });
-    }
-    if (!draftUsersResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load draft contributor attribution.",
-        cause: draftUsersResult.error,
-      });
-    }
-
-    const [chatAttributionResult, userAttributionResult] = await Promise.all([
-      addContentChatContribution({
-        db: context.db,
-        contentId: createdContent.id,
-        chatIds: draftChatsResult.value.map((entry) => entry.chatId),
-      }),
-      addContentUserContribution({
-        db: context.db,
-        contentId: createdContent.id,
-        userIds: draftUsersResult.value.map((entry) => entry.userId),
-      }),
-    ]);
-    if (!chatAttributionResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to record published content chat attribution.",
-        cause: chatAttributionResult.error,
-      });
-    }
-    if (!userAttributionResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to record published content user attribution.",
-        cause: userAttributionResult.error,
-      });
-    }
-
-    const deletedDraftResult = await hardDeleteDraft({
-      db: context.db,
-      organizationId: draft.organizationId,
-      projectId: draft.projectId,
+    const updatedDraftResult = await updateContentDraft(context.db, {
       id: draft.id,
+      projectId: draft.projectId,
+      organizationId: draft.organizationId,
+      status: "published",
     });
-    if (!deletedDraftResult.ok) {
+    if (!updatedDraftResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to delete draft after publishing.",
-        cause: deletedDraftResult.error,
+        message: "Failed to update draft after publishing.",
+        cause: updatedDraftResult.error,
       });
     }
 

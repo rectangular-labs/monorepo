@@ -127,6 +127,20 @@
       "when": 1769228503610,
       "tag": "0017_dark_spiral",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1769782486158,
+      "tag": "0018_square_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1769931175777,
+      "tag": "0019_noisy_black_bird",
+      "breakpoints": true
     }
   ]
 }

@@ -1,8 +1,8 @@
 import type { DB, schema } from "@rectangular-labs/db";
 import {
   createContentDraft,
-  getContentBySlug,
   getDraftBySlug,
+  hasPublishedSnapshotForDraft,
 } from "@rectangular-labs/db/operations";
 import { err, ok, type Result } from "@rectangular-labs/result";
 
@@ -33,47 +33,20 @@ export async function ensureDraftForSlug(args: {
     return existingDraftResult;
   }
   if (existingDraftResult.value) {
-    return ok({ draft: existingDraftResult.value, isNew: false });
-  }
-
-  // Check if there's existing live content for this slug
-  const liveResult = await getContentBySlug({
-    db: args.db,
-    organizationId: args.organizationId,
-    projectId: args.projectId,
-    slug: args.slug,
-    withContent: true,
-  });
-  if (!liveResult.ok) {
-    return liveResult;
-  }
-  const live = liveResult.value;
-
-  if (live) {
-    // Create draft from live content (for editing existing published content)
-    const draftResult = await createContentDraft(args.db, {
-      organizationId: args.organizationId,
-      projectId: args.projectId,
-      title: live.title,
-      description: live.description,
-      slug: args.slug,
-      primaryKeyword: live.primaryKeyword,
-      notes: live.notes,
-      outline: live.outline,
-      articleType: live.articleType,
-      contentMarkdown: live.contentMarkdown,
-      baseContentId: live.id,
-      // Schedule for now - it's an update to existing content
-      scheduledFor: new Date(),
+    const snapshotResult = await hasPublishedSnapshotForDraft({
+      db: args.db,
+      draftId: existingDraftResult.value.id,
     });
-    if (!draftResult.ok) {
-      return draftResult;
+    if (!snapshotResult.ok) {
+      return snapshotResult;
     }
-
-    return ok({ draft: draftResult.value, isNew: true });
+    return ok({
+      draft: existingDraftResult.value,
+      isNew: !snapshotResult.value,
+    });
   }
 
-  // No live content - create brand new draft
+  // no existing draft, create brand new draft
   if (!args.primaryKeyword) {
     return err(new Error("Primary keyword is required to create a new draft."));
   }

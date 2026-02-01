@@ -54,6 +54,13 @@ export const seoProject = pgSeoTable(
         onUpdate: "cascade",
       },
     ),
+    strategySuggestionsWorkflowId: uuid().references(
+      (): AnyPgColumn => seoTaskRun.id,
+      {
+        onDelete: "set null",
+        onUpdate: "cascade",
+      },
+    ),
     ...timestamps,
   },
   (table) => [
@@ -66,6 +73,9 @@ export const seoProject = pgSeoTable(
     index("seo_project_website_url_idx").on(table.websiteUrl),
     index("seo_project_research_workflow_idx").on(
       table.projectResearchWorkflowId,
+    ),
+    index("seo_project_strategy_suggestions_workflow_idx").on(
+      table.strategySuggestionsWorkflowId,
     ),
   ],
 );
@@ -80,6 +90,10 @@ export const seoProjectRelations = relations(seoProject, ({ one, many }) => ({
   tasks: many(seoTaskRun),
   projectResearchWorkflow: one(seoTaskRun, {
     fields: [seoProject.projectResearchWorkflowId],
+    references: [seoTaskRun.id],
+  }),
+  strategySuggestionsWorkflow: one(seoTaskRun, {
+    fields: [seoProject.strategySuggestionsWorkflowId],
     references: [seoTaskRun.id],
   }),
 }));

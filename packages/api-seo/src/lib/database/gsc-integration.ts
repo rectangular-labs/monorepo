@@ -1,12 +1,14 @@
-import { getContext } from "@rectangular-labs/api-core/lib/context-storage";
+import type { Auth } from "@rectangular-labs/auth";
 import type { DB } from "@rectangular-labs/db";
 import { getProviderIntegration } from "@rectangular-labs/db/operations";
 import { ok, safe } from "@rectangular-labs/result";
+import { getContext } from "../../context";
 
 export async function getGscIntegrationForProject(params: {
   db: DB;
   projectId: string;
   organizationId: string;
+  authOverride?: Auth;
 }) {
   const integrationResult = await getProviderIntegration(params.db, {
     projectId: params.projectId,
@@ -23,11 +25,13 @@ export async function getGscIntegrationForProject(params: {
     return ok(null);
   }
 
-  const context = getContext();
+  const context = params.authOverride
+    ? { auth: params.authOverride }
+    : getContext();
   const accessTokenResult = await safe(() =>
     context.auth.api.getAccessToken({
       body: {
-        accountId: integration.accountId,
+        accountId: integration.accountId ?? undefined,
         userId: integration.account?.userId,
         providerId: "google",
       },

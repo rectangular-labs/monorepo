@@ -119,153 +119,151 @@ export function OnboardingUserBackground({
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card className="rounded-none sm:rounded-lg">
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
-          <CardContent className="grid gap-6">
-            <FieldGroup>
+    <Card className="rounded-none sm:rounded-lg">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
+        <CardContent className="grid gap-6">
+          <FieldGroup>
+            <Controller
+              control={form.control}
+              name="source"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="onboarding-user-background-source">
+                    Where did you first hear about us?
+                  </FieldLabel>
+                  <Select
+                    defaultValue={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger
+                      aria-invalid={fieldState.invalid}
+                      className="w-full"
+                      id="onboarding-user-background-source"
+                    >
+                      <SelectValue placeholder="Source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sourceOptions.map((k) => (
+                        <SelectItem key={k.value} value={k.value}>
+                          {k.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {isOtherSource && (
               <Controller
                 control={form.control}
-                name="source"
+                name="otherSource"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="onboarding-user-background-source">
-                      Where did you first hear about us?
+                    <FieldLabel htmlFor="onboarding-user-background-otherSource">
+                      Other Source
                     </FieldLabel>
-                    <Select
-                      defaultValue={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger
-                        aria-invalid={fieldState.invalid}
-                        className="w-full"
-                        id="onboarding-user-background-source"
-                      >
-                        <SelectValue placeholder="Source" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sourceOptions.map((k) => (
-                          <SelectItem key={k.value} value={k.value}>
-                            {k.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id="onboarding-user-background-otherSource"
+                      placeholder="Times Magazine"
+                      type="text"
+                    />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
               />
-
-              {isOtherSource && (
-                <Controller
-                  control={form.control}
-                  name="otherSource"
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="onboarding-user-background-otherSource">
-                        Other Source
-                      </FieldLabel>
-                      <Input
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                        id="onboarding-user-background-otherSource"
-                        placeholder="Times Magazine"
-                        type="text"
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              )}
-
-              <Controller
-                control={form.control}
-                name="goal"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="onboarding-user-background-goal">
-                      Where would you want Fluid Posts to help with the most?
-                    </FieldLabel>
-                    <Select
-                      defaultValue={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger
-                        aria-invalid={fieldState.invalid}
-                        className="w-full"
-                        id="onboarding-user-background-goal"
-                      >
-                        <SelectValue placeholder="goals" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {goalOptions.map((k) => (
-                          <SelectItem key={k.value} value={k.value}>
-                            {k.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {isOtherGoal && (
-                <Controller
-                  control={form.control}
-                  name="otherGoal"
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="onboarding-user-background-otherGoal">
-                        Other Goal
-                      </FieldLabel>
-                      <Input
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                        id="onboarding-user-background-otherGoal"
-                        placeholder="Finding Satoshi's private key"
-                        type="text"
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              )}
-            </FieldGroup>
-
-            {form.formState.errors.root && (
-              <FieldError errors={[form.formState.errors.root]} />
             )}
-          </CardContent>
-          <CardFooter>
-            <div className="flex w-full justify-between">
-              <Button
-                disabled={isPending}
-                onClick={() => matcher.prev()}
-                type="button"
-                variant="ghost"
-              >
-                Back
-              </Button>
-              <Button className={"w-fit"} isLoading={isPending} type="submit">
-                Next
-              </Button>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+
+            <Controller
+              control={form.control}
+              name="goal"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="onboarding-user-background-goal">
+                    Where would you want Fluid Posts to help with the most?
+                  </FieldLabel>
+                  <Select
+                    defaultValue={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger
+                      aria-invalid={fieldState.invalid}
+                      className="w-full"
+                      id="onboarding-user-background-goal"
+                    >
+                      <SelectValue placeholder="goals" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {goalOptions.map((k) => (
+                        <SelectItem key={k.value} value={k.value}>
+                          {k.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {isOtherGoal && (
+              <Controller
+                control={form.control}
+                name="otherGoal"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="onboarding-user-background-otherGoal">
+                      Other Goal
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      id="onboarding-user-background-otherGoal"
+                      placeholder="Finding Satoshi's private key"
+                      type="text"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            )}
+          </FieldGroup>
+
+          {form.formState.errors.root && (
+            <FieldError errors={[form.formState.errors.root]} />
+          )}
+        </CardContent>
+        <CardFooter>
+          <div className="flex w-full justify-between">
+            <Button
+              disabled={isPending}
+              onClick={() => matcher.prev()}
+              type="button"
+              variant="ghost"
+            >
+              Back
+            </Button>
+            <Button className={"w-fit"} isLoading={isPending} type="submit">
+              Next
+            </Button>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }

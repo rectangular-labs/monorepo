@@ -6,7 +6,6 @@ import {
   ARTICLE_TYPE_TO_WRITER_RULE,
   type ArticleType,
 } from "../workspace/workflow.constant";
-import { formatBusinessBackground } from "./format-business-background";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
 import { createInternalLinksToolWithMetadata } from "./tools/internal-links-tool";
 import { createPlannerToolsWithMetadata } from "./tools/planner-tools";
@@ -20,6 +19,7 @@ import {
   formatToolSkillsSection,
 } from "./tools/utils";
 import { createWebToolsWithMetadata } from "./tools/web-tools";
+import { formatBusinessBackground } from "./utils/format-business-background";
 
 export type WriterPromptProjectContext = Pick<
   typeof schema.seoProject.$inferSelect,

@@ -104,6 +104,9 @@ const status = protectedBase
         if (taskRun.inputData.type === "seo-understand-site") {
           return context.seoOnboardingWorkflow.get(taskRun.taskId);
         }
+        if (taskRun.inputData.type === "seo-generate-strategy-suggestions") {
+          return context.seoStrategySuggestionsWorkflow.get(taskRun.taskId);
+        }
         return null;
       })();
 

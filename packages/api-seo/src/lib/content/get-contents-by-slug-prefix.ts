@@ -70,10 +70,11 @@ export async function getContentsBySlugPrefix(args: {
 
   // Add drafts
   for (const draft of draftBySlug.values()) {
+    const liveForSlug = liveBySlug.get(draft.slug);
     entries.push({
       slug: draft.slug,
       status: draft.status,
-      contentId: draft.baseContentId ?? undefined,
+      contentId: liveForSlug?.id,
     });
   }
 

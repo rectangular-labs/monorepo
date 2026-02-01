@@ -41,6 +41,11 @@ const steps = [
     description: "Connect a destination to publish your content.",
   },
   {
+    id: "strategy-insights",
+    title: "Strategy Insights",
+    description: "We generated a few strategy suggestions based on your site.",
+  },
+  {
     id: "all-set",
     title: "You're all set!",
     description:

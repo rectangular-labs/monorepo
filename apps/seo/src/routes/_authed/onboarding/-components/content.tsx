@@ -9,6 +9,7 @@ import { OnboardingConnectGsc } from "./connect-gsc";
 import { OnboardingConnectGscProperty } from "./connect-gsc-property";
 import { OnboardingConnectPublishing } from "./connect-publishing";
 import { OnboardingProgress } from "./onboarding-progress";
+import { OnboardingStrategyInsights } from "./strategy-insights";
 
 export function OnboardingContent() {
   const matcher = OnboardingSteps.useStepper();
@@ -58,6 +59,12 @@ export function OnboardingContent() {
           ),
           "connect-publishing": (step) => (
             <OnboardingConnectPublishing
+              description={step.description}
+              title={step.title}
+            />
+          ),
+          "strategy-insights": (step) => (
+            <OnboardingStrategyInsights
               description={step.description}
               title={step.title}
             />

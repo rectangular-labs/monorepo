@@ -17,8 +17,7 @@ import {
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
-import { seoContentChat } from "./content-chat-schema";
-import { seoContentUser } from "./content-user-schema";
+import { seoContentDraft } from "./content-draft-schema";
 import { seoProject } from "./project-schema";
 
 /**
@@ -41,6 +40,12 @@ export const seoContent = pgSeoTable(
     projectId: uuid()
       .notNull()
       .references(() => seoProject.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    originatingDraftId: uuid()
+      .notNull()
+      .references(() => seoContentDraft.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
@@ -85,7 +90,11 @@ export const seoContent = pgSeoTable(
   ],
 );
 
-export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
+export const seoContentRelations = relations(seoContent, ({ one }) => ({
+  originatingDraft: one(seoContentDraft, {
+    fields: [seoContent.originatingDraftId],
+    references: [seoContentDraft.id],
+  }),
   project: one(seoProject, {
     fields: [seoContent.projectId],
     references: [seoProject.id],
@@ -94,8 +103,6 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
     fields: [seoContent.organizationId],
     references: [organization.id],
   }),
-  contributingChatsMap: many(seoContentChat),
-  contributorsMap: many(seoContentUser),
 }));
 
 export const seoContentInsertSchema = createInsertSchema(seoContent).omit(
