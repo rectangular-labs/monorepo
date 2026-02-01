@@ -176,8 +176,13 @@ export async function getCurrentStrategyPhase(args: {
 }) {
   const result = await safe(() =>
     args.db.query.seoStrategyPhase.findFirst({
-      where: (table, { eq, isNull, and }) =>
-        and(eq(table.strategyId, args.strategyId), isNull(table.deletedAt)),
+      where: (table, { eq, isNull, and, ne }) =>
+        and(
+          eq(table.strategyId, args.strategyId),
+          isNull(table.deletedAt),
+          ne(table.status, "dismissed"),
+          ne(table.status, "suggestion"),
+        ),
       orderBy: (fields, { desc }) => [desc(fields.createdAt)],
     }),
   );

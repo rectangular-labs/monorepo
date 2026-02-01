@@ -1,5 +1,5 @@
 import {
-  STRATEGY_PHASE_STATUSES,
+  STRATEGY_STATUSES,
   type strategyGoalSchema,
 } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
@@ -31,9 +31,7 @@ export const seoStrategy = pgSeoTable(
     motivation: text().notNull(),
     goal: jsonb().$type<typeof strategyGoalSchema.infer>().notNull(),
     dismissalReason: text(),
-    status: text({ enum: STRATEGY_PHASE_STATUSES })
-      .notNull()
-      .default("suggestion"),
+    status: text({ enum: STRATEGY_STATUSES }).notNull().default("suggestion"),
     ...timestamps,
   },
   (table) => [
