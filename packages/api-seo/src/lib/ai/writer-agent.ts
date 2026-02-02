@@ -80,7 +80,6 @@ ${args.skillsSection}
 - Use structured formatting (lists/tables) for scannability when helpful.
 - Use semantic variations and LSI keywords where they fit naturally.
 - Follow the outline in outline tags closely; expand each section into helpful, grounded prose.
-- Include 3-5 internal links (use internal_links if outline lacks them).
 - Include 2-4 authoritative external links (use web_search if outline lacks them).
 - Write as an authoritative editor, not a conversational assistant
 - Never emit meta labels like "Opinion:", "Caption:", "HeroImage:", or "CTA:"
@@ -90,7 +89,7 @@ ${args.skillsSection}
 - Expand abbreviations on first use.
 - Keep Markdown clean: normal word spacing, no excessive blank lines, and straight quotes (")
 - NEVER use thematic breaks (---) or HTML line breaks (<br/> or <br>) anywhere in the article.
-- Headings must be clear, direct, and concise. NEVER include parenthetical elaborations or explanations in headings (e.g., use "Model data and integrations" NOT "Model your data and integrations (so the things stays true)").
+- Headings must be clear, direct, and concise. NEVER include parenthetical elaborations or explanations in headings (e.g., use "Model data and integrations" NOT "Model your data and integrations (so the thing stays true)").
 - Opening paragraph rules:
   - Start with a hook that directly addresses the reader's problem or goal.
   - Avoid generic statements like "In today's world..." or "Many businesses...".
@@ -111,7 +110,7 @@ ${args.skillsSection}
   - use tables when comparing (pricing, specs, rankings), as a summary for long listicle, and for any structured content that might have too many entries. 
   - Bold the headings for the tables (first row, and if applicable, first column)
 - External links rules
-  - Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
+  - Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
   - Statistics rules (strict)
     - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
     - Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
