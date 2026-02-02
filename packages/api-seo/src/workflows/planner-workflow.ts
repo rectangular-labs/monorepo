@@ -225,7 +225,7 @@ ${
     : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. 
+- Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT invent or guess URLs. Embed links inline within the exact phrase or sentence they support. 
     - Do not add standalone "Source:" sentences where we state some facts and then add a link at the end.
     <example>
       The average home renovation [costs $25,000](https://example.com/home-renovation-facts) which is a [10% increase](https://example.com/home-renovation-facts-2) from last year.
