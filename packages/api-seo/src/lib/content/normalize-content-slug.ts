@@ -11,9 +11,9 @@ function normalizeSlugToKebabCase(slug: string): string {
   const normalized = slug
     .toLowerCase()
     .replace(/[\s_]+/g, "-") // Replace spaces and underscores with hyphens
-    .replace(/-+/g, "-") // Remove consecutive hyphens
-    .replace(/[^a-z0-9/-]/g, "") // Remove invalid characters (keep alphanumeric, hyphens, slashes)
-    .replace(/-+/g, "-"); // Clean up any remaining consecutive hyphens
+    .replace(/[^a-z0-9/-]/g, "") // Remove invalid characters
+    .replace(/-+/g, "-") // Collapse consecutive hyphens
+    .replace(/-$/, ""); // Remove trailing hyphen
 
   return hasLeadingSlash && !normalized.startsWith("/")
     ? `/${normalized}`
@@ -29,7 +29,7 @@ function normalizeSlugToKebabCase(slug: string): string {
  * - Apply kebab-case normalization
  */
 export function normalizeContentSlug(path: string): string {
-  const trimmed = path.trim();
+  const trimmed = normalizeSlugToKebabCase(path.trim());
   const normalized = trimmed.replace(/\/+/g, "/");
   const removeTrailingSlash = normalized.endsWith("/")
     ? normalized.slice(0, -1)
@@ -38,6 +38,5 @@ export function normalizeContentSlug(path: string): string {
     ? removeTrailingSlash
     : `/${removeTrailingSlash}`;
 
-  // Also apply kebab-case normalization for consistency
-  return normalizeSlugToKebabCase(withLeadingSlash);
+  return withLeadingSlash;
 }
