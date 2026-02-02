@@ -39,10 +39,6 @@ import {
   QueueItemDescription,
   QueueItemIndicator,
   QueueList,
-  QueueSection,
-  QueueSectionContent,
-  QueueSectionLabel,
-  QueueSectionTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/queue";
 import {
   Reasoning,
@@ -616,10 +612,6 @@ Specifically:
     return todoSnapshot.filter((t) => t.status === "open");
   }, [todoSnapshot]);
 
-  const doneTodos = useMemo(() => {
-    return todoSnapshot.filter((t) => t.status === "done");
-  }, [todoSnapshot]);
-
   const isInputDisabled = isMessagesLoading;
   const showMessagesLoading = isMessagesLoading && messages.length === 0;
 
@@ -882,59 +874,25 @@ Specifically:
         </Conversation>
 
         <div className="border-t">
-          {(openTodos.length > 0 || doneTodos.length > 0) && (
+          {openTodos.length > 0 && (
             <div className="px-3 pt-2">
               <Queue>
-                <QueueSection defaultOpen={openTodos.length > 0}>
-                  <QueueSectionTrigger>
-                    <QueueSectionLabel count={openTodos.length} label="Open" />
-                  </QueueSectionTrigger>
-                  <QueueSectionContent>
-                    <QueueList>
-                      {openTodos.map((t) => (
-                        <QueueItem key={t.id}>
-                          <div className="flex items-start gap-2">
-                            <QueueItemIndicator completed={false} />
-                            <QueueItemContent>{t.title}</QueueItemContent>
-                          </div>
-                          {t.notes ? (
-                            <QueueItemDescription>
-                              {t.notes}
-                            </QueueItemDescription>
-                          ) : null}
-                        </QueueItem>
-                      ))}
-                    </QueueList>
-                  </QueueSectionContent>
-                </QueueSection>
-
-                <QueueSection defaultOpen={false}>
-                  <QueueSectionTrigger>
-                    <QueueSectionLabel
-                      count={doneTodos.length}
-                      label="Completed"
-                    />
-                  </QueueSectionTrigger>
-                  <QueueSectionContent>
-                    <QueueList>
-                      {doneTodos.map((t) => (
-                        <QueueItem key={t.id}>
-                          <div className="flex items-start gap-2">
-                            <QueueItemIndicator completed />
-                            <QueueItemContent completed>
-                              {t.title}
-                            </QueueItemContent>
-                          </div>
-                          {t.notes ? (
-                            <QueueItemDescription completed>
-                              {t.notes}
-                            </QueueItemDescription>
-                          ) : null}
-                        </QueueItem>
-                      ))}
-                    </QueueList>
-                  </QueueSectionContent>
-                </QueueSection>
+                <QueueList>
+                  {openTodos.map((t) => (
+                    <QueueItem key={t.id}>
+                      <div className="flex items-start gap-2">
+                        <QueueItemIndicator
+                          className="shrink-0"
+                          completed={false}
+                        />
+                        <QueueItemContent>{t.title}</QueueItemContent>
+                      </div>
+                      {t.notes ? (
+                        <QueueItemDescription>{t.notes}</QueueItemDescription>
+                      ) : null}
+                    </QueueItem>
+                  ))}
+                </QueueList>
               </Queue>
             </div>
           )}

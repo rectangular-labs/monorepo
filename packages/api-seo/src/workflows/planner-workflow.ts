@@ -200,7 +200,8 @@ EVERYTHING in the article should be focused AND in service of the search intent.
   - Meta description (max 160 characters): clear, succinct, keyword-rich summary that directly signals the article fulfills the user's main search intent (what they want to learn/answer)
   - Title + meta title (max 60 characters): clear and enticing for the user to click on, includes the primary keyword once (natural/organic), and answers the search intent directly; do not append extra qualifiers (no "X, Y and Z" and no parentheses), just the title
 - The plan MUST also include the H2/H3 outline with section-by-section notes (what to say, what to cite, and any unique angle to add).
-  - Headings should always be clear, direct and succinct. Reader should be able to understand what the section is covering. 
+  - Headings must be clear, direct, and concise. Reader should immediately understand what the section covers.
+  - NEVER include parenthetical elaborations in headings (e.g., use "Model data and integrations" NOT "Model your data and integrations (so the portal stays true)").
   - First H2 - incredibly focused and targeted toward answering the main intent of the searcher
   - Most H2s should have the primary keyword ${primaryKeyword} naturally written into it
   - H3 be related to the H2, and to the point
@@ -209,7 +210,7 @@ EVERYTHING in the article should be focused AND in service of the search intent.
   2. contextualize the topic for the reader's search intent
   3. contextualize how this has been recently important and what recent developments in the space are (if applicable - i.e. if the topic has significant recent updates)
   4. summarize the topics that the article would cover 
-- Include a wrap-up section that summarizes what was covered; vary the heading instead of always using "Conclusion".
+- Include a section at the end that summarizes what was covered; vary the heading instead of always using "Conclusion". For example, we can talk about wrapping up, summarizing what we covered, etc. (of course, conclusion could also be a good fit)
 - Add in a target word count to the plan so the writer knows how much to write.
   - Most articles should have a word count around 1,000 to 1,500 words. Long research pieces can have more, but 95% of articles should fall within 1,000 to 1,500 words. 
   - If there is a struggle to keep it below this word count, look to focus the article up, and talk about fewer ideas. 
@@ -224,29 +225,46 @@ ${
     : "- Do not suggest a Frequently Asked Questions section."
 }
 - Use the related_searches in the live-serp-data to suggest semantic variations and LSI keywords to naturally insert in various sections.
-- Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. Do not add standalone “Source:” sentences.
-  - Propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
+- Add external links only when they directly support a specific claim or statistic. All external links must be validated (page exists, no 404, relevant to the claim) via web_fetch or are returned from web_search. DO NOT put link placeholders or un-validated links, and DO NOT not invent or guess URLs. Embed links inline within the exact phrase or sentence they support. 
+    - Do not add standalone "Source:" sentences where we state some facts and then add a link at the end.
     <example>
-      When thinking about [process automation](/path/to/process-automation-article), you should focus on final payoff instead of the initial setup.
+      The average home renovation [costs $25,000](https://example.com/home-renovation-facts) which is a [10% increase](https://example.com/home-renovation-facts-2) from last year.
     </example>
-  - Statistics rules (strict)
-    - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
-    - Do not treat marketing or CTA language as evidence. (e.g. “See how X reduces effort by 80%” is not necessarily a verified statistic).
-    - If a number cannot be verified exactly, remove the number and rewrite the claim qualitatively.
-    - The statistic must match the source exactly — no rounding, no reinterpretation.
-  - Source quality rules
-    - Prefer research, standards bodies, reputable publications, or industry reports.
-    - Vendor pages are acceptable only for definitions or explanations — not performance claims.
-    - If the page does not clearly support the statement being made, do not use it.
+    <bad-example>
+      The average home renovation costs $25,000 (source: https://example.com/home-renovation-facts) which is a 10% increase from last year (source: https://example.com/home-renovation-facts-2).
+    </bad-example>
+- Internal links rules:
+  - Propose 5-10 highly relevant internal links to include (and suggested anchor text) in markdown link syntax.
+  - CRITICAL: Copy URLs exactly as returned by web_search. Do NOT add, remove, or modify any characters in the URL (no trailing punctuation, no possessive 's, no apostrophes).
+  - Use descriptive anchor text (2-5 words), not generic phrases like "click here", "here", "this", or "learn more".
+  - Do NOT place links at the very end of sentences in parentheses like "(this)" or "(here)".
   <example>
-    Duplicate invoices typically represent a small but real portion of AP leakage, [often cited as well under 1% of annual spend](/path/to/industry overview).
+    Explore our [home renovation guide](/home-renovation) to understand the key benefits.
   </example>
   <example>
-    According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
+    Teams using [workflow templates](/templates/workflow-templates) save significant time on setup.
   </example>
-  <example>
-    Up to [20% of companies](url_link) will be disrupted by AI in the next 5 years.
-  </example>
+  <bad-example>
+    Learn more about automation (here)[/automation].
+  </bad-example>
+- Statistics rules (strict)
+  - Use numbers only if the source explicitly states them as findings (research, report, benchmark).
+  - Do not treat marketing or CTA language as evidence. (e.g. "See how X reduces effort by 80%" is not necessarily a verified statistic).
+  - If a number cannot be verified exactly, remove the number and rewrite the claim qualitatively.
+  - The statistic must match the source exactly — no rounding, no reinterpretation.
+- Source quality rules
+  - Prefer research, standards bodies, reputable publications, or industry reports.
+  - Vendor pages are acceptable only for definitions or explanations — not performance claims.
+  - If the page does not clearly support the statement being made, do not use it.
+<example>
+  Duplicate invoices typically represent a small but real portion of AP leakage, [often cited as well under 1% of annual spend](/path/to/industry overview).
+</example>
+<example>
+  According to the [Harvard Business Review](url_link), the most successful companies of the future will be those that can innovate fast.
+</example>
+<example>
+  Up to [20% of companies](url_link) will be disrupted by AI in the next 5 years.
+</example>
 </critical-plan-requirements>
 
 
