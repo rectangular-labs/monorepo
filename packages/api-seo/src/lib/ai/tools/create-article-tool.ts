@@ -2,6 +2,7 @@ import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parser
 import type { DB, schema } from "@rectangular-labs/db";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
+import { normalizeContentSlug } from "../../content/normalize-content-slug";
 import { writeContentDraft } from "../../content/write-content-draft";
 import type { AgentToolDefinition } from "./utils";
 
@@ -54,7 +55,7 @@ export function createCreateArticleToolWithMetadata({
     ),
     async execute({
       primaryKeyword,
-      slug,
+      slug: rawSlug,
       title,
       description,
       outline,
@@ -66,9 +67,12 @@ export function createCreateArticleToolWithMetadata({
         return { success: false, message: "primaryKeyword is required." };
       }
 
-      if (!slug.startsWith("/")) {
+      if (!rawSlug.startsWith("/")) {
         return { success: false, message: "slug must start with '/'." };
       }
+
+      // Normalize slug to kebab-case (lowercase, hyphens)
+      const slug = normalizeContentSlug(rawSlug);
 
       const status = project.publishingSettings?.requireSuggestionReview
         ? "suggested"
