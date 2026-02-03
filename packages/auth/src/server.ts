@@ -62,7 +62,11 @@ export function initAuthHandler({
     ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
     : baseURL; // prod / localhost domains
   const emailDriver = createEmailClient({
-    driver: inboundApiKey ? inboundDriver(inboundApiKey) : undefined,
+    driver: inboundApiKey
+      ? inboundDriver({
+          apiKey: inboundApiKey,
+        })
+      : undefined,
   });
 
   const config = {
@@ -170,12 +174,16 @@ export function initAuthHandler({
       twoFactor(),
       organization({
         sendInvitationEmail: async ({ email, id, organization, inviter }) => {
-          await emailDriver.send({
+          const inviteUrl = `${baseURL}/invite/${id}`;
+          const result = await emailDriver.send({
             from: fromEmail,
             to: email,
             subject: `You have been invited to join ${organization.name} by ${inviter.user.name}`,
-            text: `You have been invited to join ${organization.name} by ${inviter.user.name}. Accept the invitation by entering the following code: ${id}`,
+            text: `You have been invited to join ${organization.name} by ${inviter.user.name}.\n\nClick the link below to accept the invitation:\n${inviteUrl}\n\nOr enter this code when prompted: ${id}`,
           });
+          if (!result.success) {
+            throw result.error;
+          }
         },
         organizationHooks: {
           beforeCreateOrganization: ({ organization }) => {
