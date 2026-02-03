@@ -39,6 +39,10 @@ import {
   QueueItemDescription,
   QueueItemIndicator,
   QueueList,
+  QueueSection,
+  QueueSectionContent,
+  QueueSectionLabel,
+  QueueSectionTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/queue";
 import {
   Reasoning,
@@ -176,6 +180,10 @@ function AskQuestionsToolPart({
         {questions.map((q) => {
           const selected = answers[q.id]?.selected ?? [];
           const allowMultiple = q.allow_multiple === true;
+          const hasOther = q.options.some((o) => o.id === "other");
+          const options = hasOther
+            ? q.options
+            : [...q.options, { id: "other", label: "Other" }];
 
           return (
             <div className="space-y-2" key={q.id}>
@@ -183,63 +191,61 @@ function AskQuestionsToolPart({
 
               {allowMultiple ? (
                 <div className="space-y-2">
-                  {[...q.options, { id: "other", label: "Other" }].map(
-                    (opt) => {
-                      const checked = selected.includes(opt.id);
-                      const checkboxId = `${q.id}:${opt.id}`;
-                      const isOther = opt.id === "other";
+                  {options.map((opt) => {
+                    const checked = selected.includes(opt.id);
+                    const checkboxId = `${q.id}:${opt.id}`;
+                    const isOther = opt.id === "other";
 
-                      return (
-                        <div key={opt.id}>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              checked={checked}
-                              id={checkboxId}
-                              onCheckedChange={(next) => {
-                                const isChecked = next === true;
-                                setAnswers((prev) => {
-                                  const current = prev[q.id]?.selected ?? [];
-                                  const nextSelected = isChecked
-                                    ? Array.from(new Set([...current, opt.id]))
-                                    : current.filter((id) => id !== opt.id);
-                                  return {
-                                    ...prev,
-                                    [q.id]: {
-                                      selected: nextSelected,
-                                      otherText: prev[q.id]?.otherText ?? "",
-                                    },
-                                  };
-                                });
-                              }}
-                            />
-                            <Label
-                              className="cursor-pointer"
-                              htmlFor={checkboxId}
-                            >
-                              {opt.label}
-                            </Label>
-                          </div>
-                          {isOther && checked && (
-                            <div className="mt-2 ml-6">
-                              <Input
-                                onChange={(e) => {
-                                  setAnswers((prev) => ({
-                                    ...prev,
-                                    [q.id]: {
-                                      selected: prev[q.id]?.selected ?? [],
-                                      otherText: e.target.value,
-                                    },
-                                  }));
-                                }}
-                                placeholder="Please specify..."
-                                value={answers[q.id]?.otherText ?? ""}
-                              />
-                            </div>
-                          )}
+                    return (
+                      <div key={opt.id}>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={checked}
+                            id={checkboxId}
+                            onCheckedChange={(next) => {
+                              const isChecked = next === true;
+                              setAnswers((prev) => {
+                                const current = prev[q.id]?.selected ?? [];
+                                const nextSelected = isChecked
+                                  ? Array.from(new Set([...current, opt.id]))
+                                  : current.filter((id) => id !== opt.id);
+                                return {
+                                  ...prev,
+                                  [q.id]: {
+                                    selected: nextSelected,
+                                    otherText: prev[q.id]?.otherText ?? "",
+                                  },
+                                };
+                              });
+                            }}
+                          />
+                          <Label
+                            className="cursor-pointer"
+                            htmlFor={checkboxId}
+                          >
+                            {opt.label}
+                          </Label>
                         </div>
-                      );
-                    },
-                  )}
+                        {isOther && checked && (
+                          <div className="mt-2 ml-6">
+                            <Input
+                              onChange={(e) => {
+                                setAnswers((prev) => ({
+                                  ...prev,
+                                  [q.id]: {
+                                    selected: prev[q.id]?.selected ?? [],
+                                    otherText: e.target.value,
+                                  },
+                                }));
+                              }}
+                              placeholder="Please specify..."
+                              value={answers[q.id]?.otherText ?? ""}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <RadioGroup
@@ -254,46 +260,44 @@ function AskQuestionsToolPart({
                   }}
                   value={selected[0] ?? ""}
                 >
-                  {[...q.options, { id: "other", label: "Other" }].map(
-                    (opt) => {
-                      const isOther = opt.id === "other";
-                      const isSelected = selected.includes(opt.id);
+                  {options.map((opt) => {
+                    const isOther = opt.id === "other";
+                    const isSelected = selected.includes(opt.id);
 
-                      return (
-                        <div className="space-y-2" key={opt.id}>
-                          <div className="flex items-center gap-2">
-                            <RadioGroupItem
-                              id={`${q.id}:${opt.id}`}
-                              value={opt.id}
-                            />
-                            <Label
-                              className="cursor-pointer"
-                              htmlFor={`${q.id}:${opt.id}`}
-                            >
-                              {opt.label}
-                            </Label>
-                          </div>
-                          {isOther && isSelected && (
-                            <div className="ml-6">
-                              <Input
-                                onChange={(e) => {
-                                  setAnswers((prev) => ({
-                                    ...prev,
-                                    [q.id]: {
-                                      selected: prev[q.id]?.selected ?? [],
-                                      otherText: e.target.value,
-                                    },
-                                  }));
-                                }}
-                                placeholder="Please specify..."
-                                value={answers[q.id]?.otherText ?? ""}
-                              />
-                            </div>
-                          )}
+                    return (
+                      <div className="space-y-2" key={opt.id}>
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem
+                            id={`${q.id}:${opt.id}`}
+                            value={opt.id}
+                          />
+                          <Label
+                            className="cursor-pointer"
+                            htmlFor={`${q.id}:${opt.id}`}
+                          >
+                            {opt.label}
+                          </Label>
                         </div>
-                      );
-                    },
-                  )}
+                        {isOther && isSelected && (
+                          <div className="ml-6">
+                            <Input
+                              onChange={(e) => {
+                                setAnswers((prev) => ({
+                                  ...prev,
+                                  [q.id]: {
+                                    selected: prev[q.id]?.selected ?? [],
+                                    otherText: e.target.value,
+                                  },
+                                }));
+                              }}
+                              placeholder="Please specify..."
+                              value={answers[q.id]?.otherText ?? ""}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </RadioGroup>
               )}
             </div>
@@ -606,6 +610,9 @@ Specifically:
       { body: {} },
     );
     setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
   };
 
   const openTodos = useMemo(() => {
@@ -877,22 +884,31 @@ Specifically:
           {openTodos.length > 0 && (
             <div className="px-3 pt-2">
               <Queue>
-                <QueueList>
-                  {openTodos.map((t) => (
-                    <QueueItem key={t.id}>
-                      <div className="flex items-start gap-2">
-                        <QueueItemIndicator
-                          className="shrink-0"
-                          completed={false}
-                        />
-                        <QueueItemContent>{t.title}</QueueItemContent>
-                      </div>
-                      {t.notes ? (
-                        <QueueItemDescription>{t.notes}</QueueItemDescription>
-                      ) : null}
-                    </QueueItem>
-                  ))}
-                </QueueList>
+                <QueueSection defaultOpen={false}>
+                  <QueueSectionTrigger>
+                    <QueueSectionLabel count={openTodos.length} label="Tasks" />
+                  </QueueSectionTrigger>
+                  <QueueSectionContent>
+                    <QueueList>
+                      {openTodos.map((t) => (
+                        <QueueItem key={t.id}>
+                          <div className="flex items-start gap-2">
+                            <QueueItemIndicator
+                              className="shrink-0"
+                              completed={false}
+                            />
+                            <QueueItemContent>{t.title}</QueueItemContent>
+                          </div>
+                          {t.notes ? (
+                            <QueueItemDescription>
+                              {t.notes}
+                            </QueueItemDescription>
+                          ) : null}
+                        </QueueItem>
+                      ))}
+                    </QueueList>
+                  </QueueSectionContent>
+                </QueueSection>
               </Queue>
             </div>
           )}
