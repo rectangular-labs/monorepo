@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "dotenvx decrypt -f ../../.env --stdout > .env.local && node -e \"const fs=require('node:fs'); const p='../../.env.local'; if (fs.existsSync(p)) fs.appendFileSync('.env.local', fs.readFileSync(p));\" && pnpm cf-typegen && pnpm with-env-local vite",
     "build:local": "pnpm with-env-local vite build",
-    "build:preview": "pnpm with-env-preview vite build ",
+    "build:preview": "pnpm with-env-preview vite build",
     "build:production": "pnpm with-env-production vite build",
     "serve:local": "pnpm with-env-local vite preview",
     "test": "vitest run",
