@@ -6,7 +6,7 @@ import { generateSitemap } from "tanstack-router-sitemap";
 import mkcert from "vite-plugin-mkcert";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
-import { clientEnv } from "~/lib/env";
+import { clientEnv } from "./src/lib/env";
 import { sitemap } from "./src/lib/sitemap";
 
 clientEnv();
