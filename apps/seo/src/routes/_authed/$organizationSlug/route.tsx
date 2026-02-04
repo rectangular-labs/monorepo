@@ -1,6 +1,12 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useMatchRoute,
+} from "@tanstack/react-router";
 import { getApiClient, getApiClientRq } from "~/lib/api";
 import { AUTO_ROUTE_ORG } from "~/lib/constants";
+import { NavLink } from "../-components/nav-link";
 import { AppHeader } from "./-components/app-header";
 import { ProjectChatProvider } from "./-components/project-chat-provider";
 
@@ -92,10 +98,38 @@ export const Route = createFileRoute("/_authed/$organizationSlug")({
 });
 
 function RouteComponent() {
+  const { organizationSlug } = Route.useParams();
+  const matchRoute = useMatchRoute();
+
+  const isOnOrganizationRoute = matchRoute({
+    to: "/$organizationSlug",
+  });
+  const isOnSettingsRoute = matchRoute({
+    to: "/$organizationSlug/settings/team",
+    fuzzy: true,
+  });
+
   return (
     <ProjectChatProvider>
       <AppHeader />
       <div className="flex w-full flex-1 flex-col bg-background">
+        {(isOnOrganizationRoute || isOnSettingsRoute) && (
+          <nav className="flex items-center gap-4 overflow-x-auto border-b px-4 pb-2 text-muted-foreground">
+            <NavLink
+              activeOptions={{ exact: true }}
+              params={{ organizationSlug }}
+              to="/$organizationSlug"
+            >
+              Overview
+            </NavLink>
+            <NavLink
+              params={{ organizationSlug }}
+              to="/$organizationSlug/settings/team"
+            >
+              Team
+            </NavLink>
+          </nav>
+        )}
         <Outlet />
       </div>
     </ProjectChatProvider>

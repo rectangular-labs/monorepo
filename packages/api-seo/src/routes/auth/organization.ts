@@ -1,6 +1,5 @@
 import { ORPCError } from "@orpc/client";
 import { schema } from "@rectangular-labs/db";
-import { getMembersByOrganizationId } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
 import { protectedBase } from "../../context";
 import { validateOrganizationMiddleware } from "../../lib/middleware/validate-organization";
@@ -93,41 +92,76 @@ const members = protectedBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      members: schema.memberSelectSchema
-        .merge(
-          type({
-            user: schema.userSelectSchema.pick("id", "name", "email", "image"),
-          }),
-        )
-        .array(),
+      members: type({
+        "...": schema.memberSelectSchema,
+        user: schema.userSelectSchema.pick("id", "name", "email", "image"),
+      }).array(),
+      total: "number",
     }),
   )
   .handler(async ({ context }) => {
-    const rowsResult = await getMembersByOrganizationId(
-      context.db,
-      context.organization.id,
-    );
-
-    if (!rowsResult.ok) {
+    if (!context.reqHeaders) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: rowsResult.error.message,
-        cause: rowsResult.error,
+        message: "Missing request headers",
       });
     }
-    const rows = rowsResult.value;
+
+    const result = await context.auth.api.listMembers({
+      headers: context.reqHeaders,
+      query: {
+        organizationId: context.organization.id,
+        sortBy: "createdAt",
+        sortDirection: "desc",
+      },
+    });
+
     return {
-      members: rows.map((member) => ({
+      members: result.members.map((member) => ({
         ...member,
         user: {
-          id: member.user.id,
-          name: member.user.name,
-          email: member.user.email,
+          ...member.user,
           image: member.user.image ?? null,
         },
+      })),
+      total: result.total ?? result.members.length,
+    };
+  });
+
+const invitations = protectedBase
+  .route({ method: "GET", path: "/invitations" })
+  .input(type({ organizationIdentifier: "string" }))
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(
+    type({
+      invitations: schema.invitationSelectSchema.array(),
+    }),
+  )
+  .handler(async ({ context }) => {
+    if (!context.reqHeaders) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Missing request headers",
+      });
+    }
+
+    const result = await context.auth.api.listInvitations({
+      headers: context.reqHeaders,
+      query: {
+        organizationId: context.organization.id,
+      },
+    });
+
+    // Filter to only pending invitations
+    const pendingInvitations = result.filter(
+      (invitation) => invitation.status === "pending",
+    );
+
+    return {
+      invitations: pendingInvitations.map((invitation) => ({
+        ...invitation,
       })),
     };
   });
 
 export default protectedBase
   .prefix("/organization")
-  .router({ active, setActive, list, members });
+  .router({ active, setActive, list, members, invitations });
