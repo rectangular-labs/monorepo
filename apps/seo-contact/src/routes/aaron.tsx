@@ -12,9 +12,9 @@ function AaronPage() {
   return (
     <ContactProfile
       companyRole="Co-founder"
-      email="aaron@fluidposts.com"
+      email={env.VITE_AARON_EMAIL}
       name="Aaron Leong"
-      phone="+65 96885688"
+      phone={env.VITE_AARON_PHONE}
       websiteUrl={env.VITE_WWW_URL}
     />
   );

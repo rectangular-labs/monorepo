@@ -6,13 +6,10 @@ import { generateSitemap } from "tanstack-router-sitemap";
 import mkcert from "vite-plugin-mkcert";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
+import { clientEnv } from "~/lib/env";
 import { sitemap } from "./src/lib/sitemap";
 
-const shouldSkipEnvValidation =
-  !!process.env.CI || process.env.npm_lifecycle_event === "lint";
-if (!shouldSkipEnvValidation && !process.env.VITE_WWW_URL) {
-  throw new Error("Missing VITE_WWW_URL for seo-contact build.");
-}
+clientEnv();
 
 const config = defineConfig({
   plugins: [

@@ -12,9 +12,9 @@ function WinstonPage() {
   return (
     <ContactProfile
       companyRole="Co-founder"
-      email="winston@fluidposts.com"
+      email={env.VITE_WINSTON_EMAIL}
       name="Winston Yeo"
-      phone="+1 4159888824"
+      phone={env.VITE_WINSTON_PHONE}
       websiteUrl={env.VITE_WWW_URL}
     />
   );

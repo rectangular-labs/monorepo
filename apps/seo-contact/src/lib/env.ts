@@ -6,6 +6,10 @@ export const clientEnv = () =>
     extends: [],
     clientPrefix: "VITE_",
     client: {
+      VITE_AARON_EMAIL: type("string"),
+      VITE_AARON_PHONE: type("string"),
+      VITE_WINSTON_EMAIL: type("string"),
+      VITE_WINSTON_PHONE: type("string"),
       VITE_WWW_URL: type("string"),
     },
     runtimeEnv: import.meta.env,

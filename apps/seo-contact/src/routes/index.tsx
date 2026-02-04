@@ -50,7 +50,7 @@ function App() {
                   <Link to="/aaron">View contact</Link>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <a href={`mailto:aaron@fluidposts.com`}>Email</a>
+                  <a href={`mailto:${env.VITE_AARON_EMAIL}`}>Email</a>
                 </Button>
               </CardContent>
             </Card>
@@ -65,7 +65,7 @@ function App() {
                   <Link to="/winston">View contact</Link>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <a href={`mailto:winston@fluidposts.com`}>Email</a>
+                  <a href={`mailto:${env.VITE_WINSTON_EMAIL}`}>Email</a>
                 </Button>
               </CardContent>
             </Card>
