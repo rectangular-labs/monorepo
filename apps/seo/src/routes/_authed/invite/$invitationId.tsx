@@ -35,6 +35,16 @@ function AcceptInvitationPage() {
     setIsAccepting(true);
     setAcceptError(null);
     try {
+      if (!session.user.source) {
+        const updated = await authClient.updateUser({
+          source: "invitation",
+        });
+        if (updated.error) {
+          toast.error(
+            updated.error.message ?? "Failed to update account source",
+          );
+        }
+      }
       const response = await authClient.organization.acceptInvitation({
         invitationId,
       });
@@ -43,7 +53,7 @@ function AcceptInvitationPage() {
         toast.error(response.error.message ?? "Failed to accept invitation");
         return;
       }
-      toast.success("You have joined the organization!");
+      toast.success("Successfully accepted invitation!");
       // invalidate the org list query so that we'll not be routed to the onboarding
       await queryClient.invalidateQueries({
         queryKey: getApiClientRq().auth.organization.list.queryKey(),

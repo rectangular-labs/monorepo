@@ -140,6 +140,33 @@ export function initAuthHandler({
         },
       }),
     },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user, ctx) => {
+            const deriveNameFromEmail = (email: string) => {
+              if (!email) return "";
+              const localPart = email.split("@")[0]?.trim();
+              if (!localPart) return "";
+              return localPart.replace(/[._+-]+/g, " ").trim();
+            };
+            if (ctx?.path === "/sign-up/email") {
+              // Temporary fix for better-auth issue https://github.com/better-auth/better-auth/issues/424
+              if (user.name === user.email) {
+                const derivedName = deriveNameFromEmail(user.email);
+                return {
+                  data: {
+                    ...user,
+                    name: derivedName,
+                  },
+                };
+              }
+            }
+            return await Promise.resolve({ data: user });
+          },
+        },
+      },
+    },
     plugins: [
       oAuthProxy({
         productionURL: isPreview
