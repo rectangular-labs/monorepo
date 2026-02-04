@@ -12,7 +12,6 @@ export function PasswordInput({
   onChange,
   ...props
 }: ComponentProps<typeof Input> & { enableToggle?: boolean }) {
-  console.log("props.value", props.value);
   const [disabled, setDisabled] = useState(!props.value);
   const [isVisible, setIsVisible] = useState(false);
 

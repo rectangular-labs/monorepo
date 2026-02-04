@@ -935,9 +935,6 @@ importers:
       '@aws-sdk/client-sesv2':
         specifier: ^3.938.0
         version: 3.938.0
-      '@inboundemail/sdk':
-        specifier: ^4.4.0
-        version: 4.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@plunk/node':
         specifier: ^3.0.3
         version: 3.0.3
@@ -959,6 +956,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
+      inboundemail:
+        specifier: ^0.20.0
+        version: 0.20.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       jsx-email:
         specifier: ^2.8.1
         version: 2.8.1(@jsx-email/plugin-inline@1.0.1)(@jsx-email/plugin-minify@1.0.2)(@jsx-email/plugin-pretty@1.0.0)(@types/node@24.10.1)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.39.0)(ts-node@10.9.2(@swc/core@1.13.5)(@swc/wasm@1.13.21)(@types/node@24.10.1)(typescript@5.9.3))(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -979,7 +979,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       resend:
         specifier: ^6.5.2
-        version: 6.5.2
+        version: 6.5.2(@react-email/render@2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(@swc/core@1.13.5)(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -4114,13 +4114,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@inboundemail/sdk@4.4.0':
-    resolution: {integrity: sha512-DChj0xIMeTZCgoTJ+iQm1r8JadqOj/5+EmGCK7pG9mtP2Q6mfG6OsCa8E4q/0nu4lTSrgl/OQdDHZzwWdcfA4g==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
-
   '@inquirer/external-editor@1.0.1':
     resolution: {integrity: sha512-Oau4yL24d2B5IL4ma4UpbQigkVhzPDXLoqy1ggK4gnHg/stmkffJE4oOXHXF3uz0UEpywG68KcyXsyYpA1Re/Q==}
     engines: {node: '>=18'}
@@ -6078,6 +6071,13 @@ packages:
 
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
+
+  '@react-email/render@2.0.4':
+    resolution: {integrity: sha512-kht2oTFQ1SwrLpd882ahTvUtNa9s53CERHstiTbzhm6aR2Hbykp/mQ4tpPvsBGkKAEvKRlDEoooh60Uk6nHK1g==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@react-native/assets-registry@0.81.4':
     resolution: {integrity: sha512-AMcDadefBIjD10BRqkWw+W/VdvXEomR6aEZ0fhQRAv7igrBzb4PTn4vHKYg+sUK0e3wa74kcMy2DLc/HtnGcMA==}
@@ -10272,6 +10272,9 @@ packages:
   imurmurhash@0.1.4:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
     engines: {node: '>=0.8.19'}
+
+  inboundemail@0.20.0:
+    resolution: {integrity: sha512-hXZcd9WdJDJq9dUmSWwY4Dn7lJUKoHD4hp5UnqJg/g6ER+IUOxyqGWSCJ+RTiqyEwMQDABVJmf3OlXY/ZgVcug==}
 
   indent-string@4.0.0:
     resolution: {integrity: sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==}
@@ -17820,11 +17823,6 @@ snapshots:
   '@img/sharp-win32-x64@0.33.5':
     optional: true
 
-  '@inboundemail/sdk@4.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-
   '@inquirer/external-editor@1.0.1(@types/node@24.10.1)':
     dependencies:
       chardet: 2.1.0
@@ -20262,6 +20260,13 @@ snapshots:
   '@radix-ui/rect@1.1.0': {}
 
   '@radix-ui/rect@1.1.1': {}
+
+  '@react-email/render@2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      html-to-text: 9.0.5
+      prettier: 3.5.3
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   '@react-native/assets-registry@0.81.4': {}
 
@@ -25377,6 +25382,13 @@ snapshots:
 
   imurmurhash@0.1.4: {}
 
+  inboundemail@0.20.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      '@react-email/render': 2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
   indent-string@4.0.0: {}
 
   inflight@1.0.6:
@@ -28755,9 +28767,11 @@ snapshots:
 
   reselect@5.1.1: {}
 
-  resend@6.5.2:
+  resend@6.5.2(@react-email/render@2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)):
     dependencies:
       svix: 1.76.1
+    optionalDependencies:
+      '@react-email/render': 2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
 
   resolve-alpn@1.2.1: {}
 
