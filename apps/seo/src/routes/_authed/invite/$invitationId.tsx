@@ -51,18 +51,18 @@ function AcceptInvitationPage() {
       if (response.error) {
         setAcceptError(response.error.message ?? "Failed to accept invitation");
         toast.error(response.error.message ?? "Failed to accept invitation");
-        return;
+      } else {
+        toast.success("Successfully accepted invitation!");
+        // invalidate the org list query so that we'll not be routed to the onboarding
+        await queryClient.invalidateQueries({
+          queryKey: getApiClientRq().auth.organization.list.queryKey(),
+        });
+        // Navigate to the organization - we'll let the auto-routing handle the slug
+        void navigate({
+          to: "/$organizationSlug",
+          params: { organizationSlug: "organization" },
+        });
       }
-      toast.success("Successfully accepted invitation!");
-      // invalidate the org list query so that we'll not be routed to the onboarding
-      await queryClient.invalidateQueries({
-        queryKey: getApiClientRq().auth.organization.list.queryKey(),
-      });
-      // Navigate to the organization - we'll let the auto-routing handle the slug
-      void navigate({
-        to: "/$organizationSlug",
-        params: { organizationSlug: "organization" },
-      });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to accept invitation";

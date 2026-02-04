@@ -1,4 +1,5 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import { getInitials } from "@rectangular-labs/core/format/initials";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import {
   Avatar,
@@ -309,10 +310,10 @@ function MemberRow({
       });
       if (response.error) {
         toast.error(response.error.message ?? "Failed to update role");
-        return;
+      } else {
+        toast.success("Role updated successfully");
+        await onMemberChanged();
       }
-      toast.success("Role updated successfully");
-      await onMemberChanged();
     } catch {
       toast.error("Failed to update role");
     } finally {
@@ -329,10 +330,10 @@ function MemberRow({
       });
       if (response.error) {
         toast.error(response.error.message ?? "Failed to remove member");
-        return;
+      } else {
+        toast.success("Member removed successfully");
+        await onMemberChanged();
       }
-      toast.success("Member removed successfully");
-      await onMemberChanged();
     } catch {
       toast.error("Failed to remove member");
     } finally {
@@ -340,12 +341,7 @@ function MemberRow({
     }
   }
 
-  const initials = member.user.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = getInitials(member.user.name).toUpperCase().slice(0, 2);
 
   return (
     <TableRow>
@@ -466,10 +462,10 @@ function InvitationRow({
       });
       if (response.error) {
         toast.error(response.error.message ?? "Failed to cancel invitation");
-        return;
+      } else {
+        toast.success("Invitation cancelled");
+        await onInvitationCancelled();
       }
-      toast.success("Invitation cancelled");
-      await onInvitationCancelled();
     } catch {
       toast.error("Failed to cancel invitation");
     } finally {
