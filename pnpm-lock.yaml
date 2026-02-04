@@ -204,12 +204,6 @@ importers:
 
   apps/seo-contact:
     dependencies:
-      '@rectangular-labs/content':
-        specifier: workspace:*
-        version: link:../../packages/content
-      '@rectangular-labs/db':
-        specifier: workspace:*
-        version: link:../../packages/db
       '@rectangular-labs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
