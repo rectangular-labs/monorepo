@@ -69,7 +69,7 @@ function Login() {
   const normalizedSuccessCallbackURL = search.next
     ? `${clientEnv().VITE_SEO_URL}${search.next}`
     : `${clientEnv().VITE_SEO_URL}/organization`;
-  const newUserCallbackURL = search.next?.includes("invite")
+  const newUserCallbackURL = search.next?.startsWith('/invite')
     ? normalizedSuccessCallbackURL
     : `${clientEnv().VITE_SEO_URL}/onboarding?next=${normalizedSuccessCallbackURL}`;
 
