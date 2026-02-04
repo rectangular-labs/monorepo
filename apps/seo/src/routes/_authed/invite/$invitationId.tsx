@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createFileRoute,
   Link,
@@ -15,6 +16,7 @@ import {
   useRouteContext,
 } from "@tanstack/react-router";
 import { useState } from "react";
+import { getApiClientRq } from "~/lib/api";
 import { authClient } from "~/lib/auth";
 
 export const Route = createFileRoute("/_authed/invite/$invitationId")({
@@ -27,6 +29,7 @@ function AcceptInvitationPage() {
   const session = useRouteContext({ from: "/_authed" });
   const [isAccepting, setIsAccepting] = useState(false);
   const [acceptError, setAcceptError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const handleAcceptInvitation = async () => {
     setIsAccepting(true);
@@ -41,6 +44,10 @@ function AcceptInvitationPage() {
         return;
       }
       toast.success("You have joined the organization!");
+      // invalidate the org list query so that we'll not be routed to the onboarding
+      await queryClient.invalidateQueries({
+        queryKey: getApiClientRq().auth.organization.list.queryKey(),
+      });
       // Navigate to the organization - we'll let the auto-routing handle the slug
       void navigate({
         to: "/$organizationSlug",
