@@ -179,7 +179,7 @@ export function initAuthHandler({
             from: fromEmail,
             to: email,
             subject: `You have been invited to join ${organization.name} by ${inviter.user.name}`,
-            text: `You have been invited to join ${organization.name} by ${inviter.user.name}.\n\nClick the link below to accept the invitation:\n${inviteUrl}\n\nOr enter this code when prompted: ${id}`,
+            text: `You have been invited to join ${organization.name} by ${inviter.user.name}.\n\nClick the link below to accept the invitation:\n${inviteUrl}`,
           });
           if (!result.success) {
             throw result.error;
