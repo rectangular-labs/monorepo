@@ -1,7 +1,7 @@
 import type { Sitemap } from "tanstack-router-sitemap";
 import type { FileRouteTypes } from "~/routeTree.gen";
 export type TRoutes = FileRouteTypes["fullPaths"];
-const siteUrl = process.env.VITE_WWW_URL ?? "https://www.fluidposts.com";
+const siteUrl = process.env.VITE_WWW_URL ?? "https://contact.fluidposts.com";
 
 export const sitemap: Sitemap<TRoutes> = {
   siteUrl,
