@@ -158,3 +158,11 @@ Behavior:
 - Public packages get `tsup.config.ts`; private do not.
 - Dependencies are normalized to latest (workspace deps remain `workspace:*`).
 - After scaffolding, install, format, and lint run automatically.
+
+## Mind Map of full application
+
+We maintain a mind map of the full application in `MIND_MAP.md`.
+
+Always make sure that we have an up to date MIND_MAP.md file that documents the current state of the project. 
+
+Refer to MIND_MAP_CORE.md on how to create and maintain the mind map.
