@@ -23,6 +23,7 @@ export { WebSocketServer } from "@rectangular-labs/api-seo/websocket-server";
 export {
   SeoOnboardingWorkflow,
   SeoPlannerWorkflow,
+  SeoStrategyPhaseGenerationWorkflow,
   SeoStrategySuggestionsWorkflow,
   SeoWriterWorkflow,
 } from "@rectangular-labs/api-seo/workflows";

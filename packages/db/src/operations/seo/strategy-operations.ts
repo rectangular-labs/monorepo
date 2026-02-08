@@ -1,28 +1,50 @@
 import { err, ok, safe } from "@rectangular-labs/result";
 import { and, type DB, type DBTransaction, eq, schema } from "../../client";
 import type {
-  seoStrategyInsertSchema,
   seoStrategyPhaseContentInsertSchema,
   seoStrategyPhaseInsertSchema,
   seoStrategyPhaseUpdateSchema,
+  seoStrategySnapshotInsertSchema,
   seoStrategyUpdateSchema,
 } from "../../schema/seo";
 
 export async function listStrategiesByProjectId(args: {
   db: DB;
   projectId: string;
+  organizationId: string;
 }) {
-  return await safe(() =>
-    args.db.query.seoStrategy.findMany({
+  return await safe(() => {
+    return args.db.query.seoStrategy.findMany({
       where: (table, { eq, isNull, and }) =>
-        and(eq(table.projectId, args.projectId), isNull(table.deletedAt)),
+        and(
+          eq(table.projectId, args.projectId),
+          eq(table.organizationId, args.organizationId),
+          isNull(table.deletedAt),
+        ),
       orderBy: (fields, { desc }) => [desc(fields.updatedAt)],
       with: {
+        // fetches the latest phase that's "active"
         phases: {
+          where: (table, { isNull, and, ne }) =>
+            and(
+              isNull(table.deletedAt),
+              ne(table.status, "dismissed"),
+              ne(table.status, "suggestion"),
+            ),
+          orderBy: (fields, { desc }) => [desc(fields.createdAt)],
+          limit: 1,
+        },
+        snapshots: {
+          columns: { aggregate: true },
           where: (table, { isNull }) => isNull(table.deletedAt),
           orderBy: (fields, { desc }) => [desc(fields.createdAt)],
+          limit: 1,
         },
       },
+    });
+  });
+}
+
 export async function getStrategy(args: {
   db: DB;
   projectId: string;
@@ -71,7 +93,6 @@ export async function getStrategyDetails(args: {
                   columns: {
                     contentMarkdown: false,
                     outline: false,
-                    notes: false,
                   },
                 },
               },
@@ -213,4 +234,59 @@ export async function getCurrentStrategyPhase(args: {
     return err(new Error("Failed to find strategy phase"));
   }
   return ok(phase);
+}
+
+export async function getLatestStrategySnapshot(args: {
+  db: DB;
+  strategyId: string;
+}) {
+  return await safe(() =>
+    args.db.query.seoStrategySnapshot.findFirst({
+      where: (table, { and, eq, isNull }) =>
+        and(eq(table.strategyId, args.strategyId), isNull(table.deletedAt)),
+      orderBy: (fields, { desc }) => [desc(fields.takenAt)],
+    }),
+  );
+}
+
+export async function createStrategySnapshot(
+  db: DB | DBTransaction,
+  values: typeof seoStrategySnapshotInsertSchema.infer,
+) {
+  const result = await safe(() =>
+    db.insert(schema.seoStrategySnapshot).values(values).returning(),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  const snapshot = result.value[0];
+  if (!snapshot) {
+    return err(new Error("Failed to create strategy snapshot"));
+  }
+  return ok(snapshot);
+}
+
+export async function createStrategySnapshotContent(
+  db: DB | DBTransaction,
+  values:
+    | typeof schema.seoStrategySnapshotContent.$inferInsert
+    | (typeof schema.seoStrategySnapshotContent.$inferInsert)[],
+) {
+  const valuesArray = Array.isArray(values) ? values : [values];
+  if (valuesArray.length === 0) {
+    return ok([]);
+  }
+  const result = await safe(() =>
+    db
+      .insert(schema.seoStrategySnapshotContent)
+      .values(valuesArray)
+      .returning(),
+  );
+  if (!result.ok) {
+    return result;
+  }
+  if (result.value.length !== valuesArray.length) {
+    return err(new Error("Failed to create strategy snapshot contents"));
+  }
+  return ok(result.value);
 }

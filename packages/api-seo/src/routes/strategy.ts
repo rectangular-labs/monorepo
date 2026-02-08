@@ -29,6 +29,9 @@ const list = withOrganizationIdBase
       strategies: type({
         "...": schema.seoStrategySelectSchema,
         phases: schema.seoStrategyPhaseSelectSchema.array(),
+        snapshots: schema.seoStrategySnapshotSelectSchema
+          .pick("aggregate")
+          .array(),
       }).array(),
     }),
   )
@@ -66,7 +69,7 @@ const get = withOrganizationIdBase
         phaseContents: type({
           "...": schema.seoStrategyPhaseContentSelectSchema,
           contentDraft: schema.seoContentDraftSelectSchema
-            .omit("contentMarkdown", "outline", "notes")
+            .omit("contentMarkdown", "outline")
             .or(type.null),
         }).array(),
       }).array(),
@@ -129,16 +132,39 @@ const update = withOrganizationIdBase
         cause: updateResult.error,
       });
     }
+
+    if (input.status === "active" && existingStrategy?.status !== "active") {
+      const taskResult = await createTask({
+        db: context.db,
+        userId: context.user?.id,
+        input: {
+          type: "seo-generate-strategy-phase",
+          projectId: input.projectId,
+          organizationId: context.organization.id,
+          strategyId: updateResult.value.id,
+          userId: context.user.id,
+        },
+        workflowInstanceId: `strategy_phase_generation_${updateResult.value.id}_${crypto.randomUUID().slice(0, 6)}`,
+      });
+
+      if (!taskResult.ok) {
+        console.error(
+          "Failed to trigger strategy phase generation workflow",
+          taskResult.error,
+        );
+      }
+    }
+
     return updateResult.value;
   });
 
 const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
   .input(
-      type({
+    type({
       "...": schema.seoStrategyInsertSchema,
-        organizationIdentifier: "string",
-      }),
+      organizationIdentifier: "string",
+    }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoStrategySelectSchema)
@@ -161,13 +187,13 @@ const create = withOrganizationIdBase
     }
     const createResult = await createStrategies(context.db, [
       {
-      projectId: input.projectId,
+        projectId: input.projectId,
         organizationId: context.organization.id,
-      name: input.name,
-      motivation: input.motivation,
-      description: input.description ?? null,
-      goal: input.goal,
-      status: "active",
+        name: input.name,
+        motivation: input.motivation,
+        description: input.description ?? null,
+        goal: input.goal,
+        status: "active",
       },
     ]);
     if (!createResult.ok) {
@@ -186,17 +212,20 @@ const create = withOrganizationIdBase
       db: context.db,
       userId: context.user?.id,
       input: {
-        type: "seo-start-strategy",
+        type: "seo-generate-strategy-phase",
         projectId: input.projectId,
         organizationId: context.organization.id,
         strategyId: createdStrategy.id,
-        userId: context.user?.id,
+        userId: context.user.id,
       },
-      workflowInstanceId: `strategy_start_${createdStrategy.id}_${crypto.randomUUID().slice(0, 6)}`,
+      workflowInstanceId: `strategy_phase_generation_${createdStrategy.id}_${crypto.randomUUID().slice(0, 6)}`,
     });
 
     if (!taskResult.ok) {
-      console.error("Failed to start strategy workflow", taskResult.error);
+      console.error(
+        "Failed to trigger strategy phase generation workflow",
+        taskResult.error,
+      );
     }
     return createdStrategy;
   });
@@ -214,6 +243,24 @@ const createPhase = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoStrategyPhaseSelectSchema)
   .handler(async ({ context, input }) => {
+    const strategyResult = await getStrategy({
+      db: context.db,
+      projectId: input.projectId,
+      strategyId: input.strategyId,
+      organizationId: context.organization.id,
+    });
+    if (!strategyResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load strategy.",
+        cause: strategyResult.error,
+      });
+    }
+    if (!strategyResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No strategy found.",
+      });
+    }
+
     const phaseResult = await createStrategyPhase(context.db, {
       ...input.phase,
       strategyId: input.strategyId,
@@ -240,6 +287,24 @@ const updatePhase = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(schema.seoStrategyPhaseSelectSchema)
   .handler(async ({ context, input }) => {
+    const strategyResult = await getStrategy({
+      db: context.db,
+      projectId: input.projectId,
+      strategyId: input.strategyId,
+      organizationId: context.organization.id,
+    });
+    if (!strategyResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load strategy.",
+        cause: strategyResult.error,
+      });
+    }
+    if (!strategyResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No strategy found.",
+      });
+    }
+
     const updateResult = await updateStrategyPhase(context.db, input);
     if (!updateResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {

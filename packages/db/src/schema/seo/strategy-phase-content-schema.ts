@@ -30,7 +30,7 @@ export const seoStrategyPhaseContent = pgSeoTable(
       onUpdate: "cascade",
     }),
     action: text({ enum: CONTENT_STRATEGY_ACTION }).notNull(),
-    plannedTitle: text(),
+    plannedSlug: text(),
     plannedPrimaryKeyword: text(),
     role: text({ enum: CONTENT_ROLES }),
     notes: text(),

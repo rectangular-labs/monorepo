@@ -38,7 +38,6 @@ const reviewStatuses: SeoFileStatus[] = [
 const contentDraftSummarySchema = schema.seoContentDraftSelectSchema.omit(
   "contentMarkdown",
   "outline",
-  "notes",
 );
 
 const listDrafts = withOrganizationIdBase
@@ -102,9 +101,7 @@ const listPublished = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      data: schema.seoContentSelectSchema
-        .omit("contentMarkdown", "outline", "notes")
-        .array(),
+      data: schema.seoContentSelectSchema.omit("contentMarkdown").array(),
       nextPageCursor: "string|undefined",
     }),
   )
@@ -300,7 +297,6 @@ const updateDraft = withOrganizationIdBase
     const {
       contentMarkdown: _contentMarkdown,
       outline: _outline,
-      notes: _notes,
       ...draft
     } = writeResult.value.draft;
     return { draft };
@@ -359,7 +355,6 @@ const markDraft = withOrganizationIdBase
       const {
         contentMarkdown: _contentMarkdown,
         outline: _outline,
-        notes: _notes,
         ...summary
       } = updatedResult.value;
       return { draft: summary };
@@ -385,7 +380,6 @@ const markDraft = withOrganizationIdBase
       const {
         contentMarkdown: _contentMarkdown,
         outline: _outline,
-        notes: _notes,
         ...summary
       } = updatedResult.value.draft;
       return { draft: summary };
@@ -411,7 +405,6 @@ const markDraft = withOrganizationIdBase
     const {
       contentMarkdown: _contentMarkdown,
       outline: _outline,
-      notes: _notes,
       ...summary
     } = updatedDraft;
     return {
@@ -541,13 +534,11 @@ const publishContent = base
       originatingDraftId: draft.id,
       slug: draft.slug,
       version: nextVersion,
-      title: draft.title,
-      description: draft.description,
+      title: draft.title ?? "",
+      description: draft.description ?? "",
       primaryKeyword: draft.primaryKeyword,
       articleType: draft.articleType,
       contentMarkdown: draft.contentMarkdown,
-      outline: draft.outline,
-      notes: draft.notes,
       publishedAt: draft.scheduledFor,
     });
     if (!createdContentResult.ok) {
@@ -598,7 +589,7 @@ const exportScheduled = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      data: schema.seoContentDraftSelectSchema.omit("outline", "notes").array(),
+      data: schema.seoContentDraftSelectSchema.omit("outline").array(),
     }),
   )
   .handler(async ({ context, input }) => {
@@ -628,7 +619,7 @@ const exportPublished = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      data: schema.seoContentSelectSchema.omit("outline", "notes").array(),
+      data: schema.seoContentSelectSchema.array(),
     }),
   )
   .handler(async ({ context, input }) => {

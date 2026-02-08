@@ -6,6 +6,7 @@ import {
 import { NonRetryableError } from "cloudflare:workflows";
 import { openai } from "@ai-sdk/openai";
 import { initAuthHandler } from "@rectangular-labs/auth";
+import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
 import { strategySuggestionSchema } from "@rectangular-labs/core/schemas/strategy-parsers";
 import type {
   seoStrategySuggestionsTaskInputSchema,
@@ -148,7 +149,7 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
             ? existingStrategiesResult.value
                 .map((strategy) => {
                   const goal = strategy.goal
-                    ? `${strategy.goal.target} ${strategy.goal.metric} ${strategy.goal.timeframe}`
+                    ? formatStrategyGoal(strategy.goal)
                     : "none";
                   const updatedAt = strategy.updatedAt
                     ?.toISOString?.()

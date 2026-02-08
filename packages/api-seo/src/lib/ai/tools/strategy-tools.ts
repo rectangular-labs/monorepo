@@ -47,7 +47,6 @@ export function createStrategyToolsWithMetadata(args: {
                 columns: {
                   contentMarkdown: false,
                   outline: false,
-                  notes: false,
                 },
               },
             },

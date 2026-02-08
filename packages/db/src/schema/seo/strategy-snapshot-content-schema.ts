@@ -1,4 +1,7 @@
-import type { KeywordSnapshot } from "@rectangular-labs/core/schemas/strategy-parsers";
+import type {
+  KeywordSnapshot,
+  SnapshotAggregate,
+} from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -6,7 +9,7 @@ import {
   createUpdateSchema,
 } from "drizzle-arktype";
 import { relations } from "drizzle-orm";
-import { index, integer, jsonb, real, uuid } from "drizzle-orm/pg-core";
+import { index, jsonb, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { seoContentDraft } from "./content-draft-schema";
@@ -28,10 +31,8 @@ export const seoStrategySnapshotContent = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    clicks: integer().notNull().default(0),
-    impressions: integer().notNull().default(0),
-    avgPosition: real().notNull().default(0),
-    conversions: integer(),
+    aggregate: jsonb().$type<SnapshotAggregate>().notNull(),
+    delta: jsonb().$type<SnapshotAggregate>(),
     topKeywords: jsonb().$type<KeywordSnapshot[]>().notNull(),
     ...timestamps,
   },

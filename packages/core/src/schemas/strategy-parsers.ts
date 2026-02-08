@@ -36,59 +36,96 @@ export const strategySuggestionSchema = type({
   ),
 }).describe("Single strategy suggestion.");
 
-export const strategyPhaseTypeSchema = type(
-  "'build'|'optimize'|'expand'",
-).describe("Strategy type that matches the strategy intent.");
-export const contentStrategyActionSchema = type(
-  "'create'|'improve'|'expand'",
-).describe("Content action for a strategy phase.");
 export const cadenceSchema = type({
   // "daily" => frequency is articles/day
   // "weekly" => frequency is articles/week
   // "monthly" => frequency is articles/month
-  period: type("'daily' | 'weekly' | 'monthly'").describe(
-    "Publishing cadence unit.",
-  ),
-  frequency: type("number.integer >= 1").describe(
-    "Number of items published per period.",
-  ),
+  period: type("'daily' | 'weekly' | 'monthly'")
+    .describe("Publishing cadence unit.")
+    .default("weekly"),
+  frequency: type("number.integer >= 1")
+    .describe("Number of items published per period.")
+    .default(3),
   // Days that are eligible for publishing. Deselecting a day means we won't publish on that day.
   allowedDays: type("'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'")
     .array()
-    .describe("Eligible days for publishing."),
+    .describe(
+      "Eligible days for publishing. By default prefer mon through fri for publishing",
+    )
+    .default(() => ["mon", "tue", "wed", "thu", "fri"] as const),
 });
+
+export const strategyPhaseTypeSchema = type(
+  "'build'|'optimize'|'expand'",
+).describe(
+  "Strategy phase type. Build refers to creating new content. Optimize refers to improving existing content through tweaks and alterations to things like headings, internal links, and metadata. Expand refers to expanding on existing content to include new sections and subtopics. If a phase is to do both optimize and expansion of content, simply choose the one that best represents the primary focus of the phase.",
+);
+
+const contentRoleSchema = type("'pillar'|'supporting'");
+export const contentStrategyActionSchema = type("'create'|'improve'|'expand'");
 export const strategyPhaseSuggestionScheme = type({
   phase: type({
     type: strategyPhaseTypeSchema,
-    name: type("string").describe("Short phase name."),
+    name: type("string")
+      .atLeastLength(1)
+      .atMostLength(140)
+      .describe("A short descriptive name for the phase."),
     observationWeeks: type("number").describe(
       "Number of weeks to observe results after execution.",
     ),
     successCriteria: type("string").describe(
       'Observable criteria that define phase success. Should be the "SMAR" part of a SMART goal',
     ),
-    cadence: cadenceSchema.describe("The "),
+    cadence: cadenceSchema.describe(
+      "The 'T' part of a SMART goal. Defines the publishing cadence of the content items in this phase.",
+    ),
   }).describe("Execution phase for the strategy."),
-  contents: type({
-    action: contentStrategyActionSchema.describe(
-      "Action to take on the content item.",
+  contentUpdates: type({
+    action: contentStrategyActionSchema
+      .extract("'improve'|'expand'")
+      .describe(
+        "The main action for the content we are updating. Improve refers to improving existing content through tweaks and alterations to things like headings, internal links, and metadata. Expand refers to expanding on existing content to include new sections and subtopics. If a content item is to be both improved and expanded, choose 'expand'.",
+      ),
+    contentDraftId: type("string.uuid").describe(
+      "Existing draft to improve/expand.",
     ),
-    "plannedTitle?": type("string").describe(
-      "Working title for the planned content item.",
+    updatedRole: contentRoleSchema.describe(
+      "Updated role for the content item based on the data. If not provided, the existing role will be used.",
     ),
-    "plannedPrimaryKeyword?": type("string").describe(
-      "Primary keyword targeted by the content item.",
+    "updatedTitle?": type("string").describe(
+      "Updated SEO optimized title for the content item based on the data. If not provided, the existing title will be used.",
     ),
-    "role?": type("'pillar'|'supporting'").describe(
-      "Content role within the cluster.",
+    "updatedDescription?": type("string").describe(
+      "Updated SEO optimized description for the content item based on the data. If not provided, the existing description will be used.",
     ),
-    "notes?": type("string").describe(
-      "Additional notes or constraints for the content item.",
+    "updatedPrimaryKeyword?": type("string").describe(
+      "Updated primary keyword for the content item based on the data. If not provided, the existing primary keyword will be used.",
+    ),
+    "updatedNotes?": type("string").describe(
+      "Notes on what we want to improve or expand on. This could be anything from adding new sections and subtopics, to improving the content based on the data, to adding new internal links. If we need to tweak anything in the content of the article, make sure to include notes here.",
     ),
   })
     .array()
-    .describe("Planned content items for the strategy."),
+    .describe("Content items to update."),
+  contentCreations: type({
+    action: contentStrategyActionSchema
+      .extract("'create'")
+      .describe("For content creation, the action is always 'create'"),
+    role: contentRoleSchema.describe("Content role within the cluster."),
+    plannedSlug: type("string").describe(
+      "SEO optimized slug for the planned content item.",
+    ),
+    plannedPrimaryKeyword: type("string").describe(
+      "Primary keyword targeted by the content item.",
+    ),
+    "notes?": type("string").describe(
+      "Additional notes or constraints for the content item when we get to writing the content.",
+    ),
+  })
+    .array()
+    .describe("Content items to create."),
 });
+
 export const STRATEGY_PHASE_TYPE = [
   "build",
   "optimize",
@@ -121,20 +158,11 @@ export type KeywordSnapshot = {
   position: number;
   clicks: number;
   impressions: number;
-  volume: number | null;
 };
 
 export type SnapshotAggregate = {
   clicks: number;
   impressions: number;
-  ctr: number;
   avgPosition: number;
-  conversions: number | null;
-};
-
-export type SnapshotDelta = {
-  clicks: number;
-  impressions: number;
-  avgPosition: number;
-  conversions: number | null;
+  // conversions: number | null;
 };

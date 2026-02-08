@@ -96,7 +96,6 @@ export function createCreateArticleToolWithMetadata({
           description: description?.trim(),
           outline: outline?.trim(),
           articleType,
-          notes: notes?.trim(),
         },
       });
 

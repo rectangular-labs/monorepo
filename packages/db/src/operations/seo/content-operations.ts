@@ -14,7 +14,6 @@ import {
   schema,
 } from "../../client";
 import type {
-  seoContentDraftInsertSchema,
   seoContentDraftUpdateSchema,
   seoContentInsertSchema,
 } from "../../schema/seo";
@@ -31,9 +30,7 @@ export async function getContentBySlug(args: {
 }) {
   return await safe(() =>
     args.db.query.seoContent.findFirst({
-      columns: args.withContent
-        ? undefined
-        : { contentMarkdown: false, outline: false, notes: false },
+      columns: args.withContent ? undefined : { contentMarkdown: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -58,9 +55,7 @@ export async function getContentById(args: {
 }) {
   return await safe(() =>
     args.db.query.seoContent.findFirst({
-      columns: args.withContent
-        ? undefined
-        : { contentMarkdown: false, outline: false, notes: false },
+      columns: args.withContent ? undefined : { contentMarkdown: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -84,9 +79,7 @@ export async function getContentVersionsBySlug(args: {
 }) {
   return await safe(() =>
     args.db.query.seoContent.findMany({
-      columns: args.withContent
-        ? undefined
-        : { contentMarkdown: false, outline: false, notes: false },
+      columns: args.withContent ? undefined : { contentMarkdown: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -129,6 +122,7 @@ export async function listPublishedContent(args: {
         createdAt: schema.seoContent.createdAt,
         updatedAt: schema.seoContent.updatedAt,
         deletedAt: schema.seoContent.deletedAt,
+        role: schema.seoContent.role,
       })
       .from(schema.seoContent)
       .where(
@@ -210,9 +204,45 @@ export async function getScheduledItems(args: {
   db: DB;
   organizationId: string;
   projectId: string;
+  strategyId?: string | null;
+  phaseId?: string | null;
 }) {
   return await safe(async () => {
     const now = new Date();
+    const phaseId = args.phaseId;
+    if (phaseId) {
+      const phaseRows = await args.db.query.seoStrategyPhaseContent.findMany({
+        where: (table, { and, eq, isNull }) =>
+          and(eq(table.phaseId, phaseId), isNull(table.deletedAt)),
+        with: {
+          contentDraft: {
+            columns: {
+              scheduledFor: true,
+              status: true,
+              deletedAt: true,
+              organizationId: true,
+              projectId: true,
+            },
+          },
+        },
+      });
+
+      return phaseRows
+        .map((row) => row.contentDraft)
+        .filter(
+          (draft): draft is NonNullable<typeof draft> =>
+            !!draft &&
+            draft.organizationId === args.organizationId &&
+            draft.projectId === args.projectId &&
+            draft.deletedAt === null &&
+            draft.scheduledFor !== null &&
+            draft.scheduledFor > now &&
+            draft.status !== "review-denied" &&
+            draft.status !== "suggestion-rejected",
+        )
+        .map((draft) => ({ scheduledFor: draft.scheduledFor }));
+    }
+
     const draftRows = await args.db.query.seoContentDraft.findMany({
       columns: {
         scheduledFor: true,
@@ -221,6 +251,7 @@ export async function getScheduledItems(args: {
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
+          args.strategyId ? eq(table.strategyId, args.strategyId) : undefined,
           gt(table.scheduledFor, now),
           isNull(table.deletedAt),
           ne(table.status, "review-denied"),
@@ -238,12 +269,16 @@ export async function getScheduledItems(args: {
 // Draft Operations
 // =============================================================================
 
+// todo: update content draft creation and updates to handle multi-row inserts
 export async function createContentDraft(
   db: DB | DBTransaction,
-  values: typeof seoContentDraftInsertSchema.infer,
+  values:
+    | typeof schema.seoContentDraftInsertSchema.infer
+    | (typeof schema.seoContentDraftInsertSchema.infer)[],
 ) {
+  const valueArray = Array.isArray(values) ? values : [values];
   const result = await safe(() =>
-    db.insert(schema.seoContentDraft).values(values).returning(),
+    db.insert(schema.seoContentDraft).values(valueArray).returning(),
   );
   if (!result.ok) {
     return result;
@@ -342,7 +377,7 @@ export async function getDraftBySlug(args: {
     args.db.query.seoContentDraft.findFirst({
       columns: args.withContent
         ? undefined
-        : { contentMarkdown: false, outline: false, notes: false },
+        : { contentMarkdown: false, outline: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -365,7 +400,7 @@ export async function getDraftById(args: {
     args.db.query.seoContentDraft.findFirst({
       columns: args.withContent
         ? undefined
-        : { contentMarkdown: false, outline: false, notes: false },
+        : { contentMarkdown: false, outline: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.id, args.id),
@@ -391,7 +426,7 @@ export async function getDraftsBySlugPrefix(args: {
     args.db.query.seoContentDraft.findMany({
       columns: args.withContent
         ? undefined
-        : { contentMarkdown: false, outline: false, notes: false },
+        : { contentMarkdown: false, outline: false },
       where: (table, { and, eq, isNull, or, like }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -418,7 +453,7 @@ export async function listDraftsByStatus(args: {
 }) {
   return await safe(() =>
     args.db.query.seoContentDraft.findMany({
-      columns: { contentMarkdown: false, outline: false, notes: false },
+      columns: { contentMarkdown: false, outline: false },
       where: (table, { and, eq, inArray, isNull, lt }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -451,6 +486,34 @@ export async function listDraftsByStatus(args: {
   );
 }
 
+export async function listUnassignedContentDrafts(args: {
+  db: DB;
+  organizationId: string;
+  projectId: string;
+}) {
+  return await safe(async () => {
+    const drafts = await args.db.query.seoContentDraft.findMany({
+      columns: {
+        id: true,
+        slug: true,
+        title: true,
+        primaryKeyword: true,
+        status: true,
+      },
+      where: (table, { and, eq, isNull }) =>
+        and(
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          isNull(table.strategyId),
+          isNull(table.deletedAt),
+        ),
+      orderBy: (fields, { desc }) => [desc(fields.updatedAt)],
+    });
+
+    return drafts;
+  });
+}
+
 /**
  * List drafts with full content for export (includes contentMarkdown).
  * Does not paginate - returns all matching drafts.
@@ -463,7 +526,7 @@ export async function listDraftsForExport(args: {
 }) {
   return await safe(() =>
     args.db.query.seoContentDraft.findMany({
-      columns: { outline: false, notes: false },
+      columns: { outline: false },
       where: (table, { and, eq, inArray, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -507,6 +570,7 @@ export async function listPublishedContentForExport(args: {
         createdAt: schema.seoContent.createdAt,
         updatedAt: schema.seoContent.updatedAt,
         deletedAt: schema.seoContent.deletedAt,
+        role: schema.seoContent.role,
       })
       .from(schema.seoContent)
       .where(

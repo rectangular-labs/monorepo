@@ -1,4 +1,5 @@
 import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
+import { CONTENT_ROLES } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -62,8 +63,7 @@ export const seoContent = pgSeoTable(
     primaryKeyword: text().notNull(),
     articleType: text({ enum: ARTICLE_TYPES }).notNull(),
     contentMarkdown: text().notNull(),
-    outline: text(),
-    notes: text(),
+    role: text({ enum: CONTENT_ROLES }),
 
     // Publishing metadata
     publishedAt: timestamp({ mode: "date", withTimezone: true }).notNull(),

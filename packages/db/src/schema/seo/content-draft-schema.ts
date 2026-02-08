@@ -2,6 +2,7 @@ import {
   ARTICLE_TYPES,
   CONTENT_STATUSES,
 } from "@rectangular-labs/core/schemas/content-parsers";
+import { CONTENT_ROLES } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -51,22 +52,24 @@ export const seoContentDraft = pgSeoTable(
 
     // Content identification
     slug: text().notNull(),
+    primaryKeyword: text().notNull(),
 
-    // Content fields (all optional during drafting)
-    title: text().notNull().default(""),
-    description: text().notNull().default(""),
+    // Content fields
+    title: text(),
+    description: text(),
     heroImage: text(),
     heroImageCaption: text(),
-    primaryKeyword: text().notNull().default(""),
     articleType: text({ enum: ARTICLE_TYPES }),
-    contentMarkdown: text(),
+    role: text({ enum: CONTENT_ROLES }),
+
+    // actual content items
     outline: text(),
-    notes: text(),
+    contentMarkdown: text(),
 
     status: text({ enum: CONTENT_STATUSES }).notNull().default("suggested"),
     scheduledFor: timestamp({ mode: "date", withTimezone: true }),
 
-    // Task run references for AI-generated content
+    // Task run references for generating content
     outlineGeneratedByTaskRunId: uuid().references(() => seoTaskRun.id, {
       onDelete: "set null",
       onUpdate: "cascade",

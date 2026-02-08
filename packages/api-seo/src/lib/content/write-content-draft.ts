@@ -223,6 +223,8 @@ export async function writeContentDraft(
         db: args.db,
         organizationId: draft.organizationId,
         projectId: draft.projectId,
+        strategyId: updatedDraft.strategyId,
+        phaseId: currentPhase.value.id,
       });
       if (scheduledItemsResult.ok) {
         const scheduledItems = scheduledItemsResult.value;
