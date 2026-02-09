@@ -21,8 +21,10 @@ import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './ro
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/route'
 import { Route as AuthedOrganizationSlugProjectSlugContentRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/route'
+import { Route as AuthedOrganizationSlugProjectSlugStrategiesIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/strategies/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/index'
 import { Route as AuthedOrganizationSlugProjectSlugContentIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/index'
+import { Route as AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/strategies/$strategyId'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/publishing-settings'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsProjectRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/project'
@@ -102,6 +104,12 @@ const AuthedOrganizationSlugProjectSlugContentRouteRoute =
     path: '/content',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
   } as any)
+const AuthedOrganizationSlugProjectSlugStrategiesIndexRoute =
+  AuthedOrganizationSlugProjectSlugStrategiesIndexRouteImport.update({
+    id: '/strategies/',
+    path: '/strategies/',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
+  } as any)
 const AuthedOrganizationSlugProjectSlugSettingsIndexRoute =
   AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport.update({
     id: '/',
@@ -113,6 +121,12 @@ const AuthedOrganizationSlugProjectSlugContentIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugContentRouteRoute,
+  } as any)
+const AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute =
+  AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRouteImport.update({
+    id: '/strategies/$strategyId',
+    path: '/strategies/$strategyId',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
   } as any)
 const AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute =
   AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRouteImport.update({
@@ -223,8 +237,10 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
   '/$organizationSlug/$projectSlug/settings/publishing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRoute
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
+  '/$organizationSlug/$projectSlug/strategies/$strategyId': typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
   '/$organizationSlug/$projectSlug/content/': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
   '/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
+  '/$organizationSlug/$projectSlug/strategies': typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
   '/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
   '/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
   '/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
@@ -246,8 +262,10 @@ export interface FileRoutesByTo {
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
   '/$organizationSlug/$projectSlug/settings/publishing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRoute
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
+  '/$organizationSlug/$projectSlug/strategies/$strategyId': typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
   '/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
+  '/$organizationSlug/$projectSlug/strategies': typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
   '/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
   '/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
   '/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
@@ -276,8 +294,10 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
   '/_authed/$organizationSlug/$projectSlug/settings/publishing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
+  '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId': typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
   '/_authed/$organizationSlug/$projectSlug/content/': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
+  '/_authed/$organizationSlug/$projectSlug/strategies/': typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
   '/_authed/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
   '/_authed/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
   '/_authed/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
@@ -306,8 +326,10 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/settings/project'
     | '/$organizationSlug/$projectSlug/settings/publishing-settings'
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
+    | '/$organizationSlug/$projectSlug/strategies/$strategyId'
     | '/$organizationSlug/$projectSlug/content/'
     | '/$organizationSlug/$projectSlug/settings/'
+    | '/$organizationSlug/$projectSlug/strategies'
     | '/$organizationSlug/$projectSlug/content/review/article-updates'
     | '/$organizationSlug/$projectSlug/content/review/new-articles'
     | '/$organizationSlug/$projectSlug/content/review/outlines'
@@ -329,8 +351,10 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/settings/project'
     | '/$organizationSlug/$projectSlug/settings/publishing-settings'
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
+    | '/$organizationSlug/$projectSlug/strategies/$strategyId'
     | '/$organizationSlug/$projectSlug/content'
     | '/$organizationSlug/$projectSlug/settings'
+    | '/$organizationSlug/$projectSlug/strategies'
     | '/$organizationSlug/$projectSlug/content/review/article-updates'
     | '/$organizationSlug/$projectSlug/content/review/new-articles'
     | '/$organizationSlug/$projectSlug/content/review/outlines'
@@ -358,8 +382,10 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug/$projectSlug/settings/project'
     | '/_authed/$organizationSlug/$projectSlug/settings/publishing-settings'
     | '/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
+    | '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId'
     | '/_authed/$organizationSlug/$projectSlug/content/'
     | '/_authed/$organizationSlug/$projectSlug/settings/'
+    | '/_authed/$organizationSlug/$projectSlug/strategies/'
     | '/_authed/$organizationSlug/$projectSlug/content/review/article-updates'
     | '/_authed/$organizationSlug/$projectSlug/content/review/new-articles'
     | '/_authed/$organizationSlug/$projectSlug/content/review/outlines'
@@ -461,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
     }
+    '/_authed/$organizationSlug/$projectSlug/strategies/': {
+      id: '/_authed/$organizationSlug/$projectSlug/strategies/'
+      path: '/strategies'
+      fullPath: '/$organizationSlug/$projectSlug/strategies'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
+    }
     '/_authed/$organizationSlug/$projectSlug/settings/': {
       id: '/_authed/$organizationSlug/$projectSlug/settings/'
       path: '/'
@@ -474,6 +507,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$organizationSlug/$projectSlug/content/'
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentIndexRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRoute
+    }
+    '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId': {
+      id: '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId'
+      path: '/strategies/$strategyId'
+      fullPath: '/$organizationSlug/$projectSlug/strategies/$strategyId'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
     }
     '/_authed/$organizationSlug/$projectSlug/settings/writing-settings': {
       id: '/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
@@ -654,6 +694,8 @@ interface AuthedOrganizationSlugProjectSlugRouteRouteChildren {
   AuthedOrganizationSlugProjectSlugContentRouteRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   AuthedOrganizationSlugProjectSlugSettingsRouteRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   AuthedOrganizationSlugProjectSlugIndexRoute: typeof AuthedOrganizationSlugProjectSlugIndexRoute
+  AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute: typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
+  AuthedOrganizationSlugProjectSlugStrategiesIndexRoute: typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
 }
 
 const AuthedOrganizationSlugProjectSlugRouteRouteChildren: AuthedOrganizationSlugProjectSlugRouteRouteChildren =
@@ -664,6 +706,10 @@ const AuthedOrganizationSlugProjectSlugRouteRouteChildren: AuthedOrganizationSlu
       AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren,
     AuthedOrganizationSlugProjectSlugIndexRoute:
       AuthedOrganizationSlugProjectSlugIndexRoute,
+    AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute:
+      AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute,
+    AuthedOrganizationSlugProjectSlugStrategiesIndexRoute:
+      AuthedOrganizationSlugProjectSlugStrategiesIndexRoute,
   }
 
 const AuthedOrganizationSlugProjectSlugRouteRouteWithChildren =

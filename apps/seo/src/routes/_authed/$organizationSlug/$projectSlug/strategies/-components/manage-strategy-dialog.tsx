@@ -1,6 +1,6 @@
 "use client";
 
-import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import type { RouterInputs } from "@rectangular-labs/api-seo/types";
 import { strategySuggestionSchema } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -30,10 +30,16 @@ import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { getApiClientRq } from "~/lib/api";
 
-type StrategySummary = RouterOutputs["strategy"]["list"]["strategies"][number];
+type EditableStrategy = {
+  id: string;
+  name: string;
+  description: string | null;
+  motivation: string;
+  goal: StrategyFormValues["goal"];
+};
 
 const formSchema = strategySuggestionSchema;
 type StrategyFormValues = typeof formSchema.infer;
@@ -54,23 +60,20 @@ export function ManageStrategyDialog({
   strategy,
   organizationId,
   projectId,
-  open: controlledOpen,
+  open,
   onOpenChange,
-  trigger,
 }: {
-  strategy?: StrategySummary | null;
+  strategy?: EditableStrategy | null;
   organizationId: string;
   projectId: string;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  trigger?: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [openInternal, setOpenInternal] = useState(false);
-  const open = controlledOpen ?? openInternal;
-  const setOpen = onOpenChange ?? setOpenInternal;
   const api = getApiClientRq();
   const queryClient = useQueryClient();
+
   const navigate = useNavigate();
+
   const matcher = useMatchRoute();
   const slugParams = matcher({
     to: "/$organizationSlug/$projectSlug",
@@ -109,13 +112,25 @@ export function ManageStrategyDialog({
       },
       onSuccess: async () => {
         toast.success("Strategy updated");
-        setOpen(false);
-        if (!organizationId || !projectId) return;
-        await queryClient.invalidateQueries({
-          queryKey: api.strategy.list.queryKey({
-            input: { organizationIdentifier: organizationId, projectId },
+        onOpenChange(false);
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: api.strategy.list.queryKey({
+              input: { organizationIdentifier: organizationId, projectId },
+            }),
           }),
-        });
+          strategy?.id
+            ? queryClient.invalidateQueries({
+                queryKey: api.strategy.get.queryKey({
+                  input: {
+                    organizationIdentifier: organizationId,
+                    projectId,
+                    id: strategy.id,
+                  },
+                }),
+              })
+            : Promise.resolve(),
+        ]);
       },
     }),
   );
@@ -127,14 +142,12 @@ export function ManageStrategyDialog({
       },
       onSuccess: async (data) => {
         toast.success("Strategy created");
-        setOpen(false);
-        if (organizationId && projectId) {
-          await queryClient.invalidateQueries({
-            queryKey: api.strategy.list.queryKey({
-              input: { organizationIdentifier: organizationId, projectId },
-            }),
-          });
-        }
+        onOpenChange(false);
+        await queryClient.invalidateQueries({
+          queryKey: api.strategy.list.queryKey({
+            input: { organizationIdentifier: organizationId, projectId },
+          }),
+        });
 
         if (slugParams && data.id) {
           await navigate({
@@ -151,24 +164,13 @@ export function ManageStrategyDialog({
   );
 
   const submitForm = (values: StrategyFormValues) => {
-    if (!organizationId || !projectId) {
-      form.setError("root", {
-        message: "Missing organization or project details.",
-      });
-      return;
-    }
-
-    const payload = {
+    const payload: RouterInputs["strategy"]["create"] = {
       projectId,
       organizationIdentifier: organizationId,
       name: values.name.trim(),
       motivation: values.motivation.trim(),
       description: values.description?.trim() || null,
-      goal: {
-        metric: values.goal.metric,
-        target: values.goal.target,
-        timeframe: values.goal.timeframe,
-      },
+      goal: values.goal,
     };
 
     if (strategy) {
@@ -179,10 +181,7 @@ export function ManageStrategyDialog({
       return;
     }
 
-    createStrategy({
-      ...payload,
-      status: "suggestion",
-    });
+    createStrategy(payload);
   };
 
   const fieldPrefix = strategy
@@ -194,18 +193,7 @@ export function ManageStrategyDialog({
   const submitLabel = strategy ? "Save changes" : "Create strategy";
 
   return (
-    <DialogDrawer
-      isLoading={isPending}
-      onOpenChange={setOpen}
-      open={open}
-      trigger={
-        trigger ?? (
-          <Button size="sm" type="button" variant="outline">
-            Manage
-          </Button>
-        )
-      }
-    >
+    <DialogDrawer isLoading={isPending} onOpenChange={onOpenChange} open={open}>
       <DialogDrawerHeader>
         <DialogDrawerTitle>{title}</DialogDrawerTitle>
       </DialogDrawerHeader>
@@ -361,13 +349,17 @@ export function ManageStrategyDialog({
         {formError && <FieldError>{formError}</FieldError>}
       </form>
       <DialogDrawerFooter className="gap-2">
-        <Button onClick={() => setOpen(false)} type="button" variant="ghost">
+        <Button
+          onClick={() => onOpenChange(false)}
+          type="button"
+          variant="ghost"
+        >
           Cancel
         </Button>
         <Button
           disabled={!organizationId || !projectId}
           form="strategy-manage-form"
-          isLoading={isPending}
+          isLoading={isUpdating || isCreating}
           type="submit"
         >
           {submitLabel}

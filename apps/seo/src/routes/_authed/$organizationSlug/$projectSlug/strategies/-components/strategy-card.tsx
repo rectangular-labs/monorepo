@@ -1,4 +1,6 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import { capitalize } from "@rectangular-labs/core/format/capitalize";
+import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -25,40 +27,12 @@ import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useMatchRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { ManageStrategyDialog } from "./manage-strategy-dialog";
 
 type StrategySummary = RouterOutputs["strategy"]["list"]["strategies"][number];
-
-function formatGoal(goal: StrategySummary["goal"]) {
-  const metricLabel =
-    goal.metric === "avgPosition" ? "avg position" : goal.metric;
-  const timeframeLabel = goal.timeframe === "monthly" ? "per month" : "total";
-  return `${goal.target} ${metricLabel} ${timeframeLabel}`;
-}
-
-function formatStatus(status: StrategySummary["status"]) {
-  switch (status) {
-    case "active":
-      return "Active";
-    case "observing":
-      return "Observing";
-    case "stable":
-      return "Stable";
-    case "archived":
-      return "Archived";
-    case "dismissed":
-      return "Dismissed";
-    case "suggestion":
-      return "Suggestion";
-    default: {
-      const invalidStatus: never = status;
-      throw new Error(`Invalid status received: ${invalidStatus}`);
-    }
-  }
-}
 
 const STATUS_SUMMARIES: Partial<Record<StrategySummary["status"], string>> = {
   active: "In progress and tracking outcomes.",
@@ -74,11 +48,9 @@ function formatNumber(value: number | null | undefined, digits = 0) {
 }
 
 function getLatestMetricValue(strategy: StrategySummary) {
-  const aggregate = strategy.latestSnapshot?.aggregate;
+  const aggregate = strategy.snapshots?.[0]?.aggregate;
   if (!aggregate) return null;
   switch (strategy.goal.metric) {
-    case "conversions":
-      return aggregate.conversions ?? null;
     case "clicks":
       return aggregate.clicks;
     case "impressions":
@@ -106,21 +78,22 @@ function getProgressPercent(strategy: StrategySummary, current: number | null) {
 
 export function StrategyCard({
   strategy,
-  organizationSlug,
-  projectSlug,
   organizationId,
   projectId,
   className,
 }: {
   strategy: StrategySummary;
-  organizationSlug?: string;
-  projectSlug?: string;
   organizationId?: string;
   projectId?: string;
   className?: string;
 }) {
   const api = getApiClientRq();
   const queryClient = useQueryClient();
+  const matcher = useMatchRoute();
+  const slugParams = matcher({
+    to: "/$organizationSlug/$projectSlug",
+    fuzzy: true,
+  });
 
   const phase = strategy.phases?.[0] ?? null;
   const statusSummary = STATUS_SUMMARIES[strategy.status];
@@ -223,12 +196,12 @@ export function StrategyCard({
   const formattedTarget = formatNumber(strategy.goal.target, 0);
 
   const detailHref =
-    !isSuggestion && organizationSlug && projectSlug && strategy.id
+    !isSuggestion && slugParams && strategy.id
       ? {
           to: "/$organizationSlug/$projectSlug/strategies/$strategyId",
           params: {
-            organizationSlug,
-            projectSlug,
+            organizationSlug: slugParams.organizationSlug,
+            projectSlug: slugParams.projectSlug,
             strategyId: strategy.id,
           },
         }
@@ -243,7 +216,7 @@ export function StrategyCard({
         className,
       )}
       onClick={(event) => {
-        if (!isSuggestion || event.defaultPrevented) return;
+        if (!isSuggestion || event.defaultPrevented || modifyOpen) return;
         setModifyOpen(true);
       }}
     >
@@ -255,7 +228,7 @@ export function StrategyCard({
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between">
           <Badge variant={isSuggestion ? "secondary" : "outline"}>
-            {isSuggestion ? "Suggestion" : formatStatus(strategy.status)}
+            {isSuggestion ? "Suggestion" : capitalize(strategy.status)}
           </Badge>
           {phase && (
             <Badge className="capitalize" variant="outline">
@@ -273,7 +246,9 @@ export function StrategyCard({
       <CardContent className="space-y-2">
         <div className="text-muted-foreground text-sm">
           Goal:{" "}
-          <span className="text-foreground">{formatGoal(strategy.goal)}</span>
+          <span className="text-foreground">
+            {formatStrategyGoal(strategy.goal)}
+          </span>
         </div>
         {!isSuggestion && (
           <div className="space-y-2">
@@ -392,23 +367,17 @@ export function StrategyCard({
             </DialogDrawerFooter>
           </DialogDrawer>
           <div className="ml-auto flex items-center gap-2">
-            <ManageStrategyDialog
-              onOpenChange={setModifyOpen}
-              open={modifyOpen}
-              organizationId={organizationId ?? ""}
-              projectId={projectId ?? ""}
-              strategy={strategy}
-              trigger={
-                <Button
-                  onClick={(event) => event.stopPropagation()}
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                >
-                  Modify
-                </Button>
-              }
-            />
+            <Button
+              onClick={(event) => {
+                event.stopPropagation();
+                setModifyOpen(true);
+              }}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Modify
+            </Button>
             <Button
               isLoading={isAdopting}
               onClick={(event) => {
@@ -423,6 +392,13 @@ export function StrategyCard({
           </div>
         </CardFooter>
       )}
+      <ManageStrategyDialog
+        onOpenChange={setModifyOpen}
+        open={modifyOpen}
+        organizationId={organizationId ?? ""}
+        projectId={projectId ?? ""}
+        strategy={strategy}
+      />
     </Card>
   );
 }

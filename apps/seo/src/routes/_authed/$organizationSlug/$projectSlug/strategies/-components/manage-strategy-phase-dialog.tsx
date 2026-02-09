@@ -1,0 +1,440 @@
+"use client";
+
+import type { RouterInputs } from "@rectangular-labs/api-seo/types";
+import { type } from "arktype";
+import { Button } from "@rectangular-labs/ui/components/ui/button";
+import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
+import {
+  DialogDrawer,
+  DialogDrawerDescription,
+  DialogDrawerFooter,
+  DialogDrawerHeader,
+  DialogDrawerTitle,
+} from "@rectangular-labs/ui/components/ui/dialog-drawer";
+import {
+  arktypeResolver,
+  Controller,
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  useForm,
+} from "@rectangular-labs/ui/components/ui/field";
+import { Input } from "@rectangular-labs/ui/components/ui/input";
+import { Label } from "@rectangular-labs/ui/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rectangular-labs/ui/components/ui/select";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
+import { getApiClientRq } from "~/lib/api";
+
+const weekdaySchema = type(
+  "'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'",
+);
+
+type Weekday = typeof weekdaySchema.infer;
+
+const phaseFormSchema = type({
+  name: "string >= 1",
+  status:
+    "'suggestion'|'planned'|'in_progress'|'observing'|'completed'|'dismissed'",
+  successCriteria: "string >= 1",
+  targetCompletionDate: "string",
+  cadence: {
+    period: "'daily'|'weekly'|'monthly'",
+    frequency: "number.integer >= 1",
+    allowedDays: weekdaySchema.array(),
+  },
+  observationWeeks: "number.integer >= 0",
+});
+
+type PhaseFormValues = typeof phaseFormSchema.infer;
+
+type EditablePhase = {
+  id: string;
+  strategyId: string;
+  name: string;
+  status: PhaseFormValues["status"];
+  successCriteria: string;
+  targetCompletionDate: Date | null;
+  cadence: {
+    period: PhaseFormValues["cadence"]["period"];
+    frequency: number;
+    allowedDays: Weekday[];
+  };
+  observationWeeks: number;
+};
+
+const days: { value: Weekday; label: string }[] = [
+  { value: "mon", label: "Mon" },
+  { value: "tue", label: "Tue" },
+  { value: "wed", label: "Wed" },
+  { value: "thu", label: "Thu" },
+  { value: "fri", label: "Fri" },
+  { value: "sat", label: "Sat" },
+  { value: "sun", label: "Sun" },
+];
+
+const phaseStatusOptions = [
+  { value: "planned", label: "Planned" },
+  { value: "in_progress", label: "In progress" },
+  { value: "observing", label: "Observing" },
+  { value: "completed", label: "Completed" },
+  { value: "dismissed", label: "Dismissed" },
+  { value: "suggestion", label: "Suggestion" },
+] as const;
+
+export function ManageStrategyPhaseDialog({
+  phase,
+  organizationId,
+  projectId,
+  open,
+  onOpenChange,
+}: {
+  phase: EditablePhase | null;
+  organizationId: string;
+  projectId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const api = getApiClientRq();
+  const queryClient = useQueryClient();
+
+  const defaultValues = useMemo<PhaseFormValues>(
+    () => ({
+      name: phase?.name ?? "",
+      status: phase?.status ?? "planned",
+      successCriteria: phase?.successCriteria ?? "",
+      targetCompletionDate: phase?.targetCompletionDate
+        ? isoToDatetimeLocalValue(phase.targetCompletionDate.toISOString())
+        : "",
+      cadence: {
+        period: phase?.cadence.period ?? "weekly",
+        frequency: phase?.cadence.frequency ?? 1,
+        allowedDays: phase?.cadence.allowedDays ?? ["mon"],
+      },
+      observationWeeks: phase?.observationWeeks ?? 0,
+    }),
+    [phase],
+  );
+
+  const form = useForm<PhaseFormValues>({
+    resolver: arktypeResolver(phaseFormSchema),
+    defaultValues,
+  });
+
+  useEffect(() => {
+    if (open) {
+      form.reset(defaultValues);
+    }
+  }, [defaultValues, form, open]);
+
+  const { mutate: updatePhase, isPending } = useMutation(
+    api.strategy.phases.update.mutationOptions({
+      onError: (error) => {
+        form.setError("root", { message: error.message });
+      },
+      onSuccess: async () => {
+        toast.success("Phase updated");
+        onOpenChange(false);
+        if (!phase) return;
+
+        await queryClient.invalidateQueries({
+          queryKey: api.strategy.get.queryKey({
+            input: {
+              organizationIdentifier: organizationId,
+              projectId,
+              id: phase.strategyId,
+            },
+          }),
+        });
+      },
+    }),
+  );
+
+  const submitForm = (values: PhaseFormValues) => {
+    if (!phase) return;
+
+    if (values.cadence.allowedDays.length === 0) {
+      form.setError("cadence.allowedDays", {
+        message: "Select at least one cadence day.",
+      });
+      return;
+    }
+
+    const payload: RouterInputs["strategy"]["phases"]["update"] = {
+      organizationIdentifier: organizationId,
+      projectId,
+      id: phase.id,
+      strategyId: phase.strategyId,
+      name: values.name.trim(),
+      status: values.status,
+      successCriteria: values.successCriteria.trim(),
+      targetCompletionDate: values.targetCompletionDate
+        ? new Date(values.targetCompletionDate)
+        : null,
+      cadence: {
+        period: values.cadence.period,
+        frequency: values.cadence.frequency,
+        allowedDays: values.cadence.allowedDays,
+      },
+      observationWeeks: values.observationWeeks,
+    };
+
+    updatePhase(payload);
+  };
+
+  const fieldPrefix = phase ? `phase-manage-${phase.id}` : "phase-manage";
+  const formError = form.formState.errors.root?.message;
+
+  return (
+    <DialogDrawer isLoading={isPending} onOpenChange={onOpenChange} open={open}>
+      <DialogDrawerHeader>
+        <DialogDrawerTitle>Edit phase</DialogDrawerTitle>
+        <DialogDrawerDescription>
+          Update phase details, cadence, and completion target.
+        </DialogDrawerDescription>
+      </DialogDrawerHeader>
+
+      <form
+        className="grid max-h-[70vh] gap-6 overflow-y-auto"
+        id="phase-manage-form"
+        onSubmit={form.handleSubmit(submitForm)}
+      >
+        <FieldGroup>
+          <Controller
+            control={form.control}
+            name="name"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-name`}>Title</FieldLabel>
+                <Input
+                  {...field}
+                  id={`${fieldPrefix}-name`}
+                  placeholder="Phase title"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="status"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-status`}>
+                  Status
+                </FieldLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger id={`${fieldPrefix}-status`}>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {phaseStatusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="successCriteria"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-success-criteria`}>
+                  Success criteria
+                </FieldLabel>
+                <Textarea
+                  {...field}
+                  id={`${fieldPrefix}-success-criteria`}
+                  placeholder="How do we know this phase is successful?"
+                  rows={4}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="targetCompletionDate"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-target-completion`}>
+                  Target completion date
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id={`${fieldPrefix}-target-completion`}
+                  type="datetime-local"
+                  value={field.value ?? ""}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="observationWeeks"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-observation-weeks`}>
+                  Observation weeks
+                </FieldLabel>
+                <Input
+                  id={`${fieldPrefix}-observation-weeks`}
+                  min={0}
+                  onChange={(event) => {
+                    const next = event.currentTarget.valueAsNumber;
+                    field.onChange(Number.isFinite(next) ? next : 0);
+                  }}
+                  step={1}
+                  type="number"
+                  value={field.value}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </FieldGroup>
+
+        <FieldGroup>
+          <Controller
+            control={form.control}
+            name="cadence.period"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-cadence-period`}>
+                  Cadence period
+                </FieldLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger id={`${fieldPrefix}-cadence-period`}>
+                    <SelectValue placeholder="Select cadence period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="cadence.frequency"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-cadence-frequency`}>
+                  Cadence frequency
+                </FieldLabel>
+                <FieldDescription>
+                  Number of articles for each cadence period.
+                </FieldDescription>
+                <Input
+                  id={`${fieldPrefix}-cadence-frequency`}
+                  min={1}
+                  onChange={(event) => {
+                    const next = event.currentTarget.valueAsNumber;
+                    field.onChange(Number.isFinite(next) ? next : 1);
+                  }}
+                  step={1}
+                  type="number"
+                  value={field.value}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="cadence.allowedDays"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Allowed cadence days</FieldLabel>
+                <div className="flex flex-wrap gap-3 pt-1">
+                  {days.map((day) => {
+                    const id = `${fieldPrefix}-cadence-day-${day.value}`;
+                    const checked = field.value.includes(day.value);
+                    return (
+                      <div className="flex items-center gap-2" key={day.value}>
+                        <Checkbox
+                          checked={checked}
+                          id={id}
+                          onCheckedChange={(next) => {
+                            const isChecked = next === true;
+                            const nextValue = isChecked
+                              ? Array.from(new Set([...field.value, day.value]))
+                              : field.value.filter(
+                                  (value) => value !== day.value,
+                                );
+                            field.onChange(nextValue);
+                          }}
+                        />
+                        <Label className="cursor-pointer" htmlFor={id}>
+                          {day.label}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </FieldGroup>
+
+        {formError && <FieldError>{formError}</FieldError>}
+      </form>
+
+      <DialogDrawerFooter className="gap-2">
+        <Button
+          onClick={() => onOpenChange(false)}
+          type="button"
+          variant="ghost"
+        >
+          Cancel
+        </Button>
+        <Button form="phase-manage-form" isLoading={isPending} type="submit">
+          Save changes
+        </Button>
+      </DialogDrawerFooter>
+    </DialogDrawer>
+  );
+}
