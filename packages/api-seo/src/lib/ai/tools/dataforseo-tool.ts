@@ -1,15 +1,14 @@
-import {
-  fetchKeywordSuggestions,
-  fetchKeywordsOverview,
-  fetchRankedKeywordsForSite,
-  fetchRankedPagesForSite,
-  fetchSerp,
-} from "@rectangular-labs/dataforseo";
 import type { schema } from "@rectangular-labs/db";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
+import type { InitialContext } from "../../../types";
 import {
   configureDataForSeoClient,
+  fetchKeywordSuggestionsWithCache,
+  fetchKeywordsOverviewWithCache,
+  fetchRankedKeywordsForSiteWithCache,
+  fetchRankedPagesForSiteWithCache,
+  fetchSerpWithCache,
   getLocationAndLanguage,
 } from "../../dataforseo/utils";
 import type { AgentToolDefinition } from "./utils";
@@ -105,6 +104,7 @@ const serpInputSchema = type({
 
 export function createDataforseoToolWithMetadata(
   project: typeof schema.seoProject.$inferSelect,
+  cacheKV: InitialContext["cacheKV"],
 ) {
   configureDataForSeoClient();
   const { locationName, languageCode } = getLocationAndLanguage(project);
@@ -130,7 +130,7 @@ export function createDataforseoToolWithMetadata(
         offset,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchRankedKeywordsForSite({
+      const result = await fetchRankedKeywordsForSiteWithCache({
         hostname,
         locationName,
         languageCode,
@@ -139,6 +139,7 @@ export function createDataforseoToolWithMetadata(
         limit,
         offset,
         includeGenderAndAgeDistribution,
+        cacheKV,
       });
       if (!result?.ok) {
         console.error("DFS ranked_keywords error", result.error);
@@ -197,13 +198,14 @@ export function createDataforseoToolWithMetadata(
         offset,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchRankedPagesForSite({
-        target: hostname,
+      const result = await fetchRankedPagesForSiteWithCache({
+        hostname,
         locationName,
         languageCode,
         limit,
         offset,
         includeGenderAndAgeDistribution,
+        cacheKV,
       });
       if (!result?.ok) {
         console.error("DFS ranked_pages error", result.error);
@@ -241,7 +243,7 @@ export function createDataforseoToolWithMetadata(
         includeSeedKeyword,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchKeywordSuggestions({
+      const result = await fetchKeywordSuggestionsWithCache({
         locationName,
         languageCode,
         seedKeyword,
@@ -249,6 +251,7 @@ export function createDataforseoToolWithMetadata(
         includeGenderAndAgeDistribution,
         limit,
         offset,
+        cacheKV,
       });
       if (!result.ok) {
         throw new Error(
@@ -298,11 +301,12 @@ export function createDataforseoToolWithMetadata(
         keywords,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchKeywordsOverview({
+      const result = await fetchKeywordsOverviewWithCache({
         keywords,
         locationName,
         languageCode,
         includeGenderAndAgeDistribution,
+        cacheKV,
       });
       if (!result.ok) {
         throw new Error(
@@ -349,13 +353,14 @@ export function createDataforseoToolWithMetadata(
     ),
     async execute({ keyword, depth, device, os }) {
       console.log("fetchSerp", { keyword, depth, device, os });
-      const result = await fetchSerp({
+      const result = await fetchSerpWithCache({
         keyword,
         locationName,
         languageCode,
         depth,
         device,
         os,
+        cacheKV,
       });
       if (!result.ok) {
         throw new Error(

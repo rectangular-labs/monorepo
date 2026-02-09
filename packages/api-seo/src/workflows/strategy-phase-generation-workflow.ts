@@ -426,7 +426,10 @@ export class SeoStrategyPhaseGenerationWorkflow extends WorkflowEntrypoint<
           project,
           this.env.CACHE,
         );
-        const dataforseoTools = createDataforseoToolWithMetadata(project);
+        const dataforseoTools = createDataforseoToolWithMetadata(
+          project,
+          this.env.CACHE,
+        );
 
         const db = createDb();
         const strategyTools = createStrategyToolsWithMetadata({
@@ -491,13 +494,21 @@ ${formatBusinessBackground(project.businessBackground)}
 Generate the next strategy phase now.`,
           stopWhen: [stepCountIs(40)],
           onStepFinish: (agentStep) => {
-            logAgentStep(logInfo, "phase generation tool step", agentStep);
+            logAgentStep(
+              logInfo,
+              "phase generation tool step",
+              agentStep,
+              event.instanceId,
+            );
           },
           experimental_output: Output.object({
             schema: jsonSchema<PhaseSuggestion>(
               strategyPhaseSuggestionScheme.toJsonSchema() as JSONSchema7,
             ),
           }),
+        }).catch((error) => {
+          console.error("error generating phase suggestion", error);
+          throw error;
         });
 
         return outputResult.experimental_output;

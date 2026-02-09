@@ -429,7 +429,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           locationName,
           languageCode,
           project,
-          notes: content.notes ?? undefined,
+          notes: "(none)",
         };
       });
 

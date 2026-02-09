@@ -4,6 +4,7 @@ import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parse
 import type { schema } from "@rectangular-labs/db";
 import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
+import type { InitialContext } from "../../../types";
 import { createDataforseoToolWithMetadata } from "./dataforseo-tool";
 import { createGscToolWithMetadata } from "./google-search-console-tool";
 import type { AgentToolDefinition } from "./utils";
@@ -15,12 +16,14 @@ const dataAnalysisAgentInputSchema = type({
 export function createDataAnalysisAgentToolWithMetadata({
   project,
   gscProperty,
+  cacheKV,
 }: {
   project: typeof schema.seoProject.$inferSelect;
   gscProperty: {
     config: GscConfig;
     accessToken?: string | null;
   } | null;
+  cacheKV: InitialContext["cacheKV"];
 }) {
   const hasGsc = !!(
     gscProperty?.accessToken &&
@@ -120,7 +123,7 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
             siteUrl: gscProperty?.config.domain ?? null,
             siteType: gscProperty?.config.propertyType ?? null,
           }).tools,
-          ...createDataforseoToolWithMetadata(project).tools,
+          ...createDataforseoToolWithMetadata(project, cacheKV).tools,
           web_search: openai.tools.webSearch({
             externalWebAccess: true,
             searchContextSize: "medium",
@@ -165,6 +168,7 @@ export function createDataAnalysisAgentTool(args: {
     config: GscConfig;
     accessToken?: string | null;
   } | null;
+  cacheKV: InitialContext["cacheKV"];
 }): ReturnType<typeof createDataAnalysisAgentToolWithMetadata>["tools"] {
   return createDataAnalysisAgentToolWithMetadata(args).tools;
 }

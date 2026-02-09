@@ -127,7 +127,10 @@ export function createStrategistAgent({
     siteUrl: gscProperty?.config.domain ?? null,
     siteType: gscProperty?.config.propertyType ?? null,
   });
-  const dataforseoTools = createDataforseoToolWithMetadata(project);
+  const dataforseoTools = createDataforseoToolWithMetadata(
+    project,
+    context.cacheKV,
+  );
   const createArticleTool = createCreateArticleToolWithMetadata({
     userId: context.userId,
     project,
