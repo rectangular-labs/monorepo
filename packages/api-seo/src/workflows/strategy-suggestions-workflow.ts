@@ -92,7 +92,10 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
           project,
           this.env.CACHE,
         );
-        const dataforseoTools = createDataforseoToolWithMetadata(project);
+        const dataforseoTools = createDataforseoToolWithMetadata(
+          project,
+          this.env.CACHE,
+        );
         const db = createDb();
         const strategyTools = createStrategyToolsWithMetadata({
           db,

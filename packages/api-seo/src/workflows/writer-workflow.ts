@@ -442,7 +442,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
 
           const outline = draft.outline;
           const primaryKeyword = draft.primaryKeyword;
-          const notes = draft.notes;
+          const notes = "(none)";
           const articleType =
             draft.articleType ??
             (await inferArticleType({

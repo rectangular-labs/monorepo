@@ -99,6 +99,26 @@ export async function getStrategyDetails(args: {
             },
           },
         },
+        snapshots: {
+          where: (table, { isNull }) => isNull(table.deletedAt),
+          orderBy: (fields, { desc }) => [desc(fields.takenAt)],
+          with: {
+            contentSnapshots: {
+              where: (table, { isNull }) => isNull(table.deletedAt),
+              orderBy: (fields, { desc }) => [desc(fields.createdAt)],
+              with: {
+                contentDraft: {
+                  columns: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    primaryKeyword: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     }),
   );

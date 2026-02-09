@@ -73,6 +73,15 @@ const get = withOrganizationIdBase
             .or(type.null),
         }).array(),
       }).array(),
+      snapshots: type({
+        "...": schema.seoStrategySnapshotSelectSchema,
+        contentSnapshots: type({
+          "...": schema.seoStrategySnapshotContentSelectSchema,
+          contentDraft: schema.seoContentDraftSelectSchema
+            .pick("id", "title", "slug", "primaryKeyword")
+            .or(type.null),
+        }).array(),
+      }).array(),
     }),
   )
   .handler(async ({ context, input }) => {

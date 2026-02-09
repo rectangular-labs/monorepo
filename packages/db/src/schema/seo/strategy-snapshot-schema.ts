@@ -55,7 +55,7 @@ export const seoStrategySnapshotRelations = relations(
       fields: [seoStrategySnapshot.phaseId],
       references: [seoStrategyPhase.id],
     }),
-    contents: many(seoStrategySnapshotContent),
+    contentSnapshots: many(seoStrategySnapshotContent),
   }),
 );
 

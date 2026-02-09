@@ -80,7 +80,7 @@ export const getSearchAnalyticsArgsSchema = type({
   "dimensions?": gscDimensionSchema.array(),
   "type?": gscSearchTypeSchema,
   "aggregationType?": gscAggregationTypeSchema,
-  "rowLimit?": type("number").atMost(25000).describe("Max rows to return."),
+  "rowLimit?": type("number").atMost(500).describe("Max rows to return."),
   "startRow?": type("number")
     .atLeast(0)
     .describe("Starting row for pagination."),
