@@ -67,7 +67,7 @@ function PageComponent() {
   } = useQuery(
     api.strategy.get.queryOptions({
       input: {
-        organizationIdentifier: organizationSlug,
+        organizationIdentifier: activeProject.organizationId,
         projectId: activeProject.id,
         id: strategyId,
       },

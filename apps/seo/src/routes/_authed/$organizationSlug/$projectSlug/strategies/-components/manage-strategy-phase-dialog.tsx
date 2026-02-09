@@ -1,7 +1,16 @@
 "use client";
 
-import type { RouterInputs } from "@rectangular-labs/api-seo/types";
-import { type } from "arktype";
+import type {
+  RouterInputs,
+  RouterOutputs,
+} from "@rectangular-labs/api-seo/types";
+import {
+  cadencePeriodSchema,
+  type cadenceSchema,
+  type strategyPhaseStatusSchema,
+  weekdaySchema,
+} from "@rectangular-labs/core/schemas/strategy-parsers";
+import { computePhaseTargetCompletionDate } from "@rectangular-labs/core/strategy/compute-phase-target-completion-date";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
@@ -19,6 +28,8 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldLegend,
+  FieldSet,
   useForm,
 } from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
@@ -33,15 +44,10 @@ import {
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type } from "arktype";
 import { useEffect, useMemo } from "react";
-import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
 import { getApiClientRq } from "~/lib/api";
-
-const weekdaySchema = type(
-  "'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'",
-);
-
-type Weekday = typeof weekdaySchema.infer;
+import { isoToDatetimeLocalValue } from "~/lib/datetime-local";
 
 const phaseFormSchema = type({
   name: "string >= 1",
@@ -49,31 +55,20 @@ const phaseFormSchema = type({
     "'suggestion'|'planned'|'in_progress'|'observing'|'completed'|'dismissed'",
   successCriteria: "string >= 1",
   targetCompletionDate: "string",
-  cadence: {
-    period: "'daily'|'weekly'|'monthly'",
+  cadence: type({
+    period: cadencePeriodSchema,
     frequency: "number.integer >= 1",
     allowedDays: weekdaySchema.array(),
-  },
+  }),
   observationWeeks: "number.integer >= 0",
 });
 
 type PhaseFormValues = typeof phaseFormSchema.infer;
+type StrategyPhase = RouterOutputs["strategy"]["get"]["phases"][number];
+type StrategyPhaseContent = StrategyPhase["phaseContents"][number];
+type PhaseStatus = typeof strategyPhaseStatusSchema.infer;
 
-type EditablePhase = {
-  id: string;
-  strategyId: string;
-  name: string;
-  status: PhaseFormValues["status"];
-  successCriteria: string;
-  targetCompletionDate: Date | null;
-  cadence: {
-    period: PhaseFormValues["cadence"]["period"];
-    frequency: number;
-    allowedDays: Weekday[];
-  };
-  observationWeeks: number;
-};
-
+type Weekday = (typeof cadenceSchema.infer)["allowedDays"][number];
 const days: { value: Weekday; label: string }[] = [
   { value: "mon", label: "Mon" },
   { value: "tue", label: "Tue" },
@@ -91,7 +86,7 @@ const phaseStatusOptions = [
   { value: "completed", label: "Completed" },
   { value: "dismissed", label: "Dismissed" },
   { value: "suggestion", label: "Suggestion" },
-] as const;
+] as const satisfies { value: PhaseStatus; label: string }[];
 
 export function ManageStrategyPhaseDialog({
   phase,
@@ -100,7 +95,7 @@ export function ManageStrategyPhaseDialog({
   open,
   onOpenChange,
 }: {
-  phase: EditablePhase | null;
+  phase: StrategyPhase | null;
   organizationId: string;
   projectId: string;
   open: boolean;
@@ -108,7 +103,7 @@ export function ManageStrategyPhaseDialog({
 }) {
   const api = getApiClientRq();
   const queryClient = useQueryClient();
-
+  console.log("phase", phase);
   const defaultValues = useMemo<PhaseFormValues>(
     () => ({
       name: phase?.name ?? "",
@@ -131,12 +126,74 @@ export function ManageStrategyPhaseDialog({
     resolver: arktypeResolver(phaseFormSchema),
     defaultValues,
   });
+  const cadencePeriod = form.watch("cadence.period");
+  const cadenceFrequency = form.watch("cadence.frequency");
+  const cadenceAllowedDays = form.watch("cadence.allowedDays");
+  const status = form.watch("status");
+
+  const phaseContentCounts = useMemo(() => {
+    if (!phase) {
+      return { creations: 0, updates: 0 };
+    }
+
+    return phase.phaseContents.reduce(
+      (counts, content: StrategyPhaseContent) => {
+        if (content.action === "create") {
+          counts.creations += 1;
+        } else if (
+          content.action === "improve" ||
+          content.action === "expand"
+        ) {
+          counts.updates += 1;
+        }
+        return counts;
+      },
+      { creations: 0, updates: 0 },
+    );
+  }, [phase]);
 
   useEffect(() => {
     if (open) {
       form.reset(defaultValues);
     }
   }, [defaultValues, form, open]);
+
+  useEffect(() => {
+    if (!open || !phase) return;
+
+    const nextTargetCompletionDate = computePhaseTargetCompletionDate({
+      phaseStatus: status,
+      cadence: {
+        period: cadencePeriod,
+        frequency: cadenceFrequency,
+        allowedDays: cadenceAllowedDays,
+      },
+      contentCreationsCount: phaseContentCounts.creations,
+      contentUpdatesCount: phaseContentCounts.updates,
+      now: new Date(),
+    });
+    const nextValue = nextTargetCompletionDate
+      ? isoToDatetimeLocalValue(nextTargetCompletionDate.toISOString())
+      : "";
+    const currentValue = form.getValues("targetCompletionDate") ?? "";
+
+    if (nextValue !== currentValue) {
+      form.setValue("targetCompletionDate", nextValue, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [
+    cadenceAllowedDays,
+    cadenceFrequency,
+    cadencePeriod,
+    form,
+    open,
+    phase,
+    phaseContentCounts.creations,
+    phaseContentCounts.updates,
+    status,
+  ]);
 
   const { mutate: updatePhase, isPending } = useMutation(
     api.strategy.phases.update.mutationOptions({
@@ -279,27 +336,6 @@ export function ManageStrategyPhaseDialog({
 
           <Controller
             control={form.control}
-            name="targetCompletionDate"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${fieldPrefix}-target-completion`}>
-                  Target completion date
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id={`${fieldPrefix}-target-completion`}
-                  type="datetime-local"
-                  value={field.value ?? ""}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            control={form.control}
             name="observationWeeks"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
@@ -325,60 +361,66 @@ export function ManageStrategyPhaseDialog({
           />
         </FieldGroup>
 
-        <FieldGroup>
-          <Controller
-            control={form.control}
-            name="cadence.period"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${fieldPrefix}-cadence-period`}>
-                  Cadence period
-                </FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger id={`${fieldPrefix}-cadence-period`}>
-                    <SelectValue placeholder="Select cadence period" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+        <FieldSet className="gap-3">
+          <FieldLegend variant="label">Cadence</FieldLegend>
+          <FieldDescription>
+            Set how often this phase should ship content. Target completion date
+            is automatically set to the end of the last content piece.
+          </FieldDescription>
 
-          <Controller
-            control={form.control}
-            name="cadence.frequency"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${fieldPrefix}-cadence-frequency`}>
-                  Cadence frequency
-                </FieldLabel>
-                <FieldDescription>
-                  Number of articles for each cadence period.
-                </FieldDescription>
-                <Input
-                  id={`${fieldPrefix}-cadence-frequency`}
-                  min={1}
-                  onChange={(event) => {
-                    const next = event.currentTarget.valueAsNumber;
-                    field.onChange(Number.isFinite(next) ? next : 1);
-                  }}
-                  step={1}
-                  type="number"
-                  value={field.value}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <Controller
+              control={form.control}
+              name="cadence.frequency"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`${fieldPrefix}-cadence-frequency`}>
+                    Frequency
+                  </FieldLabel>
+
+                  <Input
+                    id={`${fieldPrefix}-cadence-frequency`}
+                    min={1}
+                    onChange={(event) => {
+                      const next = event.currentTarget.valueAsNumber;
+                      field.onChange(Number.isFinite(next) ? next : 1);
+                    }}
+                    step={1}
+                    type="number"
+                    value={field.value}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="cadence.period"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`${fieldPrefix}-cadence-period`}>
+                    Period
+                  </FieldLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id={`${fieldPrefix}-cadence-period`}>
+                      <SelectValue placeholder="Select cadence period" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
 
           <Controller
             control={form.control}
@@ -418,7 +460,27 @@ export function ManageStrategyPhaseDialog({
               </Field>
             )}
           />
-        </FieldGroup>
+        </FieldSet>
+
+        <Controller
+          control={form.control}
+          name="targetCompletionDate"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={`${fieldPrefix}-target-completion`}>
+                Target completion date
+              </FieldLabel>
+              <Input
+                {...field}
+                id={`${fieldPrefix}-target-completion`}
+                readOnly
+                type="datetime-local"
+                value={field.value ?? ""}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
         {formError && <FieldError>{formError}</FieldError>}
       </form>

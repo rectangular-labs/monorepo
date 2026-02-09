@@ -1,3 +1,7 @@
+import {
+  cadencePeriodSchema,
+  weekdaySchema,
+} from "@rectangular-labs/core/schemas/strategy-parsers";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
   arktypeResolver,
@@ -33,16 +37,13 @@ export const Route = createFileRoute(
   component: PublishingSettingsPage,
 });
 
-const weekdaySchema = type(
-  "'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'",
-);
 type Weekday = typeof weekdaySchema.infer;
 
 type PublishingSettings =
   typeof import("@rectangular-labs/core/schemas/project-parsers").publishingSettingsSchema.infer;
 
 const formSchema = type({
-  period: "'daily' | 'weekly' | 'monthly'",
+  period: cadencePeriodSchema,
   frequency: "number.integer >= 1",
   allowedDays: weekdaySchema.array(),
   requireContentReview: "boolean",
