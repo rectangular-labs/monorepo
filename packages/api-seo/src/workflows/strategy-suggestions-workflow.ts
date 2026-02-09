@@ -184,7 +184,7 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
 ${input.instructions}
 
 ## Data Usage
-- Use available tools (Google Search Console, DataForSEO, web search) directly to ground recommendations.
+- Use available tools (Google Search Console, keyword research data source tools, web search) directly to ground recommendations.
 - If you need more context about a specific strategy, use get_strategy_details.
 - If Google Search Console is not available, rely on competitor and keyword tools plus public site info.
 

@@ -128,7 +128,7 @@ export function createWebToolsWithMetadata(
           });
           if (!serpResult.ok) {
             throw new Error(
-              `DFS serp error: ${JSON.stringify(serpResult.error, null, 2)}`,
+              "Failed to fetch SERP data from the keyword research data source.",
               { cause: serpResult.error },
             );
           }

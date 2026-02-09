@@ -22,7 +22,7 @@ type InternalLinksInput = typeof internalLinksInputSchema.infer;
 export function createInternalLinksToolWithMetadata(targetUrl: string) {
   const internalLinks = tool({
     description:
-      "Query SERP results via DataForSEO for a query, constrained to a target URL, and return the organic results.",
+      "Query SERP results for a query, constrained to a target URL, and return the organic results.",
     inputSchema: jsonSchema<typeof internalLinksInputSchema.infer>(
       internalLinksInputSchema.toJsonSchema() as JSONSchema7,
     ),
@@ -77,7 +77,7 @@ export function createInternalLinksToolWithMetadata(targetUrl: string) {
     {
       toolName: "internal_links",
       toolDescription:
-        "Query SERP results via DataForSEO for a query, constrained to a target URL, and return the organic results.",
+        "Query SERP results for a query, constrained to a target URL, and return the organic results.",
       toolInstruction:
         "Provide query, countryCode, and languageCode. The tool will query SERP and return the organic results (url, title, description, extendedSnippet).",
       tool: internalLinks,

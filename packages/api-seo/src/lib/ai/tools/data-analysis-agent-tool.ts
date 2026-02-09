@@ -31,7 +31,7 @@ export function createDataAnalysisAgentToolWithMetadata({
     gscProperty?.config.propertyType
   );
 
-  const systemPrompt = `You are a specialized SEO data analysis agent. Your role is to analyze SEO performance data using Google Search Console and DataForSEO tools to provide actionable insights.
+  const systemPrompt = `You are a specialized SEO data analysis agent. Your role is to analyze SEO performance data using Google Search Console and keyword research data source tools to provide actionable insights.
 
 ${
   hasGsc
@@ -57,7 +57,7 @@ You have access to Google Search Console data for ${gscProperty.config.domain}.
    - Identify pages with significant drops in clicks/impressions
    - Flag potential cannibalization (multiple pages ranking for same queries)
 
-4. **Supplement with DataForSEO**:
+4. **Supplement with keyword research data source tools**:
    - Use get_ranked_keywords_for_site to see what keywords the site ranks for
    - Use get_ranked_pages_for_site to see top-performing pages
    - Use get_keyword_suggestions to expand keyword universe
@@ -76,7 +76,7 @@ You have access to Google Search Console data for ${gscProperty.config.domain}.
 ### What You Should Do:
 1. **Immediately inform the user** that GSC connection is required for site performance analysis
 2. **Call the manage_google_search_property tool** to initiate the connection process
-3. **Do NOT attempt** to analyze the user's site performance using only DataForSEO tools
+3. **Do NOT attempt** to analyze the user's site performance using only keyword research data source tools
 4. You can still:
    - Perform competitor analysis using get_ranked_keywords_for_site and get_ranked_pages_for_site
    - Research keyword opportunities using get_keyword_suggestions
@@ -103,7 +103,7 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
 
   const seoDataAnalysisAgent = tool({
     description:
-      "Run SEO data analysis using Google Search Console and DataForSEO tools. This agent specializes in analyzing historical performance, CTR optimization, content decay, and keyword opportunities. If Google Search Console is not connected, it will guide you to connect it first.",
+      "Run SEO data analysis using Google Search Console and keyword research data source tools. This agent specializes in analyzing historical performance, CTR optimization, content decay, and keyword opportunities. If Google Search Console is not connected, it will guide you to connect it first.",
     inputSchema: jsonSchema<typeof dataAnalysisAgentInputSchema.infer>(
       dataAnalysisAgentInputSchema.toJsonSchema() as JSONSchema7,
     ),
@@ -152,7 +152,7 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
     {
       toolName: "seo_data_analysis_agent",
       toolDescription:
-        "Specialized sub-agent for SEO performance analysis (GSC + DataForSEO).",
+        "Specialized sub-agent for SEO performance analysis (GSC + keyword research data source).",
       toolInstruction:
         "Provide a concrete question and desired timeframe. Use for deep analysis: CTR opportunities, content decay, query/page pivots, and prioritization. If GSC isn’t connected, it will guide connection first.",
       tool: seoDataAnalysisAgent,

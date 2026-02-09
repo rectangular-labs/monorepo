@@ -149,7 +149,8 @@ export const metrics = withOrganizationIdBase
       });
       if (!dataForSeoDataResult.ok) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: `Failed to fetch DataForSEO ranked keywords: ${JSON.stringify(dataForSeoDataResult.error, null, 2)}`,
+          message:
+            "Failed to fetch ranked keywords from the keyword research data source.",
           cause: dataForSeoDataResult.error,
         });
       }

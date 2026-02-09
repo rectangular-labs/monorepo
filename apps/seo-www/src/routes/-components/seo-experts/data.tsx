@@ -3,7 +3,7 @@ import { Section } from "@rectangular-labs/ui/components/ui/section";
 const cards = [
   {
     title: "GSC-aware Chat",
-    body: "Connects directly to Google Search Console and DataForSEO so every plan is grounded in real demand.",
+    body: "Connects directly to Google Search Console so every plan is grounded in real demand.",
   },
   {
     title: "Article Writer",

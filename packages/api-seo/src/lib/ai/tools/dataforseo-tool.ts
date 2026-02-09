@@ -13,6 +13,12 @@ import {
 } from "../../dataforseo/utils";
 import type { AgentToolDefinition } from "./utils";
 
+const KEYWORD_RESEARCH_DATA_SOURCE = "keyword research data source";
+
+function keywordDataSourceError(operation: string) {
+  return `Failed to fetch ${operation} from the ${KEYWORD_RESEARCH_DATA_SOURCE}.`;
+}
+
 const hostnameSchema = type("string").describe(
   "The domain name of the target website. The domain should be specified without 'https://' and 'www.'. Example: 'example.xyz', 'fluidposts.ai', 'google.com'",
 );
@@ -142,13 +148,13 @@ export function createDataforseoToolWithMetadata(
         cacheKV,
       });
       if (!result?.ok) {
-        console.error("DFS ranked_keywords error", result.error);
-        throw new Error(
-          `DFS ranked_keywords error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
+        console.error(
+          "Keyword data source ranked_keywords error",
+          result.error,
         );
+        throw new Error(keywordDataSourceError("ranked keywords"), {
+          cause: result.error,
+        });
       }
       return {
         siteTraffic: result.value.siteTraffic,
@@ -208,13 +214,10 @@ export function createDataforseoToolWithMetadata(
         cacheKV,
       });
       if (!result?.ok) {
-        console.error("DFS ranked_pages error", result.error);
-        throw new Error(
-          `DFS ranked_pages error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        console.error("Keyword data source ranked_pages error", result.error);
+        throw new Error(keywordDataSourceError("ranked pages"), {
+          cause: result.error,
+        });
       }
       return {
         targetSite: result.value.targetSite,
@@ -254,12 +257,9 @@ export function createDataforseoToolWithMetadata(
         cacheKV,
       });
       if (!result.ok) {
-        throw new Error(
-          `DFS keyword_suggestions error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        throw new Error(keywordDataSourceError("keyword suggestions"), {
+          cause: result.error,
+        });
       }
       return {
         keywords: result.value.keywords.map((keyword) => ({
@@ -309,12 +309,9 @@ export function createDataforseoToolWithMetadata(
         cacheKV,
       });
       if (!result.ok) {
-        throw new Error(
-          `DFS keywords_overview error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        throw new Error(keywordDataSourceError("keyword overview"), {
+          cause: result.error,
+        });
       }
       return {
         keywords: result.value.keywords.map((keyword) => ({
@@ -363,12 +360,9 @@ export function createDataforseoToolWithMetadata(
         cacheKV,
       });
       if (!result.ok) {
-        throw new Error(
-          `DFS serp error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        throw new Error(keywordDataSourceError("SERP data"), {
+          cause: result.error,
+        });
       }
       return {
         searchTerm: result.value.searchTerm,
