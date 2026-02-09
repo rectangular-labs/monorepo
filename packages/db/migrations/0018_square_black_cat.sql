@@ -88,7 +88,6 @@ CREATE INDEX "seo_strategy_phase_content_phase_idx" ON "seo_strategy_phase_conte
 CREATE INDEX "seo_strategy_phase_content_draft_idx" ON "seo_strategy_phase_content" USING btree ("content_draft_id");--> statement-breakpoint
 CREATE INDEX "seo_strategy_phase_strategy_created_at_idx" ON "seo_strategy_phase" USING btree ("strategy_id","created_at") WHERE "seo_strategy_phase"."deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "seo_strategy_phase_status_idx" ON "seo_strategy_phase" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "seo_strategy_project_updated_at_idx" ON "seo_strategy" USING btree ("project_id","updated_at") WHERE "seo_strategy"."deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "seo_strategy_status_idx" ON "seo_strategy" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "seo_strategy_snapshot_content_snapshot_idx" ON "seo_strategy_snapshot_content" USING btree ("snapshot_id");--> statement-breakpoint
 CREATE INDEX "seo_strategy_snapshot_content_draft_idx" ON "seo_strategy_snapshot_content" USING btree ("content_draft_id");--> statement-breakpoint
