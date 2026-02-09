@@ -101,9 +101,9 @@
       "class_name": "SeoStrategySuggestionsWorkflow"
     },
     {
-      "name": "seo-strategy-start",
-      "binding": "SEO_STRATEGY_START_WORKFLOW",
-      "class_name": "SeoStrategyStartWorkflow"
+      "name": "seo-strategy-phase-generation",
+      "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
+      "class_name": "SeoStrategyPhaseGenerationWorkflow"
     }
   ],
   "env": {
@@ -184,9 +184,9 @@
           "class_name": "SeoStrategySuggestionsWorkflow"
         },
         {
-          "name": "seo-strategy-start-production",
-          "binding": "SEO_STRATEGY_START_WORKFLOW",
-          "class_name": "SeoStrategyStartWorkflow"
+          "name": "seo-strategy-phase-generation-production",
+          "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
+          "class_name": "SeoStrategyPhaseGenerationWorkflow"
         }
       ],
       "routes": [
@@ -274,9 +274,9 @@
           "class_name": "SeoStrategySuggestionsWorkflow"
         },
         {
-          "name": "seo-strategy-start",
-          "binding": "SEO_STRATEGY_START_WORKFLOW",
-          "class_name": "SeoStrategyStartWorkflow"
+          "name": "seo-strategy-phase-generation",
+          "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
+          "class_name": "SeoStrategyPhaseGenerationWorkflow"
         }
       ],
       "routes": [
