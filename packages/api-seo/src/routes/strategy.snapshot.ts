@@ -384,7 +384,7 @@ const contentDetails = withOrganizationIdBase
   });
 
 const keywordsList = withOrganizationIdBase
-  .route({ method: "GET", path: "/{strategyId}/snapshot/keywords" })
+  .route({ method: "GET", path: "/keywords" })
   .input(
     type({
       organizationIdentifier: "string",
