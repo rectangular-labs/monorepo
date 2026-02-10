@@ -148,6 +148,13 @@
       "when": 1770590089221,
       "tag": "0020_lush_johnny_blaze",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1770718338424,
+      "tag": "0021_wet_prism",
+      "breakpoints": true
     }
   ]
 }
