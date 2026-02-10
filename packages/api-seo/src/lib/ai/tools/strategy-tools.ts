@@ -6,7 +6,6 @@ import type { AgentToolDefinition } from "./utils";
 
 const strategyDetailsInputSchema = type({
   strategyId: "string.uuid",
-  "snapshotLimit?": "number",
 });
 
 export function createStrategyToolsWithMetadata(args: {
@@ -20,7 +19,7 @@ export function createStrategyToolsWithMetadata(args: {
     inputSchema: jsonSchema<typeof strategyDetailsInputSchema.infer>(
       strategyDetailsInputSchema.toJsonSchema() as JSONSchema7,
     ),
-    async execute({ strategyId, snapshotLimit = 5 }) {
+    async execute({ strategyId }) {
       const detailResult = await getStrategyDetails({
         db: args.db,
         projectId: args.projectId,

@@ -1,11 +1,11 @@
 import { type } from "arktype";
 
 export const strategyGoalSchema = type({
-  metric: type("'conversions'|'clicks'|'impressions'|'avgPosition'").describe(
-    "Primary KPI to optimize for: conversions (outcomes), clicks (traffic), impressions (visibility), avgPosition (rank).",
+  metric: type("'clicks'|'impressions'|'avgPosition'").describe(
+    "Primary KPI to optimize for: clicks (traffic), impressions (visibility), avgPosition (rank).",
   ),
   target: type("number").describe(
-    "Numeric goal for the chosen KPI (absolute count for conversions/clicks/impressions, or ranking position for avgPosition).",
+    "Numeric goal for the chosen KPI (absolute count for clicks/impressions, or ranking position for avgPosition).",
   ),
   timeframe: type("'monthly'|'total'").describe(
     "Whether the target is expected per month or cumulative across the full strategy duration.",
@@ -163,16 +163,18 @@ export const STRATEGY_SNAPSHOT_TRIGGERS = [
   "manual",
 ] as const;
 
-export type KeywordSnapshot = {
-  keyword: string;
-  position: number;
-  clicks: number;
-  impressions: number;
-};
+export const keywordSnapshotSchema = type({
+  keyword: "string",
+  position: "number",
+  clicks: "number",
+  impressions: "number",
+});
+export type KeywordSnapshot = typeof keywordSnapshotSchema.infer;
 
-export type SnapshotAggregate = {
-  clicks: number;
-  impressions: number;
-  avgPosition: number;
+export const snapshotAggregateSchema = type({
+  clicks: "number",
+  impressions: "number",
+  avgPosition: "number",
   // conversions: number | null;
-};
+});
+export type SnapshotAggregate = typeof snapshotAggregateSchema.infer;

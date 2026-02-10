@@ -146,7 +146,7 @@ function PageComponent() {
             createSnapshot({
               organizationIdentifier: activeProject.organizationId,
               projectId: activeProject.id,
-              id: strategyId,
+              strategyId,
             })
           }
           size="sm"
@@ -561,45 +561,7 @@ function getGoalMetricValue(
 
 function getLatestTopKeywords(snapshot: StrategySnapshot | null) {
   if (!snapshot) return [];
-
-  const byKeyword = new Map<
-    string,
-    {
-      keyword: string;
-      clicks: number;
-      impressions: number;
-      weightedPosition: number;
-    }
-  >();
-
-  for (const content of snapshot.contentSnapshots) {
-    for (const row of content.topKeywords) {
-      const keyword = row.keyword.trim();
-      if (!keyword) continue;
-
-      const existing = byKeyword.get(keyword) ?? {
-        keyword,
-        clicks: 0,
-        impressions: 0,
-        weightedPosition: 0,
-      };
-      existing.clicks += row.clicks;
-      existing.impressions += row.impressions;
-      existing.weightedPosition += row.position * row.impressions;
-      byKeyword.set(keyword, existing);
-    }
-  }
-
-  return Array.from(byKeyword.values())
-    .map((row) => ({
-      keyword: row.keyword,
-      clicks: row.clicks,
-      impressions: row.impressions,
-      position:
-        row.impressions > 0 ? row.weightedPosition / row.impressions : 0,
-    }))
-    .sort((a, b) => b.clicks - a.clicks)
-    .slice(0, 20);
+  return [];
 }
 
 function getCurrentPhase(phases: StrategyPhase[]) {

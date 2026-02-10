@@ -412,6 +412,56 @@ export async function getDraftById(args: {
   );
 }
 
+export async function getContentDraftWithLatestMetricSnapshot(args: {
+  db: DB | DBTransaction;
+  strategyId: string;
+  contentDraftId: string;
+}) {
+  const result = await safe(() =>
+    args.db.query.seoContentDraft.findFirst({
+      columns: {
+        id: true,
+        title: true,
+        slug: true,
+        primaryKeyword: true,
+        status: true,
+        role: true,
+      },
+      where: (table, { and, eq, isNull }) =>
+        and(
+          eq(table.id, args.contentDraftId),
+          eq(table.strategyId, args.strategyId),
+          isNull(table.deletedAt),
+        ),
+      with: {
+        metricSnapshots: {
+          columns: {
+            id: true,
+            topKeywords: true,
+          },
+          where: (table, { isNull }) => isNull(table.deletedAt),
+          orderBy: (fields, { desc }) => [desc(fields.createdAt)],
+          with: {
+            snapshot: {
+              columns: {
+                id: true,
+                strategyId: true,
+                takenAt: true,
+              },
+            },
+          },
+          limit: 1,
+        },
+      },
+    }),
+  );
+  if (!result.ok) {
+    return result;
+  }
+
+  return result;
+}
+
 /**
  * Get all drafts matching a slug prefix.
  */

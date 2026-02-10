@@ -124,9 +124,9 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.generatedByTaskRunId],
       references: [seoTaskRun.id],
     }),
-    contentSnapshot: many(seoContent),
-    metricSnapshot: many(seoStrategySnapshotContent),
-    phaseContent: many(seoStrategyPhaseContent),
+    contentSnapshots: many(seoContent),
+    metricSnapshots: many(seoStrategySnapshotContent),
+    phaseContents: many(seoStrategyPhaseContent),
     // Attribution join tables
     contributingChatsMap: many(seoContentDraftChat),
     contributorsMap: many(seoContentDraftUser),
