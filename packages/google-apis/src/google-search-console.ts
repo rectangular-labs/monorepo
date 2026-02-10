@@ -56,7 +56,7 @@ export async function listProperties(
 }
 
 export interface GscSearchAnalyticsResponse {
-  rows: Array<{
+  rows?: Array<{
     keys: string[];
     clicks: number;
     impressions: number;
@@ -125,9 +125,8 @@ export async function getSearchAnalytics(
   if (!response.ok) {
     return err(response.error);
   }
-
   return ok({
-    rows: response.value.rows,
+    rows: response.value.rows ?? [],
     responseAggregationType: response.value.responseAggregationType,
   });
 }
