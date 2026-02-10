@@ -1,5 +1,5 @@
 import {
-  type cadenceSchema,
+  type PublishingCadence,
   STRATEGY_PHASE_STATUSES,
   STRATEGY_PHASE_TYPE,
 } from "@rectangular-labs/core/schemas/strategy-parsers";
@@ -38,7 +38,7 @@ export const seoStrategyPhase = pgSeoTable(
     name: text().notNull(),
     observationWeeks: integer().notNull().default(0),
     successCriteria: text().notNull(),
-    cadence: jsonb().$type<typeof cadenceSchema.infer>().notNull(),
+    cadence: jsonb().$type<PublishingCadence>().notNull(),
     status: text({ enum: STRATEGY_PHASE_STATUSES })
       .notNull()
       .default("suggestion"),

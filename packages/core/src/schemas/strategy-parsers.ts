@@ -36,24 +36,30 @@ export const strategySuggestionSchema = type({
   ),
 }).describe("Single strategy suggestion.");
 
+export const cadencePeriodSchema = type("'daily' | 'weekly' | 'monthly'");
+export const weekdaySchema = type(
+  "'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'",
+);
 export const cadenceSchema = type({
   // "daily" => frequency is articles/day
   // "weekly" => frequency is articles/week
   // "monthly" => frequency is articles/month
-  period: type("'daily' | 'weekly' | 'monthly'")
+  period: cadencePeriodSchema
     .describe("Publishing cadence unit.")
     .default("weekly"),
   frequency: type("number.integer >= 1")
     .describe("Number of items published per period.")
     .default(3),
   // Days that are eligible for publishing. Deselecting a day means we won't publish on that day.
-  allowedDays: type("'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'")
+  allowedDays: weekdaySchema
     .array()
     .describe(
       "Eligible days for publishing. By default prefer mon through fri for publishing",
     )
     .default(() => ["mon", "tue", "wed", "thu", "fri"] as const),
 });
+
+export type PublishingCadence = typeof cadenceSchema.infer;
 
 export const strategyPhaseTypeSchema = type(
   "'build'|'optimize'|'expand'",
@@ -131,6 +137,10 @@ export const STRATEGY_PHASE_TYPE = [
   "optimize",
   "expand",
 ] as const satisfies (typeof strategyPhaseTypeSchema.infer)[];
+export const strategyPhaseStatusSchema = type(
+  "'suggestion'|'planned'|'in_progress'|'observing'|'completed'|'dismissed'",
+);
+export type StrategyPhaseStatus = typeof strategyPhaseStatusSchema.infer;
 export const STRATEGY_PHASE_STATUSES = [
   "suggestion",
   "planned",
@@ -138,7 +148,7 @@ export const STRATEGY_PHASE_STATUSES = [
   "observing",
   "completed",
   "dismissed",
-] as const;
+] as const satisfies StrategyPhaseStatus[];
 
 export const CONTENT_STRATEGY_ACTION = [
   "create",

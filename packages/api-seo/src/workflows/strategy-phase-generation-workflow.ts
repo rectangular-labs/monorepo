@@ -4,38 +4,27 @@ import {
   type WorkflowStep,
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
+import { randomUUID } from "node:crypto";
 import { openai } from "@ai-sdk/openai";
 import { initAuthHandler } from "@rectangular-labs/auth";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
-import {
-  type cadenceSchema,
-  type KeywordSnapshot,
-  type SnapshotAggregate,
-  strategyPhaseSuggestionScheme,
-} from "@rectangular-labs/core/schemas/strategy-parsers";
+import { strategyPhaseSuggestionScheme } from "@rectangular-labs/core/schemas/strategy-parsers";
 import type {
   seoGenerateStrategyPhaseTaskInputSchema,
   seoGenerateStrategyPhaseTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
+import { computePhaseTargetCompletionDate } from "@rectangular-labs/core/strategy/compute-phase-target-completion-date";
 import type { schema } from "@rectangular-labs/db";
 import { createDb } from "@rectangular-labs/db";
 import {
   createContentDraft,
   createStrategyPhase,
   createStrategyPhaseContent,
-  createStrategySnapshot,
-  createStrategySnapshotContent,
-  getDraftById,
-  getLatestStrategySnapshot,
   getSeoProjectById,
   getStrategyDetails,
   listUnassignedContentDrafts,
   updateContentDraft,
 } from "@rectangular-labs/db/operations";
-import {
-  getLastNDaysRange,
-  getSearchAnalytics,
-} from "@rectangular-labs/google-apis/google-search-console";
 import {
   generateText,
   type JSONSchema7,
@@ -51,7 +40,7 @@ import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { formatBusinessBackground } from "../lib/ai/utils/format-business-background";
 import { logAgentStep } from "../lib/ai/utils/log-agent-step";
 import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
-import { createSeoWriteArticleTasksBatch } from "../lib/task";
+import { createSeoWriteArticleTasksBatch, createTask } from "../lib/task";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
@@ -82,14 +71,6 @@ type DraftTarget = Pick<
 > & {
   source: "unassigned" | "prior-phase";
 };
-
-type SnapshotItem = {
-  draftId: string;
-  aggregate: SnapshotAggregate;
-  topKeywords: KeywordSnapshot[];
-};
-
-const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 function formatDraftTargets(drafts: DraftTarget[]) {
   if (drafts.length === 0) return "- none";
@@ -137,164 +118,6 @@ function formatStrategyPhaseHistory(phases: StrategyDetails["phases"]) {
       ].join(" |");
     })
     .join("\n");
-}
-
-function buildPageUrl(baseUrl: string, slug: string) {
-  try {
-    return new URL(slug, baseUrl).href;
-  } catch {
-    return null;
-  }
-}
-
-function startOfDay(date: Date) {
-  const value = new Date(date);
-  value.setHours(0, 0, 0, 0);
-  return value;
-}
-
-function addDays(date: Date, days: number) {
-  const value = new Date(date);
-  value.setDate(value.getDate() + days);
-  return value;
-}
-
-function localDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function getPeriodKey(
-  date: Date,
-  period: (typeof cadenceSchema.infer)["period"],
-) {
-  if (period === "daily") return localDateKey(date);
-
-  if (period === "weekly") {
-    const monday = new Date(date);
-    const offsetToMonday = (monday.getDay() + 6) % 7;
-    monday.setDate(monday.getDate() - offsetToMonday);
-    return localDateKey(monday);
-  }
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
-}
-
-function calculateCreationScheduleCompletionDate(args: {
-  articleCount: number;
-  cadence: typeof cadenceSchema.infer;
-  now: Date;
-}) {
-  const { articleCount, cadence, now } = args;
-  if (articleCount <= 0) return null;
-
-  const allowedDays =
-    cadence.allowedDays.length > 0
-      ? new Set(cadence.allowedDays)
-      : new Set<PhaseSuggestion["phase"]["cadence"]["allowedDays"][number]>([
-          "mon",
-          "tue",
-          "wed",
-          "thu",
-          "fri",
-        ]);
-
-  let remaining = articleCount;
-  let cursor = addDays(startOfDay(now), 1);
-  const usedCapacityByPeriod = new Map<string, number>();
-
-  // The upper bound is defensive against malformed cadence data.
-  for (let i = 0; i < 5000; i += 1) {
-    const weekday = WEEKDAY_KEYS[cursor.getDay()] ?? "sun";
-    if (!allowedDays.has(weekday)) {
-      cursor = addDays(cursor, 1);
-      continue;
-    }
-
-    const periodKey = getPeriodKey(cursor, cadence.period);
-    const usedCapacity = usedCapacityByPeriod.get(periodKey) ?? 0;
-    const availableCapacity = Math.max(0, cadence.frequency - usedCapacity);
-
-    if (availableCapacity > 0) {
-      const scheduledToday = Math.min(availableCapacity, remaining);
-      remaining -= scheduledToday;
-      usedCapacityByPeriod.set(periodKey, usedCapacity + scheduledToday);
-
-      if (remaining === 0) return new Date(cursor);
-    }
-
-    cursor = addDays(cursor, 1);
-  }
-
-  throw new Error("Unable to compute completion date from cadence.");
-}
-
-function calculatePhaseTargetCompletionDate(args: {
-  phaseStatus: "suggestion" | "planned";
-  cadence: PhaseSuggestion["phase"]["cadence"];
-  contentCreationsCount: number;
-  contentUpdatesCount: number;
-  now: Date;
-}) {
-  if (args.phaseStatus === "suggestion") return null;
-
-  if (args.contentCreationsCount > 0) {
-    return calculateCreationScheduleCompletionDate({
-      articleCount: args.contentCreationsCount,
-      cadence: args.cadence,
-      now: args.now,
-    });
-  }
-
-  if (args.contentUpdatesCount > 0) {
-    return addDays(args.now, 7);
-  }
-
-  return null;
-}
-
-function computeAggregate(items: SnapshotItem[]): SnapshotAggregate {
-  const clicks = items.reduce((sum, item) => sum + item.aggregate.clicks, 0);
-  const impressions = items.reduce(
-    (sum, item) => sum + item.aggregate.impressions,
-    0,
-  );
-  const weightedPosition = items.reduce(
-    (sum, item) =>
-      sum + item.aggregate.avgPosition * item.aggregate.impressions,
-    0,
-  );
-  const avgPosition = impressions > 0 ? weightedPosition / impressions : 0;
-
-  return {
-    clicks,
-    impressions,
-    avgPosition,
-  };
-}
-
-function computeDelta(
-  current: SnapshotAggregate,
-  previous: SnapshotAggregate | null,
-): SnapshotAggregate | null {
-  if (!previous) return null;
-  return {
-    clicks: current.clicks - previous.clicks,
-    impressions: current.impressions - previous.impressions,
-    avgPosition: current.avgPosition - previous.avgPosition,
-  };
-}
-
-function getEmptySnapshotAggregate(): SnapshotAggregate {
-  return {
-    clicks: 0,
-    impressions: 0,
-    avgPosition: 0,
-  };
 }
 
 async function getGscIntegrationOrThrow(args: {
@@ -515,17 +338,17 @@ Generate the next strategy phase now.`,
       },
     );
 
+    const now = new Date();
     const phaseResult = await step.do("create phase + contents", async () => {
       const db = createDb();
       const phaseStatus =
         strategy.phases.length === 0 ? "planned" : "suggestion";
-      const now = new Date();
-      const targetCompletionDate = calculatePhaseTargetCompletionDate({
+      const targetCompletionDate = computePhaseTargetCompletionDate({
         phaseStatus,
         cadence: suggestion.phase.cadence,
         contentCreationsCount: suggestion.contentCreations.length,
         contentUpdatesCount: suggestion.contentUpdates.length,
-        now,
+        now: now,
       });
 
       const phaseInsert = await createStrategyPhase(db, {
@@ -654,161 +477,32 @@ Generate the next strategy phase now.`,
       }
     });
 
-    const snapshotId = await step.do(
-      "create initial phase snapshot",
-      async () => {
-        const db = createDb();
-        const gscIntegration = await getGscIntegrationOrThrow({
-          db,
-          projectId: project.id,
-          organizationId: project.organizationId,
-          context: "create initial phase snapshot",
-        });
-        if (!gscIntegration) {
-          return null;
-        }
-
-        const draftRows = await Promise.all(
-          phaseResult.draftIds.map(async (draftId) => {
-            const draftResult = await getDraftById({
-              db,
-              organizationId: project.organizationId,
-              projectId: project.id,
-              id: draftId,
-              withContent: true,
-            });
-            if (!draftResult.ok || !draftResult.value) return null;
-            return draftResult.value;
-          }),
-        );
-        const drafts = draftRows.filter(
-          (draft): draft is NonNullable<typeof draft> => draft !== null,
-        );
-
-        const snapshotItems: SnapshotItem[] = [];
-        const { startDate, endDate } = getLastNDaysRange(7);
-
-        for (const draft of drafts) {
-          const pageUrl = buildPageUrl(project.websiteUrl, draft.slug);
-          if (!pageUrl) {
-            snapshotItems.push({
-              draftId: draft.id,
-              aggregate: getEmptySnapshotAggregate(),
-              topKeywords: [],
-            });
-            continue;
-          }
-
-          const gsc = gscIntegration;
-          const gscResult = await getSearchAnalytics(gsc.accessToken, {
-            siteUrl: gsc.config.domain,
-            siteType: gsc.config.propertyType,
-            startDate,
-            endDate,
-            dimensions: ["query"],
-            filters: [
-              {
-                dimension: "page",
-                operator: "equals",
-                expression: pageUrl,
-              },
-            ],
-            // todo: handle if user page ranks for more than 2500 keywords
-            rowLimit: 2_500,
-          });
-
-          if (!gscResult.ok) {
-            logError("GSC query failed", {
-              draftId: draft.id,
-              pageUrl,
-              error: gscResult.error,
-            });
-            snapshotItems.push({
-              draftId: draft.id,
-              aggregate: getEmptySnapshotAggregate(),
-              topKeywords: [],
-            });
-            continue;
-          }
-
-          const rows = gscResult.value.rows;
-          const clicks = rows.reduce((sum, row) => sum + row.clicks, 0);
-          const impressions = rows.reduce(
-            (sum, row) => sum + row.impressions,
-            0,
-          );
-          const weightedPosition = rows.reduce(
-            (sum, row) => sum + row.position * row.impressions,
-            0,
-          );
-          const avgPosition =
-            impressions > 0 ? weightedPosition / impressions : 0;
-
-          snapshotItems.push({
-            draftId: draft.id,
-            aggregate: {
-              clicks,
-              impressions,
-              avgPosition,
-            },
-            topKeywords: rows
-              .sort((a, b) => b.clicks - a.clicks)
-              .slice(0, 100)
-              .map((row) => ({
-                keyword: row.keys[0] ?? "",
-                position: row.position,
-                clicks: row.clicks,
-                impressions: row.impressions,
-              }))
-              .filter((row) => !!row.keyword),
-          });
-        }
-
-        const aggregate = computeAggregate(snapshotItems);
-
-        const latestSnapshotResult = await getLatestStrategySnapshot({
-          db,
-          strategyId: strategy.id,
-        });
-        if (!latestSnapshotResult.ok) throw latestSnapshotResult.error;
-
-        const delta = computeDelta(
-          aggregate,
-          latestSnapshotResult.value?.aggregate ?? null,
-        );
-
-        const snapshotInsert = await createStrategySnapshot(db, {
+    await step.do("queue initial phase snapshot", async () => {
+      const db = createDb();
+      const taskResult = await createTask({
+        db,
+        userId: input.userId,
+        input: {
+          type: "seo-generate-strategy-snapshot",
+          projectId: input.projectId,
+          organizationId: input.organizationId,
           strategyId: strategy.id,
           phaseId: phaseResult.phase.id,
-          takenAt: new Date(),
-          triggerType: "manual",
-          aggregate,
-          delta,
-          aiInsight: null,
-        });
-        if (!snapshotInsert.ok) throw snapshotInsert.error;
-
-        const snapshotContentResult = await createStrategySnapshotContent(
-          db,
-          snapshotItems.map((item) => ({
-            snapshotId: snapshotInsert.value.id,
-            contentDraftId: item.draftId,
-            aggregate: item.aggregate,
-            delta: null,
-            topKeywords: item.topKeywords,
-          })),
-        );
-        if (!snapshotContentResult.ok) throw snapshotContentResult.error;
-
-        return snapshotInsert.value.id;
-      },
-    );
+          userId: input.userId,
+          triggerType: "phase_complete",
+        },
+        workflowInstanceId: `strategy_snapshot_for_${event.instanceId}_${randomUUID().slice(-6)}`,
+      });
+      if (!taskResult.ok) {
+        throw taskResult.error;
+      }
+      return taskResult.value.id;
+    });
 
     logInfo("complete", {
       instanceId: event.instanceId,
       strategyId: strategy.id,
       phaseId: phaseResult.phase.id,
-      snapshotId,
       draftCount: phaseResult.draftIds.length,
       newDraftCount: phaseResult.createdDraftIds.length,
     });
@@ -817,7 +511,6 @@ Generate the next strategy phase now.`,
       type: "seo-generate-strategy-phase",
       strategyId: strategy.id,
       phaseId: phaseResult.phase.id,
-      snapshotId,
       draftIds: phaseResult.draftIds,
     } satisfies typeof seoGenerateStrategyPhaseTaskOutputSchema.infer;
   }

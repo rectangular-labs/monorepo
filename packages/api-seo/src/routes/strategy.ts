@@ -324,6 +324,61 @@ const updatePhase = withOrganizationIdBase
     return updateResult.value;
   });
 
+const createSnapshot = withOrganizationIdBase
+  .route({ method: "POST", path: "/{id}/snapshot" })
+  .input(
+    type({
+      organizationIdentifier: "string",
+      projectId: "string.uuid",
+      id: "string.uuid",
+    }),
+  )
+  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
+  .output(type({ taskId: "string" }))
+  .handler(async ({ context, input }) => {
+    const strategyResult = await getStrategy({
+      db: context.db,
+      projectId: input.projectId,
+      strategyId: input.id,
+      organizationId: context.organization.id,
+    });
+    if (!strategyResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load strategy.",
+        cause: strategyResult.error,
+      });
+    }
+    if (!strategyResult.value) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No strategy found.",
+      });
+    }
+
+    const taskResult = await createTask({
+      db: context.db,
+      userId: context.user?.id,
+      input: {
+        type: "seo-generate-strategy-snapshot",
+        projectId: input.projectId,
+        organizationId: context.organization.id,
+        strategyId: input.id,
+        phaseId: null,
+        triggerType: "manual",
+        userId: context.user.id,
+      },
+      workflowInstanceId: `strategy_snapshot_manual_${input.id}_${crypto.randomUUID().slice(0, 6)}`,
+    });
+
+    if (!taskResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to queue strategy snapshot.",
+        cause: taskResult.error,
+      });
+    }
+
+    return { taskId: taskResult.value.id };
+  });
+
 export default base
   .prefix("/organization/{organizationIdentifier}/project/{projectId}/strategy")
   .router({
@@ -331,6 +386,9 @@ export default base
     get,
     create,
     update,
+    snapshot: {
+      create: createSnapshot,
+    },
     phases: {
       create: createPhase,
       update: updatePhase,

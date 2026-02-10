@@ -27,6 +27,16 @@ export const seoGenerateStrategyPhaseTaskInputSchema = type({
   "userId?": "string",
 });
 
+export const seoGenerateStrategySnapshotTaskInputSchema = type({
+  type: "'seo-generate-strategy-snapshot'",
+  projectId: "string.uuid",
+  organizationId: "string",
+  strategyId: "string.uuid",
+  triggerType: "'scheduled'|'phase_complete'|'manual'",
+  "phaseId?": "string.uuid|null",
+  "userId?": "string",
+});
+
 export const seoPlanKeywordTaskInputSchema = type({
   type: "'seo-plan-keyword'",
   projectId: "string.uuid",
@@ -53,6 +63,7 @@ export const taskInputSchema = type.or(
   seoUnderstandSiteTaskInputSchema,
   seoStrategySuggestionsTaskInputSchema,
   seoGenerateStrategyPhaseTaskInputSchema,
+  seoGenerateStrategySnapshotTaskInputSchema,
 );
 
 export const understandSiteTaskOutputSchema = type({
@@ -92,8 +103,13 @@ export const seoGenerateStrategyPhaseTaskOutputSchema = type({
   type: "'seo-generate-strategy-phase'",
   strategyId: "string.uuid",
   phaseId: "string.uuid|null",
-  snapshotId: "string.uuid|null",
   draftIds: type("string.uuid").array(),
+});
+
+export const seoGenerateStrategySnapshotTaskOutputSchema = type({
+  type: "'seo-generate-strategy-snapshot'",
+  strategyId: "string.uuid",
+  snapshotId: "string.uuid|null",
 });
 
 export const taskOutputSchema = type.or(
@@ -103,4 +119,5 @@ export const taskOutputSchema = type.or(
   seoUnderstandSiteTaskOutputSchema,
   seoStrategySuggestionsTaskOutputSchema,
   seoGenerateStrategyPhaseTaskOutputSchema,
+  seoGenerateStrategySnapshotTaskOutputSchema,
 );

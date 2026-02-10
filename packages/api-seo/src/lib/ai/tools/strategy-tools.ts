@@ -40,7 +40,7 @@ export function createStrategyToolsWithMetadata(args: {
         orderBy: (fields, { desc }) => [desc(fields.takenAt)],
         limit: Math.max(1, Math.min(20, snapshotLimit)),
         with: {
-          contents: {
+          contentSnapshots: {
             where: (table, { isNull }) => isNull(table.deletedAt),
             with: {
               contentDraft: {

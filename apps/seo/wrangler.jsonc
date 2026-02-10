@@ -104,6 +104,11 @@
       "name": "seo-strategy-phase-generation",
       "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
       "class_name": "SeoStrategyPhaseGenerationWorkflow"
+    },
+    {
+      "name": "seo-strategy-snapshot",
+      "binding": "SEO_STRATEGY_SNAPSHOT_WORKFLOW",
+      "class_name": "SeoStrategySnapshotWorkflow"
     }
   ],
   "env": {
@@ -187,6 +192,11 @@
           "name": "seo-strategy-phase-generation-production",
           "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
           "class_name": "SeoStrategyPhaseGenerationWorkflow"
+        },
+        {
+          "name": "seo-strategy-snapshot-production",
+          "binding": "SEO_STRATEGY_SNAPSHOT_WORKFLOW",
+          "class_name": "SeoStrategySnapshotWorkflow"
         }
       ],
       "routes": [
@@ -277,6 +287,11 @@
           "name": "seo-strategy-phase-generation",
           "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
           "class_name": "SeoStrategyPhaseGenerationWorkflow"
+        },
+        {
+          "name": "seo-strategy-snapshot",
+          "binding": "SEO_STRATEGY_SNAPSHOT_WORKFLOW",
+          "class_name": "SeoStrategySnapshotWorkflow"
         }
       ],
       "routes": [

@@ -19,7 +19,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -29,6 +29,11 @@ import { StrategyCard } from "./-components/strategy-card";
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/strategies/",
 )({
+  beforeLoad: ({ context }) => {
+    if (!context.user?.email?.endsWith("fluidposts.com")) {
+      throw notFound();
+    }
+  },
   component: PageComponent,
 });
 

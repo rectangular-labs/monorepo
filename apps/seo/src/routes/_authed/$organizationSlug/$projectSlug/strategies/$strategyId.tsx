@@ -17,6 +17,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@rectangular-labs/ui/components/ui/empty";
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import {
   Table,
   TableBody,
@@ -31,8 +32,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rectangular-labs/ui/components/ui/tabs";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -42,12 +48,18 @@ import { ManageStrategyPhaseDialog } from "./-components/manage-strategy-phase-d
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/strategies/$strategyId",
 )({
+  beforeLoad: ({ context }) => {
+    if (!context.user?.email?.endsWith("fluidposts.com")) {
+      throw notFound();
+    }
+  },
   component: PageComponent,
 });
 
 function PageComponent() {
   const { organizationSlug, projectSlug, strategyId } = Route.useParams();
   const api = getApiClientRq();
+  const queryClient = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
   const [phaseEditOpen, setPhaseEditOpen] = useState(false);
   const { data: activeProject } = useSuspenseQuery(
@@ -83,10 +95,41 @@ function PageComponent() {
   const progress = strategy
     ? getGoalProgressFromSnapshot(strategy, latestSnapshot)
     : null;
+  const { mutate: createSnapshot, isPending: isCreatingSnapshot } = useMutation(
+    api.strategy.snapshot.create.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message);
+      },
+      onSuccess: async () => {
+        toast.success("Snapshot queued");
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: api.strategy.get.queryKey({
+              input: {
+                organizationIdentifier: activeProject.organizationId,
+                projectId: activeProject.id,
+                id: strategyId,
+              },
+            }),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: api.strategy.list.queryKey({
+              input: {
+                organizationIdentifier: activeProject.organizationId,
+                projectId: activeProject.id,
+              },
+            }),
+          }),
+        ]);
+      },
+    }),
+  );
+  const canCreateSnapshot =
+    strategy?.status === "active" || strategy?.status === "observing";
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 p-6">
-      <div className="flex items-center gap-3 text-sm">
+      <div className="flex items-center justify-between gap-3 text-sm">
         <Button asChild size="sm" variant="ghost">
           <Link
             params={{ organizationSlug, projectSlug }}
@@ -95,6 +138,22 @@ function PageComponent() {
             <Icons.ArrowLeft className="size-4" />
             Back to strategies
           </Link>
+        </Button>
+        <Button
+          disabled={!canCreateSnapshot}
+          isLoading={isCreatingSnapshot}
+          onClick={() =>
+            createSnapshot({
+              organizationIdentifier: activeProject.organizationId,
+              projectId: activeProject.id,
+              id: strategyId,
+            })
+          }
+          size="sm"
+          type="button"
+          variant="outline"
+        >
+          Take snapshot
         </Button>
       </div>
 

@@ -57,6 +57,7 @@ export const Route = createFileRoute("/_authed/$organizationSlug/$projectSlug")(
 
 function RouteComponent() {
   const { organizationSlug, projectSlug } = Route.useParams();
+  const context = Route.useRouteContext();
   const api = getApiClientRq();
 
   const queryClient = useQueryClient();
@@ -134,12 +135,14 @@ function RouteComponent() {
         >
           Content
         </NavLink>
-        <NavLink
-          params={{ organizationSlug, projectSlug }}
-          to="/$organizationSlug/$projectSlug/strategies"
-        >
-          Strategies
-        </NavLink>
+        {context.user?.email?.endsWith("fluidposts.com") && (
+          <NavLink
+            params={{ organizationSlug, projectSlug }}
+            to="/$organizationSlug/$projectSlug/strategies"
+          >
+            Strategies
+          </NavLink>
+        )}
 
         <NavLink
           params={{ organizationSlug, projectSlug }}

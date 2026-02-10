@@ -24,6 +24,7 @@ export {
   SeoOnboardingWorkflow,
   SeoPlannerWorkflow,
   SeoStrategyPhaseGenerationWorkflow,
+  SeoStrategySnapshotWorkflow,
   SeoStrategySuggestionsWorkflow,
   SeoWriterWorkflow,
 } from "@rectangular-labs/api-seo/workflows";

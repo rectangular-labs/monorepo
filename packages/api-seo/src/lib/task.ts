@@ -60,6 +60,13 @@ export async function createTask({
           });
         return { provider: "cloudflare" as const, taskId: instance.id };
       }
+      case "seo-generate-strategy-snapshot": {
+        const instance = await workflows.seoStrategySnapshotWorkflow.create({
+          id: workflowInstanceId ?? `strategy_snapshot_${crypto.randomUUID()}`,
+          params: input,
+        });
+        return { provider: "cloudflare" as const, taskId: instance.id };
+      }
       case "seo-plan-keyword": {
         const instance = await workflows.seoPlannerWorkflow.create({
           id: workflowInstanceId ?? `plan_${crypto.randomUUID()}`,

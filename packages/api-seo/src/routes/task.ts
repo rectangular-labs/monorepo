@@ -110,6 +110,9 @@ const status = protectedBase
         if (taskRun.inputData.type === "seo-generate-strategy-phase") {
           return context.seoStrategyPhaseGenerationWorkflow.get(taskRun.taskId);
         }
+        if (taskRun.inputData.type === "seo-generate-strategy-snapshot") {
+          return context.seoStrategySnapshotWorkflow.get(taskRun.taskId);
+        }
         return null;
       })();
 

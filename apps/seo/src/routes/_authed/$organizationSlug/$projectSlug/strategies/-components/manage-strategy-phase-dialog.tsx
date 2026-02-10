@@ -6,8 +6,8 @@ import type {
 } from "@rectangular-labs/api-seo/types";
 import {
   cadencePeriodSchema,
-  type cadenceSchema,
-  type strategyPhaseStatusSchema,
+  type PublishingCadence,
+  type StrategyPhaseStatus,
   weekdaySchema,
 } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { computePhaseTargetCompletionDate } from "@rectangular-labs/core/strategy/compute-phase-target-completion-date";
@@ -66,9 +66,8 @@ const phaseFormSchema = type({
 type PhaseFormValues = typeof phaseFormSchema.infer;
 type StrategyPhase = RouterOutputs["strategy"]["get"]["phases"][number];
 type StrategyPhaseContent = StrategyPhase["phaseContents"][number];
-type PhaseStatus = typeof strategyPhaseStatusSchema.infer;
 
-type Weekday = (typeof cadenceSchema.infer)["allowedDays"][number];
+type Weekday = PublishingCadence["allowedDays"][number];
 const days: { value: Weekday; label: string }[] = [
   { value: "mon", label: "Mon" },
   { value: "tue", label: "Tue" },
@@ -86,7 +85,7 @@ const phaseStatusOptions = [
   { value: "completed", label: "Completed" },
   { value: "dismissed", label: "Dismissed" },
   { value: "suggestion", label: "Suggestion" },
-] as const satisfies { value: PhaseStatus; label: string }[];
+] as const satisfies { value: StrategyPhaseStatus; label: string }[];
 
 export function ManageStrategyPhaseDialog({
   phase,
