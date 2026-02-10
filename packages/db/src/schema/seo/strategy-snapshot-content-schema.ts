@@ -32,7 +32,6 @@ export const seoStrategySnapshotContent = pgSeoTable(
         onUpdate: "cascade",
       }),
     aggregate: jsonb().$type<SnapshotAggregate>().notNull(),
-    delta: jsonb().$type<SnapshotAggregate>(),
     topKeywords: jsonb().$type<KeywordSnapshot[]>().notNull(),
     ...timestamps,
   },

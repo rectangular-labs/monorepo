@@ -17,7 +17,6 @@ import { createDb } from "@rectangular-labs/db";
 import {
   createStrategySnapshot,
   createStrategySnapshotContent,
-  getLatestStrategySnapshot,
   getSeoProjectById,
   getStrategyDetails,
 } from "@rectangular-labs/db/operations";
@@ -41,15 +40,8 @@ type StrategySnapshotInput =
 export type SeoStrategySnapshotWorkflowBinding =
   Workflow<StrategySnapshotInput>;
 
-type StrategySnapshotOutput =
-  typeof seoGenerateStrategySnapshotTaskOutputSchema.infer;
-
 type StrategyDetails = NonNullable<
-  Awaited<ReturnType<typeof getStrategyDetails>> extends infer T
-    ? T extends { ok: true; value: infer V }
-      ? V
-      : never
-    : never
+  Extract<Awaited<ReturnType<typeof getStrategyDetails>>, { ok: true }>["value"]
 >;
 
 type SnapshotItem = {
@@ -83,18 +75,6 @@ function computeAggregate(items: SnapshotItem[]): SnapshotAggregate {
     clicks,
     impressions,
     avgPosition,
-  };
-}
-
-function computeDelta(
-  current: SnapshotAggregate,
-  previous: SnapshotAggregate | null,
-): SnapshotAggregate | null {
-  if (!previous) return null;
-  return {
-    clicks: current.clicks - previous.clicks,
-    impressions: current.impressions - previous.impressions,
-    avgPosition: current.avgPosition - previous.avgPosition,
   };
 }
 
@@ -350,29 +330,12 @@ export class SeoStrategySnapshotWorkflow extends WorkflowEntrypoint<
         }
 
         const aggregate = computeAggregate(snapshotItems);
-        const latestSnapshotResult = await getLatestStrategySnapshot({
-          db,
-          strategyId: strategy.id,
-        });
-        logInfo("latest snapshot", {
-          strategyId: strategy.id,
-          phaseId: input.phaseId ?? null,
-          latestSnapshotId: latestSnapshotResult ?? null,
-        });
-        if (!latestSnapshotResult.ok) throw latestSnapshotResult.error;
-
-        const delta = computeDelta(
-          aggregate,
-          latestSnapshotResult.value?.aggregate ?? null,
-        );
-
         const snapshotInsert = await createStrategySnapshot(db, {
           strategyId: strategy.id,
           phaseId: input.phaseId ?? null,
           takenAt: new Date(),
           triggerType: input.triggerType,
           aggregate,
-          delta,
           aiInsight: null,
         });
         if (!snapshotInsert.ok) throw snapshotInsert.error;
@@ -383,7 +346,6 @@ export class SeoStrategySnapshotWorkflow extends WorkflowEntrypoint<
             snapshotId: snapshotInsert.value.id,
             contentDraftId: item.draftId,
             aggregate: item.aggregate,
-            delta: null,
             topKeywords: item.topKeywords,
           })),
         );
@@ -413,6 +375,6 @@ export class SeoStrategySnapshotWorkflow extends WorkflowEntrypoint<
       type: "seo-generate-strategy-snapshot",
       strategyId: strategy.id,
       snapshotId,
-    } satisfies StrategySnapshotOutput;
+    } satisfies typeof seoGenerateStrategySnapshotTaskOutputSchema.infer;
   }
 }

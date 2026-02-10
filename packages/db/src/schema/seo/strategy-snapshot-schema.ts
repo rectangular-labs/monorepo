@@ -33,7 +33,6 @@ export const seoStrategySnapshot = pgSeoTable(
     takenAt: timestamp({ mode: "date", withTimezone: true }).notNull(),
     triggerType: text({ enum: STRATEGY_SNAPSHOT_TRIGGERS }).notNull(),
     aggregate: jsonb().$type<SnapshotAggregate>().notNull(),
-    delta: jsonb().$type<SnapshotAggregate>(),
     aiInsight: text(),
     ...timestamps,
   },

@@ -15,7 +15,7 @@ import { ok, type Result, safe } from "@rectangular-labs/result";
 import { apiEnv } from "../../env";
 import type { InitialContext } from "../../types";
 
-const DATAFORSEO_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7;
+const DATAFORSEO_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7; // 1 week
 
 /**
  * FNV-1a hash function.

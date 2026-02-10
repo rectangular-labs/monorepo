@@ -34,30 +34,10 @@ export function createStrategyToolsWithMetadata(args: {
         return { success: false, message: "Strategy not found" };
       }
 
-      const snapshots = await args.db.query.seoStrategySnapshot.findMany({
-        where: (table, { eq, isNull, and }) =>
-          and(eq(table.strategyId, strategyId), isNull(table.deletedAt)),
-        orderBy: (fields, { desc }) => [desc(fields.takenAt)],
-        limit: Math.max(1, Math.min(20, snapshotLimit)),
-        with: {
-          contentSnapshots: {
-            where: (table, { isNull }) => isNull(table.deletedAt),
-            with: {
-              contentDraft: {
-                columns: {
-                  contentMarkdown: false,
-                  outline: false,
-                },
-              },
-            },
-          },
-        },
-      });
-
       return {
         success: true,
         strategy: detailResult.value,
-        snapshots,
+        snapshots: detailResult.value.snapshots,
       };
     },
   });

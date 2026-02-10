@@ -71,8 +71,8 @@ export async function getStrategyDetails(args: {
   strategyId: string;
   organizationId: string;
 }) {
-  return await safe(() =>
-    args.db.query.seoStrategy.findFirst({
+  return await safe(async () => {
+    const strategy = await args.db.query.seoStrategy.findFirst({
       where: (table, { eq, isNull, and }) =>
         and(
           eq(table.id, args.strategyId),
@@ -118,10 +118,35 @@ export async function getStrategyDetails(args: {
               },
             },
           },
+          limit: 2,
         },
       },
-    }),
-  );
+    });
+
+    if (!strategy) return strategy;
+    return {
+      ...strategy,
+      snapshots: strategy.snapshots.map((snapshot, index, snapshots) => {
+        const previousSnapshot = snapshots[index + 1] ?? null;
+
+        return {
+          ...snapshot,
+          delta: previousSnapshot?.aggregate
+            ? {
+                clicks:
+                  snapshot.aggregate.clicks - previousSnapshot.aggregate.clicks,
+                impressions:
+                  snapshot.aggregate.impressions -
+                  previousSnapshot.aggregate.impressions,
+                avgPosition:
+                  snapshot.aggregate.avgPosition -
+                  previousSnapshot.aggregate.avgPosition,
+              }
+            : null,
+        };
+      }),
+    };
+  });
 }
 
 export async function createStrategies(

@@ -75,12 +75,11 @@ const get = withOrganizationIdBase
       }).array(),
       snapshots: type({
         "...": schema.seoStrategySnapshotSelectSchema,
-        contentSnapshots: type({
-          "...": schema.seoStrategySnapshotContentSelectSchema,
-          contentDraft: schema.seoContentDraftSelectSchema
-            .pick("id", "title", "slug", "primaryKeyword")
-            .or(type.null),
-        }).array(),
+        delta: type({
+          clicks: "number",
+          impressions: "number",
+          avgPosition: "number",
+        }).or(type.null),
       }).array(),
     }),
   )
