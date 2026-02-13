@@ -15,7 +15,6 @@ import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
   DialogDrawer,
-  DialogDrawerDescription,
   DialogDrawerFooter,
   DialogDrawerHeader,
   DialogDrawerTitle,
@@ -102,7 +101,7 @@ export function ManageStrategyPhaseDialog({
 }) {
   const api = getApiClientRq();
   const queryClient = useQueryClient();
-  console.log("phase", phase);
+
   const defaultValues = useMemo<PhaseFormValues>(
     () => ({
       name: phase?.name ?? "",
@@ -249,16 +248,20 @@ export function ManageStrategyPhaseDialog({
     updatePhase(payload);
   };
 
-  const fieldPrefix = phase ? `phase-manage-${phase.id}` : "phase-manage";
+  const fieldPrefix = phase ? `phase-manage-${phase.id}` : "phase-manage-new";
   const formError = form.formState.errors.root?.message;
+  const title = phase ? "Edit phase" : "Phase";
+  const submitLabel = phase ? "Save changes" : "Save";
 
   return (
-    <DialogDrawer isLoading={isPending} onOpenChange={onOpenChange} open={open}>
+    <DialogDrawer
+      className="sm:max-w-2xl"
+      isLoading={isPending}
+      onOpenChange={onOpenChange}
+      open={open}
+    >
       <DialogDrawerHeader>
-        <DialogDrawerTitle>Edit phase</DialogDrawerTitle>
-        <DialogDrawerDescription>
-          Update phase details, cadence, and completion target.
-        </DialogDrawerDescription>
+        <DialogDrawerTitle>{title}</DialogDrawerTitle>
       </DialogDrawerHeader>
 
       <form
@@ -493,7 +496,7 @@ export function ManageStrategyPhaseDialog({
           Cancel
         </Button>
         <Button form="phase-manage-form" isLoading={isPending} type="submit">
-          Save changes
+          {submitLabel}
         </Button>
       </DialogDrawerFooter>
     </DialogDrawer>

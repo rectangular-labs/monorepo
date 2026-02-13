@@ -6,8 +6,6 @@ import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@rectangular-labs/ui/components/ui/card";
@@ -33,12 +31,6 @@ import { getApiClientRq } from "~/lib/api";
 import { ManageStrategyDialog } from "./manage-strategy-dialog";
 
 type StrategySummary = RouterOutputs["strategy"]["list"]["strategies"][number];
-
-const STATUS_SUMMARIES: Partial<Record<StrategySummary["status"], string>> = {
-  active: "In progress and tracking outcomes.",
-  observing: "Waiting for data to mature.",
-  stable: "Goal met. No new phase recommended.",
-};
 
 function formatNumber(value: number | null | undefined, digits = 0) {
   if (value === null || value === undefined || Number.isNaN(value)) return null;
@@ -96,8 +88,8 @@ export function StrategyCard({
   });
 
   const phase = strategy.phases?.[0] ?? null;
-  const statusSummary = STATUS_SUMMARIES[strategy.status];
   const isSuggestion = strategy.status === "suggestion";
+  const [viewOpen, setViewOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
 
   const [pendingAction, setPendingAction] = useState<
@@ -131,6 +123,7 @@ export function StrategyCard({
           setDismissalReason("");
           setDismissalError(null);
         }
+        setViewOpen(false);
         if (organizationId) {
           await queryClient.invalidateQueries({
             queryKey: api.strategy.list.queryKey({
@@ -216,8 +209,8 @@ export function StrategyCard({
         className,
       )}
       onClick={(event) => {
-        if (!isSuggestion || event.defaultPrevented || modifyOpen) return;
-        setModifyOpen(true);
+        if (!isSuggestion || event.defaultPrevented) return;
+        setViewOpen(true);
       }}
     >
       {detailHref && (
@@ -225,7 +218,7 @@ export function StrategyCard({
           <span className="sr-only">Open strategy details</span>
         </Link>
       )}
-      <CardHeader className="space-y-2">
+      <CardHeader className="space-y-3">
         <div className="flex items-center justify-between">
           <Badge variant={isSuggestion ? "secondary" : "outline"}>
             {isSuggestion ? "Suggestion" : capitalize(strategy.status)}
@@ -236,12 +229,9 @@ export function StrategyCard({
             </Badge>
           )}
         </div>
-        <CardTitle className="line-clamp-2">{strategy.name}</CardTitle>
-        {strategy.motivation && (
-          <CardDescription className="line-clamp-3" title={strategy.motivation}>
-            {strategy.motivation}
-          </CardDescription>
-        )}
+        <CardTitle className="line-clamp-2 leading-snug">
+          {strategy.name}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="text-muted-foreground text-sm">
@@ -293,112 +283,229 @@ export function StrategyCard({
             Phase: <span className="text-foreground">{phase.name}</span>
           </div>
         )}
-        {statusSummary && (
-          <div className="text-muted-foreground text-sm">{statusSummary}</div>
-        )}
       </CardContent>
-      {isSuggestion && (
-        <CardFooter>
-          <DialogDrawer
-            isLoading={isDismissing}
-            onOpenChange={handleDismissalOpenChange}
-            open={dismissalOpen}
-            trigger={
-              <Button
-                disabled={isAdopting || !organizationId || !projectId}
-                onClick={(event) => event.stopPropagation()}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                Dismiss
-              </Button>
-            }
-          >
-            <DialogDrawerHeader>
-              <DialogDrawerTitle>Dismiss strategy</DialogDrawerTitle>
-              <DialogDrawerDescription>
-                Tell us why this strategy is not a fit so we can improve future
-                suggestions.
-              </DialogDrawerDescription>
-            </DialogDrawerHeader>
 
-            <form
-              className="grid max-h-[70vh] gap-6 overflow-y-auto"
-              id="dismissal-form"
-              onSubmit={(event) => {
-                event.preventDefault();
-                submitDismissal();
-              }}
-            >
-              <Field data-invalid={!!dismissalError}>
-                <FieldLabel htmlFor={`dismissal-reason-${strategy.id}`}>
-                  Dismissal reason
-                </FieldLabel>
-                <Textarea
-                  id={`dismissal-reason-${strategy.id}`}
-                  onChange={(event) => {
-                    setDismissalReason(event.currentTarget.value);
-                    if (dismissalError) setDismissalError(null);
-                  }}
-                  placeholder="Share why this strategy does not work for your project."
-                  rows={4}
-                  value={dismissalReason}
-                />
-                {dismissalError && <FieldError>{dismissalError}</FieldError>}
-              </Field>
-            </form>
-            <DialogDrawerFooter className="gap-2">
-              <Button
-                onClick={() => handleDismissalOpenChange(false)}
-                type="button"
-                variant="ghost"
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={isAdopting || !organizationId || !projectId}
-                form="dismissal-form"
-                isLoading={isDismissing}
-                type="submit"
-              >
-                Dismiss strategy
-              </Button>
-            </DialogDrawerFooter>
-          </DialogDrawer>
-          <div className="ml-auto flex items-center gap-2">
-            <Button
-              onClick={(event) => {
-                event.stopPropagation();
-                setModifyOpen(true);
-              }}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              Modify
-            </Button>
-            <Button
-              isLoading={isAdopting}
-              onClick={(event) => {
-                event.stopPropagation();
-                handleStatusChange("active");
-              }}
-              size="sm"
-              type="button"
-            >
-              Adopt Strategy
-            </Button>
-          </div>
-        </CardFooter>
+      {isSuggestion && (
+        <>
+          <ViewStrategyDialog
+            dismissalError={dismissalError}
+            dismissalOpen={dismissalOpen}
+            dismissalReason={dismissalReason}
+            isAdopting={isAdopting}
+            isDismissing={isDismissing}
+            isPending={isPending}
+            onAdopt={() => handleStatusChange("active")}
+            onDismissalOpenChange={handleDismissalOpenChange}
+            onDismissalReasonChange={(value) => {
+              setDismissalReason(value);
+              if (dismissalError) setDismissalError(null);
+            }}
+            onModify={() => {
+              setViewOpen(false);
+              setModifyOpen(true);
+            }}
+            onOpenChange={setViewOpen}
+            onSubmitDismissal={submitDismissal}
+            open={viewOpen}
+            organizationId={organizationId}
+            projectId={projectId}
+            strategy={strategy}
+          />
+          <ManageStrategyDialog
+            onOpenChange={setModifyOpen}
+            open={modifyOpen}
+            organizationId={organizationId ?? ""}
+            projectId={projectId ?? ""}
+            strategy={strategy}
+          />
+        </>
       )}
-      <ManageStrategyDialog
-        onOpenChange={setModifyOpen}
-        open={modifyOpen}
-        organizationId={organizationId ?? ""}
-        projectId={projectId ?? ""}
-        strategy={strategy}
-      />
     </Card>
+  );
+}
+
+function ViewStrategyDialog({
+  strategy,
+  open,
+  onOpenChange,
+  organizationId,
+  projectId,
+  isAdopting,
+  isDismissing,
+  isPending,
+  onAdopt,
+  onModify,
+  dismissalOpen,
+  onDismissalOpenChange,
+  dismissalReason,
+  onDismissalReasonChange,
+  dismissalError,
+  onSubmitDismissal,
+}: {
+  strategy: StrategySummary;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  organizationId?: string;
+  projectId?: string;
+  isAdopting: boolean;
+  isDismissing: boolean;
+  isPending: boolean;
+  onAdopt: () => void;
+  onModify: () => void;
+  dismissalOpen: boolean;
+  onDismissalOpenChange: (open: boolean) => void;
+  dismissalReason: string;
+  onDismissalReasonChange: (value: string) => void;
+  dismissalError: string | null;
+  onSubmitDismissal: () => void;
+}) {
+  return (
+    <DialogDrawer
+      className="sm:max-w-2xl"
+      onOpenChange={onOpenChange}
+      open={open}
+    >
+      <DialogDrawerHeader>
+        <Badge className="w-fit" variant="secondary">
+          Suggestion
+        </Badge>
+        <DialogDrawerTitle className="leading-snug">
+          {strategy.name}
+        </DialogDrawerTitle>
+        <DialogDrawerDescription className="sr-only">
+          Strategy suggestion details
+        </DialogDrawerDescription>
+      </DialogDrawerHeader>
+
+      <div className="max-h-[70vh] space-y-4 overflow-y-auto">
+        <div className="text-muted-foreground text-sm">
+          Goal:{" "}
+          <span className="font-medium text-foreground">
+            {formatStrategyGoal(strategy.goal)}
+          </span>
+        </div>
+
+        {strategy.motivation && (
+          <div className="space-y-1">
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Motivation
+            </p>
+            <p className="whitespace-pre-line text-sm">{strategy.motivation}</p>
+          </div>
+        )}
+
+        {strategy.description && (
+          <div className="space-y-1">
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Description
+            </p>
+            <p className="whitespace-pre-wrap text-sm">
+              {strategy.description}
+            </p>
+          </div>
+        )}
+
+        {strategy.phases && strategy.phases.length > 0 && (
+          <div className="space-y-1">
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Phases
+            </p>
+            <ul className="space-y-1">
+              {strategy.phases.map((phase) => (
+                <li className="text-sm" key={phase.id}>
+                  <span className="text-muted-foreground capitalize">
+                    {phase.type}
+                  </span>{" "}
+                  &mdash; {phase.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <DialogDrawerFooter className="gap-2">
+        <DialogDrawer
+          isLoading={isDismissing}
+          onOpenChange={onDismissalOpenChange}
+          open={dismissalOpen}
+          trigger={
+            <Button
+              disabled={isAdopting || !organizationId || !projectId}
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              Dismiss
+            </Button>
+          }
+        >
+          <DialogDrawerHeader>
+            <DialogDrawerTitle>Dismiss strategy</DialogDrawerTitle>
+            <DialogDrawerDescription>
+              Tell us why this strategy is not a fit so we can improve future
+              suggestions.
+            </DialogDrawerDescription>
+          </DialogDrawerHeader>
+
+          <form
+            className="grid max-h-[70vh] gap-6 overflow-y-auto"
+            id="dismissal-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSubmitDismissal();
+            }}
+          >
+            <Field data-invalid={!!dismissalError}>
+              <FieldLabel htmlFor={`dismissal-reason-${strategy.id}`}>
+                Dismissal reason
+              </FieldLabel>
+              <Textarea
+                id={`dismissal-reason-${strategy.id}`}
+                onChange={(event) =>
+                  onDismissalReasonChange(event.currentTarget.value)
+                }
+                placeholder="Share why this strategy does not work for your project."
+                rows={4}
+                value={dismissalReason}
+              />
+              {dismissalError && <FieldError>{dismissalError}</FieldError>}
+            </Field>
+          </form>
+          <DialogDrawerFooter className="gap-2">
+            <Button
+              onClick={() => onDismissalOpenChange(false)}
+              type="button"
+              variant="ghost"
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={isAdopting || !organizationId || !projectId}
+              form="dismissal-form"
+              isLoading={isDismissing}
+              type="submit"
+            >
+              Dismiss strategy
+            </Button>
+          </DialogDrawerFooter>
+        </DialogDrawer>
+
+        <div className="ml-auto flex items-center gap-2">
+          <Button onClick={onModify} size="sm" type="button" variant="outline">
+            Modify
+          </Button>
+          <Button
+            disabled={isPending || !organizationId || !projectId}
+            isLoading={isAdopting}
+            onClick={onAdopt}
+            size="sm"
+            type="button"
+          >
+            Adopt Strategy
+          </Button>
+        </div>
+      </DialogDrawerFooter>
+    </DialogDrawer>
   );
 }

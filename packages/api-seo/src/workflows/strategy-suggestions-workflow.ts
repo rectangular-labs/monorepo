@@ -194,6 +194,7 @@ ${existingStrategies}
 ## Output Requirements
 - Keep each strategy concise and actionable.
 - Use realistic targets for goals and success criteria.
+- Strategies should be content-creation plays (new articles, pillar pages, content clusters), not technical SEO or on-page optimization tasks, unless the instructions explicitly ask for it.
 - Output MUST match the provided JSON schema.`;
         logInfo("Starting strategy suggestion generation", {
           instanceId: event.instanceId,

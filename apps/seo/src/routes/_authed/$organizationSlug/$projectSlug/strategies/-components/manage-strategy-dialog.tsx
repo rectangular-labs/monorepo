@@ -193,7 +193,12 @@ export function ManageStrategyDialog({
   const submitLabel = strategy ? "Save changes" : "Create strategy";
 
   return (
-    <DialogDrawer isLoading={isPending} onOpenChange={onOpenChange} open={open}>
+    <DialogDrawer
+      className="sm:max-w-2xl"
+      isLoading={isPending}
+      onOpenChange={onOpenChange}
+      open={open}
+    >
       <DialogDrawerHeader>
         <DialogDrawerTitle>{title}</DialogDrawerTitle>
       </DialogDrawerHeader>
@@ -224,27 +229,6 @@ export function ManageStrategyDialog({
 
           <Controller
             control={form.control}
-            name="description"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${fieldPrefix}-description`}>
-                  Description
-                </FieldLabel>
-                <Textarea
-                  {...field}
-                  id={`${fieldPrefix}-description`}
-                  placeholder="What will you do and how will it work?"
-                  rows={4}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            control={form.control}
             name="motivation"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
@@ -255,7 +239,28 @@ export function ManageStrategyDialog({
                   {...field}
                   id={`${fieldPrefix}-motivation`}
                   placeholder="Why does this strategy matter?"
-                  rows={4}
+                  rows={6}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="description"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`${fieldPrefix}-description`}>
+                  Description
+                </FieldLabel>
+                <Textarea
+                  {...field}
+                  id={`${fieldPrefix}-description`}
+                  placeholder="What will you do and how will it work?"
+                  rows={8}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

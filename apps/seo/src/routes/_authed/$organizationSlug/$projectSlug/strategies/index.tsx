@@ -1,7 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
-import { ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS } from "@rectangular-labs/core/ai/onboarding-strategy-suggestion-instructions";
+import { STRATEGY_SUGGESTION_INSTRUCTIONS } from "@rectangular-labs/core/ai/strategy-suggestion-instructions";
 import { CircleSlash } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -155,7 +155,7 @@ function PageComponent() {
               generateStrategySuggestion({
                 type: "seo-generate-strategy-suggestions",
                 projectId: activeProject.id,
-                instructions: ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS,
+                instructions: STRATEGY_SUGGESTION_INSTRUCTIONS,
               })
             }
             size="sm"

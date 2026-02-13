@@ -16,6 +16,7 @@ import {
 import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
 import {
+  configureDataForSeoClient,
   fetchKeywordsOverviewWithCache,
   getLocationAndLanguage,
 } from "../lib/dataforseo/utils";
@@ -33,7 +34,6 @@ const snapshotPointSchema = type({
 });
 
 const sortOrderSchema = type("'asc' | 'desc'");
-
 const create = withOrganizationIdBase
   .route({ method: "POST", path: "/" })
   .input(
@@ -147,7 +147,7 @@ const contentList = withOrganizationIdBase
         id: "string.uuid",
         takenAt: "Date",
       }).or(type.null),
-      contentSnapshots: type
+      rows: type
         .merge(
           schema.seoStrategySnapshotContentSelectSchema.pick(
             "contentDraftId",
@@ -185,7 +185,7 @@ const contentList = withOrganizationIdBase
 
     const latestSnapshot = latestSnapshotResult.value;
     if (!latestSnapshot) {
-      return { snapshot: null, contentSnapshots: [] };
+      return { snapshot: null, rows: [] };
     }
 
     const sortBy = input.sortBy ?? "clicks";
@@ -238,7 +238,7 @@ const contentList = withOrganizationIdBase
         id: latestSnapshot.id,
         takenAt: latestSnapshot.takenAt,
       },
-      contentSnapshots: rows,
+      rows,
     };
   });
 
@@ -341,9 +341,11 @@ const contentDetails = withOrganizationIdBase
       });
     }
 
+    const primaryKeyword = latestContentResult.value.primaryKeyword.trim();
     const { locationName, languageCode } = getLocationAndLanguage(project);
+    configureDataForSeoClient();
     const keywordOverviewResult = await fetchKeywordsOverviewWithCache({
-      keywords: [latestContentResult.value.primaryKeyword],
+      keywords: [primaryKeyword],
       includeGenderAndAgeDistribution: false,
       locationName,
       languageCode,
@@ -358,6 +360,7 @@ const contentDetails = withOrganizationIdBase
 
     const primaryKeywordOverview =
       keywordOverviewResult.value.keywords[0] ?? null;
+
     const metricSnapshot = latestContentResult.value.metricSnapshots[0] ?? null;
     return {
       contentDraft: latestContentResult.value,
@@ -403,7 +406,7 @@ const keywordsList = withOrganizationIdBase
         id: "string.uuid",
         takenAt: "Date",
       }).or(type.null),
-      keywords: type({
+      rows: type({
         "...": keywordSnapshotSchema.pick("clicks", "impressions", "keyword"),
         avgPosition: "number",
         ctr: "number",
@@ -424,7 +427,7 @@ const keywordsList = withOrganizationIdBase
 
     return {
       snapshot: result.value.snapshot,
-      keywords: result.value.rows,
+      rows: result.value.rows,
     };
   });
 
