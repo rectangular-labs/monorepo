@@ -128,6 +128,7 @@ export const publishingSettingsSchema = type({
   version: "'v1'",
   requireContentReview: "boolean",
   requireSuggestionReview: "boolean",
+  participateInLinkExchange: type("boolean").default(() => true),
 });
 
 export const authorSettingsSchema = type({

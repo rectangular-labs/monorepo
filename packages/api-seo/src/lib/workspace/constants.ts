@@ -20,8 +20,9 @@ export const DEFAULT_WRITING_SETTINGS: typeof writingSettingsSchema.infer = {
 export const DEFAULT_PUBLISHING_SETTINGS: typeof publishingSettingsSchema.infer =
   {
     version: "v1",
-    requireContentReview: true,
-    requireSuggestionReview: true,
+    requireContentReview: false,
+    requireSuggestionReview: false,
+    participateInLinkExchange: true,
   };
 
 export const DEFAULT_IMAGE_SETTINGS: typeof imageSettingsSchema.infer = {
