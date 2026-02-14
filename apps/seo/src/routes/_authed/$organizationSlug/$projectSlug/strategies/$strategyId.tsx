@@ -13,11 +13,6 @@ import {
   YAxis,
 } from "@rectangular-labs/ui/components/charts/rechart-container";
 import * as Icons from "@rectangular-labs/ui/components/icon";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@rectangular-labs/ui/components/ui/alert";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -46,7 +41,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@rectangular-labs/ui/components/ui/empty";
-import { MarkdownEditor } from "@rectangular-labs/ui/components/markdown-editor";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
 import {
   Pagination,
@@ -55,31 +49,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@rectangular-labs/ui/components/ui/pagination";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@rectangular-labs/ui/components/ui/sheet";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rectangular-labs/ui/components/ui/table";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@rectangular-labs/ui/components/ui/tabs";
-import { Textarea } from "@rectangular-labs/ui/components/ui/textarea";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -90,12 +67,6 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { type } from "arktype";
 import {
@@ -108,24 +79,25 @@ import {
 } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
+import {
+  ContentDetailsDrawer,
+  type SnapshotMetric,
+} from "../-components/content-details-drawer";
+import type {
+  ContentTableSortBy,
+  SortOrder,
+} from "../-components/content-table";
 import { ManageStrategyDialog } from "./-components/manage-strategy-dialog";
 import { ManageStrategyPhaseDialog } from "./-components/manage-strategy-phase-dialog";
+import { StrategyContentTab } from "./-components/strategy-content-tab";
 
 type Tab = "overview" | "content" | "keywords";
-type SnapshotMetric = "clicks" | "impressions" | "ctr" | "avgPosition";
-type ContentSortBy =
-  | "clicks"
-  | "impressions"
-  | "ctr"
-  | "avgPosition"
-  | "title"
-  | "status";
-type SortOrder = "asc" | "desc";
+type ContentSortBy = Exclude<ContentTableSortBy, "strategy">;
 type StrategyRouteSearch = (typeof Route)["types"]["fullSearchSchema"];
 type LocalSearchState = {
   tab: Tab;
   overviewMetric: SnapshotMetric;
-  contentSortBy: ContentSortBy;
+  contentSortBy: ContentSortBy | null;
   contentSortOrder: SortOrder;
   keywordsMetric: SnapshotMetric;
   keywordsSortOrder: SortOrder;
@@ -179,7 +151,7 @@ function toLocalSearchState(search: StrategyRouteSearch): LocalSearchState {
   return {
     tab: search.tab ?? "overview",
     overviewMetric: search.overviewMetric ?? "clicks",
-    contentSortBy: search.contentSortBy ?? "clicks",
+    contentSortBy: search.contentSortBy ?? null,
     contentSortOrder: search.contentSortOrder ?? "desc",
     keywordsMetric: search.keywordsMetric ?? "clicks",
     keywordsSortOrder: search.keywordsSortOrder ?? "desc",
@@ -213,6 +185,14 @@ function isSameLocalSearchState(
 export const Route = createFileRoute(
   "/_authed/$organizationSlug/$projectSlug/strategies/$strategyId",
 )({
+  head: ({ params }) => ({
+    links: [
+      {
+        rel: "canonical",
+        href: `/${params.organizationSlug}/${params.projectSlug}/strategies/${params.strategyId}`,
+      },
+    ],
+  }),
   beforeLoad: ({ context }) => {
     if (!context.user?.email?.endsWith("fluidposts.com")) {
       throw notFound();
@@ -222,7 +202,7 @@ export const Route = createFileRoute(
     "tab?": "'overview' | 'content' | 'keywords'",
     "overviewMetric?": "'clicks' | 'impressions' | 'ctr' | 'avgPosition'",
     "contentSortBy?":
-      "'clicks' | 'impressions' | 'ctr' | 'avgPosition' | 'title' | 'status'",
+      "'clicks' | 'impressions' | 'ctr' | 'avgPosition' | 'title' | 'status' | 'primaryKeyword'",
     "contentSortOrder?": "'asc' | 'desc'",
     "keywordsMetric?": "'clicks' | 'impressions' | 'ctr' | 'avgPosition'",
     "keywordsSortOrder?": "'asc' | 'desc'",
@@ -250,9 +230,6 @@ function PageComponent() {
     toLocalSearchState(routeSearch),
   );
   const routeLocalSearch = toLocalSearchState(routeSearch);
-  const [hasLoadedContentTab, setHasLoadedContentTab] = useState(
-    routeLocalSearch.tab === "content",
-  );
   const setLocalSearchState = useCallback(
     (updater: (prev: LocalSearchState) => LocalSearchState) => {
       isLocalUpdatePendingRef.current = true;
@@ -310,41 +287,6 @@ function PageComponent() {
     }),
   );
 
-  const contentListQuery = useQuery(
-    api.strategy.snapshot.content.list.queryOptions({
-      input: {
-        organizationIdentifier: activeProject.organizationId,
-        projectId: activeProject.id,
-        strategyId,
-        sortBy: contentSortBy,
-        sortOrder: contentSortOrder,
-      },
-      enabled: hasLoadedContentTab && !!activeProject.id && !!strategyId,
-      staleTime: 1000 * 60 * 10,
-      gcTime: 1000 * 60 * 60,
-    }),
-  );
-
-  const contentDetailsQuery = useQuery(
-    api.strategy.snapshot.content.details.queryOptions({
-      input: {
-        organizationIdentifier: activeProject.organizationId,
-        projectId: activeProject.id,
-        strategyId,
-        contentDraftId:
-          localSearch.contentDraftId ?? "00000000-0000-0000-0000-000000000000",
-        months: 3,
-      },
-      enabled:
-        !!localSearch.contentDraftId &&
-        !!activeProject.id &&
-        !!strategyId &&
-        hasLoadedContentTab,
-      staleTime: 1000 * 60 * 10,
-      gcTime: 1000 * 60 * 60,
-    }),
-  );
-
   const keywordsQuery = useQuery(
     api.strategy.snapshot.keywords.list.queryOptions({
       input: {
@@ -357,12 +299,6 @@ function PageComponent() {
       gcTime: 1000 * 60 * 30,
     }),
   );
-
-  useEffect(() => {
-    if (tab === "content") {
-      setHasLoadedContentTab(true);
-    }
-  }, [tab]);
 
   useEffect(() => {
     if (isLocalUpdatePendingRef.current) return;
@@ -384,7 +320,7 @@ function PageComponent() {
           ...prev,
           tab: localSearch.tab,
           overviewMetric: localSearch.overviewMetric,
-          contentSortBy: localSearch.contentSortBy,
+          contentSortBy: localSearch.contentSortBy ?? undefined,
           contentSortOrder: localSearch.contentSortOrder,
           keywordsMetric: localSearch.keywordsMetric,
           keywordsSortOrder: localSearch.keywordsSortOrder,
@@ -416,57 +352,8 @@ function PageComponent() {
       onError: (mutationError) => {
         toast.error(mutationError.message);
       },
-      onSuccess: async () => {
+      onSuccess: () => {
         toast.success("Snapshot queued");
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: api.strategy.get.queryKey({
-              input: {
-                organizationIdentifier: activeProject.organizationId,
-                projectId: activeProject.id,
-                id: strategyId,
-              },
-            }),
-          }),
-          queryClient.invalidateQueries({
-            queryKey: api.strategy.list.queryKey({
-              input: {
-                organizationIdentifier: activeProject.organizationId,
-                projectId: activeProject.id,
-              },
-            }),
-          }),
-          queryClient.invalidateQueries({
-            queryKey: api.strategy.snapshot.series.queryKey({
-              input: {
-                organizationIdentifier: activeProject.organizationId,
-                projectId: activeProject.id,
-                strategyId,
-                months: 3,
-              },
-            }),
-          }),
-          queryClient.invalidateQueries({
-            queryKey: api.strategy.snapshot.content.list.queryKey({
-              input: {
-                organizationIdentifier: activeProject.organizationId,
-                projectId: activeProject.id,
-                strategyId,
-                sortBy: contentSortBy,
-                sortOrder: contentSortOrder,
-              },
-            }),
-          }),
-          queryClient.invalidateQueries({
-            queryKey: api.strategy.snapshot.keywords.list.queryKey({
-              input: {
-                organizationIdentifier: activeProject.organizationId,
-                projectId: activeProject.id,
-                strategyId,
-              },
-            }),
-          }),
-        ]);
       },
     }),
   );
@@ -641,16 +528,14 @@ function PageComponent() {
             </TabsContent>
 
             <TabsContent value="content">
-              <ContentTab
-                contentSortBy={contentSortBy}
-                contentSortOrder={contentSortOrder}
-                onChangeContentSort={(sortBy) => {
+              <StrategyContentTab
+                onChangeSort={(sortBy) => {
                   setLocalSearchState((prev) => ({
                     ...prev,
                     contentSortBy: sortBy,
                   }));
                 }}
-                onChangeContentSortOrder={(sortOrder) => {
+                onChangeSortOrder={(sortOrder) => {
                   setLocalSearchState((prev) => ({
                     ...prev,
                     contentSortOrder: sortOrder,
@@ -663,15 +548,17 @@ function PageComponent() {
                     contentDraftId,
                   }));
                 }}
-                onRetry={contentListQuery.refetch}
-                query={contentListQuery}
+                organizationIdentifier={activeProject.organizationId}
+                projectId={activeProject.id}
+                projectSlug={projectSlug}
                 selectedContentDraftId={localSearch.contentDraftId}
+                sortBy={contentSortBy}
+                sortOrder={contentSortOrder}
+                strategyId={strategyId}
               />
               <ContentDetailsDrawer
-                contentDetailsQuery={contentDetailsQuery}
                 contentDraftId={localSearch.contentDraftId}
                 metric={drawerMetric}
-                organizationIdentifier={activeProject.organizationId}
                 onClose={() => {
                   setLocalSearchState((prev) => ({
                     ...prev,
@@ -684,7 +571,7 @@ function PageComponent() {
                     drawerMetric: metric,
                   }));
                 }}
-                onRefreshContentList={contentListQuery.refetch}
+                organizationIdentifier={activeProject.organizationId}
                 projectId={activeProject.id}
               />
             </TabsContent>
@@ -744,16 +631,6 @@ type Strategy = RouterOutputs["strategy"]["get"];
 type StrategyPhase = Strategy["phases"][number];
 type OverviewPoint =
   RouterOutputs["strategy"]["snapshot"]["series"]["points"][number];
-type ContentListRow =
-  RouterOutputs["strategy"]["snapshot"]["content"]["list"]["rows"][number];
-
-type ContentListQuery = ReturnType<
-  typeof useQuery<RouterOutputs["strategy"]["snapshot"]["content"]["list"]>
->;
-
-type ContentDetailsQuery = ReturnType<
-  typeof useQuery<RouterOutputs["strategy"]["snapshot"]["content"]["details"]>
->;
 
 type KeywordsQuery = ReturnType<
   typeof useQuery<RouterOutputs["strategy"]["snapshot"]["keywords"]["list"]>
@@ -1236,846 +1113,6 @@ function OverviewTab({
   );
 }
 
-function ContentTab({
-  query,
-  selectedContentDraftId,
-  contentSortBy,
-  contentSortOrder,
-  onChangeContentSort,
-  onChangeContentSortOrder,
-  onOpenContentDetails,
-  onRetry,
-}: {
-  query: ContentListQuery;
-  selectedContentDraftId: string | null;
-  contentSortBy: ContentSortBy;
-  contentSortOrder: SortOrder;
-  onChangeContentSort: (sortBy: ContentSortBy) => void;
-  onChangeContentSortOrder: (sortOrder: SortOrder) => void;
-  onOpenContentDetails: (contentDraftId: string) => void;
-  onRetry: () => void;
-}) {
-  const rows = query.data?.rows ?? [];
-  const columns = useMemo<ColumnDef<ContentListRow>[]>(
-    () => [
-      {
-        accessorFn: (row) => row.title,
-        cell: ({ row }) => (
-          <span
-            className="block max-w-64 truncate"
-            title={row.original.title ?? undefined}
-          >
-            {row.original.title ?? "To be determined"}
-          </span>
-        ),
-        enableSorting: true,
-        header: "Title",
-        id: "title",
-      },
-      {
-        accessorFn: (row) => row.role,
-        cell: ({ row }) => row.original.role ?? "-",
-        enableSorting: false,
-        header: "Role",
-        id: "role",
-      },
-      {
-        accessorFn: (row) => row.status,
-        cell: ({ row }) => capitalize(row.original.status),
-        enableSorting: true,
-        header: "Status",
-        id: "status",
-      },
-      {
-        accessorFn: (row) => row.aggregate.clicks,
-        cell: ({ row }) => formatNumber(row.original.aggregate.clicks),
-        enableSorting: true,
-        header: "Clicks",
-        id: "clicks",
-      },
-      {
-        accessorFn: (row) => row.aggregate.impressions,
-        cell: ({ row }) => formatNumber(row.original.aggregate.impressions),
-        enableSorting: true,
-        header: "Impressions",
-        id: "impressions",
-      },
-      {
-        accessorFn: (row) => row.aggregate.ctr,
-        cell: ({ row }) => formatPercent(row.original.aggregate.ctr),
-        enableSorting: true,
-        header: "CTR",
-        id: "ctr",
-      },
-      {
-        accessorFn: (row) => row.aggregate.avgPosition,
-        cell: ({ row }) => formatNumber(row.original.aggregate.avgPosition, 1),
-        enableSorting: true,
-        header: "Position",
-        id: "avgPosition",
-      },
-      {
-        accessorFn: (row) => row.topKeywords[0]?.keyword,
-        cell: ({ row }) => (
-          <span
-            className="block max-w-64 truncate"
-            title={row.original.topKeywords[0]?.keyword ?? "-"}
-          >
-            {row.original.topKeywords[0]?.keyword ?? "-"}
-          </span>
-        ),
-        enableSorting: false,
-        header: "Top keyword",
-        id: "topKeyword",
-      },
-    ],
-    [],
-  );
-  const table = useReactTable({
-    columns,
-    data: rows,
-    getCoreRowModel: getCoreRowModel(),
-    manualSorting: true,
-  });
-
-  return (
-    <Card>
-      <CardHeader className="space-y-3">
-        <CardTitle className="text-base">Strategy content</CardTitle>
-        <p className="text-muted-foreground text-xs">
-          Click a row to inspect top keywords, keyword overview, and trend.
-        </p>
-      </CardHeader>
-      <CardContent>
-        <LoadingError
-          error={query.error}
-          errorDescription="Could not load content snapshot rows."
-          errorTitle="Error loading content"
-          isLoading={query.isLoading}
-          loadingComponent={<Skeleton className="h-[240px] w-full" />}
-          onRetry={onRetry}
-        />
-
-        {!query.isLoading && !query.error && rows.length === 0 && (
-          <div className="rounded-lg border border-dashed p-6 text-muted-foreground text-sm">
-            No content rows available in the latest snapshot.
-          </div>
-        )}
-
-        {!query.isLoading && !query.error && rows.length > 0 && (
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    if (header.isPlaceholder) {
-                      return <TableHead key={header.id} />;
-                    }
-
-                    const canSort = header.column.getCanSort();
-                    const isSorted = contentSortBy === header.column.id;
-
-                    return (
-                      <TableHead key={header.id}>
-                        <button
-                          className="inline-flex items-center gap-1.5 font-medium"
-                          onClick={() => {
-                            if (!canSort) return;
-                            const nextSortBy = header.column
-                              .id as ContentSortBy;
-                            if (contentSortBy !== nextSortBy) {
-                              onChangeContentSort(nextSortBy);
-                              return;
-                            }
-                            onChangeContentSortOrder(
-                              contentSortOrder === "asc" ? "desc" : "asc",
-                            );
-                          }}
-                          type="button"
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {canSort &&
-                            isSorted &&
-                            contentSortOrder === "asc" && (
-                              <Icons.FilterAscending className="size-3.5 text-muted-foreground" />
-                            )}
-                          {canSort &&
-                            isSorted &&
-                            contentSortOrder === "desc" && (
-                              <Icons.FilterDescending className="size-3.5 text-muted-foreground" />
-                            )}
-                          {canSort && !isSorted && (
-                            <Icons.ChevronsUpDown className="size-3.5 text-muted-foreground" />
-                          )}
-                        </button>
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow
-                  className={
-                    selectedContentDraftId === row.original.contentDraftId
-                      ? "bg-muted/40"
-                      : ""
-                  }
-                  key={row.id}
-                  onClick={() =>
-                    onOpenContentDetails(row.original.contentDraftId)
-                  }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      onOpenContentDetails(row.original.contentDraftId);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function ContentDetailsDrawer({
-  contentDetailsQuery,
-  contentDraftId,
-  organizationIdentifier,
-  projectId,
-  onClose,
-  metric,
-  onMetricChange,
-  onRefreshContentList,
-}: {
-  contentDetailsQuery: ContentDetailsQuery;
-  contentDraftId: string | null;
-  organizationIdentifier: string;
-  projectId: string;
-  onClose: () => void;
-  metric: SnapshotMetric;
-  onMetricChange: (metric: SnapshotMetric) => void;
-  onRefreshContentList: () => Promise<unknown>;
-}) {
-  const api = getApiClientRq();
-  const open = contentDetailsQuery.isEnabled;
-  const details = contentDetailsQuery.data;
-  const draftId = contentDraftId;
-  const topKeywords = details?.metricSnapshot?.topKeywords ?? [];
-  const [isRegenerateOutlineOpen, setIsRegenerateOutlineOpen] = useState(false);
-  const [isRegenerateArticleOpen, setIsRegenerateArticleOpen] = useState(false);
-  const [saveIndicator, setSaveIndicator] = useState<
-    { status: "idle" } | { status: "saving" } | { status: "saved"; at: string }
-  >({ status: "idle" });
-  const [draftDetails, setDraftDetails] = useState({
-    title: "",
-    description: "",
-    slug: "",
-    primaryKeyword: "",
-    contentMarkdown: "",
-  });
-
-  const draftQuery = useQuery(
-    api.content.getDraft.queryOptions({
-      input: {
-        organizationIdentifier,
-        projectId,
-        id: draftId ?? "00000000-0000-0000-0000-000000000000",
-      },
-      enabled: open && !!draftId,
-      refetchInterval: (context) => {
-        const draft = context.state.data?.draft;
-        if (
-          draft?.status === "queued" ||
-          draft?.status === "planning" ||
-          draft?.status === "writing" ||
-          draft?.status === "reviewing-writing"
-        ) {
-          return 8_000;
-        }
-        return false;
-      },
-    }),
-  );
-
-  const draft = draftQuery.data?.draft;
-
-  const { data: generatingOutlineStatusData } = useQuery(
-    api.task.getStatus.queryOptions({
-      input: { id: draft?.outlineGeneratedByTaskRunId ?? "" },
-      enabled: open && !!draft?.outlineGeneratedByTaskRunId,
-      refetchInterval: (context) => {
-        const task = context.state.data;
-        if (
-          task?.status === "pending" ||
-          task?.status === "queued" ||
-          task?.status === "running"
-        ) {
-          return 8_000;
-        }
-        return false;
-      },
-    }),
-  );
-
-  const { data: generatingArticleStatusData } = useQuery(
-    api.task.getStatus.queryOptions({
-      input: { id: draft?.generatedByTaskRunId ?? "" },
-      enabled: open && !!draft?.generatedByTaskRunId,
-      refetchInterval: (context) => {
-        const task = context.state.data;
-        if (
-          task?.status === "pending" ||
-          task?.status === "queued" ||
-          task?.status === "running"
-        ) {
-          return 8_000;
-        }
-        return false;
-      },
-    }),
-  );
-
-  const isGeneratingOutline =
-    !!draft?.outlineGeneratedByTaskRunId &&
-    (generatingOutlineStatusData?.status === "pending" ||
-      generatingOutlineStatusData?.status === "running" ||
-      generatingOutlineStatusData?.status === "queued");
-  const isGeneratingArticle =
-    !!draft?.generatedByTaskRunId &&
-    (generatingArticleStatusData?.status === "pending" ||
-      generatingArticleStatusData?.status === "running" ||
-      generatingArticleStatusData?.status === "queued");
-  const isGenerating = isGeneratingOutline || isGeneratingArticle;
-  const canEdit = !!draft && !isGenerating;
-
-  const {
-    mutate: updateDraft,
-    mutateAsync: updateDraftAsync,
-    isPending,
-  } = useMutation(
-    api.content.updateDraft.mutationOptions({
-      onError: (error) => {
-        toast.error(error.message);
-      },
-      onSuccess: async () => {
-        setSaveIndicator({ status: "saved", at: new Date().toISOString() });
-        await Promise.all([
-          contentDetailsQuery.refetch(),
-          draftQuery.refetch(),
-          onRefreshContentList(),
-        ]);
-      },
-    }),
-  );
-
-  const chartPoints = useMemo(() => {
-    if (!details?.series) return [];
-    return details.series.map((point) => ({
-      date: formatShortDate(point.takenAt),
-      value: getMetricFromAggregate(point.aggregate, metric),
-    }));
-  }, [details?.series, metric]);
-
-  useEffect(() => {
-    if (!draft) return;
-    setDraftDetails({
-      title: draft.title ?? "",
-      description: draft.description ?? "",
-      slug: draft.slug ?? "",
-      primaryKeyword: draft.primaryKeyword ?? "",
-      contentMarkdown: draft.contentMarkdown ?? "",
-    });
-  }, [draft]);
-
-  const saveDetails = () => {
-    if (!draft || !canEdit) return;
-    setSaveIndicator({ status: "saving" });
-    updateDraft({
-      organizationIdentifier,
-      projectId,
-      id: draft.id,
-      title: draftDetails.title.trim(),
-      description: draftDetails.description.trim(),
-      slug: draftDetails.slug.trim(),
-      primaryKeyword: draftDetails.primaryKeyword.trim(),
-      contentMarkdown: draftDetails.contentMarkdown,
-    });
-  };
-
-  const handleRegenerateOutline = async () => {
-    if (!draft) return;
-    setSaveIndicator({ status: "saving" });
-    await updateDraftAsync({
-      organizationIdentifier,
-      projectId,
-      id: draft.id,
-      outlineGeneratedByTaskRunId: null,
-    });
-    setIsRegenerateOutlineOpen(false);
-    toast.success("Outline regeneration started");
-  };
-
-  const handleRegenerateArticle = async () => {
-    if (!draft) return;
-    setSaveIndicator({ status: "saving" });
-    await updateDraftAsync({
-      organizationIdentifier,
-      projectId,
-      id: draft.id,
-      status: "queued",
-      generatedByTaskRunId: null,
-    });
-    setIsRegenerateArticleOpen(false);
-    toast.success("Article regeneration started");
-  };
-
-  return (
-    <Sheet onOpenChange={(nextOpen) => !nextOpen && onClose()} open={open}>
-      <SheetContent className="gap-0 p-0 sm:max-w-4xl">
-        <SheetHeader className="border-b">
-          <SheetTitle>
-            {details?.contentDraft.title ?? "Content details"}
-          </SheetTitle>
-          <SheetDescription>
-            {details?.contentDraft.slug ??
-              "Snapshot detail and keyword performance"}
-          </SheetDescription>
-        </SheetHeader>
-
-        <LoadingError
-          className="px-4 py-3"
-          error={contentDetailsQuery.error}
-          errorDescription="Could not load content details for this row."
-          errorTitle="Error loading content details"
-          isLoading={contentDetailsQuery.isLoading}
-          loadingComponent={<Skeleton className="h-[360px] w-full" />}
-          onRetry={contentDetailsQuery.refetch}
-        />
-
-        {!contentDetailsQuery.isLoading &&
-          !contentDetailsQuery.error &&
-          details && (
-            <div className="space-y-4 overflow-y-auto p-4">
-              {isGenerating && (
-                <Alert>
-                  <Icons.Timer />
-                  <AlertTitle>
-                    {isGeneratingOutline
-                      ? "Outline is being generated"
-                      : "Article is being generated"}
-                  </AlertTitle>
-                  <AlertDescription>
-                    Editing is disabled while generation is in progress.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <LoadingError
-                error={draftQuery.error}
-                errorDescription="Could not load the content draft."
-                errorTitle="Error loading content draft"
-                isLoading={draftQuery.isLoading}
-                loadingComponent={<Skeleton className="h-[240px] w-full" />}
-                onRetry={draftQuery.refetch}
-              />
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">
-                    Primary keyword overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {!details.contentDraft.primaryKeyword.trim() ? (
-                    <p className="text-muted-foreground text-sm">
-                      No primary keyword configured.
-                    </p>
-                  ) : details.primaryKeywordOverview ? (
-                    <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                      <OverviewField
-                        label="Search volume"
-                        value={`${formatNullableNumber(
-                          details.primaryKeywordOverview.searchVolume
-                            .monthlyAverage,
-                        )} (${formatNullableSignedPercent(
-                          details.primaryKeywordOverview.searchVolume
-                            .percentageChange?.monthly ?? null,
-                        )} MoM)`}
-                      />
-                      <OverviewField
-                        label="CPC"
-                        value={formatNullableCurrency(
-                          details.primaryKeywordOverview.competition.cpc,
-                        )}
-                      />
-                      <OverviewField
-                        label="Competition"
-                        value={`${formatNullableNumber(
-                          details.primaryKeywordOverview.competition
-                            .competition,
-                        )} (${details.primaryKeywordOverview.competition.competitionLevel ?? "N/A"})`}
-                      />
-                      <OverviewField
-                        label="Keyword difficulty"
-                        value={formatNullableNumber(
-                          details.primaryKeywordOverview.keywordDifficulty,
-                        )}
-                      />
-                      <OverviewField
-                        label="Avg links for ranking domain"
-                        value={formatNullableNumber(
-                          details.primaryKeywordOverview.backlinkInfo
-                            ?.averageBacklinkCount ?? null,
-                        )}
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">
-                      Keyword overview is unavailable right now.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <CardTitle className="text-sm">3-month trend</CardTitle>
-                    <MetricToggle
-                      metric={metric}
-                      onMetricChange={onMetricChange}
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="h-[240px]">
-                  {chartPoints.length === 0 ? (
-                    <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-muted-foreground text-sm">
-                      No series points for this content draft.
-                    </div>
-                  ) : (
-                    <ReChartContainer
-                      className="h-full w-full"
-                      config={OVERVIEW_CHART_CONFIG}
-                    >
-                      <AreaChart data={chartPoints}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis
-                          axisLine={false}
-                          dataKey="date"
-                          tick={{ fontSize: 11 }}
-                          tickLine={false}
-                          tickMargin={8}
-                        />
-                        <YAxis
-                          axisLine={false}
-                          tick={{ fontSize: 11 }}
-                          tickLine={false}
-                          tickMargin={8}
-                        />
-                        <Tooltip
-                          content={
-                            <ReChartTooltipContent
-                              accessibilityLayer={false}
-                              active={false}
-                              activeIndex={undefined}
-                              coordinate={undefined}
-                              labelKey="date"
-                              payload={[]}
-                            />
-                          }
-                          cursor={{ strokeDasharray: "3 3" }}
-                        />
-                        <Area
-                          dataKey="value"
-                          dot
-                          fill="var(--color-value)"
-                          fillOpacity={0.2}
-                          stroke="var(--color-value)"
-                          strokeWidth={2}
-                          type="linear"
-                        />
-                      </AreaChart>
-                    </ReChartContainer>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">Top keywords</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {topKeywords.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">
-                      No keyword rows in latest content snapshot.
-                    </p>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Keyword</TableHead>
-                          <TableHead>Clicks</TableHead>
-                          <TableHead>Impressions</TableHead>
-                          <TableHead>Position</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {topKeywords.map((keyword) => (
-                          <TableRow key={keyword.keyword}>
-                            <TableCell
-                              className="max-w-80 truncate"
-                              title={keyword.keyword}
-                            >
-                              {keyword.keyword}
-                            </TableCell>
-                            <TableCell>
-                              {formatNumber(keyword.clicks)}
-                            </TableCell>
-                            <TableCell>
-                              {formatNumber(keyword.impressions)}
-                            </TableCell>
-                            <TableCell>
-                              {formatNumber(keyword.position, 1)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-
-              {!draftQuery.isLoading && !draftQuery.error && draft && (
-                <>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Draft details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <p className="text-muted-foreground text-xs">Title</p>
-                        <Input
-                          disabled={!canEdit}
-                          onChange={(event) =>
-                            setDraftDetails((prev) => ({
-                              ...prev,
-                              title: event.target.value,
-                            }))
-                          }
-                          value={draftDetails.title}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-muted-foreground text-xs">Slug</p>
-                        <Input
-                          disabled={!canEdit}
-                          onChange={(event) =>
-                            setDraftDetails((prev) => ({
-                              ...prev,
-                              slug: event.target.value,
-                            }))
-                          }
-                          value={draftDetails.slug}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-muted-foreground text-xs">
-                          Primary keyword
-                        </p>
-                        <Input
-                          disabled={!canEdit}
-                          onChange={(event) =>
-                            setDraftDetails((prev) => ({
-                              ...prev,
-                              primaryKeyword: event.target.value,
-                            }))
-                          }
-                          value={draftDetails.primaryKeyword}
-                        />
-                      </div>
-                      <div className="space-y-2 sm:col-span-2">
-                        <p className="text-muted-foreground text-xs">
-                          Meta description
-                        </p>
-                        <Textarea
-                          disabled={!canEdit}
-                          onChange={(event) =>
-                            setDraftDetails((prev) => ({
-                              ...prev,
-                              description: event.target.value,
-                            }))
-                          }
-                          rows={3}
-                          value={draftDetails.description}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between gap-2">
-                        <CardTitle className="text-sm">
-                          Article content
-                        </CardTitle>
-                        <Button
-                          disabled={isPending || !draft}
-                          onClick={() => setIsRegenerateArticleOpen(true)}
-                          size="sm"
-                          type="button"
-                          variant="outline"
-                        >
-                          Regenerate article
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {!draft.contentMarkdown && isGeneratingArticle && (
-                        <p className="text-muted-foreground text-sm">
-                          Article generation is in progress.
-                        </p>
-                      )}
-                      {!draft.contentMarkdown && !isGeneratingArticle && (
-                        <p className="text-muted-foreground text-sm">
-                          No article content yet.
-                        </p>
-                      )}
-                      <MarkdownEditor
-                        markdown={draftDetails.contentMarkdown}
-                        onMarkdownChange={(nextMarkdown) =>
-                          setDraftDetails((prev) => ({
-                            ...prev,
-                            contentMarkdown: nextMarkdown,
-                          }))
-                        }
-                        readOnly={!canEdit}
-                      />
-                    </CardContent>
-                  </Card>
-                </>
-              )}
-            </div>
-          )}
-
-        <SheetFooter className="border-t">
-          <div className="flex w-full items-center justify-between gap-4">
-            <span className="inline-flex items-center gap-1 text-muted-foreground text-xs">
-              {saveIndicator.status === "saving" && (
-                <>
-                  <Icons.Spinner className="size-3.5 animate-spin" />
-                  Saving...
-                </>
-              )}
-              {saveIndicator.status === "saved" && (
-                <>
-                  <Icons.Check className="size-3.5" />
-                  Saved {new Date(saveIndicator.at).toLocaleTimeString()}
-                </>
-              )}
-            </span>
-            <Button disabled={!canEdit || isPending} onClick={saveDetails}>
-              Save changes
-            </Button>
-          </div>
-        </SheetFooter>
-
-        <DialogDrawer
-          onOpenChange={setIsRegenerateOutlineOpen}
-          open={isRegenerateOutlineOpen}
-        >
-          <DialogDrawerHeader>
-            <DialogDrawerTitle>Regenerate outline</DialogDrawerTitle>
-            <DialogDrawerDescription>
-              Kick off a fresh outline for this draft.
-            </DialogDrawerDescription>
-          </DialogDrawerHeader>
-          <DialogDrawerFooter className="gap-2">
-            <Button
-              disabled={isPending || !draft}
-              onClick={handleRegenerateOutline}
-              type="button"
-            >
-              Regenerate outline
-            </Button>
-            <Button
-              onClick={() => setIsRegenerateOutlineOpen(false)}
-              type="button"
-              variant="outline"
-            >
-              Cancel
-            </Button>
-          </DialogDrawerFooter>
-        </DialogDrawer>
-
-        <DialogDrawer
-          className="sm:max-w-4xl"
-          onOpenChange={setIsRegenerateArticleOpen}
-          open={isRegenerateArticleOpen}
-        >
-          <DialogDrawerHeader>
-            <DialogDrawerTitle>Regenerate article</DialogDrawerTitle>
-            <DialogDrawerDescription>
-              Review the current outline before starting regeneration.
-            </DialogDrawerDescription>
-          </DialogDrawerHeader>
-          <div className="max-h-[70vh] space-y-3 overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <p className="font-medium text-sm">Outline</p>
-              <Button
-                disabled={isPending || !draft}
-                onClick={() => setIsRegenerateOutlineOpen(true)}
-                size="sm"
-                variant="outline"
-              >
-                Regenerate outline
-              </Button>
-            </div>
-            <MarkdownEditor
-              markdown={draft?.outline ?? ""}
-              onMarkdownChange={undefined}
-              readOnly
-            />
-          </div>
-          <DialogDrawerFooter className="gap-2">
-            <Button
-              disabled={isPending || !draft}
-              onClick={handleRegenerateArticle}
-              type="button"
-            >
-              Regenerate article
-            </Button>
-            <Button
-              onClick={() => setIsRegenerateArticleOpen(false)}
-              type="button"
-              variant="outline"
-            >
-              Cancel
-            </Button>
-          </DialogDrawerFooter>
-        </DialogDrawer>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
 function TopKeywordsTab({
   query,
   metric,
@@ -2277,15 +1314,6 @@ function TopKeywordsTab({
   );
 }
 
-function OverviewField({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border p-2">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="font-medium text-sm">{value}</p>
-    </div>
-  );
-}
-
 function MetricToggle({
   metric,
   onMetricChange,
@@ -2364,25 +1392,6 @@ function formatNumber(value: number, digits = 0) {
 
 function formatPercent(value: number) {
   return `${formatNumber(value * 100, 1)}%`;
-}
-
-function formatNullableNumber(value: number | null) {
-  return value === null ? "-" : formatNumber(value, 1);
-}
-
-function formatNullableCurrency(value: number | null) {
-  if (value === null) return "-";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function formatNullableSignedPercent(value: number | null) {
-  if (value === null) return "-";
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${formatNumber(value, 1)}%`;
 }
 
 function formatMetricValue(metric: Strategy["goal"]["metric"], value: number) {

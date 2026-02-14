@@ -1,18 +1,5 @@
-import type { SeoFileStatus } from "@rectangular-labs/core/schemas/content-parsers";
 import { err, ok, safe } from "@rectangular-labs/result";
-import {
-  and,
-  type DB,
-  type DBTransaction,
-  desc,
-  eq,
-  exists,
-  inArray,
-  isNull,
-  lt,
-  notExists,
-  schema,
-} from "../../client";
+import { and, type DB, type DBTransaction, eq, schema } from "../../client";
 import type {
   seoContentDraftUpdateSchema,
   seoContentInsertSchema,
@@ -90,64 +77,6 @@ export async function getContentVersionsBySlug(args: {
       orderBy: (fields, { desc }) => [desc(fields.version)],
     }),
   );
-}
-
-/**
- * List all published content (latest version of each slug).
- * Uses a subquery to get the max version for each slug.
- */
-export async function listPublishedContent(args: {
-  db: DB;
-  organizationId: string;
-  projectId: string;
-  cursor: string | undefined;
-  limit: number;
-}) {
-  return await safe(async () => {
-    const latestPerSlug = args.db
-      .selectDistinctOn([schema.seoContent.slug], {
-        id: schema.seoContent.id,
-        organizationId: schema.seoContent.organizationId,
-        projectId: schema.seoContent.projectId,
-        slug: schema.seoContent.slug,
-        version: schema.seoContent.version,
-        title: schema.seoContent.title,
-        description: schema.seoContent.description,
-        heroImage: schema.seoContent.heroImage,
-        heroImageCaption: schema.seoContent.heroImageCaption,
-        primaryKeyword: schema.seoContent.primaryKeyword,
-        articleType: schema.seoContent.articleType,
-        publishedAt: schema.seoContent.publishedAt,
-        originatingDraftId: schema.seoContent.originatingDraftId,
-        createdAt: schema.seoContent.createdAt,
-        updatedAt: schema.seoContent.updatedAt,
-        deletedAt: schema.seoContent.deletedAt,
-        role: schema.seoContent.role,
-      })
-      .from(schema.seoContent)
-      .where(
-        and(
-          eq(schema.seoContent.organizationId, args.organizationId),
-          eq(schema.seoContent.projectId, args.projectId),
-          isNull(schema.seoContent.deletedAt),
-        ),
-      )
-      .orderBy(schema.seoContent.slug, desc(schema.seoContent.version))
-      .as("latest_content");
-
-    const rows = await args.db
-      .select()
-      .from(latestPerSlug)
-      .where(
-        args.cursor
-          ? lt(latestPerSlug.publishedAt, new Date(args.cursor))
-          : undefined,
-      )
-      .orderBy(desc(latestPerSlug.publishedAt))
-      .limit(args.limit);
-
-    return rows;
-  });
 }
 
 /**
@@ -414,23 +343,23 @@ export async function getDraftById(args: {
 
 export async function getContentDraftWithLatestMetricSnapshot(args: {
   db: DB | DBTransaction;
-  strategyId: string;
+  organizationId: string;
+  projectId: string;
   contentDraftId: string;
+  strategyId?: string;
+  withContent?: boolean;
 }) {
-  const result = await safe(() =>
+  return await safe(() =>
     args.db.query.seoContentDraft.findFirst({
-      columns: {
-        id: true,
-        title: true,
-        slug: true,
-        primaryKeyword: true,
-        status: true,
-        role: true,
-      },
+      columns: args.withContent
+        ? undefined
+        : { contentMarkdown: false, outline: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.id, args.contentDraftId),
-          eq(table.strategyId, args.strategyId),
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          ...(args.strategyId ? [eq(table.strategyId, args.strategyId)] : []),
           isNull(table.deletedAt),
         ),
       with: {
@@ -438,6 +367,7 @@ export async function getContentDraftWithLatestMetricSnapshot(args: {
           columns: {
             id: true,
             topKeywords: true,
+            aggregate: true,
           },
           where: (table, { isNull }) => isNull(table.deletedAt),
           orderBy: (fields, { desc }) => [desc(fields.createdAt)],
@@ -455,83 +385,50 @@ export async function getContentDraftWithLatestMetricSnapshot(args: {
       },
     }),
   );
-  if (!result.ok) {
-    return result;
-  }
-
-  return result;
 }
 
-/**
- * Get all drafts matching a slug prefix.
- */
-export async function getDraftsBySlugPrefix(args: {
-  db: DB;
+export async function listContentDraftsWithLatestSnapshot(args: {
+  db: DB | DBTransaction;
   organizationId: string;
   projectId: string;
-  slugPrefix: string;
-  withContent?: boolean;
+  strategyId?: string;
 }) {
   return await safe(() =>
     args.db.query.seoContentDraft.findMany({
-      columns: args.withContent
-        ? undefined
-        : { contentMarkdown: false, outline: false },
-      where: (table, { and, eq, isNull, or, like }) =>
-        and(
-          eq(table.organizationId, args.organizationId),
-          eq(table.projectId, args.projectId),
-          or(
-            eq(table.slug, args.slugPrefix),
-            like(table.slug, `${args.slugPrefix}%`),
-          ),
-          isNull(table.deletedAt),
-        ),
-      orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
-    }),
-  );
-}
-
-export async function listDraftsByStatus(args: {
-  db: DB;
-  organizationId: string;
-  projectId: string;
-  hasPublishedSnapshot: boolean | null;
-  status: SeoFileStatus | readonly SeoFileStatus[];
-  cursor: string | undefined;
-  limit: number;
-}) {
-  return await safe(() =>
-    args.db.query.seoContentDraft.findMany({
-      columns: { contentMarkdown: false, outline: false },
-      where: (table, { and, eq, inArray, isNull, lt }) =>
+      columns: {
+        id: true,
+        title: true,
+        slug: true,
+        primaryKeyword: true,
+        status: true,
+        role: true,
+        strategyId: true,
+      },
+      where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           isNull(table.deletedAt),
-          args.hasPublishedSnapshot === null
-            ? undefined
-            : (() => {
-                const publishedSnapshotQuery = args.db
-                  .select({ id: schema.seoContent.id })
-                  .from(schema.seoContent)
-                  .where(
-                    and(
-                      eq(schema.seoContent.originatingDraftId, table.id),
-                      isNull(schema.seoContent.deletedAt),
-                    ),
-                  );
-                return args.hasPublishedSnapshot
-                  ? exists(publishedSnapshotQuery)
-                  : notExists(publishedSnapshotQuery);
-              })(),
-          typeof args.status === "string"
-            ? eq(table.status, args.status)
-            : inArray(table.status, [...args.status]),
-          args.cursor ? lt(table.id, args.cursor) : undefined,
+          ...(args.strategyId ? [eq(table.strategyId, args.strategyId)] : []),
         ),
-      orderBy: (fields, { desc }) => [desc(fields.id)],
-      limit: args.limit,
+      orderBy: (fields, { desc }) => [desc(fields.updatedAt)],
+      with: {
+        strategy: {
+          columns: {
+            name: true,
+          },
+        },
+        metricSnapshots: {
+          columns: {
+            id: true,
+            topKeywords: true,
+            aggregate: true,
+          },
+          where: (table, { isNull }) => isNull(table.deletedAt),
+          orderBy: (fields, { desc }) => [desc(fields.createdAt)],
+          limit: 1,
+        },
+      },
     }),
   );
 }
@@ -564,15 +461,11 @@ export async function listUnassignedContentDrafts(args: {
   });
 }
 
-/**
- * List drafts with full content for export (includes contentMarkdown).
- * Does not paginate - returns all matching drafts.
- */
-export async function listDraftsForExport(args: {
+export async function listDraftsForExportByIds(args: {
   db: DB;
   organizationId: string;
   projectId: string;
-  status: SeoFileStatus | readonly SeoFileStatus[];
+  draftIds: string[];
 }) {
   return await safe(() =>
     args.db.query.seoContentDraft.findMany({
@@ -582,97 +475,41 @@ export async function listDraftsForExport(args: {
           eq(table.organizationId, args.organizationId),
           eq(table.projectId, args.projectId),
           isNull(table.deletedAt),
-          typeof args.status === "string"
-            ? eq(table.status, args.status)
-            : inArray(table.status, [...args.status]),
+          inArray(table.id, args.draftIds),
         ),
-      orderBy: (fields, { desc }) => [desc(fields.id)],
+      orderBy: (fields, { desc }) => [desc(fields.updatedAt)],
     }),
   );
 }
 
 /**
- * List all published content with full content for export (includes contentMarkdown).
- * Does not paginate - returns all published content for the project.
+ * Get all drafts matching a slug prefix.
  */
-export async function listPublishedContentForExport(args: {
+export async function getDraftsBySlugPrefix(args: {
   db: DB;
   organizationId: string;
   projectId: string;
+  slugPrefix: string;
+  withContent?: boolean;
 }) {
-  return await safe(async () => {
-    const latestPerSlug = args.db
-      .selectDistinctOn([schema.seoContent.slug], {
-        id: schema.seoContent.id,
-        organizationId: schema.seoContent.organizationId,
-        projectId: schema.seoContent.projectId,
-        slug: schema.seoContent.slug,
-        version: schema.seoContent.version,
-        title: schema.seoContent.title,
-        description: schema.seoContent.description,
-        heroImage: schema.seoContent.heroImage,
-        heroImageCaption: schema.seoContent.heroImageCaption,
-        primaryKeyword: schema.seoContent.primaryKeyword,
-        articleType: schema.seoContent.articleType,
-        contentMarkdown: schema.seoContent.contentMarkdown,
-        publishedAt: schema.seoContent.publishedAt,
-        originatingDraftId: schema.seoContent.originatingDraftId,
-        createdAt: schema.seoContent.createdAt,
-        updatedAt: schema.seoContent.updatedAt,
-        deletedAt: schema.seoContent.deletedAt,
-        role: schema.seoContent.role,
-      })
-      .from(schema.seoContent)
-      .where(
+  return await safe(() =>
+    args.db.query.seoContentDraft.findMany({
+      columns: args.withContent
+        ? undefined
+        : { contentMarkdown: false, outline: false },
+      where: (table, { and, eq, isNull, or, like }) =>
         and(
-          eq(schema.seoContent.organizationId, args.organizationId),
-          eq(schema.seoContent.projectId, args.projectId),
-          isNull(schema.seoContent.deletedAt),
+          eq(table.organizationId, args.organizationId),
+          eq(table.projectId, args.projectId),
+          or(
+            eq(table.slug, args.slugPrefix),
+            like(table.slug, `${args.slugPrefix}%`),
+          ),
+          isNull(table.deletedAt),
         ),
-      )
-      .orderBy(schema.seoContent.slug, desc(schema.seoContent.version))
-      .as("latest_content");
-
-    const rows = await args.db
-      .select()
-      .from(latestPerSlug)
-      .orderBy(desc(latestPerSlug.publishedAt));
-
-    return rows;
-  });
-}
-
-export async function countDraftsByStatus(args: {
-  db: DB;
-  organizationId: string;
-  projectId: string;
-  hasPublishedSnapshot: boolean;
-  status: SeoFileStatus | readonly SeoFileStatus[];
-}) {
-  return await safe(async () => {
-    const publishedSnapshotQuery = args.db
-      .select({ id: schema.seoContent.id })
-      .from(schema.seoContent)
-      .where(
-        and(
-          eq(schema.seoContent.originatingDraftId, schema.seoContentDraft.id),
-          isNull(schema.seoContent.deletedAt),
-        ),
-      );
-    const where = and(
-      eq(schema.seoContentDraft.organizationId, args.organizationId),
-      eq(schema.seoContentDraft.projectId, args.projectId),
-      isNull(schema.seoContentDraft.deletedAt),
-      args.hasPublishedSnapshot
-        ? exists(publishedSnapshotQuery)
-        : notExists(publishedSnapshotQuery),
-      typeof args.status === "string"
-        ? eq(schema.seoContentDraft.status, args.status)
-        : inArray(schema.seoContentDraft.status, [...args.status]),
-    );
-
-    return await args.db.$count(schema.seoContentDraft, where);
-  });
+      orderBy: (fields, { desc }) => [desc(fields.updatedAt), desc(fields.id)],
+    }),
+  );
 }
 
 /**

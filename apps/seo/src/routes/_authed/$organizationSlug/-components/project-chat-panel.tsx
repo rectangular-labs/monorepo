@@ -536,14 +536,8 @@ function ChatConversation({
           (part.input.skill === "create_articles" ||
             part.input.skill === "write_file")
         ) {
-          // Bulk invalidate queries for all content.listDrafts queries
           void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.listDrafts.key({
-              type: "query",
-            }),
-          });
-          void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.getReviewCounts.key({
+            queryKey: getApiClientRq().content.list.key({
               type: "query",
             }),
           });

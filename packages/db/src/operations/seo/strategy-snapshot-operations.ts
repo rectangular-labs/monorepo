@@ -28,41 +28,6 @@ export async function listStrategySnapshotsInRange(args: {
   );
 }
 
-export async function getLatestStrategySnapshotWithContents(args: {
-  db: DB | DBTransaction;
-  strategyId: string;
-}) {
-  return await safe(() =>
-    args.db.query.seoStrategySnapshot.findFirst({
-      columns: {
-        id: true,
-        takenAt: true,
-      },
-      where: (table, { and, eq, isNull }) =>
-        and(eq(table.strategyId, args.strategyId), isNull(table.deletedAt)),
-      orderBy: (fields, { desc }) => [desc(fields.takenAt)],
-      with: {
-        contentSnapshots: {
-          where: (table, { isNull }) => isNull(table.deletedAt),
-          orderBy: (fields, { desc }) => [desc(fields.createdAt)],
-          with: {
-            contentDraft: {
-              columns: {
-                id: true,
-                title: true,
-                slug: true,
-                primaryKeyword: true,
-                status: true,
-                role: true,
-              },
-            },
-          },
-        },
-      },
-    }),
-  );
-}
-
 export async function listContentSnapshotInRange(args: {
   db: DB | DBTransaction;
   strategyId: string;

@@ -20,9 +20,9 @@ import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/route'
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/route'
-import { Route as AuthedOrganizationSlugProjectSlugContentRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/route'
 import { Route as AuthedOrganizationSlugProjectSlugStrategiesIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/strategies/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/index'
+import { Route as AuthedOrganizationSlugProjectSlugLinksIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/links/index'
 import { Route as AuthedOrganizationSlugProjectSlugContentIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/index'
 import { Route as AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/strategies/$strategyId'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
@@ -30,14 +30,7 @@ import { Route as AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRou
 import { Route as AuthedOrganizationSlugProjectSlugSettingsProjectRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/project'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsImageSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/image-settings'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/business-background'
-import { Route as AuthedOrganizationSlugProjectSlugContentScheduledRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/scheduled'
-import { Route as AuthedOrganizationSlugProjectSlugContentPublishedRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/published'
-import { Route as AuthedOrganizationSlugProjectSlugContentReviewRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/route'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/integrations/index'
-import { Route as AuthedOrganizationSlugProjectSlugContentReviewIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/index'
-import { Route as AuthedOrganizationSlugProjectSlugContentReviewOutlinesRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/outlines'
-import { Route as AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/new-articles'
-import { Route as AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/review/article-updates'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -98,12 +91,6 @@ const AuthedOrganizationSlugProjectSlugSettingsRouteRoute =
     path: '/settings',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugContentRouteRoute =
-  AuthedOrganizationSlugProjectSlugContentRouteRouteImport.update({
-    id: '/content',
-    path: '/content',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
-  } as any)
 const AuthedOrganizationSlugProjectSlugStrategiesIndexRoute =
   AuthedOrganizationSlugProjectSlugStrategiesIndexRouteImport.update({
     id: '/strategies/',
@@ -116,11 +103,17 @@ const AuthedOrganizationSlugProjectSlugSettingsIndexRoute =
     path: '/',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugSettingsRouteRoute,
   } as any)
+const AuthedOrganizationSlugProjectSlugLinksIndexRoute =
+  AuthedOrganizationSlugProjectSlugLinksIndexRouteImport.update({
+    id: '/links/',
+    path: '/links/',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
+  } as any)
 const AuthedOrganizationSlugProjectSlugContentIndexRoute =
   AuthedOrganizationSlugProjectSlugContentIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugContentRouteRoute,
+    id: '/content/',
+    path: '/content/',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
   } as any)
 const AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute =
   AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRouteImport.update({
@@ -162,60 +155,12 @@ const AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute =
       getParentRoute: () => AuthedOrganizationSlugProjectSlugSettingsRouteRoute,
     } as any,
   )
-const AuthedOrganizationSlugProjectSlugContentScheduledRoute =
-  AuthedOrganizationSlugProjectSlugContentScheduledRouteImport.update({
-    id: '/scheduled',
-    path: '/scheduled',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugContentRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugContentPublishedRoute =
-  AuthedOrganizationSlugProjectSlugContentPublishedRouteImport.update({
-    id: '/published',
-    path: '/published',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugContentRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugContentReviewRouteRoute =
-  AuthedOrganizationSlugProjectSlugContentReviewRouteRouteImport.update({
-    id: '/review',
-    path: '/review',
-    getParentRoute: () => AuthedOrganizationSlugProjectSlugContentRouteRoute,
-  } as any)
 const AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRoute =
   AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRouteImport.update({
     id: '/integrations/',
     path: '/integrations/',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugSettingsRouteRoute,
   } as any)
-const AuthedOrganizationSlugProjectSlugContentReviewIndexRoute =
-  AuthedOrganizationSlugProjectSlugContentReviewIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute =
-  AuthedOrganizationSlugProjectSlugContentReviewOutlinesRouteImport.update({
-    id: '/outlines',
-    path: '/outlines',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute =
-  AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRouteImport.update({
-    id: '/new-articles',
-    path: '/new-articles',
-    getParentRoute: () =>
-      AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
-  } as any)
-const AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute =
-  AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRouteImport.update(
-    {
-      id: '/article-updates',
-      path: '/article-updates',
-      getParentRoute: () =>
-        AuthedOrganizationSlugProjectSlugContentReviewRouteRoute,
-    } as any,
-  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -226,25 +171,18 @@ export interface FileRoutesByFullPath {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
-  '/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/$organizationSlug/$projectSlug/content/review': typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren
-  '/$organizationSlug/$projectSlug/content/published': typeof AuthedOrganizationSlugProjectSlugContentPublishedRoute
-  '/$organizationSlug/$projectSlug/content/scheduled': typeof AuthedOrganizationSlugProjectSlugContentScheduledRoute
   '/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
   '/$organizationSlug/$projectSlug/settings/publishing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRoute
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
   '/$organizationSlug/$projectSlug/strategies/$strategyId': typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
-  '/$organizationSlug/$projectSlug/content/': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
+  '/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
+  '/$organizationSlug/$projectSlug/links': typeof AuthedOrganizationSlugProjectSlugLinksIndexRoute
   '/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
   '/$organizationSlug/$projectSlug/strategies': typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
-  '/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
-  '/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
-  '/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
-  '/$organizationSlug/$projectSlug/content/review/': typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
   '/$organizationSlug/$projectSlug/settings/integrations': typeof AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -255,8 +193,6 @@ export interface FileRoutesByTo {
   '/$organizationSlug': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/$organizationSlug/$projectSlug/content/published': typeof AuthedOrganizationSlugProjectSlugContentPublishedRoute
-  '/$organizationSlug/$projectSlug/content/scheduled': typeof AuthedOrganizationSlugProjectSlugContentScheduledRoute
   '/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
@@ -264,12 +200,9 @@ export interface FileRoutesByTo {
   '/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
   '/$organizationSlug/$projectSlug/strategies/$strategyId': typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
   '/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
+  '/$organizationSlug/$projectSlug/links': typeof AuthedOrganizationSlugProjectSlugLinksIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
   '/$organizationSlug/$projectSlug/strategies': typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
-  '/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
-  '/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
-  '/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
-  '/$organizationSlug/$projectSlug/content/review': typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
   '/$organizationSlug/$projectSlug/settings/integrations': typeof AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRoute
 }
 export interface FileRoutesById {
@@ -283,12 +216,8 @@ export interface FileRoutesById {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_authed/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
-  '/_authed/$organizationSlug/$projectSlug/content': typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
-  '/_authed/$organizationSlug/$projectSlug/content/review': typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren
-  '/_authed/$organizationSlug/$projectSlug/content/published': typeof AuthedOrganizationSlugProjectSlugContentPublishedRoute
-  '/_authed/$organizationSlug/$projectSlug/content/scheduled': typeof AuthedOrganizationSlugProjectSlugContentScheduledRoute
   '/_authed/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/_authed/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
@@ -296,12 +225,9 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug/$projectSlug/settings/writing-settings': typeof AuthedOrganizationSlugProjectSlugSettingsWritingSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId': typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
   '/_authed/$organizationSlug/$projectSlug/content/': typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
+  '/_authed/$organizationSlug/$projectSlug/links/': typeof AuthedOrganizationSlugProjectSlugLinksIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings/': typeof AuthedOrganizationSlugProjectSlugSettingsIndexRoute
   '/_authed/$organizationSlug/$projectSlug/strategies/': typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
-  '/_authed/$organizationSlug/$projectSlug/content/review/article-updates': typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
-  '/_authed/$organizationSlug/$projectSlug/content/review/new-articles': typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
-  '/_authed/$organizationSlug/$projectSlug/content/review/outlines': typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
-  '/_authed/$organizationSlug/$projectSlug/content/review/': typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings/integrations/': typeof AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRoute
 }
 export interface FileRouteTypes {
@@ -315,25 +241,18 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/$organizationSlug/'
     | '/onboarding'
-    | '/$organizationSlug/$projectSlug/content'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug/'
-    | '/$organizationSlug/$projectSlug/content/review'
-    | '/$organizationSlug/$projectSlug/content/published'
-    | '/$organizationSlug/$projectSlug/content/scheduled'
     | '/$organizationSlug/$projectSlug/settings/business-background'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
     | '/$organizationSlug/$projectSlug/settings/project'
     | '/$organizationSlug/$projectSlug/settings/publishing-settings'
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
     | '/$organizationSlug/$projectSlug/strategies/$strategyId'
-    | '/$organizationSlug/$projectSlug/content/'
+    | '/$organizationSlug/$projectSlug/content'
+    | '/$organizationSlug/$projectSlug/links'
     | '/$organizationSlug/$projectSlug/settings/'
     | '/$organizationSlug/$projectSlug/strategies'
-    | '/$organizationSlug/$projectSlug/content/review/article-updates'
-    | '/$organizationSlug/$projectSlug/content/review/new-articles'
-    | '/$organizationSlug/$projectSlug/content/review/outlines'
-    | '/$organizationSlug/$projectSlug/content/review/'
     | '/$organizationSlug/$projectSlug/settings/integrations'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -344,8 +263,6 @@ export interface FileRouteTypes {
     | '/$organizationSlug'
     | '/onboarding'
     | '/$organizationSlug/$projectSlug'
-    | '/$organizationSlug/$projectSlug/content/published'
-    | '/$organizationSlug/$projectSlug/content/scheduled'
     | '/$organizationSlug/$projectSlug/settings/business-background'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
     | '/$organizationSlug/$projectSlug/settings/project'
@@ -353,12 +270,9 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/settings/writing-settings'
     | '/$organizationSlug/$projectSlug/strategies/$strategyId'
     | '/$organizationSlug/$projectSlug/content'
+    | '/$organizationSlug/$projectSlug/links'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/$projectSlug/strategies'
-    | '/$organizationSlug/$projectSlug/content/review/article-updates'
-    | '/$organizationSlug/$projectSlug/content/review/new-articles'
-    | '/$organizationSlug/$projectSlug/content/review/outlines'
-    | '/$organizationSlug/$projectSlug/content/review'
     | '/$organizationSlug/$projectSlug/settings/integrations'
   id:
     | '__root__'
@@ -371,12 +285,8 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/_authed/$organizationSlug/'
     | '/_authed/onboarding/'
-    | '/_authed/$organizationSlug/$projectSlug/content'
     | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/$projectSlug/'
-    | '/_authed/$organizationSlug/$projectSlug/content/review'
-    | '/_authed/$organizationSlug/$projectSlug/content/published'
-    | '/_authed/$organizationSlug/$projectSlug/content/scheduled'
     | '/_authed/$organizationSlug/$projectSlug/settings/business-background'
     | '/_authed/$organizationSlug/$projectSlug/settings/image-settings'
     | '/_authed/$organizationSlug/$projectSlug/settings/project'
@@ -384,12 +294,9 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug/$projectSlug/settings/writing-settings'
     | '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId'
     | '/_authed/$organizationSlug/$projectSlug/content/'
+    | '/_authed/$organizationSlug/$projectSlug/links/'
     | '/_authed/$organizationSlug/$projectSlug/settings/'
     | '/_authed/$organizationSlug/$projectSlug/strategies/'
-    | '/_authed/$organizationSlug/$projectSlug/content/review/article-updates'
-    | '/_authed/$organizationSlug/$projectSlug/content/review/new-articles'
-    | '/_authed/$organizationSlug/$projectSlug/content/review/outlines'
-    | '/_authed/$organizationSlug/$projectSlug/content/review/'
     | '/_authed/$organizationSlug/$projectSlug/settings/integrations/'
   fileRoutesById: FileRoutesById
 }
@@ -480,13 +387,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
     }
-    '/_authed/$organizationSlug/$projectSlug/content': {
-      id: '/_authed/$organizationSlug/$projectSlug/content'
-      path: '/content'
-      fullPath: '/$organizationSlug/$projectSlug/content'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
-    }
     '/_authed/$organizationSlug/$projectSlug/strategies/': {
       id: '/_authed/$organizationSlug/$projectSlug/strategies/'
       path: '/strategies'
@@ -501,12 +401,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRoute
     }
+    '/_authed/$organizationSlug/$projectSlug/links/': {
+      id: '/_authed/$organizationSlug/$projectSlug/links/'
+      path: '/links'
+      fullPath: '/$organizationSlug/$projectSlug/links'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugLinksIndexRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
+    }
     '/_authed/$organizationSlug/$projectSlug/content/': {
       id: '/_authed/$organizationSlug/$projectSlug/content/'
-      path: '/'
-      fullPath: '/$organizationSlug/$projectSlug/content/'
+      path: '/content'
+      fullPath: '/$organizationSlug/$projectSlug/content'
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRoute
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
     }
     '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId': {
       id: '/_authed/$organizationSlug/$projectSlug/strategies/$strategyId'
@@ -550,27 +457,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRoute
     }
-    '/_authed/$organizationSlug/$projectSlug/content/scheduled': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/scheduled'
-      path: '/scheduled'
-      fullPath: '/$organizationSlug/$projectSlug/content/scheduled'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentScheduledRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRoute
-    }
-    '/_authed/$organizationSlug/$projectSlug/content/published': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/published'
-      path: '/published'
-      fullPath: '/$organizationSlug/$projectSlug/content/published'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentPublishedRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRoute
-    }
-    '/_authed/$organizationSlug/$projectSlug/content/review': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/review'
-      path: '/review'
-      fullPath: '/$organizationSlug/$projectSlug/content/review'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRoute
-    }
     '/_authed/$organizationSlug/$projectSlug/settings/integrations/': {
       id: '/_authed/$organizationSlug/$projectSlug/settings/integrations/'
       path: '/integrations'
@@ -578,84 +464,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRoute
     }
-    '/_authed/$organizationSlug/$projectSlug/content/review/': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/review/'
-      path: '/'
-      fullPath: '/$organizationSlug/$projectSlug/content/review/'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
-    }
-    '/_authed/$organizationSlug/$projectSlug/content/review/outlines': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/review/outlines'
-      path: '/outlines'
-      fullPath: '/$organizationSlug/$projectSlug/content/review/outlines'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
-    }
-    '/_authed/$organizationSlug/$projectSlug/content/review/new-articles': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/review/new-articles'
-      path: '/new-articles'
-      fullPath: '/$organizationSlug/$projectSlug/content/review/new-articles'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
-    }
-    '/_authed/$organizationSlug/$projectSlug/content/review/article-updates': {
-      id: '/_authed/$organizationSlug/$projectSlug/content/review/article-updates'
-      path: '/article-updates'
-      fullPath: '/$organizationSlug/$projectSlug/content/review/article-updates'
-      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRouteImport
-      parentRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRoute
-    }
   }
 }
-
-interface AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren {
-  AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute
-  AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute
-  AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute
-  AuthedOrganizationSlugProjectSlugContentReviewIndexRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewIndexRoute
-}
-
-const AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren: AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren =
-  {
-    AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute:
-      AuthedOrganizationSlugProjectSlugContentReviewArticleUpdatesRoute,
-    AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute:
-      AuthedOrganizationSlugProjectSlugContentReviewNewArticlesRoute,
-    AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute:
-      AuthedOrganizationSlugProjectSlugContentReviewOutlinesRoute,
-    AuthedOrganizationSlugProjectSlugContentReviewIndexRoute:
-      AuthedOrganizationSlugProjectSlugContentReviewIndexRoute,
-  }
-
-const AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren =
-  AuthedOrganizationSlugProjectSlugContentReviewRouteRoute._addFileChildren(
-    AuthedOrganizationSlugProjectSlugContentReviewRouteRouteChildren,
-  )
-
-interface AuthedOrganizationSlugProjectSlugContentRouteRouteChildren {
-  AuthedOrganizationSlugProjectSlugContentReviewRouteRoute: typeof AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren
-  AuthedOrganizationSlugProjectSlugContentPublishedRoute: typeof AuthedOrganizationSlugProjectSlugContentPublishedRoute
-  AuthedOrganizationSlugProjectSlugContentScheduledRoute: typeof AuthedOrganizationSlugProjectSlugContentScheduledRoute
-  AuthedOrganizationSlugProjectSlugContentIndexRoute: typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
-}
-
-const AuthedOrganizationSlugProjectSlugContentRouteRouteChildren: AuthedOrganizationSlugProjectSlugContentRouteRouteChildren =
-  {
-    AuthedOrganizationSlugProjectSlugContentReviewRouteRoute:
-      AuthedOrganizationSlugProjectSlugContentReviewRouteRouteWithChildren,
-    AuthedOrganizationSlugProjectSlugContentPublishedRoute:
-      AuthedOrganizationSlugProjectSlugContentPublishedRoute,
-    AuthedOrganizationSlugProjectSlugContentScheduledRoute:
-      AuthedOrganizationSlugProjectSlugContentScheduledRoute,
-    AuthedOrganizationSlugProjectSlugContentIndexRoute:
-      AuthedOrganizationSlugProjectSlugContentIndexRoute,
-  }
-
-const AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren =
-  AuthedOrganizationSlugProjectSlugContentRouteRoute._addFileChildren(
-    AuthedOrganizationSlugProjectSlugContentRouteRouteChildren,
-  )
 
 interface AuthedOrganizationSlugProjectSlugSettingsRouteRouteChildren {
   AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute: typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
@@ -691,23 +501,26 @@ const AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren =
   )
 
 interface AuthedOrganizationSlugProjectSlugRouteRouteChildren {
-  AuthedOrganizationSlugProjectSlugContentRouteRoute: typeof AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren
   AuthedOrganizationSlugProjectSlugSettingsRouteRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   AuthedOrganizationSlugProjectSlugIndexRoute: typeof AuthedOrganizationSlugProjectSlugIndexRoute
   AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute: typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
+  AuthedOrganizationSlugProjectSlugContentIndexRoute: typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
+  AuthedOrganizationSlugProjectSlugLinksIndexRoute: typeof AuthedOrganizationSlugProjectSlugLinksIndexRoute
   AuthedOrganizationSlugProjectSlugStrategiesIndexRoute: typeof AuthedOrganizationSlugProjectSlugStrategiesIndexRoute
 }
 
 const AuthedOrganizationSlugProjectSlugRouteRouteChildren: AuthedOrganizationSlugProjectSlugRouteRouteChildren =
   {
-    AuthedOrganizationSlugProjectSlugContentRouteRoute:
-      AuthedOrganizationSlugProjectSlugContentRouteRouteWithChildren,
     AuthedOrganizationSlugProjectSlugSettingsRouteRoute:
       AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren,
     AuthedOrganizationSlugProjectSlugIndexRoute:
       AuthedOrganizationSlugProjectSlugIndexRoute,
     AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute:
       AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute,
+    AuthedOrganizationSlugProjectSlugContentIndexRoute:
+      AuthedOrganizationSlugProjectSlugContentIndexRoute,
+    AuthedOrganizationSlugProjectSlugLinksIndexRoute:
+      AuthedOrganizationSlugProjectSlugLinksIndexRoute,
     AuthedOrganizationSlugProjectSlugStrategiesIndexRoute:
       AuthedOrganizationSlugProjectSlugStrategiesIndexRoute,
   }

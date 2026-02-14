@@ -1,19 +1,16 @@
 import { ORPCError } from "@orpc/server";
-import {
-  contentStatusSchema,
-  type SeoFileStatus,
-} from "@rectangular-labs/core/schemas/content-parsers";
+import { contentKeywordSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
+import { snapshotAggregateSchema } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { schema } from "@rectangular-labs/db";
 import {
-  countDraftsByStatus,
   createContent,
+  getContentDraftWithLatestMetricSnapshot,
   getDraftById,
   getNextVersionForSlug,
   getSeoProjectByIdentifierAndOrgId,
-  listDraftsByStatus,
-  listDraftsForExport,
-  listPublishedContent,
-  listPublishedContentForExport,
+  listContentDraftsWithLatestSnapshot,
+  listContentSnapshotInRange,
+  listDraftsForExportByIds,
   updateContentDraft,
 } from "@rectangular-labs/db/operations";
 import { type } from "arktype";
@@ -21,222 +18,224 @@ import { base, withOrganizationIdBase } from "../context";
 import { publishToIntegrations } from "../lib/content/publish-to-integrations";
 import { writeContentDraft } from "../lib/content/write-content-draft";
 import { createSignature } from "../lib/create-signature";
+import {
+  configureDataForSeoClient,
+  fetchKeywordsOverviewWithCache,
+  getLocationAndLanguage,
+} from "../lib/dataforseo/utils";
 import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import {
   DRAFT_NOT_FOUND_ERROR_MESSAGE,
   SLUG_NOT_AVAILABLE_ERROR_MESSAGE,
 } from "../lib/workspace/constants";
 
-const reviewStatuses: SeoFileStatus[] = [
-  "pending-review",
-  "queued",
-  "planning",
-  "writing",
-  "reviewing-writing",
-] as const satisfies SeoFileStatus[];
-
 const contentDraftSummarySchema = schema.seoContentDraftSelectSchema.omit(
   "contentMarkdown",
   "outline",
 );
 
-const listDrafts = withOrganizationIdBase
-  .route({ method: "GET", path: "/drafts" })
+const list = withOrganizationIdBase
+  .route({ method: "GET", path: "/draft/list" })
   .input(
     type({
       organizationIdentifier: "string",
       projectId: "string.uuid",
-      status: contentStatusSchema.array(),
-      isNew: "boolean|null",
-      limit: "1<=number<=100 = 20",
-      "cursor?": "string.uuid|undefined",
+      "strategyId?": "string.uuid",
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      data: contentDraftSummarySchema.array(),
-      nextPageCursor: "string.uuid|undefined",
+      rows: type
+        .merge(
+          schema.seoContentDraftSelectSchema.pick(
+            "id",
+            "title",
+            "slug",
+            "status",
+            "role",
+            "primaryKeyword",
+            "strategyId",
+          ),
+          schema.seoStrategySnapshotContentSelectSchema.pick("topKeywords"),
+          {
+            strategyName: "string|null",
+            aggregate: type({
+              "...": snapshotAggregateSchema,
+              ctr: "number",
+            }).or(type.null),
+          },
+        )
+        .array(),
     }),
   )
   .handler(async ({ context, input }) => {
-    const hasPublishedSnapshot = input.isNew === null ? null : !input.isNew;
-    const rowsResult = await listDraftsByStatus({
+    const rowsResult = await listContentDraftsWithLatestSnapshot({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      hasPublishedSnapshot,
-      status: input.status,
-      cursor: input.cursor,
-      limit: input.limit + 1,
     });
     if (!rowsResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load drafts.",
+        message: "Failed to load content overview rows.",
         cause: rowsResult.error,
       });
     }
-    const rows = rowsResult.value;
-
-    const page = rows.slice(0, input.limit);
-    const nextPageCursor =
-      rows.length > input.limit ? page.at(-1)?.id : undefined;
 
     return {
-      data: page,
-      nextPageCursor,
+      rows: rowsResult.value.map((row) => {
+        const metricSnapshot = row.metricSnapshots[0] ?? null;
+        const aggregate = metricSnapshot?.aggregate ?? null;
+        return {
+          ...row,
+          topKeywords: metricSnapshot?.topKeywords ?? [],
+          strategyName: row.strategy?.name ?? null,
+          aggregate: aggregate
+            ? {
+                ...aggregate,
+                ctr:
+                  aggregate.impressions > 0
+                    ? aggregate.clicks / aggregate.impressions
+                    : 0,
+              }
+            : null,
+        };
+      }),
     };
   });
 
-const listPublished = withOrganizationIdBase
-  .route({ method: "GET", path: "/" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-      limit: "1<=number<=100 = 20",
-      "cursor?": "string|undefined",
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      data: schema.seoContentSelectSchema.omit("contentMarkdown").array(),
-      nextPageCursor: "string|undefined",
-    }),
-  )
-  .handler(async ({ context, input }) => {
-    const rowsResult = await listPublishedContent({
-      db: context.db,
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-      cursor: input.cursor,
-      limit: input.limit + 1,
-    });
-    if (!rowsResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load published content.",
-        cause: rowsResult.error,
-      });
-    }
-    const rows = rowsResult.value;
-
-    const page = rows.slice(0, input.limit);
-    const nextPageCursor =
-      rows.length > input.limit
-        ? page.at(-1)?.publishedAt.getTime().toString()
-        : undefined;
-
-    return {
-      data: page,
-      nextPageCursor,
-    };
-  });
-
-const getReviewCounts = withOrganizationIdBase
-  .route({ method: "GET", path: "/reviews/counts" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      outlines: "number",
-      newArticles: "number",
-      articleUpdates: "number",
-      total: "number",
-    }),
-  )
-  .handler(async ({ context, input }) => {
-    const [outlinesResult, newArticlesResult, articleUpdatesResult] =
-      await Promise.all([
-        countDraftsByStatus({
-          db: context.db,
-          organizationId: context.organization.id,
-          projectId: input.projectId,
-          hasPublishedSnapshot: false,
-          status: "suggested",
-        }),
-        countDraftsByStatus({
-          db: context.db,
-          organizationId: context.organization.id,
-          projectId: input.projectId,
-          hasPublishedSnapshot: false,
-          status: reviewStatuses,
-        }),
-        countDraftsByStatus({
-          db: context.db,
-          organizationId: context.organization.id,
-          projectId: input.projectId,
-          hasPublishedSnapshot: true,
-          status: reviewStatuses,
-        }),
-      ]);
-
-    if (!outlinesResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load outline review counts.",
-        cause: outlinesResult.error,
-      });
-    }
-    if (!newArticlesResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load new article review counts.",
-        cause: newArticlesResult.error,
-      });
-    }
-    if (!articleUpdatesResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load article update review counts.",
-        cause: articleUpdatesResult.error,
-      });
-    }
-
-    const outlines = outlinesResult.value;
-    const newArticles = newArticlesResult.value;
-    const articleUpdates = articleUpdatesResult.value;
-
-    return {
-      outlines,
-      newArticles,
-      articleUpdates,
-      total: outlines + newArticles + articleUpdates,
-    };
-  });
-
-const getDraft = withOrganizationIdBase
-  .route({ method: "GET", path: "/draft/{id}" })
+const snapshotPointSchema = type({
+  snapshotId: "string.uuid",
+  takenAt: "Date",
+  aggregate: type({
+    "...": snapshotAggregateSchema,
+    ctr: "number",
+  }),
+});
+const getDraftDetails = withOrganizationIdBase
+  .route({ method: "GET", path: "/draft/{id}/details" })
   .input(
     type({
       organizationIdentifier: "string",
       projectId: "string.uuid",
       id: "string.uuid",
+      "months?": "1<=number<=12",
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(type({ draft: schema.seoContentDraftSelectSchema }))
+  .output(
+    type({
+      contentDraft: schema.seoContentDraftSelectSchema,
+      metricSnapshot: type({
+        "...": schema.seoStrategySnapshotContentSelectSchema.pick(
+          "id",
+          "topKeywords",
+          "aggregate",
+        ),
+        snapshot: schema.seoStrategySnapshotSelectSchema.pick("id", "takenAt"),
+      }).or(type.null),
+      primaryKeywordOverview: contentKeywordSchema.or(type.null),
+      series: snapshotPointSchema.array(),
+    }),
+  )
   .handler(async ({ context, input }) => {
-    const draftResult = await getDraftById({
+    const contentResult = await getContentDraftWithLatestMetricSnapshot({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      id: input.id,
+      contentDraftId: input.id,
       withContent: true,
     });
-    if (!draftResult.ok) {
+    if (!contentResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get content draft.",
-        cause: draftResult.error,
+        message: "Failed to load content details.",
+        cause: contentResult.error,
       });
     }
-    const draft = draftResult.value;
-    if (!draft) {
+    if (!contentResult.value) {
       throw new ORPCError("NOT_FOUND", { message: "Content draft not found." });
     }
-    return { draft };
+
+    const draft = contentResult.value;
+    const contentSeriesResult = draft.strategyId
+      ? await listContentSnapshotInRange({
+          db: context.db,
+          strategyId: draft.strategyId,
+          contentDraftId: input.id,
+          months: input.months ?? 3,
+        })
+      : { ok: true as const, value: [] };
+    if (!contentSeriesResult.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to load content snapshot series.",
+        cause: contentSeriesResult.error,
+      });
+    }
+
+    const primaryKeyword = draft.primaryKeyword.trim();
+    const primaryKeywordOverview = primaryKeyword
+      ? await (async () => {
+          const projectResult = await getSeoProjectByIdentifierAndOrgId(
+            context.db,
+            input.projectId,
+            context.organization.id,
+            { businessBackground: true },
+          );
+          if (!projectResult.ok) {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+              message: "Failed to load project.",
+              cause: projectResult.error,
+            });
+          }
+          const project = projectResult.value;
+          if (!project) {
+            throw new ORPCError("NOT_FOUND", {
+              message: `Project not found for ${input.projectId}.`,
+            });
+          }
+          const { locationName, languageCode } =
+            getLocationAndLanguage(project);
+          configureDataForSeoClient();
+          const keywordOverviewResult = await fetchKeywordsOverviewWithCache({
+            keywords: [primaryKeyword],
+            includeGenderAndAgeDistribution: false,
+            locationName,
+            languageCode,
+            cacheKV: context.cacheKV,
+          });
+          if (!keywordOverviewResult.ok) {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+              message: "Failed to load keyword overview.",
+              cause: keywordOverviewResult.error,
+            });
+          }
+          return keywordOverviewResult.value.keywords[0] ?? null;
+        })()
+      : null;
+
+    const metricSnapshot = draft.metricSnapshots[0] ?? null;
+    return {
+      contentDraft: draft,
+      metricSnapshot,
+      primaryKeywordOverview,
+      series: contentSeriesResult.value
+        .map((point) => {
+          const aggregate = point.contentSnapshots[0]?.aggregate;
+          if (!aggregate) return null;
+          return {
+            snapshotId: point.id,
+            takenAt: point.takenAt,
+            aggregate: {
+              ...aggregate,
+              ctr:
+                aggregate.impressions > 0
+                  ? aggregate.clicks / aggregate.impressions
+                  : 0,
+            },
+          };
+        })
+        .filter((point) => point !== null),
+    };
   });
 
 const updateDraft = withOrganizationIdBase
@@ -249,30 +248,12 @@ const updateDraft = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(type({ draft: contentDraftSummarySchema }))
   .handler(async ({ context, input }) => {
-    const project = await getSeoProjectByIdentifierAndOrgId(
-      context.db,
-      input.projectId,
-      context.organization.id,
-      {
-        publishingSettings: true,
-      },
-    );
-    if (!project.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to get project.",
-        cause: project.error,
-      });
-    }
-    if (!project.value) {
-      throw new ORPCError("NOT_FOUND", { message: "Project not found." });
-    }
-
     const writeResult = await writeContentDraft({
       db: context.db,
       chatId: null,
       userId: context.user.id,
-      projectId: project.value.id,
-      organizationId: project.value.organizationId,
+      projectId: input.projectId,
+      organizationId: context.organization.id,
       lookup: { type: "id", id: input.id },
       draftNewValues: input,
     });
@@ -578,12 +559,13 @@ const publishContent = base
     return { success: true } as const;
   });
 
-const exportScheduled = withOrganizationIdBase
-  .route({ method: "GET", path: "/export/scheduled" })
+const exportByDraftIds = withOrganizationIdBase
+  .route({ method: "POST", path: "/export/selected" })
   .input(
     type({
       organizationIdentifier: "string",
       projectId: "string.uuid",
+      draftIds: "1<=string.uuid[]<=200",
     }),
   )
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
@@ -593,60 +575,29 @@ const exportScheduled = withOrganizationIdBase
     }),
   )
   .handler(async ({ context, input }) => {
-    const rowsResult = await listDraftsForExport({
+    const rowsResult = await listDraftsForExportByIds({
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
-      status: "scheduled",
+      draftIds: input.draftIds,
     });
     if (!rowsResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load scheduled content for export.",
+        message: "Failed to load selected content for export.",
         cause: rowsResult.error,
       });
     }
-    return { data: rowsResult.value };
-  });
 
-const exportPublished = withOrganizationIdBase
-  .route({ method: "GET", path: "/export/published" })
-  .input(
-    type({
-      organizationIdentifier: "string",
-      projectId: "string.uuid",
-    }),
-  )
-  .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
-  .output(
-    type({
-      data: schema.seoContentSelectSchema.array(),
-    }),
-  )
-  .handler(async ({ context, input }) => {
-    const rowsResult = await listPublishedContentForExport({
-      db: context.db,
-      organizationId: context.organization.id,
-      projectId: input.projectId,
-    });
-    if (!rowsResult.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to load published content for export.",
-        cause: rowsResult.error,
-      });
-    }
     return { data: rowsResult.value };
   });
 
 export default base
   .prefix("/organization/{organizationIdentifier}/project/{projectId}/content")
   .router({
-    listDrafts,
-    listPublished,
-    getReviewCounts,
-    getDraft,
+    list,
+    getDraftDetails,
     updateDraft,
     markDraft,
     publishContent,
-    exportScheduled,
-    exportPublished,
+    exportByDraftIds,
   });

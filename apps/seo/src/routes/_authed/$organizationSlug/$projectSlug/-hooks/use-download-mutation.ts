@@ -1,4 +1,7 @@
+import { toast } from "@rectangular-labs/ui/components/ui/sonner";
+import { useMutation } from "@tanstack/react-query";
 import { strToU8, zipSync } from "fflate";
+import { getApiClientRq } from "~/lib/api";
 
 type ContentItem = {
   slug: string;
@@ -99,7 +102,7 @@ export type DownloadContentZipOptions = {
 /**
  * Creates and downloads a zip file containing all content as markdown files with frontmatter
  */
-export function downloadContentZip({
+function downloadContentZip({
   contents,
   zipFilename,
 }: DownloadContentZipOptions): void {
@@ -137,11 +140,70 @@ export function downloadContentZip({
 /**
  * Generates a zip filename with the current date
  */
-export function generateZipFilename(
+function generateZipFilename(
   projectSlug: string,
   contentType: "scheduled" | "published",
 ): string {
   const now = new Date();
   const dateStr = formatDatePrefix(now);
   return `${projectSlug}-${contentType}-content-${dateStr}.zip`;
+}
+
+export function useDownloadMutation({
+  organizationIdentifier,
+  projectId,
+  projectSlug,
+}: {
+  organizationIdentifier: string;
+  projectId: string;
+  projectSlug: string;
+}) {
+  const api = getApiClientRq();
+
+  return useMutation({
+    mutationFn: async (draftIds: string[]) => {
+      const result = await api.content.exportByDraftIds.call({
+        organizationIdentifier,
+        projectId,
+        draftIds,
+      });
+
+      if (!result.data || result.data.length === 0) {
+        throw new Error("No content available to download");
+      }
+
+      const contents = result.data.map((item) => ({
+        slug: item.slug,
+        title: item.title ?? "Untitled",
+        description: item.description ?? "",
+        primaryKeyword: item.primaryKeyword,
+        articleType: item.articleType ?? "other",
+        heroImage: item.heroImage,
+        heroImageCaption: item.heroImageCaption,
+        contentMarkdown: item.contentMarkdown ?? "",
+        publishedAt: null,
+        scheduledFor: item.scheduledFor ? new Date(item.scheduledFor) : null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : null,
+        updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
+      }));
+
+      downloadContentZip({
+        contents,
+        zipFilename: generateZipFilename(projectSlug, "scheduled"),
+      });
+
+      return { count: contents.length };
+    },
+    onError: (error) => {
+      console.error("Download failed", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to download selected content.",
+      );
+    },
+    onSuccess: ({ count }) => {
+      toast.success(`Downloaded ${count} article${count === 1 ? "" : "s"}`);
+    },
+  });
 }
