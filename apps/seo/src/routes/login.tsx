@@ -17,12 +17,7 @@ import {
   buttonVariants,
 } from "@rectangular-labs/ui/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { type } from "arktype";
 import { getApiClientRq } from "~/lib/api";
 import { authClient } from "~/lib/auth";
@@ -64,13 +59,14 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const { session } = Route.useLoaderData();
   const search = Route.useSearch();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const normalizedSuccessCallbackURL = search.next
     ? `${clientEnv().VITE_SEO_URL}${search.next}`
     : `${clientEnv().VITE_SEO_URL}/organization`;
-  const newUserCallbackURL = `${clientEnv().VITE_SEO_URL}/onboarding?next=${normalizedSuccessCallbackURL}`;
-
+  const newUserCallbackURL = search.next?.startsWith("/invite")
+    ? normalizedSuccessCallbackURL
+    : `${clientEnv().VITE_SEO_URL}/onboarding?next=${normalizedSuccessCallbackURL}`;
+  console.log("normalizedSuccessCallbackURL", normalizedSuccessCallbackURL);
   return (
     <div className="flex min-h-screen items-center justify-center">
       <ThemeToggle className="absolute top-4 right-4" />
@@ -83,6 +79,13 @@ function Login() {
             enableForgotPassword: true,
             enableConfirmPassword: true,
             enableRememberMe: true,
+            additionalFields: {
+              name: {
+                type: "string",
+                label: "Name",
+                required: true,
+              },
+            },
           }}
           redirects={{
             successCallbackURL: normalizedSuccessCallbackURL,
@@ -93,7 +96,7 @@ function Login() {
                   refetchType: "active",
                 })
                 .finally(() => {
-                  void navigate({ to: normalizedSuccessCallbackURL });
+                  location.href = normalizedSuccessCallbackURL;
                 });
             },
             newUserCallbackURL,

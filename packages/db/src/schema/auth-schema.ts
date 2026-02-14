@@ -24,7 +24,15 @@ export const user = pgTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
-  source: text("source"),
+  source: text("source").$type<
+    | "invitation"
+    | "x"
+    | "reddit"
+    | "google"
+    | "hacker-news"
+    | "ai-conversations"
+    | (string & {})
+  >(),
   goal: text("goal"),
 });
 export const userRelations = relations(user, ({ many }) => ({
@@ -178,7 +186,9 @@ export const member = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    role: text("role").default("member").notNull(),
+    role: text("role", { enum: ["member", "owner", "admin"] })
+      .default("member")
+      .notNull(),
     createdAt: timestamp({
       mode: "date",
       withTimezone: true,

@@ -1,9 +1,6 @@
 import { Buffer } from "node:buffer";
-import type {
-  IdempotencyOptions,
-  Inbound,
-  PostEmailsRequest,
-} from "@inboundemail/sdk";
+import type { Inbound } from "inboundemail";
+import type { EmailSendParams } from "inboundemail/resources";
 import type { EmailDriver, EmailOptions, EmailResult } from "../types.js";
 import {
   normalizeEmailAddressesToString,
@@ -17,15 +14,15 @@ export function inboundDriver(
     name: "inbound",
     async send(
       options: EmailOptions,
-      messageOverrides?: PostEmailsRequest,
-      idempotencyOptions?: IdempotencyOptions,
+      messageOverrides?: EmailSendParams,
+      idempotencyOptions?: Parameters<Inbound["emails"]["send"]>[1],
     ): Promise<EmailResult> {
       try {
-        const { Inbound } = await import("@inboundemail/sdk");
+        const { Inbound } = await import("inboundemail");
 
         const inbound = new Inbound(...config);
 
-        const { data, error } = await inbound.emails.send(
+        const result = await inbound.emails.send(
           {
             from: normalizeEmailAddressToString(options.from),
             to: normalizeEmailAddressesToString(options.to),
@@ -62,17 +59,9 @@ export function inboundDriver(
           idempotencyOptions,
         );
 
-        if (error) {
-          return {
-            success: false,
-            message: error,
-            error: new Error(error),
-          };
-        }
-
         return {
           success: true,
-          messageId: data?.id ?? "",
+          messageId: result.id,
         };
       } catch (error) {
         return {

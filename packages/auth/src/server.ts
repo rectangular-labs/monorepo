@@ -62,7 +62,11 @@ export function initAuthHandler({
     ? `https://preview.${domain}` // preview.fluidposts.com or preview.rectangularlabs.com
     : baseURL; // prod / localhost domains
   const emailDriver = createEmailClient({
-    driver: inboundApiKey ? inboundDriver(inboundApiKey) : undefined,
+    driver: inboundApiKey
+      ? inboundDriver({
+          apiKey: inboundApiKey,
+        })
+      : undefined,
   });
 
   const config = {
@@ -136,6 +140,33 @@ export function initAuthHandler({
         },
       }),
     },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user, ctx) => {
+            const deriveNameFromEmail = (email: string) => {
+              if (!email) return "";
+              const localPart = email.split("@")[0]?.trim();
+              if (!localPart) return "";
+              return localPart.replace(/[._+-]+/g, " ").trim();
+            };
+            if (ctx?.path === "/sign-up/email") {
+              // Temporary fix for better-auth issue https://github.com/better-auth/better-auth/issues/424
+              if (user.name === user.email) {
+                const derivedName = deriveNameFromEmail(user.email);
+                return {
+                  data: {
+                    ...user,
+                    name: derivedName,
+                  },
+                };
+              }
+            }
+            return await Promise.resolve({ data: user });
+          },
+        },
+      },
+    },
     plugins: [
       oAuthProxy({
         productionURL: isPreview
@@ -170,12 +201,16 @@ export function initAuthHandler({
       twoFactor(),
       organization({
         sendInvitationEmail: async ({ email, id, organization, inviter }) => {
-          await emailDriver.send({
+          const inviteUrl = `${baseURL}/invite/${id}`;
+          const result = await emailDriver.send({
             from: fromEmail,
             to: email,
             subject: `You have been invited to join ${organization.name} by ${inviter.user.name}`,
-            text: `You have been invited to join ${organization.name} by ${inviter.user.name}. Accept the invitation by entering the following code: ${id}`,
+            text: `You have been invited to join ${organization.name} by ${inviter.user.name}.\n\nClick the link below to accept the invitation:\n${inviteUrl}`,
           });
+          if (!result.success) {
+            throw result.error;
+          }
         },
         organizationHooks: {
           beforeCreateOrganization: ({ organization }) => {

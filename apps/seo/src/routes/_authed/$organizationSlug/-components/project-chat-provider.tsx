@@ -133,7 +133,7 @@ export function ProjectChatProvider({
       void chatQuery.refetch();
       void chatsQuery.refetch();
     },
-    [chatsQuery.refetch, chatQuery.refetch],
+    [chatsQuery, chatQuery],
   );
 
   const openChat = useCallback(() => {
@@ -143,7 +143,7 @@ export function ProjectChatProvider({
       return;
     }
     void chatsQuery.refetch();
-  }, [activeChatId, chatsQuery.refetch, chatQuery.refetch]);
+  }, [activeChatId, chatsQuery, chatQuery]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

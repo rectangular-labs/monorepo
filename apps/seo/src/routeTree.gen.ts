@@ -17,8 +17,10 @@ import { Route as AuthedOrganizationSlugRouteRouteImport } from './routes/_authe
 import { Route as AuthedOnboardingIndexRouteImport } from './routes/_authed/onboarding/index'
 import { Route as AuthedOrganizationSlugIndexRouteImport } from './routes/_authed/$organizationSlug/index'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
+import { Route as AuthedInviteInvitationIdRouteImport } from './routes/_authed/invite/$invitationId'
 import { Route as AuthedOrganizationSlugProjectSlugRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/route'
 import { Route as AuthedOrganizationSlugProjectSlugIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/index'
+import { Route as AuthedOrganizationSlugSettingsTeamRouteImport } from './routes/_authed/$organizationSlug/settings/team'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/route'
 import { Route as AuthedOrganizationSlugProjectSlugStrategiesIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/strategies/index'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/index'
@@ -73,6 +75,12 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   path: '/api/rpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedInviteInvitationIdRoute =
+  AuthedInviteInvitationIdRouteImport.update({
+    id: '/invite/$invitationId',
+    path: '/invite/$invitationId',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
 const AuthedOrganizationSlugProjectSlugRouteRoute =
   AuthedOrganizationSlugProjectSlugRouteRouteImport.update({
     id: '/$projectSlug',
@@ -84,6 +92,12 @@ const AuthedOrganizationSlugProjectSlugIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
+  } as any)
+const AuthedOrganizationSlugSettingsTeamRoute =
+  AuthedOrganizationSlugSettingsTeamRouteImport.update({
+    id: '/settings/team',
+    path: '/settings/team',
+    getParentRoute: () => AuthedOrganizationSlugRouteRoute,
   } as any)
 const AuthedOrganizationSlugProjectSlugSettingsRouteRoute =
   AuthedOrganizationSlugProjectSlugSettingsRouteRouteImport.update({
@@ -168,10 +182,12 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
   '/api/$': typeof ApiSplatRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
+  '/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
+  '/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
@@ -189,9 +205,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
+  '/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
@@ -213,10 +231,12 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
   '/api/$': typeof ApiSplatRoute
   '/_authed/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
+  '/_authed/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_authed/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
+  '/_authed/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/_authed/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
@@ -238,10 +258,12 @@ export interface FileRouteTypes {
     | '/$organizationSlug'
     | '/api/$'
     | '/$organizationSlug/$projectSlug'
+    | '/invite/$invitationId'
     | '/api/rpc/$'
     | '/$organizationSlug/'
     | '/onboarding'
     | '/$organizationSlug/$projectSlug/settings'
+    | '/$organizationSlug/settings/team'
     | '/$organizationSlug/$projectSlug/'
     | '/$organizationSlug/$projectSlug/settings/business-background'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
@@ -259,9 +281,11 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/api/$'
+    | '/invite/$invitationId'
     | '/api/rpc/$'
     | '/$organizationSlug'
     | '/onboarding'
+    | '/$organizationSlug/settings/team'
     | '/$organizationSlug/$projectSlug'
     | '/$organizationSlug/$projectSlug/settings/business-background'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
@@ -282,10 +306,12 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug'
     | '/api/$'
     | '/_authed/$organizationSlug/$projectSlug'
+    | '/_authed/invite/$invitationId'
     | '/api/rpc/$'
     | '/_authed/$organizationSlug/'
     | '/_authed/onboarding/'
     | '/_authed/$organizationSlug/$projectSlug/settings'
+    | '/_authed/$organizationSlug/settings/team'
     | '/_authed/$organizationSlug/$projectSlug/'
     | '/_authed/$organizationSlug/$projectSlug/settings/business-background'
     | '/_authed/$organizationSlug/$projectSlug/settings/image-settings'
@@ -366,6 +392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/invite/$invitationId': {
+      id: '/_authed/invite/$invitationId'
+      path: '/invite/$invitationId'
+      fullPath: '/invite/$invitationId'
+      preLoaderRoute: typeof AuthedInviteInvitationIdRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/_authed/$organizationSlug/$projectSlug': {
       id: '/_authed/$organizationSlug/$projectSlug'
       path: '/$projectSlug'
@@ -379,6 +412,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$organizationSlug/$projectSlug/'
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugIndexRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
+    }
+    '/_authed/$organizationSlug/settings/team': {
+      id: '/_authed/$organizationSlug/settings/team'
+      path: '/settings/team'
+      fullPath: '/$organizationSlug/settings/team'
+      preLoaderRoute: typeof AuthedOrganizationSlugSettingsTeamRouteImport
+      parentRoute: typeof AuthedOrganizationSlugRouteRoute
     }
     '/_authed/$organizationSlug/$projectSlug/settings': {
       id: '/_authed/$organizationSlug/$projectSlug/settings'
@@ -533,6 +573,7 @@ const AuthedOrganizationSlugProjectSlugRouteRouteWithChildren =
 interface AuthedOrganizationSlugRouteRouteChildren {
   AuthedOrganizationSlugProjectSlugRouteRoute: typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   AuthedOrganizationSlugIndexRoute: typeof AuthedOrganizationSlugIndexRoute
+  AuthedOrganizationSlugSettingsTeamRoute: typeof AuthedOrganizationSlugSettingsTeamRoute
 }
 
 const AuthedOrganizationSlugRouteRouteChildren: AuthedOrganizationSlugRouteRouteChildren =
@@ -540,6 +581,8 @@ const AuthedOrganizationSlugRouteRouteChildren: AuthedOrganizationSlugRouteRoute
     AuthedOrganizationSlugProjectSlugRouteRoute:
       AuthedOrganizationSlugProjectSlugRouteRouteWithChildren,
     AuthedOrganizationSlugIndexRoute: AuthedOrganizationSlugIndexRoute,
+    AuthedOrganizationSlugSettingsTeamRoute:
+      AuthedOrganizationSlugSettingsTeamRoute,
   }
 
 const AuthedOrganizationSlugRouteRouteWithChildren =
@@ -549,12 +592,14 @@ const AuthedOrganizationSlugRouteRouteWithChildren =
 
 interface AuthedRouteRouteChildren {
   AuthedOrganizationSlugRouteRoute: typeof AuthedOrganizationSlugRouteRouteWithChildren
+  AuthedInviteInvitationIdRoute: typeof AuthedInviteInvitationIdRoute
   AuthedOnboardingIndexRoute: typeof AuthedOnboardingIndexRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedOrganizationSlugRouteRoute:
     AuthedOrganizationSlugRouteRouteWithChildren,
+  AuthedInviteInvitationIdRoute: AuthedInviteInvitationIdRoute,
   AuthedOnboardingIndexRoute: AuthedOnboardingIndexRoute,
 }
 
