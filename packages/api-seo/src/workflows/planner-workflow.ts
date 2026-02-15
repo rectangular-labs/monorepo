@@ -399,6 +399,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           organizationId: input.organizationId,
           projectId: input.projectId,
           id: input.draftId,
+          withContent: true,
         });
         if (!contentResult.ok) {
           throw new NonRetryableError(contentResult.error.message);
