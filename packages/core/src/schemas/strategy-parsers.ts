@@ -95,7 +95,7 @@ export const strategyPhaseSuggestionScheme = type({
     contentDraftId: type("string.uuid").describe(
       "Existing draft to improve/expand.",
     ),
-    updatedRole: contentRoleSchema.describe(
+    "updatedRole?": contentRoleSchema.describe(
       "Updated role for the content item based on the data. If not provided, the existing role will be used.",
     ),
     "updatedTitle?": type("string").describe(

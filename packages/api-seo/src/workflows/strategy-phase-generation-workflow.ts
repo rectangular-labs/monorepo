@@ -101,9 +101,7 @@ function formatStrategyPhaseHistory(phases: StrategyDetails["phases"]) {
               .map((content) => {
                 const title = content.contentDraft?.title || "(untitled)";
                 const keyword =
-                  content.plannedPrimaryKeyword ||
-                  content.contentDraft?.primaryKeyword ||
-                  "(missing)";
+                  content.contentDraft?.primaryKeyword || "(missing)";
                 return `${content.action}:${title}:${keyword}`;
               })
               .join(", ");
@@ -392,6 +390,8 @@ Generate the next strategy phase now.`,
           title: contentUpdate.updatedTitle,
           description: contentUpdate.updatedDescription,
           primaryKeyword: contentUpdate.updatedPrimaryKeyword,
+          role: contentUpdate.updatedRole,
+          notes: contentUpdate.updatedNotes ?? null,
         });
         if (!updatedDraft.ok) throw updatedDraft.error;
 
@@ -399,11 +399,6 @@ Generate the next strategy phase now.`,
           phaseId: phase.id,
           contentDraftId: updatedDraft.value.id,
           action: contentUpdate.action,
-          plannedPrimaryKeyword:
-            contentUpdate.updatedPrimaryKeyword ??
-            updatedDraft.value.primaryKeyword,
-          role: contentUpdate.updatedRole ?? updatedDraft.value.role,
-          notes: contentUpdate.updatedNotes ?? null,
         });
         if (!phaseContentResult.ok) throw phaseContentResult.error;
         if (contentUpdate.updatedNotes) {
@@ -421,17 +416,13 @@ Generate the next strategy phase now.`,
           status: "queued",
           strategyId: strategy.id,
           role: contentCreation.role,
+          notes: contentCreation.notes ?? null,
         });
         if (!draftInsert.ok) throw draftInsert.error;
-
         const phaseContentResult = await createStrategyPhaseContent(db, {
           phaseId: phase.id,
           contentDraftId: draftInsert.value.id,
           action: contentCreation.action,
-          plannedSlug: contentCreation.plannedSlug,
-          plannedPrimaryKeyword: contentCreation.plannedPrimaryKeyword,
-          role: contentCreation.role,
-          notes: contentCreation.notes ?? null,
         });
         if (!phaseContentResult.ok) throw phaseContentResult.error;
 
