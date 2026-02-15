@@ -83,11 +83,20 @@ This is a TypeScript monorepo using Turborepo:
 ## Code Conventions
 
 - React hooks must be at component top level.
+- Use kebab-case for file names (including hook files).
 - Avoid enums; prefer union types.
 - Do not use `as any` or casting generally. Prefer `satisfies` or explicit types.
+- Do not duplicate generic formatting helpers (numbers, dates, percent, currency, string casing) inside feature files; add/reuse them in `packages/core/src/format` and import from there.
 - When combining ArkType schemas, prefer attached shapes (e.g. `type({ "...": otherSchema })`) over `.merge()`.
 - When using the database object, prefer `.query` over `.select().from()`.
 - Create DB helpers in `packages/db/src/operations` and consume those helpers from API/routes or apps.
+- Avoid god components that own unrelated queries.
+- Parent/child component contract:
+  - Parent components should own orchestration concerns: route-level composition, open/close state, identity/context inputs (for example organization/project/entity ids), and wiring between independent features.
+  - Child feature components should own implementation concerns: local form state, validation, and query/mutation logic when behavior is stable across consumers.
+  - Shared/reusable child UI components should stay data-driven/dumb with explicit props and minimal side effects.
+  - Only expose callback props from child to parent when a real customization need exists (for example custom post-success navigation). Do not pass callback props preemptively.
+  - Avoid explicit `mode` props when mode can be derived from data presence (for example entity exists vs null/undefined).
 
 ## Key Architecture Patterns
 
@@ -98,6 +107,7 @@ This is a TypeScript monorepo using Turborepo:
 - Use `$` for route params (e.g. `$organizationSlug`).
 - Collocate UI in `-components`, hooks in `-hooks`, and helpers in `-lib`.
 - `routeTree.gen.ts` is generated and used by `apps/*/src/router.tsx`.
+- Use `type[]` instead of `Array<type>`.
 
 ### API (oRPC + ArkType)
 
