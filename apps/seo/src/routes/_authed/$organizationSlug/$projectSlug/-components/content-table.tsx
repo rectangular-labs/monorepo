@@ -1,3 +1,5 @@
+import { formatNullableNumber } from "@rectangular-labs/core/format/number";
+import { formatNullablePercent } from "@rectangular-labs/core/format/percent";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
@@ -46,18 +48,6 @@ export type ContentTableRow = {
   } | null;
 };
 
-function formatNumber(value: number | null, maximumFractionDigits = 0): string {
-  if (value === null) return "";
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits,
-  }).format(value);
-}
-
-function formatPercent(value: number | null): string {
-  if (value === null) return "0.0%";
-  return `${(value * 100).toFixed(1)}%`;
-}
-
 function compareNullableNumber(a: number | null, b: number | null): number {
   if (a === null && b === null) return 0;
   if (a === null) return 1;
@@ -94,6 +84,19 @@ export function ContentTable({
   showStrategyColumn?: boolean;
   showRoleColumn?: boolean;
 }) {
+  const columnWidthClassById: Record<string, string> = {
+    clicks: "w-[6rem]",
+    ctr: "w-[6rem]",
+    avgPosition: "w-[6rem]",
+    role: "w-[6rem]",
+    impressions: "w-[7rem]",
+    status: "w-[8rem]",
+    selected: "w-10 min-w-10 max-w-10",
+    primaryKeyword: "w-[12rem]",
+    strategy: "w-[14rem]",
+    title: "w-[14rem]",
+  };
+
   const [searchInput, setSearchInput] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -293,7 +296,10 @@ export function ContentTable({
     draftColumns.push(
       {
         accessorFn: (row) => row.aggregate?.clicks ?? null,
-        cell: ({ row }) => formatNumber(row.original.aggregate?.clicks ?? 0),
+        cell: ({ row }) =>
+          formatNullableNumber(row.original.aggregate?.clicks ?? null, {
+            fallback: "0",
+          }),
         enableSorting: true,
         header: "Clicks",
         id: "clicks",
@@ -301,14 +307,19 @@ export function ContentTable({
       {
         accessorFn: (row) => row.aggregate?.impressions ?? null,
         cell: ({ row }) =>
-          formatNumber(row.original.aggregate?.impressions ?? 0),
+          formatNullableNumber(row.original.aggregate?.impressions ?? null, {
+            fallback: "0",
+          }),
         enableSorting: true,
         header: "Impressions",
         id: "impressions",
       },
       {
         accessorFn: (row) => row.aggregate?.ctr ?? null,
-        cell: ({ row }) => formatPercent(row.original.aggregate?.ctr ?? 0),
+        cell: ({ row }) =>
+          formatNullablePercent(row.original.aggregate?.ctr ?? null, {
+            fallback: "0.0%",
+          }),
         enableSorting: true,
         header: "CTR",
         id: "ctr",
@@ -316,7 +327,10 @@ export function ContentTable({
       {
         accessorFn: (row) => row.aggregate?.avgPosition ?? null,
         cell: ({ row }) =>
-          formatNumber(row.original.aggregate?.avgPosition ?? 0, 1),
+          formatNullableNumber(row.original.aggregate?.avgPosition ?? null, {
+            fallback: "0",
+            maximumFractionDigits: 1,
+          }),
         enableSorting: true,
         header: "Position",
         id: "avgPosition",
@@ -401,51 +415,54 @@ export function ContentTable({
                     const canSort = header.column.getCanSort();
                     const headerId = header.column.id;
                     const isSorted = sortBy === headerId;
-                    const isSelectedColumn = headerId === "selected";
 
                     return (
                       <TableHead
-                        className={
-                          isSelectedColumn
-                            ? "w-10 min-w-10 max-w-10"
-                            : undefined
-                        }
+                        className={columnWidthClassById[headerId]}
                         key={header.id}
                       >
-                        <button
-                          className="inline-flex items-center gap-1.5 font-medium"
-                          onClick={() => {
-                            if (!canSort) return;
-                            const nextSortBy = headerId as ContentTableSortBy;
-                            if (sortBy !== nextSortBy) {
-                              onChangeSort(nextSortBy);
-                              onChangeSortOrder("asc");
-                              return;
-                            }
+                        {canSort ? (
+                          <button
+                            className="inline-flex items-center gap-1.5 font-medium"
+                            onClick={() => {
+                              const nextSortBy = headerId as ContentTableSortBy;
+                              if (sortBy !== nextSortBy) {
+                                onChangeSort(nextSortBy);
+                                onChangeSortOrder("asc");
+                                return;
+                              }
 
-                            if (sortOrder === "asc") {
-                              onChangeSortOrder("desc");
-                              return;
-                            }
+                              if (sortOrder === "asc") {
+                                onChangeSortOrder("desc");
+                                return;
+                              }
 
-                            onChangeSort(null);
-                          }}
-                          type="button"
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {canSort && isSorted && sortOrder === "asc" && (
-                            <Icons.FilterAscending className="size-3.5 text-muted-foreground" />
-                          )}
-                          {canSort && isSorted && sortOrder === "desc" && (
-                            <Icons.FilterDescending className="size-3.5 text-muted-foreground" />
-                          )}
-                          {canSort && !isSorted && (
-                            <Icons.ChevronsUpDown className="size-3.5 text-muted-foreground" />
-                          )}
-                        </button>
+                              onChangeSort(null);
+                            }}
+                            type="button"
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                            {isSorted && sortOrder === "asc" && (
+                              <Icons.FilterAscending className="size-3.5 text-muted-foreground" />
+                            )}
+                            {isSorted && sortOrder === "desc" && (
+                              <Icons.FilterDescending className="size-3.5 text-muted-foreground" />
+                            )}
+                            {!isSorted && (
+                              <Icons.ChevronsUpDown className="size-3.5 text-muted-foreground" />
+                            )}
+                          </button>
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 font-medium">
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                          </div>
+                        )}
                       </TableHead>
                     );
                   })}
@@ -472,11 +489,7 @@ export function ContentTable({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className={
-                        cell.column.id === "selected"
-                          ? "w-10 min-w-10 max-w-10"
-                          : undefined
-                      }
+                      className={columnWidthClassById[cell.column.id]}
                       key={cell.id}
                     >
                       {flexRender(

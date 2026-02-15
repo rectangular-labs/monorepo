@@ -8,10 +8,7 @@ import { type } from "arktype";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
-import {
-  ContentDetailsDrawer,
-  type SnapshotMetric,
-} from "../-components/content-details-drawer";
+import { ContentDetailsDrawer } from "../-components/content-details-drawer";
 import {
   ContentTable,
   type ContentTableSortBy,
@@ -27,7 +24,6 @@ export const Route = createFileRoute(
       "'clicks' | 'impressions' | 'ctr' | 'avgPosition' | 'title' | 'status' | 'strategy' | 'primaryKeyword'",
     "sortOrder?": "'asc' | 'desc'",
     "contentDraftId?": "string.uuid",
-    "drawerMetric?": "'clicks' | 'impressions' | 'ctr' | 'avgPosition'",
   }),
   head: ({ params }) => ({
     links: [
@@ -42,7 +38,7 @@ export const Route = createFileRoute(
 
 function PageComponent() {
   const { organizationSlug, projectSlug } = Route.useParams();
-  const { sortBy, sortOrder, contentDraftId, drawerMetric } = Route.useSearch();
+  const { sortBy, sortOrder, contentDraftId } = Route.useSearch();
   const navigate = Route.useNavigate();
   const api = getApiClientRq();
   const [selectedContentDraftId, setSelectedContentDraftId] = useState<
@@ -51,7 +47,6 @@ function PageComponent() {
 
   const resolvedSortBy = (sortBy ?? null) as ContentTableSortBy | null;
   const resolvedSortOrder = (sortOrder ?? "desc") as SortOrder;
-  const resolvedDrawerMetric = (drawerMetric ?? "clicks") as SnapshotMetric;
 
   const { data: activeProject } = useSuspenseQuery(
     api.project.get.queryOptions({
@@ -136,7 +131,6 @@ function PageComponent() {
 
       <ContentDetailsDrawer
         contentDraftId={selectedContentDraftId}
-        metric={resolvedDrawerMetric}
         onClose={() => {
           setSelectedContentDraftId(null);
           navigate({
@@ -147,17 +141,10 @@ function PageComponent() {
             replace: true,
           });
         }}
-        onMetricChange={(nextMetric) => {
-          navigate({
-            search: (prev) => ({
-              ...prev,
-              drawerMetric: nextMetric,
-            }),
-            replace: true,
-          });
-        }}
         organizationIdentifier={activeProject.organizationId}
+        organizationSlug={organizationSlug}
         projectId={activeProject.id}
+        projectSlug={projectSlug}
       />
     </Section>
   );

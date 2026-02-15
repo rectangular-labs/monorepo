@@ -32,6 +32,7 @@ import { Route as AuthedOrganizationSlugProjectSlugSettingsPublishingSettingsRou
 import { Route as AuthedOrganizationSlugProjectSlugSettingsProjectRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/project'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsImageSettingsRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/image-settings'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/business-background'
+import { Route as AuthedOrganizationSlugProjectSlugContentDraftIdRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/content/$draftId'
 import { Route as AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRouteImport } from './routes/_authed/$organizationSlug/$projectSlug/settings/integrations/index'
 
 const LoginRoute = LoginRouteImport.update({
@@ -169,6 +170,12 @@ const AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute =
       getParentRoute: () => AuthedOrganizationSlugProjectSlugSettingsRouteRoute,
     } as any,
   )
+const AuthedOrganizationSlugProjectSlugContentDraftIdRoute =
+  AuthedOrganizationSlugProjectSlugContentDraftIdRouteImport.update({
+    id: '/content/$draftId',
+    path: '/content/$draftId',
+    getParentRoute: () => AuthedOrganizationSlugProjectSlugRouteRoute,
+  } as any)
 const AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRoute =
   AuthedOrganizationSlugProjectSlugSettingsIntegrationsIndexRouteImport.update({
     id: '/integrations/',
@@ -189,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
   '/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
+  '/$organizationSlug/$projectSlug/content/$draftId': typeof AuthedOrganizationSlugProjectSlugContentDraftIdRoute
   '/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
@@ -211,6 +219,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
+  '/$organizationSlug/$projectSlug/content/$draftId': typeof AuthedOrganizationSlugProjectSlugContentDraftIdRoute
   '/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
@@ -238,6 +247,7 @@ export interface FileRoutesById {
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/_authed/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
   '/_authed/$organizationSlug/$projectSlug/': typeof AuthedOrganizationSlugProjectSlugIndexRoute
+  '/_authed/$organizationSlug/$projectSlug/content/$draftId': typeof AuthedOrganizationSlugProjectSlugContentDraftIdRoute
   '/_authed/$organizationSlug/$projectSlug/settings/business-background': typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRoute
   '/_authed/$organizationSlug/$projectSlug/settings/image-settings': typeof AuthedOrganizationSlugProjectSlugSettingsImageSettingsRoute
   '/_authed/$organizationSlug/$projectSlug/settings/project': typeof AuthedOrganizationSlugProjectSlugSettingsProjectRoute
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/settings/team'
     | '/$organizationSlug/$projectSlug/'
+    | '/$organizationSlug/$projectSlug/content/$draftId'
     | '/$organizationSlug/$projectSlug/settings/business-background'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
     | '/$organizationSlug/$projectSlug/settings/project'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/$organizationSlug/settings/team'
     | '/$organizationSlug/$projectSlug'
+    | '/$organizationSlug/$projectSlug/content/$draftId'
     | '/$organizationSlug/$projectSlug/settings/business-background'
     | '/$organizationSlug/$projectSlug/settings/image-settings'
     | '/$organizationSlug/$projectSlug/settings/project'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
     | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/settings/team'
     | '/_authed/$organizationSlug/$projectSlug/'
+    | '/_authed/$organizationSlug/$projectSlug/content/$draftId'
     | '/_authed/$organizationSlug/$projectSlug/settings/business-background'
     | '/_authed/$organizationSlug/$projectSlug/settings/image-settings'
     | '/_authed/$organizationSlug/$projectSlug/settings/project'
@@ -497,6 +510,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugSettingsBusinessBackgroundRouteImport
       parentRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRoute
     }
+    '/_authed/$organizationSlug/$projectSlug/content/$draftId': {
+      id: '/_authed/$organizationSlug/$projectSlug/content/$draftId'
+      path: '/content/$draftId'
+      fullPath: '/$organizationSlug/$projectSlug/content/$draftId'
+      preLoaderRoute: typeof AuthedOrganizationSlugProjectSlugContentDraftIdRouteImport
+      parentRoute: typeof AuthedOrganizationSlugProjectSlugRouteRoute
+    }
     '/_authed/$organizationSlug/$projectSlug/settings/integrations/': {
       id: '/_authed/$organizationSlug/$projectSlug/settings/integrations/'
       path: '/integrations'
@@ -543,6 +563,7 @@ const AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren =
 interface AuthedOrganizationSlugProjectSlugRouteRouteChildren {
   AuthedOrganizationSlugProjectSlugSettingsRouteRoute: typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   AuthedOrganizationSlugProjectSlugIndexRoute: typeof AuthedOrganizationSlugProjectSlugIndexRoute
+  AuthedOrganizationSlugProjectSlugContentDraftIdRoute: typeof AuthedOrganizationSlugProjectSlugContentDraftIdRoute
   AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute: typeof AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute
   AuthedOrganizationSlugProjectSlugContentIndexRoute: typeof AuthedOrganizationSlugProjectSlugContentIndexRoute
   AuthedOrganizationSlugProjectSlugLinksIndexRoute: typeof AuthedOrganizationSlugProjectSlugLinksIndexRoute
@@ -555,6 +576,8 @@ const AuthedOrganizationSlugProjectSlugRouteRouteChildren: AuthedOrganizationSlu
       AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren,
     AuthedOrganizationSlugProjectSlugIndexRoute:
       AuthedOrganizationSlugProjectSlugIndexRoute,
+    AuthedOrganizationSlugProjectSlugContentDraftIdRoute:
+      AuthedOrganizationSlugProjectSlugContentDraftIdRoute,
     AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute:
       AuthedOrganizationSlugProjectSlugStrategiesStrategyIdRoute,
     AuthedOrganizationSlugProjectSlugContentIndexRoute:

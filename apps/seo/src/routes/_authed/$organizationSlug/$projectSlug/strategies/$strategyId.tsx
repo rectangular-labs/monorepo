@@ -1,17 +1,6 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import { capitalize } from "@rectangular-labs/core/format/capitalize";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
-import { BarList } from "@rectangular-labs/ui/components/charts/bar-list";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ReChartContainer,
-  ReChartTooltipContent,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "@rectangular-labs/ui/components/charts/rechart-container";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
@@ -29,26 +18,12 @@ import {
   DialogDrawerTitle,
 } from "@rectangular-labs/ui/components/ui/dialog-drawer";
 import {
-  DropDrawer,
-  DropDrawerContent,
-  DropDrawerItem,
-  DropDrawerTrigger,
-} from "@rectangular-labs/ui/components/ui/dropdrawer";
-import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@rectangular-labs/ui/components/ui/empty";
-import { Input } from "@rectangular-labs/ui/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@rectangular-labs/ui/components/ui/pagination";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import {
@@ -57,36 +32,22 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rectangular-labs/ui/components/ui/tabs";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@rectangular-labs/ui/components/ui/toggle-group";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { type } from "arktype";
-import {
-  type ComponentType,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
+import { ContentDetailsDrawer } from "../-components/content-details-drawer";
 import {
-  ContentDetailsDrawer,
+  SnapshotTrendChart,
   type SnapshotMetric,
-} from "../-components/content-details-drawer";
+} from "../-components/snapshot-trend-chart";
 import type {
   ContentTableSortBy,
   SortOrder,
 } from "../-components/content-table";
+import { TopKeywords } from "../-components/top-keywords";
 import { ManageStrategyDialog } from "./-components/manage-strategy-dialog";
 import { ManageStrategyPhaseDialog } from "./-components/manage-strategy-phase-dialog";
 import { StrategyContentTab } from "./-components/strategy-content-tab";
@@ -105,47 +66,7 @@ type LocalSearchState = {
   keywordsPageSize: number;
   keywordsSearch: string;
   contentDraftId: string | null;
-  drawerMetric: SnapshotMetric;
 };
-
-const OVERVIEW_CHART_CONFIG = {
-  value: {
-    label: "Value",
-    color: "var(--chart-1)",
-  },
-};
-
-const metricToggleOptions: {
-  ariaLabel: string;
-  icon: ComponentType<{ className?: string }>;
-  title: string;
-  value: SnapshotMetric;
-}[] = [
-  {
-    ariaLabel: "toggle clicks",
-    icon: Icons.Hand,
-    title: "Clicks",
-    value: "clicks",
-  },
-  {
-    ariaLabel: "toggle impressions",
-    icon: Icons.EyeOn,
-    title: "Impressions",
-    value: "impressions",
-  },
-  {
-    ariaLabel: "toggle click through rate",
-    icon: Icons.TrendingUp,
-    title: "Click Through Rate",
-    value: "ctr",
-  },
-  {
-    ariaLabel: "toggle position",
-    icon: Icons.Target,
-    title: "Position",
-    value: "avgPosition",
-  },
-];
 
 function toLocalSearchState(search: StrategyRouteSearch): LocalSearchState {
   return {
@@ -159,7 +80,6 @@ function toLocalSearchState(search: StrategyRouteSearch): LocalSearchState {
     keywordsPageSize: Math.max(1, search.keywordsPageSize ?? 25),
     keywordsSearch: search.keywordsSearch ?? "",
     contentDraftId: search.contentDraftId ?? null,
-    drawerMetric: search.drawerMetric ?? "clicks",
   };
 }
 
@@ -177,8 +97,7 @@ function isSameLocalSearchState(
     a.keywordsPage === b.keywordsPage &&
     a.keywordsPageSize === b.keywordsPageSize &&
     a.keywordsSearch === b.keywordsSearch &&
-    a.contentDraftId === b.contentDraftId &&
-    a.drawerMetric === b.drawerMetric
+    a.contentDraftId === b.contentDraftId
   );
 }
 
@@ -210,7 +129,6 @@ export const Route = createFileRoute(
     "keywordsPageSize?": "number.integer",
     "keywordsSearch?": "string",
     "contentDraftId?": "string.uuid",
-    "drawerMetric?": "'clicks' | 'impressions' | 'ctr' | 'avgPosition'",
   }),
   component: PageComponent,
 });
@@ -220,7 +138,6 @@ function PageComponent() {
   const routeSearch = Route.useSearch();
   const navigate = Route.useNavigate();
   const api = getApiClientRq();
-  const queryClient = useQueryClient();
   const isLocalUpdatePendingRef = useRef(false);
   const [editOpen, setEditOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
@@ -246,7 +163,6 @@ function PageComponent() {
   const keywordsSortOrder = localSearch.keywordsSortOrder;
   const keywordsPage = localSearch.keywordsPage;
   const keywordsPageSize = localSearch.keywordsPageSize;
-  const drawerMetric = localSearch.drawerMetric;
 
   const { data: activeProject } = useSuspenseQuery(
     api.project.get.queryOptions({
@@ -328,7 +244,6 @@ function PageComponent() {
           keywordsPageSize: localSearch.keywordsPageSize,
           keywordsSearch: normalizedKeywordsSearch || undefined,
           contentDraftId: localSearch.contentDraftId ?? undefined,
-          drawerMetric: localSearch.drawerMetric,
         }),
         replace: true,
         resetScroll: false,
@@ -558,26 +473,24 @@ function PageComponent() {
               />
               <ContentDetailsDrawer
                 contentDraftId={localSearch.contentDraftId}
-                metric={drawerMetric}
                 onClose={() => {
                   setLocalSearchState((prev) => ({
                     ...prev,
                     contentDraftId: null,
                   }));
                 }}
-                onMetricChange={(metric) => {
-                  setLocalSearchState((prev) => ({
-                    ...prev,
-                    drawerMetric: metric,
-                  }));
-                }}
                 organizationIdentifier={activeProject.organizationId}
+                organizationSlug={organizationSlug}
                 projectId={activeProject.id}
+                projectSlug={projectSlug}
               />
             </TabsContent>
 
             <TabsContent value="keywords">
-              <TopKeywordsTab
+              <TopKeywords
+                emptyMessage="No keyword data for the selected filters."
+                error={keywordsQuery.error}
+                isLoading={keywordsQuery.isLoading}
                 metric={keywordsMetric}
                 onMetricChange={(metric) => {
                   setLocalSearchState((prev) => ({
@@ -599,6 +512,14 @@ function PageComponent() {
                     keywordsPageSize: pageSize,
                   }));
                 }}
+                onRetry={keywordsQuery.refetch}
+                onSearchInputChange={(keywordsSearch) => {
+                  setLocalSearchState((prev) => ({
+                    ...prev,
+                    keywordsPage: 1,
+                    keywordsSearch,
+                  }));
+                }}
                 onSortOrderChange={(sortOrder) => {
                   setLocalSearchState((prev) => ({
                     ...prev,
@@ -608,15 +529,8 @@ function PageComponent() {
                 }}
                 page={keywordsPage}
                 pageSize={keywordsPageSize}
-                query={keywordsQuery}
+                rows={keywordsQuery.data?.rows ?? []}
                 searchInput={localSearch.keywordsSearch}
-                setSearchInput={(keywordsSearch) => {
-                  setLocalSearchState((prev) => ({
-                    ...prev,
-                    keywordsPage: 1,
-                    keywordsSearch,
-                  }));
-                }}
                 sortOrder={keywordsSortOrder}
               />
             </TabsContent>
@@ -631,10 +545,6 @@ type Strategy = RouterOutputs["strategy"]["get"];
 type StrategyPhase = Strategy["phases"][number];
 type OverviewPoint =
   RouterOutputs["strategy"]["snapshot"]["series"]["points"][number];
-
-type KeywordsQuery = ReturnType<
-  typeof useQuery<RouterOutputs["strategy"]["snapshot"]["keywords"]["list"]>
->;
 
 function StrategyHeader({
   strategy,
@@ -1032,320 +942,30 @@ function OverviewTab({
   error: Error | null;
   retry: () => void;
 }) {
-  const chartPoints = useMemo(
-    () =>
-      points.map((point) => ({
-        date: formatShortDate(point.takenAt),
-        value: getMetricFromAggregate(point.aggregate, metric),
-      })),
-    [metric, points],
-  );
-
-  return (
-    <Card>
-      <CardHeader className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-base">Overview trend</CardTitle>
-          <MetricToggle metric={metric} onMetricChange={onMetricChange} />
-        </div>
-      </CardHeader>
-      <CardContent className="h-[280px]">
-        <LoadingError
-          error={error}
-          errorDescription="Could not load strategy snapshot series."
-          errorTitle="Error loading overview"
-          isLoading={isLoading}
-          loadingComponent={<Skeleton className="h-full w-full" />}
-          onRetry={retry}
-        />
-        {!isLoading && !error && points.length === 0 && (
-          <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-muted-foreground text-sm">
-            No snapshots in the last 3 months.
-          </div>
-        )}
-        {!isLoading && !error && points.length > 0 && (
-          <ReChartContainer
-            className="h-full w-full"
-            config={OVERVIEW_CHART_CONFIG}
-          >
-            <AreaChart data={chartPoints}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                axisLine={false}
-                dataKey="date"
-                tick={{ fontSize: 11 }}
-                tickLine={false}
-                tickMargin={8}
-              />
-              <YAxis
-                axisLine={false}
-                tick={{ fontSize: 11 }}
-                tickLine={false}
-                tickMargin={8}
-              />
-              <Tooltip
-                content={
-                  <ReChartTooltipContent
-                    accessibilityLayer={false}
-                    active={false}
-                    activeIndex={undefined}
-                    coordinate={undefined}
-                    labelKey="date"
-                    payload={[]}
-                  />
-                }
-                cursor={{ strokeDasharray: "3 3" }}
-              />
-              <Area
-                dataKey="value"
-                dot
-                fill="var(--color-value)"
-                fillOpacity={0.2}
-                stroke="var(--color-value)"
-                strokeWidth={2}
-                type="linear"
-              />
-            </AreaChart>
-          </ReChartContainer>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function TopKeywordsTab({
-  query,
-  metric,
-  sortOrder,
-  page,
-  pageSize,
-  searchInput,
-  setSearchInput,
-  onMetricChange,
-  onSortOrderChange,
-  onPageChange,
-  onPageSizeChange,
-}: {
-  query: KeywordsQuery;
-  metric: SnapshotMetric;
-  sortOrder: SortOrder;
-  page: number;
-  pageSize: number;
-  searchInput: string;
-  setSearchInput: (value: string) => void;
-  onMetricChange: (metric: SnapshotMetric) => void;
-  onSortOrderChange: (sortOrder: SortOrder) => void;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
-}) {
-  const rows = query.data?.rows ?? [];
-  const normalizedSearch = searchInput.trim().toLowerCase();
-  const filteredRows = useMemo(() => {
-    if (!normalizedSearch) return rows;
-    return rows.filter((row) =>
-      row.keyword.toLowerCase().includes(normalizedSearch),
-    );
-  }, [normalizedSearch, rows]);
-
-  const sortedRows = useMemo(() => {
-    const direction = sortOrder === "asc" ? 1 : -1;
-    return [...filteredRows].sort((a, b) => {
-      if (metric === "impressions") {
-        return (a.impressions - b.impressions) * direction;
-      }
-      if (metric === "ctr") {
-        return (a.ctr - b.ctr) * direction;
-      }
-      if (metric === "avgPosition") {
-        return (a.avgPosition - b.avgPosition) * direction;
-      }
-      return (a.clicks - b.clicks) * direction;
-    });
-  }, [filteredRows, metric, sortOrder]);
-
-  const total = sortedRows.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const currentPage = Math.min(Math.max(page, 1), totalPages);
-  const start = (currentPage - 1) * pageSize;
-  const end = start + pageSize;
-  const pagedRows = sortedRows.slice(start, end);
-
-  useEffect(() => {
-    if (currentPage !== page) {
-      onPageChange(currentPage);
-    }
-  }, [currentPage, onPageChange, page]);
-
-  return (
-    <Card>
-      <CardHeader className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-base">Top keywords</CardTitle>
-          <div className="flex items-center gap-2">
-            <MetricToggle metric={metric} onMetricChange={onMetricChange} />
-            <Button
-              onClick={() =>
-                onSortOrderChange(sortOrder === "asc" ? "desc" : "asc")
-              }
-              size="icon-sm"
-              title={sortOrder === "asc" ? "Sort descending" : "Sort ascending"}
-              variant="outline"
-            >
-              {sortOrder === "asc" ? (
-                <Icons.FilterAscending className="size-4" />
-              ) : (
-                <Icons.FilterDescending className="size-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-        <div className="relative max-w-sm">
-          <Icons.Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            className="pl-9"
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Search keyword..."
-            value={searchInput}
+  if (isLoading || error) {
+    return (
+      <Card>
+        <CardContent className="h-[280px] pt-6">
+          <LoadingError
+            error={error}
+            errorDescription="Could not load strategy snapshot series."
+            errorTitle="Error loading overview"
+            isLoading={isLoading}
+            loadingComponent={<Skeleton className="h-full w-full" />}
+            onRetry={retry}
           />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <LoadingError
-          error={query.error}
-          errorDescription="Could not load top keyword data."
-          errorTitle="Error loading top keywords"
-          isLoading={query.isLoading}
-          loadingComponent={<Skeleton className="h-[260px] w-full" />}
-          onRetry={query.refetch}
-        />
+        </CardContent>
+      </Card>
+    );
+  }
 
-        {!query.isLoading && !query.error && sortedRows.length === 0 && (
-          <div className="rounded-lg border border-dashed p-6 text-muted-foreground text-sm">
-            No keyword data for the selected filters.
-          </div>
-        )}
-
-        {!query.isLoading && !query.error && sortedRows.length > 0 && (
-          <>
-            <BarList
-              className="pt-2"
-              data={pagedRows.map((row) => ({
-                key: row.keyword,
-                name: row.keyword,
-                value: getMetricFromAggregate(row, metric),
-                clicks: row.clicks,
-                impressions: row.impressions,
-                ctr: row.ctr,
-                avgPosition: row.avgPosition,
-              }))}
-              sortOrder="none"
-              valueFormatter={(value, item) =>
-                metric === "ctr"
-                  ? `${formatPercent(value)} (${formatNumber(item.clicks)} clicks)`
-                  : metric === "avgPosition"
-                    ? `${formatNumber(value, 1)} (${formatNumber(item.impressions)} imp)`
-                    : `${formatNumber(value)} (${formatPercent(item.ctr)} ctr)`
-              }
-            />
-
-            {total > 0 && (
-              <Pagination className="justify-end">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      className={
-                        currentPage <= 1 ? "pointer-events-none opacity-50" : ""
-                      }
-                      onClick={() =>
-                        currentPage > 1 && onPageChange(currentPage - 1)
-                      }
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      className={
-                        currentPage >= totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                      onClick={() =>
-                        currentPage < totalPages &&
-                        onPageChange(currentPage + 1)
-                      }
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <span className="px-4 text-muted-foreground text-sm">
-                      {total === 0
-                        ? "0"
-                        : `${(currentPage - 1) * pageSize + 1}-${Math.min(
-                            currentPage * pageSize,
-                            total,
-                          )}`}{" "}
-                      of {total}
-                    </span>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <DropDrawer>
-                      <DropDrawerTrigger asChild>
-                        <Button size="sm" variant="outline">
-                          {pageSize} per page
-                        </Button>
-                      </DropDrawerTrigger>
-                      <DropDrawerContent>
-                        {[10, 25, 50, 100].map((pageSize) => (
-                          <DropDrawerItem
-                            key={pageSize}
-                            onSelect={() => onPageSizeChange(pageSize)}
-                          >
-                            {pageSize} per page
-                          </DropDrawerItem>
-                        ))}
-                      </DropDrawerContent>
-                    </DropDrawer>
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function MetricToggle({
-  metric,
-  onMetricChange,
-  disabled = false,
-}: {
-  metric: SnapshotMetric;
-  onMetricChange: (metric: SnapshotMetric) => void;
-  disabled?: boolean;
-}) {
   return (
-    <ToggleGroup
-      disabled={disabled}
-      onValueChange={(value) => {
-        if (!value) return;
-        onMetricChange(value as SnapshotMetric);
-      }}
-      type="single"
-      value={metric}
-    >
-      {metricToggleOptions.map((option) => (
-        <ToggleGroupItem
-          aria-label={option.ariaLabel}
-          key={option.value}
-          size="sm"
-          title={option.title}
-          value={option.value}
-          variant="outline"
-        >
-          <option.icon className="size-4" />
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+    <SnapshotTrendChart
+      emptyMessage="No snapshots in the last 3 months."
+      initialMetric={metric}
+      onMetricChange={onMetricChange}
+      series={points}
+    />
   );
 }
 
@@ -1377,21 +997,10 @@ function formatDateTime(value: Date) {
   }).format(value);
 }
 
-function formatShortDate(value: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(value);
-}
-
 function formatNumber(value: number, digits = 0) {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: digits,
   }).format(value);
-}
-
-function formatPercent(value: number) {
-  return `${formatNumber(value * 100, 1)}%`;
 }
 
 function formatMetricValue(metric: Strategy["goal"]["metric"], value: number) {
@@ -1411,21 +1020,6 @@ function formatMetricSignedValue(
   }
   const sign = value >= 0 ? "+" : "";
   return `${sign}${formatNumber(value, 0)}`;
-}
-
-function getMetricFromAggregate(
-  aggregate: {
-    clicks: number;
-    impressions: number;
-    ctr: number;
-    avgPosition: number;
-  },
-  metric: SnapshotMetric,
-) {
-  if (metric === "impressions") return aggregate.impressions;
-  if (metric === "ctr") return aggregate.ctr;
-  if (metric === "avgPosition") return aggregate.avgPosition;
-  return aggregate.clicks;
 }
 
 function getGoalProgress(
