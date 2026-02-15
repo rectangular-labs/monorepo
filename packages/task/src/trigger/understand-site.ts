@@ -94,7 +94,7 @@ export const understandSiteTask: ReturnType<
 
     // Guide the model to use tools to ground the output
     const { output } = await generateText({
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-3-flash-preview"),
       temperature: 0,
       system: [
         "You are an SEO strategy expert at extracting concise, high-signal, normalized business context.",

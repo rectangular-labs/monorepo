@@ -575,7 +575,6 @@ ${changes.join("\n")}
               },
               tools: {
                 ...webTools.tools,
-                ...todoTool.tools,
               },
               system: `<role>
 You are a strict SEO content QA reviewer. Your job is to verify the writer followed ALL explicit rules and that the article is publish-ready.
