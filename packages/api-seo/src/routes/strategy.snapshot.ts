@@ -141,6 +141,8 @@ const keywordsList = withOrganizationIdBase
   .handler(async ({ context, input }) => {
     const result = await aggregateLatestSnapshotKeywords({
       db: context.db,
+      organizationId: context.organization.id,
+      projectId: input.projectId,
       strategyId: input.strategyId,
     });
     if (!result.ok) {

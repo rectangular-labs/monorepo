@@ -1,6 +1,7 @@
 import type { KeywordSnapshot } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { safe } from "@rectangular-labs/result";
 import type { DB, DBTransaction } from "../../client";
+import { listContentDraftsWithLatestSnapshot } from "./content-operations";
 
 export async function listStrategySnapshotsInRange(args: {
   db: DB | DBTransaction;
@@ -70,19 +71,26 @@ export async function listContentSnapshotInRange(args: {
 
 export async function aggregateLatestSnapshotKeywords(args: {
   db: DB | DBTransaction;
+  organizationId: string;
+  projectId: string;
   strategyId: string;
 }) {
   return await safe(async () => {
-    const snapshotResult = await getLatestStrategySnapshotWithContents({
+    const contentDraftsResult = await listContentDraftsWithLatestSnapshot({
       db: args.db,
+      organizationId: args.organizationId,
+      projectId: args.projectId,
       strategyId: args.strategyId,
     });
-    if (!snapshotResult.ok) {
-      throw snapshotResult.error;
+    if (!contentDraftsResult.ok) {
+      throw contentDraftsResult.error;
     }
 
-    const snapshot = snapshotResult.value;
-    if (!snapshot) {
+    const metricSnapshots = contentDraftsResult.value
+      .map((draft) => draft.metricSnapshots[0] ?? null)
+      .filter((snapshot) => snapshot !== null);
+
+    if (metricSnapshots.length === 0) {
       return {
         snapshot: null,
         rows: [],
@@ -91,8 +99,8 @@ export async function aggregateLatestSnapshotKeywords(args: {
 
     const byKeyword = new Map<string, KeywordSnapshot>();
 
-    for (const contentSnapshot of snapshot.contentSnapshots) {
-      for (const row of contentSnapshot.topKeywords) {
+    for (const metricSnapshot of metricSnapshots) {
+      for (const row of metricSnapshot.topKeywords) {
         const keyword = row.keyword.trim();
         if (!keyword) continue;
         const existing = byKeyword.get(keyword) ?? {
@@ -121,11 +129,23 @@ export async function aggregateLatestSnapshotKeywords(args: {
       };
     });
 
+    const latestSnapshot = metricSnapshots.reduce<{
+      id: string;
+      takenAt: Date;
+    } | null>((latest, metricSnapshot) => {
+      const snapshot = metricSnapshot.snapshot;
+      if (!snapshot) return latest;
+      if (!latest || snapshot.takenAt > latest.takenAt) {
+        return {
+          id: snapshot.id,
+          takenAt: snapshot.takenAt,
+        };
+      }
+      return latest;
+    }, null);
+
     return {
-      snapshot: {
-        id: snapshot.id,
-        takenAt: snapshot.takenAt,
-      },
+      snapshot: latestSnapshot,
       rows,
     };
   });

@@ -426,6 +426,14 @@ export async function listContentDraftsWithLatestSnapshot(args: {
           },
           where: (table, { isNull }) => isNull(table.deletedAt),
           orderBy: (fields, { desc }) => [desc(fields.createdAt)],
+          with: {
+            snapshot: {
+              columns: {
+                id: true,
+                takenAt: true,
+              },
+            },
+          },
           limit: 1,
         },
       },
