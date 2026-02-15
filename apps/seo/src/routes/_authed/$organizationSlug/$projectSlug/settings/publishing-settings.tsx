@@ -1,4 +1,3 @@
-import type { weekdaySchema } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
 import {
   arktypeResolver,
@@ -23,8 +22,6 @@ export const Route = createFileRoute(
 )({
   component: PublishingSettingsPage,
 });
-
-type Weekday = typeof weekdaySchema.infer;
 
 const formSchema = type({
   requireContentReview: "boolean",
