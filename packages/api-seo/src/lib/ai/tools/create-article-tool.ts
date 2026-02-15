@@ -60,7 +60,6 @@ export function createCreateArticleToolWithMetadata({
       description,
       outline,
       articleType,
-      notes,
     }) {
       const keyword = primaryKeyword.trim();
       if (!keyword) {

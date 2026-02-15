@@ -571,7 +571,7 @@ const exportByDraftIds = withOrganizationIdBase
   .use(validateOrganizationMiddleware, (input) => input.organizationIdentifier)
   .output(
     type({
-      data: schema.seoContentDraftSelectSchema.omit("outline").array(),
+      data: schema.seoContentDraftSelectSchema.omit("outline", "notes").array(),
     }),
   )
   .handler(async ({ context, input }) => {
