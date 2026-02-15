@@ -14,13 +14,7 @@ import {
 } from "@rectangular-labs/core/schemas/task-parsers";
 import { createDb } from "@rectangular-labs/db";
 import { updateSeoProject } from "@rectangular-labs/db/operations";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  Output,
-  stepCountIs,
-} from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { logAgentStep } from "../lib/ai/utils/log-agent-step";
@@ -100,7 +94,7 @@ export class SeoOnboardingWorkflow extends WorkflowEntrypoint<
 - use the homepage title and URL to derive the entity name.
 - If unclear, return an empty string.`;
 
-          const { experimental_output } = await generateText({
+          const { output } = await generateText({
             model: google("gemini-3-flash-preview"),
             system,
             prompt: `Context:
@@ -109,16 +103,14 @@ Homepage Title: ${homepageTitle}
 
 Extract the name from the above context.`,
 
-            experimental_output: Output.object({
-              schema: jsonSchema<{ name: string }>(
-                type({
-                  name: "string",
-                }).toJsonSchema() as JSONSchema7,
-              ),
+            output: Output.object({
+              schema: type({
+                name: "string",
+              }),
             }),
           });
 
-          return experimental_output;
+          return output;
         },
       ),
       step.do(
@@ -156,20 +148,13 @@ Extract the name from the above context.`,
             onStepFinish: (step) => {
               logAgentStep(logInfo, "[backgroundResearch] step finished", step);
             },
-            experimental_output: Output.object({
-              schema: jsonSchema<
-                type.infer<
-                  typeof seoUnderstandSiteTaskOutputSchema
-                >["businessBackground"]
-              >(
-                seoUnderstandSiteTaskOutputSchema
-                  .get("businessBackground")
-                  .toJsonSchema() as JSONSchema7,
-              ),
+            output: Output.object({
+              schema:
+                seoUnderstandSiteTaskOutputSchema.get("businessBackground"),
             }),
           });
 
-          return outputResult.experimental_output;
+          return outputResult.output;
         },
       ),
     ]);
@@ -273,16 +258,14 @@ Extract the name from the above context.`,
           onStepFinish: (step) => {
             logAgentStep(logInfo, "step to extract brand voice finished", step);
           },
-          experimental_output: Output.object({
-            schema: jsonSchema<{ brandVoice: string }>(
-              type({
-                brandVoice: "string",
-              }).toJsonSchema() as JSONSchema7,
-            ),
+          output: Output.object({
+            schema: type({
+              brandVoice: "string",
+            }),
           }),
         });
 
-        return outputResult.experimental_output;
+        return outputResult.output;
       }),
     ]);
 

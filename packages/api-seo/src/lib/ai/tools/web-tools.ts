@@ -1,13 +1,6 @@
 import { google } from "@ai-sdk/google";
 import type { schema } from "@rectangular-labs/db";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  Output,
-  stepCountIs,
-  tool,
-} from "ai";
+import { generateText, Output, stepCountIs, tool } from "ai";
 import { type } from "arktype";
 import type { InitialContext } from "../../../types";
 import {
@@ -60,9 +53,7 @@ export function createWebToolsWithMetadata(
   const webFetch = tool({
     description:
       "Fetch a webpage and answer a specific query regarding a webpage.",
-    inputSchema: jsonSchema<typeof webFetchInputSchema.infer>(
-      webFetchInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: webFetchInputSchema,
     async execute({ url, query }) {
       const prompt = [
         "Fetch the page content using url_context and answer the query.",
@@ -107,9 +98,7 @@ export function createWebToolsWithMetadata(
   const webSearch = tool({
     description:
       "Run a live web search for up-to-date information. This tool uses the web to find the latest information on the given queries.",
-    inputSchema: jsonSchema<typeof webSearchInputSchema.infer>(
-      webSearchInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: webSearchInputSchema,
     async execute({ instruction, queries }) {
       if (queries.length === 0) {
         return {
@@ -177,12 +166,10 @@ ${item.result
   )
   .join("\n")}`;
 
-      const { experimental_output: object } = await generateText({
+      const { output: object } = await generateText({
         model: google("gemini-3-flash-preview"),
-        experimental_output: Output.object({
-          schema: jsonSchema<typeof webSearchOutputSchema.infer>(
-            webSearchOutputSchema.toJsonSchema() as JSONSchema7,
-          ),
+        output: Output.object({
+          schema: webSearchOutputSchema,
         }),
         system: "You are a precise research assistant.",
         prompt,

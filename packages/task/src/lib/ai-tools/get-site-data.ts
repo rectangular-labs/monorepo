@@ -1,5 +1,5 @@
 import { type AnyOrama, getByID } from "@orama/orama";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import type { SiteSchema } from "../orama/site-schema";
 
@@ -25,12 +25,8 @@ export function createGetSitesDataTool(db: AnyOrama<SiteSchema>) {
   return tool({
     description:
       "Retrieve the full, original site data by its hit id returned from the `search-sites` tool.",
-    inputSchema: jsonSchema<typeof toolInputSchema.infer>(
-      toolInputSchema.toJsonSchema() as JSONSchema7,
-    ),
-    outputSchema: jsonSchema<typeof toolOutputSchema.infer>(
-      toolOutputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: toolInputSchema,
+    outputSchema: toolOutputSchema,
     execute: async ({ ids }) => {
       const documents: (typeof documentSchema.infer)[] = [];
       for (const id of ids) {

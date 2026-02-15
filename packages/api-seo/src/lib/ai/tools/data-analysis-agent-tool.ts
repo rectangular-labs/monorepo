@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { NO_SEARCH_CONSOLE_ERROR_MESSAGE } from "@rectangular-labs/core/schemas/gsc-property-parsers";
 import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
 import type { schema } from "@rectangular-labs/db";
-import { generateText, type JSONSchema7, jsonSchema, tool } from "ai";
+import { generateText, tool } from "ai";
 import { type } from "arktype";
 import type { InitialContext } from "../../../types";
 import { createDataforseoToolWithMetadata } from "./dataforseo-tool";
@@ -104,9 +104,7 @@ ${NO_SEARCH_CONSOLE_ERROR_MESSAGE}`
   const seoDataAnalysisAgent = tool({
     description:
       "Run SEO data analysis using Google Search Console and keyword research data source tools. This agent specializes in analyzing historical performance, CTR optimization, content decay, and keyword opportunities. If Google Search Console is not connected, it will guide you to connect it first.",
-    inputSchema: jsonSchema<typeof dataAnalysisAgentInputSchema.infer>(
-      dataAnalysisAgentInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: dataAnalysisAgentInputSchema,
     async execute({ question }) {
       const result = await generateText({
         model: openai("gpt-5.1"),

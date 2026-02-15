@@ -1,5 +1,5 @@
 import type { schema } from "@rectangular-labs/db";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import type { InitialContext } from "../../../types";
 import {
@@ -117,9 +117,7 @@ export function createDataforseoToolWithMetadata(
 
   const getRankedKeywordsForSite = tool({
     description: "Fetch keywords that the site currently ranks for.",
-    inputSchema: jsonSchema<typeof rankedKeywordsInputSchema.infer>(
-      rankedKeywordsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: rankedKeywordsInputSchema,
     async execute({
       hostname,
       positionFrom,
@@ -189,9 +187,7 @@ export function createDataforseoToolWithMetadata(
   // Ranked Pages tool
   const getRankedPagesForSite = tool({
     description: "Fetch pages of the site that are currently ranked.",
-    inputSchema: jsonSchema<typeof rankedPagesInputSchema.infer>(
-      rankedPagesInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: rankedPagesInputSchema,
     async execute({
       hostname,
       limit,
@@ -229,9 +225,7 @@ export function createDataforseoToolWithMetadata(
   // Keyword Suggestions tool
   const getKeywordSuggestions = tool({
     description: "Generate keyword suggestions based of a seed keyword.",
-    inputSchema: jsonSchema<typeof keywordSuggestionsInputSchema.infer>(
-      keywordSuggestionsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: keywordSuggestionsInputSchema,
     async execute({
       seedKeyword,
       limit,
@@ -293,9 +287,7 @@ export function createDataforseoToolWithMetadata(
   // Keywords Overview tool
   const getKeywordOverview = tool({
     description: "Fetch data for a list of keywords.",
-    inputSchema: jsonSchema<typeof keywordsOverviewInputSchema.infer>(
-      keywordsOverviewInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: keywordsOverviewInputSchema,
     async execute({ keywords, includeGenderAndAgeDistribution }) {
       console.log("fetchKeywordsOverview", {
         keywords,
@@ -345,9 +337,7 @@ export function createDataforseoToolWithMetadata(
   // SERP (Advanced) tool
   const getSerpForKeyword = tool({
     description: "Fetch search engine results page (SERP) for a keyword.",
-    inputSchema: jsonSchema<typeof serpInputSchema.infer>(
-      serpInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: serpInputSchema,
     async execute({ keyword, depth, device, os }) {
       console.log("fetchSerp", { keyword, depth, device, os });
       const result = await fetchSerpWithCache({

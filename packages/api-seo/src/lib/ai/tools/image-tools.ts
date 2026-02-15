@@ -2,13 +2,7 @@ import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { getExtensionFromMimeType } from "@rectangular-labs/core/project/get-extension-from-mimetype";
 import type { imageSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import { uuidv7 } from "@rectangular-labs/db";
-import {
-  generateObject,
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  tool,
-} from "ai";
+import { Output, generateText, tool } from "ai";
 import { type } from "arktype";
 import { apiEnv } from "../../../env";
 import type { InitialContext } from "../../../types";
@@ -56,11 +50,11 @@ async function selectBestStockImageIndex(args: {
   candidates: StockImageCandidate[];
 }): Promise<number> {
   const selectionSchema = type({ index: "number.integer >= -1" });
-  const { object } = await generateObject({
+  const { output } = await generateText({
     model: google("gemini-3-flash-preview"),
-    schema: jsonSchema<typeof selectionSchema.infer>(
-      selectionSchema.toJsonSchema() as JSONSchema7,
-    ),
+    output: Output.object({
+      schema: selectionSchema,
+    }),
     system:
       "You pick the best matching image for a query. Return JSON only with an integer `index` corresponding to the index of the best matching image in the list of candidates. Return -1 if none of the pictures match the query well.",
     messages: [
@@ -81,7 +75,7 @@ Attached are ${args.candidates.length} images. Return {"index": N} where N is -1
     ],
   });
 
-  const index = typeof object.index === "number" ? object.index : -1;
+  const index = output.index;
   if (index < -1 || index >= args.candidates.length) return -1;
   return index;
 }
@@ -94,9 +88,7 @@ export function createImageToolsWithMetadata(args: {
 }) {
   const generateImage = tool({
     description: "Generate an image based on a prompt.",
-    inputSchema: jsonSchema<typeof imageAgentInputSchema.infer>(
-      imageAgentInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: imageAgentInputSchema,
     execute: async ({ prompt }) => {
       const { imageSettings } = args;
       if (!imageSettings) {
@@ -198,9 +190,7 @@ export function createImageToolsWithMetadata(args: {
   const findStockImage = tool({
     description:
       "Find a royalty-free stock image based on a search query. Returns the best match with attribution details. You must put the attribution as the image caption.",
-    inputSchema: jsonSchema<typeof stockImageInputSchema.infer>(
-      stockImageInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: stockImageInputSchema,
     execute: async ({ searchQuery, orientation }) => {
       const providers: (typeof imageSettingsSchema.infer)["stockImageProviders"] =
         args.imageSettings?.stockImageProviders ?? [
@@ -292,9 +282,7 @@ export function createImageToolsWithMetadata(args: {
   const captureScreenshotTool = tool({
     description:
       "Capture a rendered screenshot of a given website URL using ScreenshotOne. Blocks ads, cookie banners, and common overlays. Stores the screenshot in the public bucket (optionally optimized to WebP).",
-    inputSchema: jsonSchema<typeof screenshotInputSchema.infer>(
-      screenshotInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: screenshotInputSchema,
     async execute({ url, viewportWidth, viewportHeight, fullPage }) {
       const result = await captureScreenshotOne({
         url,

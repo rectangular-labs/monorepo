@@ -74,7 +74,7 @@ Output requirements:
 - If proposing edits to existing content, describe them clearly
  */
 
-export function createStrategistAgent({
+export async function createStrategistAgent({
   messages,
   gscProperty,
   project,
@@ -86,7 +86,7 @@ export function createStrategistAgent({
   project: NonNullable<ChatContext["cache"]["project"]>;
   context: ChatContext;
   currentPage: ProjectChatCurrentPage;
-}): Parameters<typeof streamText>[0] {
+}): Promise<Parameters<typeof streamText>[0]> {
   const hasGsc = !!(
     gscProperty?.accessToken &&
     gscProperty?.config.domain &&
@@ -201,7 +201,7 @@ ${skillsSection}
       } satisfies OpenAIResponsesProviderOptions,
     },
     system: systemPrompt,
-    messages: convertToModelMessages(messages),
+    messages: await convertToModelMessages(messages),
     tools: {
       ...createSkillTools({ toolDefinitions: skillDefinitions }),
       ...plannerTools.tools,

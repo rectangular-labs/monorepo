@@ -3,7 +3,7 @@ import {
   contentStatusSchema,
 } from "@rectangular-labs/core/schemas/content-parsers";
 import type { DB } from "@rectangular-labs/db";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import {
   deleteDraftForSlug,
@@ -78,9 +78,7 @@ export function createFileToolsWithMetadata(args: {
   const ls = tool({
     description:
       "List files and directories in the virtual workspace filesystem, similar to `ls`.",
-    inputSchema: jsonSchema<typeof lsInputSchema.infer>(
-      lsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: lsInputSchema,
     async execute({ slug }) {
       return await listContentTree({
         db: args.db,
@@ -95,9 +93,7 @@ export function createFileToolsWithMetadata(args: {
   const cat = tool({
     description:
       "Read the contents of a file in the virtual workspace filesystem, similar to `cat` (supports line ranges).",
-    inputSchema: jsonSchema<typeof catInputSchema.infer>(
-      catInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: catInputSchema,
     async execute({ slug, startLine, endLine }) {
       const result = await getContentForSlug({
         db: args.db,
@@ -129,9 +125,7 @@ export function createFileToolsWithMetadata(args: {
   const rm = tool({
     description:
       "Delete a file in the virtual workspace filesystem, similar to `rm`.",
-    inputSchema: jsonSchema<typeof rmInputSchema.infer>(
-      rmInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: rmInputSchema,
     async execute({ slug }) {
       const result = await deleteDraftForSlug({
         db: args.db,
@@ -149,9 +143,7 @@ export function createFileToolsWithMetadata(args: {
   // const mv = tool({
   //   description:
   //     "Move or rename a file or directory in the virtual workspace filesystem, similar to `mv`.",
-  //   inputSchema: jsonSchema<typeof mvInputSchema.infer>(
-  //     mvInputSchema.toJsonSchema() as JSONSchema7,
-  //   ),
+  //   inputSchema: mvInputSchema,
   //   async execute({ fromSlug, toSlug }) {
   //     const from = normalizeContentSlug(fromSlug);
   //     const to = normalizeContentSlug(toSlug);
@@ -173,9 +165,7 @@ export function createFileToolsWithMetadata(args: {
   const writeFile = tool({
     description:
       "Create or update a file in the virtual workspace filesystem by slug (content, title, description, notes, outline, etc.).",
-    inputSchema: jsonSchema<typeof writeFileInputSchema.infer>(
-      writeFileInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: writeFileInputSchema,
     async execute({
       id,
       slug,

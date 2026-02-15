@@ -1,6 +1,6 @@
 import { COUNTRY_CODE_MAP } from "@rectangular-labs/core/schemas/project-parsers";
 import { fetchSerp } from "@rectangular-labs/dataforseo";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import { configureDataForSeoClient } from "../../dataforseo/utils";
 import type { AgentToolDefinition } from "./utils";
@@ -23,9 +23,7 @@ export function createInternalLinksToolWithMetadata(targetUrl: string) {
   const internalLinks = tool({
     description:
       "Query SERP results for a query, constrained to a target URL, and return the organic results.",
-    inputSchema: jsonSchema<typeof internalLinksInputSchema.infer>(
-      internalLinksInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: internalLinksInputSchema,
     execute: async (input: InternalLinksInput) => {
       configureDataForSeoClient();
 

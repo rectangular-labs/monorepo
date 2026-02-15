@@ -8,7 +8,7 @@ import { protectedBase } from "../lib/context";
 const write = protectedBase
   .route({ method: "POST", path: "/write" })
   .input(type<{ chatId: string; messages: UIMessage[] }>())
-  .handler(({ input }) => {
+  .handler(async ({ input }) => {
     const result = streamText({
       model: claudeCode("haiku", {
         systemPrompt: { type: "preset", preset: "claude_code" },
@@ -28,7 +28,7 @@ const write = protectedBase
           "WebSearch",
         ],
       }),
-      messages: convertToModelMessages(input.messages),
+      messages: await convertToModelMessages(input.messages),
       onStepFinish: (step) => {
         console.log("step", step);
       },

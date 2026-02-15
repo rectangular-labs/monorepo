@@ -6,11 +6,10 @@ import {
   type understandSiteTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
 import { schemaTask } from "@trigger.dev/sdk";
-import { generateText, stepCountIs } from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
 import { crawlSite } from "../crawlers/site.js";
 import { createGetSitesDataTool } from "../lib/ai-tools/get-site-data.js";
-import { llmParseJson } from "../lib/ai-tools/llm-parse-json.js";
 import { createSearchSitesTool } from "../lib/ai-tools/search-site.js";
 import { siteSchema } from "../lib/orama/site-schema.js";
 import { setTaskMetadata } from "../lib/task-metadata.js";
@@ -94,7 +93,7 @@ export const understandSiteTask: ReturnType<
       .describe("Normalized business context for downstream SEO planning.");
 
     // Guide the model to use tools to ground the output
-    const { text } = await generateText({
+    const { output } = await generateText({
       model: google("gemini-2.5-flash"),
       temperature: 0,
       system: [
@@ -129,12 +128,14 @@ export const understandSiteTask: ReturnType<
           step.toolResults.map((tool) => JSON.stringify(tool)),
         );
       },
+      output: Output.object({
+        schema: StructuredSeoSchema,
+      }),
       stopWhen: stepCountIs(15),
     }).catch((error) => {
       console.error("Error in understandSiteTask", error);
       throw error;
     });
-    const websiteInfo = await llmParseJson(text, StructuredSeoSchema);
 
     setTaskMetadata({
       progress: 100,
@@ -144,7 +145,7 @@ export const understandSiteTask: ReturnType<
     return {
       type: "understand-site",
       websiteInfo: {
-        ...websiteInfo,
+        ...output,
         version: "v1",
       },
     };

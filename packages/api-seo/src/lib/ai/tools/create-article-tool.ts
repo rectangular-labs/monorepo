@@ -1,6 +1,6 @@
 import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import { normalizeContentSlug } from "../../content/normalize-content-slug";
 import { writeContentDraft } from "../../content/write-content-draft";
@@ -50,9 +50,7 @@ export function createCreateArticleToolWithMetadata({
   const createArticle = tool({
     description:
       "Create a new article draft for a primary keyword, optionally including title, description, outline, article type, and notes. Use this when the user wants to create a new article.",
-    inputSchema: jsonSchema<typeof createArticleInputSchema.infer>(
-      createArticleInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: createArticleInputSchema,
     async execute({
       primaryKeyword,
       slug: rawSlug,

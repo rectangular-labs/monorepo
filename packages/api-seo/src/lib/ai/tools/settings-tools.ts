@@ -10,7 +10,7 @@ import {
   getSeoProjectByIdentifierAndOrgId,
   updateSeoProject,
 } from "@rectangular-labs/db/operations";
-import { generateObject, type JSONSchema7, jsonSchema, tool } from "ai";
+import { Output, generateText, tool } from "ai";
 import { type } from "arktype";
 import type { ChatContext } from "../../../types";
 import type { AgentToolDefinition } from "./utils";
@@ -27,9 +27,7 @@ export function createSettingsToolsWithMetadata(args: {
 
   const manageSettings = tool({
     description: "Manage project settings (display or update).",
-    inputSchema: jsonSchema<typeof manageSettingsInputSchema.infer>(
-      manageSettingsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: manageSettingsInputSchema,
     async execute({ mode, settingToUpdate, updateTask }) {
       if (mode === "display") {
         return { success: true, message: "setting displayed to user" };
@@ -59,28 +57,19 @@ export function createSettingsToolsWithMetadata(args: {
         | typeof publishingSettingsSchema.infer
         | null
         | undefined;
-      let schemaToUse:
-        | typeof businessBackgroundSchema
-        | typeof imageSettingsSchema
-        | typeof writingSettingsSchema
-        | typeof publishingSettingsSchema;
 
       switch (settingToUpdate) {
         case "businessBackground":
           currentSettings = project.businessBackground;
-          schemaToUse = businessBackgroundSchema;
           break;
         case "imageSettings":
           currentSettings = project.imageSettings;
-          schemaToUse = imageSettingsSchema;
           break;
         case "writingSettings":
           currentSettings = project.writingSettings;
-          schemaToUse = writingSettingsSchema;
           break;
         case "publishingSettings":
           currentSettings = project.publishingSettings;
-          schemaToUse = publishingSettingsSchema;
           break;
       }
 
@@ -93,21 +82,54 @@ Task: ${updateTask}
 Keep everything as is while fulfilling the updateTask.
 Respond with the new object matching the schema.`;
 
-      const { object } = await generateObject({
-        model: openai("gpt-5.1-codex-mini"),
-        schema: jsonSchema<typeof schemaToUse.infer>(
-          schemaToUse.toJsonSchema() as JSONSchema7,
-        ),
-        prompt: prompt,
-      });
+      const output = await (async () => {
+        if (settingToUpdate === "businessBackground") {
+          const result = await generateText({
+            model: openai("gpt-5.1-codex-mini"),
+            output: Output.object({
+              schema: businessBackgroundSchema,
+            }),
+            prompt,
+          });
+          return result.output;
+        }
+        if (settingToUpdate === "imageSettings") {
+          const result = await generateText({
+            model: openai("gpt-5.1-codex-mini"),
+            output: Output.object({
+              schema: imageSettingsSchema,
+            }),
+            prompt,
+          });
+          return result.output;
+        }
+        if (settingToUpdate === "writingSettings") {
+          const result = await generateText({
+            model: openai("gpt-5.1-codex-mini"),
+            output: Output.object({
+              schema: writingSettingsSchema,
+            }),
+            prompt,
+          });
+          return result.output;
+        }
+        const result = await generateText({
+          model: openai("gpt-5.1-codex-mini"),
+          output: Output.object({
+            schema: publishingSettingsSchema,
+          }),
+          prompt,
+        });
+        return result.output;
+      })();
 
       await updateSeoProject(args.context.db, {
         id: args.context.projectId,
         organizationId: args.context.organizationId,
-        [settingToUpdate]: object,
+        [settingToUpdate]: output,
       });
 
-      return { success: true, message: "Settings updated", settings: object };
+      return { success: true, message: "Settings updated", settings: output };
     },
   });
 
@@ -117,9 +139,7 @@ Respond with the new object matching the schema.`;
   const manageIntegrations = tool({
     description:
       "Help the user view, connect, or manage integrations for publishing content or tracking performance.",
-    inputSchema: jsonSchema<typeof manageIntegrationsInputSchema.infer>(
-      manageIntegrationsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: manageIntegrationsInputSchema,
     async execute({ provider }) {
       return await Promise.resolve({
         success: true,

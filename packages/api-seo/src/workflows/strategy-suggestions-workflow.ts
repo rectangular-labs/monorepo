@@ -18,13 +18,7 @@ import {
   getSeoProjectById,
   listStrategiesByProjectId,
 } from "@rectangular-labs/db/operations";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  Output,
-  stepCountIs,
-} from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
 import { apiEnv } from "../env";
 import { createDataforseoToolWithMetadata } from "../lib/ai/tools/dataforseo-tool";
@@ -217,18 +211,14 @@ Generate strategy suggestions now.`,
           onStepFinish: (step) => {
             logAgentStep(logInfo, "step to generate suggestion finished", step);
           },
-          experimental_output: Output.object({
-            schema: jsonSchema<{
-              suggestions: (typeof strategySuggestionSchema.infer)[];
-            }>(
-              type({
-                suggestions: strategySuggestionSchema.array(),
-              }).toJsonSchema() as JSONSchema7,
-            ),
+          output: Output.object({
+            schema: type({
+              suggestions: strategySuggestionSchema.array(),
+            }),
           }),
         });
 
-        return outputResult.experimental_output;
+        return outputResult.output;
       },
     );
 
