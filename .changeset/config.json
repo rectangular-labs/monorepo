@@ -25,6 +25,7 @@
     "@rectangular-labs/ui",
     "www", 
     "seo",
-    "seo-www"
+    "seo-www",
+    "contact"
   ]
 }

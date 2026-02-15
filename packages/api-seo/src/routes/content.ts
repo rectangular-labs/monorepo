@@ -74,6 +74,7 @@ const list = withOrganizationIdBase
       db: context.db,
       organizationId: context.organization.id,
       projectId: input.projectId,
+      strategyId: input.strategyId,
     });
     if (!rowsResult.ok) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
