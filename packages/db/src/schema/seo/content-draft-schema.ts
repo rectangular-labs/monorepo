@@ -63,6 +63,7 @@ export const seoContentDraft = pgSeoTable(
     role: text({ enum: CONTENT_ROLES }),
 
     // actual content items
+    notes: text(),
     outline: text(),
     contentMarkdown: text(),
 

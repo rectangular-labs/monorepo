@@ -1,7 +1,4 @@
-import {
-  CONTENT_ROLES,
-  CONTENT_STRATEGY_ACTION,
-} from "@rectangular-labs/core/schemas/strategy-parsers";
+import { CONTENT_STRATEGY_ACTION } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -25,15 +22,13 @@ export const seoStrategyPhaseContent = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    contentDraftId: uuid().references(() => seoContentDraft.id, {
-      onDelete: "set null",
-      onUpdate: "cascade",
-    }),
+    contentDraftId: uuid()
+      .notNull()
+      .references(() => seoContentDraft.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     action: text({ enum: CONTENT_STRATEGY_ACTION }).notNull(),
-    plannedSlug: text(),
-    plannedPrimaryKeyword: text(),
-    role: text({ enum: CONTENT_ROLES }),
-    notes: text(),
     ...timestamps,
   },
   (table) => [

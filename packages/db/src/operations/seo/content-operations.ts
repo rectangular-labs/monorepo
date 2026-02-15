@@ -306,7 +306,7 @@ export async function getDraftBySlug(args: {
     args.db.query.seoContentDraft.findFirst({
       columns: args.withContent
         ? undefined
-        : { contentMarkdown: false, outline: false },
+        : { contentMarkdown: false, outline: false, notes: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -329,7 +329,7 @@ export async function getDraftById(args: {
     args.db.query.seoContentDraft.findFirst({
       columns: args.withContent
         ? undefined
-        : { contentMarkdown: false, outline: false },
+        : { contentMarkdown: false, outline: false, notes: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.id, args.id),
@@ -353,7 +353,7 @@ export async function getContentDraftWithLatestMetricSnapshot(args: {
     args.db.query.seoContentDraft.findFirst({
       columns: args.withContent
         ? undefined
-        : { contentMarkdown: false, outline: false },
+        : { contentMarkdown: false, outline: false, notes: false },
       where: (table, { and, eq, isNull }) =>
         and(
           eq(table.id, args.contentDraftId),
@@ -477,7 +477,7 @@ export async function listDraftsForExportByIds(args: {
 }) {
   return await safe(() =>
     args.db.query.seoContentDraft.findMany({
-      columns: { outline: false },
+      columns: { outline: false, notes: false },
       where: (table, { and, eq, inArray, isNull }) =>
         and(
           eq(table.organizationId, args.organizationId),
@@ -504,7 +504,7 @@ export async function getDraftsBySlugPrefix(args: {
     args.db.query.seoContentDraft.findMany({
       columns: args.withContent
         ? undefined
-        : { contentMarkdown: false, outline: false },
+        : { contentMarkdown: false, outline: false, notes: false },
       where: (table, { and, eq, isNull, or, like }) =>
         and(
           eq(table.organizationId, args.organizationId),
