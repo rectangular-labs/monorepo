@@ -64,7 +64,8 @@ export async function deleteSeoProject(
 export function getSeoProjectById(db: DB, id: string) {
   return safe(() =>
     db.query.seoProject.findFirst({
-      where: (table, { eq }) => eq(table.id, id),
+      where: (table, { eq, and, isNull }) =>
+        and(eq(table.id, id), isNull(table.deletedAt)),
     }),
   );
 }
@@ -134,10 +135,15 @@ export async function getSeoProjectByIdentifierAndOrgId<
         organizationId: true,
         deletedAt: true,
         projectResearchWorkflowId: true,
+        strategySuggestionsWorkflowId: true,
         ...(includeSettings ?? {}),
       },
-      where: (table, { eq, and }) =>
-        and(check(table), eq(table.organizationId, orgId)),
+      where: (table, { eq, and, isNull }) =>
+        and(
+          check(table),
+          eq(table.organizationId, orgId),
+          isNull(table.deletedAt),
+        ),
     }),
   );
   if (!result.ok) {
@@ -161,12 +167,13 @@ export async function getSeoProjectWithWritingSettingAndAuthors(
         id: true,
         writingSettings: true,
       },
-      where: (table, { eq }) =>
+      where: (table, { eq, isNull }) =>
         and(
           isSlug
             ? eq(table.slug, projectIdentifier)
             : eq(table.id, projectIdentifier),
           eq(table.organizationId, organizationId),
+          isNull(table.deletedAt),
         ),
       with: {
         authors: true,

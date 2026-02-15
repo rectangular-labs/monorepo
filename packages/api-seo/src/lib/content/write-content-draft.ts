@@ -1,12 +1,12 @@
-import { ORPCError } from "@orpc/client";
 import { computeNextAvailableScheduleIso } from "@rectangular-labs/core/project/compute-next-available-schedule";
 import type { DB, schema } from "@rectangular-labs/db";
 import {
   addChatContribution,
   addUserContribution,
+  getCurrentStrategyPhase,
   getDraftById,
   getScheduledItems,
-  getSeoProjectByIdentifierAndOrgId,
+  hasPublishedSnapshotForDraft,
   updateContentDraft,
   validateSlug,
 } from "@rectangular-labs/db/operations";
@@ -55,8 +55,6 @@ export async function writeContentDraft(
   }
 
   let draft: typeof schema.seoContentDraft.$inferSelect;
-  let isNew = false;
-
   if (args.lookup.type === "id") {
     const draftResult = await getDraftById({
       db: args.db,
@@ -80,7 +78,6 @@ export async function writeContentDraft(
     });
     if (!draftResult.ok) return draftResult;
     draft = draftResult.value.draft;
-    isNew = draftResult.value.isNew;
   }
 
   // Record attribution
@@ -112,7 +109,7 @@ export async function writeContentDraft(
       projectId: args.projectId,
       slug: nextSlug,
       ignoreDraftId: draft.id,
-      ignoreContentId: draft.baseContentId ?? undefined,
+      ignoreOriginatingDraftId: draft.id,
     });
     if (!slugValidation.ok) return slugValidation;
     if (!slugValidation.value.valid) {
@@ -199,50 +196,47 @@ export async function writeContentDraft(
     }
   }
 
+  const hasPublishedSnapshotResult = await hasPublishedSnapshotForDraft({
+    db: args.db,
+    draftId: draft.id,
+  });
+  if (!hasPublishedSnapshotResult.ok) {
+    return hasPublishedSnapshotResult;
+  }
+  const hasPublishedSnapshot = hasPublishedSnapshotResult.value;
+
   if (nextStatus === "scheduled") {
     // Determine scheduled publish time
     let scheduledFor = updatedDraft.scheduledFor;
 
-    // new content should be scheduled
-    if (!scheduledFor && !draft.baseContentId) {
-      const projectResult = await getSeoProjectByIdentifierAndOrgId(
-        args.db,
-        args.projectId,
-        args.organizationId,
-        {
-          publishingSettings: true,
-        },
-      );
-      if (!projectResult.ok) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to get project.",
-          cause: projectResult.error,
-        });
+    // new content should be scheduled if it's part of a strategy phase
+    if (!scheduledFor && !hasPublishedSnapshot && updatedDraft.strategyId) {
+      const currentPhase = await getCurrentStrategyPhase({
+        db: args.db,
+        strategyId: updatedDraft.strategyId,
+      });
+      if (!currentPhase.ok) {
+        return currentPhase;
       }
-      if (!projectResult.value) {
-        throw new ORPCError("NOT_FOUND", { message: "Project not found." });
-      }
-      const project = projectResult.value;
-
-      const cadence = project.publishingSettings?.cadence;
-      if (cadence) {
-        const scheduledItemsResult = await getScheduledItems({
-          db: args.db,
-          organizationId: draft.organizationId,
-          projectId: draft.projectId,
+      const { cadence } = currentPhase.value;
+      const scheduledItemsResult = await getScheduledItems({
+        db: args.db,
+        organizationId: draft.organizationId,
+        projectId: draft.projectId,
+        strategyId: updatedDraft.strategyId,
+        phaseId: currentPhase.value.id,
+      });
+      if (scheduledItemsResult.ok) {
+        const scheduledItems = scheduledItemsResult.value;
+        const scheduledIso = computeNextAvailableScheduleIso({
+          cadence,
+          scheduledItems: scheduledItems.filter(
+            (item): item is { scheduledFor: Date } =>
+              item.scheduledFor !== null,
+          ),
         });
-        if (scheduledItemsResult.ok) {
-          const scheduledItems = scheduledItemsResult.value;
-          const scheduledIso = computeNextAvailableScheduleIso({
-            cadence,
-            scheduledItems: scheduledItems.filter(
-              (item): item is { scheduledFor: Date } =>
-                item.scheduledFor !== null,
-            ),
-          });
-          if (scheduledIso) {
-            scheduledFor = new Date(scheduledIso);
-          }
+        if (scheduledIso) {
+          scheduledFor = new Date(scheduledIso);
         }
       }
     }
@@ -298,5 +292,5 @@ export async function writeContentDraft(
     });
   }
 
-  return ok({ draft: updatedDraft, isNew });
+  return ok({ draft: updatedDraft, isNew: !hasPublishedSnapshot });
 }

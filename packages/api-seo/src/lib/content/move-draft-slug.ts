@@ -108,8 +108,6 @@ export async function moveDraftSlug(args: {
       description: live.description,
       slug: args.toSlug,
       primaryKeyword: live.primaryKeyword,
-      notes: live.notes,
-      outline: live.outline,
       articleType: live.articleType,
       contentMarkdown: live.contentMarkdown,
       status: "pending-review",

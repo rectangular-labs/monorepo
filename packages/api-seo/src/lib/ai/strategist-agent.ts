@@ -2,7 +2,6 @@ import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { ProjectChatCurrentPage } from "@rectangular-labs/core/schemas/project-chat-parsers";
 import { convertToModelMessages, type streamText } from "ai";
 import type { ChatContext, SeoChatMessage } from "../../types";
-import { formatBusinessBackground } from "./format-business-background";
 import { createCreateArticleToolWithMetadata } from "./tools/create-article-tool";
 import { createDataforseoToolWithMetadata } from "./tools/dataforseo-tool";
 import { createFileToolsWithMetadata } from "./tools/file-tool";
@@ -10,6 +9,7 @@ import { createGscToolWithMetadata } from "./tools/google-search-console-tool";
 import { createPlannerToolsWithMetadata } from "./tools/planner-tools";
 import { createSettingsToolsWithMetadata } from "./tools/settings-tools";
 import { createSkillTools } from "./tools/skill-tools";
+import { createStrategyToolsWithMetadata } from "./tools/strategy-tools";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -19,6 +19,7 @@ import {
   formatToolSkillsSection,
 } from "./tools/utils";
 import { createWebToolsWithMetadata } from "./tools/web-tools";
+import { formatBusinessBackground } from "./utils/format-business-background";
 
 function formatCurrentPageFocusReminder(
   currentPage: ProjectChatCurrentPage,
@@ -126,11 +127,19 @@ export function createStrategistAgent({
     siteUrl: gscProperty?.config.domain ?? null,
     siteType: gscProperty?.config.propertyType ?? null,
   });
-  const dataforseoTools = createDataforseoToolWithMetadata(project);
+  const dataforseoTools = createDataforseoToolWithMetadata(
+    project,
+    context.cacheKV,
+  );
   const createArticleTool = createCreateArticleToolWithMetadata({
     userId: context.userId,
     project,
     context,
+  });
+  const strategyTools = createStrategyToolsWithMetadata({
+    db: context.db,
+    projectId: project.id,
+    organizationId: project.organizationId,
   });
 
   const skillDefinitions: AgentToolDefinition[] = [
@@ -139,6 +148,7 @@ export function createStrategistAgent({
     ...gscTools.toolDefinitions,
     ...dataforseoTools.toolDefinitions,
     ...createArticleTool.toolDefinitions,
+    ...strategyTools.toolDefinitions,
     ...readOnlyFileToolDefinitions,
   ];
   const skillsSection = formatToolSkillsSection(skillDefinitions);

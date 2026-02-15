@@ -5,6 +5,7 @@ export const router = {
   chat: lazy(() => import("./chat")),
   task: lazy(() => import("./task")),
   content: lazy(() => import("./content")),
+  strategy: lazy(() => import("./strategy")),
   integrations: lazy(() => import("./integration")),
   auth: {
     session: lazy(() => import("./auth/session")),

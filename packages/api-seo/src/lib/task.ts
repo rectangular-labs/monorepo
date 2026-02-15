@@ -1,12 +1,17 @@
 import { ORPCError } from "@orpc/server";
 import type { taskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { type DB, schema } from "@rectangular-labs/db";
-import { err, ok, safe } from "@rectangular-labs/result";
+import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import { triggerTask } from "@rectangular-labs/task/client";
 import type { type } from "arktype";
 import { createWorkflows } from "../workflows";
 
 type TaskInput = type.infer<typeof taskInputSchema>;
+type SeoWriteArticleTaskInput = Extract<
+  TaskInput,
+  { type: "seo-write-article" }
+>;
+type SeoTaskRun = typeof schema.seoTaskRun.$inferSelect;
 
 export async function createTask({
   db,
@@ -34,6 +39,30 @@ export async function createTask({
       case "seo-understand-site": {
         const instance = await workflows.seoOnboardingWorkflow.create({
           id: workflowInstanceId ?? `onboarding_${crypto.randomUUID()}`,
+          params: input,
+        });
+        return { provider: "cloudflare" as const, taskId: instance.id };
+      }
+      case "seo-generate-strategy-suggestions": {
+        const instance = await workflows.seoStrategySuggestionsWorkflow.create({
+          id: workflowInstanceId ?? `strategy_${crypto.randomUUID()}`,
+          params: input,
+        });
+        return { provider: "cloudflare" as const, taskId: instance.id };
+      }
+      case "seo-generate-strategy-phase": {
+        const instance =
+          await workflows.seoStrategyPhaseGenerationWorkflow.create({
+            id:
+              workflowInstanceId ??
+              `strategy_phase_generation_${crypto.randomUUID()}`,
+            params: input,
+          });
+        return { provider: "cloudflare" as const, taskId: instance.id };
+      }
+      case "seo-generate-strategy-snapshot": {
+        const instance = await workflows.seoStrategySnapshotWorkflow.create({
+          id: workflowInstanceId ?? `strategy_snapshot_${crypto.randomUUID()}`,
           params: input,
         });
         return { provider: "cloudflare" as const, taskId: instance.id };
@@ -97,4 +126,70 @@ export async function createTask({
     );
   }
   return ok(taskRun);
+}
+
+export async function createSeoWriteArticleTasksBatch({
+  db,
+  userId,
+  tasks,
+}: {
+  db: DB;
+  userId: string | undefined;
+  tasks: {
+    input: SeoWriteArticleTaskInput;
+    workflowInstanceId?: string;
+  }[];
+}): Promise<Result<SeoTaskRun[], Error>> {
+  if (tasks.length === 0) {
+    return ok([] as SeoTaskRun[]);
+  }
+
+  const workflows = createWorkflows();
+  const allTaskRuns: SeoTaskRun[] = [];
+
+  for (let index = 0; index < tasks.length; index += 100) {
+    const taskBatch = tasks.slice(index, index + 100);
+
+    const instancesResult = await safe(() =>
+      workflows.seoWriterWorkflow.createBatch(
+        taskBatch.map((task) => ({
+          id: task.workflowInstanceId ?? `write_${crypto.randomUUID()}`,
+          params: task.input,
+        })),
+      ),
+    );
+    if (!instancesResult.ok) {
+      return instancesResult;
+    }
+
+    const taskRunsResult = await safe(() =>
+      db
+        .insert(schema.seoTaskRun)
+        .values(
+          instancesResult.value.map((instance, taskIndex) => {
+            const task = taskBatch[taskIndex];
+            if (!task) {
+              throw new Error(
+                "Writer task batch is out of sync with instances",
+              );
+            }
+            return {
+              projectId: task.input.projectId,
+              requestedBy: userId,
+              taskId: instance.id,
+              provider: "cloudflare" as const,
+              inputData: task.input,
+            };
+          }),
+        )
+        .returning(),
+    );
+    if (!taskRunsResult.ok) {
+      return taskRunsResult;
+    }
+
+    allTaskRuns.push(...taskRunsResult.value);
+  }
+
+  return ok(allTaskRuns);
 }

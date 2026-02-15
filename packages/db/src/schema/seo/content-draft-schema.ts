@@ -2,6 +2,7 @@ import {
   ARTICLE_TYPES,
   CONTENT_STATUSES,
 } from "@rectangular-labs/core/schemas/content-parsers";
+import { CONTENT_ROLES } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -17,6 +18,9 @@ import { seoContentDraftChat } from "./content-draft-chat-schema";
 import { seoContentDraftUser } from "./content-draft-user-schema";
 import { seoContent } from "./content-schema";
 import { seoProject } from "./project-schema";
+import { seoStrategyPhaseContent } from "./strategy-phase-content-schema";
+import { seoStrategy } from "./strategy-schema";
+import { seoStrategySnapshotContent } from "./strategy-snapshot-content-schema";
 import { seoTaskRun } from "./task-run-schema";
 
 /**
@@ -41,29 +45,32 @@ export const seoContentDraft = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    baseContentId: uuid().references(() => seoContent.id, {
-      onDelete: "cascade",
+    strategyId: uuid().references(() => seoStrategy.id, {
+      onDelete: "set null",
       onUpdate: "cascade",
     }),
 
     // Content identification
     slug: text().notNull(),
+    primaryKeyword: text().notNull(),
 
-    // Content fields (all optional during drafting)
-    title: text().notNull().default(""),
-    description: text().notNull().default(""),
+    // Content fields
+    title: text(),
+    description: text(),
     heroImage: text(),
     heroImageCaption: text(),
-    primaryKeyword: text().notNull().default(""),
     articleType: text({ enum: ARTICLE_TYPES }),
+    role: text({ enum: CONTENT_ROLES }),
+
+    // actual content items
+    notes: text(),
     outline: text(),
     contentMarkdown: text(),
-    notes: text(),
 
     status: text({ enum: CONTENT_STATUSES }).notNull().default("suggested"),
     scheduledFor: timestamp({ mode: "date", withTimezone: true }),
 
-    // Task run references for AI-generated content
+    // Task run references for generating content
     outlineGeneratedByTaskRunId: uuid().references(() => seoTaskRun.id, {
       onDelete: "set null",
       onUpdate: "cascade",
@@ -89,14 +96,8 @@ export const seoContentDraft = pgSeoTable(
         sql`${table.slug} text_pattern_ops`,
       )
       .where(isNull(table.deletedAt)),
-    index("seo_content_draft_org_project_status_base_id_idx")
-      .on(
-        table.organizationId,
-        table.projectId,
-        table.status,
-        table.baseContentId,
-        table.id,
-      )
+    index("seo_content_draft_org_project_status_idx")
+      .on(table.organizationId, table.projectId, table.status, table.id)
       .where(isNull(table.deletedAt)),
   ],
 );
@@ -112,9 +113,9 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.organizationId],
       references: [organization.id],
     }),
-    baseContent: one(seoContent, {
-      fields: [seoContentDraft.baseContentId],
-      references: [seoContent.id],
+    strategy: one(seoStrategy, {
+      fields: [seoContentDraft.strategyId],
+      references: [seoStrategy.id],
     }),
     outlineTask: one(seoTaskRun, {
       fields: [seoContentDraft.outlineGeneratedByTaskRunId],
@@ -124,6 +125,9 @@ export const seoContentDraftRelations = relations(
       fields: [seoContentDraft.generatedByTaskRunId],
       references: [seoTaskRun.id],
     }),
+    contentSnapshots: many(seoContent),
+    metricSnapshots: many(seoStrategySnapshotContent),
+    phaseContents: many(seoStrategyPhaseContent),
     // Attribution join tables
     contributingChatsMap: many(seoContentDraftChat),
     contributorsMap: many(seoContentDraftUser),

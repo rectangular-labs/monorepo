@@ -90,62 +90,60 @@ export function OnboardingCreateOrganization() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card className="rounded-none sm:rounded-lg">
-        <CardHeader>
-          <CardTitle>Set Up Organization</CardTitle>
-          <CardDescription>
-            Your organization will let you manage team members and projects.
-          </CardDescription>
-        </CardHeader>
-        <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
-          <CardContent>
-            <FieldGroup>
-              <Controller
-                control={form.control}
-                name="name"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="onboarding-create-organization-name">
-                      Organization Name
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                      id="onboarding-create-organization-name"
-                      placeholder="Xerox"
-                    />
-                    <FieldDescription>
-                      You will be able to change this at anytime later on
-                    </FieldDescription>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </FieldGroup>
+    <Card className="rounded-none sm:rounded-lg">
+      <CardHeader>
+        <CardTitle>Set Up Organization</CardTitle>
+        <CardDescription>
+          Your organization will let you manage team members and projects.
+        </CardDescription>
+      </CardHeader>
+      <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
+        <CardContent>
+          <FieldGroup>
+            <Controller
+              control={form.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="onboarding-create-organization-name">
+                    Organization Name
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="onboarding-create-organization-name"
+                    placeholder="Xerox"
+                  />
+                  <FieldDescription>
+                    You will be able to change this at anytime later on
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </FieldGroup>
 
-            {form.formState.errors.root && (
-              <FieldError errors={[form.formState.errors.root]} />
-            )}
-          </CardContent>
-          <CardFooter>
-            <div className="flex w-full justify-between">
-              <Button
-                onClick={() => matcher.prev()}
-                type="button"
-                variant="ghost"
-              >
-                Back
-              </Button>
-              <Button className={"w-fit"} isLoading={isLoading} type="submit">
-                Continue
-              </Button>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+          {form.formState.errors.root && (
+            <FieldError errors={[form.formState.errors.root]} />
+          )}
+        </CardContent>
+        <CardFooter>
+          <div className="flex w-full justify-between">
+            <Button
+              onClick={() => matcher.prev()}
+              type="button"
+              variant="ghost"
+            >
+              Back
+            </Button>
+            <Button className={"w-fit"} isLoading={isLoading} type="submit">
+              Continue
+            </Button>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }

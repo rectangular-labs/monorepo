@@ -15,6 +15,7 @@ import {
   fetchSerpWithCache,
   getLocationAndLanguage,
 } from "../../dataforseo/utils";
+import { logAgentStep } from "../utils/log-agent-step";
 import type { AgentToolDefinition } from "./utils";
 
 const webFetchInputSchema = type({
@@ -81,7 +82,7 @@ export function createWebToolsWithMetadata(
           url_context: google.tools.urlContext({}),
         },
         onStepFinish: (step) => {
-          console.log("web fetch step", step);
+          logAgentStep(console.log, "web fetch step", step);
         },
         stopWhen: [stepCountIs(25)],
       }).catch((error) => {
@@ -127,7 +128,7 @@ export function createWebToolsWithMetadata(
           });
           if (!serpResult.ok) {
             throw new Error(
-              `DFS serp error: ${JSON.stringify(serpResult.error, null, 2)}`,
+              "Failed to fetch SERP data from the keyword research data source.",
               { cause: serpResult.error },
             );
           }
@@ -189,7 +190,7 @@ ${item.result
           url_context: google.tools.urlContext({}),
         },
         onStepFinish: (step) => {
-          console.log("web search step", step);
+          logAgentStep(console.log, "web search step", step);
         },
         stopWhen: [stepCountIs(25)],
       });

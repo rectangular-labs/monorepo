@@ -127,6 +127,41 @@
       "when": 1769228503610,
       "tag": "0017_dark_spiral",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1769782486158,
+      "tag": "0018_square_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1769931175777,
+      "tag": "0019_noisy_black_bird",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1770590089221,
+      "tag": "0020_lush_johnny_blaze",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1770718338424,
+      "tag": "0021_wet_prism",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1771143933411,
+      "tag": "0022_sour_namorita",
+      "breakpoints": true
     }
   ]
 }

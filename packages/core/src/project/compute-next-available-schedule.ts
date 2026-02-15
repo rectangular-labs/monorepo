@@ -1,8 +1,4 @@
-import type { publishingSettingsSchema } from "../schemas/project-parsers";
-
-type PublishingCadence = NonNullable<
-  typeof publishingSettingsSchema.infer
->["cadence"];
+import type { PublishingCadence } from "../schemas/strategy-parsers";
 
 function weekdayFromDate(date: Date): PublishingCadence["allowedDays"][number] {
   switch (date.getUTCDay()) {

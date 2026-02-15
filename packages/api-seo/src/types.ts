@@ -20,6 +20,9 @@ import type {
 import type { router } from "./routes";
 import type { SeoOnboardingWorkflowBinding } from "./workflows/onboarding-workflow";
 import type { SeoPlannerWorkflowBinding } from "./workflows/planner-workflow";
+import type { SeoStrategyPhaseGenerationWorkflowBinding } from "./workflows/strategy-phase-generation-workflow";
+import type { SeoStrategySnapshotWorkflowBinding } from "./workflows/strategy-snapshot-workflow";
+import type { SeoStrategySuggestionsWorkflowBinding } from "./workflows/strategy-suggestions-workflow";
 import type { SeoWriterWorkflowBinding } from "./workflows/writer-workflow";
 
 export type Router = UnlaziedRouter<typeof router>;
@@ -60,6 +63,9 @@ export interface InitialContext extends BaseContextWithAuth {
   seoPlannerWorkflow: SeoPlannerWorkflowBinding;
   seoWriterWorkflow: SeoWriterWorkflowBinding;
   seoOnboardingWorkflow: SeoOnboardingWorkflowBinding;
+  seoStrategySuggestionsWorkflow: SeoStrategySuggestionsWorkflowBinding;
+  seoStrategyPhaseGenerationWorkflow: SeoStrategyPhaseGenerationWorkflowBinding;
+  seoStrategySnapshotWorkflow: SeoStrategySnapshotWorkflowBinding;
   cacheKV: KVNamespace;
   scheduler: DurableObjectStub<Scheduler>;
 }

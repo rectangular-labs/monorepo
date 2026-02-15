@@ -58,6 +58,10 @@ import {
   SourcesTrigger,
 } from "@rectangular-labs/ui/components/ai-elements/sources";
 import {
+  Suggestion,
+  Suggestions,
+} from "@rectangular-labs/ui/components/ai-elements/suggestion";
+import {
   Task,
   TaskContent,
   TaskItem,
@@ -452,7 +456,6 @@ function ChatConversation({
   input,
   setInput,
   isMessagesLoading,
-  hasChat,
 }: {
   organizationId: string;
   projectId: string;
@@ -533,14 +536,8 @@ function ChatConversation({
           (part.input.skill === "create_articles" ||
             part.input.skill === "write_file")
         ) {
-          // Bulk invalidate queries for all content.listDrafts queries
           void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.listDrafts.key({
-              type: "query",
-            }),
-          });
-          void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.getReviewCounts.key({
+            queryKey: getApiClientRq().content.list.key({
               type: "query",
             }),
           });
@@ -560,43 +557,14 @@ function ChatConversation({
     }
   }, [messages, queryClient]);
 
-  useEffect(() => {
-    // If there are no chats, the assistant should introduce itself.
-    if (!hasChat && messages.length === 0 && !isMessagesLoading && !input) {
-      setMessages([
-        {
-          id: "intro",
-          role: "assistant",
-          parts: [
-            {
-              type: "text",
-              text: `Hi! I'm Fluid, your SEO specialist. Looks like this project just got started. 
-              
-Hang tight, because I'm going to do a few things to kick things off!
-
-Specifically:
-
-1. Analyzing what you currently have.
-2. Figuring out good new topics to cover
-3. Proposing a content plan for the next thirty days along with expectations`,
-            },
-          ],
-        },
-      ]);
-      sendMessage();
-    }
-  }, [
-    hasChat,
-    messages.length,
-    isMessagesLoading,
-    input,
-    setMessages,
-    sendMessage,
-  ]);
-
   const rejectPlanPrefill = () => {
     setInput("Let's change the following:\n1. ");
     textareaRef.current?.focus();
+  };
+
+  const handleSuggestion = (suggestion: string) => {
+    if (isMessagesLoading) return;
+    handleSubmit({ text: suggestion });
   };
 
   const handleSubmit = (message: PromptInputMessage) => {
@@ -881,6 +849,18 @@ Specifically:
         </Conversation>
 
         <div className="border-t">
+          {messages.length === 0 && (
+            <Suggestions className="px-3 pt-3">
+              <Suggestion
+                onClick={handleSuggestion}
+                suggestion="How is the site doing lately?"
+              />
+              <Suggestion
+                onClick={handleSuggestion}
+                suggestion="I want to create a new SEO strategy."
+              />
+            </Suggestions>
+          )}
           {openTodos.length > 0 && (
             <div className="px-3 pt-2">
               <Queue>

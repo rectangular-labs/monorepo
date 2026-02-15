@@ -1,18 +1,23 @@
-import {
-  fetchKeywordSuggestions,
-  fetchKeywordsOverview,
-  fetchRankedKeywordsForSite,
-  fetchRankedPagesForSite,
-  fetchSerp,
-} from "@rectangular-labs/dataforseo";
 import type { schema } from "@rectangular-labs/db";
 import { type JSONSchema7, jsonSchema, tool } from "ai";
 import { type } from "arktype";
+import type { InitialContext } from "../../../types";
 import {
   configureDataForSeoClient,
+  fetchKeywordSuggestionsWithCache,
+  fetchKeywordsOverviewWithCache,
+  fetchRankedKeywordsForSiteWithCache,
+  fetchRankedPagesForSiteWithCache,
+  fetchSerpWithCache,
   getLocationAndLanguage,
 } from "../../dataforseo/utils";
 import type { AgentToolDefinition } from "./utils";
+
+const KEYWORD_RESEARCH_DATA_SOURCE = "keyword research data source";
+
+function keywordDataSourceError(operation: string) {
+  return `Failed to fetch ${operation} from the ${KEYWORD_RESEARCH_DATA_SOURCE}.`;
+}
 
 const hostnameSchema = type("string").describe(
   "The domain name of the target website. The domain should be specified without 'https://' and 'www.'. Example: 'example.xyz', 'fluidposts.ai', 'google.com'",
@@ -105,6 +110,7 @@ const serpInputSchema = type({
 
 export function createDataforseoToolWithMetadata(
   project: typeof schema.seoProject.$inferSelect,
+  cacheKV: InitialContext["cacheKV"],
 ) {
   configureDataForSeoClient();
   const { locationName, languageCode } = getLocationAndLanguage(project);
@@ -130,7 +136,7 @@ export function createDataforseoToolWithMetadata(
         offset,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchRankedKeywordsForSite({
+      const result = await fetchRankedKeywordsForSiteWithCache({
         hostname,
         locationName,
         languageCode,
@@ -139,15 +145,16 @@ export function createDataforseoToolWithMetadata(
         limit,
         offset,
         includeGenderAndAgeDistribution,
+        cacheKV,
       });
       if (!result?.ok) {
-        console.error("DFS ranked_keywords error", result.error);
-        throw new Error(
-          `DFS ranked_keywords error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
+        console.error(
+          "Keyword data source ranked_keywords error",
+          result.error,
         );
+        throw new Error(keywordDataSourceError("ranked keywords"), {
+          cause: result.error,
+        });
       }
       return {
         siteTraffic: result.value.siteTraffic,
@@ -197,22 +204,20 @@ export function createDataforseoToolWithMetadata(
         offset,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchRankedPagesForSite({
-        target: hostname,
+      const result = await fetchRankedPagesForSiteWithCache({
+        hostname,
         locationName,
         languageCode,
         limit,
         offset,
         includeGenderAndAgeDistribution,
+        cacheKV,
       });
       if (!result?.ok) {
-        console.error("DFS ranked_pages error", result.error);
-        throw new Error(
-          `DFS ranked_pages error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        console.error("Keyword data source ranked_pages error", result.error);
+        throw new Error(keywordDataSourceError("ranked pages"), {
+          cause: result.error,
+        });
       }
       return {
         targetSite: result.value.targetSite,
@@ -241,7 +246,7 @@ export function createDataforseoToolWithMetadata(
         includeSeedKeyword,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchKeywordSuggestions({
+      const result = await fetchKeywordSuggestionsWithCache({
         locationName,
         languageCode,
         seedKeyword,
@@ -249,14 +254,12 @@ export function createDataforseoToolWithMetadata(
         includeGenderAndAgeDistribution,
         limit,
         offset,
+        cacheKV,
       });
       if (!result.ok) {
-        throw new Error(
-          `DFS keyword_suggestions error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        throw new Error(keywordDataSourceError("keyword suggestions"), {
+          cause: result.error,
+        });
       }
       return {
         keywords: result.value.keywords.map((keyword) => ({
@@ -298,19 +301,17 @@ export function createDataforseoToolWithMetadata(
         keywords,
         includeGenderAndAgeDistribution,
       });
-      const result = await fetchKeywordsOverview({
+      const result = await fetchKeywordsOverviewWithCache({
         keywords,
         locationName,
         languageCode,
         includeGenderAndAgeDistribution,
+        cacheKV,
       });
       if (!result.ok) {
-        throw new Error(
-          `DFS keywords_overview error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        throw new Error(keywordDataSourceError("keyword overview"), {
+          cause: result.error,
+        });
       }
       return {
         keywords: result.value.keywords.map((keyword) => ({
@@ -349,21 +350,19 @@ export function createDataforseoToolWithMetadata(
     ),
     async execute({ keyword, depth, device, os }) {
       console.log("fetchSerp", { keyword, depth, device, os });
-      const result = await fetchSerp({
+      const result = await fetchSerpWithCache({
         keyword,
         locationName,
         languageCode,
         depth,
         device,
         os,
+        cacheKV,
       });
       if (!result.ok) {
-        throw new Error(
-          `DFS serp error: ${JSON.stringify(result.error, null, 2)}`,
-          {
-            cause: result.error,
-          },
-        );
+        throw new Error(keywordDataSourceError("SERP data"), {
+          cause: result.error,
+        });
       }
       return {
         searchTerm: result.value.searchTerm,
@@ -383,15 +382,14 @@ export function createDataforseoToolWithMetadata(
   const toolDefinitions: AgentToolDefinition[] = [
     {
       toolName: "get_ranked_keywords_for_site",
-      toolDescription:
-        "Fetch keywords a site currently ranks for (DataForSEO).",
+      toolDescription: "Fetch keywords a site currently ranks for.",
       toolInstruction:
         "Provide hostname without protocol. Use for profiling your site or competitors, and to discover ranking keyword clusters. Tune positionFrom/positionTo and limit/offset.",
       tool: getRankedKeywordsForSite,
     },
     {
       toolName: "get_ranked_pages_for_site",
-      toolDescription: "Fetch ranked pages for a site (DataForSEO).",
+      toolDescription: "Fetch ranked pages for a site.",
       toolInstruction:
         "Provide hostname without protocol. Use to find top pages and infer content strategy and templates.",
       tool: getRankedPagesForSite,

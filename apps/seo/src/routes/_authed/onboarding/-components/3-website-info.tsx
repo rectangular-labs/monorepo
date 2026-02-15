@@ -91,65 +91,63 @@ export function OnboardingWebsiteInfo({
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-      <Card className="rounded-none sm:rounded-lg">
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
-          <CardContent>
-            <FieldGroup>
-              <Controller
-                control={form.control}
-                name="url"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="onboarding-website-info-url">
-                      Website
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="url"
-                      id="onboarding-website-info-url"
-                      placeholder="https://42.com"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </FieldGroup>
-
-            {form.formState.errors.root && (
-              <FieldError errors={[form.formState.errors.root]} />
-            )}
-          </CardContent>
-          <CardFooter>
-            <div className="flex w-full justify-between">
-              {type === "new-user" && (
-                <Button
-                  disabled={isPending}
-                  onClick={() => matcher.prev()}
-                  type="button"
-                  variant="ghost"
-                >
-                  Back
-                </Button>
+    <Card className="w-full rounded-none sm:rounded-lg">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <form className="grid gap-6" onSubmit={form.handleSubmit(handleSubmit)}>
+        <CardContent>
+          <FieldGroup>
+            <Controller
+              control={form.control}
+              name="url"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="onboarding-website-info-url">
+                    Website
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    autoComplete="url"
+                    id="onboarding-website-info-url"
+                    placeholder="https://42.com"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
+            />
+          </FieldGroup>
+
+          {form.formState.errors.root && (
+            <FieldError errors={[form.formState.errors.root]} />
+          )}
+        </CardContent>
+        <CardFooter>
+          <div className="flex w-full justify-between">
+            {type === "new-user" && (
               <Button
-                className={"ml-auto w-fit"}
-                isLoading={isPending}
-                type="submit"
+                disabled={isPending}
+                onClick={() => matcher.prev()}
+                type="button"
+                variant="ghost"
               >
-                Next
+                Back
               </Button>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+            )}
+            <Button
+              className={"ml-auto w-fit"}
+              isLoading={isPending}
+              type="submit"
+            >
+              Next
+            </Button>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }

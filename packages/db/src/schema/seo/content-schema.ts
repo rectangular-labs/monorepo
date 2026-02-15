@@ -1,4 +1,5 @@
 import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
+import { CONTENT_ROLES } from "@rectangular-labs/core/schemas/strategy-parsers";
 import { type } from "arktype";
 import {
   createInsertSchema,
@@ -17,8 +18,7 @@ import {
 import { timestamps, uuidv7 } from "../_helper";
 import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
-import { seoContentChat } from "./content-chat-schema";
-import { seoContentUser } from "./content-user-schema";
+import { seoContentDraft } from "./content-draft-schema";
 import { seoProject } from "./project-schema";
 
 /**
@@ -44,6 +44,12 @@ export const seoContent = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    originatingDraftId: uuid()
+      .notNull()
+      .references(() => seoContentDraft.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
 
     // Versioning - each publish increments version for the same slug
     slug: text().notNull(),
@@ -57,8 +63,7 @@ export const seoContent = pgSeoTable(
     primaryKeyword: text().notNull(),
     articleType: text({ enum: ARTICLE_TYPES }).notNull(),
     contentMarkdown: text().notNull(),
-    outline: text(),
-    notes: text(),
+    role: text({ enum: CONTENT_ROLES }),
 
     // Publishing metadata
     publishedAt: timestamp({ mode: "date", withTimezone: true }).notNull(),
@@ -85,7 +90,11 @@ export const seoContent = pgSeoTable(
   ],
 );
 
-export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
+export const seoContentRelations = relations(seoContent, ({ one }) => ({
+  originatingDraft: one(seoContentDraft, {
+    fields: [seoContent.originatingDraftId],
+    references: [seoContentDraft.id],
+  }),
   project: one(seoProject, {
     fields: [seoContent.projectId],
     references: [seoProject.id],
@@ -94,8 +103,6 @@ export const seoContentRelations = relations(seoContent, ({ one, many }) => ({
     fields: [seoContent.organizationId],
     references: [organization.id],
   }),
-  contributingChatsMap: many(seoContentChat),
-  contributorsMap: many(seoContentUser),
 }));
 
 export const seoContentInsertSchema = createInsertSchema(seoContent).omit(

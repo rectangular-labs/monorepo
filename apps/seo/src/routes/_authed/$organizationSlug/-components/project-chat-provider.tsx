@@ -46,7 +46,7 @@ export function ProjectChatProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [historyOpen, setHistoryOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
