@@ -119,11 +119,8 @@ export function ManageContentMetadataDialog({
         onOpenChange(false);
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: api.content.list.queryKey({
-              input: {
-                organizationIdentifier,
-                projectId,
-              },
+            queryKey: api.content.list.key({
+              type: "query",
             }),
           }),
           draftId

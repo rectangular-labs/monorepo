@@ -447,7 +447,7 @@ export class SeoPlannerWorkflow extends WorkflowEntrypoint<
           locationName,
           languageCode,
           project,
-          notes: "(none)",
+          notes: content.notes ?? undefined,
         };
       });
 

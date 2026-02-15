@@ -91,17 +91,14 @@ export class SeoOnboardingWorkflow extends WorkflowEntrypoint<
           }
 
           logInfo("homepage title", { homepageTitle });
-          const system = `You extract a company or product name from a homepage title.
+          const system = `You extract a company or product name from a homepage title/website url.
 
 ## Task
 - Analyze the provided homepage title and URL to derive the entity name.
 
 ## Guidelines
-- Return the homepage title exactly as provided in the input.
-- Extract the brand or product name from the title; if unclear, return an empty string.
-
-## Expectations
-- Provide concise, exact values without extra commentary.`;
+- use the homepage title and URL to derive the entity name.
+- If unclear, return an empty string.`;
 
           const { experimental_output } = await generateText({
             model: google("gemini-3-flash-preview"),
@@ -211,43 +208,40 @@ Extract the name from the above context.`,
       },
     );
 
-    await step.do("trigger strategy suggestions workflow", async () => {
-      const db = createDb();
-      const taskResult = await createTask({
-        db,
-        userId: undefined,
-        input: {
-          type: "seo-generate-strategy-suggestions",
-          projectId: project.id,
-          instructions: ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS,
-        },
-        workflowInstanceId: `strategy_${event.instanceId}_${crypto.randomUUID().slice(0, 5)}`,
-      });
-      if (!taskResult.ok) {
-        logError("failed to trigger strategy suggestions workflow", {
-          projectId: project.id,
-          error: taskResult.error,
+    const [, brandVoiceResult] = await Promise.all([
+      step.do("trigger strategy suggestions workflow", async () => {
+        const db = createDb();
+        const taskResult = await createTask({
+          db,
+          userId: undefined,
+          input: {
+            type: "seo-generate-strategy-suggestions",
+            projectId: project.id,
+            instructions: ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS,
+          },
+          workflowInstanceId: `strategy_${event.instanceId}_${crypto.randomUUID().slice(0, 5)}`,
         });
-        return;
-      }
+        if (!taskResult.ok) {
+          logError("failed to trigger strategy suggestions workflow", {
+            projectId: project.id,
+            error: taskResult.error,
+          });
+          return;
+        }
 
-      const updateResult = await updateSeoProject(db, {
-        id: project.id,
-        organizationId: project.organizationId,
-        strategySuggestionsWorkflowId: taskResult.value.id,
-      });
-      if (!updateResult.ok) {
-        logError("failed to save strategy suggestions workflow id", {
-          projectId: project.id,
-          error: updateResult.error,
+        const updateResult = await updateSeoProject(db, {
+          id: project.id,
+          organizationId: project.organizationId,
+          strategySuggestionsWorkflowId: taskResult.value.id,
         });
-      }
-    });
-
-    const brandVoiceResult = await step.do(
-      "generate brand voice",
-      { timeout: "10 minutes" },
-      async () => {
+        if (!updateResult.ok) {
+          logError("failed to save strategy suggestions workflow id", {
+            projectId: project.id,
+            error: updateResult.error,
+          });
+        }
+      }),
+      step.do("generate brand voice", { timeout: "10 minutes" }, async () => {
         const { tools } = createWebToolsWithMetadata(project, this.env.CACHE);
         const system = `You are an SEO research expert extracting a brand's writing tone.
 
@@ -289,8 +283,8 @@ Extract the name from the above context.`,
         });
 
         return outputResult.experimental_output;
-      },
-    );
+      }),
+    ]);
 
     const { brandVoice } = await step.do(
       "update project brand voice",

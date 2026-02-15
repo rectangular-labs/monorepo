@@ -36,7 +36,7 @@ import {
   TabsTrigger,
 } from "@rectangular-labs/ui/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
 import { ManageContentMetadataDialog } from "./manage-content-metadata-dialog";
@@ -147,8 +147,6 @@ export function useContentDisplayController({
     { status: "idle" } | { status: "saving" } | { status: "saved"; at: string }
   >({ status: "idle" });
   const [lastSavedContentMarkdown, setLastSavedContentMarkdown] = useState("");
-  const latestSaveVersionRef = useRef(0);
-  const latestAppliedSaveVersionRef = useRef(0);
 
   const [draftDetails, setDraftDetails] = useState({
     contentMarkdown: "",
@@ -163,11 +161,8 @@ export function useContentDisplayController({
         await Promise.all([
           contentDetailsQuery.refetch(),
           queryClient.invalidateQueries({
-            queryKey: api.content.list.queryKey({
-              input: {
-                organizationIdentifier,
-                projectId,
-              },
+            queryKey: api.content.list.key({
+              type: "query",
             }),
           }),
         ]);
@@ -197,19 +192,16 @@ export function useContentDisplayController({
       status: "saved",
       at: new Date(draft.updatedAt).toISOString(),
     });
-    latestSaveVersionRef.current = 0;
-    latestAppliedSaveVersionRef.current = 0;
   }, [draft]);
 
   useEffect(() => {
     if (!draft || !canEdit) return;
-    if (draftDetails.contentMarkdown === lastSavedContentMarkdown) return;
+    const markdownToSave = draftDetails.contentMarkdown;
+    if (markdownToSave === lastSavedContentMarkdown) return;
 
+    let cancelled = false;
     setContentSaveIndicator({ status: "saving" });
     const timeoutId = window.setTimeout(() => {
-      const saveVersion = ++latestSaveVersionRef.current;
-      const markdownToSave = draftDetails.contentMarkdown;
-
       void saveContentMarkdownAsync({
         organizationIdentifier,
         projectId,
@@ -217,8 +209,7 @@ export function useContentDisplayController({
         contentMarkdown: markdownToSave,
       })
         .then(() => {
-          if (saveVersion < latestAppliedSaveVersionRef.current) return;
-          latestAppliedSaveVersionRef.current = saveVersion;
+          if (cancelled) return;
           setLastSavedContentMarkdown(markdownToSave);
           setContentSaveIndicator({
             status: "saved",
@@ -226,12 +217,15 @@ export function useContentDisplayController({
           });
         })
         .catch(() => {
-          if (saveVersion < latestAppliedSaveVersionRef.current) return;
+          if (cancelled) return;
           setContentSaveIndicator({ status: "idle" });
         });
     }, 800);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [
     canEdit,
     draft,
