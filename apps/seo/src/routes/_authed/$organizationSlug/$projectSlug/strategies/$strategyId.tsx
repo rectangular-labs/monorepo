@@ -44,8 +44,8 @@ import type {
   SortOrder,
 } from "../-components/content-table";
 import {
-  SnapshotTrendChart,
   type SnapshotMetric,
+  SnapshotTrendChart,
 } from "../-components/snapshot-trend-chart";
 import { TopKeywords } from "../-components/top-keywords";
 import { ManageStrategyDialog } from "./-components/manage-strategy-dialog";
