@@ -691,14 +691,13 @@ export const TwitchIcon = (props: IconProps) => (
     y="0px"
     {...props}
   >
+    <title>Twitch</title>
     <style type="text/css">
       {`
                 .st0{fill:#FFFFFF}
                 .st1{fill:#9146FF}
             `}
     </style>
-
-    <title>Twitch</title>
 
     <g>
       <polygon

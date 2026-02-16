@@ -12,7 +12,7 @@ export async function generateReply({
   systemPrompt: string | null;
 }) {
   // TODO: add env to allow for different models without changing code
-  const modelId = "gemini-2.5-flash";
+  const modelId = "gemini-3-flash-preview";
   const finalPrompt = systemPrompt ?? DEFAULT_SYSTEM_PROMPT;
   const generationResult = await safe(() =>
     generateText({

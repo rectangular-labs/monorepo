@@ -23,7 +23,7 @@ export async function handleTitleGeneration({
     model: google("gemini-3-flash-preview"),
     system:
       "Based on the user's message extract out the main topic and generate a concise and succinct title for this chat. JUST RETURN WITH A TITLE AND NOTHING ELSE. The title should be no more than 10 words.",
-    messages: convertToModelMessages([
+    messages: await convertToModelMessages([
       message,
       {
         role: "user",

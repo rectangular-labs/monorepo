@@ -1,4 +1,4 @@
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import type { AgentToolDefinition } from "./utils";
 
@@ -35,9 +35,7 @@ export function createPlannerToolsWithMetadata() {
   const askQuestions = tool({
     description:
       'Ask the user clarification questions to help provide clarity to the request. Returns immediately while waiting for the user\'s response. By default the "other" option is always added to each question so you can omit that option from the options array.',
-    inputSchema: jsonSchema<typeof askQuestionInputSchema.infer>(
-      askQuestionInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: askQuestionInputSchema,
     async execute() {
       return await Promise.resolve({
         success: true,
@@ -49,9 +47,7 @@ export function createPlannerToolsWithMetadata() {
   const createPlan = tool({
     description:
       "Create or update a plan artifact for the SEO/GEO task (overview + steps/todos).",
-    inputSchema: jsonSchema<typeof createPlanInputSchema.infer>(
-      createPlanInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: createPlanInputSchema,
     async execute() {
       return await Promise.resolve({
         success: true,

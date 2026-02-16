@@ -1,6 +1,6 @@
 import type { DB } from "@rectangular-labs/db";
 import { getStrategyDetails } from "@rectangular-labs/db/operations";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import type { AgentToolDefinition } from "./utils";
 
@@ -16,9 +16,7 @@ export function createStrategyToolsWithMetadata(args: {
   const getStrategyDetailsTool = tool({
     description:
       "Fetch detailed strategy information, including phases, phase contents, and recent snapshots.",
-    inputSchema: jsonSchema<typeof strategyDetailsInputSchema.infer>(
-      strategyDetailsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: strategyDetailsInputSchema,
     async execute({ strategyId }) {
       const detailResult = await getStrategyDetails({
         db: args.db,

@@ -25,13 +25,7 @@ import {
   listUnassignedContentDrafts,
   updateContentDraft,
 } from "@rectangular-labs/db/operations";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  Output,
-  stepCountIs,
-} from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { apiEnv } from "../env";
 import { createDataforseoToolWithMetadata } from "../lib/ai/tools/dataforseo-tool";
 import { createGscToolWithMetadata } from "../lib/ai/tools/google-search-console-tool";
@@ -56,7 +50,6 @@ type StrategyPhaseGenerationInput =
 export type SeoStrategyPhaseGenerationWorkflowBinding =
   Workflow<StrategyPhaseGenerationInput>;
 
-type PhaseSuggestion = typeof strategyPhaseSuggestionScheme.infer;
 type StrategyDetails = NonNullable<
   Awaited<ReturnType<typeof getStrategyDetails>> extends infer T
     ? T extends { ok: true; value: infer V }
@@ -322,17 +315,15 @@ Generate the next strategy phase now.`,
               event.instanceId,
             );
           },
-          experimental_output: Output.object({
-            schema: jsonSchema<PhaseSuggestion>(
-              strategyPhaseSuggestionScheme.toJsonSchema() as JSONSchema7,
-            ),
+          output: Output.object({
+            schema: strategyPhaseSuggestionScheme,
           }),
         }).catch((error) => {
           console.error("error generating phase suggestion", error);
           throw error;
         });
 
-        return outputResult.experimental_output;
+        return outputResult.output;
       },
     );
 

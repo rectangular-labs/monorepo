@@ -4,8 +4,7 @@ import {
   understandSiteTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
 import { schemaTask } from "@trigger.dev/sdk";
-import { generateText } from "ai";
-import { llmParseJson } from "../lib/ai-tools/llm-parse-json.js";
+import { generateText, Output } from "ai";
 import { setTaskMetadata } from "../lib/task-metadata.js";
 
 export const understandSiteLlmTask: ReturnType<
@@ -65,7 +64,7 @@ export const understandSiteLlmTask: ReturnType<
         "DO NOT ASK FOR MORE INFORMATION. Start planning deeply for 30 minutes right away and use the appropriate tools to get the information. A great response will help a lot of people and could save the business from going under. Good work will be thoroughly rewarded.",
       ].join(" \n");
 
-      const { text } = await generateText({
+      const { output } = await generateText({
         model: openai("gpt-5-mini"),
         tools: {
           web_search: openai.tools.webSearch({
@@ -79,6 +78,11 @@ export const understandSiteLlmTask: ReturnType<
             content: `Extract the required information from the website: ${payload.websiteUrl}`,
           },
         ],
+        output: Output.object({
+          schema: understandSiteTaskOutputSchema
+            .get("websiteInfo")
+            .omit("version"),
+        }),
         onStepFinish: (step) => {
           console.log("Step content", step.text);
           console.log(
@@ -87,12 +91,6 @@ export const understandSiteLlmTask: ReturnType<
           );
         },
       });
-      console.log("text", text);
-
-      const object = await llmParseJson(
-        text,
-        understandSiteTaskOutputSchema.get("websiteInfo").omit("version"),
-      );
 
       setTaskMetadata({
         progress: 100,
@@ -102,7 +100,7 @@ export const understandSiteLlmTask: ReturnType<
       return {
         type: "understand-site",
         websiteInfo: {
-          ...object,
+          ...output,
           version: "v1",
         },
       };

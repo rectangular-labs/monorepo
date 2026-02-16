@@ -5,7 +5,7 @@ import {
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
-import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
+import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
 import type { searchItemSchema } from "@rectangular-labs/core/schemas/keyword-parsers";
 import type {
   seoPlanKeywordTaskInputSchema,
@@ -17,13 +17,7 @@ import {
   getSeoProjectByIdentifierAndOrgId,
 } from "@rectangular-labs/db/operations";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  Output,
-  stepCountIs,
-} from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
 import {
   createTodoToolWithMetadata,
@@ -89,10 +83,8 @@ ${serpValue}
       },
       prompt,
       stopWhen: [stepCountIs(40)],
-      experimental_output: Output.object({
-        schema: jsonSchema<type.infer<typeof schema>>(
-          schema.toJsonSchema() as JSONSchema7,
-        ),
+      output: Output.object({
+        schema,
       }),
     }),
   );
@@ -104,7 +96,7 @@ ${serpValue}
     return serp;
   }
 
-  const extracted = extraction.value.experimental_output.outlines;
+  const extracted = extraction.value.output.outlines;
   logInfo("SERP outlines extracted", {
     extracted,
   });
@@ -299,7 +291,7 @@ ${JSON.stringify(serp)}
   );
   const result = await safe(() =>
     generateText({
-      model: google("gemini-3-flash-preview"),
+      model: openai("gpt-5.1-codex-mini"),
       providerOptions: {
         openai: {
           reasoningEffort: "medium",
@@ -344,15 +336,13 @@ ${JSON.stringify(serp)}
         };
       },
       stopWhen: [stepCountIs(25)],
-      experimental_output: Output.object({
-        schema: jsonSchema<type.infer<typeof outputSchema>>(
-          outputSchema.toJsonSchema() as JSONSchema7,
-        ),
+      output: Output.object({
+        schema: outputSchema,
       }),
     }),
   );
   if (!result.ok) return err(result.error);
-  const output = result.value.experimental_output;
+  const output = result.value.output;
   const outline = output.outline.trim();
   const title = output.title.trim();
   const description = output.description.trim();

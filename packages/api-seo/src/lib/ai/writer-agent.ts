@@ -170,7 +170,7 @@ ${args.outline ?? "(missing)"}
 </outline>`;
 }
 
-export function createWriterAgent({
+export async function createWriterAgent({
   messages,
   project,
   context,
@@ -178,7 +178,7 @@ export function createWriterAgent({
   messages: SeoChatMessage[];
   project: NonNullable<ChatContext["cache"]["project"]>;
   context: ChatContext;
-}): Parameters<typeof streamText>[0] {
+}): Promise<Parameters<typeof streamText>[0]> {
   const plannerTools = createPlannerToolsWithMetadata();
   const todoTools = createTodoToolWithMetadata({ messages });
 
@@ -215,7 +215,7 @@ export function createWriterAgent({
       } satisfies OpenAIResponsesProviderOptions,
     },
     system: systemPrompt,
-    messages: convertToModelMessages(messages),
+    messages: await convertToModelMessages(messages),
     tools: {
       ...createSkillTools({ toolDefinitions: skillDefinitions }),
       ...plannerTools.tools,

@@ -1,7 +1,7 @@
 import { cn } from "@rectangular-labs/ui/utils/cn";
-import type { Experimental_GeneratedImage } from "ai";
+import type { GeneratedFile } from "ai";
 
-export type ImageProps = Experimental_GeneratedImage & {
+export type ImageProps = GeneratedFile & {
   className?: string;
   alt?: string;
 };

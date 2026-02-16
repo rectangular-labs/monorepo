@@ -29,8 +29,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.46",
-    "@ai-sdk/openai": "^2.0.85",
+    "@ai-sdk/google": "^3.0.29",
+    "@ai-sdk/openai": "^3.0.29",
     "@orama/orama": "^3.1.16",
     "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/dataforseo": "workspace:*",
@@ -38,7 +38,7 @@
     "@rectangular-labs/result": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "@trigger.dev/sdk": "4.1.1",
-    "ai": "^5.0.112",
+    "ai": "^6.0.86",
     "arktype": "^2.1.29",
     "crawlee": "^3.15.3",
     "defuddle": "^0.6.6",

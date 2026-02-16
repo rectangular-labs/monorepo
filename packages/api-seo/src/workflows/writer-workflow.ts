@@ -16,13 +16,7 @@ import {
   getDraftById,
   getSeoProjectByIdentifierAndOrgId,
 } from "@rectangular-labs/db/operations";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  Output,
-  stepCountIs,
-} from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
 import {
@@ -211,20 +205,12 @@ ${outlineText ?? ""}
   try {
     const result = await generateText({
       model: google("gemini-3-flash-preview"),
-      experimental_output: Output.object({
-        schema: jsonSchema<typeof inferArticleTypeSchema.infer>(
-          // Google api doesn't support const keyword in json schema for anyOf, only string.
-          JSON.parse(
-            JSON.stringify(inferArticleTypeSchema.toJsonSchema()).replaceAll(
-              "enum",
-              'type":"string","enum',
-            ),
-          ) as JSONSchema7,
-        ),
+      output: Output.object({
+        schema: inferArticleTypeSchema,
       }),
       prompt,
     });
-    const inferred = result.experimental_output.articleType;
+    const inferred = result.output.articleType;
     logInfo("inferred article type via model", {
       articleType: inferred,
       title,
@@ -511,18 +497,12 @@ ${changes.join("\n")}
                     : "Write the full article now.",
                 },
               ],
-              experimental_output: Output.object({
-                schema: jsonSchema<{
-                  heroImage: string;
-                  heroImageCaption: string | null;
-                  markdown: string;
-                }>(
-                  type({
-                    heroImage: "string",
-                    heroImageCaption: "string|null",
-                    markdown: "string",
-                  }).toJsonSchema() as JSONSchema7,
-                ),
+              output: Output.object({
+                schema: type({
+                  heroImage: "string",
+                  heroImageCaption: "string|null",
+                  markdown: "string",
+                }),
               }),
               onStepFinish: (step) => {
                 logInfo(`[generateArticle] Step completed:`, {
@@ -548,7 +528,7 @@ ${changes.join("\n")}
               stopWhen: [stepCountIs(40)],
             });
 
-            const outputMarkdown = result.experimental_output.markdown.trim();
+            const outputMarkdown = result.output.markdown.trim();
             const repairedLinks = repairPublicBucketImageLinks({
               markdown: outputMarkdown,
               orgId: input.organizationId,
@@ -556,9 +536,8 @@ ${changes.join("\n")}
               kind: "content-image",
             });
             text = repairedLinks.markdown;
-            heroImage = result.experimental_output.heroImage.trim();
-            heroImageCaption =
-              result.experimental_output.heroImageCaption?.trim() || null;
+            heroImage = result.output.heroImage.trim();
+            heroImageCaption = result.output.heroImageCaption?.trim() || null;
             if (!text) throw new Error("Empty article returned by model");
             logInfo("article generated. Going through review process.", {
               instanceId: event.instanceId,
@@ -584,7 +563,7 @@ ${changes.join("\n")}
               month: "long",
               day: "numeric",
             }).format(new Date());
-            const { experimental_output: reviewResult } = await generateText({
+            const { output: reviewResult } = await generateText({
               model: google("gemini-3-flash-preview"),
               providerOptions: {
                 google: {
@@ -596,7 +575,6 @@ ${changes.join("\n")}
               },
               tools: {
                 ...webTools.tools,
-                ...todoTool.tools,
               },
               system: `<role>
 You are a strict SEO content QA reviewer. Your job is to verify the writer followed ALL explicit rules and that the article is publish-ready.
@@ -658,10 +636,8 @@ ${text}
                   content: `Review the article against the requirements and return (approved, changes).`,
                 },
               ],
-              experimental_output: Output.object({
-                schema: jsonSchema<typeof reviewArticleOutputSchema.infer>(
-                  reviewArticleOutputSchema.toJsonSchema() as JSONSchema7,
-                ),
+              output: Output.object({
+                schema: reviewArticleOutputSchema,
               }),
               onStepFinish: (step) => {
                 logInfo("review step completed", {

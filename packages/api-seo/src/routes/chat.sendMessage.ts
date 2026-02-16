@@ -202,16 +202,16 @@ export const sendMessage = withOrganizationIdBase
       }
     }
 
-    const agent = (() => {
+    const agent = await (async () => {
       if (input.currentPage === "article-editor") {
-        const writerAgent = createWriterAgent({
+        const writerAgent = await createWriterAgent({
           project,
           context,
           messages: input.messages,
         });
         return writerAgent;
       }
-      const strategistAgent = createStrategistAgent({
+      const strategistAgent = await createStrategistAgent({
         project,
         context,
         messages: input.messages,
@@ -245,13 +245,15 @@ export const sendMessage = withOrganizationIdBase
     });
     console.log("[chat.sendMessage] streamText result created");
     waitUntil(
-      result.consumeStream({
-        onError: (error) => {
-          console.error("[chat.sendMessage] consumeStream onError", {
-            error,
-          });
-        },
-      }),
+      Promise.resolve(
+        result.consumeStream({
+          onError: (error) => {
+            console.error("[chat.sendMessage] consumeStream onError", {
+              error,
+            });
+          },
+        }),
+      ),
     );
     const uiMessageStream = result.toUIMessageStream<SeoChatMessage>({
       sendSources: true,

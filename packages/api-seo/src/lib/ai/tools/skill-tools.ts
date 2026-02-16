@@ -1,12 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { uuidv7 } from "@rectangular-labs/db";
-import {
-  generateText,
-  type JSONSchema7,
-  jsonSchema,
-  stepCountIs,
-  tool,
-} from "ai";
+import { generateText, stepCountIs, tool } from "ai";
 import { type } from "arktype";
 import type { AgentToolDefinition } from "./utils";
 
@@ -60,9 +54,7 @@ export function createSkillTools({
   const readSkills = tool({
     description:
       "Read usage instructions for a given skill. Returns guidance on how to best use the skill.",
-    inputSchema: jsonSchema<typeof readSkillsInputSchema.infer>(
-      readSkillsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: readSkillsInputSchema,
     async execute({ skill }) {
       const skillDefinition = findSkillDefinition({ skill, toolDefinitions });
       if (!skillDefinition) {
@@ -84,9 +76,7 @@ export function createSkillTools({
   const useSkills = tool({
     description:
       "Use a given skill. Returns the result of the skill execution.",
-    inputSchema: jsonSchema<typeof useSkillsInputSchema.infer>(
-      useSkillsInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: useSkillsInputSchema,
     async execute({ skill, instructions }) {
       const skillDefinition = findSkillDefinition({ skill, toolDefinitions });
       if (!skillDefinition) {

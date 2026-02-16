@@ -1,5 +1,5 @@
 import { uuidv7 } from "@rectangular-labs/db";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import type { SeoChatMessage } from "../../../types";
 import type { AgentToolDefinition } from "./utils";
@@ -84,15 +84,7 @@ export function createTodoToolWithMetadata(args: {
   const manageTodo = tool({
     description:
       "Manage todos for the SEO chat. Todos are stored in chat history via tool results (not in the workspace filesystem).",
-    inputSchema: jsonSchema<typeof manageTodoInputSchema.infer>(
-      // Google api doesn't support const keyword in json schema for anyOf, only string.
-      JSON.parse(
-        JSON.stringify(manageTodoInputSchema.toJsonSchema()).replaceAll(
-          "enum",
-          'type":"string","enum',
-        ),
-      ) as JSONSchema7,
-    ),
+    inputSchema: manageTodoInputSchema,
     async execute({ action, todo }) {
       await Promise.resolve();
       if (action === "list") {

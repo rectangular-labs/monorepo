@@ -1,6 +1,6 @@
 import type { AnyOrama } from "@orama/orama";
 import { search } from "@orama/orama";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
 import { type } from "arktype";
 import type { SiteSchema } from "../orama/site-schema";
 
@@ -15,9 +15,7 @@ export function createSearchSitesTool(db: AnyOrama<SiteSchema>) {
   return tool({
     description:
       "Search the indexed sites to find the most relevant pages. To get the full site data, use the `get-sites-data` tool.",
-    inputSchema: jsonSchema<typeof toolInputSchema.infer>(
-      toolInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: toolInputSchema,
     execute: async ({ query }) => {
       const result = await search(db, {
         term: query,
