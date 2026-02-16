@@ -10,7 +10,7 @@ import {
   getSeoProjectByIdentifierAndOrgId,
   updateSeoProject,
 } from "@rectangular-labs/db/operations";
-import { Output, generateText, tool } from "ai";
+import { generateText, Output, tool } from "ai";
 import { type } from "arktype";
 import type { ChatContext } from "../../../types";
 import type { AgentToolDefinition } from "./utils";

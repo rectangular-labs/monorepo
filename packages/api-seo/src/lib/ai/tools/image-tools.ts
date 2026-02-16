@@ -2,7 +2,7 @@ import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { getExtensionFromMimeType } from "@rectangular-labs/core/project/get-extension-from-mimetype";
 import type { imageSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import { uuidv7 } from "@rectangular-labs/db";
-import { Output, generateText, tool } from "ai";
+import { generateText, Output, tool } from "ai";
 import { type } from "arktype";
 import { apiEnv } from "../../../env";
 import type { InitialContext } from "../../../types";
