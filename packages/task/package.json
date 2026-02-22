@@ -24,25 +24,25 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "@trigger.dev/build": "4.1.1",
-    "@types/node": "^24.10.1",
+    "@trigger.dev/build": "4.4.1",
+    "@types/node": "^24.10.13",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.29",
-    "@ai-sdk/openai": "^3.0.29",
-    "@orama/orama": "^3.1.16",
+    "@ai-sdk/google": "^3.0.30",
+    "@ai-sdk/openai": "^3.0.30",
+    "@orama/orama": "^3.1.18",
     "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/dataforseo": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
-    "@t3-oss/env-core": "^0.13.8",
-    "@trigger.dev/sdk": "4.1.1",
-    "ai": "^6.0.86",
+    "@t3-oss/env-core": "^0.13.10",
+    "@trigger.dev/sdk": "4.4.1",
+    "ai": "^6.0.97",
     "arktype": "^2.1.29",
-    "crawlee": "^3.15.3",
-    "defuddle": "^0.6.6",
+    "crawlee": "^3.16.0",
+    "defuddle": "^0.7.0",
     "jsdom": "^26.1.0",
-    "playwright": "1.56.1"
+    "playwright": "1.58.2"
   }
 }
