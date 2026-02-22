@@ -42,22 +42,22 @@
     "sso": "aws sso login --sso-session=rectangular-labs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.0",
-    "@changesets/cli": "^2.29.7",
-    "@dotenvx/dotenvx": "^1.51.1",
+    "@biomejs/biome": "2.4.4",
+    "@changesets/cli": "^2.29.8",
+    "@dotenvx/dotenvx": "^1.52.0",
     "@rectangular-labs/typescript": "workspace:*",
-    "@turbo/gen": "^2.6.1",
-    "knip": "^5.70.1",
-    "miniflare": "4.20251118.1",
-    "tsx": "^4.20.6",
-    "turbo": "^2.6.1",
+    "@turbo/gen": "^2.8.10",
+    "knip": "^5.85.0",
+    "miniflare": "4.20260219.0",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.10",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.13"
+    "vitest": "^4.0.18"
   },
   "pnpm": {
     "overrides": {
-      "react-is": "^19.2.0",
-      "vite": "7.2.4"
+      "react-is": "^19.2.4",
+      "vite": "7.3.1"
     },
     "ignoredBuiltDependencies": [
       "@prisma/client",
@@ -81,5 +81,5 @@
       "@ark/util": "patches/@ark__util.patch"
     }
   },
-  "packageManager": "pnpm@10.23.0"
+  "packageManager": "pnpm@10.30.1"
 }

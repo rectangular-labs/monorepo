@@ -33,14 +33,14 @@
   "devDependencies": {
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/typescript": "workspace:*",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.13",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@hey-api/openapi-ts": "^0.88.0",
+    "@hey-api/openapi-ts": "^0.92.4",
     "@rectangular-labs/core": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
-    "@t3-oss/env-core": "^0.13.8",
+    "@t3-oss/env-core": "^0.13.10",
     "arktype": "^2.1.29"
   }
 }
