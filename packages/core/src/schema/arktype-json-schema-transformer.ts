@@ -26,7 +26,7 @@ function replaceStringEnumWithAnyOf(value: unknown): unknown {
     normalized.type = "string";
     delete normalized.enum;
   }
-  if (Array.isArray(record.anyOf)) {
+  if (Array.isArray(record.anyOf) || record.const) {
     normalized.type = "string";
   }
 

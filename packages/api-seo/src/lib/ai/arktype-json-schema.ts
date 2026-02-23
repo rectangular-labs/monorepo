@@ -53,6 +53,7 @@ export function arktypeToAiJsonSchema<TSchema extends ArkTypeWithInfer>(
   schema: TSchema,
 ) {
   const intermediate = arkTypeJsonSchemaTransformer(schema) as JSONSchema7;
+
   const result = jsonSchema<TSchema["infer"]>(
     addAdditionalPropertiesToJsonSchema(intermediate),
   );
