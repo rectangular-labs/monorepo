@@ -19,6 +19,7 @@ import {
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
+import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
 import {
   createTodoToolWithMetadata,
   formatTodoFocusReminder,
@@ -84,7 +85,7 @@ ${serpValue}
       prompt,
       stopWhen: [stepCountIs(40)],
       output: Output.object({
-        schema,
+        schema: arktypeToAiJsonSchema(schema),
       }),
     }),
   );
@@ -337,7 +338,7 @@ ${JSON.stringify(serp)}
       },
       stopWhen: [stepCountIs(25)],
       output: Output.object({
-        schema: outputSchema,
+        schema: arktypeToAiJsonSchema(outputSchema),
       }),
     }),
   );

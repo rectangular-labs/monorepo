@@ -28,7 +28,7 @@ export const strategySuggestionSchema = type({
   motivation: type("string").describe(
     "Why this strategy matters right now, grounded in research or data.",
   ),
-  "description?": type("string").describe(
+  description: type("string|null").describe(
     "Concise description of what will be executed and how it works.",
   ),
   goal: strategyGoalSchema.describe(

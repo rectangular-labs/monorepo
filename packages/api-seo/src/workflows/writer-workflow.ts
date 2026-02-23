@@ -18,6 +18,7 @@ import {
 } from "@rectangular-labs/db/operations";
 import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
+import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
 import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
 import {
   createTodoToolWithMetadata,
@@ -206,7 +207,7 @@ ${outlineText ?? ""}
     const result = await generateText({
       model: google("gemini-3-flash-preview"),
       output: Output.object({
-        schema: inferArticleTypeSchema,
+        schema: arktypeToAiJsonSchema(inferArticleTypeSchema),
       }),
       prompt,
     });
@@ -498,11 +499,13 @@ ${changes.join("\n")}
                 },
               ],
               output: Output.object({
-                schema: type({
-                  heroImage: "string",
-                  heroImageCaption: "string|null",
-                  markdown: "string",
-                }),
+                schema: arktypeToAiJsonSchema(
+                  type({
+                    heroImage: "string",
+                    heroImageCaption: "string|null",
+                    markdown: "string",
+                  }),
+                ),
               }),
               onStepFinish: (step) => {
                 logInfo(`[generateArticle] Step completed:`, {
@@ -637,7 +640,7 @@ ${text}
                 },
               ],
               output: Output.object({
-                schema: reviewArticleOutputSchema,
+                schema: arktypeToAiJsonSchema(reviewArticleOutputSchema),
               }),
               onStepFinish: (step) => {
                 logInfo("review step completed", {

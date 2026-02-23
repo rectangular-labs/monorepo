@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
+import { Route as AuthedAdminRouteRouteImport } from './routes/_authed/admin/route'
 import { Route as AuthedOrganizationSlugRouteRouteImport } from './routes/_authed/$organizationSlug/route'
 import { Route as AuthedOnboardingIndexRouteImport } from './routes/_authed/onboarding/index'
 import { Route as AuthedOrganizationSlugIndexRouteImport } from './routes/_authed/$organizationSlug/index'
@@ -53,6 +54,11 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   id: '/api/$',
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedAdminRouteRoute = AuthedAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthedRouteRoute,
 } as any)
 const AuthedOrganizationSlugRouteRoute =
   AuthedOrganizationSlugRouteRouteImport.update({
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
+  '/admin': typeof AuthedAdminRouteRoute
   '/api/$': typeof ApiSplatRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin': typeof AuthedAdminRouteRoute
   '/api/$': typeof ApiSplatRoute
   '/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_authed/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
+  '/_authed/admin': typeof AuthedAdminRouteRoute
   '/api/$': typeof ApiSplatRoute
   '/_authed/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/_authed/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/$organizationSlug'
+    | '/admin'
     | '/api/$'
     | '/$organizationSlug/$projectSlug'
     | '/invite/$invitationId'
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin'
     | '/api/$'
     | '/invite/$invitationId'
     | '/api/rpc/$'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/login'
     | '/_authed/$organizationSlug'
+    | '/_authed/admin'
     | '/api/$'
     | '/_authed/$organizationSlug/$projectSlug'
     | '/_authed/invite/$invitationId'
@@ -376,6 +388,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/$'
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/admin': {
+      id: '/_authed/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthedAdminRouteRouteImport
+      parentRoute: typeof AuthedRouteRoute
     }
     '/_authed/$organizationSlug': {
       id: '/_authed/$organizationSlug'
@@ -615,6 +634,7 @@ const AuthedOrganizationSlugRouteRouteWithChildren =
 
 interface AuthedRouteRouteChildren {
   AuthedOrganizationSlugRouteRoute: typeof AuthedOrganizationSlugRouteRouteWithChildren
+  AuthedAdminRouteRoute: typeof AuthedAdminRouteRoute
   AuthedInviteInvitationIdRoute: typeof AuthedInviteInvitationIdRoute
   AuthedOnboardingIndexRoute: typeof AuthedOnboardingIndexRoute
 }
@@ -622,6 +642,7 @@ interface AuthedRouteRouteChildren {
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedOrganizationSlugRouteRoute:
     AuthedOrganizationSlugRouteRouteWithChildren,
+  AuthedAdminRouteRoute: AuthedAdminRouteRoute,
   AuthedInviteInvitationIdRoute: AuthedInviteInvitationIdRoute,
   AuthedOnboardingIndexRoute: AuthedOnboardingIndexRoute,
 }

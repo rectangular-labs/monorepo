@@ -27,6 +27,7 @@ import {
 } from "@rectangular-labs/db/operations";
 import { generateText, Output, stepCountIs } from "ai";
 import { apiEnv } from "../env";
+import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
 import { createDataforseoToolWithMetadata } from "../lib/ai/tools/dataforseo-tool";
 import { createGscToolWithMetadata } from "../lib/ai/tools/google-search-console-tool";
 import { createStrategyToolsWithMetadata } from "../lib/ai/tools/strategy-tools";
@@ -316,7 +317,7 @@ Generate the next strategy phase now.`,
             );
           },
           output: Output.object({
-            schema: strategyPhaseSuggestionScheme,
+            schema: arktypeToAiJsonSchema(strategyPhaseSuggestionScheme),
           }),
         }).catch((error) => {
           console.error("error generating phase suggestion", error);

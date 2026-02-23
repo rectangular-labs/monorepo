@@ -13,6 +13,7 @@ import {
 import { generateText, Output, tool } from "ai";
 import { type } from "arktype";
 import type { ChatContext } from "../../../types";
+import { arktypeToAiJsonSchema } from "../arktype-json-schema";
 import type { AgentToolDefinition } from "./utils";
 
 export function createSettingsToolsWithMetadata(args: {
@@ -87,7 +88,7 @@ Respond with the new object matching the schema.`;
           const result = await generateText({
             model: openai("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: businessBackgroundSchema,
+              schema: arktypeToAiJsonSchema(businessBackgroundSchema),
             }),
             prompt,
           });
@@ -97,7 +98,7 @@ Respond with the new object matching the schema.`;
           const result = await generateText({
             model: openai("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: imageSettingsSchema,
+              schema: arktypeToAiJsonSchema(imageSettingsSchema),
             }),
             prompt,
           });
@@ -107,7 +108,7 @@ Respond with the new object matching the schema.`;
           const result = await generateText({
             model: openai("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: writingSettingsSchema,
+              schema: arktypeToAiJsonSchema(writingSettingsSchema),
             }),
             prompt,
           });
@@ -116,7 +117,7 @@ Respond with the new object matching the schema.`;
         const result = await generateText({
           model: openai("gpt-5.1-codex-mini"),
           output: Output.object({
-            schema: publishingSettingsSchema,
+            schema: arktypeToAiJsonSchema(publishingSettingsSchema),
           }),
           prompt,
         });
