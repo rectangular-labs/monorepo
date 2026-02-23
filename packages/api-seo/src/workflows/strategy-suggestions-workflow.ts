@@ -21,6 +21,7 @@ import {
 import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
 import { apiEnv } from "../env";
+import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
 import { createDataforseoToolWithMetadata } from "../lib/ai/tools/dataforseo-tool";
 import { createGscToolWithMetadata } from "../lib/ai/tools/google-search-console-tool";
 import { createStrategyToolsWithMetadata } from "../lib/ai/tools/strategy-tools";
@@ -78,97 +79,99 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
         timeout: "10 minutes",
       },
       async () => {
-        logInfo("creating strategy suggestion tools", {
-          instanceId: event.instanceId,
-          projectId: input.projectId,
-        });
-        const { tools: webTools } = createWebToolsWithMetadata(
-          project,
-          this.env.CACHE,
-        );
-        const dataforseoTools = createDataforseoToolWithMetadata(
-          project,
-          this.env.CACHE,
-        );
-        const db = createDb();
-        const strategyTools = createStrategyToolsWithMetadata({
-          db,
-          projectId: project.id,
-          organizationId: project.organizationId,
-        });
-        const env = apiEnv();
-        const auth = initAuthHandler({
-          baseURL: env.SEO_URL,
-          db,
-          encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
-          fromEmail: env.AUTH_SEO_FROM_EMAIL,
-          inboundApiKey: env.SEO_INBOUND_API_KEY,
-          credentialVerificationType: env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
-          discordClientId: env.AUTH_SEO_DISCORD_ID,
-          discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
-          githubClientId: env.AUTH_SEO_GITHUB_ID,
-          githubClientSecret: env.AUTH_SEO_GITHUB_SECRET,
-          googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
-          googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
-        });
-        const gscIntegrationResult = await getGscIntegrationForProject({
-          db,
-          projectId: project.id,
-          organizationId: project.organizationId,
-          authOverride: auth,
-        });
-        if (!gscIntegrationResult.ok) {
-          throw new Error(
-            `Something went wrong getting gsc integration ${gscIntegrationResult.error}`,
-            {
-              cause: gscIntegrationResult.error,
-            },
+        try {
+          logInfo("creating strategy suggestion tools", {
+            instanceId: event.instanceId,
+            projectId: input.projectId,
+          });
+          const { tools: webTools } = createWebToolsWithMetadata(
+            project,
+            this.env.CACHE,
           );
-        }
+          const dataforseoTools = createDataforseoToolWithMetadata(
+            project,
+            this.env.CACHE,
+          );
+          const db = createDb();
+          const strategyTools = createStrategyToolsWithMetadata({
+            db,
+            projectId: project.id,
+            organizationId: project.organizationId,
+          });
+          const env = apiEnv();
+          const auth = initAuthHandler({
+            baseURL: env.SEO_URL,
+            db,
+            encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
+            fromEmail: env.AUTH_SEO_FROM_EMAIL,
+            inboundApiKey: env.SEO_INBOUND_API_KEY,
+            credentialVerificationType:
+              env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
+            discordClientId: env.AUTH_SEO_DISCORD_ID,
+            discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
+            githubClientId: env.AUTH_SEO_GITHUB_ID,
+            githubClientSecret: env.AUTH_SEO_GITHUB_SECRET,
+            googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
+            googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
+          });
+          const gscIntegrationResult = await getGscIntegrationForProject({
+            db,
+            projectId: project.id,
+            organizationId: project.organizationId,
+            authOverride: auth,
+          });
+          if (!gscIntegrationResult.ok) {
+            throw new Error(
+              `Something went wrong getting gsc integration ${gscIntegrationResult.error}`,
+              {
+                cause: gscIntegrationResult.error,
+              },
+            );
+          }
 
-        const gscTools = createGscToolWithMetadata({
-          accessToken: gscIntegrationResult.value?.accessToken ?? null,
-          siteUrl: gscIntegrationResult.value?.config?.domain ?? null,
-          siteType: gscIntegrationResult.value?.config?.propertyType ?? null,
-        });
+          const gscTools = createGscToolWithMetadata({
+            accessToken: gscIntegrationResult.value?.accessToken ?? null,
+            siteUrl: gscIntegrationResult.value?.config?.domain ?? null,
+            siteType: gscIntegrationResult.value?.config?.propertyType ?? null,
+          });
 
-        const existingStrategiesResult = await listStrategiesByProjectId({
-          db,
-          projectId: project.id,
-          organizationId: project.organizationId,
-        });
-        if (!existingStrategiesResult.ok) {
-          throw existingStrategiesResult.error;
-        }
+          const existingStrategiesResult = await listStrategiesByProjectId({
+            db,
+            projectId: project.id,
+            organizationId: project.organizationId,
+          });
+          if (!existingStrategiesResult.ok) {
+            throw existingStrategiesResult.error;
+          }
 
-        const existingStrategies =
-          existingStrategiesResult.value.length > 0
-            ? existingStrategiesResult.value
-                .map((strategy) => {
-                  const goal = strategy.goal
-                    ? formatStrategyGoal(strategy.goal)
-                    : "none";
-                  const updatedAt = strategy.updatedAt
-                    ?.toISOString?.()
-                    ?.slice(0, 10);
-                  const dismissalReason = strategy.dismissalReason
-                    ? `dismissal reason: ${strategy.dismissalReason}`
-                    : "";
-                  return [
-                    `- [${strategy.status}] "${strategy.name}"`,
-                    `id: ${strategy.id}`,
-                    `goal: ${goal}`,
-                    `phases:${strategy.phases?.length ?? 0}`,
-                    `updated:${updatedAt ?? "unknown"}`,
-                    dismissalReason,
-                  ]
-                    .filter(Boolean)
-                    .join("|");
-                })
-                .join("\n")
-            : "- none";
+          const existingStrategies =
+            existingStrategiesResult.value.length > 0
+              ? existingStrategiesResult.value
+                  .map((strategy) => {
+                    const goal = strategy.goal
+                      ? formatStrategyGoal(strategy.goal)
+                      : "none";
+                    const updatedAt = strategy.updatedAt
+                      ?.toISOString?.()
+                      ?.slice(0, 10);
+                    const dismissalReason = strategy.dismissalReason
+                      ? `dismissal reason: ${strategy.dismissalReason}`
+                      : "";
+                    return [
+                      `- [${strategy.status}] "${strategy.name}"`,
+                      `id: ${strategy.id}`,
+                      `goal: ${goal}`,
+                      `phases:${strategy.phases?.length ?? 0}`,
+                      `updated:${updatedAt ?? "unknown"}`,
+                      dismissalReason,
+                    ]
+                      .filter(Boolean)
+                      .join("|");
+                  })
+                  .join("\n")
+              : "- none";
 
-        const system = `You are an SEO strategist generating strategy suggestions.
+          const system = `You are an SEO strategist generating strategy suggestions.
 
 ## Objective
 - Propose strategy suggestions that fit the project's context and current work.
@@ -190,35 +193,48 @@ ${existingStrategies}
 - Use realistic targets for goals and success criteria.
 - Strategies should be content-creation plays (new articles, pillar pages, content clusters), not technical SEO or on-page optimization tasks, unless the instructions explicitly ask for it.
 - Output MUST match the provided JSON schema.`;
-        logInfo("Starting strategy suggestion generation", {
-          instanceId: event.instanceId,
-          projectId: input.projectId,
-        });
-        const outputResult = await generateText({
-          model: openai("gpt-5.2"),
-          system,
-          tools: {
-            ...webTools,
-            ...dataforseoTools.tools,
-            ...strategyTools.tools,
-            ...(gscIntegrationResult.value ? gscTools.tools : {}),
-          },
-          prompt: `Project website: ${project.websiteUrl}
+          logInfo("Starting strategy suggestion generation", {
+            instanceId: event.instanceId,
+            projectId: input.projectId,
+          });
+          const outputResult = await generateText({
+            model: openai("gpt-5.2"),
+            system,
+            tools: {
+              ...webTools,
+              ...dataforseoTools.tools,
+              ...strategyTools.tools,
+              ...(gscIntegrationResult.value ? gscTools.tools : {}),
+            },
+            prompt: `Project website: ${project.websiteUrl}
 Business background:${formatBusinessBackground(project.businessBackground)}
 
 Generate strategy suggestions now.`,
-          stopWhen: [stepCountIs(40)],
-          onStepFinish: (step) => {
-            logAgentStep(logInfo, "step to generate suggestion finished", step);
-          },
-          output: Output.object({
-            schema: type({
-              suggestions: strategySuggestionSchema.array(),
+            stopWhen: [stepCountIs(40)],
+            onStepFinish: (step) => {
+              logAgentStep(
+                logInfo,
+                "step to generate suggestion finished",
+                step,
+              );
+            },
+            output: Output.object({
+              schema: arktypeToAiJsonSchema(
+                type({
+                  suggestions: strategySuggestionSchema.array(),
+                }),
+              ),
             }),
-          }),
-        });
+          });
 
-        return outputResult.output;
+          return outputResult.output;
+        } catch (e) {
+          console.error(
+            "[SeoStrategySuggestionsWorkflow] Error generating strategy suggestions",
+            e,
+          );
+          throw e;
+        }
       },
     );
 
