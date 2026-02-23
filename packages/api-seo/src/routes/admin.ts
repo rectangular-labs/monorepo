@@ -7,7 +7,7 @@ import { createTask } from "../lib/task";
 
 const triggerOnboardingTask = protectedBase
   .route({ method: "POST", path: "/trigger-onboarding-task" })
-  .input(type({ projectSlug: "string" }))
+  .input(type({ organizationSlug: "string", projectSlug: "string" }))
   .output(
     type({
       projectId: "string",
@@ -16,13 +16,25 @@ const triggerOnboardingTask = protectedBase
     }),
   )
   .handler(async ({ context, input }) => {
-    if (!context.user.email?.endsWith("fluidposts.com")) {
+    if (!context.user.email?.endsWith("@fluidposts.com")) {
       throw new ORPCError("FORBIDDEN", { message: "Not authorized" });
     }
 
     const db = context.db;
+    const organizationResult = await db.query.organization.findFirst({
+      where: eq(schema.organization.slug, input.organizationSlug),
+    });
+
+    if (!organizationResult) {
+      throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
+    }
+
     const projectResult = await db.query.seoProject.findFirst({
-      where: eq(schema.seoProject.slug, input.projectSlug),
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.organizationId, organizationResult.id),
+          eq(table.slug, input.projectSlug),
+        ),
     });
 
     if (!projectResult) {
@@ -59,7 +71,13 @@ const triggerOnboardingTask = protectedBase
 
 const triggerStrategySuggestionsTask = protectedBase
   .route({ method: "POST", path: "/trigger-strategy-suggestions-task" })
-  .input(type({ projectSlug: "string", instructions: "string" }))
+  .input(
+    type({
+      organizationSlug: "string",
+      projectSlug: "string",
+      instructions: "string",
+    }),
+  )
   .output(
     type({
       projectId: "string",
@@ -68,13 +86,25 @@ const triggerStrategySuggestionsTask = protectedBase
     }),
   )
   .handler(async ({ context, input }) => {
-    if (!context.user.email?.endsWith("fluidposts.com")) {
+    if (!context.user.email?.endsWith("@fluidposts.com")) {
       throw new ORPCError("FORBIDDEN", { message: "Not authorized" });
     }
 
     const db = context.db;
+    const organizationResult = await db.query.organization.findFirst({
+      where: eq(schema.organization.slug, input.organizationSlug),
+    });
+
+    if (!organizationResult) {
+      throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
+    }
+
     const projectResult = await db.query.seoProject.findFirst({
-      where: eq(schema.seoProject.slug, input.projectSlug),
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.organizationId, organizationResult.id),
+          eq(table.slug, input.projectSlug),
+        ),
     });
 
     if (!projectResult) {
@@ -122,7 +152,7 @@ const triggerStrategyPhaseGenerationTask = protectedBase
     }),
   )
   .handler(async ({ context, input }) => {
-    if (!context.user.email?.endsWith("fluidposts.com")) {
+    if (!context.user.email?.endsWith("@fluidposts.com")) {
       throw new ORPCError("FORBIDDEN", { message: "Not authorized" });
     }
 

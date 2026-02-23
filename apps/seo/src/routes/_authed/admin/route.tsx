@@ -19,24 +19,21 @@ export const Route = createFileRoute("/_authed/admin")({
 
 function RouteComponent() {
   const api = getApiClientRq();
+  const [organizationSlug, setOrganizationSlug] = useState("");
   const [projectSlug, setProjectSlug] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [phaseStrategyName, setPhaseStrategyName] = useState("");
 
   const { mutate: triggerOnboarding, isPending } = useMutation(
     api.admin.triggerOnboardingTask.mutationOptions({
       onSuccess: () => {
         toast.success("Triggered onboarding workflow successfully.");
-        setProjectSlug("");
       },
       onError: (error) => {
         toast.error(error.message);
       },
     }),
   );
-
-  const [instructions, setInstructions] = useState("");
-  const [phaseOrganizationSlug, setPhaseOrganizationSlug] = useState("");
-  const [phaseProjectSlug, setPhaseProjectSlug] = useState("");
-  const [phaseStrategyName, setPhaseStrategyName] = useState("");
 
   const { mutate: triggerStrategySuggestions, isPending: isPendingStrategy } =
     useMutation(
@@ -45,7 +42,6 @@ function RouteComponent() {
           toast.success(
             "Triggered strategy suggestions workflow successfully.",
           );
-          setProjectSlug("");
           setInstructions("");
         },
         onError: (error) => {
@@ -53,6 +49,7 @@ function RouteComponent() {
         },
       }),
     );
+
   const { mutate: triggerStrategyPhase, isPending: isPendingStrategyPhase } =
     useMutation(
       api.admin.triggerStrategyPhaseGenerationTask.mutationOptions({
@@ -60,8 +57,6 @@ function RouteComponent() {
           toast.success(
             "Triggered strategy phase generation workflow successfully.",
           );
-          setPhaseOrganizationSlug("");
-          setPhaseProjectSlug("");
           setPhaseStrategyName("");
         },
         onError: (error) => {
@@ -72,20 +67,29 @@ function RouteComponent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!organizationSlug.trim()) {
+      toast.error("Please enter an organization slug");
+      return;
+    }
     if (!projectSlug.trim()) {
       toast.error("Please enter a project slug");
       return;
     }
-    triggerOnboarding({ projectSlug });
+    triggerOnboarding({ organizationSlug, projectSlug });
   };
 
   const handleStrategySubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!organizationSlug.trim()) {
+      toast.error("Please enter an organization slug");
+      return;
+    }
     if (!projectSlug.trim()) {
       toast.error("Please enter a project slug");
       return;
     }
     triggerStrategySuggestions({
+      organizationSlug,
       projectSlug,
       instructions,
     });
@@ -93,11 +97,11 @@ function RouteComponent() {
 
   const handleStrategyPhaseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phaseOrganizationSlug.trim()) {
+    if (!organizationSlug.trim()) {
       toast.error("Please enter an organization slug");
       return;
     }
-    if (!phaseProjectSlug.trim()) {
+    if (!projectSlug.trim()) {
       toast.error("Please enter a project slug");
       return;
     }
@@ -107,8 +111,8 @@ function RouteComponent() {
     }
 
     triggerStrategyPhase({
-      organizationSlug: phaseOrganizationSlug,
-      projectSlug: phaseProjectSlug,
+      organizationSlug,
+      projectSlug,
       strategyName: phaseStrategyName,
     });
   };
@@ -135,6 +139,16 @@ function RouteComponent() {
         <div className="p-6 pt-0">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
+              <Label htmlFor="organizationSlug">Organization Slug</Label>
+              <Input
+                disabled={isPending}
+                id="organizationSlug"
+                onChange={(e) => setOrganizationSlug(e.target.value)}
+                placeholder="e.g. acme"
+                value={organizationSlug}
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="projectSlug">Project Slug</Label>
               <Input
                 disabled={isPending}
@@ -145,7 +159,9 @@ function RouteComponent() {
               />
             </div>
             <Button
-              disabled={!projectSlug.trim() || isPending}
+              disabled={
+                !organizationSlug.trim() || !projectSlug.trim() || isPending
+              }
               isLoading={isPending}
               type="submit"
             >
@@ -168,6 +184,18 @@ function RouteComponent() {
         <div className="p-6 pt-0">
           <form className="space-y-4" onSubmit={handleStrategySubmit}>
             <div className="space-y-2">
+              <Label htmlFor="strategyOrganizationSlug">
+                Organization Slug
+              </Label>
+              <Input
+                disabled={isPendingStrategy}
+                id="strategyOrganizationSlug"
+                onChange={(e) => setOrganizationSlug(e.target.value)}
+                placeholder="e.g. acme"
+                value={organizationSlug}
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="strategyProjectSlug">Project Slug</Label>
               <Input
                 disabled={isPendingStrategy}
@@ -188,7 +216,11 @@ function RouteComponent() {
               />
             </div>
             <Button
-              disabled={!projectSlug.trim() || isPendingStrategy}
+              disabled={
+                !organizationSlug.trim() ||
+                !projectSlug.trim() ||
+                isPendingStrategy
+              }
               isLoading={isPendingStrategy}
               type="submit"
             >
@@ -215,9 +247,9 @@ function RouteComponent() {
               <Input
                 disabled={isPendingStrategyPhase}
                 id="phaseOrganizationSlug"
-                onChange={(e) => setPhaseOrganizationSlug(e.target.value)}
+                onChange={(e) => setOrganizationSlug(e.target.value)}
                 placeholder="e.g. rectangular-labs"
-                value={phaseOrganizationSlug}
+                value={organizationSlug}
               />
             </div>
             <div className="space-y-2">
@@ -225,9 +257,9 @@ function RouteComponent() {
               <Input
                 disabled={isPendingStrategyPhase}
                 id="phaseProjectSlug"
-                onChange={(e) => setPhaseProjectSlug(e.target.value)}
+                onChange={(e) => setProjectSlug(e.target.value)}
                 placeholder="e.g. acme-corp"
-                value={phaseProjectSlug}
+                value={projectSlug}
               />
             </div>
             <div className="space-y-2">
@@ -242,8 +274,8 @@ function RouteComponent() {
             </div>
             <Button
               disabled={
-                !phaseOrganizationSlug.trim() ||
-                !phaseProjectSlug.trim() ||
+                !organizationSlug.trim() ||
+                !projectSlug.trim() ||
                 !phaseStrategyName.trim() ||
                 isPendingStrategyPhase
               }

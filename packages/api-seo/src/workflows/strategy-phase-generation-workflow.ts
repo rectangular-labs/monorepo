@@ -381,7 +381,7 @@ Generate the next strategy phase now.`,
           strategyId: strategy.id,
           title: contentUpdate.updatedTitle,
           description: contentUpdate.updatedDescription,
-          primaryKeyword: contentUpdate.updatedPrimaryKeyword,
+          primaryKeyword: contentUpdate.updatedPrimaryKeyword ?? undefined,
           role: contentUpdate.updatedRole,
           notes: contentUpdate.updatedNotes ?? null,
         });
