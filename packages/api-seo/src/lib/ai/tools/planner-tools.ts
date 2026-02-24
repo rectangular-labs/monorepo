@@ -18,19 +18,6 @@ const askQuestionInputSchema = type({
   }).array(),
 });
 
-const createPlanInputSchema = type({
-  "name?": "string",
-  "overview?": "string",
-  plan: "string",
-  "todos?": type({
-    id: "string",
-    content: "string",
-    "dependencies?": "string[]",
-  }).array(),
-  "old_str?": "string",
-  "new_str?": "string",
-});
-
 export function createPlannerToolsWithMetadata() {
   const askQuestions = tool({
     description:
@@ -44,22 +31,7 @@ export function createPlannerToolsWithMetadata() {
     },
   });
 
-  const createPlan = tool({
-    description:
-      "Create or update a plan artifact for the SEO/GEO task (overview + steps/todos).",
-    inputSchema: createPlanInputSchema,
-    async execute() {
-      return await Promise.resolve({
-        success: true,
-        message: "Plan created/updated",
-      });
-    },
-  });
-
-  const tools = {
-    ask_questions: askQuestions,
-    create_plan: createPlan,
-  } as const;
+  const tools = { ask_questions: askQuestions } as const;
 
   const toolDefinitions: AgentToolDefinition[] = [
     {
@@ -69,14 +41,6 @@ export function createPlannerToolsWithMetadata() {
       toolInstruction:
         "Use when missing info would materially change the approach. Provide 1-6 questions. Each question needs an id, prompt, and options[] (id+label). Set allow_multiple=true only if multiple selections are valid. Keep questions crisp and decision-driving.",
       tool: askQuestions,
-    },
-    {
-      toolName: "create_plan",
-      toolDescription:
-        "Publish a structured plan artifact (overview + step-by-step plan + optional todos with dependencies).",
-      toolInstruction:
-        "Use for larger/multi-step work. Provide: plan (markdown), optional name/overview, and optional todos[] with ids and dependencies. Only include old_str/new_str when proposing a text diff-style transformation.",
-      tool: createPlan,
     },
   ];
 

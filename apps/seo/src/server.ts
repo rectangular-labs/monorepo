@@ -22,7 +22,6 @@ export { Scheduler } from "@rectangular-labs/api-seo/scheduler-server";
 export { WebSocketServer } from "@rectangular-labs/api-seo/websocket-server";
 export {
   SeoOnboardingWorkflow,
-  SeoPlannerWorkflow,
   SeoStrategyPhaseGenerationWorkflow,
   SeoStrategySnapshotWorkflow,
   SeoStrategySuggestionsWorkflow,

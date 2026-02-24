@@ -11,15 +11,13 @@ import type { DB, schema } from "@rectangular-labs/db";
 import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
 import type { Scheduler } from "partywhen";
 import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
-import type { createSkillTools } from "./lib/ai/tools/skill-tools";
-import type { createTodoToolWithMetadata } from "./lib/ai/tools/todo-tool";
+import type { createSettingsToolsWithMetadata } from "./lib/ai/tools/settings-tools";
 import type {
   createPublicImagesBucket,
   createWorkspaceBucket,
 } from "./lib/bucket";
 import type { router } from "./routes";
 import type { SeoOnboardingWorkflowBinding } from "./workflows/onboarding-workflow";
-import type { SeoPlannerWorkflowBinding } from "./workflows/planner-workflow";
 import type { SeoStrategyPhaseGenerationWorkflowBinding } from "./workflows/strategy-phase-generation-workflow";
 import type { SeoStrategySnapshotWorkflowBinding } from "./workflows/strategy-snapshot-workflow";
 import type { SeoStrategySuggestionsWorkflowBinding } from "./workflows/strategy-suggestions-workflow";
@@ -31,9 +29,8 @@ export type RouterInputs = InferRouterInputs<Router>;
 export type RouterOutputs = InferRouterOutputs<Router>;
 
 type AiTools = InferUITools<
-  ReturnType<typeof createSkillTools> &
-    ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
-    ReturnType<typeof createTodoToolWithMetadata>["tools"]
+  ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
+    ReturnType<typeof createSettingsToolsWithMetadata>["tools"]
 >;
 export type SeoChatMessage = UIMessage<
   typeof chatMessageMetadataSchema.infer,
@@ -60,7 +57,6 @@ export interface InitialContext extends BaseContextWithAuth {
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
   publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
-  seoPlannerWorkflow: SeoPlannerWorkflowBinding;
   seoWriterWorkflow: SeoWriterWorkflowBinding;
   seoOnboardingWorkflow: SeoOnboardingWorkflowBinding;
   seoStrategySuggestionsWorkflow: SeoStrategySuggestionsWorkflowBinding;

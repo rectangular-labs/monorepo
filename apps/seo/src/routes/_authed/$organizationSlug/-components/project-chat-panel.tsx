@@ -33,18 +33,6 @@ import {
   PromptInputTools,
 } from "@rectangular-labs/ui/components/ai-elements/prompt-input";
 import {
-  Queue,
-  QueueItem,
-  QueueItemContent,
-  QueueItemDescription,
-  QueueItemIndicator,
-  QueueList,
-  QueueSection,
-  QueueSectionContent,
-  QueueSectionLabel,
-  QueueSectionTrigger,
-} from "@rectangular-labs/ui/components/ai-elements/queue";
-import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
@@ -61,13 +49,7 @@ import {
   Suggestion,
   Suggestions,
 } from "@rectangular-labs/ui/components/ai-elements/suggestion";
-import {
-  Task,
-  TaskContent,
-  TaskItem,
-  TaskItemFile,
-  TaskTrigger,
-} from "@rectangular-labs/ui/components/ai-elements/task";
+import { TaskItemFile } from "@rectangular-labs/ui/components/ai-elements/task";
 import {
   Copy,
   File,
@@ -79,12 +61,6 @@ import {
 } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Checkbox } from "@rectangular-labs/ui/components/ui/checkbox";
-import {
-  DialogDrawer,
-  DialogDrawerFooter,
-  DialogDrawerHeader,
-  DialogDrawerTitle,
-} from "@rectangular-labs/ui/components/ui/dialog-drawer";
 import {
   DropDrawer,
   DropDrawerContent,
@@ -112,11 +88,10 @@ import {
 } from "@rectangular-labs/ui/components/ui/tooltip";
 import { useIsApple } from "@rectangular-labs/ui/hooks/use-apple";
 import { cn } from "@rectangular-labs/ui/utils/cn";
-import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Fragment } from "react/jsx-runtime";
-import { getApiClient, getApiClientRq } from "~/lib/api";
+import { getApiClient } from "~/lib/api";
 import { useProjectChat } from "./project-chat-provider";
 
 type ChatMessagePart = SeoChatMessage["parts"][number];
@@ -323,125 +298,6 @@ function AskQuestionsToolPart({
   );
 }
 
-function CreatePlanToolPart({
-  part,
-  onApprove,
-  onReject,
-}: {
-  part: ChatToolPart;
-  onApprove: () => void;
-  onReject: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  if (
-    part.type !== "tool-create_plan" ||
-    part.state === "input-streaming" ||
-    part.state === "output-error"
-  )
-    return null;
-  const plan = part.input;
-  const title = plan.name?.trim() || "Proposed plan";
-  const overview = plan.overview?.trim();
-  const markdown = plan.plan ?? "";
-
-  return (
-    <div className="mb-4 w-full rounded-md border bg-background p-4">
-      <DialogDrawer
-        onOpenChange={setOpen}
-        open={open}
-        trigger={
-          <button
-            className={cn(
-              "w-full text-left",
-              "rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            )}
-            type="button"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="truncate font-medium text-sm">{title}</div>
-                {overview ? (
-                  <div className="mt-1 line-clamp-2 text-muted-foreground text-xs">
-                    {overview}
-                  </div>
-                ) : (
-                  <div className="mt-1 text-muted-foreground text-xs">
-                    Click to view details
-                  </div>
-                )}
-              </div>
-              <div className="shrink-0 text-muted-foreground text-xs">
-                {part.state === "output-available" ? "Ready" : "Running"}
-              </div>
-            </div>
-          </button>
-        }
-      >
-        <DialogDrawerHeader className="space-y-1">
-          <DialogDrawerTitle>{title}</DialogDrawerTitle>
-          {overview ? (
-            <div className="text-muted-foreground text-sm">{overview}</div>
-          ) : null}
-        </DialogDrawerHeader>
-
-        <div className="max-h-[60vh] overflow-auto px-4 pb-4">
-          <Response>{markdown}</Response>
-        </div>
-
-        <DialogDrawerFooter className="gap-2">
-          <Button
-            disabled={part.state !== "output-available"}
-            onClick={() => {
-              setOpen(false);
-              onReject();
-            }}
-            size="sm"
-            type="button"
-            variant="outline"
-          >
-            Reject
-          </Button>
-          <Button
-            disabled={part.state !== "output-available"}
-            onClick={() => {
-              setOpen(false);
-              onApprove();
-            }}
-            size="sm"
-            type="button"
-          >
-            Approve
-          </Button>
-        </DialogDrawerFooter>
-      </DialogDrawer>
-
-      <div className="mt-3 flex justify-end gap-2">
-        <Button
-          disabled={part.state !== "output-available"}
-          onClick={onReject}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          Reject
-        </Button>
-        <Button
-          disabled={part.state !== "output-available"}
-          onClick={onApprove}
-          size="sm"
-          type="button"
-        >
-          Approve
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-type TodoSnapshot = Extract<
-  Extract<ChatMessagePart, { type: `tool-manage_todo` }>,
-  { state: `output-available` }
->["output"]["todos"];
 function inferCurrentPage(pathname: string): ProjectChatCurrentPage {
   if (pathname.includes("/content")) return "content-list";
   if (pathname.includes("/settings")) return "settings";
@@ -470,11 +326,6 @@ function ChatConversation({
   const { pathname } = useLocation();
   const currentPage = inferCurrentPage(pathname);
 
-  const queryClient = useQueryClient();
-  const todoSnapshotSetRef = useRef<Set<string>>(new Set());
-  const [todoSnapshot, setTodoSnapshot] = useState<NonNullable<TodoSnapshot>>(
-    [],
-  );
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const chatIdRef = useRef<string | null>(chatId);
 
@@ -523,44 +374,7 @@ function ChatConversation({
     if (!chatId) {
       setMessages([]);
     }
-    setTodoSnapshot([]);
-    todoSnapshotSetRef.current.clear();
   }, [chatId, setMessages]);
-
-  useEffect(() => {
-    for (const message of messages) {
-      for (const part of message.parts) {
-        if (
-          part.type === "tool-use_skills" &&
-          part.state === "output-available" &&
-          (part.input.skill === "create_articles" ||
-            part.input.skill === "write_file")
-        ) {
-          void queryClient.invalidateQueries({
-            queryKey: getApiClientRq().content.list.key({
-              type: "query",
-            }),
-          });
-        }
-
-        if (
-          part.type === "tool-manage_todo" &&
-          part.state === "output-available" &&
-          !todoSnapshotSetRef.current.has(part.toolCallId)
-        ) {
-          todoSnapshotSetRef.current.add(part.toolCallId);
-          if (part.output.todos) {
-            setTodoSnapshot(part.output.todos);
-          }
-        }
-      }
-    }
-  }, [messages, queryClient]);
-
-  const rejectPlanPrefill = () => {
-    setInput("Let's change the following:\n1. ");
-    textareaRef.current?.focus();
-  };
 
   const handleSuggestion = (suggestion: string) => {
     if (isMessagesLoading) return;
@@ -582,10 +396,6 @@ function ChatConversation({
       textareaRef.current.style.height = "auto";
     }
   };
-
-  const openTodos = useMemo(() => {
-    return todoSnapshot.filter((t) => t.status === "open");
-  }, [todoSnapshot]);
 
   const isInputDisabled = isMessagesLoading;
   const showMessagesLoading = isMessagesLoading && messages.length === 0;
@@ -687,152 +497,6 @@ function ChatConversation({
                         </Shimmer>
                       );
                     }
-                    case "tool-create_plan": {
-                      if (part.state === "output-available") {
-                        return (
-                          <CreatePlanToolPart
-                            key={`${message.id}-${part.toolCallId}`}
-                            onApprove={() =>
-                              handleSubmit({
-                                text: "plan looks good, let's start.",
-                              })
-                            }
-                            onReject={() => rejectPlanPrefill()}
-                            part={part}
-                          />
-                        );
-                      }
-                      return <Shimmer>Creating plan</Shimmer>;
-                    }
-                    case "tool-manage_todo": {
-                      if (part.state === "input-streaming") {
-                        return (
-                          <Shimmer
-                            className="mb-4 text-sm"
-                            key={part.toolCallId}
-                          >
-                            Managing tasks
-                          </Shimmer>
-                        );
-                      }
-
-                      if (part.state === "input-available") {
-                        const { action } = part.input;
-                        const actionLabel = (() => {
-                          switch (action) {
-                            case "create":
-                              return "Creating task";
-                            case "update":
-                              return "Updating task";
-                            case "list":
-                              return "Listing tasks";
-                          }
-                        })();
-                        return (
-                          <Shimmer
-                            className="mb-4 text-sm"
-                            key={part.toolCallId}
-                          >
-                            {actionLabel}
-                          </Shimmer>
-                        );
-                      }
-
-                      if (part.state === "output-available") {
-                        const { action } = part.input;
-                        const actionLabel = (() => {
-                          switch (action) {
-                            case "create":
-                              return `Creating task ${part.input.todo?.title}`;
-                            case "update":
-                              return `Updating task`;
-                            case "list":
-                              return "Listed tasks";
-                          }
-                        })();
-                        return (
-                          <div
-                            className="mb-4 text-muted-foreground text-sm"
-                            key={part.toolCallId}
-                          >
-                            {actionLabel}
-                          </div>
-                        );
-                      }
-                      return (
-                        <div
-                          className="mb-4 text-muted-foreground text-sm"
-                          key={`${message.id}-${part.toolCallId}`}
-                        >
-                          Something went wrong managing tasks
-                        </div>
-                      );
-                    }
-                    case "tool-read_skills": {
-                      if (part.state === "output-available") {
-                        const skillName = part.input.skill.replaceAll("_", " ");
-                        return (
-                          <div
-                            className="mb-4 text-muted-foreground text-sm"
-                            key={`${message.id}-${part.toolCallId}`}
-                          >
-                            Done reading skill {skillName}.
-                          </div>
-                        );
-                      }
-                      return (
-                        <Shimmer
-                          className="mb-4 text-sm"
-                          key={`${message.id}-${part.toolCallId}`}
-                        >
-                          Reading skill...
-                        </Shimmer>
-                      );
-                    }
-
-                    case "tool-use_skills": {
-                      const taskName =
-                        part.input?.taskName?.trim() || "Executing Task";
-                      const state = (() => {
-                        switch (part.state) {
-                          case "output-available": {
-                            const result = (() => {
-                              if (part.output?.success) {
-                                return part.output?.result ?? "Completed";
-                              }
-                              return "Failed";
-                            })();
-                            return result;
-                          }
-                          case "output-error":
-                            return part.errorText;
-                          default:
-                            return part.input?.instructions ?? "Running";
-                        }
-                      })();
-                      const isRunning =
-                        part.state !== "output-available" &&
-                        part.state !== "output-error";
-                      return (
-                        <Task
-                          className="mb-4"
-                          defaultOpen={false}
-                          key={`${message.id}-${i}`}
-                        >
-                          {isRunning ? (
-                            <Shimmer className="text-sm" key={part.toolCallId}>
-                              {taskName}
-                            </Shimmer>
-                          ) : (
-                            <TaskTrigger title={taskName} />
-                          )}
-                          <TaskContent>
-                            <TaskItem>{state}</TaskItem>
-                          </TaskContent>
-                        </Task>
-                      );
-                    }
-
                     default: {
                       return null;
                     }
@@ -861,38 +525,6 @@ function ChatConversation({
               />
             </Suggestions>
           )}
-          {openTodos.length > 0 && (
-            <div className="px-3 pt-2">
-              <Queue>
-                <QueueSection defaultOpen={false}>
-                  <QueueSectionTrigger>
-                    <QueueSectionLabel count={openTodos.length} label="Tasks" />
-                  </QueueSectionTrigger>
-                  <QueueSectionContent>
-                    <QueueList>
-                      {openTodos.map((t) => (
-                        <QueueItem key={t.id}>
-                          <div className="flex items-start gap-2">
-                            <QueueItemIndicator
-                              className="shrink-0"
-                              completed={false}
-                            />
-                            <QueueItemContent>{t.title}</QueueItemContent>
-                          </div>
-                          {t.notes ? (
-                            <QueueItemDescription>
-                              {t.notes}
-                            </QueueItemDescription>
-                          ) : null}
-                        </QueueItem>
-                      ))}
-                    </QueueList>
-                  </QueueSectionContent>
-                </QueueSection>
-              </Queue>
-            </div>
-          )}
-
           <PromptInput
             className="px-3 py-2"
             globalDrop
