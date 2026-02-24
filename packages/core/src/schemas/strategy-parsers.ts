@@ -28,7 +28,7 @@ export const strategySuggestionSchema = type({
   motivation: type("string").describe(
     "Why this strategy matters right now, grounded in research or data.",
   ),
-  "description?": type("string").describe(
+  description: type("string|null").describe(
     "Concise description of what will be executed and how it works.",
   ),
   goal: strategyGoalSchema.describe(
@@ -44,19 +44,22 @@ export const cadenceSchema = type({
   // "daily" => frequency is articles/day
   // "weekly" => frequency is articles/week
   // "monthly" => frequency is articles/month
-  period: cadencePeriodSchema
-    .describe("Publishing cadence unit.")
-    .default("weekly"),
-  frequency: type("number.integer >= 1")
-    .describe("Number of items published per period.")
-    .default(3),
+  period: cadencePeriodSchema.describe(
+    "Publishing cadence unit. Default to weekly",
+  ),
+  // .default("weekly"),
+  frequency: type("number.integer >= 1").describe(
+    "Number of items published per period. Default to 3",
+  ),
+  // .default(3),
   // Days that are eligible for publishing. Deselecting a day means we won't publish on that day.
   allowedDays: weekdaySchema
+    .describe("Eligible days for publishing.")
     .array()
     .describe(
-      "Eligible days for publishing. By default prefer mon through fri for publishing",
-    )
-    .default(() => ["mon", "tue", "wed", "thu", "fri"] as const),
+      "The set of days that content will be published on. By default prefer mon through fri for publishing.",
+    ),
+  // .default(() => ["mon", "tue", "wed", "thu", "fri"] as const),
 });
 
 export type PublishingCadence = typeof cadenceSchema.infer;
@@ -95,19 +98,21 @@ export const strategyPhaseSuggestionScheme = type({
     contentDraftId: type("string.uuid").describe(
       "Existing draft to improve/expand.",
     ),
-    "updatedRole?": contentRoleSchema.describe(
-      "Updated role for the content item based on the data. If not provided, the existing role will be used.",
-    ),
-    "updatedTitle?": type("string").describe(
+    updatedRole: contentRoleSchema
+      .or(type.null)
+      .describe(
+        "Updated role for the content item based on the data. If not provided, the existing role will be used.",
+      ),
+    updatedTitle: type("string|null").describe(
       "Updated SEO optimized title for the content item based on the data. If not provided, the existing title will be used.",
     ),
-    "updatedDescription?": type("string").describe(
+    updatedDescription: type("string|null").describe(
       "Updated SEO optimized description for the content item based on the data. If not provided, the existing description will be used.",
     ),
-    "updatedPrimaryKeyword?": type("string").describe(
+    updatedPrimaryKeyword: type("string|null").describe(
       "Updated primary keyword for the content item based on the data. If not provided, the existing primary keyword will be used.",
     ),
-    "updatedNotes?": type("string").describe(
+    updatedNotes: type("string|null").describe(
       "Notes on what we want to improve or expand on. This could be anything from adding new sections and subtopics, to improving the content based on the data, to adding new internal links. If we need to tweak anything in the content of the article, make sure to include notes here.",
     ),
   })
@@ -124,7 +129,7 @@ export const strategyPhaseSuggestionScheme = type({
     plannedPrimaryKeyword: type("string").describe(
       "Primary keyword targeted by the content item.",
     ),
-    "notes?": type("string").describe(
+    notes: type("string|null").describe(
       "Additional notes or constraints for the content item when we get to writing the content.",
     ),
   })

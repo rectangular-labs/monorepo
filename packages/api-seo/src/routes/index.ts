@@ -7,6 +7,7 @@ export const router = {
   content: lazy(() => import("./content")),
   strategy: lazy(() => import("./strategy")),
   integrations: lazy(() => import("./integration")),
+  admin: lazy(() => import("./admin")),
   auth: {
     session: lazy(() => import("./auth/session")),
     organization: lazy(() => import("./auth/organization")),
