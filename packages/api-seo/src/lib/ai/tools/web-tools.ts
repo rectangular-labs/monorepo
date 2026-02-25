@@ -1,7 +1,6 @@
 import { google } from "@ai-sdk/google";
 import type { schema } from "@rectangular-labs/db";
-import { generateText, Output, stepCountIs, tool } from "ai";
-import { type } from "arktype";
+import { generateText, jsonSchema, Output, stepCountIs, tool } from "ai";
 import type { InitialContext } from "../../../types";
 import {
   configureDataForSeoClient,
@@ -9,41 +8,8 @@ import {
   getLocationAndLanguage,
 } from "../../dataforseo/utils";
 import { logAgentStep } from "../utils/log-agent-step";
-import type { AgentToolDefinition } from "./utils";
 
-const webFetchInputSchema = type({
-  url: type("string").describe("The URL to fetch."),
-  query: type("string").describe(
-    "What to find or answer from the page content.",
-  ),
-});
-
-const webSearchInputSchema = type({
-  instruction: type("string").describe(
-    "The instruction for what the web search should focus on. The instruction should be focused on a singular goal or topic. Break out multiple goals into multiple instructions via multiple web_search tool calls.",
-  ),
-  queries: type("string[]").describe(
-    "The queries to that the search itself should be focused on that would help fulfill the instruction.",
-  ),
-});
-
-const webSearchOutputSchema = type({
-  results: type({
-    url: type("string").describe(
-      "The URL of the site that contains the relevant information.",
-    ),
-    siteGroundingText: type("string").describe(
-      "The text from the site that grounds the relevant information.",
-    ),
-    relevantInformation: type("string").describe(
-      "The relevant information from the site that helps fulfill the instruction.",
-    ),
-  })
-    .array()
-    .describe("Array of relevant web search results."),
-});
-
-export function createWebToolsWithMetadata(
+export function createWebTools(
   project: typeof schema.seoProject.$inferSelect,
   cacheKV: InitialContext["cacheKV"],
 ) {
@@ -53,7 +19,38 @@ export function createWebToolsWithMetadata(
   const webFetch = tool({
     description:
       "Fetch a webpage and answer a specific query regarding a webpage.",
-    inputSchema: webFetchInputSchema,
+    inputSchema: jsonSchema<{
+      url: string;
+      query: string;
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["url", "query"],
+      properties: {
+        url: {
+          type: "string",
+          description: "The URL to fetch.",
+        },
+        query: {
+          type: "string",
+          description: "What to find or answer from the page content.",
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          url: "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+          query: "Summarize how Google recommends writing useful titles.",
+        },
+      },
+      {
+        input: {
+          url: "https://example.com/pricing",
+          query: "Extract only the monthly pricing tiers and limits.",
+        },
+      },
+    ],
     async execute({ url, query }) {
       const prompt = [
         "Fetch the page content using url_context and answer the query.",
@@ -97,8 +94,52 @@ export function createWebToolsWithMetadata(
 
   const webSearch = tool({
     description:
-      "Run a live web search for up-to-date information. This tool uses the web to find the latest information on the given queries.",
-    inputSchema: webSearchInputSchema,
+      "Run a live web search for up-to-date information. This tool uses the web to find the latest information  based off the the given instruction and queries.",
+    inputSchema: jsonSchema<{
+      instruction: string;
+      queries: string[];
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["instruction", "queries"],
+      properties: {
+        instruction: {
+          type: "string",
+          description:
+            "The instruction for what the web search should focus on. Keep it focused on a singular goal or topic. Break out multiple goals into multiple instructions via multiple web_search tool calls.",
+        },
+        queries: {
+          type: "array",
+          minItems: 1,
+          description: "Search queries that will help fulfill the instruction.",
+          items: {
+            type: "string",
+          },
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          instruction:
+            "Find reliable sources comparing AI content detection false positives.",
+          queries: [
+            "ai content detector false positives study",
+            "llm detector reliability research",
+          ],
+        },
+      },
+      {
+        input: {
+          instruction:
+            "Find current guidance on internal linking for large websites.",
+          queries: [
+            "internal linking best practices large sites",
+            "site architecture internal links seo",
+          ],
+        },
+      },
+    ],
     async execute({ instruction, queries }) {
       if (queries.length === 0) {
         return {
@@ -169,7 +210,44 @@ ${item.result
       const { output: object } = await generateText({
         model: google("gemini-3-flash-preview"),
         output: Output.object({
-          schema: webSearchOutputSchema,
+          schema: jsonSchema<{
+            results: {
+              url: string;
+              siteGroundingText: string;
+              relevantInformation: string;
+            }[];
+          }>({
+            type: "object",
+            additionalProperties: false,
+            required: ["results"],
+            properties: {
+              results: {
+                type: "array",
+                description: "Array of relevant web search results.",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  required: ["url", "siteGroundingText", "relevantInformation"],
+                  properties: {
+                    url: {
+                      type: "string",
+                      description:
+                        "The URL of the site that contains the relevant information.",
+                    },
+                    siteGroundingText: {
+                      type: "string",
+                      description: "Grounding text pulled from the site.",
+                    },
+                    relevantInformation: {
+                      type: "string",
+                      description:
+                        "Relevant information that helps fulfill the instruction.",
+                    },
+                  },
+                },
+              },
+            },
+          }),
         }),
         system: "You are a precise research assistant.",
         prompt,
@@ -198,23 +276,5 @@ ${item.result
   });
 
   const tools = { web_fetch: webFetch, web_search: webSearch } as const;
-  const toolDefinitions: AgentToolDefinition[] = [
-    {
-      toolName: "web_fetch",
-      toolDescription:
-        "Fetch and render a URL, returning readable Markdown of the page.",
-      toolInstruction:
-        "Provide url. Use to quote/summarize competitor pages, docs, pricing, and SERP landing pages.",
-      tool: webFetch,
-    },
-    {
-      toolName: "web_search",
-      toolDescription: "Run a live web search for up-to-date information.",
-      toolInstruction:
-        "Provide an instruction for what the web search should focus on and a list of queries to that the search itself should be focused on. Use for competitor research, definitions, current best practices, and finding relevant URLs to fetch.",
-      tool: webSearch,
-    },
-  ];
-
-  return { toolDefinitions, tools };
+  return { tools };
 }

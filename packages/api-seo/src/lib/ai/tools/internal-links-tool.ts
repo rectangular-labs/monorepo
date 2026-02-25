@@ -1,40 +1,54 @@
-import { COUNTRY_CODE_MAP } from "@rectangular-labs/core/schemas/project-parsers";
 import { fetchSerp } from "@rectangular-labs/dataforseo";
-import { tool } from "ai";
-import { type } from "arktype";
-import { configureDataForSeoClient } from "../../dataforseo/utils";
-import type { AgentToolDefinition } from "./utils";
+import type { schema } from "@rectangular-labs/db";
+import { jsonSchema, tool } from "ai";
+import {
+  configureDataForSeoClient,
+  getLocationAndLanguage,
+} from "../../dataforseo/utils";
 
-const internalLinksInputSchema = type({
-  query: type("string")
-    .atLeastLength(1)
-    .describe("Query/keyword to search for in SERP."),
-  countryCode: type("string")
-    .atLeastLength(2)
-    .describe("2-letter country code (e.g. US, GB, CA)."),
-  languageCode: type("string")
-    .atLeastLength(2)
-    .describe("2-letter language code (e.g. en, es)."),
-});
+export function createInternalLinksTool(
+  project: typeof schema.seoProject.$inferSelect,
+) {
+  const { locationName, languageCode } = getLocationAndLanguage(project);
+  const targetUrl = project.websiteUrl;
 
-type InternalLinksInput = typeof internalLinksInputSchema.infer;
-
-export function createInternalLinksToolWithMetadata(targetUrl: string) {
   const internalLinks = tool({
     description:
       "Query SERP results for a query, constrained to a target URL, and return the organic results.",
-    inputSchema: internalLinksInputSchema,
-    execute: async (input: InternalLinksInput) => {
+    inputSchema: jsonSchema<{
+      query: string;
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["query"],
+      properties: {
+        query: {
+          type: "string",
+          minLength: 1,
+          description:
+            "Query/keyword to search for that we want to find related content previously written on.",
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          query: "invoice automation software",
+        },
+      },
+      {
+        input: {
+          query: "AI content generation",
+        },
+      },
+    ],
+    execute: async (input) => {
       configureDataForSeoClient();
 
-      const locationName =
-        COUNTRY_CODE_MAP[input.countryCode] ?? "United States";
-
       const serpResult = await fetchSerp({
-        keyword: input.query,
+        keyword: `${input.query} site:${targetUrl}`,
         locationName,
-        languageCode: input.languageCode,
-        targetUrl,
+        languageCode,
       });
 
       if (!serpResult.ok) {
@@ -71,16 +85,5 @@ export function createInternalLinksToolWithMetadata(targetUrl: string) {
   });
 
   const tools = { internal_links: internalLinks } as const;
-  const toolDefinitions: AgentToolDefinition[] = [
-    {
-      toolName: "internal_links",
-      toolDescription:
-        "Query SERP results for a query, constrained to a target URL, and return the organic results.",
-      toolInstruction:
-        "Provide query, countryCode, and languageCode. The tool will query SERP and return the organic results (url, title, description, extendedSnippet).",
-      tool: internalLinks,
-    },
-  ];
-
-  return { toolDefinitions, tools };
+  return { tools };
 }
