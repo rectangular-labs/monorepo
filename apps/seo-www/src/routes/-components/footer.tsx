@@ -7,19 +7,6 @@ import { Link } from "@tanstack/react-router";
 
 const links = [
   {
-    group: "Solution",
-    items: [
-      {
-        title: "Founders",
-        href: "/",
-      },
-      {
-        title: "Freelancers",
-        href: "/seo-experts",
-      },
-    ],
-  },
-  {
     group: "Company",
     items: [
       {

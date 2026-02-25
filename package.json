@@ -10,6 +10,7 @@
     "dev": "docker compose up -d && pnpm turbo watch dev --continue",
     "dev:seo": "docker compose up -d && pnpm turbo watch dev --continue --filter=seo... --filter=!seo-www",
     "dev:seo-www": "pnpm turbo watch dev --continue --filter=seo-www",
+    "dev:localhost": "pnpm --filter seo-www dev",
     "build": "turbo build",
     "build:preview": "turbo build:preview",
     "build:production": "turbo build:production",

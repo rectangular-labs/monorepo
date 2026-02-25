@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhoWeAreRouteImport } from './routes/who-we-are'
 import { Route as SeoExpertsRouteImport } from './routes/seo-experts'
 import { Route as ReferralRouteImport } from './routes/referral'
+import { Route as LandingMockupRouteImport } from './routes/landing-mockup'
+import { Route as LandingDemoRouteImport } from './routes/landing-demo'
 import { Route as BlogRouteRouteImport } from './routes/blog/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
@@ -35,6 +37,16 @@ const SeoExpertsRoute = SeoExpertsRouteImport.update({
 const ReferralRoute = ReferralRouteImport.update({
   id: '/referral',
   path: '/referral',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingMockupRoute = LandingMockupRouteImport.update({
+  id: '/landing-mockup',
+  path: '/landing-mockup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingDemoRoute = LandingDemoRouteImport.update({
+  id: '/landing-demo',
+  path: '/landing-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRouteRoute = BlogRouteRouteImport.update({
@@ -87,6 +99,8 @@ const ApiBlogSearchRoute = ApiBlogSearchRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteRouteWithChildren
+  '/landing-demo': typeof LandingDemoRoute
+  '/landing-mockup': typeof LandingMockupRoute
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
@@ -100,6 +114,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/landing-demo': typeof LandingDemoRoute
+  '/landing-mockup': typeof LandingMockupRoute
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
@@ -115,6 +131,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteRouteWithChildren
+  '/landing-demo': typeof LandingDemoRoute
+  '/landing-mockup': typeof LandingMockupRoute
   '/referral': typeof ReferralRoute
   '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
@@ -131,6 +149,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
+    | '/landing-demo'
+    | '/landing-mockup'
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
@@ -144,6 +164,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/landing-demo'
+    | '/landing-mockup'
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
@@ -158,6 +180,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/blog'
+    | '/landing-demo'
+    | '/landing-mockup'
     | '/referral'
     | '/seo-experts'
     | '/who-we-are'
@@ -173,6 +197,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogRouteRoute: typeof BlogRouteRouteWithChildren
+  LandingDemoRoute: typeof LandingDemoRoute
+  LandingMockupRoute: typeof LandingMockupRoute
   ReferralRoute: typeof ReferralRoute
   SeoExpertsRoute: typeof SeoExpertsRoute
   WhoWeAreRoute: typeof WhoWeAreRoute
@@ -203,6 +229,20 @@ declare module '@tanstack/react-router' {
       path: '/referral'
       fullPath: '/referral'
       preLoaderRoute: typeof ReferralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing-mockup': {
+      id: '/landing-mockup'
+      path: '/landing-mockup'
+      fullPath: '/landing-mockup'
+      preLoaderRoute: typeof LandingMockupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing-demo': {
+      id: '/landing-demo'
+      path: '/landing-demo'
+      fullPath: '/landing-demo'
+      preLoaderRoute: typeof LandingDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -290,6 +330,8 @@ const BlogRouteRouteWithChildren = BlogRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogRouteRoute: BlogRouteRouteWithChildren,
+  LandingDemoRoute: LandingDemoRoute,
+  LandingMockupRoute: LandingMockupRoute,
   ReferralRoute: ReferralRoute,
   SeoExpertsRoute: SeoExpertsRoute,
   WhoWeAreRoute: WhoWeAreRoute,

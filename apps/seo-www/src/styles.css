@@ -8,3 +8,16 @@
   --border: oklch(0.78 0 0);
   --input: oklch(0.78 0 0);
 }
+
+.seo-www-hero-display {
+  font-family: "EB Garamond Variable", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+@keyframes grid-flow {
+  0%, 100% { opacity: 0.88; }
+  50% { opacity: 1; }
+}
+
+.animate-grid-flow {
+  animation: grid-flow 25s ease-in-out infinite;
+}
