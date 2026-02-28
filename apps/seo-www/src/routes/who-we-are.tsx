@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/who-we-are")({
   component: WhoWeArePage,
@@ -95,14 +95,14 @@ function WhoWeArePage() {
             <span className="text-emerald-600 dark:text-emerald-400">.</span>
           </h2>
           <p className="mb-8 text-neutral-600 leading-relaxed dark:text-neutral-300">
-            Fluid Posts is run by two people. Winston spent five years in
-            Silicon Valley building automation systems for startups; he handles
-            the technical side—data pipelines, content systems, and
-            infrastructure that runs reliably at scale. Aaron trained in law at
-            Oxford and moved into content strategy; he leads keyword research,
-            competitor analysis, and the editorial process that turns topics
-            into pages that rank. We built the company after ranking our own
-            projects and seeing the same approach work for clients.
+            Two of us make Fluid Posts. Winston spent five years in Silicon
+            Valley building automation systems for startups; he handles the
+            technical side—data pipelines, content systems, and infrastructure
+            that runs reliably at scale. Aaron trained in law at Oxford and
+            moved into content strategy; he leads keyword research, competitor
+            analysis, and the editorial process that turns topics into pages
+            that rank. We built the company after ranking our own projects and
+            seeing the same approach work for clients.
           </p>
           <div className="flex flex-wrap gap-6 border-neutral-200 text-sm sm:border-l sm:pl-6 dark:border-neutral-700">
             <div>
