@@ -156,12 +156,14 @@ export function BlogPost({
             ) : null}
           </div>
         ) : null}
-        <DocsBody>
-          <MDXRenderer
-            code={data.body}
-            {...(components ? { components } : {})}
-          />
-        </DocsBody>
+        <div className="blog-article-prose">
+          <DocsBody>
+            <MDXRenderer
+              code={data.body}
+              {...(components ? { components } : {})}
+            />
+          </DocsBody>
+        </div>
         <div className="mt-10 border-t pt-6">
           <div className="flex items-center justify-between gap-4">
             {prevPost ? (

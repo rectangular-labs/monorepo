@@ -89,46 +89,36 @@ function WhoWeArePage() {
           </svg>
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 text-center sm:mb-16">
-            <h2 className="mb-4 font-light font-serif text-[28px] text-neutral-900 leading-[1.1] tracking-[-0.02em] sm:text-[36px] md:text-[44px] dark:text-white">
-              The Team
-              <span className="text-emerald-600 dark:text-emerald-400">.</span>
-            </h2>
-            <div className="mx-auto h-0.5 w-16 bg-emerald-600 dark:bg-emerald-400" />
-          </div>
-
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-2">
-            <div className="group relative overflow-hidden rounded-2xl bg-white p-8 transition-transform hover:scale-[1.02] dark:bg-neutral-800">
-              <div className="mb-4">
-                <h3 className="font-serif text-2xl text-neutral-900 tracking-[-0.01em] sm:text-3xl dark:text-white">
-                  Winston
-                </h3>
-                <p className="text-emerald-600 text-sm dark:text-emerald-400">
-                  Co-founder · Engineering
-                </p>
-              </div>
-              <p className="text-neutral-600 leading-relaxed dark:text-neutral-300">
-                Five years building automation systems in Silicon Valley.
-                Winston handles the technical infrastructure—data pipelines,
-                content automation, and the systems that keep everything running
-                reliably at scale.
+        <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 className="mb-6 font-light font-serif text-[28px] text-neutral-900 leading-[1.1] tracking-[-0.02em] sm:text-[36px] md:text-[44px] dark:text-white">
+            The Team
+            <span className="text-emerald-600 dark:text-emerald-400">.</span>
+          </h2>
+          <p className="mb-8 text-neutral-600 leading-relaxed dark:text-neutral-300">
+            Fluid Posts is run by two people. Winston spent five years in
+            Silicon Valley building automation systems for startups; he handles
+            the technical side—data pipelines, content systems, and
+            infrastructure that runs reliably at scale. Aaron trained in law at
+            Oxford and moved into content strategy; he leads keyword research,
+            competitor analysis, and the editorial process that turns topics
+            into pages that rank. We built the company after ranking our own
+            projects and seeing the same approach work for clients.
+          </p>
+          <div className="flex flex-wrap gap-6 border-neutral-200 text-sm sm:border-l sm:pl-6 dark:border-neutral-700">
+            <div>
+              <p className="font-medium text-neutral-900 dark:text-white">
+                Winston
+              </p>
+              <p className="text-emerald-600 dark:text-emerald-400">
+                Co-founder · Engineering
               </p>
             </div>
-
-            <div className="group relative overflow-hidden rounded-2xl bg-white p-8 transition-transform hover:scale-[1.02] dark:bg-neutral-800">
-              <div className="mb-4">
-                <h3 className="font-serif text-2xl text-neutral-900 tracking-[-0.01em] sm:text-3xl dark:text-white">
-                  Aaron
-                </h3>
-                <p className="text-emerald-600 text-sm dark:text-emerald-400">
-                  Co-founder · Strategy
-                </p>
-              </div>
-              <p className="text-neutral-600 leading-relaxed dark:text-neutral-300">
-                Law background from Oxford, now focused on content strategy.
-                Aaron leads keyword research, competitor analysis, and the
-                editorial process that turns topics into pages that rank.
+            <div>
+              <p className="font-medium text-neutral-900 dark:text-white">
+                Aaron
+              </p>
+              <p className="text-emerald-600 dark:text-emerald-400">
+                Co-founder · Strategy
               </p>
             </div>
           </div>
@@ -165,40 +155,26 @@ function WhoWeArePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white dark:from-neutral-950 dark:via-transparent dark:to-neutral-950" />
         </div>
 
-        <div className="relative mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="mb-10 text-center">
-            <h2 className="mb-4 font-light font-serif text-[28px] text-neutral-900 leading-[1.1] tracking-[-0.02em] sm:text-[36px] md:text-[44px] dark:text-white">
-              Our Approach
-              <span className="text-emerald-600 dark:text-emerald-400">.</span>
-            </h2>
-            <div className="mx-auto h-0.5 w-16 bg-emerald-600 dark:bg-emerald-400" />
-          </div>
-
-          <div className="space-y-6">
-            <div className="rounded-2xl border-2 border-neutral-300 bg-white p-6 sm:p-8 dark:border-neutral-600 dark:bg-neutral-800">
-              <p className="text-base text-neutral-600 leading-relaxed sm:text-lg dark:text-neutral-300">
-                We started by ranking our own projects. Through trial and error,
-                we figured out which SEO practices actually move the needle and
-                which are noise. That experience became the foundation for Fluid
-                Posts.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border-2 border-emerald-500 bg-emerald-50 p-6 sm:p-8 dark:border-emerald-600 dark:bg-emerald-900/20">
-              <p className="font-serif text-lg text-neutral-900 leading-relaxed sm:text-xl dark:text-white">
-                We now apply that same methodology to help businesses grow their
-                organic traffic—without the typical agency overhead or the need
-                for in-house expertise.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border-2 border-neutral-300 bg-white p-6 sm:p-8 dark:border-neutral-600 dark:bg-neutral-800">
-              <p className="text-base text-neutral-600 leading-relaxed sm:text-lg dark:text-neutral-300">
-                Every client gets a strategy tailored to their market, content
-                written to rank, and the ongoing support needed to sustain
-                results over time.
-              </p>
-            </div>
+        <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 className="mb-6 font-light font-serif text-[28px] text-neutral-900 leading-[1.1] tracking-[-0.02em] sm:text-[36px] md:text-[44px] dark:text-white">
+            How We Work
+            <span className="text-emerald-600 dark:text-emerald-400">.</span>
+          </h2>
+          <div className="space-y-5 text-neutral-600 leading-relaxed dark:text-neutral-300">
+            <p>
+              We started by ranking our own sites. That meant testing what
+              actually moved the needle—keyword research, content structure,
+              technical SEO—and ignoring the rest. The process we use for
+              clients is the same one we use for ourselves: understand the
+              market, identify gaps, produce content that answers real queries,
+              and keep optimising over time.
+            </p>
+            <p>
+              Every engagement includes a strategy tailored to your market,
+              content written to rank, and ongoing support so results hold. We
+              don’t do long-term contracts or opaque retainers; we work in clear
+              phases and report on what’s done.
+            </p>
           </div>
         </div>
       </section>
