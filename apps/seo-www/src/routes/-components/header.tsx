@@ -5,8 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 const menuItems = [
-  { name: "Founders", href: "/" },
-  { name: "SEO Experts", href: "/seo-experts" },
+  { name: "Blog", href: "/blog" },
   { name: "Referral", href: "/referral" },
   { name: "About us", href: "/who-we-are" },
 ];

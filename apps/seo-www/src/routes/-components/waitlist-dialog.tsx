@@ -179,13 +179,18 @@ export function WaitListDialog({ trigger, className }: Props) {
           ) : null}
 
           <div className="flex gap-2 pt-1">
-            <Button asChild className="h-10" type="button" variant="outline">
+            <Button
+              asChild
+              className="h-10 border-emerald-600 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:border-emerald-500 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+              type="button"
+              variant="outline"
+            >
               <a href={ONBOARD_LINK} rel="noopener" target="_blank">
                 Book a call
               </a>
             </Button>
             <Button
-              className="h-10 flex-1 gap-2"
+              className="h-10 flex-1 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
               disabled={status === "success"}
               isLoading={form.formState.isSubmitting}
               type="submit"

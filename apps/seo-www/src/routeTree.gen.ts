@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhoWeAreRouteImport } from './routes/who-we-are'
-import { Route as SeoExpertsRouteImport } from './routes/seo-experts'
 import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as BlogRouteRouteImport } from './routes/blog/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -25,11 +24,6 @@ import { Route as ApiBlogSearchRouteImport } from './routes/api/blog/search'
 const WhoWeAreRoute = WhoWeAreRouteImport.update({
   id: '/who-we-are',
   path: '/who-we-are',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SeoExpertsRoute = SeoExpertsRouteImport.update({
-  id: '/seo-experts',
-  path: '/seo-experts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReferralRoute = ReferralRouteImport.update({
@@ -88,7 +82,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteRouteWithChildren
   '/referral': typeof ReferralRoute
-  '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
@@ -101,7 +94,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/referral': typeof ReferralRoute
-  '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
@@ -116,7 +108,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteRouteWithChildren
   '/referral': typeof ReferralRoute
-  '/seo-experts': typeof SeoExpertsRoute
   '/who-we-are': typeof WhoWeAreRoute
   '/blog/$': typeof BlogSplatRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
@@ -132,7 +123,6 @@ export interface FileRouteTypes {
     | '/'
     | '/blog'
     | '/referral'
-    | '/seo-experts'
     | '/who-we-are'
     | '/blog/$'
     | '/blog/rss.xml'
@@ -145,7 +135,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/referral'
-    | '/seo-experts'
     | '/who-we-are'
     | '/blog/$'
     | '/blog/rss.xml'
@@ -159,7 +148,6 @@ export interface FileRouteTypes {
     | '/'
     | '/blog'
     | '/referral'
-    | '/seo-experts'
     | '/who-we-are'
     | '/blog/$'
     | '/blog/rss.xml'
@@ -174,7 +162,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogRouteRoute: typeof BlogRouteRouteWithChildren
   ReferralRoute: typeof ReferralRoute
-  SeoExpertsRoute: typeof SeoExpertsRoute
   WhoWeAreRoute: typeof WhoWeAreRoute
   LegalDataProcessingAgreementRoute: typeof LegalDataProcessingAgreementRoute
   LegalPrivacyPolicyRoute: typeof LegalPrivacyPolicyRoute
@@ -189,13 +176,6 @@ declare module '@tanstack/react-router' {
       path: '/who-we-are'
       fullPath: '/who-we-are'
       preLoaderRoute: typeof WhoWeAreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/seo-experts': {
-      id: '/seo-experts'
-      path: '/seo-experts'
-      fullPath: '/seo-experts'
-      preLoaderRoute: typeof SeoExpertsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/referral': {
@@ -291,7 +271,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogRouteRoute: BlogRouteRouteWithChildren,
   ReferralRoute: ReferralRoute,
-  SeoExpertsRoute: SeoExpertsRoute,
   WhoWeAreRoute: WhoWeAreRoute,
   LegalDataProcessingAgreementRoute: LegalDataProcessingAgreementRoute,
   LegalPrivacyPolicyRoute: LegalPrivacyPolicyRoute,
