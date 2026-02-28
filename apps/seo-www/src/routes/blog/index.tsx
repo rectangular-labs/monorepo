@@ -2,7 +2,7 @@ import { seoBlogSource } from "@rectangular-labs/content";
 import { getPostsOverview } from "@rectangular-labs/content/get-posts-overview";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const getBlogTree = createServerFn({ method: "GET" }).handler(() =>
   getPostsOverview(seoBlogSource),
@@ -30,25 +30,27 @@ function Page() {
 
   const filteredPosts = useMemo(() => {
     let posts = postOverview;
-    
+
     if (activeCategory !== "all") {
-      posts = posts.filter(post => 
-        post.tags?.some(tag => 
-          tag.toLowerCase().replace(/\s+/g, "-") === activeCategory ||
-          tag.toLowerCase().includes(activeCategory.replace(/-/g, " "))
-        )
+      posts = posts.filter((post) =>
+        post.tags?.some(
+          (tag) =>
+            tag.toLowerCase().replace(/\s+/g, "-") === activeCategory ||
+            tag.toLowerCase().includes(activeCategory.replace(/-/g, " ")),
+        ),
       );
     }
-    
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      posts = posts.filter(post =>
-        post.title?.toLowerCase().includes(query) ||
-        post.description?.toLowerCase().includes(query) ||
-        post.tags?.some(tag => tag.toLowerCase().includes(query))
+      posts = posts.filter(
+        (post) =>
+          post.title?.toLowerCase().includes(query) ||
+          post.description?.toLowerCase().includes(query) ||
+          post.tags?.some((tag) => tag.toLowerCase().includes(query)),
       );
     }
-    
+
     return posts;
   }, [postOverview, activeCategory, searchQuery]);
 
@@ -65,20 +67,20 @@ function Page() {
             <p className="mt-2 text-neutral-500 text-sm leading-relaxed dark:text-neutral-400">
               Thoughts on SEO, content strategy, and building organic growth.
             </p>
-            
+
             {/* Categories sidebar */}
             <nav className="mt-8 hidden lg:block">
               <ul className="space-y-1">
                 {CATEGORIES.map((cat) => (
                   <li key={cat.id}>
                     <button
-                      type="button"
-                      onClick={() => setActiveCategory(cat.id)}
                       className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                         activeCategory === cat.id
                           ? "bg-neutral-100 font-medium text-neutral-900 dark:bg-neutral-800 dark:text-white"
                           : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/50 dark:hover:text-white"
                       }`}
+                      onClick={() => setActiveCategory(cat.id)}
+                      type="button"
                     >
                       {cat.label}
                     </button>
@@ -94,25 +96,25 @@ function Page() {
             <div className="mb-6">
               <div className="relative">
                 <svg
+                  aria-hidden="true"
                   className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-neutral-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  aria-hidden="true"
                 >
                   <path
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={1.5}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
                 <input
-                  type="text"
-                  placeholder="Search articles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-xl border border-neutral-200 bg-white py-3 pr-4 pl-12 text-neutral-900 placeholder:text-neutral-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:focus:border-emerald-400 dark:placeholder:text-neutral-500"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search articles..."
+                  type="text"
+                  value={searchQuery}
                 />
               </div>
             </div>
@@ -121,14 +123,14 @@ function Page() {
             <div className="mb-6 flex gap-2 overflow-x-auto pb-2 lg:hidden">
               {CATEGORIES.map((cat) => (
                 <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.id)}
                   className={`flex-shrink-0 rounded-full px-4 py-2 text-sm transition-colors ${
                     activeCategory === cat.id
                       ? "bg-neutral-900 font-medium text-white dark:bg-white dark:text-neutral-900"
                       : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
                   }`}
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  type="button"
                 >
                   {cat.label}
                 </button>
@@ -138,17 +140,19 @@ function Page() {
             {/* Posts grid */}
             {filteredPosts.length === 0 ? (
               <div className="py-16 text-center">
-                <p className="text-neutral-500 dark:text-neutral-400">No articles found.</p>
+                <p className="text-neutral-500 dark:text-neutral-400">
+                  No articles found.
+                </p>
               </div>
             ) : (
               <div className="grid gap-8 sm:grid-cols-2">
                 {filteredPosts.map((post, index) => (
                   <a
-                    key={post.url}
-                    href={post.url}
                     className={`group flex flex-col gap-4 ${
                       index === 0 ? "sm:col-span-2" : ""
                     }`}
+                    href={post.url}
+                    key={post.url}
                   >
                     {/* Cover image */}
                     {post.cover ? (
@@ -174,8 +178,8 @@ function Page() {
                       <div className="flex flex-wrap gap-2">
                         {post.tags.slice(0, 3).map((tag) => (
                           <span
-                            key={tag}
                             className="rounded-full bg-neutral-100 px-3 py-1 text-neutral-600 text-xs dark:bg-neutral-800 dark:text-neutral-400"
+                            key={tag}
                           >
                             {tag}
                           </span>
@@ -187,22 +191,22 @@ function Page() {
                     <div className="flex items-center gap-3">
                       {post.authorDetail?.image ? (
                         <img
-                          src={post.authorDetail.image}
                           alt={post.authorDetail.name ?? "Author"}
                           className="h-8 w-8 rounded-full object-cover"
+                          src={post.authorDetail.image}
                         />
                       ) : (
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700">
                           <svg
+                            aria-hidden="true"
                             className="h-4 w-4 text-neutral-500"
                             fill="currentColor"
                             viewBox="0 0 20 20"
-                            aria-hidden="true"
                           >
                             <path
-                              fillRule="evenodd"
-                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                               clipRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              fillRule="evenodd"
                             />
                           </svg>
                         </div>
@@ -215,11 +219,14 @@ function Page() {
                           <>
                             <span className="mx-2 text-neutral-400">·</span>
                             <span className="text-neutral-500 dark:text-neutral-400">
-                              {new Date(post.createdAt).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
+                              {new Date(post.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              )}
                             </span>
                           </>
                         )}
