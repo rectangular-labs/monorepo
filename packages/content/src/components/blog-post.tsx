@@ -68,12 +68,6 @@ export function BlogPost({
         breadcrumb={{
           enabled: false,
         }}
-        editOnGithub={{
-          owner: "rectangular-labs",
-          repo: "monorepo",
-          sha: "main",
-          path: `packages/content/posts/${data._meta.fileName}`,
-        }}
         footer={{
           enabled: true,
         }}
@@ -139,12 +133,37 @@ export function BlogPost({
         {data.description ? (
           <DocsDescription>{data.description}</DocsDescription>
         ) : null}
-        <DocsBody>
-          <MDXRenderer
-            code={data.body}
-            {...(components ? { components } : {})}
-          />
-        </DocsBody>
+        {data.createdAt || data.authorDetail ? (
+          <div className="mb-6 flex flex-wrap items-center gap-2 text-muted-foreground text-sm">
+            {data.authorDetail?.name ? (
+              <span>By {data.authorDetail.name}</span>
+            ) : null}
+            {data.authorDetail?.name && data.createdAt ? <span>·</span> : null}
+            {data.createdAt ? (
+              <time dateTime={data.createdAt}>
+                {new Date(data.createdAt).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </time>
+            ) : null}
+            {data.readingTime ? (
+              <>
+                <span>·</span>
+                <span>{data.readingTime}</span>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+        <div className="blog-article-prose">
+          <DocsBody>
+            <MDXRenderer
+              code={data.body}
+              {...(components ? { components } : {})}
+            />
+          </DocsBody>
+        </div>
         <div className="mt-10 border-t pt-6">
           <div className="flex items-center justify-between gap-4">
             {prevPost ? (

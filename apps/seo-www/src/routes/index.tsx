@@ -1015,7 +1015,10 @@ function FeaturesSection() {
 
 function PricingSection() {
   return (
-    <section className="relative overflow-hidden bg-emerald-50 py-16 sm:py-24 dark:bg-neutral-900">
+    <section
+      className="relative overflow-hidden bg-emerald-50 py-16 sm:py-24 dark:bg-neutral-900"
+      id="pricing"
+    >
       {/* Dot pattern - same as Real Results */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.22]">
         <svg
