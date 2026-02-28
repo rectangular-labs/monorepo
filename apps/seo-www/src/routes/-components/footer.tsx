@@ -14,8 +14,8 @@ const links = [
         href: "/who-we-are",
       },
       {
-        title: "Referral",
-        href: "/referral",
+        title: "Pricing",
+        href: "/#pricing",
       },
       {
         title: "Blog",
