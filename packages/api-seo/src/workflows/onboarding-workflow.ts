@@ -16,6 +16,7 @@ import { createDb } from "@rectangular-labs/db";
 import { updateSeoProject } from "@rectangular-labs/db/operations";
 import { generateText, Output, stepCountIs } from "ai";
 import { type } from "arktype";
+import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
 import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
 import { logAgentStep } from "../lib/ai/utils/log-agent-step";
 import { createTask } from "../lib/task";
@@ -104,9 +105,11 @@ Homepage Title: ${homepageTitle}
 Extract the name from the above context.`,
 
             output: Output.object({
-              schema: type({
-                name: "string",
-              }),
+              schema: arktypeToAiJsonSchema(
+                type({
+                  name: "string",
+                }),
+              ),
             }),
           });
 
@@ -149,8 +152,9 @@ Extract the name from the above context.`,
               logAgentStep(logInfo, "[backgroundResearch] step finished", step);
             },
             output: Output.object({
-              schema:
+              schema: arktypeToAiJsonSchema(
                 seoUnderstandSiteTaskOutputSchema.get("businessBackground"),
+              ),
             }),
           });
 
@@ -259,9 +263,11 @@ Extract the name from the above context.`,
             logAgentStep(logInfo, "step to extract brand voice finished", step);
           },
           output: Output.object({
-            schema: type({
-              brandVoice: "string",
-            }),
+            schema: arktypeToAiJsonSchema(
+              type({
+                brandVoice: "string",
+              }),
+            ),
           }),
         });
 

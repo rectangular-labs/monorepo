@@ -4,7 +4,8 @@ import {
   type seoGscPropertyTypeSchema,
 } from "@rectangular-labs/core/schemas/gsc-property-parsers";
 import { getSearchAnalytics } from "@rectangular-labs/google-apis/google-search-console";
-import { type JSONSchema7, jsonSchema, tool } from "ai";
+import { tool } from "ai";
+import { arktypeToAiJsonSchema } from "../arktype-json-schema";
 import type { AgentToolDefinition } from "./utils";
 
 const gscQueryInputSchema = getSearchAnalyticsArgsSchema.omit(
@@ -24,9 +25,7 @@ export function createGscToolWithMetadata({
   const gscTool = tool({
     description:
       "Query the project's Google Search Console account for searchAnalytics for a given date range.",
-    inputSchema: jsonSchema<typeof gscQueryInputSchema.infer>(
-      gscQueryInputSchema.toJsonSchema() as JSONSchema7,
-    ),
+    inputSchema: arktypeToAiJsonSchema(gscQueryInputSchema),
     async execute(props) {
       console.log("getSearchAnalytics", {
         siteUrl,

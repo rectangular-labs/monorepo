@@ -261,6 +261,7 @@ export function ManageStrategyDialog({
                   id={`${fieldPrefix}-description`}
                   placeholder="What will you do and how will it work?"
                   rows={8}
+                  value={field.value || ""}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
