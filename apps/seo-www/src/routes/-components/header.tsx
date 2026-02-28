@@ -48,9 +48,9 @@ export function Header() {
   const [menuState, setMenuState] = useState<boolean>(false);
 
   return (
-    <header>
+    <header className="sticky top-0 z-20 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <nav
-        className="fixed z-20 w-full border-b backdrop-blur md:relative md:backdrop-blur-none lg:h-[70px]"
+        className="w-full lg:h-[70px]"
         data-state={menuState && "active"}
       >
         <div className="m-auto flex h-full max-w-5xl flex-wrap items-center justify-between gap-6 px-4 py-3 md:px-6 lg:gap-0 lg:py-4">
