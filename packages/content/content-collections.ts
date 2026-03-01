@@ -36,9 +36,8 @@ const mdxTransformer = async <
       [
         rehypeExternalLinks,
         {
-          target: "_blank",
           rel: ["noopener", "noreferrer"],
-          content: { type: "text", value: " 🔗" },
+          target: "_blank",
         },
       ],
     ],
