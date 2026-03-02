@@ -8,10 +8,9 @@ import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { chatMessageMetadataSchema } from "@rectangular-labs/core/schemas/chat-message-parser";
 import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
-import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
+import type { InferAgentUIMessage } from "ai";
 import type { Scheduler } from "partywhen";
-import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
-import type { createSettingsToolsWithMetadata } from "./lib/ai/tools/settings-tools";
+import type { createOrchestrator } from "./lib/ai/agents/orchestrator";
 import type {
   createPublicImagesBucket,
   createWorkspaceBucket,
@@ -28,25 +27,10 @@ export type RouterClient = ORPCRouterClient<Router>;
 export type RouterInputs = InferRouterInputs<Router>;
 export type RouterOutputs = InferRouterOutputs<Router>;
 
-type AiTools = InferUITools<
-  ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
-    ReturnType<typeof createSettingsToolsWithMetadata>["tools"]
+export type SeoChatMessage = InferAgentUIMessage<
+  ReturnType<typeof createOrchestrator>,
+  typeof chatMessageMetadataSchema.infer
 >;
-export type SeoChatMessage = UIMessage<
-  typeof chatMessageMetadataSchema.infer,
-  UIDataTypes,
-  AiTools
->;
-export type WebSocketMessages =
-  | { type: "new-msg"; message: SeoChatMessage }
-  | {
-      type: "msg-chunk";
-      clientMessageId: string;
-      chunk: UIMessageChunk<
-        typeof chatMessageMetadataSchema.infer,
-        UIDataTypes
-      >;
-    };
 
 /**
  * Initial context type definition for oRPC procedures
