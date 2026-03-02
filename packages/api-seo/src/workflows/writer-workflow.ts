@@ -4,9 +4,8 @@ import {
   type WorkflowStep,
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
-import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { type OpenAIResponsesProviderOptions, openai } from "@ai-sdk/openai";
-import { articleTypeSchema } from "@rectangular-labs/core/schemas/content-parsers";
+import { ARTICLE_TYPES } from "@rectangular-labs/core/schemas/content-parsers";
 import type {
   seoWriteArticleTaskInputSchema,
   seoWriteArticleTaskOutputSchema,
@@ -15,47 +14,24 @@ import { createDb, type schema } from "@rectangular-labs/db";
 import {
   getDraftById,
   getSeoProjectByIdentifierAndOrgId,
+  getStrategyDetails,
 } from "@rectangular-labs/db/operations";
-import { generateText, Output, stepCountIs } from "ai";
-import { type } from "arktype";
-import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
-import { createImageToolsWithMetadata } from "../lib/ai/tools/image-tools";
+import { generateText, jsonSchema, Output } from "ai";
+import type { type } from "arktype";
 import {
-  createTodoToolWithMetadata,
-  formatTodoFocusReminder,
-} from "../lib/ai/tools/todo-tool";
-import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
-import { buildWriterSystemPrompt } from "../lib/ai/writer-agent";
+  createWriterPipeline,
+  type StrategyContext,
+} from "../lib/ai/agents/writer";
+import { summarizeAgentInvocation } from "../lib/ai/utils/agent-telemetry";
 import { createPublicImagesBucket } from "../lib/bucket";
-import {
-  analyzeArticleMarkdownForReview,
-  repairPublicBucketImageLinks,
-} from "../lib/content/review-utils";
+import { repairPublicBucketImageLinks } from "../lib/content/review-utils";
 import { writeContentDraft } from "../lib/content/write-content-draft";
-import { configureDataForSeoClient } from "../lib/dataforseo/utils";
-import { createTask } from "../lib/task";
-import {
-  ARTICLE_TYPE_TO_WRITER_RULE,
-  type ArticleType,
-} from "../lib/workspace/workflow.constant";
+import type { ArticleType } from "../lib/workspace/workflow.constant";
 import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
   console.info(`[SeoWriterWorkflow] ${message}`, data ?? {});
 }
-
-function logError(message: string, data?: Record<string, unknown>) {
-  console.error(`[SeoWriterWorkflow] ${message}`, data ?? {});
-}
-
-const reviewArticleOutputSchema = type({
-  approved: type("boolean").describe("Whether the article is approved."),
-  changes: type("string[]").describe("Changes to be made to the article."),
-});
-
-const inferArticleTypeSchema = type({
-  articleType: articleTypeSchema,
-}).describe("Chosen article type for the content");
 
 async function inferArticleType(args: {
   title?: string | null;
@@ -65,11 +41,6 @@ async function inferArticleType(args: {
 }): Promise<ArticleType> {
   const { title, primaryKeyword, notes, outline } = args;
   if (!title && !primaryKeyword && !outline && !notes) {
-    logInfo("inferred article type defaulted", {
-      articleType: "other",
-      title,
-      primaryKeyword,
-    });
     return "other";
   }
 
@@ -147,88 +118,43 @@ async function inferArticleType(args: {
     }
     return null;
   })();
+
   if (heuristicMatch) {
-    logInfo("inferred article type via heuristic", {
-      articleType: heuristicMatch,
-      title,
-      primaryKeyword,
-    });
     return heuristicMatch;
   }
 
-  const prompt = `Choose the single best article type for the intended content.
-
-Return ONLY JSON matching: { "articleType": string }
-
-"articleType" must be one of:
-- "best-of-list"
-- "comparison"
-- "how-to"
-- "listicle"
-- "long-form-opinion"
-- "faq"
-- "news"
-- "whitepaper"
-- "infographic"
-- "case-study"
-- "press-release"
-- "interview"
-- "product-update"
-- "contest-giveaway"
-- "research-summary"
-- "event-recap"
-- "best-practices"
-- "other"
-
-Decision rules:
-- If notes clearly specify a format (e.g. "press release", "interview", "case study"), prioritize notes over outline.
-- If the outline structure signals a format (steps, Q&A headings, comparisons, rankings), match it.
-- Use "best-of-list" only for explicit "best/top" ranking intent; otherwise use "listicle" for general lists.
-- Pricing, cost, or rate-focused titles usually map to "comparison".
-- Use your reasoning and judgement to discern between the other article types. use "other" if none of the article types apply.
-
-<title>
-${titleText ?? ""}
-</title>
-
-<primary_keyword>
-${keywordText ?? ""}
-</primary_keyword>
-
-<notes>
-${notesText ?? ""}
-</notes>
-
-<outline>
-${outlineText ?? ""}
-</outline>`;
-
-  try {
-    const result = await generateText({
-      model: google("gemini-3-flash-preview"),
-      output: Output.object({
-        schema: arktypeToAiJsonSchema(inferArticleTypeSchema),
+  const result = await generateText({
+    model: openai("gpt-5.2"),
+    providerOptions: {
+      openai: {
+        reasoningEffort: "low",
+      } satisfies OpenAIResponsesProviderOptions,
+    },
+    output: Output.object({
+      schema: jsonSchema<{
+        articleType: ArticleType;
+      }>({
+        type: "object",
+        additionalProperties: false,
+        required: ["articleType"],
+        properties: {
+          articleType: {
+            type: "string",
+            enum: [...ARTICLE_TYPES],
+            description: "Chosen article type for the content",
+          },
+        },
       }),
-      prompt,
-    });
-    const inferred = result.output.articleType;
-    logInfo("inferred article type via model", {
-      articleType: inferred,
-      title,
-      primaryKeyword,
-    });
-    return inferred;
-  } catch (error) {
-    logError("failed to infer article type; defaulting to other", {
-      error,
-    });
-    logInfo("inferred article type defaulted", {
-      articleType: "other",
-      title,
-      primaryKeyword,
-    });
-    return "other";
-  }
+    }),
+    prompt: `Choose the best article type for this content and return JSON only.
+
+<title>${titleText}</title>
+<primary_keyword>${keywordText}</primary_keyword>
+<notes>${notesText}</notes>
+<outline>${outlineText}</outline>`,
+  });
+
+  return result.output.articleType;
 }
 
 async function loadDraftAndProject(args: {
@@ -271,16 +197,15 @@ async function loadDraftAndProject(args: {
   if (!projectResult.value) {
     throw new NonRetryableError(`Project (${args.projectId}) not found`);
   }
-  const project = projectResult.value;
 
-  return { draft, project };
+  return { draft, project: projectResult.value };
 }
 
 type WriterInput = type.infer<typeof seoWriteArticleTaskInputSchema>;
 export type SeoWriterWorkflowBinding = Workflow<WriterInput>;
+
 export class SeoWriterWorkflow extends WorkflowEntrypoint<
   {
-    SEO_PLANNER_WORKFLOW: InitialContext["seoPlannerWorkflow"];
     CACHE: InitialContext["cacheKV"];
   },
   WriterInput
@@ -296,80 +221,103 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
       chatId: input.chatId,
       userId: input.userId,
     });
-    configureDataForSeoClient();
 
-    const isOutlinePresent = await step.do(
-      "Ensure outline is present",
+    const { draft, project, articleType, strategyContext } = await step.do(
+      "load generation context",
       async () => {
         const db = createDb();
-        const { draft } = await loadDraftAndProject({
+        const { draft, project } = await loadDraftAndProject({
           db,
           organizationId: input.organizationId,
           projectId: input.projectId,
           draftId: input.draftId,
         });
-        const outline = draft.outline;
-        if (outline) {
-          return true;
-        }
-        const result = await createTask({
-          db,
-          input: {
-            type: "seo-plan-keyword",
+
+        const resolvedArticleType =
+          draft.articleType ??
+          (await inferArticleType({
+            title: draft.title,
+            primaryKeyword: draft.primaryKeyword,
+            notes: draft.notes,
+            outline: draft.outline,
+          }));
+
+        let strategyContext: StrategyContext | undefined;
+
+        if (draft.strategyId) {
+          const strategyResult = await getStrategyDetails({
+            db,
             projectId: input.projectId,
+            strategyId: draft.strategyId,
             organizationId: input.organizationId,
-            chatId: input.chatId,
-            draftId: input.draftId,
-            callbackInstanceId: event.instanceId,
-            userId: input.userId,
-          },
-          workflowInstanceId: `child-${event.instanceId}_${crypto.randomUUID().slice(0, 5)}`,
-          userId: input.userId,
-        });
-        if (!result.ok) {
-          logError("failed to create planner task", {
-            instanceId: event.instanceId,
-            draftId: input.draftId,
-            error: result.error,
           });
-          throw result.error;
+
+          if (strategyResult.ok && strategyResult.value) {
+            const strategy = strategyResult.value;
+
+            // Find the phase that contains this draft to determine phase type
+            const currentPhase = strategy.phases.find((phase) =>
+              phase.phaseContents.some((pc) => pc.contentDraftId === draft.id),
+            );
+
+            // Collect sibling content from all phases
+            const siblingContent = strategy.phases.flatMap((phase) =>
+              phase.phaseContents.flatMap((pc) => {
+                if (pc.contentDraftId === draft.id || pc.contentDraft == null) {
+                  return [];
+                }
+                const d = pc.contentDraft;
+                return [
+                  {
+                    title: d.title,
+                    slug: d.slug,
+                    role: d.role as "pillar" | "supporting" | null,
+                    primaryKeyword: d.primaryKeyword,
+                    status: d.status,
+                  },
+                ];
+              }),
+            );
+
+            // Deduplicate siblings by draft id (a draft can appear in multiple phases)
+            const seen = new Set<string>();
+            const uniqueSiblings = siblingContent.filter((s) => {
+              const key = s.slug;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
+
+            strategyContext = {
+              name: strategy.name,
+              motivation: strategy.motivation,
+              description: strategy.description,
+              goal: strategy.goal as {
+                metric: string;
+                target: number;
+                timeframe: string;
+              },
+              phaseType:
+                (currentPhase?.type as
+                  | "build"
+                  | "optimize"
+                  | "expand"
+                  | null) ?? null,
+              contentRole:
+                (draft.role as "pillar" | "supporting" | null) ?? null,
+              siblingContent: uniqueSiblings,
+            };
+          }
         }
-        return false;
+
+        return {
+          draft,
+          project,
+          articleType: resolvedArticleType,
+          strategyContext,
+        };
       },
     );
-    logInfo("outline check", {
-      instanceId: event.instanceId,
-      draftId: input.draftId,
-      isOutlinePresent,
-    });
-    if (!isOutlinePresent) {
-      logInfo("waiting for planner callback", {
-        instanceId: event.instanceId,
-        draftId: input.draftId,
-      });
-      const plannerEvent = await step.waitForEvent<{ draftId: string }>(
-        "wait for planner callback",
-        {
-          type: "planner_complete",
-          timeout: "1 hour",
-        },
-      );
-      logInfo("received planner callback", {
-        instanceId: event.instanceId,
-        expectedDraftId: input.draftId,
-        receivedDraftId: plannerEvent.payload.draftId,
-      });
-      if (plannerEvent.payload.draftId !== input.draftId) {
-        logError("planner callback draftId mismatch", {
-          instanceId: event.instanceId,
-          expectedDraftId: input.draftId,
-          receivedDraftId: plannerEvent.payload.draftId,
-        });
-        throw new Error(
-          `Planner callback draftId mismatch: expected ${input.draftId}, got ${plannerEvent.payload.draftId}`,
-        );
-      }
-    }
 
     await step.do("mark writing", async () => {
       const db = createDb();
@@ -384,350 +332,200 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
           status: "writing",
         },
       });
-      if (!writeResult.ok) throw new Error(writeResult.error.message);
+      if (!writeResult.ok) {
+        throw writeResult.error;
+      }
     });
-    logInfo("status set to writing", {
+
+    const taskPrompt = `Write the full article for this draft.
+
+Context:
+- Draft ID: ${draft.id}
+- Title: ${draft.title ?? "(none)"}
+- Primary keyword: ${draft.primaryKeyword ?? "(missing)"}
+- Notes: ${draft.notes ?? "(none)"}
+- Outline:
+${draft.outline ?? "(missing)"}`;
+
+    const createPipeline = () =>
+      createWriterPipeline({
+        db: createDb(),
+        project,
+        messages: [],
+        cacheKV: this.env.CACHE,
+        publicImagesBucket: createPublicImagesBucket(),
+        mode: "workflow",
+        articleType,
+        primaryKeyword: draft.primaryKeyword ?? undefined,
+        strategyContext,
+      });
+
+    const research = await step.do(
+      "writer phase 1 research",
+      { timeout: "3 minutes" },
+      async () => {
+        const pipeline = createPipeline();
+        const phase = await pipeline.runResearchPhase({ task: taskPrompt });
+        logInfo("writer phase completed", {
+          instanceId: event.instanceId,
+          draftId: input.draftId,
+          phase: "research",
+          ...summarizeAgentInvocation(phase.steps),
+        });
+        return phase.output;
+      },
+    );
+
+    const plan = await step.do(
+      "writer phase 2 planning",
+      { timeout: "2 minutes" },
+      async () => {
+        const pipeline = createPipeline();
+        const phase = await pipeline.runPlanningPhase({
+          task: taskPrompt,
+          research,
+        });
+        logInfo("writer phase completed", {
+          instanceId: event.instanceId,
+          draftId: input.draftId,
+          phase: "planning",
+          ...summarizeAgentInvocation(phase.steps),
+        });
+        return phase.output;
+      },
+    );
+
+    const rawDraft = await step.do(
+      "writer phase 3 writing",
+      { timeout: "5 minutes" },
+      async () => {
+        const pipeline = createPipeline();
+        const phase = await pipeline.runWritingPhase({
+          task: taskPrompt,
+          research,
+          plan,
+        });
+        logInfo("writer phase completed", {
+          instanceId: event.instanceId,
+          draftId: input.draftId,
+          phase: "writing",
+          ...summarizeAgentInvocation(phase.steps),
+        });
+        return phase.output;
+      },
+    );
+
+    const internalLinkedDraft = await step.do(
+      "writer phase 4 internal links",
+      { timeout: "2 minutes" },
+      async () => {
+        const pipeline = createPipeline();
+        const phase = await pipeline.runInternalLinksPhase({
+          draft: rawDraft,
+        });
+        logInfo("writer phase completed", {
+          instanceId: event.instanceId,
+          draftId: input.draftId,
+          phase: "internal-links",
+          ...summarizeAgentInvocation(phase.steps),
+        });
+        return phase.output;
+      },
+    );
+
+    const imagedDraft = await step.do(
+      "writer phase 5 images",
+      { timeout: "3 minutes" },
+      async () => {
+        const pipeline = createPipeline();
+        const phase = await pipeline.runImagesPhase({
+          internalLinkedDraft,
+        });
+        logInfo("writer phase completed", {
+          instanceId: event.instanceId,
+          draftId: input.draftId,
+          phase: "images",
+          ...summarizeAgentInvocation(phase.steps),
+        });
+        return phase.output;
+      },
+    );
+
+    const reviewedArticle = await step.do(
+      "writer phase 6 review",
+      { timeout: "10 minutes" },
+      async () => {
+        const pipeline = createPipeline();
+        const phase = await pipeline.runReviewLoopPhase({
+          article: {
+            markdown: imagedDraft.markdown,
+            heroImage: imagedDraft.heroImage,
+            heroImageCaption: imagedDraft.heroImageCaption,
+          },
+          maxReviewIterations: 3,
+        });
+        logInfo("writer phase completed", {
+          instanceId: event.instanceId,
+          draftId: input.draftId,
+          phase: "review",
+          ...summarizeAgentInvocation(phase.steps),
+          reviewAttempts: phase.reviews.length,
+          lastReviewPasses: phase.reviews.at(-1)?.passes ?? true,
+          lastReviewScore: phase.reviews.at(-1)?.overallScore ?? null,
+        });
+        return phase.output;
+      },
+    );
+
+    const repairedLinks = repairPublicBucketImageLinks({
+      markdown: reviewedArticle.markdown.trim(),
+      orgId: input.organizationId,
+      projectId: input.projectId,
+      kind: "content-image",
+    });
+
+    const articleMarkdown = repairedLinks.markdown;
+    const heroImage = reviewedArticle.heroImage.trim();
+    const heroImageCaption = reviewedArticle.heroImageCaption?.trim() || null;
+
+    await step.do("save article draft", async () => {
+      const db = createDb();
+      const writeResult = await writeContentDraft({
+        db,
+        chatId: input.chatId ?? null,
+        userId: input.userId ?? null,
+        projectId: input.projectId,
+        organizationId: input.organizationId,
+        lookup: { type: "id", id: input.draftId },
+        draftNewValues: {
+          contentMarkdown: articleMarkdown,
+          heroImage,
+          heroImageCaption,
+          status: project.publishingSettings?.requireContentReview
+            ? "pending-review"
+            : "scheduled",
+          articleType,
+        },
+      });
+      if (!writeResult.ok) {
+        throw writeResult.error;
+      }
+    });
+
+    logInfo("complete", {
       instanceId: event.instanceId,
       draftId: input.draftId,
+      articleType,
+      contentLength: articleMarkdown.length,
     });
-    try {
-      const {
-        text: articleMarkdown,
-        articleType,
-        heroImage,
-        heroImageCaption,
-      } = await step.do(
-        "generate article markdown",
-        {
-          timeout: "30 minutes",
-        },
-        async () => {
-          const db = createDb();
-          const { project, draft } = await loadDraftAndProject({
-            db,
-            organizationId: input.organizationId,
-            projectId: input.projectId,
-            draftId: input.draftId,
-          });
 
-          const webTools = createWebToolsWithMetadata(project, this.env.CACHE);
-
-          const imageTools = createImageToolsWithMetadata({
-            organizationId: input.organizationId,
-            projectId: input.projectId,
-            imageSettings: project.imageSettings ?? null,
-            publicImagesBucket: createPublicImagesBucket(),
-          });
-          const todoTool = createTodoToolWithMetadata({ messages: [] });
-
-          logInfo("writer tools ready", {
-            instanceId: event.instanceId,
-            draftId: input.draftId,
-            webToolCount: Object.keys(webTools.tools).length,
-            imageToolCount: Object.keys(imageTools.tools).length,
-          });
-
-          const outline = draft.outline;
-          const primaryKeyword = draft.primaryKeyword;
-          const notes = "(none)";
-          const articleType =
-            draft.articleType ??
-            (await inferArticleType({
-              title: draft.title,
-              primaryKeyword,
-              notes,
-              outline,
-            }));
-          logInfo("article type resolved", {
-            instanceId: event.instanceId,
-            draftId: input.draftId,
-            articleType,
-            source: draft.articleType ? "draft" : "inferred",
-          });
-          const systemPrompt = buildWriterSystemPrompt({
-            project,
-            skillsSection: "",
-            mode: "workflow",
-            articleType,
-            primaryKeyword,
-            outline: outline ?? undefined,
-          });
-
-          logInfo("starting article generation", {
-            instanceId: event.instanceId,
-            draftId: input.draftId,
-          });
-          let approved = false;
-          let changes: string[] = [];
-          let attempts = 0;
-          let text = "";
-          let heroImage = "";
-          let heroImageCaption: string | null = null;
-          while (!approved && attempts < 3) {
-            const result = await generateText({
-              model: openai("gpt-5.2"),
-              providerOptions: {
-                openai: {
-                  reasoningEffort: "medium",
-                } satisfies OpenAIResponsesProviderOptions,
-                google: {
-                  thinkingConfig: {
-                    includeThoughts: true,
-                    thinkingLevel: "medium",
-                  },
-                } satisfies GoogleGenerativeAIProviderOptions,
-              },
-              tools: {
-                ...webTools.tools,
-                ...imageTools.tools,
-                ...todoTool.tools,
-              },
-              system: systemPrompt,
-              messages: [
-                {
-                  role: "user",
-                  content: changes.length
-                    ? `The article has been written and reviewed. Please refer to the original article and apply the changes to the article and return the updated article.
-<original-article>
-${text}
-</original-article>
-
-<changes>
-${changes.join("\n")}
-</changes>`
-                    : "Write the full article now.",
-                },
-              ],
-              output: Output.object({
-                schema: arktypeToAiJsonSchema(
-                  type({
-                    heroImage: "string",
-                    heroImageCaption: "string|null",
-                    markdown: "string",
-                  }),
-                ),
-              }),
-              onStepFinish: (step) => {
-                logInfo(`[generateArticle] Step completed:`, {
-                  text: step.text,
-                  toolResults: JSON.stringify(step.toolResults, null, 2),
-                  usage: step.usage,
-                });
-              },
-              prepareStep: ({ messages }) => {
-                return {
-                  messages: [
-                    ...messages,
-                    {
-                      role: "assistant",
-                      content: formatTodoFocusReminder({
-                        todos: todoTool.getSnapshot(),
-                        maxOpen: 5,
-                      }),
-                    },
-                  ],
-                };
-              },
-              stopWhen: [stepCountIs(40)],
-            });
-
-            const outputMarkdown = result.output.markdown.trim();
-            const repairedLinks = repairPublicBucketImageLinks({
-              markdown: outputMarkdown,
-              orgId: input.organizationId,
-              projectId: input.projectId,
-              kind: "content-image",
-            });
-            text = repairedLinks.markdown;
-            heroImage = result.output.heroImage.trim();
-            heroImageCaption = result.output.heroImageCaption?.trim() || null;
-            if (!text) throw new Error("Empty article returned by model");
-            logInfo("article generated. Going through review process.", {
-              instanceId: event.instanceId,
-              draftId: input.draftId,
-              articleChars: text.length,
-              heroImagePresent: !!heroImage,
-              usage: result.usage ?? null,
-              replacedCount: repairedLinks.replacedCount,
-            });
-
-            const articleTypeRule = articleType
-              ? ARTICLE_TYPE_TO_WRITER_RULE[articleType]
-              : undefined;
-
-            const analysis = analyzeArticleMarkdownForReview({
-              markdown: text,
-              websiteUrl: project.websiteUrl,
-              outline,
-            });
-            const utcDate = new Intl.DateTimeFormat("en-US", {
-              timeZone: "UTC",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }).format(new Date());
-            const { output: reviewResult } = await generateText({
-              model: google("gemini-3-flash-preview"),
-              providerOptions: {
-                google: {
-                  thinkingConfig: {
-                    includeThoughts: true,
-                    thinkingLevel: "medium",
-                  },
-                } satisfies GoogleGenerativeAIProviderOptions,
-              },
-              tools: {
-                ...webTools.tools,
-              },
-              system: `<role>
-You are a strict SEO content QA reviewer. Your job is to verify the writer followed ALL explicit rules and that the article is publish-ready.
-</role>
-
-<approval-policy>
-- Only set approved=true when ALL requirements are satisfied.
-- If ANY measurable requirement fails (counts, missing sections, forbidden characters), approved MUST be false.
-- In changes, focus on concrete edits: what to add/remove/move, and exactly where (section names/headings).
-</approval-policy>
-
-<hard-requirements>
-- Outline coverage: every outline heading (H2+) must exist in the article and be meaningfully covered.
-- Internal links: at least 3 internal links (relative URLs and URLs whose host matches the website host count as internal).
-- External links: at least 2 external links whose host is NOT the website host.
-- Images:
-  - At least 1 image inside an H2 section (an H2 section that contains an image).
-  - All images must have non-empty, descriptive alt text.
-- Formatting:
-  - No em dashes (—) anywhere.
-  - If bullet points are used, each bullet must start with a bold heading and a colon (e.g. "- **Heading**: ...").
-- Article-type rule (if present) must be enforced.
-</hard-requirements>
-
-<link-verification>
-- Use web_search and web_fetch to verify external links are accurate, relevant, and resolve to the intended content.
-- If a link is broken, non-authoritative, or mismatched to the claim, propose a replacement URL and specify where to swap it in.
-</link-verification>
-
-<output>
-Return JSON that matches the schema: { approved: boolean, changes: string[] }.
-If not approved, changes must be a prioritized, actionable edit list (include observed counts and missing items).
-</output>
-
-<project-context>
-- Today's date: ${utcDate} (UTC timezone)
-- Website URL: ${project.websiteUrl}
-- Article type: ${articleType ?? "(missing)"}
-- Primary keyword: ${primaryKeyword ?? "(missing)"}
-- Brand voice (must be followed): ${project.writingSettings?.brandVoice ?? "(missing)"}
-- User instructions (must be followed): ${project.writingSettings?.customInstructions ?? "(missing)"}
-${articleTypeRule ? `- Article-type rule:\n${articleTypeRule}` : ""}
-</project-context>
-
-<programmatic-analysis>
-${JSON.stringify(analysis, null, 2)}
-</programmatic-analysis>
-
-<outline>
-${outline ?? "(missing)"}
-</outline>
-
-<article-markdown>
-${text}
-</article-markdown>`,
-              messages: [
-                {
-                  role: "user",
-                  content: `Review the article against the requirements and return (approved, changes).`,
-                },
-              ],
-              output: Output.object({
-                schema: arktypeToAiJsonSchema(reviewArticleOutputSchema),
-              }),
-              onStepFinish: (step) => {
-                logInfo("review step completed", {
-                  instanceId: event.instanceId,
-                  draftId: input.draftId,
-                  text: step.text,
-                  toolResults: JSON.stringify(step.toolResults, null, 2),
-                  usage: step.usage,
-                });
-              },
-              prepareStep: ({ messages }) => {
-                return {
-                  messages: [
-                    ...messages,
-                    {
-                      role: "assistant",
-                      content: formatTodoFocusReminder({
-                        todos: todoTool.getSnapshot(),
-                        maxOpen: 5,
-                      }),
-                    },
-                  ],
-                };
-              },
-              stopWhen: [stepCountIs(20)],
-            });
-            ++attempts;
-            ({ approved, changes } = reviewResult);
-            logInfo("review result", {
-              instanceId: event.instanceId,
-              draftId: input.draftId,
-              approved,
-              changes,
-            });
-          }
-          return { text, articleType, heroImage, heroImageCaption };
-        },
-      );
-
-      await step.do("Save article to file and update status", async () => {
-        const db = createDb();
-        const { project } = await loadDraftAndProject({
-          db,
-          organizationId: input.organizationId,
-          projectId: input.projectId,
-          draftId: input.draftId,
-        });
-        const writeResult = await writeContentDraft({
-          db,
-          chatId: input.chatId,
-          userId: input.userId ?? null,
-          projectId: input.projectId,
-          organizationId: input.organizationId,
-          lookup: { type: "id", id: input.draftId },
-          draftNewValues: {
-            contentMarkdown: articleMarkdown,
-            heroImage,
-            heroImageCaption,
-            status: project.publishingSettings?.requireContentReview
-              ? "pending-review"
-              : "scheduled",
-            articleType,
-          },
-        });
-        if (!writeResult.ok) throw new Error(writeResult.error.message);
-      });
-      logInfo("article saved", {
-        instanceId: event.instanceId,
-        draftId: input.draftId,
-      });
-      return {
-        type: "seo-write-article",
-        draftId: input.draftId,
-        content: articleMarkdown,
-        articleType,
-        heroImage,
-        heroImageCaption,
-      } satisfies typeof seoWriteArticleTaskOutputSchema.infer;
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Unknown error";
-      logError("generation failed", {
-        instanceId: event.instanceId,
-        draftId: input.draftId,
-        message,
-      });
-
-      throw e;
-    }
+    return {
+      type: "seo-write-article",
+      draftId: input.draftId,
+      content: articleMarkdown,
+      articleType,
+      heroImage,
+      heroImageCaption,
+    } satisfies typeof seoWriteArticleTaskOutputSchema.infer;
   }
 }

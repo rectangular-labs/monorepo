@@ -5,10 +5,8 @@ import {
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
 import { randomUUID } from "node:crypto";
-import { openai } from "@ai-sdk/openai";
-import { initAuthHandler } from "@rectangular-labs/auth";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
-import { strategyPhaseSuggestionScheme } from "@rectangular-labs/core/schemas/strategy-parsers";
+import type { strategyPhaseSuggestionScheme } from "@rectangular-labs/core/schemas/strategy-parsers";
 import type {
   seoGenerateStrategyPhaseTaskInputSchema,
   seoGenerateStrategyPhaseTaskOutputSchema,
@@ -25,15 +23,9 @@ import {
   listUnassignedContentDrafts,
   updateContentDraft,
 } from "@rectangular-labs/db/operations";
-import { generateText, Output, stepCountIs } from "ai";
-import { apiEnv } from "../env";
-import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
-import { createDataforseoToolWithMetadata } from "../lib/ai/tools/dataforseo-tool";
-import { createGscToolWithMetadata } from "../lib/ai/tools/google-search-console-tool";
-import { createStrategyToolsWithMetadata } from "../lib/ai/tools/strategy-tools";
-import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
-import { formatBusinessBackground } from "../lib/ai/utils/format-business-background";
-import { logAgentStep } from "../lib/ai/utils/log-agent-step";
+import { createStrategyAdvisorAgent } from "../lib/ai/agents/strategy-advisor";
+import { summarizeAgentInvocation } from "../lib/ai/utils/agent-telemetry";
+import { createWorkflowAuth } from "../lib/ai/utils/auth-init";
 import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import { createSeoWriteArticleTasksBatch, createTask } from "../lib/task";
 import type { InitialContext } from "../types";
@@ -48,6 +40,7 @@ function logError(message: string, data?: Record<string, unknown>) {
 
 type StrategyPhaseGenerationInput =
   typeof seoGenerateStrategyPhaseTaskInputSchema.infer;
+
 export type SeoStrategyPhaseGenerationWorkflowBinding =
   Workflow<StrategyPhaseGenerationInput>;
 
@@ -67,7 +60,10 @@ type DraftTarget = Pick<
 };
 
 function formatDraftTargets(drafts: DraftTarget[]) {
-  if (drafts.length === 0) return "- none";
+  if (drafts.length === 0) {
+    return "- none";
+  }
+
   return drafts
     .map((draft) => {
       const title = draft.title ? `"${draft.title}"` : "(untitled)";
@@ -84,7 +80,9 @@ function formatDraftTargets(drafts: DraftTarget[]) {
 }
 
 function formatStrategyPhaseHistory(phases: StrategyDetails["phases"]) {
-  if (phases.length === 0) return "- none";
+  if (phases.length === 0) {
+    return "- none";
+  }
 
   return phases
     .map((phase, index) => {
@@ -112,48 +110,6 @@ function formatStrategyPhaseHistory(phases: StrategyDetails["phases"]) {
     .join("\n");
 }
 
-async function getGscIntegrationOrThrow(args: {
-  db: ReturnType<typeof createDb>;
-  projectId: string;
-  organizationId: string;
-  context: string;
-}) {
-  const env = apiEnv();
-  const auth = initAuthHandler({
-    baseURL: env.SEO_URL,
-    db: args.db,
-    encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
-    fromEmail: env.AUTH_SEO_FROM_EMAIL,
-    inboundApiKey: env.SEO_INBOUND_API_KEY,
-    credentialVerificationType: env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
-    discordClientId: env.AUTH_SEO_DISCORD_ID,
-    discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
-    githubClientId: env.AUTH_SEO_GITHUB_ID,
-    githubClientSecret: env.AUTH_SEO_GITHUB_SECRET,
-    googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
-    googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
-  });
-
-  const gscIntegrationResult = await getGscIntegrationForProject({
-    db: args.db,
-    projectId: args.projectId,
-    organizationId: args.organizationId,
-    authOverride: auth,
-  });
-
-  if (!gscIntegrationResult.ok) {
-    logError("failed to load GSC integration", {
-      context: args.context,
-      projectId: args.projectId,
-      organizationId: args.organizationId,
-      error: gscIntegrationResult.error,
-    });
-    throw gscIntegrationResult.error;
-  }
-
-  return gscIntegrationResult.value;
-}
-
 export class SeoStrategyPhaseGenerationWorkflow extends WorkflowEntrypoint<
   {
     CACHE: InitialContext["cacheKV"];
@@ -178,7 +134,9 @@ export class SeoStrategyPhaseGenerationWorkflow extends WorkflowEntrypoint<
         const db = createDb();
 
         const projectResult = await getSeoProjectById(db, input.projectId);
-        if (!projectResult.ok) throw projectResult.error;
+        if (!projectResult.ok) {
+          throw projectResult.error;
+        }
         if (!projectResult.value) {
           throw new NonRetryableError(`Missing project ${input.projectId}`);
         }
@@ -189,7 +147,9 @@ export class SeoStrategyPhaseGenerationWorkflow extends WorkflowEntrypoint<
           strategyId: input.strategyId,
           organizationId: input.organizationId,
         });
-        if (!strategyResult.ok) throw strategyResult.error;
+        if (!strategyResult.ok) {
+          throw strategyResult.error;
+        }
         if (!strategyResult.value) {
           throw new NonRetryableError(`Missing strategy ${input.strategyId}`);
         }
@@ -200,12 +160,15 @@ export class SeoStrategyPhaseGenerationWorkflow extends WorkflowEntrypoint<
 
     const candidateDrafts = await step.do("load candidate drafts", async () => {
       const db = createDb();
+
       const unassignedResult = await listUnassignedContentDrafts({
         db,
         organizationId: input.organizationId,
         projectId: input.projectId,
       });
-      if (!unassignedResult.ok) throw unassignedResult.error;
+      if (!unassignedResult.ok) {
+        throw unassignedResult.error;
+      }
 
       const combined = new Map<string, DraftTarget>();
 
@@ -215,9 +178,13 @@ export class SeoStrategyPhaseGenerationWorkflow extends WorkflowEntrypoint<
           source: "unassigned",
         });
       }
+
       for (const phase of strategy.phases) {
         for (const content of phase.phaseContents) {
-          if (!content.contentDraft) continue;
+          if (!content.contentDraft) {
+            continue;
+          }
+
           const { contentDraft: draft } = content;
           combined.set(draft.id, {
             id: draft.id,
@@ -237,98 +204,181 @@ export class SeoStrategyPhaseGenerationWorkflow extends WorkflowEntrypoint<
       "generate phase suggestion",
       { timeout: "10 minutes" },
       async () => {
-        const { tools: webTools } = createWebToolsWithMetadata(
-          project,
-          this.env.CACHE,
-        );
-        const dataforseoTools = createDataforseoToolWithMetadata(
-          project,
-          this.env.CACHE,
-        );
-
         const db = createDb();
-        const strategyTools = createStrategyToolsWithMetadata({
+
+        const gscIntegrationResult = await getGscIntegrationForProject({
           db,
           projectId: project.id,
           organizationId: project.organizationId,
+          authOverride: createWorkflowAuth(db),
         });
+        if (!gscIntegrationResult.ok) {
+          logError("failed to load GSC integration", {
+            projectId: project.id,
+            organizationId: project.organizationId,
+            error: gscIntegrationResult.error,
+          });
+          throw gscIntegrationResult.error;
+        }
 
-        const gscIntegration = await getGscIntegrationOrThrow({
+        const { agent } = createStrategyAdvisorAgent<
+          typeof strategyPhaseSuggestionScheme.infer
+        >({
           db,
-          projectId: project.id,
-          organizationId: project.organizationId,
-          context: "generate phase suggestion",
+          project,
+          cacheKV: this.env.CACHE,
+          jsonSchema: {
+            type: "object",
+            additionalProperties: false,
+            required: ["phase", "contentUpdates", "contentCreations"],
+            properties: {
+              phase: {
+                type: "object",
+                additionalProperties: false,
+                required: [
+                  "type",
+                  "name",
+                  "observationWeeks",
+                  "successCriteria",
+                  "cadence",
+                ],
+                properties: {
+                  type: {
+                    type: "string",
+                    enum: ["build", "optimize", "expand"],
+                  },
+                  name: { type: "string" },
+                  observationWeeks: { type: "number" },
+                  successCriteria: { type: "string" },
+                  cadence: {
+                    type: "object",
+                    additionalProperties: false,
+                    required: ["period", "frequency", "allowedDays"],
+                    properties: {
+                      period: {
+                        type: "string",
+                        enum: ["daily", "weekly", "monthly"],
+                      },
+                      frequency: { type: "number" },
+                      allowedDays: {
+                        type: "array",
+                        items: {
+                          type: "string",
+                          enum: [
+                            "mon",
+                            "tue",
+                            "wed",
+                            "thu",
+                            "fri",
+                            "sat",
+                            "sun",
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              contentUpdates: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  required: [
+                    "action",
+                    "contentDraftId",
+                    "updatedRole",
+                    "updatedTitle",
+                    "updatedDescription",
+                    "updatedPrimaryKeyword",
+                    "updatedNotes",
+                  ],
+                  properties: {
+                    action: {
+                      type: "string",
+                      enum: ["improve", "expand"],
+                    },
+                    contentDraftId: { type: "string" },
+                    updatedRole: {
+                      type: ["string", "null"],
+                      enum: ["pillar", "supporting", null],
+                    },
+                    updatedTitle: { type: ["string", "null"] },
+                    updatedDescription: { type: ["string", "null"] },
+                    updatedPrimaryKeyword: { type: ["string", "null"] },
+                    updatedNotes: { type: ["string", "null"] },
+                  },
+                },
+              },
+              contentCreations: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  required: [
+                    "action",
+                    "role",
+                    "plannedSlug",
+                    "plannedPrimaryKeyword",
+                    "notes",
+                  ],
+                  properties: {
+                    action: {
+                      type: "string",
+                      enum: ["create"],
+                    },
+                    role: {
+                      type: "string",
+                      enum: ["pillar", "supporting"],
+                    },
+                    plannedSlug: { type: "string" },
+                    plannedPrimaryKeyword: { type: "string" },
+                    notes: { type: ["string", "null"] },
+                  },
+                },
+              },
+            },
+          },
+          gscProperty: gscIntegrationResult.value
+            ? {
+                config: gscIntegrationResult.value.config,
+                accessToken: gscIntegrationResult.value.accessToken,
+              }
+            : null,
         });
 
-        const gscTools = createGscToolWithMetadata({
-          accessToken: gscIntegration?.accessToken ?? null,
-          siteUrl: gscIntegration?.config?.domain ?? null,
-          siteType: gscIntegration?.config?.propertyType ?? null,
-        });
+        const result = await agent.generate({
+          prompt: `Generate the NEXT execution phase for this strategy.
 
-        const system = `You are an SEO strategist generating the NEXT execution phase for an approved strategy.
-
-## Strategy
+<strategy>
 Name: ${strategy.name}
 Motivation: ${strategy.motivation}
 Description: ${strategy.description ?? "(none)"}
 Goal: ${formatStrategyGoal(strategy.goal)}
+</strategy>
 
-## Historical Context (oldest to newest)
+<history>
 ${formatStrategyPhaseHistory(strategy.phases)}
+</history>
 
-## Rules
-- Use tools before deciding what should be improved, expanded, or created.
-- Ground decisions in project data (GSC, keyword data, web research, strategy details).
-- Use Google Search Console to verify publication and performance before proposing improvements:
-  - Query GSC with dimensions ['page', 'query'] when possible.
-  - Use includingRegex filters on page to match draft slugs (for example slug 'best-crm-tools' -> regex '.*/best-crm-tools/?$').
-  - If a slug has no matching page/query rows over a useful date range, treat it as likely not published or not yet indexed and avoid recommending optimize/expand based on missing evidence.
-  - For published pages, inspect clicks, impressions, queries, and position trends before recommending improve/expand actions.
-- The phase should be clear, concise, and focused with a clear hypothesis.
-- Use contentUpdates for improving/expanding existing drafts when it is warranted.
-- Use contentCreations for all net-new content to create in this phase.
-- Output JSON matching the provided schema exactly.
-
-## Candidate existing drafts for updates
-${formatDraftTargets(candidateDrafts)}`;
-
-        const outputResult = await generateText({
-          model: openai("gpt-5.2"),
-          system,
-          tools: {
-            ...webTools,
-            ...dataforseoTools.tools,
-            ...strategyTools.tools,
-            ...(gscIntegration ? gscTools.tools : {}),
-          },
-          prompt: `Project website: ${project.websiteUrl}
-Business background:
-${formatBusinessBackground(project.businessBackground)}
-
-Generate the next strategy phase now.`,
-          stopWhen: [stepCountIs(40)],
-          onStepFinish: (agentStep) => {
-            logAgentStep(
-              logInfo,
-              "phase generation tool step",
-              agentStep,
-              event.instanceId,
-            );
-          },
-          output: Output.object({
-            schema: arktypeToAiJsonSchema(strategyPhaseSuggestionScheme),
-          }),
-        }).catch((error) => {
-          console.error("error generating phase suggestion", error);
-          throw error;
+<candidate-existing-drafts>
+${formatDraftTargets(candidateDrafts)}
+</candidate-existing-drafts>`,
+        });
+        const telemetry = summarizeAgentInvocation(result.steps);
+        logInfo("strategy advisor invocation complete", {
+          instanceId: event.instanceId,
+          projectId: project.id,
+          strategyId: strategy.id,
+          ...telemetry,
         });
 
-        return outputResult.output;
+        return result.output;
       },
     );
 
     const now = new Date();
+
     const phaseResult = await step.do("create phase + contents", async () => {
       const db = createDb();
       const phaseStatus =
@@ -338,7 +388,7 @@ Generate the next strategy phase now.`,
         cadence: suggestion.phase.cadence,
         contentCreationsCount: suggestion.contentCreations.length,
         contentUpdatesCount: suggestion.contentUpdates.length,
-        now: now,
+        now,
       });
 
       const phaseInsert = await createStrategyPhase(db, {
@@ -352,7 +402,9 @@ Generate the next strategy phase now.`,
         startedAt: phaseStatus === "planned" ? now : null,
         targetCompletionDate,
       });
-      if (!phaseInsert.ok) throw phaseInsert.error;
+      if (!phaseInsert.ok) {
+        throw phaseInsert.error;
+      }
 
       const phase = phaseInsert.value;
       const allPhaseDraftIds = new Set<string>();
@@ -366,7 +418,7 @@ Generate the next strategy phase now.`,
         const knownDraft = candidateById.get(contentUpdate.contentDraftId);
         if (!knownDraft) {
           logError(
-            "content update draft was not found in candidate set, skipping",
+            "content update draft not found in candidate set, skipping",
             {
               draftId: contentUpdate.contentDraftId,
             },
@@ -385,14 +437,19 @@ Generate the next strategy phase now.`,
           role: contentUpdate.updatedRole,
           notes: contentUpdate.updatedNotes ?? null,
         });
-        if (!updatedDraft.ok) throw updatedDraft.error;
+        if (!updatedDraft.ok) {
+          throw updatedDraft.error;
+        }
 
         const phaseContentResult = await createStrategyPhaseContent(db, {
           phaseId: phase.id,
           contentDraftId: updatedDraft.value.id,
           action: contentUpdate.action,
         });
-        if (!phaseContentResult.ok) throw phaseContentResult.error;
+        if (!phaseContentResult.ok) {
+          throw phaseContentResult.error;
+        }
+
         if (contentUpdate.updatedNotes) {
           draftIdsToUpdate.push(updatedDraft.value.id);
         }
@@ -410,13 +467,18 @@ Generate the next strategy phase now.`,
           role: contentCreation.role,
           notes: contentCreation.notes ?? null,
         });
-        if (!draftInsert.ok) throw draftInsert.error;
+        if (!draftInsert.ok) {
+          throw draftInsert.error;
+        }
+
         const phaseContentResult = await createStrategyPhaseContent(db, {
           phaseId: phase.id,
           contentDraftId: draftInsert.value.id,
           action: contentCreation.action,
         });
-        if (!phaseContentResult.ok) throw phaseContentResult.error;
+        if (!phaseContentResult.ok) {
+          throw phaseContentResult.error;
+        }
 
         createdDraftIds.push(draftInsert.value.id);
         allPhaseDraftIds.add(draftInsert.value.id);

@@ -16,6 +16,21 @@ import {
   searchUnsplash,
 } from "./image-tools.image-providers";
 
+function normalizeImageMediaType(mediaType: string | null | undefined): string {
+  const normalized = mediaType?.split(";")[0]?.trim().toLowerCase();
+  switch (normalized) {
+    case "image/jpg":
+      return "image/jpeg";
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+      return normalized;
+    default:
+      return "image/jpeg";
+  }
+}
+
 async function selectBestStockImageIndex(args: {
   query: string;
   candidates: StockImageCandidate[];
@@ -130,7 +145,8 @@ export function createImageTools(args: {
       const { organizationId, projectId, publicImagesBucket } = args;
       const fileNames: string[] = [];
       for (const file of result.files) {
-        const originalContentType = file.mediaType || "image/jpeg";
+        const originalContentType = normalizeImageMediaType(file.mediaType);
+
         const originalExt = getExtensionFromMimeType(originalContentType);
         const originalKey = getPublicImageUri({
           orgId: organizationId,
@@ -165,26 +181,6 @@ export function createImageTools(args: {
         imageUris: fileNames.map(
           (fileName) => `${apiEnv().SEO_PUBLIC_BUCKET_URL}/${fileName}`,
         ),
-      };
-    },
-    toModelOutput({ output }) {
-      if (!output.success) {
-        return {
-          type: "content" as const,
-          value: [{ type: "text" as const, text: output.message }],
-        };
-      }
-
-      return {
-        type: "content" as const,
-        value: [
-          { type: "text" as const, text: output.message },
-          ...output.imageUris.map((uri) => ({
-            type: "media" as const,
-            data: uri,
-            mediaType: "image/jpeg",
-          })),
-        ],
       };
     },
   });
@@ -270,8 +266,9 @@ export function createImageTools(args: {
         const downloadResponse = await fetch(picked.imageUrl).catch(() => null);
         if (!downloadResponse?.ok) continue;
 
-        const downloadedType =
-          downloadResponse.headers.get("content-type") || "image/jpeg";
+        const downloadedType = normalizeImageMediaType(
+          downloadResponse.headers.get("content-type"),
+        );
 
         const { organizationId, projectId, publicImagesBucket } = args;
         const originalExt = getExtensionFromMimeType(downloadedType);
@@ -375,7 +372,11 @@ export function createImageTools(args: {
       }
       const { organizationId, projectId, publicImagesBucket } = args;
       const baseId = uuidv7();
-      const originalExt = getExtensionFromMimeType(result.value.contentType);
+      const screenshotMediaType = normalizeImageMediaType(
+        result.value.contentType,
+      );
+
+      const originalExt = getExtensionFromMimeType(screenshotMediaType);
       const originalKey = getPublicImageUri({
         orgId: organizationId,
         projectId,
@@ -386,7 +387,7 @@ export function createImageTools(args: {
         bucket: publicImagesBucket,
         bytes: result.value.bytes,
         key: originalKey,
-        mimeType: result.value.contentType,
+        mimeType: screenshotMediaType,
       });
 
       if (!stored.ok) {
@@ -399,26 +400,6 @@ export function createImageTools(args: {
       return {
         success: true as const,
         screenshot: `${apiEnv().SEO_PUBLIC_BUCKET_URL}/${stored.value.key}`,
-      };
-    },
-    toModelOutput({ output }) {
-      if (!output.success) {
-        return {
-          type: "content" as const,
-          value: [{ type: "text" as const, text: output.message }],
-        };
-      }
-
-      return {
-        type: "content" as const,
-        value: [
-          { type: "text" as const, text: output.screenshot },
-          {
-            type: "media" as const,
-            data: output.screenshot,
-            mediaType: "image/jpeg",
-          },
-        ],
       };
     },
   });

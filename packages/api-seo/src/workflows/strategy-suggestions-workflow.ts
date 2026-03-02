@@ -4,10 +4,8 @@ import {
   type WorkflowStep,
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
-import { openai } from "@ai-sdk/openai";
-import { initAuthHandler } from "@rectangular-labs/auth";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
-import { strategySuggestionSchema } from "@rectangular-labs/core/schemas/strategy-parsers";
+import type { strategySuggestionSchema } from "@rectangular-labs/core/schemas/strategy-parsers";
 import type {
   seoStrategySuggestionsTaskInputSchema,
   seoStrategySuggestionsTaskOutputSchema,
@@ -18,16 +16,9 @@ import {
   getSeoProjectById,
   listStrategiesByProjectId,
 } from "@rectangular-labs/db/operations";
-import { generateText, Output, stepCountIs } from "ai";
-import { type } from "arktype";
-import { apiEnv } from "../env";
-import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
-import { createDataforseoToolWithMetadata } from "../lib/ai/tools/dataforseo-tool";
-import { createGscToolWithMetadata } from "../lib/ai/tools/google-search-console-tool";
-import { createStrategyToolsWithMetadata } from "../lib/ai/tools/strategy-tools";
-import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
-import { formatBusinessBackground } from "../lib/ai/utils/format-business-background";
-import { logAgentStep } from "../lib/ai/utils/log-agent-step";
+import { createStrategyAdvisorAgent } from "../lib/ai/agents/strategy-advisor";
+import { summarizeAgentInvocation } from "../lib/ai/utils/agent-telemetry";
+import { createWorkflowAuth } from "../lib/ai/utils/auth-init";
 import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import type { InitialContext } from "../types";
 
@@ -39,6 +30,7 @@ type StrategySuggestionsInput =
   typeof seoStrategySuggestionsTaskInputSchema.infer;
 export type SeoStrategySuggestionsWorkflowBinding =
   Workflow<StrategySuggestionsInput>;
+
 export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
   {
     CACHE: InitialContext["cacheKV"];
@@ -60,9 +52,6 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
       const db = createDb();
       const projectResult = await getSeoProjectById(db, input.projectId);
       if (!projectResult.ok) {
-        console.error(
-          `[SeoStrategySuggestionsWorkflow] ${projectResult.error}`,
-        );
         throw projectResult.error;
       }
       if (!projectResult.value) {
@@ -75,166 +64,125 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
 
     const suggestionResult = await step.do(
       "generate strategy suggestions",
-      {
-        timeout: "10 minutes",
-      },
+      { timeout: "10 minutes" },
       async () => {
-        try {
-          logInfo("creating strategy suggestion tools", {
-            instanceId: event.instanceId,
-            projectId: input.projectId,
-          });
-          const { tools: webTools } = createWebToolsWithMetadata(
-            project,
-            this.env.CACHE,
-          );
-          const dataforseoTools = createDataforseoToolWithMetadata(
-            project,
-            this.env.CACHE,
-          );
-          const db = createDb();
-          const strategyTools = createStrategyToolsWithMetadata({
-            db,
-            projectId: project.id,
-            organizationId: project.organizationId,
-          });
-          const env = apiEnv();
-          const auth = initAuthHandler({
-            baseURL: env.SEO_URL,
-            db,
-            encryptionKey: env.AUTH_SEO_ENCRYPTION_KEY,
-            fromEmail: env.AUTH_SEO_FROM_EMAIL,
-            inboundApiKey: env.SEO_INBOUND_API_KEY,
-            credentialVerificationType:
-              env.AUTH_SEO_CREDENTIAL_VERIFICATION_TYPE,
-            discordClientId: env.AUTH_SEO_DISCORD_ID,
-            discordClientSecret: env.AUTH_SEO_DISCORD_SECRET,
-            githubClientId: env.AUTH_SEO_GITHUB_ID,
-            githubClientSecret: env.AUTH_SEO_GITHUB_SECRET,
-            googleClientId: env.AUTH_SEO_GOOGLE_CLIENT_ID,
-            googleClientSecret: env.AUTH_SEO_GOOGLE_CLIENT_SECRET,
-          });
-          const gscIntegrationResult = await getGscIntegrationForProject({
-            db,
-            projectId: project.id,
-            organizationId: project.organizationId,
-            authOverride: auth,
-          });
-          if (!gscIntegrationResult.ok) {
-            throw new Error(
-              `Something went wrong getting gsc integration ${gscIntegrationResult.error}`,
-              {
-                cause: gscIntegrationResult.error,
-              },
-            );
-          }
+        const db = createDb();
 
-          const gscTools = createGscToolWithMetadata({
-            accessToken: gscIntegrationResult.value?.accessToken ?? null,
-            siteUrl: gscIntegrationResult.value?.config?.domain ?? null,
-            siteType: gscIntegrationResult.value?.config?.propertyType ?? null,
-          });
-
-          const existingStrategiesResult = await listStrategiesByProjectId({
-            db,
-            projectId: project.id,
-            organizationId: project.organizationId,
-          });
-          if (!existingStrategiesResult.ok) {
-            throw existingStrategiesResult.error;
-          }
-
-          const existingStrategies =
-            existingStrategiesResult.value.length > 0
-              ? existingStrategiesResult.value
-                  .map((strategy) => {
-                    const goal = strategy.goal
-                      ? formatStrategyGoal(strategy.goal)
-                      : "none";
-                    const updatedAt = strategy.updatedAt
-                      ?.toISOString?.()
-                      ?.slice(0, 10);
-                    const dismissalReason = strategy.dismissalReason
-                      ? `dismissal reason: ${strategy.dismissalReason}`
-                      : "";
-                    return [
-                      `- [${strategy.status}] "${strategy.name}"`,
-                      `id: ${strategy.id}`,
-                      `goal: ${goal}`,
-                      `phases:${strategy.phases?.length ?? 0}`,
-                      `updated:${updatedAt ?? "unknown"}`,
-                      dismissalReason,
-                    ]
-                      .filter(Boolean)
-                      .join("|");
-                  })
-                  .join("\n")
-              : "- none";
-
-          const system = `You are an SEO strategist generating strategy suggestions.
-
-## Objective
-- Propose strategy suggestions that fit the project's context and current work.
-- Avoid duplicates by name and intent. Learn from dismissed strategies and their reasons.
-
-## Instructions
-${input.instructions}
-
-## Data Usage
-- Use available tools (Google Search Console, keyword research data source tools, web search) directly to ground recommendations.
-- If you need more context about a specific strategy, use get_strategy_details.
-- If Google Search Console is not available, rely on competitor and keyword tools plus public site info.
-
-## Existing Strategies (compact)
-${existingStrategies}
-
-## Output Requirements
-- Keep each strategy concise and actionable.
-- Use realistic targets for goals and success criteria.
-- Strategies should be content-creation plays (new articles, pillar pages, content clusters), not technical SEO or on-page optimization tasks, unless the instructions explicitly ask for it.
-- Output MUST match the provided JSON schema.`;
-          logInfo("Starting strategy suggestion generation", {
-            instanceId: event.instanceId,
-            projectId: input.projectId,
-          });
-          const outputResult = await generateText({
-            model: openai("gpt-5.2"),
-            system,
-            tools: {
-              ...webTools,
-              ...dataforseoTools.tools,
-              ...strategyTools.tools,
-              ...(gscIntegrationResult.value ? gscTools.tools : {}),
-            },
-            prompt: `Project website: ${project.websiteUrl}
-Business background:${formatBusinessBackground(project.businessBackground)}
-
-Generate strategy suggestions now.`,
-            stopWhen: [stepCountIs(40)],
-            onStepFinish: (step) => {
-              logAgentStep(
-                logInfo,
-                "step to generate suggestion finished",
-                step,
-              );
-            },
-            output: Output.object({
-              schema: arktypeToAiJsonSchema(
-                type({
-                  suggestions: strategySuggestionSchema.array(),
-                }),
-              ),
-            }),
-          });
-
-          return outputResult.output;
-        } catch (e) {
-          console.error(
-            "[SeoStrategySuggestionsWorkflow] Error generating strategy suggestions",
-            e,
-          );
-          throw e;
+        const gscIntegrationResult = await getGscIntegrationForProject({
+          db,
+          projectId: project.id,
+          organizationId: project.organizationId,
+          authOverride: createWorkflowAuth(db),
+        });
+        if (!gscIntegrationResult.ok) {
+          throw gscIntegrationResult.error;
         }
+
+        const existingStrategiesResult = await listStrategiesByProjectId({
+          db,
+          projectId: project.id,
+          organizationId: project.organizationId,
+        });
+        if (!existingStrategiesResult.ok) {
+          throw existingStrategiesResult.error;
+        }
+
+        const existingStrategies =
+          existingStrategiesResult.value.length > 0
+            ? existingStrategiesResult.value
+                .map((strategy) => {
+                  const goal = strategy.goal
+                    ? formatStrategyGoal(strategy.goal)
+                    : "none";
+                  const updatedAt = strategy.updatedAt
+                    ?.toISOString?.()
+                    ?.slice(0, 10);
+                  const dismissalReason = strategy.dismissalReason
+                    ? `dismissal reason: ${strategy.dismissalReason}`
+                    : "";
+                  return [
+                    `- [${strategy.status}] "${strategy.name}"`,
+                    `id: ${strategy.id}`,
+                    `goal: ${goal}`,
+                    `phases:${strategy.phases?.length ?? 0}`,
+                    `updated:${updatedAt ?? "unknown"}`,
+                    dismissalReason,
+                  ]
+                    .filter(Boolean)
+                    .join("|");
+                })
+                .join("\n")
+            : "- none";
+
+        const { agent } = createStrategyAdvisorAgent<{
+          suggestions: (typeof strategySuggestionSchema.infer)[];
+        }>({
+          db,
+          project,
+          cacheKV: this.env.CACHE,
+          jsonSchema: {
+            type: "object",
+            additionalProperties: false,
+            required: ["suggestions"],
+            properties: {
+              suggestions: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  required: ["name", "motivation", "description", "goal"],
+                  properties: {
+                    name: { type: "string" },
+                    motivation: { type: "string" },
+                    description: { type: ["string", "null"] },
+                    goal: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["metric", "target", "timeframe"],
+                      properties: {
+                        metric: {
+                          type: "string",
+                          enum: ["clicks", "impressions", "avgPosition"],
+                        },
+                        target: { type: "number" },
+                        timeframe: {
+                          type: "string",
+                          enum: ["monthly", "total"],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          gscProperty: gscIntegrationResult.value
+            ? {
+                config: gscIntegrationResult.value.config,
+                accessToken: gscIntegrationResult.value.accessToken,
+              }
+            : null,
+        });
+
+        const result = await agent.generate({
+          prompt: `Generate strategy suggestions for this project.
+
+<instructions>
+${input.instructions}
+</instructions>
+
+<existing-strategies>
+${existingStrategies}
+</existing-strategies>`,
+        });
+        const telemetry = summarizeAgentInvocation(result.steps);
+        logInfo("strategy advisor invocation complete", {
+          instanceId: event.instanceId,
+          projectId: project.id,
+          ...telemetry,
+        });
+
+        return result.output;
       },
     );
 
@@ -244,14 +192,12 @@ Generate strategy suggestions now.`,
         const db = createDb();
         const strategyResult = await createStrategies(
           db,
-          suggestionResult.suggestions.map((suggestion) => {
-            return {
-              ...suggestion,
-              organizationId: project.organizationId,
-              projectId: project.id,
-              status: "suggestion",
-            };
-          }),
+          suggestionResult.suggestions.map((suggestion) => ({
+            ...suggestion,
+            organizationId: project.organizationId,
+            projectId: project.id,
+            status: "suggestion",
+          })),
         );
         if (!strategyResult.ok) {
           throw strategyResult.error;

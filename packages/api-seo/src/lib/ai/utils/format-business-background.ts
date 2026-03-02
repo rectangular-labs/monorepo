@@ -6,7 +6,7 @@ export function formatBusinessBackground(
   if (!background) {
     return "";
   }
-  return `\n- Business Overview: ${background.businessOverview}
+  return `- Business Overview: ${background.businessOverview}
 - Target Audience: ${background.targetAudience}
 - Industry: ${background.industry}
 - Case Studies: ${
@@ -19,6 +19,6 @@ export function formatBusinessBackground(
           )
           .join("")}`
   }
-- Sample Competitor's site: ${background.competitorsWebsites.length === 0 ? "None Present" : `${background.competitorsWebsites.length} Present`}
+- Competitor websites: ${background.competitorsWebsites.length === 0 ? "None Present" : `${background.competitorsWebsites.map((website, index) => `\n    - ${index + 1}. ${website}`).join("")}`}
 `;
 }

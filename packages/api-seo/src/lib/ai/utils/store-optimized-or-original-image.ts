@@ -1,17 +1,21 @@
-import { env as cloudflareEnv } from "cloudflare:workers";
 import { err, ok, type Result, safe } from "@rectangular-labs/result";
 import type { InitialContext } from "../../../types";
 
-function getImagesBinding(): ImagesBinding {
-  // biome-ignore lint/suspicious/noExplicitAny: Cloudflare bindings are injected at runtime.
-  return (cloudflareEnv as any).IMAGES;
+async function getImagesBinding(): Promise<ImagesBinding | null> {
+  try {
+    const workersModule = await import("cloudflare:workers");
+    // biome-ignore lint/suspicious/noExplicitAny: Cloudflare bindings are injected at runtime.
+    return (workersModule.env as any)?.IMAGES ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function tryConvertToWebp(
   bytes: Uint8Array,
 ): Promise<Result<Uint8Array, Error>> {
   try {
-    const images = getImagesBinding();
+    const images = await getImagesBinding();
     if (!images) {
       return err(new Error("Cloudflare IMAGES binding not configured"));
     }

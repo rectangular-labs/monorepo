@@ -14,7 +14,7 @@ import {
 } from "@rectangular-labs/db/operations";
 import { generateText, jsonSchema, Output, tool } from "ai";
 import type { ChatContext } from "../../../types";
-import { wrappedOpenAI } from "../wrapped-language-model";
+import { wrappedOpenAI } from "../utils/wrapped-language-model";
 
 export function createSettingsTools(args: {
   context: Pick<ChatContext, "db" | "projectId" | "organizationId">;
@@ -131,9 +131,9 @@ Respond with the new object matching the schema.`;
           const result = await generateText({
             model: wrappedOpenAI("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: jsonSchema<typeof businessBackgroundSchema.infer>(
-                businessBackgroundJsonSchema,
-              ),
+              schema: jsonSchema<
+                Omit<typeof businessBackgroundSchema.infer, "version">
+              >(businessBackgroundJsonSchema),
             }),
             prompt,
           });
@@ -143,9 +143,9 @@ Respond with the new object matching the schema.`;
           const result = await generateText({
             model: wrappedOpenAI("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: jsonSchema<typeof imageSettingsSchema.infer>(
-                imageSettingsJsonSchema,
-              ),
+              schema: jsonSchema<
+                Omit<typeof imageSettingsSchema.infer, "version">
+              >(imageSettingsJsonSchema),
             }),
             prompt,
           });
@@ -155,9 +155,9 @@ Respond with the new object matching the schema.`;
           const result = await generateText({
             model: wrappedOpenAI("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: jsonSchema<typeof writingSettingsSchema.infer>(
-                writingSettingsJsonSchema,
-              ),
+              schema: jsonSchema<
+                Omit<typeof writingSettingsSchema.infer, "version">
+              >(writingSettingsJsonSchema),
             }),
             prompt,
           });
