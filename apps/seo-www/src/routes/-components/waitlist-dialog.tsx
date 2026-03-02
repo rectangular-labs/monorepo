@@ -69,12 +69,8 @@ const createApolloContact = createServerFn({ method: "POST" })
     });
 
     if (!response.ok) {
-      const errorData = (await response.json().catch(() => null)) as {
-        error?: string;
-        message?: string;
-      } | null;
-      const message =
-        errorData?.error || errorData?.message || "Unable to submit";
+      const errorData = await response.text().catch(() => null);
+      const message = errorData || "Unable to submit";
       throw new Error(message);
     }
 
