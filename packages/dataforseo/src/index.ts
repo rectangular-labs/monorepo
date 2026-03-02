@@ -18,7 +18,7 @@ import {
   googleRelevantPagesLive,
 } from "./sdk.gen";
 
-export async function fetchRankedKeywordsForSite(args: {
+export type FetchRankedKeywordsForSiteArgs = {
   hostname: string;
   locationName: string;
   languageCode: string;
@@ -27,7 +27,11 @@ export async function fetchRankedKeywordsForSite(args: {
   positionTo?: number;
   limit?: number;
   offset?: number;
-}): Promise<
+};
+
+export async function fetchRankedKeywordsForSite(
+  args: FetchRankedKeywordsForSiteArgs,
+): Promise<
   Result<
     {
       cost: number;
@@ -175,14 +179,18 @@ export async function fetchRankedKeywordsForSite(args: {
   });
 }
 
-export async function fetchRankedPagesForSite(args: {
+export type FetchRankedPagesForSiteArgs = {
   target: string;
   locationName: string;
   languageCode: string;
   limit?: number;
   offset?: number;
   includeGenderAndAgeDistribution?: boolean;
-}): Promise<
+};
+
+export async function fetchRankedPagesForSite(
+  args: FetchRankedPagesForSiteArgs,
+): Promise<
   Result<
     {
       cost: number;
@@ -267,7 +275,7 @@ export async function fetchRankedPagesForSite(args: {
   });
 }
 
-export async function fetchKeywordSuggestions(args: {
+export type FetchKeywordSuggestionsArgs = {
   seedKeyword: string;
   locationName: string;
   languageCode: string;
@@ -275,7 +283,11 @@ export async function fetchKeywordSuggestions(args: {
   includeGenderAndAgeDistribution?: boolean;
   limit?: number;
   offset?: number;
-}): Promise<
+};
+
+export async function fetchKeywordSuggestions(
+  args: FetchKeywordSuggestionsArgs,
+): Promise<
   Result<
     {
       cost: number;
@@ -368,12 +380,16 @@ export async function fetchKeywordSuggestions(args: {
   });
 }
 
-export async function fetchKeywordsOverview(args: {
+export type FetchKeywordsOverviewArgs = {
   keywords: string[];
   locationName: string;
   languageCode: string;
   includeGenderAndAgeDistribution?: boolean;
-}): Promise<
+};
+
+export async function fetchKeywordsOverview(
+  args: FetchKeywordsOverviewArgs,
+): Promise<
   Result<
     {
       cost: number;
@@ -457,15 +473,20 @@ export async function fetchKeywordsOverview(args: {
   });
 }
 
-export async function fetchSerp(args: {
+type FetchSerpDevice = "desktop" | "mobile";
+type FetchSerpOs = "windows" | "macos" | "android" | "ios";
+
+export type FetchSerpArgs = {
   keyword: string;
   locationName: string;
   languageCode: string;
   depth?: number;
-  device?: "desktop" | "mobile";
-  os?: "windows" | "macos" | "android" | "ios";
+  device?: FetchSerpDevice;
+  os?: FetchSerpOs;
   targetUrl?: string;
-}): Promise<
+};
+
+export async function fetchSerp(args: FetchSerpArgs): Promise<
   Result<
     {
       cost: number;

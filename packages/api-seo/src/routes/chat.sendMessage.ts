@@ -11,11 +11,11 @@ import {
   getChatById,
   updateChat,
 } from "@rectangular-labs/db/operations";
-import { hasToolCall, streamText } from "ai";
+import { convertToModelMessages } from "ai";
 import { type as arktype } from "arktype";
 import { withOrganizationIdBase } from "../context";
-import { createStrategistAgent } from "../lib/ai/strategist-agent";
-import { createWriterAgent } from "../lib/ai/writer-agent";
+import { createOrchestrator } from "../lib/ai/agents/orchestrator";
+import { summarizeAgentStep } from "../lib/ai/utils/agent-telemetry";
 import { handleTitleGeneration } from "../lib/chat/handle-title-generation";
 import { getGscIntegrationForProject } from "../lib/database/gsc-integration";
 import { getProjectInChat } from "../lib/database/project";
@@ -202,48 +202,26 @@ export const sendMessage = withOrganizationIdBase
       }
     }
 
-    const agent = await (async () => {
-      if (input.currentPage === "article-editor") {
-        const writerAgent = await createWriterAgent({
-          project,
-          context,
-          messages: input.messages,
-        });
-        return writerAgent;
-      }
-      const strategistAgent = await createStrategistAgent({
-        project,
-        context,
-        messages: input.messages,
-        currentPage: input.currentPage,
-        gscProperty: gscIntegration ?? undefined,
-      });
-      return strategistAgent;
-    })();
-
-    const result = streamText({
-      ...agent,
-      onError: (error) => {
-        console.error("[chat.sendMessage] streamText onError", {
-          error,
-        });
-      },
-      onStepFinish: (step) => {
-        console.log("[chat.sendMessage] step finished", {
-          text: step?.text,
-          toolResults: step?.toolResults,
-          toolCallCount: Array.isArray(step?.toolCalls)
-            ? step.toolCalls.length
-            : 0,
-        });
-      },
-      stopWhen: [
-        hasToolCall("ask_questions"),
-        hasToolCall("create_plan"),
-        hasToolCall("manage_integrations"),
-      ],
+    const orchestrator = createOrchestrator({
+      db: context.db,
+      project,
+      messages: input.messages,
+      cacheKV: context.cacheKV,
+      publicImagesBucket: context.publicImagesBucket,
+      gscProperty: gscIntegration ?? null,
     });
-    console.log("[chat.sendMessage] streamText result created");
+
+    const modelMessages = await convertToModelMessages(input.messages);
+    const result = await orchestrator.stream({
+      messages: modelMessages,
+      onStepFinish: (step) => {
+        console.log(
+          "[chat.sendMessage] orchestrator step finished",
+          summarizeAgentStep(step),
+        );
+      },
+    });
+    console.log("[chat.sendMessage] orchestrator stream created");
     waitUntil(
       Promise.resolve(
         result.consumeStream({

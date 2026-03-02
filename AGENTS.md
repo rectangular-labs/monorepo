@@ -19,23 +19,7 @@ After creating or modifying code, run typecheck, lint, and format as needed:
 
 ## Common Commands
 
-- `pnpm dev` - Start development server (requires Docker for PostgreSQL)
-- `pnpm build` - Build all packages and apps
-- `pnpm build:preview` - Build with preview environment (uses `.env`)
-- `pnpm build:production` - Build for production (uses `.env.production`)
-- `pnpm lint` - Run Biome linting across all workspaces
-- `pnpm typecheck` - Run TypeScript type checking across all workspaces
-- `pnpm format` - Format code using Biome
-- `pnpm check` - Run Biome check with auto-fix
-
-## Database Commands
-
-- `pnpm db:push` - Push schema changes to local database (force)
-- `pnpm db:mg` - Generate migration files (local env)
-- `pnpm db:mp:local` - Apply migrations to local database
-- `pnpm db:mp:preview` - Apply migrations to preview database
-- `pnpm db:mp:production` - Apply migrations to production database
-- `pnpm db:studio` - Open Drizzle Studio
+check the root level package.json for the list of supported commands
 
 ## Environment Management
 
@@ -48,38 +32,6 @@ Environment variables are encrypted using dotenvx:
 Set variables with: `pnpm env:set <VARIABLE_NAME> <VALUE>`  
 Use `-f` to target a specific env file: `pnpm env:set <VAR> <VALUE> -f .env.local`
 
-## Repository Layout
-
-This is a TypeScript monorepo using Turborepo:
-
-### Apps
-
-- `apps/www` - Main web app (TanStack Start, Vite dev server on 6969).
-- `apps/seo` - SEO product app (TanStack Start + Cloudflare Workers).
-- `apps/seo-www` - Marketing site for SEO app.
-
-### Packages
-
-- `packages/api-core` - Shared oRPC handlers, CORS, OpenAPI wiring.
-- `packages/api-seo` - SEO oRPC API routes, context, workflows, and handlers.
-- `packages/api-user-vm` - User VM service + OpenAPI client/container exports.
-- `packages/auth` - Auth server/client + UI components (better-auth).
-- `packages/content` - Content collections, RSS/search helpers, content UI.
-- `packages/core` - Shared utilities/integrations (e.g. Octokit/Shopify helpers).
-- `packages/dataforseo` - DataForSEO API client + env/types.
-- `packages/db` - Drizzle ORM client, schemas, and operations.
-- `packages/emails` - Unified email client.
-- `packages/google-apis` - Google Search Console client.
-- `packages/loro-file-system` - Loro CRDT filesystem wrapper.
-- `packages/result` - Result type helpers (`ok`/`err`/`safe`).
-- `packages/task` - Trigger.dev jobs/tasks (crawler/AI workflows).
-- `packages/ui` - Shared UI components, hooks, and styles.
-
-### Tooling
-
-- `tooling/typescript` - Shared TS configs.
-- `tooling/github` - GitHub Actions setup/utility actions.
-
 ## Code Conventions
 
 - React hooks must be at component top level.
@@ -88,6 +40,7 @@ This is a TypeScript monorepo using Turborepo:
 - Do not use `as any` or casting generally. Prefer `satisfies` or explicit types.
 - Do not duplicate generic formatting helpers (numbers, dates, percent, currency, string casing) inside feature files; add/reuse them in `packages/core/src/format` and import from there.
 - When combining ArkType schemas, prefer attached shapes (e.g. `type({ "...": otherSchema })`) over `.merge()`.
+- For AI tool definitions, define schemas inline with `jsonSchema<...>()` directly inside the tool object and inline the TypeScript type in that generic; avoid separate ArkType schema references for tool input/output schema wiring.
 - When using the database object, prefer `.query` over `.select().from()`.
 - Create DB helpers in `packages/db/src/operations` and consume those helpers from API/routes or apps.
 - Avoid god components that own unrelated queries.
@@ -97,6 +50,7 @@ This is a TypeScript monorepo using Turborepo:
   - Shared/reusable child UI components should stay data-driven/dumb with explicit props and minimal side effects.
   - Only expose callback props from child to parent when a real customization need exists (for example custom post-success navigation). Do not pass callback props preemptively.
   - Avoid explicit `mode` props when mode can be derived from data presence (for example entity exists vs null/undefined).
+  - Unless a piece of code is needed to be used elsewhere do not export it out of the file by default.
 
 ## Key Architecture Patterns
 
@@ -122,6 +76,7 @@ This is a TypeScript monorepo using Turborepo:
 - Create query helpers in `packages/db/src/operations/**` and export from `packages/db/src/operations/index.ts`.
 - Operations typically return `Result` (`ok`/`err`/`safe`) from `@rectangular-labs/result`.
 - API routes call operations and translate failures into `ORPCError`s.
+- Create DB helpers in `packages/db/src/operations` and consume those helpers from API/routes or apps as relevant.
 
 ### App ↔ API Integration
 
@@ -139,35 +94,6 @@ This is a TypeScript monorepo using Turborepo:
 - Env is managed by dotenvx (`pnpm env:set`, `.env`, `.env.local`, `.env.production`).
 - Apps use Cloudflare Workers + Wrangler; `pnpm dev` decrypts env into app `.env.local`.
 - CI runs Biome, typecheck, and tests; deploys go through Cloudflare workflows.
-
-## Domain Context
-
-- `strategy-architecture.md` documents the Strategy-first model and related DB/UI changes.
-- Create DB helpers in `packages/db/src/operations` and consume those helpers from API/routes or apps as relevant.
-
-## Package Generation
-
-Preferred for AI/non-interactive: use `--args` to bypass prompts.
-
-- Argument order: `name`, `type`, `features`
-- Features: comma-separated list from `docs`, `env`, `react`, `styles`
-- Use empty string `""` for no features
-
-Examples:
-
-```bash
-pnpm new:package --args "my-lib" "public" ""
-pnpm new:package --args "my-lib" "public" "docs"
-pnpm new:package --args "my-private-lib" "private" "docs,env,react,styles"
-pnpm new:package --args "my-svc" "private" "env"
-pnpm new:package --args "my-svc" "private" "env,react"
-```
-
-Behavior:
-
-- Public packages get `tsup.config.ts`; private do not.
-- Dependencies are normalized to latest (workspace deps remain `workspace:*`).
-- After scaffolding, install, format, and lint run automatically.
 
 ## Mind Map of full application
 

@@ -1,34 +1,77 @@
-import { openai } from "@ai-sdk/openai";
-import { integrationProvidersSchema } from "@rectangular-labs/core/schemas/integration-parsers";
 import {
-  businessBackgroundSchema,
-  imageSettingsSchema,
-  publishingSettingsSchema,
-  writingSettingsSchema,
+  businessBackgroundJsonSchema,
+  type businessBackgroundSchema,
+  imageSettingsJsonSchema,
+  type imageSettingsSchema,
+  publishingSettingsJsonSchema,
+  type publishingSettingsSchema,
+  writingSettingsJsonSchema,
+  type writingSettingsSchema,
 } from "@rectangular-labs/core/schemas/project-parsers";
 import {
   getSeoProjectByIdentifierAndOrgId,
   updateSeoProject,
 } from "@rectangular-labs/db/operations";
-import { generateText, Output, tool } from "ai";
-import { type } from "arktype";
+import { generateText, jsonSchema, Output, tool } from "ai";
 import type { ChatContext } from "../../../types";
-import { arktypeToAiJsonSchema } from "../arktype-json-schema";
-import type { AgentToolDefinition } from "./utils";
+import { wrappedOpenAI } from "../utils/wrapped-language-model";
 
-export function createSettingsToolsWithMetadata(args: {
+export function createSettingsTools(args: {
   context: Pick<ChatContext, "db" | "projectId" | "organizationId">;
 }) {
-  const manageSettingsInputSchema = type({
-    mode: "'update' | 'display'",
-    settingToUpdate:
-      "'businessBackground' | 'imageSettings' | 'writingSettings' | 'publishingSettings'",
-    "updateTask?": "string",
-  });
-
   const manageSettings = tool({
     description: "Manage project settings (display or update).",
-    inputSchema: manageSettingsInputSchema,
+    inputSchema: jsonSchema<{
+      mode: "update" | "display";
+      settingToUpdate:
+        | "businessBackground"
+        | "imageSettings"
+        | "writingSettings"
+        | "publishingSettings";
+      updateTask?: string;
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["mode", "settingToUpdate"],
+      properties: {
+        mode: {
+          type: "string",
+          enum: ["update", "display"],
+          description:
+            "Use 'display' to show current settings in chat to the user. Use 'update' to apply targeted changes while preserving all unrelated fields.",
+        },
+        settingToUpdate: {
+          type: "string",
+          enum: [
+            "businessBackground",
+            "imageSettings",
+            "writingSettings",
+            "publishingSettings",
+          ],
+        },
+        updateTask: {
+          type: "string",
+          description:
+            "Only needed when the mode is 'update'. This provides the instruction on what in the settings we want to change.",
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          mode: "display",
+          settingToUpdate: "writingSettings",
+        },
+      },
+      {
+        input: {
+          mode: "update",
+          settingToUpdate: "businessBackground",
+          updateTask:
+            "Add an ICP section for B2B SaaS finance teams while keeping existing positioning details.",
+        },
+      },
+    ],
     async execute({ mode, settingToUpdate, updateTask }) {
       if (mode === "display") {
         return { success: true, message: "setting displayed to user" };
@@ -86,9 +129,11 @@ Respond with the new object matching the schema.`;
       const output = await (async () => {
         if (settingToUpdate === "businessBackground") {
           const result = await generateText({
-            model: openai("gpt-5.1-codex-mini"),
+            model: wrappedOpenAI("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: arktypeToAiJsonSchema(businessBackgroundSchema),
+              schema: jsonSchema<
+                Omit<typeof businessBackgroundSchema.infer, "version">
+              >(businessBackgroundJsonSchema),
             }),
             prompt,
           });
@@ -96,9 +141,11 @@ Respond with the new object matching the schema.`;
         }
         if (settingToUpdate === "imageSettings") {
           const result = await generateText({
-            model: openai("gpt-5.1-codex-mini"),
+            model: wrappedOpenAI("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: arktypeToAiJsonSchema(imageSettingsSchema),
+              schema: jsonSchema<
+                Omit<typeof imageSettingsSchema.infer, "version">
+              >(imageSettingsJsonSchema),
             }),
             prompt,
           });
@@ -106,18 +153,22 @@ Respond with the new object matching the schema.`;
         }
         if (settingToUpdate === "writingSettings") {
           const result = await generateText({
-            model: openai("gpt-5.1-codex-mini"),
+            model: wrappedOpenAI("gpt-5.1-codex-mini"),
             output: Output.object({
-              schema: arktypeToAiJsonSchema(writingSettingsSchema),
+              schema: jsonSchema<
+                Omit<typeof writingSettingsSchema.infer, "version">
+              >(writingSettingsJsonSchema),
             }),
             prompt,
           });
           return result.output;
         }
         const result = await generateText({
-          model: openai("gpt-5.1-codex-mini"),
+          model: wrappedOpenAI("gpt-5.1-codex-mini"),
           output: Output.object({
-            schema: arktypeToAiJsonSchema(publishingSettingsSchema),
+            schema: jsonSchema<typeof publishingSettingsSchema.infer>(
+              publishingSettingsJsonSchema,
+            ),
           }),
           prompt,
         });
@@ -134,13 +185,27 @@ Respond with the new object matching the schema.`;
     },
   });
 
-  const manageIntegrationsInputSchema = type({
-    provider: integrationProvidersSchema,
-  });
   const manageIntegrations = tool({
     description:
       "Help the user view, connect, or manage integrations for publishing content or tracking performance.",
-    inputSchema: manageIntegrationsInputSchema,
+    inputSchema: jsonSchema<{
+      provider: "github" | "webhook" | "google-search-console";
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["provider"],
+      properties: {
+        provider: {
+          type: "string",
+          enum: ["github", "webhook", "google-search-console"],
+          description: "The provider to manage.",
+        },
+      },
+    }),
+    inputExamples: [
+      { input: { provider: "google-search-console" } },
+      { input: { provider: "github" } },
+    ],
     async execute({ provider }) {
       return await Promise.resolve({
         success: true,
@@ -154,25 +219,5 @@ Respond with the new object matching the schema.`;
     manage_settings: manageSettings,
     manage_integrations: manageIntegrations,
   } as const;
-
-  const toolDefinitions: AgentToolDefinition[] = [
-    {
-      toolName: "manage_settings",
-      toolDescription:
-        "Display or update project settings (business background, image settings, writing settings).",
-      toolInstruction:
-        "Use mode='display' to show settings; mode='update' to modify. Provide settingToUpdate and a concrete updateTask describing the change to make while keeping other fields unchanged.",
-      tool: manageSettings,
-    },
-    {
-      toolName: "manage_integrations",
-      toolDescription:
-        "Help the user view/connect integrations. Available integrations: github (push content to repo), shopify (publish to store blog), webhook (send to any HTTP endpoint), google-search-console (track search performance).",
-      toolInstruction:
-        "Use when user asks about: connecting GitHub for publishing, setting up Shopify blog, configuring webhooks, connecting GSC, or when performance analysis is requested but GSC is not connected. Always provide the provider parameter.",
-      tool: manageIntegrations,
-    },
-  ];
-
-  return { toolDefinitions, tools };
+  return { tools };
 }

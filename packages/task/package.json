@@ -25,7 +25,7 @@
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
     "@trigger.dev/build": "4.1.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.2.3",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -36,7 +36,7 @@
     "@rectangular-labs/dataforseo": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/result": "workspace:*",
-    "@t3-oss/env-core": "^0.13.8",
+    "@t3-oss/env-core": "^0.13.10",
     "@trigger.dev/sdk": "4.1.1",
     "ai": "^6.0.86",
     "arktype": "^2.1.29",

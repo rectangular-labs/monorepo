@@ -43,7 +43,7 @@
     "@fumadocs/content-collections": "^1.2.4",
     "@rectangular-labs/typescript": "workspace:*",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.2.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "concurrently": "^9.2.1",

@@ -37,16 +37,6 @@ export const seoGenerateStrategySnapshotTaskInputSchema = type({
   "userId?": "string",
 });
 
-export const seoPlanKeywordTaskInputSchema = type({
-  type: "'seo-plan-keyword'",
-  projectId: "string.uuid",
-  organizationId: "string",
-  chatId: "string|null",
-  draftId: "string.uuid",
-  "callbackInstanceId?": "string",
-  "userId?": "string",
-});
-
 export const seoWriteArticleTaskInputSchema = type({
   type: "'seo-write-article'",
   projectId: "string",
@@ -58,7 +48,6 @@ export const seoWriteArticleTaskInputSchema = type({
 
 export const taskInputSchema = type.or(
   understandSiteTaskInputSchema,
-  seoPlanKeywordTaskInputSchema,
   seoWriteArticleTaskInputSchema,
   seoUnderstandSiteTaskInputSchema,
   seoStrategySuggestionsTaskInputSchema,
@@ -69,12 +58,6 @@ export const taskInputSchema = type.or(
 export const understandSiteTaskOutputSchema = type({
   type: "'understand-site'",
   websiteInfo: businessBackgroundSchema.merge(type({ name: "string" })),
-});
-
-export const seoPlanKeywordTaskOutputSchema = type({
-  type: "'seo-plan-keyword'",
-  draftId: "string.uuid",
-  outline: "string",
 });
 
 export const seoWriteArticleTaskOutputSchema = type({
@@ -114,7 +97,6 @@ export const seoGenerateStrategySnapshotTaskOutputSchema = type({
 
 export const taskOutputSchema = type.or(
   understandSiteTaskOutputSchema,
-  seoPlanKeywordTaskOutputSchema,
   seoWriteArticleTaskOutputSchema,
   seoUnderstandSiteTaskOutputSchema,
   seoStrategySuggestionsTaskOutputSchema,
