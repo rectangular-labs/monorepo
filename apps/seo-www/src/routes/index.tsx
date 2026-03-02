@@ -80,13 +80,19 @@ function NetworkGraph() {
   }, []);
 
   const connections = useMemo(() => {
-    const lines: Array<{ from: number; to: number; opacity: number }> = [];
+    const lines: Array<{
+      id: string;
+      from: number;
+      to: number;
+      opacity: number;
+    }> = [];
     for (let i = 0; i < nodes.length; i++) {
       const numConnections = Math.floor(Math.random() * 3) + 1;
       for (let j = 0; j < numConnections; j++) {
         const target = Math.floor(Math.random() * nodes.length);
         if (target !== i) {
           lines.push({
+            id: `line-${i}-${target}-${j}`,
             from: i,
             to: target,
             opacity: Math.random() * 0.3 + 0.1,
@@ -120,7 +126,7 @@ function NetworkGraph() {
         preserveAspectRatio="xMidYMid slice"
         viewBox="0 0 100 100"
       >
-        {connections.map((conn, i) => {
+        {connections.map((conn) => {
           const fromNode = nodes[conn.from];
           const toNode = nodes[conn.to];
           if (!fromNode || !toNode) return null;
@@ -129,7 +135,7 @@ function NetworkGraph() {
           return (
             <line
               className="stroke-neutral-400 dark:stroke-neutral-500"
-              key={`line-${conn.from}-${conn.to}-${i}`}
+              key={conn.id}
               opacity={conn.opacity}
               strokeWidth="0.15"
               x1={fromNode.x + fromOff.x}
@@ -1318,6 +1324,7 @@ function PricingSection() {
             </div>
 
             <WaitListDialog
+              source="pricing_starter"
               trigger={
                 <button
                   className="mt-6 w-full rounded-full bg-emerald-600 py-3 font-medium text-white transition-all hover:bg-emerald-700"
@@ -1437,6 +1444,7 @@ function PricingSection() {
             </div>
 
             <WaitListDialog
+              source="pricing_business"
               trigger={
                 <button
                   className="mt-6 w-full rounded-full bg-emerald-600 py-3 font-medium text-white transition-all hover:bg-emerald-700"
@@ -1472,6 +1480,7 @@ function CTASection() {
         </p>
         <div className="mx-auto mb-8 h-0.5 w-16 bg-emerald-200 dark:bg-emerald-300" />
         <WaitListDialog
+          source="cta_section"
           trigger={
             <button
               className="w-full rounded-full bg-white px-8 py-4 font-medium text-emerald-700 transition-all hover:bg-emerald-50 sm:w-auto sm:px-12 dark:bg-emerald-50 dark:hover:bg-white"

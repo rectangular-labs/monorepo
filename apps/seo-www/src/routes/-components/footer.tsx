@@ -1,3 +1,4 @@
+import { usePostHog } from "@posthog/react";
 import {
   LinkedInIcon,
   Logo,
@@ -43,6 +44,8 @@ const links = [
 ];
 
 export function Footer() {
+  const posthog = usePostHog();
+
   return (
     <footer className="pt-14">
       <div className="mx-auto max-w-5xl px-6">
@@ -61,6 +64,17 @@ export function Footer() {
                   <Link
                     className="block text-muted-foreground hover:text-primary"
                     key={item.href}
+                    onClick={() => {
+                      if (item.href === "/blog") {
+                        posthog.capture("marketing_blog_clicked", {
+                          source: "footer",
+                          path:
+                            typeof window === "undefined"
+                              ? null
+                              : window.location.pathname,
+                        });
+                      }
+                    }}
                     to={item.href}
                   >
                     <span>{item.title}</span>
