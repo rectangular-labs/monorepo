@@ -89,6 +89,7 @@ import {
 import { useIsApple } from "@rectangular-labs/ui/hooks/use-apple";
 import { cn } from "@rectangular-labs/ui/utils/cn";
 import { useLocation } from "@tanstack/react-router";
+import { lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Fragment } from "react/jsx-runtime";
 import { getApiClient } from "~/lib/api";
@@ -96,6 +97,10 @@ import { useProjectChat } from "./project-chat-provider";
 
 type ChatMessagePart = SeoChatMessage["parts"][number];
 type ChatToolPart = Extract<ChatMessagePart, { type: `tool-${string}` }>;
+type DeleteDataToolPart = Extract<
+  ChatToolPart,
+  { type: "tool-delete_existing_data" }
+>;
 
 function AskQuestionsToolPart({
   part,
@@ -298,6 +303,124 @@ function AskQuestionsToolPart({
   );
 }
 
+function DeleteDataToolPart({
+  part,
+  onRespond,
+}: {
+  part: DeleteDataToolPart;
+  onRespond: (args: { id: string; approved: boolean; reason?: string }) => void;
+}) {
+  const [denialReason, setDenialReason] = useState("");
+
+  if (part.type !== "tool-delete_existing_data") return null;
+
+  const input = part.input;
+  if (!input) {
+    return (
+      <div className="mb-4 w-full rounded-md border bg-background p-4 text-sm">
+        Delete request is missing input parameters.
+      </div>
+    );
+  }
+
+  const entityLabel =
+    input.entityType === "strategy" ? "strategy" : "content draft";
+  const isApprovalRequested = part.state === "approval-requested";
+
+  if (part.state === "input-streaming" || part.state === "input-available") {
+    return (
+      <Shimmer className="text-sm" key={part.toolCallId}>
+        Preparing delete request
+      </Shimmer>
+    );
+  }
+
+  return (
+    <div className="mb-4 w-full rounded-md border bg-background p-4">
+      <div className="space-y-2">
+        <div className="font-medium text-sm">Delete {entityLabel}</div>
+        <div className="text-muted-foreground text-sm">
+          ID: <code>{input.id}</code>
+        </div>
+        {input.reason ? (
+          <div className="text-muted-foreground text-sm">
+            Reason: {input.reason}
+          </div>
+        ) : null}
+        {input.entityType === "strategy" ? (
+          <div className="text-amber-700 text-sm">
+            This only removes the strategy. Content previously linked to it will
+            remain in your project.
+          </div>
+        ) : (
+          <div className="text-amber-700 text-sm">
+            Deleting this content also unpublishes it from your site.
+          </div>
+        )}
+
+        {part.state === "output-available" &&
+        part.output &&
+        typeof part.output === "object" &&
+        "success" in part.output &&
+        part.output.success === true ? (
+          <div className="text-green-700 text-sm">
+            Deletion approved and completed.
+          </div>
+        ) : null}
+        {part.state === "output-error" ? (
+          <div className="text-destructive text-sm">
+            Delete failed: {part.errorText}
+          </div>
+        ) : null}
+        {part.state === "output-denied" ? (
+          <div className="text-orange-700 text-sm">
+            Delete request denied.
+            {part.approval.reason ? ` Reason: ${part.approval.reason}` : ""}
+          </div>
+        ) : null}
+      </div>
+
+      {isApprovalRequested ? (
+        <div className="mt-4 space-y-2">
+          <Input
+            onChange={(event) => setDenialReason(event.target.value)}
+            placeholder="Optional denial reason"
+            value={denialReason}
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() =>
+                onRespond({
+                  id: part.approval.id,
+                  approved: false,
+                  reason: denialReason.trim() || undefined,
+                })
+              }
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Deny
+            </Button>
+            <Button
+              onClick={() =>
+                onRespond({
+                  id: part.approval.id,
+                  approved: true,
+                })
+              }
+              size="sm"
+              type="button"
+            >
+              Approve delete
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function inferCurrentPage(pathname: string): ProjectChatCurrentPage {
   if (pathname.includes("/content")) return "content-list";
   if (pathname.includes("/settings")) return "settings";
@@ -329,45 +452,53 @@ function ChatConversation({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const chatIdRef = useRef<string | null>(chatId);
 
-  const { messages, setMessages, sendMessage, status, regenerate, stop } =
-    useChat<SeoChatMessage>({
-      ...(!!chatIdRef.current && !isMessagesLoading
-        ? {
-            id: chatIdRef.current,
-            messages: initialMessages,
-          }
-        : {}),
-      transport: {
-        reconnectToStream: async () => null,
-        sendMessages: async ({ abortSignal, messages, messageId, trigger }) => {
-          console.log("messageId", messageId, trigger);
-          const eventIterator = await getApiClient().chat.sendMessage(
-            {
-              organizationId,
-              projectId,
-              currentPage,
-              messages,
-              chatId: chatIdRef.current,
-              messageId,
-              model: undefined,
-            },
-            { signal: abortSignal },
-          );
-          return eventIteratorToUnproxiedDataStream(eventIterator);
-        },
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    status,
+    regenerate,
+    stop,
+    addToolApprovalResponse,
+  } = useChat<SeoChatMessage>({
+    ...(!!chatIdRef.current && !isMessagesLoading
+      ? {
+          id: chatIdRef.current,
+          messages: initialMessages,
+        }
+      : {}),
+    transport: {
+      reconnectToStream: async () => null,
+      sendMessages: async ({ abortSignal, messages, messageId, trigger }) => {
+        console.log("messageId", messageId, trigger);
+        const eventIterator = await getApiClient().chat.sendMessage(
+          {
+            organizationId,
+            projectId,
+            currentPage,
+            messages,
+            chatId: chatIdRef.current,
+            messageId,
+            model: undefined,
+          },
+          { signal: abortSignal },
+        );
+        return eventIteratorToUnproxiedDataStream(eventIterator);
       },
-      onError: (error) => {
-        console.error("project chat error", error);
-      },
-      onToolCall: ({ toolCall }) => {
-        console.log("toolCall", toolCall);
-      },
-      onFinish: ({ message }) => {
-        const createdChatId = message.metadata?.chatId ?? null;
-        if (!createdChatId || !!chatIdRef.current) return;
-        onAdoptChatId(createdChatId);
-      },
-    });
+    },
+    onError: (error) => {
+      console.error("project chat error", error);
+    },
+    onToolCall: ({ toolCall }) => {
+      console.log("toolCall", toolCall);
+    },
+    onFinish: ({ message }) => {
+      const createdChatId = message.metadata?.chatId ?? null;
+      if (!createdChatId || !!chatIdRef.current) return;
+      onAdoptChatId(createdChatId);
+    },
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+  });
 
   useEffect(() => {
     chatIdRef.current = chatId;
@@ -495,6 +626,21 @@ function ChatConversation({
                         <Shimmer className="text-sm" key={part.toolCallId}>
                           Drilling into the details
                         </Shimmer>
+                      );
+                    }
+                    case "tool-delete_existing_data": {
+                      return (
+                        <DeleteDataToolPart
+                          key={`${message.id}-${part.toolCallId}`}
+                          onRespond={({ id, approved, reason }) => {
+                            void addToolApprovalResponse({
+                              id,
+                              approved,
+                              reason,
+                            });
+                          }}
+                          part={part}
+                        />
                       );
                     }
                     default: {
