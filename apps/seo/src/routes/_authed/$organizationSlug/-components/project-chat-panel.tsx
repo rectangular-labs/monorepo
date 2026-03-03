@@ -609,8 +609,10 @@ function ChatConversation({
                       />
                       {message.parts
                         .filter((p) => p.type === "source-url")
-                        .map((part, i) => (
-                          <SourcesContent key={`${message.id}-${i}`}>
+                        .map((part) => (
+                          <SourcesContent
+                            key={`${message.id}-${part.sourceId}`}
+                          >
                             <Source href={part.url} title={part.url} />
                           </SourcesContent>
                         ))}
@@ -621,7 +623,7 @@ function ChatConversation({
                   switch (part.type) {
                     case "text":
                       return (
-                        <Fragment key={`${message.id}-${i}`}>
+                        <Fragment key={`${message.id}-${part.text}`}>
                           <Message from={message.role}>
                             <MessageContent>
                               <Response>{part.text}</Response>
@@ -657,7 +659,7 @@ function ChatConversation({
                           className="w-full"
                           defaultOpen={false}
                           isStreaming={part.state !== "done"}
-                          key={`${message.id}-${i}`}
+                          key={`${message.id}-${part.text}`}
                         >
                           <ReasoningTrigger />
                           <ReasoningContent>{part.text}</ReasoningContent>
@@ -666,7 +668,7 @@ function ChatConversation({
                     }
                     case "file":
                       return (
-                        <TaskItemFile key={`${message.id}-${i}`}>
+                        <TaskItemFile key={`${message.id}-${part.filename}`}>
                           <File className="size-4" />
                           <span>{part.filename}</span>
                         </TaskItemFile>
@@ -817,7 +819,7 @@ function ChatConversation({
                         <Task
                           className="mb-4"
                           defaultOpen={false}
-                          key={`${message.id}-${i}`}
+                          key={`${message.id}-${part.toolCallId}`}
                         >
                           {isRunning ? (
                             <Shimmer className="text-sm" key={part.toolCallId}>
