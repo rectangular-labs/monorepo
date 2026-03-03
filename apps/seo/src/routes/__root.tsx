@@ -1,3 +1,4 @@
+import { PostHogErrorBoundary } from "@posthog/react";
 import { ThemeProvider } from "@rectangular-labs/ui/components/theme-provider";
 import { Toaster } from "@rectangular-labs/ui/components/ui/sonner";
 import type { QueryClient } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { seo } from "~/lib/seo";
 import appCss from "../styles.css?url";
+import { PosthogProvider } from "./-components/posthog-provider";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -77,20 +79,24 @@ export const Route = createRootRouteWithContext<{
 
 function RootLayout() {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body className="flex min-h-screen flex-col">
-        <ThemeProvider attribute="class" enableSystem>
-          <Outlet />
-          <Toaster />
-        </ThemeProvider>
-        <TanStackRouterDevtools position="bottom-left" />
-        <ReactQueryDevtools buttonPosition="bottom-left" />
-        <Scripts />
-      </body>
-    </html>
+    <PosthogProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <HeadContent />
+        </head>
+        <body className="flex min-h-screen flex-col">
+          <PostHogErrorBoundary>
+            <ThemeProvider attribute="class" enableSystem>
+              <Outlet />
+              <Toaster />
+            </ThemeProvider>
+          </PostHogErrorBoundary>
+          <TanStackRouterDevtools position="bottom-left" />
+          <ReactQueryDevtools buttonPosition="bottom-left" />
+          <Scripts />
+        </body>
+      </html>
+    </PosthogProvider>
   );
 }
 
