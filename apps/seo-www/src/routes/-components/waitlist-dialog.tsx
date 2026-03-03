@@ -132,31 +132,13 @@ export function WaitListDialog({ trigger, className, source }: Props) {
     try {
       await createApolloContact({ data });
       setStatus("success");
-      posthog.capture(
-        "marketing_waitlist_submit_succeeded",
-        trackingProperties(),
-      );
     } catch (e) {
       setStatus("error");
-      setSubmitError(e instanceof Error ? e.message : "Unable to submit");
-      posthog.capture("marketing_waitlist_submit_failed", {
-        ...trackingProperties(),
-        error: e instanceof Error ? e.message : "Unable to submit",
-      });
     }
   }
 
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (open) {
-          posthog.capture(
-            "marketing_waitlist_dialog_opened",
-            trackingProperties(),
-          );
-        }
-      }}
-    >
+    <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         className={cn("w-[calc(100%-2rem)] max-w-sm sm:max-w-sm", className)}
