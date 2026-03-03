@@ -230,7 +230,7 @@ function JourneySection() {
                 <li className="flex items-start gap-3">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -245,7 +245,7 @@ function JourneySection() {
                 <li className="flex items-start gap-3">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -260,7 +260,7 @@ function JourneySection() {
                 <li className="flex items-start gap-3">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -981,7 +981,7 @@ function FeaturesSection() {
                 className="flex items-start gap-3 sm:gap-4"
                 key={group.title}
               >
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-200 sm:h-10 sm:w-10 dark:bg-emerald-200/20 dark:backdrop-blur-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-200 sm:h-10 sm:w-10 dark:bg-emerald-200/20 dark:backdrop-blur-sm">
                   <group.icon className="h-5 w-5 text-emerald-700 sm:h-5 sm:w-5 dark:text-emerald-400" />
                 </div>
                 <div>
@@ -1096,7 +1096,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-600 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1111,7 +1111,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-600 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1126,7 +1126,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-600 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1147,7 +1147,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-500 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-red-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1162,7 +1162,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-500 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-red-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1177,7 +1177,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-500 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-red-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1233,7 +1233,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1248,7 +1248,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1263,7 +1263,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1278,7 +1278,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1293,7 +1293,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1308,7 +1308,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1368,7 +1368,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1383,7 +1383,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1398,7 +1398,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1413,7 +1413,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1428,7 +1428,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
