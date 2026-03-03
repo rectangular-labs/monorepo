@@ -120,7 +120,7 @@ function NetworkGraph() {
         preserveAspectRatio="xMidYMid slice"
         viewBox="0 0 100 100"
       >
-        {connections.map((conn, i) => {
+        {connections.map((conn) => {
           const fromNode = nodes[conn.from];
           const toNode = nodes[conn.to];
           if (!fromNode || !toNode) return null;
@@ -129,7 +129,7 @@ function NetworkGraph() {
           return (
             <line
               className="stroke-neutral-400 dark:stroke-neutral-500"
-              key={`line-${conn.from}-${conn.to}-${i}`}
+              key={`${conn.from}-${conn.to}-${conn.opacity}-${window.crypto.randomUUID()}`}
               opacity={conn.opacity}
               strokeWidth="0.15"
               x1={fromNode.x + fromOff.x}
