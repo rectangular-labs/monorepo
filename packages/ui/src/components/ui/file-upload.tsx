@@ -146,7 +146,7 @@ export function FileUpload({
           {files.map((file, index) => (
             <FileItem
               file={file}
-              key={`${file.name}-${file.mimeType}-${index}`}
+              key={`${file.name}-${file.mimeType}`}
               onRemove={() => removeUploadById(index)}
             />
           ))}
