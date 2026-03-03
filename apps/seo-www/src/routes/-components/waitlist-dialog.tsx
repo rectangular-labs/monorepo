@@ -1,3 +1,4 @@
+import { usePostHog } from "@posthog/react";
 import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -99,11 +100,20 @@ const createApolloContact = createServerFn({ method: "POST" })
 type Props = {
   trigger: React.ReactElement;
   className?: string;
+  source?: string;
 };
 
-export function WaitListDialog({ trigger, className }: Props) {
+export function WaitListDialog({ trigger, className, source }: Props) {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const posthog = usePostHog();
+
+  function trackingProperties() {
+    return {
+      source: source ?? "unknown",
+      path: typeof window === "undefined" ? null : window.location.pathname,
+    };
+  }
 
   const form = useForm({
     resolver: arktypeResolver(contactSchema),
@@ -115,12 +125,15 @@ export function WaitListDialog({ trigger, className }: Props) {
 
   async function onSubmit(data: ContactInput) {
     setSubmitError(null);
+    posthog.capture(
+      "marketing_waitlist_submit_attempted",
+      trackingProperties(),
+    );
     try {
       await createApolloContact({ data });
       setStatus("success");
     } catch (e) {
       setStatus("error");
-      setSubmitError(e instanceof Error ? e.message : "Unable to submit");
     }
   }
 
@@ -181,7 +194,17 @@ export function WaitListDialog({ trigger, className }: Props) {
               type="button"
               variant="outline"
             >
-              <a href={ONBOARD_LINK} rel="noopener" target="_blank">
+              <a
+                href={ONBOARD_LINK}
+                onClick={() => {
+                  posthog.capture(
+                    "marketing_book_call_clicked",
+                    trackingProperties(),
+                  );
+                }}
+                rel="noopener"
+                target="_blank"
+              >
                 Book a call
               </a>
             </Button>

@@ -1,3 +1,4 @@
+import { usePostHog } from "@posthog/react";
 import { Logo, Menu, X } from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Link } from "@tanstack/react-router";
@@ -10,7 +11,15 @@ const menuItems = [
   { name: "About us", href: "/who-we-are" },
 ];
 
-function HeaderItems({ items }: { items: { name: string; href: string }[] }) {
+function HeaderItems({
+  items,
+  placement,
+}: {
+  items: { name: string; href: string }[];
+  placement: "desktop" | "mobile";
+}) {
+  const posthog = usePostHog();
+
   return (
     <>
       <div className="lg:pr-4">
@@ -27,6 +36,17 @@ function HeaderItems({ items }: { items: { name: string; href: string }[] }) {
               ) : (
                 <Link
                   className="block text-muted-foreground duration-150 hover:text-accent-foreground"
+                  onClick={() => {
+                    if (item.href === "/blog") {
+                      posthog.capture("marketing_blog_clicked", {
+                        source: `header_${placement}`,
+                        path:
+                          typeof window === "undefined"
+                            ? null
+                            : window.location.pathname,
+                      });
+                    }
+                  }}
                   to={item.href}
                 >
                   <span>{item.name}</span>
@@ -79,12 +99,12 @@ export function Header() {
                 initial={{ opacity: 0, scaleY: 0.98, y: -10 }}
                 transition={{ duration: 0.2, ease: [0, 0, 0.28, 1] }}
               >
-                <HeaderItems items={menuItems} />
+                <HeaderItems items={menuItems} placement="mobile" />
               </motion.div>
             )}
           </AnimatePresence>
           <div className="m-0 hidden w-fit flex-nowrap items-center justify-end gap-6 rounded-lg border border-transparent bg-transparent p-0 lg:flex">
-            <HeaderItems items={menuItems} />
+            <HeaderItems items={menuItems} placement="desktop" />
           </div>
         </div>
       </nav>

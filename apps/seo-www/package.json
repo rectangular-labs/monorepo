@@ -21,6 +21,7 @@
     "cf-typegen": "wrangler types --env-interface Env"
   },
   "dependencies": {
+    "@posthog/react": "^1.8.2",
     "@rectangular-labs/content": "workspace:*",
     "@rectangular-labs/db": "workspace:*",
     "@rectangular-labs/ui": "workspace:*",
@@ -33,6 +34,7 @@
     "@tanstack/react-start": "^1.146.2",
     "arktype": "^2.1.29",
     "motion": "^12.23.24",
+    "posthog-js": "^1.357.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tanstack-router-sitemap": "^1.0.13"

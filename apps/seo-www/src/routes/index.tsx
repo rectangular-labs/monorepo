@@ -80,13 +80,19 @@ function NetworkGraph() {
   }, []);
 
   const connections = useMemo(() => {
-    const lines: Array<{ from: number; to: number; opacity: number }> = [];
+    const lines: Array<{
+      id: string;
+      from: number;
+      to: number;
+      opacity: number;
+    }> = [];
     for (let i = 0; i < nodes.length; i++) {
       const numConnections = Math.floor(Math.random() * 3) + 1;
       for (let j = 0; j < numConnections; j++) {
         const target = Math.floor(Math.random() * nodes.length);
         if (target !== i) {
           lines.push({
+            id: `line-${i}-${target}-${j}`,
             from: i,
             to: target,
             opacity: Math.random() * 0.3 + 0.1,
@@ -129,7 +135,7 @@ function NetworkGraph() {
           return (
             <line
               className="stroke-neutral-400 dark:stroke-neutral-500"
-              key={`${conn.from}-${conn.to}-${conn.opacity}-${window.crypto.randomUUID()}`}
+              key={conn.id}
               opacity={conn.opacity}
               strokeWidth="0.15"
               x1={fromNode.x + fromOff.x}
@@ -224,7 +230,7 @@ function JourneySection() {
                 <li className="flex items-start gap-3">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -239,7 +245,7 @@ function JourneySection() {
                 <li className="flex items-start gap-3">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -254,7 +260,7 @@ function JourneySection() {
                 <li className="flex items-start gap-3">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -975,7 +981,7 @@ function FeaturesSection() {
                 className="flex items-start gap-3 sm:gap-4"
                 key={group.title}
               >
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-200 sm:h-10 sm:w-10 dark:bg-emerald-200/20 dark:backdrop-blur-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-200 sm:h-10 sm:w-10 dark:bg-emerald-200/20 dark:backdrop-blur-sm">
                   <group.icon className="h-5 w-5 text-emerald-700 sm:h-5 sm:w-5 dark:text-emerald-400" />
                 </div>
                 <div>
@@ -1090,7 +1096,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-600 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1105,7 +1111,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-600 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1120,7 +1126,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-600 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1141,7 +1147,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-500 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-red-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1156,7 +1162,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-500 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-red-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1171,7 +1177,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-500 text-xs sm:text-sm dark:text-neutral-400">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-red-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1227,7 +1233,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1242,7 +1248,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1257,7 +1263,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1272,7 +1278,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1287,7 +1293,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1302,7 +1308,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1318,6 +1324,7 @@ function PricingSection() {
             </div>
 
             <WaitListDialog
+              source="pricing_starter"
               trigger={
                 <button
                   className="mt-6 w-full rounded-full bg-emerald-600 py-3 font-medium text-white transition-all hover:bg-emerald-700"
@@ -1361,7 +1368,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1376,7 +1383,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1391,7 +1398,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1406,7 +1413,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1421,7 +1428,7 @@ function PricingSection() {
                 <li className="flex items-start gap-2 text-neutral-700 text-xs sm:text-sm dark:text-neutral-300">
                   <svg
                     aria-hidden="true"
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -1437,6 +1444,7 @@ function PricingSection() {
             </div>
 
             <WaitListDialog
+              source="pricing_business"
               trigger={
                 <button
                   className="mt-6 w-full rounded-full bg-emerald-600 py-3 font-medium text-white transition-all hover:bg-emerald-700"
@@ -1472,6 +1480,7 @@ function CTASection() {
         </p>
         <div className="mx-auto mb-8 h-0.5 w-16 bg-emerald-200 dark:bg-emerald-300" />
         <WaitListDialog
+          source="cta_section"
           trigger={
             <button
               className="w-full rounded-full bg-white px-8 py-4 font-medium text-emerald-700 transition-all hover:bg-emerald-50 sm:w-auto sm:px-12 dark:bg-emerald-50 dark:hover:bg-white"

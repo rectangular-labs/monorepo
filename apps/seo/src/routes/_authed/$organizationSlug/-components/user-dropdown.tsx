@@ -1,5 +1,6 @@
 "use client";
 
+import { usePostHog } from "@posthog/react";
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import { getInitials } from "@rectangular-labs/core/format/initials";
 import * as Icons from "@rectangular-labs/ui/components/icon";
@@ -39,10 +40,12 @@ export function UserDropdown({ user }: UserDropdownProps) {
   };
 
   const navigate = useNavigate();
+  const posthog = usePostHog();
   const queryClient = useQueryClient();
   const { mutate: signOut, isPending: isSigningOut } = useMutation(
     getApiClientRq().auth.session.signOut.mutationOptions({
       onSuccess: async () => {
+        posthog.reset();
         await queryClient.invalidateQueries({
           queryKey: getApiClientRq().auth.session.current.queryKey(),
         });

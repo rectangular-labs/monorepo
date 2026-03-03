@@ -844,6 +844,7 @@ export function SerpClimbDemo() {
             <span className="text-emerald-600 dark:text-emerald-400">.</span>
           </p>
           <WaitListDialog
+            source="hero"
             trigger={
               <button
                 className="rounded-full bg-emerald-600 px-8 py-3 font-medium text-white transition-all hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
