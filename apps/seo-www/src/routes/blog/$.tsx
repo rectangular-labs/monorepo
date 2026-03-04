@@ -26,5 +26,19 @@ export const Route = createFileRoute("/blog/$")({
 
 function Page() {
   const { data, postsOverview, tree } = Route.useLoaderData();
-  return <BlogPost data={data} postsOverview={postsOverview} tree={tree} />;
+  return (
+    <BlogPost
+      data={data}
+      layoutOptions={{
+        nav: {
+          enabled: false,
+          title: "Fluid Posts",
+          transparentMode: "top",
+          url: "/",
+        },
+      }}
+      postsOverview={postsOverview}
+      tree={tree}
+    />
+  );
 }
