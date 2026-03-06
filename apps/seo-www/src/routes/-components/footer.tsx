@@ -47,7 +47,7 @@ export function Footer() {
   const posthog = usePostHog();
 
   return (
-    <footer className="pt-14">
+    <footer className="relative z-10 bg-background pt-14">
       <div className="mx-auto max-w-5xl px-6">
         <div className="grid gap-12 md:grid-cols-5">
           <div className="md:col-span-2">
