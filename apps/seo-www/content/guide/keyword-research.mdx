@@ -1,0 +1,121 @@
+---
+title: "The ultimate guide to keyword research for SEO/GEO (2026)"
+description: "My step-by-step, no nonsense guide to automated keyword research for SEO/GEO."
+icon: "Search"
+cover: "/blog/keyword-research-cover.png"
+author: "winston"
+tags:
+  - "seo"
+  - "keyword research"
+  - "programmatic seo"
+---
+
+I want to make this the no nonsense guide for doing keyword research in 2026. If you're looking for how this fits into the bigger picture, check out our [ultimate guide to SEO/GEO automation](/blog/guide/seo-geo-atuomation).
+
+In this guide I'm going to cover the exact process we use here at Fluid Posts for keyword research:
+
+1. Identifying relevant keywords
+2. Grouping keywords
+3. Ranking keyword groups
+4. Gathering content briefs
+
+With AI search and generative overviews changing the game, the old playbook of writing long-form top-of-funnel educational posts is losing steam. Those clicks and impressions are pretty much replace by AI overviews.
+
+## Identifying relevant keywords
+
+I like to think of keyword research as trying to understand the language my target audience uses. It tells me what they want to know and what they want to do.
+
+Not every keyword is going to be relevant to our business. And not every relevant keyword is equally important. You can roughly think of keywords as falling into three buckets:
+
+* **Top of funnel** — Not problem aware, not solution aware. E.g. "how to get more website traffic" or "importance of organic search"
+* **Middle of funnel** — Problem aware, not solution aware. E.g. "how to rank higher on Google" or "improve website SEO"
+* **Bottom of funnel** — Problem aware, solution aware. E.g. "best SEO automation software 2026" or "AI SEO agents for agencies"
+
+> Bottom-of-funnel keywords are so important to modern-day SEO
+>
+>[Edward Sturm](https://edwardsturm.com/articles/pareto-seo/#bottom-of-funnel)
+
+When starting out, I agree with Edward Sturm. You should be going after bottom of funnel keywords. These are folks who are problem aware and solution aware. You get the most bang for your buck here.
+
+To start building your list, look at the language your customer use, what your competitors are ranking for, and what shows up in marketplaces or any relevant business listing sites. 
+
+SEO tools like [Ahrefs](https://ahrefs.com/), [SEMrush](https://semrush.com/), or cheaper data brokers like [DataForSEO](https://dataforseo.com/) and [Bishopi](https://www.bishopi.io) are also relevant to sieve through and get inspiration fo r keyword ideas. Filter out the noise and focus on queries where people are actually looking to buy or solve a specific problem.
+
+Some examples would include "glow in the dark show lace for night running" or "CAD with airflow simulation".
+
+Sweet, so now you've got your list of keywords, we are ready to figure out how to group them.
+
+## Grouping keywords
+
+One of the biggest traps in SEO is keyword cannibalization. This is where you end up creating a bunch of slightly different pages that all compete against each other. 
+
+Not great.
+
+To fix that, we look at what's currently ranking for your keywords and see if the same pages show up. If you search for two different keywords and more than 60% of the top results are the same URLs, Google basically sees those queries as the same thing.
+
+So instead of writing two separate articles, we'll write a single piece of content to target both keywords. This does two things:
+
+1. We don't accidentally have two pieces of content ranking for the same keywords
+2. We can have our backlinks directed at a single URL making it cheaper for us to rank higher.
+
+<Callout>
+If you want to learn more about backlinks, I've written a [full guide on backlinks](/blog/guide/backlink-research) that you can use as a reference sheet.
+</Callout>
+
+Go through your keyword list and group everything with similar search results together. Once they're grouped, we can figure out which ones to go after first.
+
+## Ranking keyword groups
+
+Not every group of keywords is worth your time. You need a way to figure out what to write first.
+
+We use a simple scoring formula for this:
+
+`Score = Sum of each keyword's search volume * (1 - Normalized Average Domain Backlinks)`
+
+Let's break that down.
+
+For each keyword in the group, we are going to calculate a score. Once each keyword is scored, we'll sum them up to get the final score for the group.
+
+Within each keyword we have:
+
+* **Estimated search volume/month**: We use search volume as a proxy for clicks. If you somehow have click data, feel free to use that instead. Note that this is conditional on you having identified that these keywords are targeting the bottom of funnel. Top or Middle of funnel keywords have tons of searches but nobody clicks through (thanks, AI overviews).
+* **Normalized Average Domain Backlinks**: We look at the top results for each keyword to see how many backlinks they have on average, then normalize it to a 0 to 1 scale. More backlinks means more competition, so we subtract from 1 to favor the easier wins.
+
+Basically we're multiplying traffic value by how easy it is to rank. Start at the top of the list and work your way down.
+
+## Gathering content briefs
+
+Now that we have our ranked list, the last step is to figure out what to actually write about for each group.
+
+Since we're going after bottom of funnel keywords, we usually don't need massive 3,000 word guides. These are people who already know what they want, they just need to find the right solution.
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Check what's ranking
+    Google the core terms in your group and look at the top 10 results and any AI overviews that show up.
+  </div>
+  <div className="fd-step">
+    ### Pull out what they cover
+    See what headings (H2s and H3s) the top pages are using. What questions are they answering? What structure are they following?
+  </div>
+  <div className="fd-step">
+    ### Find the gaps
+    What unique angle or data can you bring that the top results missed? This is where you differentiate yourself.
+  </div>
+</div>
+
+From there, use your primary keyword (the highest value one in the group) in your title, URL, meta description, and opening paragraph. The secondary keywords naturally become your H2s and H3s or within your content.
+
+If you want to speed this up even more, we covered how to automate this with AI tools in the [SEO/GEO automation guide](/blog/guide/seo-geo-atuomation#automating-keyword-research-and-content-briefs). You can basically feed your keyword groups to an LLM and have it generate the briefs for you based on real SERP data.
+
+## Wrapping up
+
+That's the whole process. Find the right keywords, group the ones that share the same intent, score them so you know what to prioritize, and then build briefs based on what's already working. Nothing fancy, just a system that keeps you focused on the stuff that actually moves the needle.
+
+<Callout type="info">
+If you want a done for you system, our team at Fluid Posts will be happy to help.
+
+<div className='flex justify-center w-full pb-4'>
+<WaitListDialog source="keyword_research_article" trigger={<Button>register your interest today</Button>}/>
+</div>
+</Callout>
