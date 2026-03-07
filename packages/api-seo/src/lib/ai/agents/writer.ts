@@ -15,6 +15,7 @@ import type { createPublicImagesBucket } from "../../bucket";
 import type { ArticleType } from "../../workspace/workflow.constant";
 import { buildWriterInstructions } from "../instructions/writer";
 import { createDataAccessTools } from "../tools/data-access-tool";
+import { createDataforseoTool } from "../tools/dataforseo-tool";
 import { createImageTools } from "../tools/image-tools";
 import { createInternalLinksTool } from "../tools/internal-links-tool";
 import { createWebTools } from "../tools/web-tools";
@@ -157,6 +158,8 @@ export function createWriterPipeline(ctx: WriterAgentContext) {
     publicImagesBucket: ctx.publicImagesBucket,
   });
 
+  const dataforseoTools = createDataforseoTool(ctx.project, ctx.cacheKV);
+
   const internalLinksTools = createInternalLinksTool(ctx.project);
 
   const dataAccessTools = createDataAccessTools({
@@ -178,7 +181,9 @@ export function createWriterPipeline(ctx: WriterAgentContext) {
   }): Promise<
     WriterPhaseResult<
       ResearchSummary,
-      typeof researchTools.tools & typeof dataAccessTools.tools
+      typeof researchTools.tools &
+        typeof dataAccessTools.tools &
+        typeof dataforseoTools.tools
     >
   > {
     const researchAgent = new ToolLoopAgent({
@@ -188,6 +193,7 @@ export function createWriterPipeline(ctx: WriterAgentContext) {
       tools: {
         ...researchTools.tools,
         ...dataAccessTools.tools,
+        ...dataforseoTools.tools,
       },
       output: Output.object({
         schema: jsonSchema<ResearchSummary>({
@@ -320,18 +326,37 @@ export function createWriterPipeline(ctx: WriterAgentContext) {
 Research for this writing task:
 ${args.task}
 
-Your goal is to build the evidence base the writer needs. Focus on:
+Your goal is to build the evidence base the writer needs. Follow these steps IN ORDER:
 
-1. **Intent classification**: Determine the primary search intent and where it falls on the intent spectrum (informational -> evaluation -> purchase-intent). This determines content length, structure, and tone.
-2. **SERP reality check**: Evaluate whether current SERP pages are representative of the intent. Note the content formats that rank (listicle, comparison, guide, landing pages, etc.), approximate word counts, and SERP features present. If the SERP does not match the likely intent, note this — we will build from first principles instead.
-3. **Competitor breakdown**: For each of the top 3-5 ranking pages, produce a structured breakdown:
+## Step 0: SERP Lookup (MANDATORY FIRST STEP)
+Call \`get_serp_for_keyword\` with the primary keyword${ctx.primaryKeyword ? ` ("${ctx.primaryKeyword}")` : ""} BEFORE doing anything else. The results contain structured SERP items with a \`type\` field. Extract from them:
+- **Top organic results** (type: "organic"): The top 10 sites currently ranking. Use these as your reference list for competitor analysis — these are the pages you must read via \`web_fetch\` to understand what existing content covers.
+- **People Also Ask (PAA) questions** (type: "people_also_ask"): The actual PAA questions Google surfaces for this keyword. These are the real questions searchers see — copy them verbatim into \`faqCandidates\`.
+- **Related searches**: The related search queries Google shows at the bottom. Include these in \`faqCandidates\` alongside PAA questions (phrased as questions where appropriate).
+
+This SERP data is your ground truth for understanding the search landscape.
+
+## Step 1: Intent classification
+Determine the primary search intent and where it falls on the intent spectrum (informational -> evaluation -> purchase-intent). This determines content length, structure, and tone.
+
+## Step 2: SERP reality check
+Using the SERP data from Step 0, evaluate whether current ranking pages are representative of the intent. Note the content formats that rank (listicle, comparison, guide, landing pages, etc.), approximate word counts, and SERP features present. If the SERP does not match the likely intent, note this — we will build from first principles instead.
+
+## Step 3: Competitor breakdown (from SERP organic results)
+For each of the top 5 ranking pages FROM THE SERP LOOKUP RESULTS, produce a structured breakdown:
    - What topics and subtopics does the page cover?
    - What are its strengths (depth, data, unique angles)?
    - What are its gaps or weaknesses (missing topics, shallow coverage, outdated info)?
-   Use web_fetch to read each top result and extract this breakdown. This is critical — the planning phase will use this to build a section plan that covers everything the best pages cover, plus our information gain angle.
-4. **Information gain identification**: Across all competitor pages, what do they ALL miss? Identify the unique angle or data this article can provide that none of the existing pages offer. This is the single most important quality signal.
-5. **Source candidates**: Gather 3-6 authoritative REFERENCE sources — these are NOT competitor/SERP pages (those go in competitorBreakdown). Sources are citable authorities: research papers, industry reports, government/standards body publications, official documentation, reputable news outlets, or recognized expert publications. These sources will be embedded as inline citations during writing to back up specific claims. Use web_fetch to verify each source URL is live and the content matches your stated relevance. Every source must have a specific relevance statement explaining what claim it supports.
-6. **FAQ/PAA questions**: Collect real People Also Ask questions and related queries that you actually observe in the SERP results. Copy the exact wording. Do NOT invent or infer questions — only include questions you actually found. If there are none, return an empty array.
+   Use \`web_fetch\` to read each top result and extract this breakdown. This is critical — the planning phase will use this to build a section plan that covers everything the best pages cover, plus our information gain angle.
+
+## Step 4: Information gain identification
+Across all competitor pages, what do they ALL miss? Identify the unique angle or data this article can provide that none of the existing pages offer. This is the single most important quality signal.
+
+## Step 5: Source candidates
+Gather 3-6 authoritative REFERENCE sources — these are NOT competitor/SERP pages (those go in competitorBreakdown). Sources are citable authorities: research papers, industry reports, government/standards body publications, official documentation, reputable news outlets, or recognized expert publications. These sources will be embedded as inline citations during writing to back up specific claims. Use web_fetch to verify each source URL is live and the content matches your stated relevance. Every source must have a specific relevance statement explaining what claim it supports.
+
+## Step 6: FAQ/PAA questions
+Populate \`faqCandidates\` with the REAL People Also Ask questions and related searches from the get_serp_for_keyword results in Step 0. Copy the exact wording from the SERP data. Do NOT invent or infer questions — only include questions that appeared in the actual SERP PAA box (type: "people_also_ask") and related searches (type: "related_searches"). If the SERP returned no PAA questions or related searches, return an empty array.
 
 Do not draft article prose. Output a structured research summary.
 </phase>`,
