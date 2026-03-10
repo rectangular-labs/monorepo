@@ -215,7 +215,9 @@ export async function createWriterAgent({
       } satisfies OpenAIResponsesProviderOptions,
     },
     system: systemPrompt,
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(messages, {
+      ignoreIncompleteToolCalls: true,
+    }),
     tools: {
       ...createSkillTools({ toolDefinitions: skillDefinitions }),
       ...plannerTools.tools,
