@@ -1,0 +1,190 @@
+---
+title: "The Ultimate guide to SEO/GEO Automation (2026)"
+description: "The landscape of SEO and GEO is changing every day. This ultimate guide to SEO/GEO automation aims to cover everything you need to stay ahead."
+icon: "Rocket"
+cover: "/blog/seo-automation-cover.png"
+author: "winston"
+tags:
+  - "seo"
+  - "geo"
+  - "automation"
+---
+
+I want to make this the ultimate no-nonsense guide to SEO/GEO automation for 2026. The idea is not 0 work, but smart work where you are still in charge of setting the high level strategy and AI handles the execution.
+
+In this guide I'm going to cover how we do automations here at Fluid Posts for:
+
+1. What to write/cover
+2. How to write it
+3. How to publish it
+4. How to get backlinks
+
+Then, to tie it all together, I'll give some ways to track our work and make sure we are on the right track.
+
+<Callout type="info">
+When I refer to GEO, I am talking about both results in AI chats, and results from Google's AI overviews.
+</Callout>
+
+Everyone already knows the stats. AI overviews in Google has led to some sites losing up to 79% of their traffic if their link came below an AI overview according to [Authoritas](https://www.theguardian.com/technology/2025/jul/24/ai-summaries-causing-devastating-drop-in-online-news-audiences-study-finds).
+
+And it's likely only going to get worst.
+
+In the meantime, according to [Ahref](https://chatgpt-vs-google.com/), search is still the biggest source of traffic with over 40% market share while AI at 0.25% plays catch up.
+
+![traffic share by category](/blog/traffic-share.png)
+
+So while things change, it's up to businesses and teams to straddle the weird middle and tackle both SEO and GEO. And as cliche as it sounds, the way to do that isn't necessarily working harder, It's working smarter.
+
+## Automating keyword research and content briefs
+
+Keyword research and content briefs form the what to write and cover piece of the puzzle. 
+
+I like to think of keyword research as trying to understand the language my target audience uses. It tells me what they want to know and what they want to do.
+
+There's a ton of tools out there today for this. The most popular ones are [AhRefs](https://ahrefs.com/), [SEMrush](https://semrush.com/), and [Moz](https://moz.com/)
+
+<Callout type="info">
+If you don't want to miss a single thing, I've written more on [everything you need to know about keyword research](/blog/guide/keyword-research-checklist).
+</Callout>
+
+The high level goals here is as follows: 
+
+1. Identify keywords that you think are relevant to your business
+2. Group keywords that are similar together
+3. Use what's ranking for the keywords to understand the language your audience is using, what they expect to be covered, and what they hope to get out of the query
+
+In particular, you want to identify bottom of funnel keywords. These are folks who are problem aware and solution aware. 
+
+Once you have your list, you can group similar keywords together by simply looking at what shows up when you google them. If more than 60% of the top ranking pages are the same, you can group them together.
+
+The grouping here just means that you can use a single piece of content to rank for all of these keywords.
+
+Finally, you want to check the top results and AI overview (if any) to see what it covers. You want to make sure you at least cover the key points that the top 10 + AI overview covers and add your own unique angle on top.
+
+Now to automate this:
+
+1. Grab an account with AhRefs, or SEMRush, or your data broker of choice. There's a bunch of cheaper options like [Bishopi](https://www.bishopi.io), [dataForSEO](https://dataforseo.com/), and [Haloscan](https://www.haloscan.com/en) although you might have to do more work to get it set-up.
+2. They ([AhRefs](https://docs.ahrefs.com/docs/mcp/reference/introduction), [SEMRush](https://developer.semrush.com/api/basics/semrush-mcp/)) both expose an MCP connector that you can use to integrate with your favorite AI tool. See instructions for [claude code](https://code.claude.com/docs/en/mcp), [codex](https://developers.openai.com/codex/mcp/), and [gemini](https://geminicli.com/docs/tools/mcp-server/).
+3. Now, you can simply ask your AI tool to use the mcp tool and do keyword research for you.
+
+Here's an example prompt that we use at Fluid Posts to get you started:
+
+```markdown
+Use your MCP tool to perform keyword research for [INSERT TOPIC]. We want to find keywords targetting bottom of funnel users in this toppic.
+
+For each of the keywords found, look at what's currently ranking in the SERPs. Group keywords whose SERPs are at least 60% similar (i.e., the same items are ranking for both) together. Then for each group, look at the AI overview and the top 10 results. Figure out what the user is looking for and what they expect to get out of the query.
+
+Finally, output the results as a markdown file. Each section of the markdown file should contain the group keywords that are similar, and a brief of what we'd need to cover for that particular group of keywords in order to fulfill the user's intent.
+```
+
+This basically will generate a file for you containing a list of keywords grouped by intent and a brief on what we'd need to cover.
+
+You can then use this file to move onto the next step of our automation process.
+
+## Automating Content Writing
+
+Automating writing should be fairly straightforward with modern AI tools regardless of what you like to use. ChatGPT, Claude, Gemini, and Copilot are all capable of producing high quality content. 
+
+The two main things to look out for here is writing in a way that's useful for both humans and AI and internal linking.
+
+<Callout type="info">
+I have a [full guide on writing content](/blog/guide/seo-content-writing) if you want all the edge and learn the full process that we use here at Fluid Posts.
+</Callout>
+
+For the part on writing for humans and AI, we have a few guiding principles:
+
+1. Answers as soon as possible.
+2. Back up your claims (https://www.pewresearch.org/short-reads/2025/07/22/google-users-are-less-likely-to-click-on-links-when-an-ai-summary-appears-in-the-results/?ref=404media.co), obviously don't keyword stuff.
+3. Schemas ?? (https://www.linkedin.com/posts/markseo_seo-share-7424067359088455680-vNFv/, https://searchengineland.com/schema-ai-overviews-structured-data-visibility-462353)
+4. Stay focused. Put your primary targetted keyword in the title, the meta description, and in the opening paragraph of your article.
+
+This should get you most of the way there. 
+
+There's a lot of noise with people speculating about what works and what doesn't. We generally stay away from it unless they ran [experiments proving otherwise](https://ahrefs.com/blog/best-lists-research/).
+
+Even then, if there's anyone saying doing `X` and `X` alone will get you to the top of the being mentioned or in search, it's probably an exploit. Exploits are eventually patched and you [might get penalized](https://www.blackhatworld.com/seo/ai-sites-getting-hit-hard-by-the-latest-google-core-update.1578311/) in the process. So unless that's a risk you're okay with, I suggest avoiding any tempting "get rich quick" schemes.
+
+For internal links, we agree with a lot of what [Press Whizz](https://presswhizz.com/blog/link-sculpting/) says on link sculpting. The general rule of thumb here is to link from your content pages to your money pages.
+
+> Say you have a landing page for "plumbers in [city]", and a blog post about "how to fix a leaky faucet". You'd want to link from the blog post to the landing page.
+
+## Automating CMS Publishing
+
+There's not much AI here, but it's a critical step in the process that drains a lot of time and effort.
+
+We have our own internal integrations for our own use but you can consider something like [Wordable](https://wordable.io/) to automate this step for wordpress (no affiliation, they just look like a fairly priced option).
+
+Main thing to look out for here is that you can automate:
+
+1. Content with proper formatting (this includes your tables, bullet points, images with alt text, and JSON-LD schemas)
+2. Metadata for the title, description.
+
+## Automating Backlink Outreach 
+
+If you've made it this far into the article, congratulations!
+
+Now that we've written and publish our content, we are ready to help it get ranked and seen.
+
+Backlinks matter because they're a fundamental piece of Google's PageRank algorithm. More quality backlinks = higher rankings. And since most AI systems today run a search to get the latest information, you also end up getting seen by AI systems.
+
+<Callout type="info">
+I have a [full backlink playbook](/blog/guide/backlink-strategy-playbook) if you want the complete step-by-step process that we use here at Fluid Posts.
+</Callout>
+
+You might've heard that backlink outreach is tedious and time consuming, but the trick is not to just go out and get as many links as possible. That's a great way to get penalized. 
+
+Instead, we want to be strategic about it. At a high level, the process looks like this:
+
+1. **Analyze your competitors' backlinks.** Using a tool like Ahrefs or SEMrush, download the backlink profiles of your top 3 - 5 competitors. Filter out domains with zero organic traffic, then bucket the remaining links by Domain Rating (DR).
+2. **Figure out how many links you need.** Compare your backlink profile against your competitors across different DR buckets. This gives us a specific number to hit.
+3. **Figure out the anchor text profile.** Don't have every backlink to you be an exact keyword match. That's the fastest way to trigger a penalty by the [Penguin update](https://en.wikipedia.org/wiki/Google_Penguin). Reverse engineer the top 3 - 5 competitors to see what they have for their anchor texts, then just copy it.
+4. **Get your links**. There's a bunch of various sources out there that doesn't involve manually emailing prospects, I've compiled a short list in our [backlink guide](/blog/guide/backlink-strategy-playbook#where-to-get-backlinks)
+
+One thing to keep in mind is that building backlinks isn't just about boosting rankings. It's also helping corroborate a story about your brand. 
+
+Based on Fluid Posts internal testing and [data from DEJAN](https://dejan.ai/blog/sro-grounding-snippets/), the models today works similar to a consensus mechanism. This means that the more other people mention you and your brand in a consistent way, the more likely the models will parrot back the same things.
+
+## Tracking and tying it all together 
+
+Finally, in order to know how we are doing, we need a way to track everything. There's so many players in this space, each with their own twists. We're obviously biased here at [Fluid Posts](/) since we have our own systems, but the core is to know:
+
+1. What you are doing (likely creating content or landing pages to capture leads)
+2. What impact did the thing you do have
+
+More practically, for the impact, we likely want to track two big things:
+
+1. Keywords
+2. Prompts
+
+For keywords, we are interested in 3 things
+
+1. Clicks
+2. Position
+3. Impression
+
+As a bonus, it'll also nice to know how we fare in relation to the other brands in the SERPs so you can get a sense of whether there's more to do in an area or whether to move on.
+
+For prompts, we are interested in 4 things:
+
+1. Mentions
+2. Position
+3. Sentiment
+4. Citations
+
+As a bonus, it'll also be nice to know how we fare in relations to other brands for the same reason as keywords.
+
+We've found that it's also convenient to have things grouped based on relevant clusters and to view keywords and prompt data in that context. But you likely have your own preferences.
+
+## Wrapping Up
+
+That's everything!
+
+We've covered the 4 big pillars of SEO/GEO automation. From research, to writing, to publishing, and ranking. Hopefully you got something out of it! 
+
+Feel free to reach out to me at winston@fluidposts.com anytime to share your thoughts and feedback!
+
+<Callout type="info">
+If this is something that you want done for you, we'll be more than happy to help!
+
+<WaitListDialog trigger={<Button>Get the end to end automation today</Button>}/>
+</Callout>
