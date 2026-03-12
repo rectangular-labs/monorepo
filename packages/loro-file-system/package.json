@@ -41,11 +41,11 @@
   },
   "devDependencies": {
     "@rectangular-labs/typescript": "workspace:*",
-    "loro-crdt": "^1.10.0",
+    "loro-crdt": "^1.10.6",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "loro-crdt": "^1.10.0"
+    "loro-crdt": "^1.10.6"
   }
 }
