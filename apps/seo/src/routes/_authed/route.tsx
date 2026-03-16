@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getApiClientRq } from "~/lib/api";
+import { PosthogIdentify } from "~/routes/-components/posthog-identify";
 
 export const Route = createFileRoute("/_authed")({
   beforeLoad: async ({ location, context }) => {
@@ -22,5 +23,10 @@ export const Route = createFileRoute("/_authed")({
 });
 
 function AuthedLayout() {
-  return <Outlet />;
+  return (
+    <>
+      <PosthogIdentify />
+      <Outlet />
+    </>
+  );
 }

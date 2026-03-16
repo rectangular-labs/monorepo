@@ -7,6 +7,8 @@ export const clientEnv = () =>
     clientPrefix: "VITE_",
     client: {
       VITE_WWW_URL: type("string"),
+      VITE_PUBLIC_POSTHOG_KEY: type("string"),
+      VITE_PUBLIC_POSTHOG_HOST: type("string"),
     },
     runtimeEnv: import.meta.env,
     emptyStringAsUndefined: true,

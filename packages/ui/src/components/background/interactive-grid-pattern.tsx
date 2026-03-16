@@ -55,12 +55,12 @@ export function InteractiveGridPattern({
         return (
           <rect
             className={cn(
-              "stroke-border transition-all duration-100 ease-in-out [&:not(:hover)]:duration-1000",
+              "stroke-border transition-all duration-100 not-[&:hover]:duration-1000 ease-in-out",
               hoveredSquare === index ? "fill-border" : "fill-transparent",
               squaresClassName,
             )}
             height={height}
-            key={`${index}-${x}-${y}`}
+            key={`${Math.random()}-${x}-${y}`}
             {...(interactive
               ? {
                   onMouseEnter: () => setHoveredSquare(index),

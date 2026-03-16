@@ -1,3 +1,4 @@
+import { usePostHog } from "@posthog/react";
 import { Logo, Menu, X } from "@rectangular-labs/ui/components/icon";
 import { ThemeToggle } from "@rectangular-labs/ui/components/theme-provider";
 import { Link } from "@tanstack/react-router";
@@ -5,13 +6,20 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 const menuItems = [
-  { name: "Founders", href: "/" },
-  { name: "SEO Experts", href: "/seo-experts" },
-  { name: "Referral", href: "/referral" },
+  { name: "Blog", href: "/blog" },
+  { name: "Pricing", href: "/#pricing" },
   { name: "About us", href: "/who-we-are" },
 ];
 
-function HeaderItems({ items }: { items: { name: string; href: string }[] }) {
+function HeaderItems({
+  items,
+  placement,
+}: {
+  items: { name: string; href: string }[];
+  placement: "desktop" | "mobile";
+}) {
+  const posthog = usePostHog();
+
   return (
     <>
       <div className="lg:pr-4">
@@ -28,6 +36,17 @@ function HeaderItems({ items }: { items: { name: string; href: string }[] }) {
               ) : (
                 <Link
                   className="block text-muted-foreground duration-150 hover:text-accent-foreground"
+                  onClick={() => {
+                    if (item.href === "/blog") {
+                      posthog.capture("marketing_blog_clicked", {
+                        source: `header_${placement}`,
+                        path:
+                          typeof window === "undefined"
+                            ? null
+                            : window.location.pathname,
+                      });
+                    }
+                  }}
                   to={item.href}
                 >
                   <span>{item.name}</span>
@@ -49,11 +68,8 @@ export function Header() {
   const [menuState, setMenuState] = useState<boolean>(false);
 
   return (
-    <header>
-      <nav
-        className="fixed z-20 w-full border-b backdrop-blur md:relative md:backdrop-blur-none lg:h-[70px]"
-        data-state={menuState && "active"}
-      >
+    <header className="sticky top-0 z-20 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <nav className="w-full lg:h-[70px]" data-state={menuState && "active"}>
         <div className="m-auto flex h-full max-w-5xl flex-wrap items-center justify-between gap-6 px-4 py-3 md:px-6 lg:gap-0 lg:py-4">
           <div className="flex w-full justify-between lg:w-auto">
             <Link
@@ -83,12 +99,12 @@ export function Header() {
                 initial={{ opacity: 0, scaleY: 0.98, y: -10 }}
                 transition={{ duration: 0.2, ease: [0, 0, 0.28, 1] }}
               >
-                <HeaderItems items={menuItems} />
+                <HeaderItems items={menuItems} placement="mobile" />
               </motion.div>
             )}
           </AnimatePresence>
           <div className="m-0 hidden w-fit flex-nowrap items-center justify-end gap-6 rounded-lg border border-transparent bg-transparent p-0 lg:flex">
-            <HeaderItems items={menuItems} />
+            <HeaderItems items={menuItems} placement="desktop" />
           </div>
         </div>
       </nav>

@@ -1,3 +1,4 @@
+import { usePostHog } from "@posthog/react";
 import { MoveRight } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -69,12 +70,8 @@ const createApolloContact = createServerFn({ method: "POST" })
     });
 
     if (!response.ok) {
-      const errorData = (await response.json().catch(() => null)) as {
-        error?: string;
-        message?: string;
-      } | null;
-      const message =
-        errorData?.error || errorData?.message || "Unable to submit";
+      const errorData = await response.text().catch(() => null);
+      const message = errorData || "Unable to submit";
       throw new Error(message);
     }
 
@@ -103,11 +100,20 @@ const createApolloContact = createServerFn({ method: "POST" })
 type Props = {
   trigger: React.ReactElement;
   className?: string;
+  source?: string;
 };
 
-export function WaitListDialog({ trigger, className }: Props) {
+export function WaitListDialog({ trigger, className, source }: Props) {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const posthog = usePostHog();
+
+  function trackingProperties() {
+    return {
+      source: source ?? "unknown",
+      path: typeof window === "undefined" ? null : window.location.pathname,
+    };
+  }
 
   const form = useForm({
     resolver: arktypeResolver(contactSchema),
@@ -119,12 +125,15 @@ export function WaitListDialog({ trigger, className }: Props) {
 
   async function onSubmit(data: ContactInput) {
     setSubmitError(null);
+    posthog.capture(
+      "marketing_waitlist_submit_attempted",
+      trackingProperties(),
+    );
     try {
       await createApolloContact({ data });
       setStatus("success");
-    } catch (e) {
+    } catch {
       setStatus("error");
-      setSubmitError(e instanceof Error ? e.message : "Unable to submit");
     }
   }
 
@@ -179,13 +188,28 @@ export function WaitListDialog({ trigger, className }: Props) {
           ) : null}
 
           <div className="flex gap-2 pt-1">
-            <Button asChild className="h-10" type="button" variant="outline">
-              <a href={ONBOARD_LINK} rel="noopener" target="_blank">
+            <Button
+              asChild
+              className="h-10 border-emerald-600 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:border-emerald-500 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+              type="button"
+              variant="outline"
+            >
+              <a
+                href={ONBOARD_LINK}
+                onClick={() => {
+                  posthog.capture(
+                    "marketing_book_call_clicked",
+                    trackingProperties(),
+                  );
+                }}
+                rel="noopener"
+                target="_blank"
+              >
                 Book a call
               </a>
             </Button>
             <Button
-              className="h-10 flex-1 gap-2"
+              className="h-10 flex-1 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
               disabled={status === "success"}
               isLoading={form.formState.isSubmitting}
               type="submit"

@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.88",
+    "@posthog/react": "^1.8.2",
     "@rectangular-labs/api-seo": "workspace:*",
     "@rectangular-labs/api-user-vm": "workspace:*",
     "@rectangular-labs/auth": "workspace:*",
@@ -49,6 +50,7 @@
     "loro-mirror-react": "1.1.1",
     "motion": "^12.23.24",
     "partysocket": "^1.1.6",
+    "posthog-js": "^1.357.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tanstack-router-sitemap": "^1.0.13"
