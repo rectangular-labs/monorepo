@@ -192,7 +192,6 @@ function TreeDragLine({
   );
 }
 
-export { Tree, TreeItem, TreeItemLabel, TreeDragLine };
 export {
   expandAllFeature,
   hotkeysCoreFeature,
@@ -202,3 +201,4 @@ export {
   type TreeState,
 } from "@headless-tree/core";
 export { AssistiveTreeDescription, useTree } from "@headless-tree/react";
+export { Tree, TreeDragLine, TreeItem, TreeItemLabel };

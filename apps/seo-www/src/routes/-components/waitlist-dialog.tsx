@@ -132,7 +132,7 @@ export function WaitListDialog({ trigger, className, source }: Props) {
     try {
       await createApolloContact({ data });
       setStatus("success");
-    } catch (e) {
+    } catch {
       setStatus("error");
     }
   }
