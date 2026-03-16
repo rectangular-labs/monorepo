@@ -212,7 +212,7 @@ export const sendMessage = withOrganizationIdBase
     });
 
     const modelMessages = await convertToModelMessages(input.messages, {
-      ignoreIncompleteToolCalls: t,rue,
+      ignoreIncompleteToolCalls: true,
     });
     const result = await orchestrator.stream({
       messages: modelMessages,
