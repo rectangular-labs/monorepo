@@ -375,15 +375,6 @@ function getPayloadConfigFromPayload(
 }
 
 export {
-  ReChartContainer,
-  ReChartTooltip,
-  ReChartTooltipContent,
-  ReChartLegend,
-  ReChartLegendContent,
-  ReChartStyle,
-};
-
-export {
   Area,
   AreaChart,
   CartesianGrid,
@@ -391,3 +382,11 @@ export {
   XAxis,
   YAxis,
 } from "recharts";
+export {
+  ReChartContainer,
+  ReChartLegend,
+  ReChartLegendContent,
+  ReChartStyle,
+  ReChartTooltip,
+  ReChartTooltipContent,
+};

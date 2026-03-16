@@ -131,7 +131,7 @@ export function BlogPost({
         ) : null}
         <DocsTitle>{data.title}</DocsTitle>
         {data.description ? (
-          <DocsDescription>{data.description}</DocsDescription>
+          <DocsDescription className="mb-0">{data.description}</DocsDescription>
         ) : null}
         {data.createdAt || data.authorDetail ? (
           <div className="mb-6 flex flex-wrap items-center gap-2 text-muted-foreground text-sm">

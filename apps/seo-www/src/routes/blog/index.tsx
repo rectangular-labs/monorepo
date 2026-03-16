@@ -55,16 +55,16 @@ function Page() {
   }, [postOverview, activeCategory, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         {/* Header */}
         <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-16">
           {/* Title and tagline */}
           <div className="lg:sticky lg:top-24 lg:w-64 lg:flex-shrink-0">
-            <h1 className="font-serif text-4xl text-neutral-900 tracking-[-0.02em] sm:text-5xl dark:text-white">
+            <h1 className="font-serif text-4xl text-foreground tracking-[-0.02em] sm:text-5xl">
               Blog
             </h1>
-            <p className="mt-2 text-neutral-500 text-sm leading-relaxed dark:text-neutral-400">
+            <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
               Thoughts on SEO, content strategy, and building organic growth.
             </p>
 
@@ -76,8 +76,8 @@ function Page() {
                     <button
                       className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                         activeCategory === cat.id
-                          ? "bg-neutral-100 font-medium text-neutral-900 dark:bg-neutral-800 dark:text-white"
-                          : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/50 dark:hover:text-white"
+                          ? "bg-accent font-medium text-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       }`}
                       onClick={() => setActiveCategory(cat.id)}
                       type="button"
@@ -97,7 +97,7 @@ function Page() {
               <div className="relative">
                 <svg
                   aria-hidden="true"
-                  className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-neutral-400"
+                  className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted-foreground"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -110,7 +110,7 @@ function Page() {
                   />
                 </svg>
                 <input
-                  className="w-full rounded-xl border border-neutral-200 bg-white py-3 pr-4 pl-12 text-neutral-900 placeholder:text-neutral-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:focus:border-emerald-400 dark:placeholder:text-neutral-500"
+                  className="w-full rounded-xl border border-border bg-background py-3 pr-4 pl-12 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search articles..."
                   type="text"
@@ -125,8 +125,8 @@ function Page() {
                 <button
                   className={`flex-shrink-0 rounded-full px-4 py-2 text-sm transition-colors ${
                     activeCategory === cat.id
-                      ? "bg-neutral-900 font-medium text-white dark:bg-white dark:text-neutral-900"
-                      : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                      ? "bg-primary font-medium text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground hover:bg-accent"
                   }`}
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
@@ -140,9 +140,7 @@ function Page() {
             {/* Posts grid */}
             {filteredPosts.length === 0 ? (
               <div className="py-16 text-center">
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  No articles found.
-                </p>
+                <p className="text-muted-foreground">No articles found.</p>
               </div>
             ) : (
               <div className="grid gap-8 sm:grid-cols-2">
@@ -156,7 +154,7 @@ function Page() {
                   >
                     {/* Cover image */}
                     {post.cover ? (
-                      <div className="overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-800">
+                      <div className="overflow-hidden rounded-xl bg-muted">
                         <img
                           alt={post.title ?? "Cover"}
                           className={`w-full object-cover transition-transform duration-300 group-hover:scale-105 ${
@@ -167,7 +165,7 @@ function Page() {
                       </div>
                     ) : (
                       <div
-                        className={`rounded-xl bg-neutral-100 dark:bg-neutral-800 ${
+                        className={`rounded-xl bg-muted ${
                           index === 0 ? "aspect-[2/1]" : "aspect-video"
                         }`}
                       />
@@ -178,7 +176,7 @@ function Page() {
                       <div className="flex flex-wrap gap-2">
                         {post.tags.slice(0, 3).map((tag) => (
                           <span
-                            className="rounded-full bg-neutral-100 px-3 py-1 text-neutral-600 text-xs dark:bg-neutral-800 dark:text-neutral-400"
+                            className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground text-xs"
                             key={tag}
                           >
                             {tag}
@@ -196,10 +194,10 @@ function Page() {
                           src={post.authorDetail.image}
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                           <svg
                             aria-hidden="true"
-                            className="h-4 w-4 text-neutral-500"
+                            className="h-4 w-4 text-muted-foreground"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                           >
@@ -212,13 +210,15 @@ function Page() {
                         </div>
                       )}
                       <div className="text-sm">
-                        <span className="text-neutral-900 dark:text-white">
+                        <span className="text-foreground">
                           {post.authorDetail?.name ?? "Editorial"}
                         </span>
                         {post.createdAt && (
                           <>
-                            <span className="mx-2 text-neutral-400">·</span>
-                            <span className="text-neutral-500 dark:text-neutral-400">
+                            <span className="mx-2 text-muted-foreground">
+                              ·
+                            </span>
+                            <span className="text-muted-foreground">
                               {new Date(post.createdAt).toLocaleDateString(
                                 "en-US",
                                 {
@@ -236,14 +236,14 @@ function Page() {
                     {/* Title and description */}
                     <div>
                       <h2
-                        className={`font-serif text-neutral-900 tracking-[-0.01em] group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400 ${
+                        className={`font-serif text-foreground tracking-[-0.01em] group-hover:text-primary ${
                           index === 0 ? "text-2xl sm:text-3xl" : "text-xl"
                         }`}
                       >
                         {post.title ?? "Untitled"}
                       </h2>
                       {post.description && (
-                        <p className="mt-2 line-clamp-2 text-neutral-500 text-sm leading-relaxed dark:text-neutral-400">
+                        <p className="mt-2 line-clamp-2 text-muted-foreground text-sm leading-relaxed">
                           {post.description}
                         </p>
                       )}
