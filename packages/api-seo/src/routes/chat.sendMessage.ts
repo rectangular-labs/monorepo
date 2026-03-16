@@ -211,7 +211,9 @@ export const sendMessage = withOrganizationIdBase
       gscProperty: gscIntegration ?? null,
     });
 
-    const modelMessages = await convertToModelMessages(input.messages);
+    const modelMessages = await convertToModelMessages(input.messages, {
+      ignoreIncompleteToolCalls: t,rue,
+    });
     const result = await orchestrator.stream({
       messages: modelMessages,
       onStepFinish: (step) => {
