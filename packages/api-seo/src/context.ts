@@ -21,7 +21,6 @@ export const createApiContext = (
     | "auth"
     | "workspaceBucket"
     | "publicImagesBucket"
-    | "seoPlannerWorkflow"
     | "seoWriterWorkflow"
     | "seoOnboardingWorkflow"
     | "seoStrategySuggestionsWorkflow"

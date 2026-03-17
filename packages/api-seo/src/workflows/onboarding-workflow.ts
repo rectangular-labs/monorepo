@@ -9,15 +9,18 @@ import { openai } from "@ai-sdk/openai";
 import { ONBOARDING_STRATEGY_SUGGESTION_INSTRUCTIONS } from "@rectangular-labs/core/ai/onboarding-strategy-suggestion-instructions";
 import { toSlug } from "@rectangular-labs/core/format/to-slug";
 import {
-  type seoUnderstandSiteTaskInputSchema,
+  businessBackgroundJsonSchema,
+  type businessBackgroundSchema,
+} from "@rectangular-labs/core/schemas/project-parsers";
+import type {
+  seoUnderstandSiteTaskInputSchema,
   seoUnderstandSiteTaskOutputSchema,
 } from "@rectangular-labs/core/schemas/task-parsers";
 import { createDb } from "@rectangular-labs/db";
 import { updateSeoProject } from "@rectangular-labs/db/operations";
-import { generateText, Output, stepCountIs } from "ai";
+import { generateText, jsonSchema, Output, stepCountIs } from "ai";
 import { type } from "arktype";
-import { arktypeToAiJsonSchema } from "../lib/ai/arktype-json-schema";
-import { createWebToolsWithMetadata } from "../lib/ai/tools/web-tools";
+import { createWebTools } from "../lib/ai/tools/web-tools";
 import { logAgentStep } from "../lib/ai/utils/log-agent-step";
 import { createTask } from "../lib/task";
 import { DEFAULT_BRAND_VOICE } from "../lib/workspace/workflow.constant";
@@ -105,11 +108,9 @@ Homepage Title: ${homepageTitle}
 Extract the name from the above context.`,
 
             output: Output.object({
-              schema: arktypeToAiJsonSchema(
-                type({
-                  name: "string",
-                }),
-              ),
+              schema: type({
+                name: "string",
+              }),
             }),
           });
 
@@ -122,7 +123,7 @@ Extract the name from the above context.`,
           timeout: "30 minutes",
         },
         async () => {
-          const { tools } = createWebToolsWithMetadata(project, this.env.CACHE);
+          const { tools } = createWebTools(project, this.env.CACHE);
           const system = `You are an SEO research expert extracting concise, high-signal business context.
 
 ## Task
@@ -152,9 +153,9 @@ Extract the name from the above context.`,
               logAgentStep(logInfo, "[backgroundResearch] step finished", step);
             },
             output: Output.object({
-              schema: arktypeToAiJsonSchema(
-                seoUnderstandSiteTaskOutputSchema.get("businessBackground"),
-              ),
+              schema: jsonSchema<
+                Omit<typeof businessBackgroundSchema.infer, "version">
+              >(businessBackgroundJsonSchema),
             }),
           });
 
@@ -231,7 +232,7 @@ Extract the name from the above context.`,
         }
       }),
       step.do("generate brand voice", { timeout: "10 minutes" }, async () => {
-        const { tools } = createWebToolsWithMetadata(project, this.env.CACHE);
+        const { tools } = createWebTools(project, this.env.CACHE);
         const system = `You are an SEO research expert extracting a brand's writing tone.
 
 ## Task
@@ -263,11 +264,9 @@ Extract the name from the above context.`,
             logAgentStep(logInfo, "step to extract brand voice finished", step);
           },
           output: Output.object({
-            schema: arktypeToAiJsonSchema(
-              type({
-                brandVoice: "string",
-              }),
-            ),
+            schema: type({
+              brandVoice: "string",
+            }),
           }),
         });
 

@@ -4,6 +4,11 @@ import {
   COUNTRY_CODE_MAP,
 } from "@rectangular-labs/core/schemas/project-parsers";
 import {
+  type FetchKeywordSuggestionsArgs,
+  type FetchKeywordsOverviewArgs,
+  type FetchRankedKeywordsForSiteArgs,
+  type FetchRankedPagesForSiteArgs,
+  type FetchSerpArgs,
   fetchKeywordSuggestions,
   fetchKeywordsOverview,
   fetchRankedKeywordsForSite,
@@ -69,11 +74,7 @@ export function getSerpCacheOptions(
   primaryKeyword: string,
   locationName: string,
   languageCode: string,
-  options?: {
-    depth?: number;
-    device?: "desktop" | "mobile";
-    os?: "windows" | "macos" | "android" | "ios";
-  },
+  options?: Pick<FetchSerpArgs, "depth" | "device" | "os">,
 ) {
   return {
     key: createDataforseoCacheKey("serp", {
@@ -98,14 +99,8 @@ export function fetchSerpWithCache({
   depth,
   device,
   os,
-}: {
-  keyword: string;
-  locationName: string;
-  languageCode: string;
+}: Omit<FetchSerpArgs, "targetUrl"> & {
   cacheKV: InitialContext["cacheKV"];
-  depth?: number;
-  device?: "desktop" | "mobile";
-  os?: "windows" | "macos" | "android" | "ios";
 }) {
   return fetchWithCache({
     ...getSerpCacheOptions(keyword, locationName, languageCode, {
@@ -139,15 +134,7 @@ export function fetchRankedKeywordsForSiteWithCache({
   offset,
   includeGenderAndAgeDistribution,
   cacheKV,
-}: {
-  hostname: string;
-  locationName: string;
-  languageCode: string;
-  positionFrom: number;
-  positionTo: number;
-  limit: number;
-  offset: number;
-  includeGenderAndAgeDistribution: boolean;
+}: FetchRankedKeywordsForSiteArgs & {
   cacheKV: InitialContext["cacheKV"];
 }) {
   return fetchWithCache({
@@ -190,13 +177,8 @@ export function fetchRankedPagesForSiteWithCache({
   offset,
   includeGenderAndAgeDistribution,
   cacheKV,
-}: {
+}: Omit<FetchRankedPagesForSiteArgs, "target"> & {
   hostname: string;
-  locationName: string;
-  languageCode: string;
-  limit: number;
-  offset: number;
-  includeGenderAndAgeDistribution: boolean;
   cacheKV: InitialContext["cacheKV"];
 }) {
   return fetchWithCache({
@@ -236,14 +218,7 @@ export function fetchKeywordSuggestionsWithCache({
   limit,
   offset,
   cacheKV,
-}: {
-  seedKeyword: string;
-  includeSeedKeyword: boolean;
-  includeGenderAndAgeDistribution: boolean;
-  locationName: string;
-  languageCode: string;
-  limit: number;
-  offset: number;
+}: FetchKeywordSuggestionsArgs & {
   cacheKV: InitialContext["cacheKV"];
 }) {
   return fetchWithCache({
@@ -282,11 +257,7 @@ export function fetchKeywordsOverviewWithCache({
   locationName,
   languageCode,
   cacheKV,
-}: {
-  keywords: string[];
-  includeGenderAndAgeDistribution: boolean;
-  locationName: string;
-  languageCode: string;
+}: FetchKeywordsOverviewArgs & {
   cacheKV: InitialContext["cacheKV"];
 }) {
   return fetchWithCache({

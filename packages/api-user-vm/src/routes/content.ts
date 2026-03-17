@@ -28,7 +28,9 @@ const write = protectedBase
           "WebSearch",
         ],
       }),
-      messages: await convertToModelMessages(input.messages),
+      messages: await convertToModelMessages(input.messages, {
+        ignoreIncompleteToolCalls: true,
+      }),
       onStepFinish: (step) => {
         console.log("step", step);
       },

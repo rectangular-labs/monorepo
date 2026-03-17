@@ -179,6 +179,55 @@ export async function updateStrategy(
   return ok(strategy);
 }
 
+export async function softDeleteStrategy(args: {
+  db: DB | DBTransaction;
+  id: string;
+  projectId: string;
+  organizationId: string;
+  dismissalReason?: string | null;
+}) {
+  const result = await safe(async () => {
+    const deletedStrategies = await args.db
+      .update(schema.seoStrategy)
+      .set({
+        deletedAt: new Date(),
+        status: "dismissed",
+        dismissalReason: args.dismissalReason ?? "deleted via data access tool",
+      })
+      .where(
+        and(
+          eq(schema.seoStrategy.id, args.id),
+          eq(schema.seoStrategy.projectId, args.projectId),
+          eq(schema.seoStrategy.organizationId, args.organizationId),
+        ),
+      )
+      .returning();
+
+    await args.db
+      .update(schema.seoContentDraft)
+      .set({
+        strategyId: null,
+      })
+      .where(
+        and(
+          eq(schema.seoContentDraft.strategyId, args.id),
+          eq(schema.seoContentDraft.projectId, args.projectId),
+          eq(schema.seoContentDraft.organizationId, args.organizationId),
+        ),
+      );
+
+    return deletedStrategies;
+  });
+  if (!result.ok) {
+    return result;
+  }
+  const strategy = result.value[0];
+  if (!strategy) {
+    return err(new Error("Failed to soft delete strategy"));
+  }
+  return ok(strategy);
+}
+
 export async function createStrategyPhase(
   db: DB | DBTransaction,
   values: typeof seoStrategyPhaseInsertSchema.infer,

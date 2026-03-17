@@ -13,9 +13,9 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
-import { Route as AuthedAdminRouteRouteImport } from './routes/_authed/admin/route'
 import { Route as AuthedOrganizationSlugRouteRouteImport } from './routes/_authed/$organizationSlug/route'
 import { Route as AuthedOnboardingIndexRouteImport } from './routes/_authed/onboarding/index'
+import { Route as AuthedAdminIndexRouteImport } from './routes/_authed/admin/index'
 import { Route as AuthedOrganizationSlugIndexRouteImport } from './routes/_authed/$organizationSlug/index'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as AuthedInviteInvitationIdRouteImport } from './routes/_authed/invite/$invitationId'
@@ -55,11 +55,6 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedAdminRouteRoute = AuthedAdminRouteRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthedRouteRoute,
-} as any)
 const AuthedOrganizationSlugRouteRoute =
   AuthedOrganizationSlugRouteRouteImport.update({
     id: '/$organizationSlug',
@@ -69,6 +64,11 @@ const AuthedOrganizationSlugRouteRoute =
 const AuthedOnboardingIndexRoute = AuthedOnboardingIndexRouteImport.update({
   id: '/onboarding/',
   path: '/onboarding/',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedAdminIndexRoute = AuthedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
 const AuthedOrganizationSlugIndexRoute =
@@ -193,12 +193,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
-  '/admin': typeof AuthedAdminRouteRoute
   '/api/$': typeof ApiSplatRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
+  '/admin': typeof AuthedAdminIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
@@ -219,11 +219,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/admin': typeof AuthedAdminRouteRoute
   '/api/$': typeof ApiSplatRoute
   '/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$organizationSlug': typeof AuthedOrganizationSlugIndexRoute
+  '/admin': typeof AuthedAdminIndexRoute
   '/onboarding': typeof AuthedOnboardingIndexRoute
   '/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
   '/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugIndexRoute
@@ -246,12 +246,12 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_authed/$organizationSlug': typeof AuthedOrganizationSlugRouteRouteWithChildren
-  '/_authed/admin': typeof AuthedAdminRouteRoute
   '/api/$': typeof ApiSplatRoute
   '/_authed/$organizationSlug/$projectSlug': typeof AuthedOrganizationSlugProjectSlugRouteRouteWithChildren
   '/_authed/invite/$invitationId': typeof AuthedInviteInvitationIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_authed/$organizationSlug/': typeof AuthedOrganizationSlugIndexRoute
+  '/_authed/admin/': typeof AuthedAdminIndexRoute
   '/_authed/onboarding/': typeof AuthedOnboardingIndexRoute
   '/_authed/$organizationSlug/$projectSlug/settings': typeof AuthedOrganizationSlugProjectSlugSettingsRouteRouteWithChildren
   '/_authed/$organizationSlug/settings/team': typeof AuthedOrganizationSlugSettingsTeamRoute
@@ -275,12 +275,12 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/$organizationSlug'
-    | '/admin'
     | '/api/$'
     | '/$organizationSlug/$projectSlug'
     | '/invite/$invitationId'
     | '/api/rpc/$'
     | '/$organizationSlug/'
+    | '/admin'
     | '/onboarding'
     | '/$organizationSlug/$projectSlug/settings'
     | '/$organizationSlug/settings/team'
@@ -301,11 +301,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
-    | '/admin'
     | '/api/$'
     | '/invite/$invitationId'
     | '/api/rpc/$'
     | '/$organizationSlug'
+    | '/admin'
     | '/onboarding'
     | '/$organizationSlug/settings/team'
     | '/$organizationSlug/$projectSlug'
@@ -327,12 +327,12 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/login'
     | '/_authed/$organizationSlug'
-    | '/_authed/admin'
     | '/api/$'
     | '/_authed/$organizationSlug/$projectSlug'
     | '/_authed/invite/$invitationId'
     | '/api/rpc/$'
     | '/_authed/$organizationSlug/'
+    | '/_authed/admin/'
     | '/_authed/onboarding/'
     | '/_authed/$organizationSlug/$projectSlug/settings'
     | '/_authed/$organizationSlug/settings/team'
@@ -389,13 +389,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/admin': {
-      id: '/_authed/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthedAdminRouteRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
     '/_authed/$organizationSlug': {
       id: '/_authed/$organizationSlug'
       path: '/$organizationSlug'
@@ -408,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthedOnboardingIndexRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/admin/': {
+      id: '/_authed/admin/'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthedAdminIndexRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
     '/_authed/$organizationSlug/': {
@@ -634,16 +634,16 @@ const AuthedOrganizationSlugRouteRouteWithChildren =
 
 interface AuthedRouteRouteChildren {
   AuthedOrganizationSlugRouteRoute: typeof AuthedOrganizationSlugRouteRouteWithChildren
-  AuthedAdminRouteRoute: typeof AuthedAdminRouteRoute
   AuthedInviteInvitationIdRoute: typeof AuthedInviteInvitationIdRoute
+  AuthedAdminIndexRoute: typeof AuthedAdminIndexRoute
   AuthedOnboardingIndexRoute: typeof AuthedOnboardingIndexRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedOrganizationSlugRouteRoute:
     AuthedOrganizationSlugRouteRouteWithChildren,
-  AuthedAdminRouteRoute: AuthedAdminRouteRoute,
   AuthedInviteInvitationIdRoute: AuthedInviteInvitationIdRoute,
+  AuthedAdminIndexRoute: AuthedAdminIndexRoute,
   AuthedOnboardingIndexRoute: AuthedOnboardingIndexRoute,
 }
 

@@ -292,6 +292,53 @@ export async function hardDeleteDraft(args: {
   return ok(deletedDraft);
 }
 
+export async function softDeleteDraft(args: {
+  db: DB | DBTransaction;
+  organizationId: string;
+  projectId: string;
+  id: string;
+}) {
+  const result = await safe(async () => {
+    const now = new Date();
+
+    // Deleting a draft should also unpublish any published versions created from it.
+    await args.db
+      .update(schema.seoContent)
+      .set({
+        deletedAt: now,
+      })
+      .where(
+        and(
+          eq(schema.seoContent.originatingDraftId, args.id),
+          eq(schema.seoContent.projectId, args.projectId),
+          eq(schema.seoContent.organizationId, args.organizationId),
+        ),
+      );
+
+    return await args.db
+      .update(schema.seoContentDraft)
+      .set({
+        deletedAt: now,
+      })
+      .where(
+        and(
+          eq(schema.seoContentDraft.id, args.id),
+          eq(schema.seoContentDraft.projectId, args.projectId),
+          eq(schema.seoContentDraft.organizationId, args.organizationId),
+        ),
+      )
+      .returning();
+  });
+  if (!result.ok) {
+    return result;
+  }
+  const deletedDraft = result.value[0];
+  if (!deletedDraft) {
+    return err(new Error("Failed to soft delete draft"));
+  }
+  return ok(deletedDraft);
+}
+
 /**
  * Get draft by slug. Since there's only one draft per slug, no need for originatingChatId.
  */

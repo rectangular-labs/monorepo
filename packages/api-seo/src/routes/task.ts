@@ -95,9 +95,6 @@ const status = protectedBase
 
     if (taskRun.provider === "cloudflare") {
       const instance = await (() => {
-        if (taskRun.inputData.type === "seo-plan-keyword") {
-          return context.seoPlannerWorkflow.get(taskRun.taskId);
-        }
         if (taskRun.inputData.type === "seo-write-article") {
           return context.seoWriterWorkflow.get(taskRun.taskId);
         }

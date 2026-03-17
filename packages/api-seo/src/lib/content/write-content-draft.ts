@@ -142,33 +142,6 @@ export async function writeContentDraft(
   }
   let updatedDraft = updatedResult.value;
 
-  if (nextStatus === "suggested" && !updatedDraft.outlineGeneratedByTaskRunId) {
-    const taskResult = await createTask({
-      db: args.db,
-      userId: args.userId ?? undefined,
-      input: {
-        type: "seo-plan-keyword",
-        userId: args.userId ?? undefined,
-        projectId: args.projectId,
-        organizationId: args.organizationId,
-        chatId: args.chatId ?? null,
-        draftId: draft.id,
-      },
-    });
-    if (taskResult.ok) {
-      const updatedResult = await updateContentDraft(args.db, {
-        id: updatedDraft.id,
-        projectId: args.projectId,
-        organizationId: args.organizationId,
-        outlineGeneratedByTaskRunId: taskResult.value.id,
-      });
-      if (!updatedResult.ok) {
-        return updatedResult;
-      }
-      updatedDraft = updatedResult.value;
-    }
-  }
-
   if (nextStatus === "queued" && !updatedDraft.generatedByTaskRunId) {
     const taskResult = await createTask({
       db: args.db,

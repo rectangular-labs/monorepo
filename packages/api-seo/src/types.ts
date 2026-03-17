@@ -8,18 +8,15 @@ import type { BaseContextWithAuth } from "@rectangular-labs/api-core/lib/types";
 import type { chatMessageMetadataSchema } from "@rectangular-labs/core/schemas/chat-message-parser";
 import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
 import type { DB, schema } from "@rectangular-labs/db";
-import type { InferUITools, UIDataTypes, UIMessage, UIMessageChunk } from "ai";
+import type { InferAgentUIMessage } from "ai";
 import type { Scheduler } from "partywhen";
-import type { createPlannerToolsWithMetadata } from "./lib/ai/tools/planner-tools";
-import type { createSkillTools } from "./lib/ai/tools/skill-tools";
-import type { createTodoToolWithMetadata } from "./lib/ai/tools/todo-tool";
+import type { createOrchestrator } from "./lib/ai/agents/orchestrator";
 import type {
   createPublicImagesBucket,
   createWorkspaceBucket,
 } from "./lib/bucket";
 import type { router } from "./routes";
 import type { SeoOnboardingWorkflowBinding } from "./workflows/onboarding-workflow";
-import type { SeoPlannerWorkflowBinding } from "./workflows/planner-workflow";
 import type { SeoStrategyPhaseGenerationWorkflowBinding } from "./workflows/strategy-phase-generation-workflow";
 import type { SeoStrategySnapshotWorkflowBinding } from "./workflows/strategy-snapshot-workflow";
 import type { SeoStrategySuggestionsWorkflowBinding } from "./workflows/strategy-suggestions-workflow";
@@ -30,26 +27,10 @@ export type RouterClient = ORPCRouterClient<Router>;
 export type RouterInputs = InferRouterInputs<Router>;
 export type RouterOutputs = InferRouterOutputs<Router>;
 
-type AiTools = InferUITools<
-  ReturnType<typeof createSkillTools> &
-    ReturnType<typeof createPlannerToolsWithMetadata>["tools"] &
-    ReturnType<typeof createTodoToolWithMetadata>["tools"]
+export type SeoChatMessage = InferAgentUIMessage<
+  ReturnType<typeof createOrchestrator>,
+  typeof chatMessageMetadataSchema.infer
 >;
-export type SeoChatMessage = UIMessage<
-  typeof chatMessageMetadataSchema.infer,
-  UIDataTypes,
-  AiTools
->;
-export type WebSocketMessages =
-  | { type: "new-msg"; message: SeoChatMessage }
-  | {
-      type: "msg-chunk";
-      clientMessageId: string;
-      chunk: UIMessageChunk<
-        typeof chatMessageMetadataSchema.infer,
-        UIDataTypes
-      >;
-    };
 
 /**
  * Initial context type definition for oRPC procedures
@@ -60,7 +41,6 @@ export interface InitialContext extends BaseContextWithAuth {
   url: URL;
   workspaceBucket: ReturnType<typeof createWorkspaceBucket>;
   publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
-  seoPlannerWorkflow: SeoPlannerWorkflowBinding;
   seoWriterWorkflow: SeoWriterWorkflowBinding;
   seoOnboardingWorkflow: SeoOnboardingWorkflowBinding;
   seoStrategySuggestionsWorkflow: SeoStrategySuggestionsWorkflowBinding;

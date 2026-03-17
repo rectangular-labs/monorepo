@@ -81,11 +81,6 @@
   ],
   "workflows": [
     {
-      "name": "seo-planner",
-      "binding": "SEO_PLANNER_WORKFLOW",
-      "class_name": "SeoPlannerWorkflow"
-    },
-    {
       "name": "seo-writer",
       "binding": "SEO_WRITER_WORKFLOW",
       "class_name": "SeoWriterWorkflow"
@@ -168,11 +163,6 @@
         }
       ],
       "workflows": [
-        {
-          "name": "seo-planner-production",
-          "binding": "SEO_PLANNER_WORKFLOW",
-          "class_name": "SeoPlannerWorkflow"
-        },
         {
           "name": "seo-writer-production",
           "binding": "SEO_WRITER_WORKFLOW",
@@ -263,11 +253,6 @@
         }
       ],
       "workflows": [
-        {
-          "name": "seo-planner",
-          "binding": "SEO_PLANNER_WORKFLOW",
-          "class_name": "SeoPlannerWorkflow"
-        },
         {
           "name": "seo-writer",
           "binding": "SEO_WRITER_WORKFLOW",

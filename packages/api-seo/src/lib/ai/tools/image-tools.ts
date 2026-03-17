@@ -2,7 +2,7 @@ import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google";
 import { getExtensionFromMimeType } from "@rectangular-labs/core/project/get-extension-from-mimetype";
 import type { imageSettingsSchema } from "@rectangular-labs/core/schemas/project-parsers";
 import { uuidv7 } from "@rectangular-labs/db";
-import { generateText, Output, tool } from "ai";
+import { generateText, jsonSchema, Output, tool } from "ai";
 import { type } from "arktype";
 import { apiEnv } from "../../../env";
 import type { InitialContext } from "../../../types";
@@ -15,35 +15,21 @@ import {
   searchPixabay,
   searchUnsplash,
 } from "./image-tools.image-providers";
-import type { AgentToolDefinition } from "./utils";
 
-const imageAgentInputSchema = type({
-  prompt: type("string").describe("The prompt to generate an image for."),
-});
-
-const screenshotInputSchema = type({
-  url: type("string").describe(
-    "The URL to capture a screenshot of. Must be a valid URL.",
-  ),
-  viewportWidth: type("number.integer >= 480")
-    .describe("The width of the viewport to capture a screenshot of.")
-    .default(1280),
-  viewportHeight: type("number.integer >= 480")
-    .describe("The height of the viewport to capture a screenshot of.")
-    .default(720),
-  fullPage: type("boolean")
-    .describe("Whether to capture a full page screenshot.")
-    .default(false),
-});
-
-const stockImageInputSchema = type({
-  searchQuery: type("string").describe(
-    "The search query that describes the image to search for.",
-  ),
-  orientation: type("'landscape'|'portrait'|'square'")
-    .describe("The orientation of the image to search for.")
-    .default("landscape"),
-});
+function normalizeImageMediaType(mediaType: string | null | undefined): string {
+  const normalized = mediaType?.split(";")[0]?.trim().toLowerCase();
+  switch (normalized) {
+    case "image/jpg":
+      return "image/jpeg";
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+      return normalized;
+    default:
+      return "image/jpeg";
+  }
+}
 
 async function selectBestStockImageIndex(args: {
   query: string;
@@ -80,15 +66,42 @@ Attached are ${args.candidates.length} images. Return {"index": N} where N is -1
   return index;
 }
 
-export function createImageToolsWithMetadata(args: {
+export function createImageTools(args: {
   organizationId: string;
   projectId: string;
   imageSettings: typeof imageSettingsSchema.infer | null;
   publicImagesBucket: InitialContext["publicImagesBucket"];
 }) {
   const generateImage = tool({
-    description: "Generate an image based on a prompt.",
-    inputSchema: imageAgentInputSchema,
+    description:
+      "Generate a project image based on the project's image settings and a prompt. Use for custom visuals like infographics, diagrams, and conceptual hero images.",
+    inputSchema: jsonSchema<{
+      prompt: string;
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["prompt"],
+      properties: {
+        prompt: {
+          type: "string",
+          description: "The prompt to generate an image for.",
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          prompt:
+            "A clean isometric diagram of an invoice automation workflow with OCR, validation, and ERP sync.",
+        },
+      },
+      {
+        input: {
+          prompt:
+            "Minimal flat vector hero image showing a marketing analytics dashboard and trend lines.",
+        },
+      },
+    ],
     execute: async ({ prompt }) => {
       const { imageSettings } = args;
       if (!imageSettings) {
@@ -132,7 +145,8 @@ export function createImageToolsWithMetadata(args: {
       const { organizationId, projectId, publicImagesBucket } = args;
       const fileNames: string[] = [];
       for (const file of result.files) {
-        const originalContentType = file.mediaType || "image/jpeg";
+        const originalContentType = normalizeImageMediaType(file.mediaType);
+
         const originalExt = getExtensionFromMimeType(originalContentType);
         const originalKey = getPublicImageUri({
           orgId: organizationId,
@@ -169,36 +183,51 @@ export function createImageToolsWithMetadata(args: {
         ),
       };
     },
-    // toModelOutput(result) {
-    //   return {
-    //     type: "content",
-    //     value: [
-    //       {
-    //         type: "text" as const,
-    //         text: result.success ? result.imageUris.join(", ") : result.message,
-    //       },
-    //       ...(result.imageUris?.map((uri) => ({
-    //         type: "media" as const,
-    //         data: uri,
-    //         mediaType: "image/jpeg",
-    //       })) ?? []),
-    //     ],
-    //   };
-    // },
   });
 
   const findStockImage = tool({
     description:
       "Find a royalty-free stock image based on a search query. Returns the best match with attribution details. You must put the attribution as the image caption.",
-    inputSchema: stockImageInputSchema,
-    execute: async ({ searchQuery, orientation }) => {
-      const providers: (typeof imageSettingsSchema.infer)["stockImageProviders"] =
-        args.imageSettings?.stockImageProviders ?? [
-          "pixabay",
-          "unsplash",
-          "pexels",
-        ];
-      const effectiveOrientation = orientation ?? "landscape";
+    inputSchema: jsonSchema<{
+      searchQuery: string;
+      orientation?: "landscape" | "portrait" | "square";
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["searchQuery"],
+      properties: {
+        searchQuery: {
+          type: "string",
+          description: "The search query describing the desired image.",
+        },
+        orientation: {
+          type: "string",
+          enum: ["landscape", "portrait", "square"],
+          default: "landscape",
+          description: "The orientation of the image to search for.",
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          searchQuery: "team collaborating around a laptop in office",
+          orientation: "landscape",
+        },
+      },
+      {
+        input: {
+          searchQuery: "city skyline at sunrise",
+          orientation: "portrait",
+        },
+      },
+    ],
+    execute: async ({ searchQuery, orientation = "landscape" }) => {
+      const providers = args.imageSettings?.stockImageProviders ?? [
+        "pixabay",
+        "unsplash",
+        "pexels",
+      ];
 
       const providerSearchers = {
         unsplash: searchUnsplash,
@@ -212,7 +241,7 @@ export function createImageToolsWithMetadata(args: {
 
         const candidates = await search({
           query: searchQuery,
-          orientation: effectiveOrientation,
+          orientation,
         }).catch(() => []);
         if (!candidates.length) continue;
 
@@ -237,8 +266,9 @@ export function createImageToolsWithMetadata(args: {
         const downloadResponse = await fetch(picked.imageUrl).catch(() => null);
         if (!downloadResponse?.ok) continue;
 
-        const downloadedType =
-          downloadResponse.headers.get("content-type") || "image/jpeg";
+        const downloadedType = normalizeImageMediaType(
+          downloadResponse.headers.get("content-type"),
+        );
 
         const { organizationId, projectId, publicImagesBucket } = args;
         const originalExt = getExtensionFromMimeType(downloadedType);
@@ -282,15 +312,56 @@ export function createImageToolsWithMetadata(args: {
   const captureScreenshotTool = tool({
     description:
       "Capture a rendered screenshot of a given website URL using ScreenshotOne. Blocks ads, cookie banners, and common overlays. Stores the screenshot in the public bucket (optionally optimized to WebP).",
-    inputSchema: screenshotInputSchema,
-    async execute({ url, viewportWidth, viewportHeight, fullPage }) {
+    inputSchema: jsonSchema<{
+      url: string;
+      viewportWidth?: number;
+      viewportHeight?: number;
+    }>({
+      type: "object",
+      additionalProperties: false,
+      required: ["url"],
+      properties: {
+        url: {
+          type: "string",
+          description:
+            "The URL to capture a screenshot of. Must be a valid URL.",
+        },
+        viewportWidth: {
+          type: "integer",
+          minimum: 480,
+          default: 1280,
+          description: "Viewport width for the screenshot.",
+        },
+        viewportHeight: {
+          type: "integer",
+          minimum: 480,
+          default: 720,
+          description: "Viewport height for the screenshot.",
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          url: "https://example.com",
+        },
+      },
+      {
+        input: {
+          url: "https://example.com/pricing",
+          viewportWidth: 1440,
+          viewportHeight: 900,
+        },
+      },
+    ],
+    async execute({ url, viewportWidth = 1280, viewportHeight = 720 }) {
       const result = await captureScreenshotOne({
         url,
         viewport: {
           width: viewportWidth,
           height: viewportHeight,
         },
-        fullPage,
+        fullPage: false,
       });
 
       if (!result.ok) {
@@ -301,7 +372,11 @@ export function createImageToolsWithMetadata(args: {
       }
       const { organizationId, projectId, publicImagesBucket } = args;
       const baseId = uuidv7();
-      const originalExt = getExtensionFromMimeType(result.value.contentType);
+      const screenshotMediaType = normalizeImageMediaType(
+        result.value.contentType,
+      );
+
+      const originalExt = getExtensionFromMimeType(screenshotMediaType);
       const originalKey = getPublicImageUri({
         orgId: organizationId,
         projectId,
@@ -312,7 +387,7 @@ export function createImageToolsWithMetadata(args: {
         bucket: publicImagesBucket,
         bytes: result.value.bytes,
         key: originalKey,
-        mimeType: result.value.contentType,
+        mimeType: screenshotMediaType,
       });
 
       if (!stored.ok) {
@@ -327,26 +402,6 @@ export function createImageToolsWithMetadata(args: {
         screenshot: `${apiEnv().SEO_PUBLIC_BUCKET_URL}/${stored.value.key}`,
       };
     },
-    // toModelOutput(result) {
-    //   return {
-    //     type: "content",
-    //     value: [
-    //       {
-    //         type: "text" as const,
-    //         text: result.success ? result.screenshot : result.message,
-    //       },
-    //       ...(result.screenshot
-    //         ? [
-    //             {
-    //               type: "media" as const,
-    //               data: result.screenshot,
-    //               mediaType: "image/jpeg",
-    //             },
-    //           ]
-    //         : []),
-    //     ],
-    //   };
-    // },
   });
 
   const tools = {
@@ -354,32 +409,5 @@ export function createImageToolsWithMetadata(args: {
     find_stock_image: findStockImage,
     capture_screenshot: captureScreenshotTool,
   } as const;
-  const toolDefinitions: AgentToolDefinition[] = [
-    {
-      toolName: "generate_image",
-      toolDescription:
-        "Generate a project image based on the project's image settings and a prompt. Helpful for generating a custom image for the project like an infographic, flowchart, or other visual representation.",
-      toolInstruction:
-        "Provide `prompt` describing the desired image. Use when the user asks for image generation. If image settings are missing, instruct the user to configure image settings first.",
-      tool: generateImage,
-    },
-    {
-      toolName: "find_stock_image",
-      toolDescription:
-        "Find a royalty-free stock image based on a search query. Returns the best match with attribution details. Helpful for finding an image that is relevant to the project's content like of certain objects, places, etc.",
-      toolInstruction:
-        "Provide `searchQuery` and optionally `orientation` (landscape/portrait/square). Use when you need a royalty-free stock image with source and photographer attribution. You must put the attribution as the image caption.",
-      tool: findStockImage,
-    },
-    {
-      toolName: "capture_screenshot",
-      toolDescription:
-        "Capture a rendered screenshot of a given website URL. Helpful for capturing a screenshot of a landing or product page.",
-      toolInstruction:
-        "Provide `url` to capture a screenshot of. Optionally specify `viewportWidth`, `viewportHeight`, and `fullPage`. This tool is best used when you need to capture a screenshot of a website, normally of a landing or product page.",
-      tool: captureScreenshotTool,
-    },
-  ];
-
-  return { toolDefinitions, tools };
+  return { tools };
 }
