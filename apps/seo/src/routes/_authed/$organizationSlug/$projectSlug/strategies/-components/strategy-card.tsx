@@ -1,5 +1,4 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
-import { capitalize } from "@rectangular-labs/core/format/capitalize";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
@@ -219,16 +218,6 @@ export function StrategyCard({
         </Link>
       )}
       <CardHeader className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Badge variant={isSuggestion ? "secondary" : "outline"}>
-            {isSuggestion ? "Suggestion" : capitalize(strategy.status)}
-          </Badge>
-          {phase && (
-            <Badge className="capitalize" variant="outline">
-              {phase.type}
-            </Badge>
-          )}
-        </div>
         <CardTitle className="line-clamp-2 leading-snug">
           {strategy.name}
         </CardTitle>

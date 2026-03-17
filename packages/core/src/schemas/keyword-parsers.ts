@@ -98,6 +98,57 @@ export const contentKeywordSchema = type({
   backlinkInfo: backlinkInfoSchema.or(type.null),
 });
 
+export const strategyItemStatusSchema = type("'active'|'dropped'");
+export const STRATEGY_ITEM_STATUSES = [
+  "active",
+  "dropped",
+] as const satisfies (typeof strategyItemStatusSchema.infer)[];
+
+export const strategyLlmQueriesSchema = type({
+  version: "1",
+  items: type({
+    id: type("string").atLeastLength(1),
+    query: type("string").atLeastLength(1),
+    rationale: "string | null",
+    status: strategyItemStatusSchema,
+  }).array(),
+});
+
+export const strategyKeywordSourceSchema = type.or(
+  type({
+    type: "'strategyGeneration'",
+  }),
+  type({
+    type: "'llmQueryFanOut'",
+    llmQueryId: type("string").atLeastLength(1),
+  }),
+);
+
+export const strategyKeywordCategorySchema = type(
+  "'core'|'supporting'|'fanOut'",
+);
+export const STRATEGY_KEYWORD_CATEGORIES = [
+  "core",
+  "supporting",
+  "fanOut",
+] as const satisfies (typeof strategyKeywordCategorySchema.infer)[];
+
+export const strategyKeywordUniverseSchema = type({
+  version: "1",
+  items: type({
+    id: type("string").atLeastLength(1),
+    keyword: type("string").atLeastLength(1),
+    status: strategyItemStatusSchema,
+    source: strategyKeywordSourceSchema,
+    category: strategyKeywordCategorySchema,
+    intent: keywordIntentSchema.or(type.null),
+    difficulty: "number | null",
+    searchVolume: "number | null",
+    cpc: "number | null",
+    cpcCompetitionLevel: keywordCompetitionSchema.get("competitionLevel"),
+  }).array(),
+});
+
 /**
  * Types of google element that we dropped from DataForSEO
  *

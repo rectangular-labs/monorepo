@@ -1,3 +1,7 @@
+import type {
+  strategyKeywordUniverseSchema,
+  strategyLlmQueriesSchema,
+} from "@rectangular-labs/core/schemas/keyword-parsers";
 import {
   STRATEGY_STATUSES,
   type strategyGoalSchema,
@@ -37,6 +41,9 @@ export const seoStrategy = pgSeoTable(
     description: text(),
     motivation: text().notNull(),
     goal: jsonb().$type<typeof strategyGoalSchema.infer>().notNull(),
+    keywordUniverse:
+      jsonb().$type<typeof strategyKeywordUniverseSchema.infer>(),
+    llmQueries: jsonb().$type<typeof strategyLlmQueriesSchema.infer>(),
     dismissalReason: text(),
     status: text({ enum: STRATEGY_STATUSES }).notNull().default("suggestion"),
     ...timestamps,

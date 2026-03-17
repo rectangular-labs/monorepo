@@ -162,6 +162,13 @@
       "when": 1771143933411,
       "tag": "0022_sour_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1773750791206,
+      "tag": "0023_mean_joshua_kane",
+      "breakpoints": true
     }
   ]
 }

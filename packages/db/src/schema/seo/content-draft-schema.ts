@@ -53,6 +53,7 @@ export const seoContentDraft = pgSeoTable(
     // Content identification
     slug: text().notNull(),
     primaryKeyword: text().notNull(),
+    secondaryKeywords: text().array().notNull().default([]),
 
     // Content fields
     title: text(),

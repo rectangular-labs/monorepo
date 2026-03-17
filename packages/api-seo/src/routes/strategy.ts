@@ -191,6 +191,8 @@ const create = withOrganizationIdBase
         motivation: input.motivation,
         description: input.description ?? null,
         goal: input.goal,
+        keywordUniverse: input.keywordUniverse ?? null,
+        llmQueries: input.llmQueries ?? null,
         status: "active",
       },
     ]);

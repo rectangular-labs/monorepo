@@ -447,6 +447,7 @@ export async function listContentDraftsWithLatestSnapshot(args: {
         title: true,
         slug: true,
         primaryKeyword: true,
+        secondaryKeywords: true,
         status: true,
         role: true,
         strategyId: true,

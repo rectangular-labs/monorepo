@@ -20,6 +20,7 @@ import { pgSeoTable } from "../_table";
 import { organization } from "../auth-schema";
 import { seoContentDraft } from "./content-draft-schema";
 import { seoProject } from "./project-schema";
+import { seoStrategy } from "./strategy-schema";
 
 /**
  * Published content versions (immutable).
@@ -44,6 +45,10 @@ export const seoContent = pgSeoTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    strategyId: uuid().references(() => seoStrategy.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     originatingDraftId: uuid()
       .notNull()
       .references(() => seoContentDraft.id, {
@@ -61,6 +66,7 @@ export const seoContent = pgSeoTable(
     heroImage: text(),
     heroImageCaption: text(),
     primaryKeyword: text().notNull(),
+    secondaryKeywords: text().array().notNull().default([]),
     articleType: text({ enum: ARTICLE_TYPES }).notNull(),
     contentMarkdown: text().notNull(),
     role: text({ enum: CONTENT_ROLES }),
@@ -94,6 +100,10 @@ export const seoContentRelations = relations(seoContent, ({ one }) => ({
   originatingDraft: one(seoContentDraft, {
     fields: [seoContent.originatingDraftId],
     references: [seoContentDraft.id],
+  }),
+  strategy: one(seoStrategy, {
+    fields: [seoContent.strategyId],
+    references: [seoStrategy.id],
   }),
   project: one(seoProject, {
     fields: [seoContent.projectId],
