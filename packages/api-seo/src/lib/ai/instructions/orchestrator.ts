@@ -29,7 +29,7 @@ You are NOT the expert. Your role is to:
 
 <project-context>
 ${projectContext}
-- Google Search Console: ${args.gscConnected ? `Connected (${args.gscDomain})` : "Not connected. If the the user asks for performance/decay/CTR, prioritize connecting via `manage_integrations`"}
+- Google Search Console: ${args.gscConnected ? `Connected (${args.gscDomain})` : "Not connected. If the user asks for performance/decay/CTR, prioritize connecting via `manage_integrations`"}
 </project-context>
 
 <constraints>

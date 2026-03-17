@@ -166,9 +166,9 @@ Respond with the new object matching the schema.`;
         const result = await generateText({
           model: wrappedOpenAI("gpt-5.1-codex-mini"),
           output: Output.object({
-            schema: jsonSchema<typeof publishingSettingsSchema.infer>(
-              publishingSettingsJsonSchema,
-            ),
+            schema: jsonSchema<
+              Omit<typeof publishingSettingsSchema.infer, "version">
+            >(publishingSettingsJsonSchema),
           }),
           prompt,
         });
@@ -178,7 +178,7 @@ Respond with the new object matching the schema.`;
       await updateSeoProject(args.context.db, {
         id: args.context.projectId,
         organizationId: args.context.organizationId,
-        [settingToUpdate]: output,
+        [settingToUpdate]: { ...output, version: "v1" },
       });
 
       return { success: true, message: "Settings updated", settings: output };

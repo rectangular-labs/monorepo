@@ -376,6 +376,8 @@ interface EvalGenerationStatusValue {
   type: "content" | "strategy";
   fixtureId: string;
   output: string | null;
+  heroImage: string | null;
+  heroImageCaption: string | null;
   generatedAt: string | null;
   outputFileName: string | null;
   stepsJson: string | null;
@@ -438,7 +440,9 @@ ${fixture.input.outline ? `Outline: ${fixture.input.outline}` : ""}`;
         status: "completed",
         type: "content",
         fixtureId: fixture.id,
-        output: draft.text,
+        output: draft.output.markdown,
+        heroImage: draft.output.heroImage,
+        heroImageCaption: draft.output.heroImageCaption,
         generatedAt: createdAt.toISOString(),
         outputFileName: `${fixture.id}-${createdAt.toISOString().replace(/[:.]/g, "-")}.md`,
         stepsJson: JSON.stringify(
@@ -484,6 +488,8 @@ Output requirements:
       type: "strategy",
       fixtureId: fixture.id,
       output: result.text,
+      heroImage: null,
+      heroImageCaption: null,
       generatedAt: createdAt.toISOString(),
       outputFileName: `${fixture.id}-${createdAt.toISOString().replace(/[:.]/g, "-")}.md`,
       stepsJson: JSON.stringify(
@@ -508,6 +514,8 @@ Output requirements:
       type: args.type,
       fixtureId: args.fixture.id,
       output: null,
+      heroImage: null,
+      heroImageCaption: null,
       generatedAt: null,
       outputFileName: null,
       stepsJson: null,
@@ -575,6 +583,8 @@ const generateEvalOutput = protectedBase
         type: "content",
         fixtureId: fixture.id,
         output: null,
+        heroImage: null,
+        heroImageCaption: null,
         generatedAt: null,
         outputFileName: null,
         stepsJson: null,
@@ -614,6 +624,8 @@ const generateEvalOutput = protectedBase
       type: "strategy",
       fixtureId: fixture.id,
       output: null,
+      heroImage: null,
+      heroImageCaption: null,
       generatedAt: null,
       outputFileName: null,
       stepsJson: null,

@@ -19,6 +19,6 @@ export function formatBusinessBackground(
           )
           .join("")}`
   }
-- Competitor websites: ${background.competitorsWebsites.length === 0 ? "None Present" : `${background.competitorsWebsites.map((website, index) => `\n    - ${index + 1}. ${website}`).join("")}`}
+- Competitor websites: ${background.competitorsWebsites.length === 0 ? "None Present" : `${background.competitorsWebsites.map((item, index) => `\n    - ${index + 1}. ${item.url}`).join("")}`}
 `;
 }

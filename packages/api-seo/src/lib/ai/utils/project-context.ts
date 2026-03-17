@@ -10,7 +10,7 @@ export function buildProjectContext(
     typeof schema.seoProject.$inferSelect,
     "websiteUrl" | "name" | "businessBackground"
   >,
-): string[] {
+): string {
   const utcDate = new Intl.DateTimeFormat("en-US", {
     timeZone: "UTC",
     year: "numeric",
@@ -22,5 +22,5 @@ export function buildProjectContext(
     `- Project name: ${project.name ?? "(none)"}`,
     `- Website: ${project.websiteUrl}
     ${formatBusinessBackground(project.businessBackground)}`,
-  ];
+  ].join("\n");
 }

@@ -923,6 +923,7 @@ export function createWriterAgent(ctx: WriterAgentContext) {
 
       return {
         text: JSON.stringify(result.artifacts.finalArticle, null, 2),
+        output: result.artifacts.finalArticle,
         steps: result.steps,
       };
     },

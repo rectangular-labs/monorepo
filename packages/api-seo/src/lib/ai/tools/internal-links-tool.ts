@@ -10,7 +10,16 @@ export function createInternalLinksTool(
   project: typeof schema.seoProject.$inferSelect,
 ) {
   const { locationName, languageCode } = getLocationAndLanguage(project);
-  const targetUrl = project.websiteUrl;
+
+  let targetUrl = project.websiteUrl;
+  try {
+    const url = new URL(
+      targetUrl.startsWith("http") ? targetUrl : `https://${targetUrl}`,
+    );
+    targetUrl = url.hostname;
+  } catch {
+    // Fallback to original if parsing fails
+  }
 
   const internalLinks = tool({
     description:

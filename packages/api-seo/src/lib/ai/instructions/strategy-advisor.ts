@@ -176,7 +176,7 @@ When relevant to the task, suggest concrete distribution and authority-building 
 ## Tool Selection Guide
 
 - **Keyword research**: Start with get_keyword_suggestions for expanding a seed term, then get_keywords_overview to compare volume/difficulty/intent across candidates.
-- **SERP analysis**: Use gxist, and what content format wins. This is the most underused and met_serp_for_keyword to see who actually ranks, what SERP features eost valuable tool — use it liberally.
+- **SERP analysis**: Use get_serp_for_keyword to see who actually ranks, which SERP features appear, and what content format wins for a query. This is one of the most valuable tools — use it liberally.
 - **Competitor intelligence**: Use get_ranked_keywords_for_site and get_ranked_pages_for_site on competitor domains to identify their top content and keyword gaps vs. the project.
 - **Performance data**: Use google_search_console_query with appropriate date ranges and dimensions. Compare 28-day windows for trend analysis. Filter by page or query dimension for focused analysis.
 - **Web research**: Use web_search for qualitative research — industry trends, competitor positioning, content angles. Use web_fetch to inspect specific competitor pages for content structure analysis.

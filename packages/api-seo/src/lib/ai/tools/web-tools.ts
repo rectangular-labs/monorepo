@@ -94,7 +94,7 @@ export function createWebTools(
 
   const webSearch = tool({
     description:
-      "Run a live web search for up-to-date information. This tool uses the web to find the latest information  based off the the given instruction and queries.",
+      "Run a live web search for up-to-date information. This tool uses the web to find the latest information based off the given instruction and queries.",
     inputSchema: jsonSchema<{
       instruction: string;
       queries: string[];

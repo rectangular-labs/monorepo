@@ -108,7 +108,7 @@ export const businessBackgroundJsonSchema = {
         additionalProperties: false,
         required: ["url"] satisfies string[],
         properties: {
-          url: { type: "string" },
+          url: { type: "string", format: "uri" },
         },
       },
     },
@@ -253,16 +253,11 @@ export const publishingSettingsJsonSchema = {
   type: "object",
   additionalProperties: false,
   required: [
-    "version",
     "requireContentReview",
     "requireSuggestionReview",
     "participateInLinkExchange",
   ] satisfies string[],
   properties: {
-    version: {
-      type: "string",
-      const: "v1",
-    },
     requireContentReview: { type: "boolean" },
     requireSuggestionReview: { type: "boolean" },
     participateInLinkExchange: { type: "boolean" },

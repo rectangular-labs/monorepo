@@ -88,11 +88,12 @@ import {
 } from "@rectangular-labs/ui/components/ui/tooltip";
 import { useIsApple } from "@rectangular-labs/ui/hooks/use-apple";
 import { cn } from "@rectangular-labs/ui/utils/cn";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Fragment } from "react/jsx-runtime";
-import { getApiClient } from "~/lib/api";
+import { getApiClient, getApiClientRq } from "~/lib/api";
 import { useProjectChat } from "./project-chat-provider";
 
 type ChatMessagePart = SeoChatMessage["parts"][number];
@@ -311,6 +312,47 @@ function DeleteDataToolPart({
   onRespond: (args: { id: string; approved: boolean; reason?: string }) => void;
 }) {
   const [denialReason, setDenialReason] = useState("");
+  const queryClient = useQueryClient();
+  const api = getApiClientRq();
+  const { organizationId, projectId } = useProjectChat();
+
+  const isSuccess =
+    part.state === "output-available" &&
+    part.output &&
+    typeof part.output === "object" &&
+    "success" in part.output &&
+    part.output.success === true;
+
+  useEffect(() => {
+    if (isSuccess && part.input?.entityType && organizationId && projectId) {
+      if (part.input.entityType === "strategy") {
+        void queryClient.invalidateQueries({
+          queryKey: api.strategy.list.queryKey({
+            input: {
+              organizationIdentifier: organizationId,
+              projectId: projectId,
+            },
+          }),
+        });
+      } else if (part.input.entityType === "contentDraft") {
+        void queryClient.invalidateQueries({
+          queryKey: api.content.list.queryKey({
+            input: {
+              organizationIdentifier: organizationId,
+              projectId: projectId,
+            },
+          }),
+        });
+      }
+    }
+  }, [
+    isSuccess,
+    part.input?.entityType,
+    organizationId,
+    projectId,
+    queryClient,
+    api,
+  ]);
 
   if (part.type !== "tool-delete_existing_data") return null;
 
