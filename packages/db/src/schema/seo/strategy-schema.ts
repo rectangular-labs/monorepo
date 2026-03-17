@@ -38,7 +38,6 @@ export const seoStrategy = pgSeoTable(
         onUpdate: "cascade",
       }),
     name: text().notNull(),
-    description: text(),
     motivation: text().notNull(),
     goal: jsonb().$type<typeof strategyGoalSchema.infer>().notNull(),
     keywordUniverse:
