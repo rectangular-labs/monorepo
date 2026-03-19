@@ -6,11 +6,13 @@ import {
 import {
   type FetchKeywordSuggestionsArgs,
   type FetchKeywordsOverviewArgs,
+  type FetchKeywordUniverseSuggestionsArgs,
   type FetchRankedKeywordsForSiteArgs,
   type FetchRankedPagesForSiteArgs,
   type FetchSerpArgs,
   fetchKeywordSuggestions,
   fetchKeywordsOverview,
+  fetchKeywordUniverseSuggestions,
   fetchRankedKeywordsForSite,
   fetchRankedPagesForSite,
   fetchSerp,
@@ -243,6 +245,42 @@ export function fetchKeywordSuggestionsWithCache({
         includeGenderAndAgeDistribution,
         limit,
         offset,
+      });
+      if (!result.ok) throw result.error;
+      return result.value;
+    },
+    cacheKV,
+  });
+}
+
+export function fetchKeywordUniverseSuggestionsWithCache({
+  seedKeywords,
+  includeGenderAndAgeDistribution,
+  locationName,
+  languageCode,
+  limit,
+  cacheKV,
+}: FetchKeywordUniverseSuggestionsArgs & {
+  cacheKV: InitialContext["cacheKV"];
+}) {
+  return fetchWithCache({
+    key: createDataforseoCacheKey("keyword-universe-suggestions", {
+      seedKeywords,
+      includeGenderAndAgeDistribution,
+      locationName,
+      languageCode,
+      limit,
+    }),
+    options: {
+      ttlSeconds: DATAFORSEO_CACHE_TTL_SECONDS,
+    },
+    fn: async () => {
+      const result = await fetchKeywordUniverseSuggestions({
+        seedKeywords,
+        includeGenderAndAgeDistribution,
+        locationName,
+        languageCode,
+        limit,
       });
       if (!result.ok) throw result.error;
       return result.value;
