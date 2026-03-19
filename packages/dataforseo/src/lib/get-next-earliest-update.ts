@@ -1,4 +1,4 @@
-import { dataforseoLabsStatus } from "../sdk.gen";
+import { status } from "../sdk.gen";
 
 /**
  * DataForSEO Labs updates approximately once per month (~30 days)
@@ -6,10 +6,10 @@ import { dataforseoLabsStatus } from "../sdk.gen";
  * @returns The next earliest update date for the DataForSEO Labs API
  */
 export async function getNextEarliestUpdate() {
-  const status = await dataforseoLabsStatus();
+  const response = await status();
   const THIRTY_DAYS_IN_MILLISECONDS = 30 * 24 * 60 * 60 * 1000;
 
-  const result = status.data?.tasks?.[0]?.result?.[0]?.google?.date_update;
+  const result = response.data?.tasks?.[0]?.result?.[0]?.google?.date_update;
   const updatedDate = new Date(result ?? Date.now());
   const nextUpdate = updatedDate.getTime() + THIRTY_DAYS_IN_MILLISECONDS;
 

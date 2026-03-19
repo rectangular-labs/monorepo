@@ -96,6 +96,25 @@ export type SpellInfo = {
     type?: string | null;
 };
 
+export type AmazonLabelElement = {
+    /**
+     * type of element
+     */
+    type?: string | null;
+    /**
+     * title of the element
+     */
+    title?: string | null;
+    /**
+     * search URL with refinement parameters
+     */
+    url?: string | null;
+    /**
+     * domain in SERP
+     */
+    domain?: string | null;
+};
+
 export type MonthlySearchesInfo = {
     /**
      * year
@@ -254,6 +273,11 @@ export type KeywordProperties = {
      * if true, the language set in the request does not match the language determined by our system for a given keyword
      */
     is_another_language?: boolean | null;
+    /**
+     * number of words in the keyword
+     * indicates how many words the keyword consists of
+     */
+    words_count?: number | null;
 };
 
 export type ClickstreamKeywordInfo = {
@@ -447,236 +471,6 @@ export type KeywordDataInfo = {
     search_intent_info?: SearchIntentInfo | null;
 };
 
-export type DataforseoLabsMetricsInfo = {
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #1
-     */
-    pos_1?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #2-3
-     */
-    pos_2_3?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #4-10
-     */
-    pos_4_10?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #11-20
-     */
-    pos_11_20?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #21-30
-     */
-    pos_21_30?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #31-40
-     */
-    pos_31_40?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #41-50
-     */
-    pos_41_50?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #51-60
-     */
-    pos_51_60?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #61-70
-     */
-    pos_61_70?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #71-80
-     */
-    pos_71_80?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #81-90
-     */
-    pos_81_90?: number | null;
-    /**
-     * number of organic SERPs where the domain or subdomain ranks #91-100
-     */
-    pos_91_100?: number | null;
-    /**
-     * estimated traffic volume
-     * estimated organic monthly traffic to the domain or subdomain
-     * calculated as the product of CTR (click-through-rate) and search volume values of all keywords in the category that the domain or subdomain ranks for
-     * learn more about how the metric is calculated in this help center article
-     */
-    etv?: number | null;
-    /**
-     * total count of organic SERPs that contain the domain or subdomain
-     */
-    count?: number | null;
-    /**
-     * estimated cost of converting organic search traffic into paid
-     * represents the estimated monthly cost (USD) of running ads for all keywords in the category that the domain or subdomain ranks for
-     * the metric is calculated as the product of organic etv and paid cpc values and indicates the cost of driving the estimated volume of monthly organic traffic through PPC advertising in Google Search
-     * learn more about how the metric is calculated in this help center article
-     */
-    estimated_paid_traffic_cost?: number | null;
-    /**
-     * number of new ranked elements
-     * indicates how many new ranked elements were found for the indicated target
-     */
-    is_new?: number | null;
-    /**
-     * rank went up
-     * indicates how many ranked elements of the indicated target went up
-     */
-    is_up?: number | null;
-    /**
-     * rank went down
-     * indicates how many ranked elements of the indicated target went down
-     */
-    is_down?: number | null;
-    /**
-     * lost ranked elements
-     * indicates how many ranked elements of the indicated target were previously presented in SERPs, but weren’t found during the last check
-     */
-    is_lost?: number | null;
-    /**
-     * estimated traffic volume based on clickstream data
-     * calculated as the product of click-through-rate and clickstream search volume values of all keywords the domain ranks for
-     * to retrieve results for this field, the parameter include_clickstream_data must be set to true
-     * learn more about how the metric is calculated in this help center article
-     */
-    clickstream_etv?: number | null;
-    /**
-     * distribution of estimated clickstream-based metrics by gender
-     * to retrieve results for this field, the parameter include_clickstream_data must be set to true
-     * learn more about how the metric is calculated in this help center article
-     */
-    clickstream_gender_distribution?: {
-        [key: string]: number | null;
-    } | null;
-    /**
-     * distribution of clickstream-based metrics by age
-     * to retrieve results for this field, the parameter include_clickstream_data must be set to true
-     * learn more about how the metric is calculated in this help center article
-     */
-    clickstream_age_distribution?: {
-        [key: string]: number | null;
-    } | null;
-};
-
-export type DataforseoLabsRelevantPagesLiveItem = {
-    /**
-     * search engine type
-     */
-    se_type?: string | null;
-    /**
-     * absolute URL of the relevant page
-     */
-    page_address?: string | null;
-    /**
-     * rankings and traffic metrics for the relevant page
-     */
-    metrics?: {
-        [key: string]: DataforseoLabsMetricsInfo;
-    } | null;
-};
-
-export type BaseDataforseoLabsApiElementItem = {
-    /**
-     * type of element
-     */
-    type?: string | null;
-    /**
-     * search engine type
-     */
-    se_type?: string | null;
-    /**
-     * position within a group of elements with identical type values
-     * positions of elements with different type values are omitted from rank_group
-     */
-    rank_group?: number | null;
-    /**
-     * absolute rank in SERP
-     * absolute position among all the elements in SERP
-     */
-    rank_absolute?: number | null;
-    /**
-     * the alignment of the element in SERP
-     * can take the following values:
-     * left, right
-     */
-    position?: string | null;
-    /**
-     * the XPath of the element
-     */
-    xpath?: string | null;
-};
-
-export type RankedSerpElement = {
-    /**
-     * search engine type
-     */
-    se_type?: string | null;
-    /**
-     * contains data on the SERP element
-     * the list of supported SERP elements can be found below
-     */
-    serp_item?: BaseDataforseoLabsApiElementItem | null;
-    /**
-     * direct URL to search engine results
-     * you can use it to make sure that we provided accurate results
-     */
-    check_url?: string | null;
-    /**
-     * types of search results in SERP
-     * contains types of search results (items) found in SERP
-     * all possible item types can be found here, they include:
-     * answer_box, app, carousel, multi_carousel, featured_snippet, google_flights, google_reviews, images, jobs, knowledge_graph, local_pack, map, organic, paid, people_also_ask, related_searches, people_also_search, shopping, top_stories, twitter, video, events, mention_carousel, recipes, top_sights, scholarly_articles, popular_products, podcasts, questions_and_answers, find_results_on, stocks_box;
-     * note that the actual results will be returned only for organic, paid, featured_snippet, local_pack, and ai_overview_reference elements
-     */
-    serp_item_types?: Array<string | null> | null;
-    /**
-     * number of search results for the returned keyword
-     */
-    se_results_count?: number | null;
-    /**
-     * difficulty of ranking in the first top-10 organic results for a keyword
-     * indicates the chance of getting in top-10 organic results for a keyword on a logarithmic scale from 0 to 100;
-     * calculated by analysing, among other parameters, link profiles of the first 10 pages in SERP;
-     * learn more about the metric in this help center guide
-     */
-    keyword_difficulty?: number | null;
-    /**
-     * lost ranked elements
-     * indicates how many ranked elements of this target were previously presented in SERPs, but weren’t found during the last check
-     */
-    is_lost?: boolean | null;
-    /**
-     * date and time when SERP data was updated
-     * in the UTC format: “yyyy-mm-dd hh-mm-ss +00:00”
-     * example:
-     * 2019-11-15 12:57:46 +00:00
-     */
-    last_updated_time?: string | null;
-    /**
-     * previous to the most recent date and time when SERP data was updated
-     * in the UTC format: “yyyy-mm-dd hh-mm-ss +00:00”
-     * example:
-     * 2019-10-15 12:57:46 +00:00
-     */
-    previous_updated_time?: string | null;
-};
-
-export type DataforseoLabsRankedKeywordsLiveItem = {
-    /**
-     * search engine type
-     */
-    se_type?: string | null;
-    /**
-     * keyword data for the returned keyword
-     */
-    keyword_data?: KeywordDataInfo | null;
-    /**
-     * contains data on the domain’s SERP element found for the returned keyword
-     */
-    ranked_serp_element?: RankedSerpElement | null;
-};
-
 export type DataforseoLabsGoogleKeywordOverviewLiveResponseInfo = BaseResponseInfo & {
     /**
      * array of tasks
@@ -856,11 +650,171 @@ export type DataforseoLabsGoogleKeywordOverviewLiveRequestInfo = {
     tag?: string | null;
 };
 
+export type BaseDataforseoLabsApiElementItem = {
+    /**
+     * type of element
+     */
+    type?: string | null;
+    /**
+     * search engine type
+     */
+    se_type?: string | null;
+    /**
+     * position within a group of elements with identical type values
+     * positions of elements with different type values are omitted from rank_group
+     */
+    rank_group?: number | null;
+    /**
+     * absolute rank in SERP
+     * absolute position among all the elements in SERP
+     */
+    rank_absolute?: number | null;
+    /**
+     * the alignment of the element in SERP
+     * can take the following values:
+     * left, right
+     */
+    position?: string | null;
+    /**
+     * the XPath of the element
+     */
+    xpath?: string | null;
+};
+
+export type DataforseoLabsMetricsInfo = {
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #1
+     */
+    pos_1?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #2-3
+     */
+    pos_2_3?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #4-10
+     */
+    pos_4_10?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #11-20
+     */
+    pos_11_20?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #21-30
+     */
+    pos_21_30?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #31-40
+     */
+    pos_31_40?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #41-50
+     */
+    pos_41_50?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #51-60
+     */
+    pos_51_60?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #61-70
+     */
+    pos_61_70?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #71-80
+     */
+    pos_71_80?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #81-90
+     */
+    pos_81_90?: number | null;
+    /**
+     * number of organic SERPs where the domain or subdomain ranks #91-100
+     */
+    pos_91_100?: number | null;
+    /**
+     * estimated traffic volume
+     * estimated organic monthly traffic to the domain or subdomain
+     * calculated as the product of CTR (click-through-rate) and search volume values of all keywords in the category that the domain or subdomain ranks for
+     * learn more about how the metric is calculated in this help center article
+     */
+    etv?: number | null;
+    /**
+     * total count of organic SERPs that contain the domain or subdomain
+     */
+    count?: number | null;
+    /**
+     * estimated cost of converting organic search traffic into paid
+     * represents the estimated monthly cost (USD) of running ads for all keywords in the category that the domain or subdomain ranks for
+     * the metric is calculated as the product of organic etv and paid cpc values and indicates the cost of driving the estimated volume of monthly organic traffic through PPC advertising in Google Search
+     * learn more about how the metric is calculated in this help center article
+     */
+    estimated_paid_traffic_cost?: number | null;
+    /**
+     * number of new ranked elements
+     * indicates how many new ranked elements were found for the indicated target
+     */
+    is_new?: number | null;
+    /**
+     * rank went up
+     * indicates how many ranked elements of the indicated target went up
+     */
+    is_up?: number | null;
+    /**
+     * rank went down
+     * indicates how many ranked elements of the indicated target went down
+     */
+    is_down?: number | null;
+    /**
+     * lost ranked elements
+     * indicates how many ranked elements of the indicated target were previously presented in SERPs, but weren’t found during the last check
+     */
+    is_lost?: number | null;
+    /**
+     * estimated traffic volume based on clickstream data
+     * calculated as the product of click-through-rate and clickstream search volume values of all keywords the domain ranks for
+     * to retrieve results for this field, the parameter include_clickstream_data must be set to true
+     * learn more about how the metric is calculated in this help center article
+     */
+    clickstream_etv?: number | null;
+    /**
+     * distribution of estimated clickstream-based metrics by gender
+     * to retrieve results for this field, the parameter include_clickstream_data must be set to true
+     * learn more about how the metric is calculated in this help center article
+     */
+    clickstream_gender_distribution?: {
+        [key: string]: number | null;
+    } | null;
+    /**
+     * distribution of clickstream-based metrics by age
+     * to retrieve results for this field, the parameter include_clickstream_data must be set to true
+     * learn more about how the metric is calculated in this help center article
+     */
+    clickstream_age_distribution?: {
+        [key: string]: number | null;
+    } | null;
+};
+
 export type DataforseoLabsGoogleRelevantPagesLiveResponseInfo = BaseResponseInfo & {
     /**
      * array of tasks
      */
     tasks?: Array<DataforseoLabsGoogleRelevantPagesLiveTaskInfo | null> | null;
+};
+
+export type DataforseoLabsGoogleRelevantPagesLiveItem = {
+    /**
+     * search engine type
+     */
+    se_type?: string | null;
+    /**
+     * absolute URL of the relevant page
+     */
+    page_address?: string | null;
+    /**
+     * rankings and traffic metrics for the relevant page
+     */
+    metrics?: {
+        [key: string]: DataforseoLabsMetricsInfo;
+    } | null;
 };
 
 export type DataforseoLabsGoogleRelevantPagesLiveResultInfo = {
@@ -893,7 +847,7 @@ export type DataforseoLabsGoogleRelevantPagesLiveResultInfo = {
     /**
      * relevant pages and related data
      */
-    items?: Array<DataforseoLabsRelevantPagesLiveItem | null> | null;
+    items?: Array<DataforseoLabsGoogleRelevantPagesLiveItem | null> | null;
 };
 
 export type DataforseoLabsGoogleRelevantPagesLiveTaskInfo = BaseResponseTaskInfo & {
@@ -1059,6 +1013,75 @@ export type DataforseoLabsGoogleRankedKeywordsLiveResponseInfo = BaseResponseInf
     tasks?: Array<DataforseoLabsGoogleRankedKeywordsLiveTaskInfo | null> | null;
 };
 
+export type RankedSerpElement = {
+    /**
+     * search engine type
+     */
+    se_type?: string | null;
+    /**
+     * contains data on the SERP element
+     * the list of supported SERP elements can be found below
+     */
+    serp_item?: BaseDataforseoLabsApiElementItem | null;
+    /**
+     * direct URL to search engine results
+     * you can use it to make sure that we provided accurate results
+     */
+    check_url?: string | null;
+    /**
+     * types of search results in SERP
+     * contains types of search results (items) found in SERP
+     * all possible item types can be found here, they include:
+     * answer_box, app, carousel, multi_carousel, featured_snippet, google_flights, google_reviews, images, jobs, knowledge_graph, local_pack, map, organic, paid, people_also_ask, related_searches, people_also_search, shopping, top_stories, twitter, video, events, mention_carousel, recipes, top_sights, scholarly_articles, popular_products, podcasts, questions_and_answers, find_results_on, stocks_box;
+     * note that the actual results will be returned only for organic, paid, featured_snippet, local_pack, and ai_overview_reference elements
+     */
+    serp_item_types?: Array<string | null> | null;
+    /**
+     * number of search results for the returned keyword
+     */
+    se_results_count?: number | null;
+    /**
+     * difficulty of ranking in the first top-10 organic results for a keyword
+     * indicates the chance of getting in top-10 organic results for a keyword on a logarithmic scale from 0 to 100;
+     * calculated by analysing, among other parameters, link profiles of the first 10 pages in SERP
+     */
+    keyword_difficulty?: number | null;
+    /**
+     * lost ranked elements
+     * indicates how many ranked elements of this target were previously presented in SERPs, but weren’t found during the last check
+     */
+    is_lost?: boolean | null;
+    /**
+     * date and time when SERP data was updated
+     * in the UTC format: “yyyy-mm-dd hh-mm-ss +00:00”
+     * example:
+     * 2019-11-15 12:57:46 +00:00
+     */
+    last_updated_time?: string | null;
+    /**
+     * previous to the most recent date and time when SERP data was updated
+     * in the UTC format: “yyyy-mm-dd hh-mm-ss +00:00”
+     * example:
+     * 2019-10-15 12:57:46 +00:00
+     */
+    previous_updated_time?: string | null;
+};
+
+export type DataforseoLabsGoogleRankedKeywordsLiveItem = {
+    /**
+     * search engine type
+     */
+    se_type?: string | null;
+    /**
+     * keyword data for the returned keyword
+     */
+    keyword_data?: KeywordDataInfo | null;
+    /**
+     * contains data on the domain’s SERP element found for the returned keyword
+     */
+    ranked_serp_element?: RankedSerpElement | null;
+};
+
 export type DataforseoLabsGoogleRankedKeywordsLiveResultInfo = {
     /**
      * search engine type
@@ -1103,7 +1126,7 @@ export type DataforseoLabsGoogleRankedKeywordsLiveResultInfo = {
     /**
      * contains ranked keywords and related data
      */
-    items?: Array<DataforseoLabsRankedKeywordsLiveItem | null> | null;
+    items?: Array<DataforseoLabsGoogleRankedKeywordsLiveItem | null> | null;
 };
 
 export type DataforseoLabsGoogleRankedKeywordsLiveTaskInfo = BaseResponseTaskInfo & {
@@ -1264,6 +1287,223 @@ export type DataforseoLabsGoogleRankedKeywordsLiveRequestInfo = {
      * you should use a comma to separate several sorting rules
      * example:
      * ["keyword_data.keyword_info.search_volume,desc","keyword_data.keyword_info.cpc,desc"]
+     */
+    order_by?: Array<string> | null;
+    /**
+     * user-defined task identifier
+     * optional field
+     * the character limit is 255
+     * you can use this parameter to identify the task and match it with the result
+     * you will find the specified tag value in the data object of the response
+     */
+    tag?: string | null;
+};
+
+export type DataforseoLabsGoogleKeywordIdeasLiveResponseInfo = BaseResponseInfo & {
+    /**
+     * array of tasks
+     */
+    tasks?: Array<DataforseoLabsGoogleKeywordIdeasLiveTaskInfo | null> | null;
+};
+
+export type DataforseoLabsGoogleKeywordIdeasLiveResultInfo = {
+    /**
+     * search engine type
+     */
+    se_type?: string | null;
+    /**
+     * keywords in a POST array
+     * keywords are returned with decoded %## (plus character ‘+’ will be decoded to a space character)
+     */
+    seed_keywords?: Array<string | null> | null;
+    /**
+     * location code in a POST array
+     */
+    location_code?: number | null;
+    /**
+     * language code in a POST array
+     */
+    language_code?: string | null;
+    /**
+     * total number of results relevant to your request in our database
+     */
+    total_count?: number | null;
+    /**
+     * number of results returned in the items array
+     */
+    items_count?: number | null;
+    /**
+     * current offset value
+     */
+    offset?: number | null;
+    /**
+     * offset token for subsequent requests
+     * you can use the string provided in this field to get the subsequent results of the initial task;
+     * note: offset_token values are unique for each subsequent task
+     */
+    offset_token?: string | null;
+    /**
+     * contains keyword ideas and related data
+     */
+    items?: Array<KeywordDataInfo | null> | null;
+};
+
+export type DataforseoLabsGoogleKeywordIdeasLiveTaskInfo = BaseResponseTaskInfo & {
+    /**
+     * array of results
+     */
+    result?: Array<DataforseoLabsGoogleKeywordIdeasLiveResultInfo | null> | null;
+};
+
+export type DataforseoLabsGoogleKeywordIdeasLiveRequestInfo = {
+    /**
+     * keywords
+     * required field
+     * UTF-8 encoding
+     * The maximum number of keywords you can specify: 200.
+     * The keywords will be converted to lowercase format
+     * learn more about rules and limitations of keyword and keywords fields in DataForSEO APIs in this Help Center article
+     */
+    keywords?: Array<string>;
+    /**
+     * full name of the location
+     * required field if you don’t specify location_code
+     * Note: it is required to specify either location_name or location_code
+     * you can receive the list of available locations with their location_name by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * United Kingdom
+     */
+    location_name?: string | null;
+    /**
+     * unique location identifier
+     * required field if you don’t specify location_name
+     * Note: it is required to specify either location_name or location_code
+     * you can receive the list of available locations with their location_code by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * 2840
+     */
+    location_code?: number | null;
+    /**
+     * full name of the language
+     * optional field
+     * if you use this field, you don’t need to specify language_code
+     * you can receive the list of available languages with their language_name by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * English
+     * Note: if omitted, results default to the language with the most keyword records in the specified location;
+     * refer to the available_languages.keywords field of the Locations and Languages endpoint to determine the default language
+     */
+    language_name?: string | null;
+    /**
+     * language code
+     * optional field
+     * if you use this field, you don’t need to specify language_name
+     * you can receive the list of available languages with their language_code by making a separate request to the
+     * https://api.dataforseo.com/v3/dataforseo_labs/locations_and_languages
+     * example:
+     * en
+     * Note: if omitted, results default to the language with the most keyword records in the specified location;
+     * refer to the available_languages.keywords field of the Locations and Languages endpoint to determine the default language
+     */
+    language_code?: string | null;
+    /**
+     * search mode
+     * optional field
+     * if set to true the results will be based on the phrase-match search algorithm
+     * if set to false the results will be based on the broad-match search algorithm
+     * default value: false
+     */
+    closely_variants?: boolean | null;
+    /**
+     * ignore highly similar keywords
+     * optional field
+     * if set to true only core keywords will be returned, all highly similar keywords will be excluded;
+     * default value: false
+     */
+    ignore_synonyms?: boolean | null;
+    /**
+     * include data from SERP for each keyword
+     * optional field
+     * if set to true, we will return a serp_info array containing SERP data (number of search results, relevant URL, and SERP features) for every keyword in the response
+     * default value: false
+     */
+    include_serp_info?: boolean | null;
+    /**
+     * include or exclude data from clickstream-based metrics in the result
+     * optional field
+     * if the parameter is set to true, you will receive clickstream_keyword_info, keyword_info_normalized_with_clickstream, and keyword_info_normalized_with_bing fields in the response
+     * default value: false
+     * with this parameter enabled, you will be charged double the price for the request
+     * learn more about how clickstream-based metrics are calculated in this help center article
+     */
+    include_clickstream_data?: boolean | null;
+    /**
+     * the maximum number of keywords in the results array
+     * optional field
+     * default value: 700
+     * maximum value: 1000
+     */
+    limit?: number | null;
+    /**
+     * offset in the results array of returned keywords
+     * optional field
+     * default value: 0
+     * if you specify the 10 value, the first ten keywords in the results array will be omitted and the data will be provided for the successive keywords
+     * Note: we recommend using this parameter only when retrieving up to 10,000 results
+     * for retrieving over 10,000 results, use the offset_token instead.
+     */
+    offset?: number | null;
+    /**
+     * offset token for subsequent requests
+     * optional field
+     * provided in the identical filed of the response to each request;
+     * use this parameter to avoid timeouts while trying to obtain over 10,000 results in a single request;
+     * by specifying the unique offset_token value from the response array, you will get the subsequent results of the initial task;
+     * offset_token values are unique for each subsequent task
+     * Note: if the offset_token is specified in the request, all other parameters except limit will not be taken into account when processing a task.
+     * learn more about this parameter on our Help Center
+     */
+    offset_token?: string | null;
+    /**
+     * array of results filtering parameters
+     * optional field
+     * you can add several filters at once (8 filters maximum)
+     * you should set a logical operator and, or between the conditions
+     * the following operators are supported:
+     * regex, not_regex, <, <=, >, >=, =, <>, in, not_in, match, not_match, ilike, not_ilike, like, not_like
+     * you can use the % operator with like and not_like,as well as ilike, not_ilike to match any string of zero or more characters
+     * note that you can not filter the results by relevance
+     * example:
+     * ["keyword_info.search_volume",">",0]
+     * [["keyword_info.search_volume","in",[0,1000]],
+     * "and",
+     * ["keyword_info.competition_level","=","LOW"]]
+     * [["keyword_info.search_volume",">",100],
+     * "and",
+     * [["keyword_info.cpc","<",0.5],
+     * "or",
+     * ["keyword_info.high_top_of_page_bid","<=",0.5]]]
+     * for more information about filters, please refer to Dataforseo Labs – Filters or this help center guide
+     */
+    filters?: Array<string | string[]> | null;
+    /**
+     * results sorting rules
+     * optional field
+     * you can use the same values as in the filters array to sort the results
+     * possible sorting types:
+     * asc – results will be sorted in the ascending order
+     * desc – results will be sorted in the descending order
+     * you should use a comma to set up a sorting parameter
+     * default rule:
+     * ["relevance,desc"]
+     * relevance is used as the default sorting rule to provide you with the closest keyword ideas. We recommend using this sorting rule to get highly-relevant search terms. Note that relevance is only our internal system identifier, so it can not be used as a filter, and you will not find this field in the result array. The relevance score is based on a similar principle as used in the Keywords For Keywords endpoint.
+     * note that you can set no more than three sorting rules in a single request
+     * you should use a comma to separate several sorting rules
+     * example:
+     * ["relevance,desc","keyword_info.search_volume,desc"]
      */
     order_by?: Array<string> | null;
     /**
@@ -1478,6 +1718,8 @@ export type DataforseoLabsGoogleKeywordSuggestionsLiveRequestInfo = {
      * optional field
      * default value: 0
      * if you specify the 10 value, the first ten keywords in the results array will be omitted and the data will be provided for the successive keywords
+     * Note: we recommend using this parameter only when retrieving up to 10,000 results
+     * for retrieving over 10,000 results, use the offset_token instead.
      */
     offset?: number | null;
     /**
@@ -1488,6 +1730,7 @@ export type DataforseoLabsGoogleKeywordSuggestionsLiveRequestInfo = {
      * by specifying the unique offset_token value from the response array, you will get the subsequent results of the initial task;
      * offset_token values are unique for each subsequent task
      * Note: if the offset_token is specified in the request, all other parameters except limit will not be taken into account when processing a task.
+     * learn more about this parameter on our Help Center
      */
     offset_token?: string | null;
     /**
@@ -1539,25 +1782,6 @@ export type DataforseoLabsStatusTaskInfo = BaseResponseTaskInfo & {
     result?: Array<DataforseoLabsStatusResultInfo | null> | null;
 };
 
-export type LicensesElement = {
-    /**
-     * type of element
-     */
-    type?: string | null;
-    /**
-     * title of the element
-     */
-    title?: string | null;
-    /**
-     * search URL with refinement parameters
-     */
-    url?: string | null;
-    /**
-     * domain in SERP
-     */
-    domain?: string | null;
-};
-
 export type RefinementChipsElement = {
     /**
      * type of element
@@ -1578,7 +1802,7 @@ export type RefinementChipsElement = {
     /**
      * further search refinement options
      */
-    options?: Array<LicensesElement | null> | null;
+    options?: Array<AmazonLabelElement | null> | null;
 };
 
 export type RefinementChipsInfo = {
@@ -1643,6 +1867,24 @@ export type BaseSerpApiElementItem = {
      * equals null if calculate_rectangles in the POST request is not set to true
      */
     rectangle?: AiModeRectangleInfo | null;
+};
+
+export type SerpApiStopCrawlOnMatchInfo = {
+    /**
+     * arget domain or wildcard value
+     * required field if stop_crawl_on_match is specified;
+     * specify a target domain or wildcard value;
+     * Note: domain name must be specified without a request protocol;
+     * example: dataforseo.com
+     */
+    match_value?: string | null;
+    /**
+     * target match type
+     * required field if stop_crawl_on_match is specified;
+     * type of match for the match_value
+     * possible values: domain, with_subdomains, wildcard
+     */
+    match_type?: string | null;
 };
 
 export type SerpGoogleOrganicLiveAdvancedResponseInfo = BaseResponseInfo & {
@@ -1738,18 +1980,27 @@ export type SerpGoogleOrganicLiveAdvancedRequestInfo = {
      * if you need to use the “%” character for your keyword, please specify it as “%25”;
      * if you need to use the “+” character for your keyword, please specify it as “%2B”;
      * if this field contains such parameters as ‘allinanchor:’, ‘allintext:’, ‘allintitle:’, ‘allinurl:’, ‘define:’, ‘definition:’, ‘filetype:’, ‘id:’, ‘inanchor:’, ‘info:’, ‘intext:’, ‘intitle:’, ‘inurl:’, ‘link:’, ‘site:’, the charge per task will be multiplied by 5
-     * Note: queries containing the ‘cache:’ parameter are not supported and will return a validation error
-     * learn more about rules and limitations of keyword and keywords fields in DataForSEO APIs in this Help Center article
+     * Note: queries containing the ‘cache:’ parameter are not supported and will return a validation errorlearn more about rules and limitations of keyword and keywords fields in DataForSEO APIs in this Help Center article
      */
     keyword?: string;
     /**
-     * direct URL of the search query
-     * optional field
-     * you can specify a direct URL and we will sort it out to the necessary fields. Note that this method is the most difficult for our API to process and also requires you to specify the exact language and location in the URL. In most cases, we wouldn’t recommend using this method.
+     * search engine location code
+     * required field if you don't specify location_name or location_coordinate
+     * if you use this field, you don't need to specify location_name or location_coordinate
+     * you can receive the list of available locations of the search engines with their location_code by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/locations
      * example:
-     * https://www.google.co.uk/search?q=%20rank%20tracker%20api&hl=en&gl=GB&uule=w+CAIQIFISCXXeIa8LoNhHEZkq1d1aOpZS
+     * 2840
      */
-    url?: string | null;
+    location_code?: number | null;
+    /**
+     * search engine language code
+     * optional field if you specify language_name
+     * if you use this field, you don't need to specify language_name
+     * you can receive the list of available languages of the search engine with their language_code by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/languages
+     * example:
+     * en
+     */
+    language_code?: string | null;
     /**
      * parsing depth
      * optional field
@@ -1762,6 +2013,89 @@ export type SerpGoogleOrganicLiveAdvancedRequestInfo = {
      */
     depth?: number | null;
     /**
+     * device type
+     * optional field
+     * return results for a specific device type
+     * can take the values:desktop, mobile
+     * default value: desktop
+     */
+    device?: string | null;
+    /**
+     * load asynchronous ai overview
+     * optional field
+     * set to true to obtain ai_overview items is SERPs even if they are loaded asynchronously;
+     * if set to false, you will only obtain ai_overview items from cache;
+     * default value: false
+     * Note: you will be charged extra $0.002 for using this parameter;
+     * if the element is absent or contains "asynchronous_ai_overview": false, all extra charges will be returned to your account balance
+     */
+    load_async_ai_overview?: boolean | null;
+    /**
+     * full name of search engine location
+     * required field if you don't specify location_code or location_coordinate
+     * if you use this field, you don't need to specify location_code or location_coordinate
+     * you can receive the list of available locations of the search engine with their location_name by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/locations
+     * example:
+     * London,England,United Kingdom
+     */
+    location_name?: string | null;
+    /**
+     * full name of search engine language
+     * optional field if you specify language_code
+     * if you use this field, you don't need to specify language_code
+     * you can receive the list of available languages of the search engine with their language_name by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/languages
+     * example:
+     * English
+     */
+    language_name?: string | null;
+    /**
+     * device operating system
+     * optional field
+     * if you specify desktop in the device field, choose from the following values: windows, macos
+     * default value: windows
+     * if you specify mobile in the device field, choose from the following values: android, ios
+     * default value: android
+     */
+    os?: string | null;
+    /**
+     * user-defined task identifier
+     * optional field
+     * the character limit is 255
+     * you can use this parameter to identify the task and match it with the result
+     * you will find the specified tag value in the data object of the response
+     */
+    tag?: string | null;
+    /**
+     * array of targets to stop crawling
+     * optional field
+     * if specified, the response will contain SERP results up to and including the specified match_value;
+     * you can specify up to 10 target values in this array
+     * example:
+     * "stop_crawl_on_match":[{"match_value":"dataforseo.com","match_type":"with_subdomains"}]
+     * learn more about this parameter on our Help Center - https://dataforseo.com/help-center/using-the-stop_crawl_on_match-parameter-in-serp-api
+     * Your account will be billed per each SERP crawled through the specified targets
+     */
+    stop_crawl_on_match?: Array<SerpApiStopCrawlOnMatchInfo | null> | null;
+    /**
+     * target match type
+     * required field if stop_crawl_on_match is specified
+     * type of match for the match_value
+     * possible values:
+     * domain – specific domain or subdomain
+     * with_subdomains – main domain and subdomains
+     * wildcard –  wildcard pattern
+     */
+    match_type?: string | null;
+    /**
+     * target domain, subdomain, or wildcard value
+     * required field if stop_crawl_on_match is specified
+     * specify a target domain, subdomain, or wildcard value;
+     * Note: domain or subdomain must be specified without a request protocol;
+     * example: "match_value": "dataforseo.com",
+     * "match_value": "/blog/post-*"
+     */
+    match_value?: string | null;
+    /**
      * page crawl limit
      * optional field
      * number of search results pages to crawl
@@ -1773,118 +2107,29 @@ export type SerpGoogleOrganicLiveAdvancedRequestInfo = {
      */
     max_crawl_pages?: number | null;
     /**
-     * full name of search engine location
-     * required field if you don’t specify location_code or location_coordinate
-     * if you use this field, you don’t need to specify location_code or location_coordinate
-     * you can receive the list of available locations of the search engine with their location_name by making a separate request to the https://api.dataforseo.com/v3/serp/google/locations
-     * example:
-     * London,England,United Kingdom
-     */
-    location_name?: string | null;
-    /**
-     * search engine location code
-     * required field if you don’t specify location_name or location_coordinate
-     * if you use this field, you don’t need to specify location_name or location_coordinate
-     * you can receive the list of available locations of the search engines with their location_code by making a separate request to the https://api.dataforseo.com/v3/serp/google/locations
-     * example:
-     * 2840
-     */
-    location_code?: number | null;
-    /**
-     * GPS coordinates of a location
-     * optional field if you specify location_name or location_code
-     * if you use this field, you don’t need to specify location_name or location_code
-     * location_coordinate parameter should be specified in the “latitude,longitude,radius” format
-     * the maximum number of decimal digits for “latitude” and “longitude”: 7
-     * the minimum value for “radius”: 199.9 (mm)
-     * the maximum value for “radius”: 199999 (mm)
-     * example:
-     * 53.476225,-2.243572,200
-     */
-    location_coordinate?: string | null;
-    /**
-     * full name of search engine language
-     * optional field if you specify language_code
-     * if you use this field, you don’t need to specify language_code
-     * you can receive the list of available languages of the search engine with their language_name by making a separate request to the https://api.dataforseo.com/v3/serp/google/languages
-     * example:
-     * English
-     */
-    language_name?: string | null;
-    /**
-     * search engine language code
-     * optional field if you specify language_name
-     * if you use this field, you don’t need to specify language_name
-     * you can receive the list of available languages of the search engine with their language_code by making a separate request to the https://api.dataforseo.com/v3/serp/google/languages
-     * example:
-     * en
-     */
-    language_code?: string | null;
-    /**
-     * search engine domain
+     * additional parameters of the search query
      * optional field
-     * we choose the relevant search engine domain automatically according to the location and language you specify
-     * however, you can set a custom search engine domain in this field
+     * get the list of available parameters and additional details here
+     */
+    search_param?: string | null;
+    /**
+     * remove specific parameters from URLs
+     * optional field
+     * using this field, you can specify up to 10 parameters to remove from URLs in the result
      * example:
-     * google.co.uk, google.com.au, google.de, etc.
+     * "remove_from_url": ["srsltid"]
+     * Note: if the target field is specified, the specified URL parameters will be removed before the search
      */
-    se_domain?: string | null;
+    remove_from_url?: Array<string> | null;
     /**
-     * device type
+     * clicks on the corresponding element
      * optional field
-     * can take the values:desktop, mobile
-     * default value: desktop
+     * specify the click depth on the people_also_ask element to get additional people_also_ask_element items;
+     * Note your account will be billed $0.00015 extra for each click;
+     * if the element is absent or we perform fewer clicks than you specified, all extra charges will be returned to your account balance
+     * possible values: from 1 to 4
      */
-    device?: string | null;
-    /**
-     * device operating system
-     * optional field
-     * if you specify desktop in the device field, choose from the following values: windows, macos
-     * default value: windows
-     * if you specify mobile in the device field, choose from the following values: android, ios
-     * default value: android
-     */
-    os?: string | null;
-    /**
-     * target domain, subdomain, or webpage to get results for
-     * optional field
-     * a domain or a subdomain should be specified without https:// and www.
-     * note that the results of target-specific tasks will only include SERP elements that contain a url string;
-     * you can also use a wildcard (‘*’) character to specify the search pattern in SERP and narrow down the results;
-     * examples:
-     * example.com  – returns results for the website’s home page with URLs, such as https://example.com, or https://www.example.com/, or https://example.com/;
-     * example.com* – returns results for the domain, including all its pages;
-     * *example.com* – returns results for the entire domain, including all its pages and subdomains;
-     * *example.com  – returns results for the home page regardless of the subdomain, such as https://en.example.com;
-     * example.com/example-page  – returns results for the exact URL;
-     * example.com/example-page*  – returns results for all domain’s URLs that start with the specified string
-     */
-    target?: string | null;
-    /**
-     * array of targets to stop crawling
-     * optional field
-     * if specified, the response will contain SERP results up to and including the specified match_value;
-     * you can specify up to 10 target values in this array
-     * example:
-     * "stop_crawl_on_match":[{"match_value":"dataforseo.com","match_type":"with_subdomains"}]
-     * Your account will be billed per each SERP crawled through the specified targets;
-     */
-    stop_crawl_on_match?: Array<string> | null;
-    /**
-     * array of targets to stop crawling
-     * required field if stop_crawl_on_match is specified;
-     * specify a target domain or wildcard value;
-     * Note: domain name must be specified without a request protocol;
-     * example: dataforseo.com
-     */
-    match_value?: string | null;
-    /**
-     * array of targets to stop crawling
-     * required field if stop_crawl_on_match is specified;
-     * type of match for the match_value
-     * possible values: domain, with_subdomains, wildcard
-     */
-    match_type?: Array<string> | null;
+    people_also_ask_click_depth?: number | null;
     /**
      * display related results
      * optional field
@@ -1906,6 +2151,7 @@ export type SerpGoogleOrganicLiveAdvancedRequestInfo = {
      * browser screen width
      * optional field
      * you can set a custom browser screen width to calculate pixel rankings for a particular device;
+     * can be specified within the following range: 240-9999;
      * by default, the parameter is set to:
      * 1920 for desktop;
      * 360 for mobile on android;
@@ -1917,6 +2163,7 @@ export type SerpGoogleOrganicLiveAdvancedRequestInfo = {
      * browser screen height
      * optional field
      * you can set a custom browser screen height to calculate pixel rankings for a particular device;
+     * can be specified within the following range: 240-9999;
      * by default, the parameter is set to:
      * 1080 for desktop;
      * 640 for mobile on android;
@@ -1928,7 +2175,7 @@ export type SerpGoogleOrganicLiveAdvancedRequestInfo = {
      * browser screen resolution ratio
      * optional field
      * you can set a custom browser screen resolution ratio to calculate pixel rankings for a particular device;
-     * possible values: from 1 to 3;
+     * can be specified within the following range: 0.5-3;
      * by default, the parameter is set to:
      * 1 for desktop;
      * 3 for mobile on android;
@@ -1937,47 +2184,86 @@ export type SerpGoogleOrganicLiveAdvancedRequestInfo = {
      */
     browser_screen_resolution_ratio?: number | null;
     /**
-     * clicks on the corresponding element
+     * direct URL of the search query
      * optional field
-     * specify the click depth on the people_also_ask element to get additional people_also_ask_element items;
-     * Note your account will be billed $0.00015 extra for each click;
-     * if the element is absent or we perform fewer clicks than you specified, all extra charges will be returned to your account balance
-     * possible values: from 1 to 4
-     */
-    people_also_ask_click_depth?: number | null;
-    /**
-     * load asynchronous ai overview
-     * optional field
-     * set to true to obtain ai_overview items is SERPs even if they are loaded asynchronically;
-     * if set to false, you will only obtain ai_overview items from cache;
-     * default value: false
-     * Note: you will be charged extra $0.002 for using this parameter;
-     * if the element is absent or contains "asynchronous_ai_overview": false, all extra charges will be returned to your account balance
-     */
-    load_async_ai_overview?: boolean | null;
-    /**
-     * additional parameters of the search query
-     * optional field
-     * get the list of available parameters and additional details here
-     */
-    search_param?: string | null;
-    /**
-     * remove specific parameters from URLs
-     * optional field
-     * using this field, you can specify up to 10 parameters to remove from URLs in the result
+     * you can specify a direct URL and we will sort it out to the necessary fields. Note that this method is the most difficult for our API to process and also requires you to specify the exact language and location in the URL. In most cases, we wouldn’t recommend using this method.
      * example:
-     * "remove_from_url": ["srsltid"]
-     * Note: if the target field is specified, the specified URL parameters will be removed before the search
+     * https://www.google.co.uk/search?q=%20rank%20tracker%20api&hl=en&gl=GB&uule=w+CAIQIFISCXXeIa8LoNhHEZkq1d1aOpZS
      */
-    remove_from_url?: Array<string> | null;
+    url?: string | null;
     /**
-     * user-defined task identifier
-     * optional field
-     * the character limit is 255
-     * you can use this parameter to identify the task and match it with the result
-     * you will find the specified tag value in the data object of the response
+     * GPS coordinates of a location
+     * optional field if you specify location_name or location_code
+     * if you use this field, you don't need to specify location_name or location_code
+     * location_coordinate parameter should be specified in the "latitude,longitude,radius" format
+     * the maximum number of decimal digits for "latitude" and "longitude": 7
+     * the minimum value for "radius": 199.9 (mm)
+     * the maximum value for "radius": 199999 (mm)
+     * example:
+     * 53.476225,-2.243572,200
      */
-    tag?: string | null;
+    location_coordinate?: string | null;
+    /**
+     * search engine domain
+     * optional field
+     * we choose the relevant search engine domain automatically according to the location and language you specify
+     * however, you can set a custom search engine domain in this field
+     * example:
+     * google.co.uk, google.com.au, google.de, etc.
+     */
+    se_domain?: string | null;
+    /**
+     * target domain, subdomain, or webpage to get results for
+     * optional field
+     * a domain or a subdomain should be specified without https:// and www.
+     * note that the results of target-specific tasks will only include SERP elements that contain a url string;
+     * you can also use a wildcard (‘*’) character to specify the search pattern in SERP and narrow down the results;
+     * examples:
+     * example.com - returns results for the website's home page with URLs, such as https://example.com, or https://www.example.com/, or https://example.com/;
+     * example.com* - returns results for the domain, including all its pages;
+     * *example.com* - returns results for the entire domain, including all its pages and subdomains;
+     * *example.com - returns results for the home page regardless of the subdomain, such as https://en.example.com;
+     * example.com/example-page - returns results for the exact URL;
+     * example.com/example-page* - returns results for all domain's URLs that start with the specified string
+     */
+    target?: string | null;
+    /**
+     * target matching mode
+     * optional field
+     * to enable this parameter, stop_crawl_on_match must also be enabled
+     * defines how the crawl should stop when multiple targets are specified in stop_crawl_on_match
+     * possible values: all, any
+     * all – the crawl stops only when all specified targets are found
+     * any – the crawl stops when any single target is found
+     * default value: any
+     * learn more about this parameter on our Help Center
+     */
+    target_search_mode?: string | null;
+    /**
+     * SERP element types to check for targets
+     * optional field
+     * to enable this parameter, stop_crawl_on_match must also be enabled
+     * specifies which SERP element types should be checked for target matches
+     * if not specified, all first-level elements with url and domain fields are checked for targets
+     * possible values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, knowledge_graph, local_service, map, scholarly_articles, third_party_reviews, twitter
+     * Note: cannot contain the same element types as ignore_targets_in
+     * example:
+     * "find_targets_in": ["organic", "featured_snippet"]
+     * learn more about this parameter on our Help Center
+     */
+    find_targets_in?: Array<string> | null;
+    /**
+     * SERP element types to exclude from target search
+     * optional field
+     * to enable this parameter, stop_crawl_on_match must also be enabled
+     * specifies which SERP element types should be excluded when searching for target matches
+     * possible values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, knowledge_graph, local_service, map, scholarly_articles, third_party_reviews, twitter
+     * Note: cannot contain the same element types as find_targets_in
+     * example:
+     * "ignore_targets_in": ["paid", "images"]
+     * learn more about this parameter on our Help Center
+     */
+    ignore_targets_in?: Array<string> | null;
 };
 
 export type SerpGoogleOrganicLiveRegularResponseInfo = BaseResponseInfo & {
@@ -2068,97 +2354,34 @@ export type SerpGoogleOrganicLiveRegularTaskInfo = BaseResponseTaskInfo & {
 
 export type SerpGoogleOrganicLiveRegularRequestInfo = {
     /**
-     * direct URL of the search query
-     * optional field
-     * you can specify a direct URL and we will sort it out to the necessary fields. Note that this method is the most difficult for our API to process and also requires you to specify the exact language and location in the URL. In most cases, we wouldn’t recommend using this method.
-     * example:
-     * https://www.google.co.uk/search?q=%20rank%20tracker%20api&hl=en&gl=GB&uule=w+CAIQIFISCXXeIa8LoNhHEZkq1d1aOpZS
-     */
-    url?: string | null;
-    /**
      * keyword
      * required field
      * you can specify up to 700 characters in the keyword field
-     * all %## will be decoded (plus character ‘+’ will be decoded to a space character)
-     * if you need to use the “%” character for your keyword, please specify it as “%25”;
+     * all %## will be decoded (plus character '+' will be decoded to a space character)
+     * if you need to use the "%" character for your keyword, please specify it as "%25";
      * if you need to use the “+” character for your keyword, please specify it as “%2B”;
-     * if this field contains such parameters as ‘allinanchor:’, ‘allintext:’, ‘allintitle:’, ‘allinurl:’, ‘define:’, ‘filetype:’, ‘id:’, ‘inanchor:’, ‘info:’, ‘intext:’, ‘intitle:’, ‘inurl:’, ‘link:’, ‘site:’, the charge per task will be multiplied by 5
+     * if this field contains such parameters as 'allinanchor:', 'allintext:', 'allintitle:', 'allinurl:', 'define:', 'filetype:', 'id:', 'inanchor:', 'info:', 'intext:', 'intitle:', 'inurl:', 'link:', 'site:', the charge per task will be multiplied by 5
      * Note: queries containing the ‘cache:’ parameter are not supported and will return a validation error
      */
     keyword?: string;
     /**
-     * full name of search engine location
-     * required field if you don’t specify location_code or location_coordinate
-     * if you use this field, you don’t need to specify location_code or location_coordinate
-     * you can receive the list of available locations of the search engine with their location_name by making a separate request to the https://api.dataforseo.com/v3/serp/google/locations
-     * example:
-     * London,England,United Kingdom
-     */
-    location_name?: string | null;
-    /**
      * search engine location code
-     * required field if you don’t specify location_name or location_coordinate
-     * if you use this field, you don’t need to specify location_name or location_coordinate
-     * you can receive the list of available locations of the search engines with their location_code by making a separate request to the https://api.dataforseo.com/v3/serp/google/locations
+     * required field if you don't specify location_name or location_coordinate
+     * if you use this field, you don't need to specify location_name or location_coordinate
+     * you can receive the list of available locations of the search engines with their location_code by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/locations
      * example:
      * 2840
      */
     location_code?: number | null;
     /**
-     * GPS coordinates of a location
-     * required field if you don’t specify location_name or location_code
-     * if you use this field, you don’t need to specify location_name or location_code
-     * location_coordinate parameter should be specified in the “latitude,longitude,radius” format
-     * the maximum number of decimal digits for “latitude” and “longitude”: 7
-     * the minimum value for “radius”: 199.9 (mm)
-     * the maximum value for “radius”: 199999 (mm)
-     * example:
-     * 53.476225,-2.243572,200
-     */
-    location_coordinate?: string | null;
-    /**
-     * full name of search engine language
-     * required field if you don’t specify language_code
-     * if you use this field, you don’t need to specify language_code
-     * you can receive the list of available languages of the search engine with their language_name by making a separate request to the https://api.dataforseo.com/v3/serp/google/languages
-     * example:
-     * English
-     */
-    language_name?: string | null;
-    /**
      * search engine language code
-     * required field if you don’t specify language_name
-     * if you use this field, you don’t need to specify language_name
-     * you can receive the list of available languages of the search engine with their language_code by making a separate request to the https://api.dataforseo.com/v3/serp/google/languages
+     * required field if you don't specify language_name
+     * if you use this field, you don't need to specify language_name
+     * you can receive the list of available languages of the search engine with their language_code by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/languages
      * example:
      * en
      */
     language_code?: string | null;
-    /**
-     * device type
-     * optional field
-     * can take the values:desktop, mobile
-     * default value: desktop
-     */
-    device?: string | null;
-    /**
-     * device operating system
-     * optional field
-     * if you specify desktop in the device field, choose from the following values: windows, macos
-     * default value: windows
-     * if you specify mobile in the device field, choose from the following values: android, ios
-     * default value: android
-     */
-    os?: string | null;
-    /**
-     * search engine domain
-     * optional field
-     * we choose the relevant search engine domain automatically according to the location and language you specify
-     * however, you can set a custom search engine domain in this field
-     * example:
-     * google.co.uk, google.com.au, google.de, etc.
-     */
-    se_domain?: string | null;
     /**
      * parsing depth
      * optional field
@@ -2171,20 +2394,48 @@ export type SerpGoogleOrganicLiveRegularRequestInfo = {
      */
     depth?: number | null;
     /**
-     * target domain, subdomain, or webpage to get results for
+     * device type
      * optional field
-     * a domain or a subdomain should be specified without https:// and www.
-     * note that the results of target-specific tasks will only include SERP elements that contain a url string;
-     * you can also use a wildcard (‘*’) character to specify the search pattern in SERP and narrow down the results;
-     * examples:
-     * example.com  – returns results for the website’s home page with URLs, such as https://example.com, or https://www.example.com/, or https://example.com/;
-     * example.com* – returns results for the domain, including all its pages;
-     * *example.com* – returns results for the entire domain, including all its pages and subdomains;
-     * *example.com  – returns results for the home page regardless of the subdomain, such as https://en.example.com;
-     * example.com/example-page  – returns results for the exact URL;
-     * example.com/example-page*  – returns results for all domain’s URLs that start with the specified string
+     * return results for a specific device type
+     * can take the values:desktop, mobile
+     * default value: desktop
      */
-    target?: string | null;
+    device?: string | null;
+    /**
+     * full name of search engine location
+     * required field if you don't specify location_code or location_coordinate
+     * if you use this field, you don't need to specify location_code or location_coordinate
+     * you can receive the list of available locations of the search engine with their location_name by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/locations
+     * example:
+     * London,England,United Kingdom
+     */
+    location_name?: string | null;
+    /**
+     * full name of search engine language
+     * required field if you don't specify language_code
+     * if you use this field, you don't need to specify language_code
+     * you can receive the list of available languages of the search engine with their language_name by making a separate request to the https://api.dataforseo.com/v3/serp/{{low_se_name}}/languages
+     * example:
+     * English
+     */
+    language_name?: string | null;
+    /**
+     * device operating system
+     * optional field
+     * if you specify desktop in the device field, choose from the following values: windows, macos
+     * default value: windows
+     * if you specify mobile in the device field, choose from the following values: android, ios
+     * default value: android
+     */
+    os?: string | null;
+    /**
+     * user-defined task identifier
+     * optional field
+     * the character limit is 255
+     * you can use this parameter to identify the task and match it with the result
+     * you will find the specified tag value in the data object of the response
+     */
+    tag?: string | null;
     /**
      * array of targets to stop crawling
      * optional field
@@ -2192,32 +2443,29 @@ export type SerpGoogleOrganicLiveRegularRequestInfo = {
      * you can specify up to 10 target values in this array
      * example:
      * "stop_crawl_on_match":[{"match_value":"dataforseo.com","match_type":"with_subdomains"}]
-     * Your account will be billed per each SERP crawled through the specified targets;
+     * learn more about this parameter on our Help Center - https://dataforseo.com/help-center/using-the-stop_crawl_on_match-parameter-in-serp-api
+     * Your account will be billed per each SERP crawled through the specified targets
      */
-    stop_crawl_on_match?: Array<string> | null;
+    stop_crawl_on_match?: Array<SerpApiStopCrawlOnMatchInfo | null> | null;
     /**
-     * array of targets to stop crawling
-     * required field if stop_crawl_on_match is specified;
-     * specify a target domain or wildcard value;
-     * Note: domain name must be specified without a request protocol;
-     * example: dataforseo.com
+     * target match type
+     * required field if stop_crawl_on_match is specified
+     * type of match for the match_value
+     * possible values:
+     * domain – specific domain or subdomain
+     * with_subdomains – main domain and subdomains
+     * wildcard –  wildcard pattern
+     */
+    match_type?: string | null;
+    /**
+     * target domain, subdomain, or wildcard value
+     * required field if stop_crawl_on_match is specified
+     * specify a target domain, subdomain, or wildcard value;
+     * Note: domain or subdomain must be specified without a request protocol;
+     * example: "match_value": "dataforseo.com",
+     * "match_value": "/blog/post-*"
      */
     match_value?: string | null;
-    /**
-     * array of targets to stop crawling
-     * required field if stop_crawl_on_match is specified;
-     * type of match for the match_value
-     * possible values: domain, with_subdomains, wildcard
-     */
-    match_type?: Array<string> | null;
-    /**
-     * display related results
-     * optional field
-     * if set to true, the related_result element in the response will be provided as a snippet of its parent organic result;
-     * if set to false, the related_result element will be provided as a separate organic result;
-     * default value: true
-     */
-    group_organic_results?: boolean | null;
     /**
      * page crawl limit
      * optional field
@@ -2236,13 +2484,94 @@ export type SerpGoogleOrganicLiveRegularRequestInfo = {
      */
     search_param?: string | null;
     /**
-     * user-defined task identifier
+     * display related results
      * optional field
-     * the character limit is 255
-     * you can use this parameter to identify the task and match it with the result
-     * you will find the specified tag value in the data object of the response
+     * if set to true, the related_result element in the response will be provided as a snippet of its parent organic result;
+     * if set to false, the related_result element will be provided as a separate organic result;
+     * default value: true
      */
-    tag?: string | null;
+    group_organic_results?: boolean | null;
+    /**
+     * direct URL of the search query
+     * optional field
+     * you can specify a direct URL and we will sort it out to the necessary fields. Note that this method is the most difficult for our API to process and also requires you to specify the exact language and location in the URL. In most cases, we wouldn’t recommend using this method.
+     * example:
+     * https://www.google.co.uk/search?q=%20rank%20tracker%20api&hl=en&gl=GB&uule=w+CAIQIFISCXXeIa8LoNhHEZkq1d1aOpZS
+     */
+    url?: string | null;
+    /**
+     * GPS coordinates of a location
+     * required field if you don't specify location_name or location_code
+     * if you use this field, you don't need to specify location_name or location_code
+     * location_coordinate parameter should be specified in the "latitude,longitude,radius" format
+     * the maximum number of decimal digits for "latitude" and "longitude": 7
+     * the minimum value for "radius": 199.9 (mm)
+     * the maximum value for "radius": 199999 (mm)
+     * example:
+     * 53.476225,-2.243572,200
+     */
+    location_coordinate?: string | null;
+    /**
+     * search engine domain
+     * optional field
+     * we choose the relevant search engine domain automatically according to the location and language you specify
+     * however, you can set a custom search engine domain in this field
+     * example:
+     * google.co.uk, google.com.au, google.de, etc.
+     */
+    se_domain?: string | null;
+    /**
+     * target domain, subdomain, or webpage to get results for
+     * optional field
+     * a domain or a subdomain should be specified without https:// and www.
+     * note that the results of target-specific tasks will only include SERP elements that contain a url string;
+     * you can also use a wildcard (‘*’) character to specify the search pattern in SERP and narrow down the results;
+     * examples:
+     * example.com  - returns results for the website's home page with URLs, such as https://example.com, or https://www.example.com/, or https://example.com/;
+     * example.com* - returns results for the domain, including all its pages;
+     * *example.com* - returns results for the entire domain, including all its pages and subdomains;
+     * *example.com  - returns results for the home page regardless of the subdomain, such as https://en.example.com;
+     * example.com/example-page  - returns results for the exact URL;
+     * example.com/example-page*  - returns results for all domain's URLs that start with the specified string
+     */
+    target?: string | null;
+    /**
+     * target matching mode
+     * optional field
+     * to enable this parameter, stop_crawl_on_match must also be enabled
+     * defines how the crawl should stop when multiple targets are specified in stop_crawl_on_match
+     * possible values: all, any
+     * all – the crawl stops only when all specified targets are found
+     * any – the crawl stops when any single target is found
+     * default value: any
+     * learn more about this parameter on our Help Center
+     */
+    target_search_mode?: string | null;
+    /**
+     * SERP element types to check for targets
+     * optional field
+     * to enable this parameter, stop_crawl_on_match must also be enabled
+     * specifies which SERP element types should be checked for target matches
+     * if not specified, all first-level elements with url and domain fields are checked for targets
+     * possible values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, knowledge_graph, local_service, map, scholarly_articles, third_party_reviews, twitter
+     * Note: cannot contain the same element types as ignore_targets_in
+     * example:
+     * "find_targets_in": ["organic", "featured_snippet"]
+     * learn more about this parameter on our Help Center
+     */
+    find_targets_in?: Array<string> | null;
+    /**
+     * SERP element types to exclude from target search
+     * optional field
+     * to enable this parameter, stop_crawl_on_match must also be enabled
+     * specifies which SERP element types should be excluded when searching for target matches
+     * possible values: organic, paid, local_pack, featured_snippet, events, google_flights, images, jobs, knowledge_graph, local_service, map, scholarly_articles, third_party_reviews, twitter
+     * Note: cannot contain the same element types as find_targets_in
+     * example:
+     * "ignore_targets_in": ["paid", "images"]
+     * learn more about this parameter on our Help Center
+     */
+    ignore_targets_in?: Array<string> | null;
 };
 
 export type GoogleOrganicLiveRegularData = {
@@ -2277,21 +2606,21 @@ export type GoogleOrganicLiveAdvancedResponses = {
 
 export type GoogleOrganicLiveAdvancedResponse = GoogleOrganicLiveAdvancedResponses[keyof GoogleOrganicLiveAdvancedResponses];
 
-export type DataforseoLabsStatusData = {
+export type StatusData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/v3/dataforseo_labs/status';
 };
 
-export type DataforseoLabsStatusResponses = {
+export type StatusResponses = {
     /**
      * Successful operation
      */
     200: DataforseoLabsStatusResponseInfo | null;
 };
 
-export type DataforseoLabsStatusResponse = DataforseoLabsStatusResponses[keyof DataforseoLabsStatusResponses];
+export type StatusResponse = StatusResponses[keyof StatusResponses];
 
 export type GoogleKeywordSuggestionsLiveData = {
     body?: Array<DataforseoLabsGoogleKeywordSuggestionsLiveRequestInfo | null>;
@@ -2308,6 +2637,22 @@ export type GoogleKeywordSuggestionsLiveResponses = {
 };
 
 export type GoogleKeywordSuggestionsLiveResponse = GoogleKeywordSuggestionsLiveResponses[keyof GoogleKeywordSuggestionsLiveResponses];
+
+export type GoogleKeywordIdeasLiveData = {
+    body?: Array<DataforseoLabsGoogleKeywordIdeasLiveRequestInfo | null>;
+    path?: never;
+    query?: never;
+    url: '/v3/dataforseo_labs/google/keyword_ideas/live';
+};
+
+export type GoogleKeywordIdeasLiveResponses = {
+    /**
+     * Successful operation
+     */
+    200: DataforseoLabsGoogleKeywordIdeasLiveResponseInfo | null;
+};
+
+export type GoogleKeywordIdeasLiveResponse = GoogleKeywordIdeasLiveResponses[keyof GoogleKeywordIdeasLiveResponses];
 
 export type GoogleRankedKeywordsLiveData = {
     body?: Array<DataforseoLabsGoogleRankedKeywordsLiveRequestInfo | null>;
