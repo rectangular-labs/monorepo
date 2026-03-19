@@ -138,6 +138,7 @@ export const strategyKeywordUniverseSchema = type({
   items: type({
     id: type("string").atLeastLength(1),
     keyword: type("string").atLeastLength(1),
+    clusterId: type("string").atLeastLength(1),
     status: strategyItemStatusSchema,
     source: strategyKeywordSourceSchema,
     category: strategyKeywordCategorySchema,
