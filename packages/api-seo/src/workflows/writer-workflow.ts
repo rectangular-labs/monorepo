@@ -291,7 +291,6 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
             strategyContext = {
               name: strategy.name,
               motivation: strategy.motivation,
-              description: strategy.description,
               goal: strategy.goal as {
                 metric: string;
                 target: number;

@@ -254,7 +254,7 @@ export function fetchKeywordSuggestionsWithCache({
 }
 
 export function fetchKeywordUniverseSuggestionsWithCache({
-  seedKeywords,
+  keywords,
   includeGenderAndAgeDistribution,
   locationName,
   languageCode,
@@ -265,7 +265,7 @@ export function fetchKeywordUniverseSuggestionsWithCache({
 }) {
   return fetchWithCache({
     key: createDataforseoCacheKey("keyword-universe-suggestions", {
-      seedKeywords,
+      keywords,
       includeGenderAndAgeDistribution,
       locationName,
       languageCode,
@@ -276,7 +276,7 @@ export function fetchKeywordUniverseSuggestionsWithCache({
     },
     fn: async () => {
       const result = await fetchKeywordUniverseSuggestions({
-        seedKeywords,
+        keywords,
         includeGenderAndAgeDistribution,
         locationName,
         languageCode,

@@ -376,7 +376,7 @@ export async function fetchKeywordSuggestions(
 }
 
 export type FetchKeywordUniverseSuggestionsArgs = {
-  seedKeywords: string[];
+  keywords: string[];
 } & BaseArgs;
 
 export async function fetchKeywordUniverseSuggestions(
@@ -388,7 +388,6 @@ export async function fetchKeywordUniverseSuggestions(
       provider: "dataforseo";
       seProvider: "google" | (string & {});
       nextEarliestUpdate: string;
-      seeds: string[];
       keywords: (typeof contentKeywordSchema.infer)[];
     },
     unknown
@@ -397,7 +396,7 @@ export async function fetchKeywordUniverseSuggestions(
   const json = await googleKeywordIdeasLive({
     body: [
       {
-        keywords: args.seedKeywords,
+        keywords: args.keywords,
         location_name: args.locationName,
         language_code: args.languageCode,
         closely_variants: false,
@@ -439,7 +438,7 @@ export async function fetchKeywordUniverseSuggestions(
   if (!result) {
     return err(
       new Error(
-        `No result returned from DataForSEO for keyword ideas for seed keyword ${args.seedKeywords.join(", ")}`,
+        `No result returned from DataForSEO for keyword ideas for seed keyword ${args.keywords.join(", ")}`,
       ),
     );
   }
@@ -467,7 +466,6 @@ export async function fetchKeywordUniverseSuggestions(
     provider: "dataforseo",
     seProvider: result.se_type ?? "google",
     nextEarliestUpdate: nextEarliestUpdate.toISOString(),
-    seeds: args.seedKeywords,
     keywords,
   });
 }

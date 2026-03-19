@@ -161,7 +161,7 @@ export function createDataAccessTools(args: {
           entityType,
           rows: result.value
             .filter((strategy) =>
-              [strategy.name, strategy.description, strategy.motivation]
+              [strategy.name, strategy.motivation]
                 .filter((value): value is string => Boolean(value))
                 .some((value) => value.toLowerCase().includes(term)),
             )

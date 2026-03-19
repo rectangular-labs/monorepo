@@ -29,7 +29,6 @@ function RouteComponent() {
   const [organizationSlug, setOrganizationSlug] = useState("");
   const [projectSlug, setProjectSlug] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [phaseStrategyName, setPhaseStrategyName] = useState("");
   const [evalType, setEvalType] = useState<"content" | "strategy">("content");
   const [selectedFixtureId, setSelectedFixtureId] = useState("");
   const [generatedOutput, setGeneratedOutput] = useState("");
@@ -140,21 +139,6 @@ function RouteComponent() {
       }),
     );
 
-  const { mutate: triggerStrategyPhase, isPending: isPendingStrategyPhase } =
-    useMutation(
-      api.admin.triggerStrategyPhaseGenerationTask.mutationOptions({
-        onSuccess: () => {
-          toast.success(
-            "Triggered strategy phase generation workflow successfully.",
-          );
-          setPhaseStrategyName("");
-        },
-        onError: (error) => {
-          toast.error(error.message);
-        },
-      }),
-    );
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!organizationSlug.trim()) {
@@ -182,28 +166,6 @@ function RouteComponent() {
       organizationSlug,
       projectSlug,
       instructions,
-    });
-  };
-
-  const handleStrategyPhaseSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!organizationSlug.trim()) {
-      toast.error("Please enter an organization slug");
-      return;
-    }
-    if (!projectSlug.trim()) {
-      toast.error("Please enter a project slug");
-      return;
-    }
-    if (!phaseStrategyName.trim()) {
-      toast.error("Please enter a strategy name");
-      return;
-    }
-
-    triggerStrategyPhase({
-      organizationSlug,
-      projectSlug,
-      strategyName: phaseStrategyName,
     });
   };
 
@@ -407,64 +369,6 @@ function RouteComponent() {
               type="submit"
             >
               Trigger Strategy Suggestions
-            </Button>
-          </form>
-        </div>
-      </div>
-
-      <div className="w-full rounded-lg border bg-card text-card-foreground shadow-sm">
-        <div className="flex flex-col space-y-1.5 p-6">
-          <h3 className="font-semibold leading-none tracking-tight">
-            Trigger Strategy Phase Generation
-          </h3>
-          <p className="text-muted-foreground text-sm">
-            Trigger the strategy phase generation workflow in the api-seo
-            package for a specific strategy.
-          </p>
-        </div>
-        <div className="p-6 pt-0">
-          <form className="space-y-4" onSubmit={handleStrategyPhaseSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="phaseOrganizationSlug">Organization Slug</Label>
-              <Input
-                disabled={isPendingStrategyPhase}
-                id="phaseOrganizationSlug"
-                onChange={(e) => setOrganizationSlug(e.target.value)}
-                placeholder="e.g. rectangular-labs"
-                value={organizationSlug}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phaseProjectSlug">Project Slug</Label>
-              <Input
-                disabled={isPendingStrategyPhase}
-                id="phaseProjectSlug"
-                onChange={(e) => setProjectSlug(e.target.value)}
-                placeholder="e.g. acme-corp"
-                value={projectSlug}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phaseStrategyName">Strategy Name</Label>
-              <Input
-                disabled={isPendingStrategyPhase}
-                id="phaseStrategyName"
-                onChange={(e) => setPhaseStrategyName(e.target.value)}
-                placeholder="e.g. Topic Cluster For CRM ROI"
-                value={phaseStrategyName}
-              />
-            </div>
-            <Button
-              disabled={
-                !organizationSlug.trim() ||
-                !projectSlug.trim() ||
-                !phaseStrategyName.trim() ||
-                isPendingStrategyPhase
-              }
-              isLoading={isPendingStrategyPhase}
-              type="submit"
-            >
-              Trigger Strategy Phase Generation
             </Button>
           </form>
         </div>

@@ -13,7 +13,6 @@ import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import { validateStrategyMiddleware } from "../lib/middleware/validate-strategy";
-import { createTask } from "../lib/task";
 import snapshot from "./strategy.snapshot";
 
 const list = withOrganizationIdBase
@@ -131,28 +130,6 @@ const update = withOrganizationIdBase
       });
     }
 
-    if (input.status === "active" && context.strategy.status !== "active") {
-      const taskResult = await createTask({
-        db: context.db,
-        userId: context.user?.id,
-        input: {
-          type: "seo-generate-strategy-phase",
-          projectId: input.projectId,
-          organizationId: context.organization.id,
-          strategyId: updateResult.value.id,
-          userId: context.user.id,
-        },
-        workflowInstanceId: `strategy_phase_generation_${updateResult.value.id}_${crypto.randomUUID().slice(0, 6)}`,
-      });
-
-      if (!taskResult.ok) {
-        console.error(
-          "Failed to trigger strategy phase generation workflow",
-          taskResult.error,
-        );
-      }
-    }
-
     return updateResult.value;
   });
 
@@ -189,7 +166,6 @@ const create = withOrganizationIdBase
         organizationId: context.organization.id,
         name: input.name,
         motivation: input.motivation,
-        description: input.description ?? null,
         goal: input.goal,
         keywordUniverse: input.keywordUniverse ?? null,
         llmQueries: input.llmQueries ?? null,
@@ -207,25 +183,6 @@ const create = withOrganizationIdBase
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: "BAD STATE: Missing created strategy",
       });
-    }
-    const taskResult = await createTask({
-      db: context.db,
-      userId: context.user?.id,
-      input: {
-        type: "seo-generate-strategy-phase",
-        projectId: input.projectId,
-        organizationId: context.organization.id,
-        strategyId: createdStrategy.id,
-        userId: context.user.id,
-      },
-      workflowInstanceId: `strategy_phase_generation_${createdStrategy.id}_${crypto.randomUUID().slice(0, 6)}`,
-    });
-
-    if (!taskResult.ok) {
-      console.error(
-        "Failed to trigger strategy phase generation workflow",
-        taskResult.error,
-      );
     }
     return createdStrategy;
   });

@@ -348,7 +348,6 @@ This content is part of a deliberate content strategy. Use this context to align
 
 - **Strategy:** ${strategy.name}
 - **Motivation:** ${strategy.motivation}
-${strategy.description ? `- **Description:** ${strategy.description}` : ""}
 - **Goal:** ${strategy.goal.metric} — target ${strategy.goal.target} (${strategy.goal.timeframe})
 ${strategy.phaseType ? `- **Current phase type:** ${strategy.phaseType}` : ""}
 - **Content role:** ${strategy.contentRole ?? "unset"}
