@@ -1,8 +1,8 @@
 import { type } from "arktype";
 
 import {
-  strategyKeywordUniverseSchema,
-  strategyLlmQueriesSchema,
+  strategyKeywordUniverseDraftSchema,
+  strategyLlmQueriesDraftSchema,
 } from "./keyword-parsers";
 
 export const strategyGoalSchema = type({
@@ -20,18 +20,36 @@ export const STRATEGY_STATUSES = [
   "dismissed",
 ] as const;
 
-export const strategySuggestionSchema = type({
+const strategyBaseSchema = type({
   name: type("string"),
   motivation: type("string"),
   goal: strategyGoalSchema,
-  keywordUniverse: strategyKeywordUniverseSchema,
-  llmQueries: strategyLlmQueriesSchema,
 });
 
-export const strategyEditableSchema = type({
-  name: type("string"),
-  motivation: type("string"),
-  goal: strategyGoalSchema,
+export const strategySuggestionSchema = type({
+  "...": strategyBaseSchema,
+  keywordUniverse: strategyKeywordUniverseDraftSchema,
+  llmQueries: strategyLlmQueriesDraftSchema,
+});
+
+export const strategyEditableSchema = strategyBaseSchema;
+
+export const strategyKeywordClusterFormSchema = type({
+  clusterId: "string",
+  coreKeyword: "string",
+  supportingKeywords: type({
+    value: "string",
+  }).array(),
+});
+
+export const strategyLlmQueryFormSchema = type({
+  query: "string",
+});
+
+export const strategyManageFormSchema = type({
+  "...": strategyEditableSchema,
+  keywordClusters: strategyKeywordClusterFormSchema.array(),
+  llmQueries: strategyLlmQueryFormSchema.array(),
 });
 
 export const cadencePeriodSchema = type("'daily' | 'weekly' | 'monthly'");

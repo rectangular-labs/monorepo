@@ -1,5 +1,7 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
+import { formatNullableNumber } from "@rectangular-labs/core/format/number";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
+import { getStrategyKeywordStats } from "@rectangular-labs/core/strategy/get-strategy-keyword-stats";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
@@ -28,15 +30,9 @@ import { Link, useMatchRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { ManageStrategyDialog } from "./manage-strategy-dialog";
+import { StrategyKeywordSections } from "./strategy-keyword-sections";
 
 type StrategySummary = RouterOutputs["strategy"]["list"]["strategies"][number];
-
-function formatNumber(value: number | null | undefined, digits = 0) {
-  if (value === null || value === undefined || Number.isNaN(value)) return null;
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: digits,
-  }).format(value);
-}
 
 function getLatestMetricValue(strategy: StrategySummary) {
   const aggregate = strategy.snapshots?.[0]?.aggregate;
@@ -88,6 +84,10 @@ export function StrategyCard({
 
   const phase = strategy.phases?.[0] ?? null;
   const isSuggestion = strategy.status === "suggestion";
+  const keywordStats = getStrategyKeywordStats({
+    keywordUniverse: strategy.keywordUniverse,
+    llmQueries: strategy.llmQueries,
+  });
   const [viewOpen, setViewOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
 
@@ -181,11 +181,13 @@ export function StrategyCard({
     typeof progressPercent === "number" &&
     !Number.isNaN(progressPercent) &&
     strategy.status !== "suggestion";
-  const formattedLatest = formatNumber(
-    latestValue,
-    strategy.goal.metric === "avgPosition" ? 1 : 0,
-  );
-  const formattedTarget = formatNumber(strategy.goal.target, 0);
+  const formattedLatest = formatNullableNumber(latestValue, {
+    fallback: "",
+    maximumFractionDigits: strategy.goal.metric === "avgPosition" ? 1 : 0,
+  });
+  const formattedTarget = formatNullableNumber(strategy.goal.target, {
+    maximumFractionDigits: 0,
+  });
 
   const detailHref =
     !isSuggestion && slugParams && strategy.id
@@ -229,6 +231,11 @@ export function StrategyCard({
             {formatStrategyGoal(strategy.goal)}
           </span>
         </div>
+        {isSuggestion && keywordStats.activeKeywords.length > 0 && (
+          <div className="text-muted-foreground text-sm">
+            {formatStrategySuggestionSummary(keywordStats)}
+          </div>
+        )}
         {!isSuggestion && (
           <div className="space-y-2">
             {formattedLatest ? (
@@ -348,6 +355,11 @@ function ViewStrategyDialog({
   dismissalError: string | null;
   onSubmitDismissal: () => void;
 }) {
+  const keywordStats = getStrategyKeywordStats({
+    keywordUniverse: strategy.keywordUniverse,
+    llmQueries: strategy.llmQueries,
+  });
+
   return (
     <DialogDrawer
       className="sm:max-w-2xl"
@@ -383,16 +395,7 @@ function ViewStrategyDialog({
           </div>
         )}
 
-        {strategy.description && (
-          <div className="space-y-1">
-            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              Description
-            </p>
-            <p className="whitespace-pre-wrap text-sm">
-              {strategy.description}
-            </p>
-          </div>
-        )}
+        <StrategyKeywordSections keywordStats={keywordStats} />
 
         {strategy.phases && strategy.phases.length > 0 && (
           <div className="space-y-1">
@@ -497,4 +500,26 @@ function ViewStrategyDialog({
       </DialogDrawerFooter>
     </DialogDrawer>
   );
+}
+
+function formatStrategySuggestionSummary(
+  keywordStats: ReturnType<typeof getStrategyKeywordStats>,
+) {
+  const parts = [
+    `${keywordStats.activeKeywords.length} keywords`,
+    `${keywordStats.activeQueries.length} LLM queries`,
+  ];
+
+  if (keywordStats.clusters.length > 1) {
+    parts.push(`${keywordStats.clusters.length} clusters`);
+  }
+
+  const volume = formatNullableNumber(keywordStats.totalSearchVolume, {
+    fallback: "",
+  });
+  if (volume) {
+    parts.push(`raw volume ${volume}`);
+  }
+
+  return parts.join(" · ");
 }

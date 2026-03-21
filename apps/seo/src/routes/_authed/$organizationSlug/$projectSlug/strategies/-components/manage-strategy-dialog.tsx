@@ -1,7 +1,12 @@
 "use client";
 
 import type { RouterInputs } from "@rectangular-labs/api-seo/types";
-import { strategySuggestionSchema } from "@rectangular-labs/core/schemas/strategy-parsers";
+import {
+  type strategyEditableSchema,
+  strategyManageFormSchema,
+} from "@rectangular-labs/core/schemas/strategy-parsers";
+import { getStrategyKeywordStats } from "@rectangular-labs/core/strategy/get-strategy-keyword-stats";
+import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import {
   DialogDrawer,
@@ -11,11 +16,13 @@ import {
 } from "@rectangular-labs/ui/components/ui/dialog-drawer";
 import {
   arktypeResolver,
+  type Control,
   Controller,
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
+  useFieldArray,
   useForm,
 } from "@rectangular-labs/ui/components/ui/field";
 import { Input } from "@rectangular-labs/ui/components/ui/input";
@@ -36,13 +43,19 @@ import { getApiClientRq } from "~/lib/api";
 type EditableStrategy = {
   id: string;
   name: string;
-  description: string | null;
   motivation: string;
   goal: StrategyFormValues["goal"];
+  keywordUniverse?:
+    | RouterInputs["strategy"]["create"]["keywordUniverse"]
+    | null;
+  llmQueries?: RouterInputs["strategy"]["create"]["llmQueries"] | null;
 };
 
-const formSchema = strategySuggestionSchema;
-type StrategyFormValues = typeof formSchema.infer;
+type StrategyFormValues = typeof strategyEditableSchema.infer;
+type ManageStrategyFormValues = typeof strategyManageFormSchema.infer;
+type KeywordClusterFormValue =
+  ManageStrategyFormValues["keywordClusters"][number];
+type LlmQueryFormValue = ManageStrategyFormValues["llmQueries"][number];
 
 const goalMetricOptions = [
   { value: "conversions", label: "Conversions" },
@@ -55,6 +68,114 @@ const goalTimeframeOptions = [
   { value: "monthly", label: "Monthly" },
   { value: "total", label: "Total" },
 ] as const;
+
+function KeywordClusterFields({
+  control,
+  fieldPrefix,
+  index,
+  onRemove,
+}: {
+  control: Control<ManageStrategyFormValues>;
+  fieldPrefix: string;
+  index: number;
+  onRemove: () => void;
+}) {
+  const {
+    fields: supportingKeywordFields,
+    append: appendSupportingKeyword,
+    remove: removeSupportingKeyword,
+  } = useFieldArray({
+    control,
+    name: `keywordClusters.${index}.supportingKeywords`,
+  });
+
+  return (
+    <FieldGroup>
+      <div className="flex items-center justify-between gap-2">
+        <FieldLabel>Keyword cluster {index + 1}</FieldLabel>
+        <Button onClick={onRemove} size="icon" type="button" variant="ghost">
+          <Icons.Trash className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <Controller
+        control={control}
+        name={`keywordClusters.${index}.coreKeyword`}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={`${fieldPrefix}-cluster-${index}-core`}>
+              Core keyword
+            </FieldLabel>
+            <Input
+              {...field}
+              id={`${fieldPrefix}-cluster-${index}-core`}
+              placeholder="Primary keyword"
+            />
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
+
+      <div className="space-y-3">
+        <FieldLabel>Supporting keywords</FieldLabel>
+
+        {supportingKeywordFields.length === 0 && (
+          <p className="text-muted-foreground text-sm">
+            No supporting keywords yet.
+          </p>
+        )}
+
+        {supportingKeywordFields.map((supportingKeywordField, keywordIndex) => (
+          <div
+            className="flex items-start gap-2"
+            key={supportingKeywordField.id}
+          >
+            <Controller
+              control={control}
+              name={`keywordClusters.${index}.supportingKeywords.${keywordIndex}.value`}
+              render={({ field, fieldState }) => (
+                <Field className="flex-1" data-invalid={fieldState.invalid}>
+                  <FieldLabel
+                    htmlFor={`${fieldPrefix}-cluster-${index}-supporting-${keywordIndex}`}
+                  >
+                    Keyword {keywordIndex + 1}
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={`${fieldPrefix}-cluster-${index}-supporting-${keywordIndex}`}
+                    placeholder="Supporting keyword"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Button
+              className="mt-7"
+              onClick={() => removeSupportingKeyword(keywordIndex)}
+              size="icon"
+              type="button"
+              variant="ghost"
+            >
+              <Icons.Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+
+        <Button
+          onClick={() => appendSupportingKeyword({ value: "" })}
+          size="sm"
+          type="button"
+          variant="outline"
+        >
+          <Icons.Plus className="mr-2 h-4 w-4" />
+          Add keyword
+        </Button>
+      </div>
+    </FieldGroup>
+  );
+}
 
 export function ManageStrategyDialog({
   strategy,
@@ -80,30 +201,88 @@ export function ManageStrategyDialog({
     fuzzy: true,
   });
 
-  const defaultValues = useMemo<StrategyFormValues>(
+  const keywordStats = useMemo(
+    () =>
+      getStrategyKeywordStats({
+        keywordUniverse: strategy?.keywordUniverse,
+        llmQueries: strategy?.llmQueries,
+      }),
+    [strategy?.keywordUniverse, strategy?.llmQueries],
+  );
+
+  const defaultKeywordClusters = useMemo<KeywordClusterFormValue[]>(() => {
+    return keywordStats.clusters.map((cluster) => {
+      const keywords = cluster.keywords.filter(
+        (keyword) => keyword.status === "active",
+      );
+      return {
+        clusterId: cluster.clusterId,
+        coreKeyword: cluster.coreKeyword?.keyword ?? "",
+        supportingKeywords: keywords
+          .filter((keyword) => keyword.category === "supporting")
+          .map((keyword) => ({ value: keyword.keyword })),
+      };
+    });
+  }, [keywordStats.clusters]);
+
+  const defaultLlmQueries = useMemo<LlmQueryFormValue[]>(
+    () => keywordStats.activeQueries.map((query) => ({ query: query.query })),
+    [keywordStats.activeQueries],
+  );
+
+  const defaultValues = useMemo<ManageStrategyFormValues>(
     () => ({
       name: strategy?.name ?? "",
-      description: strategy?.description ?? "",
       motivation: strategy?.motivation ?? "",
       goal: {
         metric: strategy?.goal?.metric ?? "clicks",
         target: strategy?.goal?.target ?? 0,
         timeframe: strategy?.goal?.timeframe ?? "monthly",
       },
+      keywordClusters: defaultKeywordClusters,
+      llmQueries: defaultLlmQueries,
     }),
-    [strategy],
+    [defaultKeywordClusters, defaultLlmQueries, strategy],
   );
 
-  const form = useForm<StrategyFormValues>({
-    resolver: arktypeResolver(formSchema),
+  const form = useForm<ManageStrategyFormValues>({
+    resolver: arktypeResolver(strategyManageFormSchema),
     defaultValues,
+  });
+  const {
+    fields: keywordClusterFields,
+    append: appendKeywordCluster,
+    remove: removeKeywordCluster,
+    replace: replaceKeywordClusters,
+  } = useFieldArray({
+    control: form.control,
+    name: "keywordClusters",
+  });
+  const {
+    fields: llmQueryFields,
+    append: appendLlmQuery,
+    remove: removeLlmQuery,
+    replace: replaceLlmQueries,
+  } = useFieldArray({
+    control: form.control,
+    name: "llmQueries",
   });
 
   useEffect(() => {
     if (open) {
       form.reset(defaultValues);
+      replaceKeywordClusters(defaultKeywordClusters);
+      replaceLlmQueries(defaultLlmQueries);
     }
-  }, [defaultValues, form, open]);
+  }, [
+    defaultKeywordClusters,
+    defaultLlmQueries,
+    defaultValues,
+    form,
+    open,
+    replaceKeywordClusters,
+    replaceLlmQueries,
+  ]);
 
   const { mutate: updateStrategy, isPending: isUpdating } = useMutation(
     api.strategy.update.mutationOptions({
@@ -163,14 +342,73 @@ export function ManageStrategyDialog({
     }),
   );
 
-  const submitForm = (values: StrategyFormValues) => {
+  const submitForm = (values: ManageStrategyFormValues) => {
+    const existingKeywordByValue = new Map(
+      strategy?.keywordUniverse?.items.map((item) => [item.keyword, item]) ??
+        [],
+    );
+    const existingQueryByValue = new Map(
+      strategy?.llmQueries?.items.map((item) => [item.query, item]) ?? [],
+    );
+    const normalizedKeywordItems = values.keywordClusters.flatMap((cluster) => {
+      const coreKeyword = cluster.coreKeyword.trim();
+      const supportingKeywords = cluster.supportingKeywords
+        .map((keyword) => keyword.value.trim())
+        .filter(Boolean);
+      const keywords = Array.from(
+        new Set([coreKeyword, ...supportingKeywords]),
+      ).filter(Boolean);
+
+      return keywords.map((keyword, index) => {
+        const existing = existingKeywordByValue.get(keyword);
+        return {
+          id: existing?.id ?? crypto.randomUUID(),
+          keyword,
+          clusterId: cluster.clusterId,
+          status: "active" as const,
+          source: existing?.source ?? { type: "strategyGeneration" as const },
+          category: index === 0 ? ("core" as const) : ("supporting" as const),
+          intent: existing?.intent ?? null,
+          difficulty: existing?.difficulty ?? null,
+          searchVolume: existing?.searchVolume ?? null,
+          cpc: existing?.cpc ?? null,
+          cpcCompetitionLevel: existing?.cpcCompetitionLevel ?? null,
+        };
+      });
+    });
+    const normalizedLlmQueries = values.llmQueries
+      .map((item) => item.query.trim())
+      .filter(Boolean)
+      .map((query) => {
+        const existing = existingQueryByValue.get(query);
+        return {
+          id: existing?.id ?? crypto.randomUUID(),
+          query,
+          rationale: existing?.rationale ?? null,
+          status: "active" as const,
+        };
+      });
+
     const payload: RouterInputs["strategy"]["create"] = {
       projectId,
       organizationIdentifier: organizationId,
       name: values.name.trim(),
       motivation: values.motivation.trim(),
-      description: values.description?.trim() || null,
       goal: values.goal,
+      keywordUniverse:
+        normalizedKeywordItems.length > 0
+          ? {
+              version: 1,
+              items: normalizedKeywordItems,
+            }
+          : null,
+      llmQueries:
+        normalizedLlmQueries.length > 0
+          ? {
+              version: 1,
+              items: normalizedLlmQueries,
+            }
+          : null,
     };
 
     if (strategy) {
@@ -191,6 +429,7 @@ export function ManageStrategyDialog({
   const isPending = isUpdating || isCreating;
   const title = strategy ? "Edit strategy" : "New strategy";
   const submitLabel = strategy ? "Save changes" : "Create strategy";
+  const showKeywordFields = !!strategy;
 
   return (
     <DialogDrawer
@@ -227,6 +466,106 @@ export function ManageStrategyDialog({
             )}
           />
 
+          {showKeywordFields && (
+            <>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Keyword clusters</FieldLabel>
+                  <Button
+                    onClick={() =>
+                      appendKeywordCluster({
+                        clusterId: crypto.randomUUID(),
+                        coreKeyword: "",
+                        supportingKeywords: [],
+                      })
+                    }
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    <Icons.Plus className="mr-2 h-4 w-4" />
+                    Add cluster
+                  </Button>
+                </div>
+
+                {keywordClusterFields.length === 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    No keyword clusters yet.
+                  </p>
+                )}
+
+                {keywordClusterFields.map((cluster, index) => (
+                  <KeywordClusterFields
+                    control={form.control}
+                    fieldPrefix={fieldPrefix}
+                    index={index}
+                    key={cluster.id}
+                    onRemove={() => removeKeywordCluster(index)}
+                  />
+                ))}
+              </div>
+
+              <div className="space-y-3">
+                <FieldLabel>LLM queries</FieldLabel>
+
+                {llmQueryFields.length === 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    No queries yet.
+                  </p>
+                )}
+
+                {llmQueryFields.map((queryField, index) => (
+                  <div className="flex items-start gap-2" key={queryField.id}>
+                    <Controller
+                      control={form.control}
+                      name={`llmQueries.${index}.query`}
+                      render={({ field, fieldState }) => (
+                        <Field
+                          className="flex-1"
+                          data-invalid={fieldState.invalid}
+                        >
+                          <FieldLabel
+                            htmlFor={`${fieldPrefix}-llm-query-${index}`}
+                          >
+                            Query {index + 1}
+                          </FieldLabel>
+                          <Textarea
+                            {...field}
+                            id={`${fieldPrefix}-llm-query-${index}`}
+                            placeholder="LLM query"
+                            rows={3}
+                          />
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Button
+                      className="mt-7"
+                      onClick={() => removeLlmQuery(index)}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Icons.Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+
+                <Button
+                  onClick={() => appendLlmQuery({ query: "" })}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <Icons.Plus className="mr-2 h-4 w-4" />
+                  Add query
+                </Button>
+              </div>
+            </>
+          )}
+
           <Controller
             control={form.control}
             name="motivation"
@@ -240,28 +579,6 @@ export function ManageStrategyDialog({
                   id={`${fieldPrefix}-motivation`}
                   placeholder="Why does this strategy matter?"
                   rows={6}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="description"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${fieldPrefix}-description`}>
-                  Description
-                </FieldLabel>
-                <Textarea
-                  {...field}
-                  id={`${fieldPrefix}-description`}
-                  placeholder="What will you do and how will it work?"
-                  rows={8}
-                  value={field.value || ""}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

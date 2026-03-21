@@ -104,14 +104,24 @@ export const STRATEGY_ITEM_STATUSES = [
   "dropped",
 ] as const satisfies (typeof strategyItemStatusSchema.infer)[];
 
+export const strategyLlmQueryDraftItemSchema = type({
+  query: type("string").atLeastLength(1),
+  rationale: "string | null",
+});
+
+export const strategyLlmQueriesDraftSchema = type({
+  items: strategyLlmQueryDraftItemSchema.array(),
+});
+
+export const strategyLlmQueryItemSchema = type({
+  "...": strategyLlmQueryDraftItemSchema,
+  id: type("string").atLeastLength(1),
+  status: strategyItemStatusSchema,
+});
+
 export const strategyLlmQueriesSchema = type({
   version: "1",
-  items: type({
-    id: type("string").atLeastLength(1),
-    query: type("string").atLeastLength(1),
-    rationale: "string | null",
-    status: strategyItemStatusSchema,
-  }).array(),
+  items: strategyLlmQueryItemSchema.array(),
 });
 
 export const strategyKeywordSourceSchema = type.or(
@@ -133,21 +143,40 @@ export const STRATEGY_KEYWORD_CATEGORIES = [
   "fanOut",
 ] as const satisfies (typeof strategyKeywordCategorySchema.infer)[];
 
+export const strategySuggestionKeywordSourceSchema = type({
+  type: "'strategyGeneration'",
+});
+
+const strategyKeywordUniverseBaseItemSchema = type({
+  keyword: type("string").atLeastLength(1),
+  clusterId: type("string").atLeastLength(1),
+  category: strategyKeywordCategorySchema,
+});
+
+export const strategyKeywordUniverseDraftItemSchema = type({
+  "...": strategyKeywordUniverseBaseItemSchema,
+  source: strategySuggestionKeywordSourceSchema,
+});
+
+export const strategyKeywordUniverseDraftSchema = type({
+  items: strategyKeywordUniverseDraftItemSchema.array(),
+});
+
+export const strategyKeywordUniverseItemSchema = type({
+  "...": strategyKeywordUniverseBaseItemSchema,
+  id: type("string").atLeastLength(1),
+  status: strategyItemStatusSchema,
+  source: strategyKeywordSourceSchema,
+  intent: keywordIntentSchema.or(type.null),
+  difficulty: "number | null",
+  searchVolume: "number | null",
+  cpc: "number | null",
+  cpcCompetitionLevel: keywordCompetitionSchema.get("competitionLevel"),
+});
+
 export const strategyKeywordUniverseSchema = type({
   version: "1",
-  items: type({
-    id: type("string").atLeastLength(1),
-    keyword: type("string").atLeastLength(1),
-    clusterId: type("string").atLeastLength(1),
-    status: strategyItemStatusSchema,
-    source: strategyKeywordSourceSchema,
-    category: strategyKeywordCategorySchema,
-    intent: keywordIntentSchema.or(type.null),
-    difficulty: "number | null",
-    searchVolume: "number | null",
-    cpc: "number | null",
-    cpcCompetitionLevel: keywordCompetitionSchema.get("competitionLevel"),
-  }).array(),
+  items: strategyKeywordUniverseItemSchema.array(),
 });
 
 /**
