@@ -129,7 +129,10 @@ function StrategyKeywordDetails({ keyword }: { keyword: StrategyKeyword }) {
       <p className="text-muted-foreground">
         CPC:{" "}
         {keyword.cpc !== null && keyword.cpc !== undefined
-          ? keyword.cpc.toFixed(2)
+          ? new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(keyword.cpc)
           : "n/a"}
       </p>
     </div>

@@ -15,6 +15,7 @@ import {
   getDraftById,
   getSeoProjectByIdentifierAndOrgId,
   getStrategyDetails,
+  listContentDraftsWithLatestSnapshot,
 } from "@rectangular-labs/db/operations";
 import { generateText, jsonSchema, Output } from "ai";
 import type { type } from "arktype";
@@ -260,33 +261,40 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               phase.phaseContents.some((pc) => pc.contentDraftId === draft.id),
             );
 
-            // Collect sibling content from all phases
-            const siblingContent = strategy.phases.flatMap((phase) =>
-              phase.phaseContents.flatMap((pc) => {
-                if (pc.contentDraftId === draft.id || pc.contentDraft == null) {
-                  return [];
-                }
-                const d = pc.contentDraft;
-                return [
-                  {
-                    title: d.title,
-                    slug: d.slug,
-                    role: d.role as "pillar" | "supporting" | null,
-                    primaryKeyword: d.primaryKeyword,
-                    status: d.status,
-                  },
-                ];
-              }),
-            );
-
-            // Deduplicate siblings by draft id (a draft can appear in multiple phases)
-            const seen = new Set<string>();
-            const uniqueSiblings = siblingContent.filter((s) => {
-              const key = s.slug;
-              if (seen.has(key)) return false;
-              seen.add(key);
-              return true;
+            const siblingDraftsResult = await listContentDraftsWithLatestSnapshot({
+              db,
+              organizationId: input.organizationId,
+              projectId: input.projectId,
+              strategyId: draft.strategyId,
             });
+
+            const siblingContent = siblingDraftsResult.ok
+              ? siblingDraftsResult.value
+                  .filter((siblingDraft) => siblingDraft.id !== draft.id)
+                  .map((siblingDraft) => ({
+                    title: siblingDraft.title,
+                    slug: siblingDraft.slug,
+                    role: siblingDraft.role as "pillar" | "supporting" | null,
+                    primaryKeyword: siblingDraft.primaryKeyword,
+                    status: siblingDraft.status,
+                  }))
+              : strategy.phases.flatMap((phase) =>
+                  phase.phaseContents.flatMap((pc) => {
+                    if (pc.contentDraftId === draft.id || pc.contentDraft == null) {
+                      return [];
+                    }
+                    const siblingDraft = pc.contentDraft;
+                    return [
+                      {
+                        title: siblingDraft.title,
+                        slug: siblingDraft.slug,
+                        role: siblingDraft.role as "pillar" | "supporting" | null,
+                        primaryKeyword: siblingDraft.primaryKeyword,
+                        status: siblingDraft.status,
+                      },
+                    ];
+                  }),
+                );
 
             strategyContext = {
               name: strategy.name,
@@ -304,7 +312,7 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
                   | null) ?? null,
               contentRole:
                 (draft.role as "pillar" | "supporting" | null) ?? null,
-              siblingContent: uniqueSiblings,
+              siblingContent,
             };
           }
         }
@@ -361,7 +369,7 @@ ${draft.outline ?? "(missing)"}`;
 
     const research = await step.do(
       "writer phase 1 research",
-      { timeout: "3 minutes" },
+      { timeout: "5 minutes" },
       async () => {
         const pipeline = createPipeline();
         const phase = await pipeline.runResearchPhase({ task: taskPrompt });
