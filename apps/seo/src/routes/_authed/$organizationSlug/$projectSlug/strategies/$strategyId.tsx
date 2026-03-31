@@ -247,7 +247,6 @@ function PageComponent() {
     };
   }, [localSearch, navigate, routeLocalSearch]);
 
-  const currentPhase = getCurrentPhase(strategy?.phases ?? []);
   const latestSnapshot = strategy?.snapshots?.[0] ?? null;
   const goalProgress = getGoalProgress(
     strategy,
@@ -493,7 +492,6 @@ function PageComponent() {
 }
 
 type Strategy = RouterOutputs["strategy"]["get"];
-type StrategyPhase = Strategy["phases"][number];
 type OverviewPoint =
   RouterOutputs["strategy"]["snapshot"]["series"]["points"][number];
 
@@ -872,14 +870,4 @@ function getGoalMetricValue(
   if (metric === "impressions") return aggregate.impressions;
   if (metric === "avgPosition") return aggregate.avgPosition;
   return aggregate.clicks;
-}
-
-function getCurrentPhase(phases: StrategyPhase[]) {
-  if (phases.length === 0) return null;
-  const activePhase = phases.find((phase) =>
-    ["in_progress", "planned", "observing"].includes(phase.status),
-  );
-  if (activePhase) return activePhase;
-  const observingPhase = phases.find((phase) => phase.status === "observing");
-  return observingPhase ?? phases[0];
 }
