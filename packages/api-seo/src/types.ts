@@ -17,6 +17,7 @@ import type {
 } from "./lib/bucket";
 import type { router } from "./routes";
 import type { SeoOnboardingWorkflowBinding } from "./workflows/onboarding-workflow";
+import type { SeoStrategyDraftPlanningWorkflowBinding } from "./workflows/strategy-draft-planning-workflow";
 import type { SeoStrategySnapshotWorkflowBinding } from "./workflows/strategy-snapshot-workflow";
 import type { SeoStrategySuggestionsWorkflowBinding } from "./workflows/strategy-suggestions-workflow";
 import type { SeoWriterWorkflowBinding } from "./workflows/writer-workflow";
@@ -43,6 +44,7 @@ export interface InitialContext extends BaseContextWithAuth {
   seoWriterWorkflow: SeoWriterWorkflowBinding;
   seoOnboardingWorkflow: SeoOnboardingWorkflowBinding;
   seoStrategySuggestionsWorkflow: SeoStrategySuggestionsWorkflowBinding;
+  seoStrategyDraftPlanningWorkflow: SeoStrategyDraftPlanningWorkflowBinding;
   seoStrategySnapshotWorkflow: SeoStrategySnapshotWorkflowBinding;
   cacheKV: KVNamespace;
   scheduler: DurableObjectStub<Scheduler>;

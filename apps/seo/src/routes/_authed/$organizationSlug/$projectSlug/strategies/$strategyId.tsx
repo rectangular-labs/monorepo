@@ -43,7 +43,6 @@ import {
 } from "../-components/snapshot-trend-chart";
 import { TopKeywords } from "../-components/top-keywords";
 import { ManageStrategyDialog } from "./-components/manage-strategy-dialog";
-import { ManageStrategyPhaseDialog } from "./-components/manage-strategy-phase-dialog";
 import { StrategyContentTab } from "./-components/strategy-content-tab";
 import { StrategyKeywordSections } from "./-components/strategy-keyword-sections";
 
@@ -136,8 +135,6 @@ function PageComponent() {
   const isLocalUpdatePendingRef = useRef(false);
   const [editOpen, setEditOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
-  const [phaseViewOpen, setPhaseViewOpen] = useState(false);
-  const [phaseEditOpen, setPhaseEditOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState<LocalSearchState>(() =>
     toLocalSearchState(routeSearch),
   );
@@ -325,13 +322,6 @@ function PageComponent() {
             organizationId={activeProject.organizationId}
             projectId={activeProject.id}
             strategy={strategy}
-          />
-          <ManageStrategyPhaseDialog
-            onOpenChange={setPhaseEditOpen}
-            open={phaseEditOpen}
-            organizationId={activeProject.organizationId}
-            phase={currentPhase ?? null}
-            projectId={activeProject.id}
           />
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">

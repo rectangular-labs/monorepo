@@ -13,6 +13,7 @@ import { type } from "arktype";
 import { base, withOrganizationIdBase } from "../context";
 import { validateOrganizationMiddleware } from "../lib/middleware/validate-organization";
 import { validateStrategyMiddleware } from "../lib/middleware/validate-strategy";
+import { createTask } from "../lib/task";
 import snapshot from "./strategy.snapshot";
 
 const list = withOrganizationIdBase
@@ -130,6 +131,30 @@ const update = withOrganizationIdBase
       });
     }
 
+    if (
+      updateResult.value.status === "active" &&
+      context.strategy.status !== "active"
+    ) {
+      const taskResult = await createTask({
+        db: context.db,
+        userId: context.user.id,
+        input: {
+          type: "seo-generate-strategy-drafts",
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          strategyId: updateResult.value.id,
+          userId: context.user.id,
+        },
+        workflowInstanceId: `strategy_drafts_${updateResult.value.id}_${crypto.randomUUID().slice(0, 6)}`,
+      });
+      if (!taskResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to queue strategy draft planning workflow.",
+          cause: taskResult.error,
+        });
+      }
+    }
+
     return updateResult.value;
   });
 
@@ -184,6 +209,28 @@ const create = withOrganizationIdBase
         message: "BAD STATE: Missing created strategy",
       });
     }
+
+    if (createdStrategy.status === "active") {
+      const taskResult = await createTask({
+        db: context.db,
+        userId: context.user.id,
+        input: {
+          type: "seo-generate-strategy-drafts",
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          strategyId: createdStrategy.id,
+          userId: context.user.id,
+        },
+        workflowInstanceId: `strategy_drafts_${createdStrategy.id}_${crypto.randomUUID().slice(0, 6)}`,
+      });
+      if (!taskResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to queue strategy draft planning workflow.",
+          cause: taskResult.error,
+        });
+      }
+    }
+
     return createdStrategy;
   });
 

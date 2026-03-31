@@ -21,7 +21,7 @@ export async function getGscIntegrationForProject(params: {
     return integrationResult;
   }
   const integration = integrationResult.value;
-  if (!integration || !integration.account) {
+  if (!integration?.account) {
     return ok(null);
   }
 

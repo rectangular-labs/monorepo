@@ -261,12 +261,13 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
               phase.phaseContents.some((pc) => pc.contentDraftId === draft.id),
             );
 
-            const siblingDraftsResult = await listContentDraftsWithLatestSnapshot({
-              db,
-              organizationId: input.organizationId,
-              projectId: input.projectId,
-              strategyId: draft.strategyId,
-            });
+            const siblingDraftsResult =
+              await listContentDraftsWithLatestSnapshot({
+                db,
+                organizationId: input.organizationId,
+                projectId: input.projectId,
+                strategyId: draft.strategyId,
+              });
 
             const siblingContent = siblingDraftsResult.ok
               ? siblingDraftsResult.value
@@ -280,7 +281,10 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
                   }))
               : strategy.phases.flatMap((phase) =>
                   phase.phaseContents.flatMap((pc) => {
-                    if (pc.contentDraftId === draft.id || pc.contentDraft == null) {
+                    if (
+                      pc.contentDraftId === draft.id ||
+                      pc.contentDraft == null
+                    ) {
                       return [];
                     }
                     const siblingDraft = pc.contentDraft;
@@ -288,7 +292,10 @@ export class SeoWriterWorkflow extends WorkflowEntrypoint<
                       {
                         title: siblingDraft.title,
                         slug: siblingDraft.slug,
-                        role: siblingDraft.role as "pillar" | "supporting" | null,
+                        role: siblingDraft.role as
+                          | "pillar"
+                          | "supporting"
+                          | null,
                         primaryKeyword: siblingDraft.primaryKeyword,
                         status: siblingDraft.status,
                       },

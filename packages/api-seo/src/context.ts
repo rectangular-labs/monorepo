@@ -24,6 +24,7 @@ export const createApiContext = (
     | "seoWriterWorkflow"
     | "seoOnboardingWorkflow"
     | "seoStrategySuggestionsWorkflow"
+    | "seoStrategyDraftPlanningWorkflow"
     | "seoStrategySnapshotWorkflow"
     | "cacheKV"
     | "scheduler"

@@ -19,6 +19,14 @@ export const seoStrategySuggestionsTaskInputSchema = type({
   instructions: "string",
 });
 
+export const seoGenerateStrategyDraftsTaskInputSchema = type({
+  type: "'seo-generate-strategy-drafts'",
+  projectId: "string.uuid",
+  organizationId: "string",
+  strategyId: "string.uuid",
+  "userId?": "string",
+});
+
 export const seoGenerateStrategySnapshotTaskInputSchema = type({
   type: "'seo-generate-strategy-snapshot'",
   projectId: "string.uuid",
@@ -43,6 +51,7 @@ export const taskInputSchema = type.or(
   seoWriteArticleTaskInputSchema,
   seoUnderstandSiteTaskInputSchema,
   seoStrategySuggestionsTaskInputSchema,
+  seoGenerateStrategyDraftsTaskInputSchema,
   seoGenerateStrategySnapshotTaskInputSchema,
 );
 
@@ -73,6 +82,13 @@ export const seoStrategySuggestionsTaskOutputSchema = type({
   strategyIds: type("string.uuid").array(),
 });
 
+export const seoGenerateStrategyDraftsTaskOutputSchema = type({
+  type: "'seo-generate-strategy-drafts'",
+  strategyId: "string.uuid",
+  createdDraftIds: type("string.uuid").array(),
+  queuedDraftIds: type("string.uuid").array(),
+});
+
 export const seoGenerateStrategySnapshotTaskOutputSchema = type({
   type: "'seo-generate-strategy-snapshot'",
   strategyId: "string.uuid",
@@ -84,5 +100,6 @@ export const taskOutputSchema = type.or(
   seoWriteArticleTaskOutputSchema,
   seoUnderstandSiteTaskOutputSchema,
   seoStrategySuggestionsTaskOutputSchema,
+  seoGenerateStrategyDraftsTaskOutputSchema,
   seoGenerateStrategySnapshotTaskOutputSchema,
 );
