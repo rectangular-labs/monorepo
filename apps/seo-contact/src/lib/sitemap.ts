@@ -19,5 +19,9 @@ export const sitemap: Sitemap<TRoutes> = {
       priority: 0.8,
       changeFrequency: "monthly",
     },
+    "/sign-up-link": {
+      priority: 0.7,
+      changeFrequency: "monthly",
+    },
   },
 };
