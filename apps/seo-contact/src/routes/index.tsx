@@ -23,14 +23,17 @@ function App() {
       <Section className="py-12 md:py-16">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 text-center">
           <div className="flex flex-col gap-4">
-            <div className="flex w-full items-center justify-center gap-4">
-              <Logo className="h-14 w-14" />
+            <a
+              className="flex w-full items-center justify-center gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              href={env.VITE_WWW_URL}
+            >
+              <Logo className="h-14 w-14 shrink-0" />
               <div>
                 <p className="text-muted-foreground text-xs uppercase tracking-[0.2em]">
                   Fluid Posts
                 </p>
               </div>
-            </div>
+            </a>
             <h1 className="font-semibold text-3xl tracking-tight md:text-4xl">
               Connect directly with our team
             </h1>
@@ -71,7 +74,10 @@ function App() {
             </Card>
           </div>
 
-          <div className="flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-4">
+            <Button asChild variant="ghost">
+              <Link to="/sign-up-link">Sign-up link</Link>
+            </Button>
             <Button asChild variant="ghost">
               <a href={env.VITE_WWW_URL} rel="noreferrer" target="_blank">
                 Visit main website

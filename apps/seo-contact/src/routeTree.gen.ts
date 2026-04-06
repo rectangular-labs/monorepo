@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WinstonRouteImport } from './routes/winston'
+import { Route as SignUpLinkRouteImport } from './routes/sign-up-link'
 import { Route as AaronRouteImport } from './routes/aaron'
 import { Route as IndexRouteImport } from './routes/index'
 
 const WinstonRoute = WinstonRouteImport.update({
   id: '/winston',
   path: '/winston',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpLinkRoute = SignUpLinkRouteImport.update({
+  id: '/sign-up-link',
+  path: '/sign-up-link',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AaronRoute = AaronRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/aaron': typeof AaronRoute
+  '/sign-up-link': typeof SignUpLinkRoute
   '/winston': typeof WinstonRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aaron': typeof AaronRoute
+  '/sign-up-link': typeof SignUpLinkRoute
   '/winston': typeof WinstonRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/aaron': typeof AaronRoute
+  '/sign-up-link': typeof SignUpLinkRoute
   '/winston': typeof WinstonRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/aaron' | '/winston'
+  fullPaths: '/' | '/aaron' | '/sign-up-link' | '/winston'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/aaron' | '/winston'
-  id: '__root__' | '/' | '/aaron' | '/winston'
+  to: '/' | '/aaron' | '/sign-up-link' | '/winston'
+  id: '__root__' | '/' | '/aaron' | '/sign-up-link' | '/winston'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AaronRoute: typeof AaronRoute
+  SignUpLinkRoute: typeof SignUpLinkRoute
   WinstonRoute: typeof WinstonRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/winston'
       fullPath: '/winston'
       preLoaderRoute: typeof WinstonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up-link': {
+      id: '/sign-up-link'
+      path: '/sign-up-link'
+      fullPath: '/sign-up-link'
+      preLoaderRoute: typeof SignUpLinkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/aaron': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AaronRoute: AaronRoute,
+  SignUpLinkRoute: SignUpLinkRoute,
   WinstonRoute: WinstonRoute,
 }
 export const routeTree = rootRouteImport
