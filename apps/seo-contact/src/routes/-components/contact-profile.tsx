@@ -7,6 +7,7 @@ import {
   LinkedInIcon,
   Logo,
   TikTokIcon,
+  YouTubeIcon,
 } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Card, CardContent } from "@rectangular-labs/ui/components/ui/card";
@@ -16,6 +17,7 @@ import { type ReactNode, useState } from "react";
 
 export type ContactSocialLinks = {
   instagram?: string;
+  youtube?: string;
   facebook?: string;
   tiktok?: string;
 };
@@ -133,8 +135,12 @@ export function ContactProfile({
   socials,
 }: ContactProfileProps) {
   const showSocialIcons =
-    Boolean(socials?.instagram || socials?.facebook || socials?.tiktok) ||
-    Boolean(companyLinkedInUrl);
+    Boolean(
+      socials?.instagram ||
+        socials?.youtube ||
+        socials?.facebook ||
+        socials?.tiktok,
+    ) || Boolean(companyLinkedInUrl);
 
   return (
     <main className="bg-background">
@@ -230,6 +236,14 @@ export function ContactProfile({
                         label="Fluid Posts on Instagram"
                       >
                         <InstagramIcon className="h-9 w-9" />
+                      </SocialIconLink>
+                    ) : null}
+                    {socials?.youtube ? (
+                      <SocialIconLink
+                        href={socials.youtube}
+                        label="Fluid Posts on YouTube"
+                      >
+                        <YouTubeIcon className="h-9 w-9" />
                       </SocialIconLink>
                     ) : null}
                     {socials?.facebook ? (

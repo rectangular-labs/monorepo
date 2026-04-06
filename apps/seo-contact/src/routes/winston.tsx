@@ -26,6 +26,7 @@ function WinstonPage() {
       phone={env.VITE_WINSTON_PHONE}
       socials={{
         instagram: fluidPostsSocial.instagram,
+        youtube: fluidPostsSocial.youtube,
         facebook: fluidPostsSocial.facebook,
         tiktok: fluidPostsSocial.tiktok,
       }}

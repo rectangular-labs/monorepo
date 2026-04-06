@@ -26,6 +26,7 @@ function AaronPage() {
       phone={env.VITE_AARON_PHONE}
       socials={{
         instagram: fluidPostsSocial.instagram,
+        youtube: fluidPostsSocial.youtube,
         facebook: fluidPostsSocial.facebook,
         tiktok: fluidPostsSocial.tiktok,
       }}
