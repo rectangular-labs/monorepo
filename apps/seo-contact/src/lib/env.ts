@@ -8,6 +8,8 @@ export const clientEnv = () =>
     client: {
       VITE_AARON_EMAIL: type("string"),
       VITE_AARON_PHONE: type("string"),
+      VITE_PUBLIC_POSTHOG_HOST: type("string"),
+      VITE_PUBLIC_POSTHOG_KEY: type("string"),
       VITE_WINSTON_EMAIL: type("string"),
       VITE_WINSTON_PHONE: type("string"),
       VITE_WWW_URL: type("string"),

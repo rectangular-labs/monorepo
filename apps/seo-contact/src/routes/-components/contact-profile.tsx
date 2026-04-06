@@ -7,6 +7,7 @@ import {
   LinkedInIcon,
   Logo,
   TikTokIcon,
+  YouTubeIcon,
 } from "@rectangular-labs/ui/components/icon";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
 import { Card, CardContent } from "@rectangular-labs/ui/components/ui/card";
@@ -16,6 +17,8 @@ import { type ReactNode, useState } from "react";
 
 export type ContactSocialLinks = {
   instagram?: string;
+  youtube?: string;
+  linkedin?: string;
   facebook?: string;
   tiktok?: string;
 };
@@ -29,7 +32,6 @@ type ContactProfileProps = {
   /** Main marketing site; logo links here. */
   homeUrl: string;
   linkedinUrl?: string;
-  companyLinkedInUrl?: string;
   socials?: ContactSocialLinks;
 };
 
@@ -129,12 +131,15 @@ export function ContactProfile({
   websiteUrl,
   homeUrl,
   linkedinUrl,
-  companyLinkedInUrl,
   socials,
 }: ContactProfileProps) {
-  const showSocialIcons =
-    Boolean(socials?.instagram || socials?.facebook || socials?.tiktok) ||
-    Boolean(companyLinkedInUrl);
+  const showSocialIcons = Boolean(
+    socials?.instagram ||
+      socials?.youtube ||
+      socials?.linkedin ||
+      socials?.facebook ||
+      socials?.tiktok,
+  );
 
   return (
     <main className="bg-background">
@@ -187,12 +192,12 @@ export function ContactProfile({
                   value={linkedinUrl.replace(/^https?:\/\/(www\.)?/, "")}
                 />
               ) : null}
-              {companyLinkedInUrl ? (
+              {socials?.linkedin ? (
                 <CopyRow
-                  actionHref={companyLinkedInUrl}
+                  actionHref={socials.linkedin}
                   actionLabel="Company"
                   label="Company LinkedIn"
-                  value={companyLinkedInUrl.replace(/^https?:\/\/(www\.)?/, "")}
+                  value={socials.linkedin.replace(/^https?:\/\/(www\.)?/, "")}
                 />
               ) : null}
               <div className="flex flex-col gap-3 border-border/60 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
@@ -232,6 +237,14 @@ export function ContactProfile({
                         <InstagramIcon className="h-9 w-9" />
                       </SocialIconLink>
                     ) : null}
+                    {socials?.youtube ? (
+                      <SocialIconLink
+                        href={socials.youtube}
+                        label="Fluid Posts on YouTube"
+                      >
+                        <YouTubeIcon className="h-9 w-9" />
+                      </SocialIconLink>
+                    ) : null}
                     {socials?.facebook ? (
                       <SocialIconLink
                         href={socials.facebook}
@@ -248,9 +261,9 @@ export function ContactProfile({
                         <TikTokIcon className="h-9 w-9" />
                       </SocialIconLink>
                     ) : null}
-                    {companyLinkedInUrl ? (
+                    {socials?.linkedin ? (
                       <SocialIconLink
-                        href={companyLinkedInUrl}
+                        href={socials.linkedin}
                         label="Fluid Posts company on LinkedIn"
                       >
                         <LinkedInIcon className="h-9 w-9" />

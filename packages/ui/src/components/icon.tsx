@@ -679,6 +679,17 @@ export const TikTokIcon = (props: IconProps) => (
   </svg>
 );
 
+export const YouTubeIcon = (props: IconProps) => (
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <title>YouTube</title>
+    <path
+      d="M23.498 6.186a2.99 2.99 0 0 0-2.103-2.117C19.538 3.57 12 3.57 12 3.57s-7.538 0-9.395.5A2.99 2.99 0 0 0 .502 6.186C0 8.057 0 11.96 0 11.96s0 3.904.502 5.774a2.99 2.99 0 0 0 2.103 2.117c1.857.5 9.395.5 9.395.5s7.538 0 9.395-.5a2.99 2.99 0 0 0 2.103-2.117C24 15.864 24 11.96 24 11.96s0-3.904-.502-5.774"
+      fill="#f00"
+    />
+    <path d="m9.545 15.568l6.273-3.608l-6.273-3.608z" fill="#fff" />
+  </svg>
+);
+
 export const TwitchIcon = (props: IconProps) => (
   <svg
     id="Layer_1"

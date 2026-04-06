@@ -1,3 +1,4 @@
+import { PostHogErrorBoundary } from "@posthog/react";
 import { ThemeProvider } from "@rectangular-labs/ui/components/theme-provider";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -8,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { seo } from "~/lib/seo";
 import appCss from "../styles.css?url";
+import { PosthogProvider } from "./-components/posthog-provider";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -64,20 +66,24 @@ export const Route = createRootRouteWithContext<{
 
 function RootLayout() {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body className="flex min-h-screen flex-col">
-        <ThemeProvider attribute="class" enableSystem>
-          <div className="flex min-h-screen flex-col">
-            <div className="flex-1">
-              <Outlet />
-            </div>
-          </div>
-        </ThemeProvider>
-        <Scripts />
-      </body>
-    </html>
+    <PosthogProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <HeadContent />
+        </head>
+        <body className="flex min-h-screen flex-col">
+          <PostHogErrorBoundary>
+            <ThemeProvider attribute="class" enableSystem>
+              <div className="flex min-h-screen flex-col">
+                <div className="flex-1">
+                  <Outlet />
+                </div>
+              </div>
+            </ThemeProvider>
+          </PostHogErrorBoundary>
+          <Scripts />
+        </body>
+      </html>
+    </PosthogProvider>
   );
 }

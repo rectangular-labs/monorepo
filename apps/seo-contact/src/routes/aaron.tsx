@@ -1,8 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  fluidPostsCompanyLinkedIn,
-  fluidPostsSocial,
-} from "~/lib/contact-links";
+import { fluidPostsSocial } from "~/lib/contact-links";
 import { clientEnv } from "~/lib/env";
 import { ContactProfile } from "./-components/contact-profile";
 
@@ -17,15 +14,16 @@ function AaronPage() {
 
   return (
     <ContactProfile
-      companyLinkedInUrl={fluidPostsCompanyLinkedIn}
       companyRole="Co-founder"
       email={env.VITE_AARON_EMAIL}
       homeUrl={env.VITE_WWW_URL}
       linkedinUrl={AARON_LINKEDIN}
       name="Aaron Leong"
-      phone="+65 9668 5288"
+      phone={env.VITE_AARON_PHONE}
       socials={{
         instagram: fluidPostsSocial.instagram,
+        youtube: fluidPostsSocial.youtube,
+        linkedin: fluidPostsSocial.linkedin,
         facebook: fluidPostsSocial.facebook,
         tiktok: fluidPostsSocial.tiktok,
       }}
