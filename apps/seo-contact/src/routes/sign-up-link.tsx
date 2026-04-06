@@ -242,6 +242,15 @@ function SignUpLinkPage() {
                   <Button disabled={status === "submitting"} type="submit">
                     {status === "submitting" ? "Submitting…" : "Submit"}
                   </Button>
+                      placeholder="e.g. “best CRM for small business”"
+                    />
+                  </div>
+                  {error ? (
+                    <p className="text-destructive text-sm" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
+                  <Button type="submit">Send request</Button>
                 </form>
               )}
             </CardContent>
