@@ -105,7 +105,9 @@ export const Route = createFileRoute("/sign-up-link")({
 });
 
 function SignUpLinkPage() {
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -160,7 +162,7 @@ function SignUpLinkPage() {
             <h1 className="font-semibold text-3xl tracking-tight md:text-4xl">
               Sign-up link
             </h1>
-            <p className="text-muted-foreground mt-2 text-sm">
+            <p className="mt-2 text-muted-foreground text-sm">
               Share a few details and we will follow up with next steps.
             </p>
           </div>
@@ -176,7 +178,8 @@ function SignUpLinkPage() {
               {status === "success" ? (
                 <div className="flex flex-col gap-4">
                   <p className="font-medium text-emerald-600 text-sm">
-                    Thanks! We have received your request and will be in touch soon.
+                    Thanks! We have received your request and will be in touch
+                    soon.
                   </p>
                   <Button asChild variant="outline">
                     <Link to="/">Back to contacts</Link>
@@ -231,7 +234,7 @@ function SignUpLinkPage() {
                       className="min-h-[100px] resize-y"
                       id="su-terms"
                       name="searchTerms"
-                      placeholder="e.g. "best CRM for small business""
+                      placeholder={'e.g. "best CRM for small business"'}
                     />
                   </div>
                   {errorMessage ? (
@@ -242,15 +245,6 @@ function SignUpLinkPage() {
                   <Button disabled={status === "submitting"} type="submit">
                     {status === "submitting" ? "Submitting…" : "Submit"}
                   </Button>
-                      placeholder="e.g. “best CRM for small business”"
-                    />
-                  </div>
-                  {error ? (
-                    <p className="text-destructive text-sm" role="alert">
-                      {error}
-                    </p>
-                  ) : null}
-                  <Button type="submit">Send request</Button>
                 </form>
               )}
             </CardContent>
