@@ -429,7 +429,6 @@ export function ManageStrategyDialog({
   const isPending = isUpdating || isCreating;
   const title = strategy ? "Edit strategy" : "New strategy";
   const submitLabel = strategy ? "Save changes" : "Create strategy";
-  const showKeywordFields = !!strategy;
 
   return (
     <DialogDrawer
@@ -466,105 +465,94 @@ export function ManageStrategyDialog({
             )}
           />
 
-          {showKeywordFields && (
-            <>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <FieldLabel>Keyword clusters</FieldLabel>
-                  <Button
-                    onClick={() =>
-                      appendKeywordCluster({
-                        clusterId: crypto.randomUUID(),
-                        coreKeyword: "",
-                        supportingKeywords: [],
-                      })
-                    }
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    <Icons.Plus className="mr-2 h-4 w-4" />
-                    Add cluster
-                  </Button>
-                </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <FieldLabel>Keyword clusters</FieldLabel>
+              <Button
+                onClick={() =>
+                  appendKeywordCluster({
+                    clusterId: crypto.randomUUID(),
+                    coreKeyword: "",
+                    supportingKeywords: [],
+                  })
+                }
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                <Icons.Plus className="mr-2 h-4 w-4" />
+                Add cluster
+              </Button>
+            </div>
 
-                {keywordClusterFields.length === 0 && (
-                  <p className="text-muted-foreground text-sm">
-                    No keyword clusters yet.
-                  </p>
-                )}
+            {keywordClusterFields.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                No keyword clusters yet.
+              </p>
+            )}
 
-                {keywordClusterFields.map((cluster, index) => (
-                  <KeywordClusterFields
-                    control={form.control}
-                    fieldPrefix={fieldPrefix}
-                    index={index}
-                    key={cluster.id}
-                    onRemove={() => removeKeywordCluster(index)}
-                  />
-                ))}
-              </div>
+            {keywordClusterFields.map((cluster, index) => (
+              <KeywordClusterFields
+                control={form.control}
+                fieldPrefix={fieldPrefix}
+                index={index}
+                key={cluster.id}
+                onRemove={() => removeKeywordCluster(index)}
+              />
+            ))}
+          </div>
 
-              <div className="space-y-3">
-                <FieldLabel>LLM queries</FieldLabel>
+          <div className="space-y-3">
+            <FieldLabel>LLM queries</FieldLabel>
 
-                {llmQueryFields.length === 0 && (
-                  <p className="text-muted-foreground text-sm">
-                    No queries yet.
-                  </p>
-                )}
+            {llmQueryFields.length === 0 && (
+              <p className="text-muted-foreground text-sm">No queries yet.</p>
+            )}
 
-                {llmQueryFields.map((queryField, index) => (
-                  <div className="flex items-start gap-2" key={queryField.id}>
-                    <Controller
-                      control={form.control}
-                      name={`llmQueries.${index}.query`}
-                      render={({ field, fieldState }) => (
-                        <Field
-                          className="flex-1"
-                          data-invalid={fieldState.invalid}
-                        >
-                          <FieldLabel
-                            htmlFor={`${fieldPrefix}-llm-query-${index}`}
-                          >
-                            Query {index + 1}
-                          </FieldLabel>
-                          <Textarea
-                            {...field}
-                            id={`${fieldPrefix}-llm-query-${index}`}
-                            placeholder="LLM query"
-                            rows={3}
-                          />
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
+            {llmQueryFields.map((queryField, index) => (
+              <div className="flex items-start gap-2" key={queryField.id}>
+                <Controller
+                  control={form.control}
+                  name={`llmQueries.${index}.query`}
+                  render={({ field, fieldState }) => (
+                    <Field className="flex-1" data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={`${fieldPrefix}-llm-query-${index}`}>
+                        Query {index + 1}
+                      </FieldLabel>
+                      <Textarea
+                        {...field}
+                        id={`${fieldPrefix}-llm-query-${index}`}
+                        placeholder="LLM query"
+                        rows={3}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
                       )}
-                    />
-                    <Button
-                      className="mt-7"
-                      onClick={() => removeLlmQuery(index)}
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                    >
-                      <Icons.Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-
+                    </Field>
+                  )}
+                />
                 <Button
-                  onClick={() => appendLlmQuery({ query: "" })}
-                  size="sm"
+                  className="mt-7"
+                  onClick={() => removeLlmQuery(index)}
+                  size="icon"
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                 >
-                  <Icons.Plus className="mr-2 h-4 w-4" />
-                  Add query
+                  <Icons.Trash className="h-4 w-4" />
                 </Button>
               </div>
-            </>
-          )}
+            ))}
+
+            <Button
+              onClick={() => appendLlmQuery({ query: "" })}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              <Icons.Plus className="mr-2 h-4 w-4" />
+              Add query
+            </Button>
+          </div>
 
           <Controller
             control={form.control}
