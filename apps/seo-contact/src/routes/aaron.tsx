@@ -23,7 +23,7 @@ function AaronPage() {
       homeUrl={env.VITE_WWW_URL}
       linkedinUrl={AARON_LINKEDIN}
       name="Aaron Leong"
-      phone="+65 9668 5288"
+      phone={env.VITE_AARON_PHONE}
       socials={{
         instagram: fluidPostsSocial.instagram,
         facebook: fluidPostsSocial.facebook,

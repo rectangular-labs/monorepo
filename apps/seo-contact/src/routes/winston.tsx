@@ -23,7 +23,7 @@ function WinstonPage() {
       homeUrl={env.VITE_WWW_URL}
       linkedinUrl={WINSTON_LINKEDIN}
       name="Winston Yeo"
-      phone="+65 8421 1148"
+      phone={env.VITE_WINSTON_PHONE}
       socials={{
         instagram: fluidPostsSocial.instagram,
         facebook: fluidPostsSocial.facebook,
