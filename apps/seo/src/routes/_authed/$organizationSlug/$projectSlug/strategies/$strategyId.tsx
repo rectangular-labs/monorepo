@@ -29,6 +29,7 @@ import {
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { type } from "arktype";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -323,41 +324,39 @@ function PageComponent() {
             strategy={strategy}
           />
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Latest snapshot</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {latestSnapshot ? (
-                  <div className="space-y-2">
-                    <p className="text-sm">
-                      Captured {formatDateTime(latestSnapshot.takenAt)}
-                    </p>
-                    {latestSnapshot.delta && (
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <SnapshotDeltaPill
-                          label="Clicks"
-                          value={latestSnapshot.delta.clicks}
-                        />
-                        <SnapshotDeltaPill
-                          label="Impressions"
-                          value={latestSnapshot.delta.impressions}
-                        />
-                        <SnapshotDeltaPill
-                          label="Position"
-                          lowerIsBetter
-                          value={latestSnapshot.delta.avgPosition}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No data yet.</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Latest snapshot</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {latestSnapshot ? (
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Captured {formatDateTime(latestSnapshot.takenAt)}
+                  </p>
+                  {latestSnapshot.delta && (
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <SnapshotDeltaPill
+                        label="Clicks"
+                        value={latestSnapshot.delta.clicks}
+                      />
+                      <SnapshotDeltaPill
+                        label="Impressions"
+                        value={latestSnapshot.delta.impressions}
+                      />
+                      <SnapshotDeltaPill
+                        label="Position"
+                        lowerIsBetter
+                        value={latestSnapshot.delta.avgPosition}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No data yet.</p>
+              )}
+            </CardContent>
+          </Card>
 
           <Tabs
             onValueChange={(value) => {
@@ -572,21 +571,27 @@ function StrategyHeader({
       {goalProgress ? (
         <div className="space-y-3 rounded-lg border p-4">
           <div className="grid gap-2 text-sm md:grid-cols-3">
-            <div className="text-muted-foreground">
-              Baseline{" "}
-              <span className="text-foreground">
+            <div className="flex min-h-20 flex-col justify-between rounded-md border bg-muted/20 p-3">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
+                Starting Point
+              </span>
+              <span className="text-base text-foreground">
                 {formatMetricValue(strategy.goal.metric, goalProgress.baseline)}
               </span>
             </div>
-            <div className="text-muted-foreground">
-              Current{" "}
-              <span className="text-foreground">
+            <div className="flex min-h-20 flex-col justify-between rounded-md border bg-muted/20 p-3">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
+                Current
+              </span>
+              <span className="text-base text-foreground">
                 {formatMetricValue(strategy.goal.metric, goalProgress.current)}
               </span>
             </div>
-            <div className="text-muted-foreground">
-              Target{" "}
-              <span className="text-foreground">
+            <div className="flex min-h-20 flex-col justify-between rounded-md border bg-muted/20 p-3">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
+                Goal Target
+              </span>
+              <span className="text-base text-foreground">
                 {formatMetricValue(strategy.goal.metric, strategy.goal.target)}
               </span>
             </div>
@@ -638,6 +643,11 @@ function ViewStrategyDetailDialog({
     keywordUniverse: strategy.keywordUniverse,
     llmQueries: strategy.llmQueries,
   });
+  const hasKeywordDetails =
+    keywordStats.activeKeywords.length > 0 ||
+    keywordStats.activeQueries.length > 0;
+  const hasAdditionalDetails =
+    Boolean(strategy.motivation) || hasKeywordDetails;
 
   return (
     <DialogDrawer
@@ -658,23 +668,33 @@ function ViewStrategyDetailDialog({
       </DialogDrawerHeader>
 
       <div className="max-h-[70vh] space-y-4 overflow-y-auto">
-        <div className="text-muted-foreground text-sm">
-          Goal:{" "}
-          <span className="font-medium text-foreground">
-            {formatStrategyGoal(strategy.goal)}
-          </span>
-        </div>
+        <StrategyDetailSection title="Goal">
+          <p className="text-sm">
+            <span className="font-medium text-foreground">
+              {formatStrategyGoal(strategy.goal)}
+            </span>
+          </p>
+        </StrategyDetailSection>
 
         {strategy.motivation && (
-          <div className="space-y-1">
-            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              Motivation
-            </p>
+          <StrategyDetailSection title="Motivation">
             <p className="whitespace-pre-line text-sm">{strategy.motivation}</p>
+          </StrategyDetailSection>
+        )}
+
+        {hasKeywordDetails && (
+          <div className="space-y-3">
+            <StrategyKeywordSections keywordStats={keywordStats} />
           </div>
         )}
 
-        <StrategyKeywordSections keywordStats={keywordStats} />
+        {!hasAdditionalDetails && (
+          <div className="rounded-md border border-dashed p-4">
+            <p className="text-muted-foreground text-sm">
+              No additional strategy details yet.
+            </p>
+          </div>
+        )}
       </div>
 
       <DialogDrawerFooter className="gap-2">
@@ -692,6 +712,23 @@ function ViewStrategyDetailDialog({
         )}
       </DialogDrawerFooter>
     </DialogDrawer>
+  );
+}
+
+function StrategyDetailSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-2 rounded-md border p-4">
+      <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+        {title}
+      </p>
+      {children}
+    </div>
   );
 }
 
