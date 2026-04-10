@@ -205,9 +205,9 @@ export const sendMessage = withOrganizationIdBase
     const orchestrator = createOrchestrator({
       db: context.db,
       project,
-      messages: input.messages,
+      chatId: context.chatId,
+      userId: context.user.id,
       cacheKV: context.cacheKV,
-      publicImagesBucket: context.publicImagesBucket,
       gscProperty: gscIntegration ?? null,
     });
 

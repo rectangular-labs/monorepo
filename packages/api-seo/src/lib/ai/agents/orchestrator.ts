@@ -1,15 +1,13 @@
 import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
-import type { DB, schema } from "@rectangular-labs/db";
 import {
-  hasToolCall,
-  jsonSchema,
-  stepCountIs,
-  ToolLoopAgent,
-  tool,
-  type UIMessage,
-} from "ai";
-import type { createPublicImagesBucket } from "../../bucket";
+  ARTICLE_TYPES,
+  type ArticleType,
+} from "@rectangular-labs/core/schemas/content-parsers";
+import type { GscConfig } from "@rectangular-labs/core/schemas/integration-parsers";
+import { CONTENT_ROLES } from "@rectangular-labs/core/schemas/strategy-parsers";
+import type { DB, schema } from "@rectangular-labs/db";
+import { hasToolCall, jsonSchema, stepCountIs, ToolLoopAgent, tool } from "ai";
+import { queueSeoWriteArticleTask } from "../../task";
 import { buildOrchestratorInstructions } from "../instructions/orchestrator";
 import { createAskQuestionsTool } from "../tools/ask-question-tool";
 import { createDataAccessTools } from "../tools/data-access-tool";
@@ -20,14 +18,13 @@ import {
 } from "../utils/agent-telemetry";
 import { wrappedOpenAI } from "../utils/wrapped-language-model";
 import { createStrategyAdvisorAgent } from "./strategy-advisor";
-import { createWriterAgent as createWriterSubagent } from "./writer";
 
 interface OrchestratorContext {
   db: DB;
   project: typeof schema.seoProject.$inferSelect;
-  messages: UIMessage[];
+  chatId: string | null;
+  userId: string;
   cacheKV: KVNamespace;
-  publicImagesBucket: ReturnType<typeof createPublicImagesBucket>;
   gscProperty: {
     config: GscConfig;
     accessToken?: string | null;
@@ -53,16 +50,6 @@ export function createOrchestrator(ctx: OrchestratorContext) {
     project: ctx.project,
     cacheKV: ctx.cacheKV,
     gscProperty: ctx.gscProperty,
-  });
-
-  // Create the Writer subagent (chat mode)
-  const { agent: writerAgent } = createWriterSubagent({
-    db: ctx.db,
-    project: ctx.project,
-    messages: ctx.messages,
-    cacheKV: ctx.cacheKV,
-    publicImagesBucket: ctx.publicImagesBucket,
-    mode: "chat",
   });
 
   // Orchestrator owns workspace tools directly for interactive use
@@ -159,8 +146,19 @@ export function createOrchestrator(ctx: OrchestratorContext) {
 
   const write = tool({
     description:
-      "Delegate article writing or editing to the Writer. Provide a clear task description of what to write or improve. The writer will research, plan, write, and self-review the content.",
-    inputSchema: jsonSchema<{ task: string; draftId?: string }>({
+      "Queue article writing or rewriting in the background. For an existing draft, pass draftId. For a new article, pass slug and primaryKeyword. If you're reusing a slug that may already contain generated content and the user explicitly confirmed overwriting it, set confirmOverwrite to true.",
+    inputSchema: jsonSchema<{
+      task: string;
+      draftId?: string;
+      slug?: string;
+      primaryKeyword?: string;
+      title?: string;
+      notes?: string;
+      strategyId?: string;
+      role?: "pillar" | "supporting";
+      articleType?: ArticleType;
+      confirmOverwrite?: boolean;
+    }>({
       type: "object",
       additionalProperties: false,
       required: ["task"],
@@ -171,7 +169,48 @@ export function createOrchestrator(ctx: OrchestratorContext) {
         },
         draftId: {
           type: "string",
-          description: "The ID of the draft to edit.",
+          description:
+            "The ID of an existing draft to write or rewrite. Use this when it is already clear that we are updating a specific draft.",
+        },
+        slug: {
+          type: "string",
+          description:
+            "Slug for a new article draft. Required for new article generation when draftId is not provided.",
+        },
+        primaryKeyword: {
+          type: "string",
+          description:
+            "Primary keyword for a new article draft. Required when creating a new draft.",
+        },
+        title: {
+          type: "string",
+          description:
+            "Optional draft title to persist before queueing the writer.",
+        },
+        notes: {
+          type: "string",
+          description:
+            "Optional notes or instructions to persist on the draft before queueing the writer.",
+        },
+        strategyId: {
+          type: "string",
+          description:
+            "Optional strategy id to associate with the draft before queueing the writer.",
+        },
+        role: {
+          type: "string",
+          enum: [...CONTENT_ROLES],
+          description: "Optional content role for the draft.",
+        },
+        articleType: {
+          type: "string",
+          enum: [...ARTICLE_TYPES],
+          description: "Optional article type to persist before queueing.",
+        },
+        confirmOverwrite: {
+          type: "boolean",
+          description:
+            "Set to true only when the user clearly confirmed that it's okay to overwrite an already-generated draft.",
         },
       },
     }),
@@ -179,6 +218,8 @@ export function createOrchestrator(ctx: OrchestratorContext) {
       {
         input: {
           task: "Write a 1,200-word article targeting 'invoice automation software' with practical examples.",
+          slug: "invoice-automation-software",
+          primaryKeyword: "invoice automation software",
         },
       },
       {
@@ -187,35 +228,130 @@ export function createOrchestrator(ctx: OrchestratorContext) {
           draftId: "00000000-0000-0000-0000-000000000000",
         },
       },
+      {
+        input: {
+          task: "Rewrite this article to focus more on implementation detail.",
+          slug: "invoice-automation-software",
+          primaryKeyword: "invoice automation software",
+          confirmOverwrite: true,
+        },
+      },
     ],
-    execute: async ({ task, draftId }) => {
-      const prompt = draftId ? `${task}\n\nDraft ID to edit: ${draftId}` : task;
+    execute: async ({
+      task,
+      draftId,
+      slug,
+      primaryKeyword,
+      title,
+      notes,
+      strategyId,
+      role,
+      articleType,
+      confirmOverwrite,
+    }) => {
+      if (!draftId && (!slug || !primaryKeyword)) {
+        return {
+          status: "missing_required_input" as const,
+          message:
+            "Creating a new article requires both slug and primaryKeyword.",
+        };
+      }
 
-      const result = await writerAgent.generate({
-        prompt,
+      const target = draftId
+        ? { draftId }
+        : slug && primaryKeyword
+          ? { slug, primaryKeyword }
+          : null;
+      if (!target) {
+        return {
+          status: "missing_required_input" as const,
+          message:
+            "Creating a new article requires both slug and primaryKeyword.",
+        };
+      }
+
+      const result = await queueSeoWriteArticleTask({
+        db: ctx.db,
+        projectId: ctx.project.id,
+        organizationId: ctx.project.organizationId,
+        userId: ctx.userId,
+        chatId: ctx.chatId,
+        confirmOverwrite,
+        target,
+        metadata: {
+          title,
+          notes,
+          strategyId,
+          role,
+          articleType,
+        },
       });
-      const telemetry = summarizeAgentInvocation(result.steps);
-      console.log("[orchestrator] write subagent completed", telemetry);
 
-      return {
-        content: result.text,
-        telemetry,
-      };
+      if (!result.ok) {
+        return {
+          status: "error" as const,
+          message: result.error.message,
+        };
+      }
+
+      if (result.value.status === "queued") {
+        console.log("[orchestrator] write task queued", {
+          task,
+          draftId: result.value.draft.id,
+          taskRunId: result.value.draft.generatedByTaskRunId,
+          status: result.value.draft.status,
+        });
+      }
+
+      return result.value.status === "queued"
+        ? {
+            status: "queued" as const,
+            draftId: result.value.draft.id,
+            draftStatus: result.value.draft.status,
+          }
+        : result.value.status === "in_progress"
+          ? {
+              status: "in_progress" as const,
+              draftId: result.value.draft.id,
+              draftStatus: result.value.draft.status,
+              message:
+                "This draft is already being generated in the background.",
+            }
+          : {
+              status: "confirmation_required" as const,
+              draftId: result.value.draft.id,
+              draftStatus: result.value.draft.status,
+              message:
+                "This draft already has generated content. Confirm with the user before re-queueing to overwrite it.",
+            };
     },
     toModelOutput: ({ output }) => ({
       type: "content",
       value: [
         {
           type: "text" as const,
-          text: [
-            "Writer result:",
-            `- steps: ${output.telemetry.stepCount}`,
-            `- tool calls: ${output.telemetry.toolCallCount}`,
-            output.telemetry.estimatedCostUsd != null
-              ? `- est. cost (USD): ${output.telemetry.estimatedCostUsd}`
-              : "- est. cost (USD): unavailable",
-            `- content preview: ${output.content.slice(0, 1_500)}`,
-          ].join("\n"),
+          text:
+            output.status === "queued"
+              ? [
+                  "Writer task queued:",
+                  `- draftId: ${output.draftId}`,
+                  `- draft status: ${output.draftStatus}`,
+                ].join("\n")
+              : output.status === "in_progress"
+                ? [
+                    "Writer task already in progress:",
+                    `- draftId: ${output.draftId}`,
+                    `- draft status: ${output.draftStatus}`,
+                    `- message: ${output.message}`,
+                  ].join("\n")
+                : output.status === "confirmation_required"
+                  ? [
+                      "Writer task requires confirmation:",
+                      `- draftId: ${output.draftId}`,
+                      `- draft status: ${output.draftStatus}`,
+                      `- message: ${output.message}`,
+                    ].join("\n")
+                  : `Writer task could not be queued: ${output.message}`,
         },
       ],
     }),
