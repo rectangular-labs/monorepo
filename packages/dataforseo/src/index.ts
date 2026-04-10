@@ -11,6 +11,7 @@ import { parseKeywordData } from "./lib/parse-keyword-data";
 import { parseSerpAdvancedToItems } from "./lib/parse-serp-advanced";
 import { parseSiteMetrics } from "./lib/parse-site-metrics";
 import {
+  googleKeywordIdeasLive,
   googleKeywordOverviewLive,
   googleKeywordSuggestionsLive,
   googleOrganicLiveAdvanced,
@@ -18,16 +19,19 @@ import {
   googleRelevantPagesLive,
 } from "./sdk.gen";
 
-export type FetchRankedKeywordsForSiteArgs = {
-  hostname: string;
+type BaseArgs = {
   locationName: string;
   languageCode: string;
   includeGenderAndAgeDistribution?: boolean;
-  positionFrom?: number;
-  positionTo?: number;
   limit?: number;
   offset?: number;
 };
+
+export type FetchRankedKeywordsForSiteArgs = {
+  hostname: string;
+  positionFrom?: number;
+  positionTo?: number;
+} & BaseArgs;
 
 export async function fetchRankedKeywordsForSite(
   args: FetchRankedKeywordsForSiteArgs,
@@ -48,35 +52,36 @@ export async function fetchRankedKeywordsForSite(
     unknown
   >
 > {
+  const filters: (string | string[])[] = [];
+  if (args.positionFrom) {
+    filters.push(
+      [
+        "ranked_serp_element.serp_item.rank_absolute",
+        ">=",
+        args.positionFrom.toString(),
+      ],
+      "and",
+    );
+  }
+  if (args.positionTo) {
+    filters.push(
+      [
+        "ranked_serp_element.serp_item.rank_absolute",
+        "<=",
+        args.positionTo.toString(),
+      ],
+      "and",
+    );
+  }
+  filters.push(["keyword_data.keyword_info.search_volume", ">=", "100"]);
+
   const json = await googleRankedKeywordsLive({
     body: [
       {
         target: args.hostname,
         location_name: args.locationName,
         language_code: args.languageCode,
-        filters: [
-          ...(args.positionFrom
-            ? [
-                [
-                  "ranked_serp_element.serp_item.rank_absolute",
-                  ">=",
-                  args.positionFrom.toString(),
-                ],
-                "and",
-              ]
-            : []),
-          ...(args.positionTo
-            ? [
-                [
-                  "ranked_serp_element.serp_item.rank_absolute",
-                  "<=",
-                  args.positionTo.toString(),
-                ],
-                "and",
-              ]
-            : []),
-          ["keyword_data.keyword_info.search_volume", ">=", "100"],
-        ],
+        filters,
         order_by: ["keyword_data.keyword_info.search_volume,desc"],
         offset: args.offset ?? 0,
         limit: args.limit ?? 1000,
@@ -181,12 +186,7 @@ export async function fetchRankedKeywordsForSite(
 
 export type FetchRankedPagesForSiteArgs = {
   target: string;
-  locationName: string;
-  languageCode: string;
-  limit?: number;
-  offset?: number;
-  includeGenderAndAgeDistribution?: boolean;
-};
+} & BaseArgs;
 
 export async function fetchRankedPagesForSite(
   args: FetchRankedPagesForSiteArgs,
@@ -277,13 +277,8 @@ export async function fetchRankedPagesForSite(
 
 export type FetchKeywordSuggestionsArgs = {
   seedKeyword: string;
-  locationName: string;
-  languageCode: string;
   includeSeedKeyword?: boolean;
-  includeGenderAndAgeDistribution?: boolean;
-  limit?: number;
-  offset?: number;
-};
+} & BaseArgs;
 
 export async function fetchKeywordSuggestions(
   args: FetchKeywordSuggestionsArgs,
@@ -380,12 +375,104 @@ export async function fetchKeywordSuggestions(
   });
 }
 
+export type FetchKeywordUniverseSuggestionsArgs = {
+  keywords: string[];
+} & BaseArgs;
+
+export async function fetchKeywordUniverseSuggestions(
+  args: FetchKeywordUniverseSuggestionsArgs,
+): Promise<
+  Result<
+    {
+      cost: number;
+      provider: "dataforseo";
+      seProvider: "google" | (string & {});
+      nextEarliestUpdate: string;
+      keywords: (typeof contentKeywordSchema.infer)[];
+    },
+    unknown
+  >
+> {
+  const json = await googleKeywordIdeasLive({
+    body: [
+      {
+        keywords: args.keywords,
+        location_name: args.locationName,
+        language_code: args.languageCode,
+        closely_variants: false,
+        ignore_synonyms: false,
+        include_serp_info: true,
+        include_clickstream_data: args.includeGenderAndAgeDistribution ?? false,
+        limit: args.limit ?? 100,
+        offset: args.offset ?? 0,
+        filters: [["keyword_info.search_volume", ">=", "100"]],
+        order_by: ["relevance,desc", "keyword_info.search_volume,desc"],
+      },
+    ],
+  });
+
+  if (json.error) {
+    console.error("fetchKeywordUniverseSuggestions error", json.error);
+    return err(json.error);
+  }
+  if (!json.data) {
+    return err(new Error("No data returned from DataForSEO"));
+  }
+  if (json.data.status_code !== 20000) {
+    return err(
+      new Error(
+        `DataForSEO returned an error: ${json.data.status_code} - ${json.data.status_message}`,
+      ),
+    );
+  }
+  const task = json.data.tasks?.[0];
+  if (task?.status_code !== 20000) {
+    return err(
+      new Error(
+        `DataForSEO returned an error: ${task?.status_code} - ${task?.status_message}`,
+      ),
+    );
+  }
+
+  const result = task?.result?.[0];
+  if (!result) {
+    return err(
+      new Error(
+        `No result returned from DataForSEO for keyword ideas for seed keyword ${args.keywords.join(", ")}`,
+      ),
+    );
+  }
+
+  const keywords = (result.items ?? [])
+    .map((item) => {
+      if (!item) {
+        return null;
+      }
+
+      const keywordData = parseKeywordData(item);
+      if (!keywordData) {
+        console.warn(
+          `No keyword data found for keyword idea ${JSON.stringify(item)}`,
+        );
+      }
+      return keywordData;
+    })
+    .filter((item) => !!item);
+
+  const nextEarliestUpdate = await getNextEarliestUpdate();
+
+  return ok({
+    cost: json.data.cost ?? 0,
+    provider: "dataforseo",
+    seProvider: result.se_type ?? "google",
+    nextEarliestUpdate: nextEarliestUpdate.toISOString(),
+    keywords,
+  });
+}
+
 export type FetchKeywordsOverviewArgs = {
   keywords: string[];
-  locationName: string;
-  languageCode: string;
-  includeGenderAndAgeDistribution?: boolean;
-};
+} & Omit<BaseArgs, "limit" | "offset">;
 
 export async function fetchKeywordsOverview(
   args: FetchKeywordsOverviewArgs,
@@ -478,13 +565,11 @@ type FetchSerpOs = "windows" | "macos" | "android" | "ios";
 
 export type FetchSerpArgs = {
   keyword: string;
-  locationName: string;
-  languageCode: string;
   depth?: number;
   device?: FetchSerpDevice;
   os?: FetchSerpOs;
   targetUrl?: string;
-};
+} & Omit<BaseArgs, "limit" | "offset" | "includeGenderAndAgeDistribution">;
 
 export async function fetchSerp(args: FetchSerpArgs): Promise<
   Result<

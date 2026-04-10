@@ -1,0 +1,1 @@
+ALTER TABLE "seo_strategy" DROP COLUMN "description";

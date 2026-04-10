@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DataforseoLabsStatusData, DataforseoLabsStatusResponses, GoogleKeywordOverviewLiveData, GoogleKeywordOverviewLiveResponses, GoogleKeywordSuggestionsLiveData, GoogleKeywordSuggestionsLiveResponses, GoogleOrganicLiveAdvancedData, GoogleOrganicLiveAdvancedResponses, GoogleOrganicLiveRegularData, GoogleOrganicLiveRegularResponses, GoogleRankedKeywordsLiveData, GoogleRankedKeywordsLiveResponses, GoogleRelevantPagesLiveData, GoogleRelevantPagesLiveResponses } from './types.gen';
+import type { GoogleKeywordIdeasLiveData, GoogleKeywordIdeasLiveResponses, GoogleKeywordOverviewLiveData, GoogleKeywordOverviewLiveResponses, GoogleKeywordSuggestionsLiveData, GoogleKeywordSuggestionsLiveResponses, GoogleOrganicLiveAdvancedData, GoogleOrganicLiveAdvancedResponses, GoogleOrganicLiveRegularData, GoogleOrganicLiveRegularResponses, GoogleRankedKeywordsLiveData, GoogleRankedKeywordsLiveResponses, GoogleRelevantPagesLiveData, GoogleRelevantPagesLiveResponses, StatusData, StatusResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -22,145 +22,106 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * Live SERP provides real-time data on search engine results for the specified keyword, search engine, and location.
  * for more info please visit 'https://docs.dataforseo.com/v3/serp/google/organic/live/regular/?bash'
  */
-export const googleOrganicLiveRegular = <ThrowOnError extends boolean = false>(options?: Options<GoogleOrganicLiveRegularData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoogleOrganicLiveRegularResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'basic',
-                type: 'http'
-            }
-        ],
-        url: '/v3/serp/google/organic/live/regular',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+export const googleOrganicLiveRegular = <ThrowOnError extends boolean = false>(options?: Options<GoogleOrganicLiveRegularData, ThrowOnError>) => (options?.client ?? client).post<GoogleOrganicLiveRegularResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/serp/google/organic/live/regular',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
 /**
- * ‌
+ * Live SERP provides real-time data on top search engine results for the specified keyword, search engine, and location. This endpoint will supply a complete overview of featured snippets and other extra elements of SERPs.
  * for more info please visit 'https://docs.dataforseo.com/v3/serp/google/organic/live/advanced/?bash'
  */
-export const googleOrganicLiveAdvanced = <ThrowOnError extends boolean = false>(options?: Options<GoogleOrganicLiveAdvancedData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoogleOrganicLiveAdvancedResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'basic',
-                type: 'http'
-            }
-        ],
-        url: '/v3/serp/google/organic/live/advanced',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+export const googleOrganicLiveAdvanced = <ThrowOnError extends boolean = false>(options?: Options<GoogleOrganicLiveAdvancedData, ThrowOnError>) => (options?.client ?? client).post<GoogleOrganicLiveAdvancedResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/serp/google/organic/live/advanced',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
 /**
- * ‌
  * By calling this endpoint, you will find out when the DataForSEO Labs data was last updated. The API response will provide separate update dates for the Google, Bing, and Amazon endpoints of DataForSEO Labs API.
  * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/status/?bash'
  */
-export const dataforseoLabsStatus = <ThrowOnError extends boolean = false>(options?: Options<DataforseoLabsStatusData, ThrowOnError>) => {
-    return (options?.client ?? client).get<DataforseoLabsStatusResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'basic',
-                type: 'http'
-            }
-        ],
-        url: '/v3/dataforseo_labs/status',
-        ...options
-    });
-};
+export const status = <ThrowOnError extends boolean = false>(options?: Options<StatusData, ThrowOnError>) => (options?.client ?? client).get<StatusResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/dataforseo_labs/status',
+    ...options
+});
 
 /**
- * ‌‌
  * The Keyword Suggestions endpoint provides search queries that include the specified seed keyword.
  * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/google/keyword_suggestions/live/?bash'
  */
-export const googleKeywordSuggestionsLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleKeywordSuggestionsLiveData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoogleKeywordSuggestionsLiveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'basic',
-                type: 'http'
-            }
-        ],
-        url: '/v3/dataforseo_labs/google/keyword_suggestions/live',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+export const googleKeywordSuggestionsLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleKeywordSuggestionsLiveData, ThrowOnError>) => (options?.client ?? client).post<GoogleKeywordSuggestionsLiveResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/dataforseo_labs/google/keyword_suggestions/live',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
 /**
- * ‌
+ * The Keyword Ideas endpoint provides search terms that are relevant to the product or service categories of the specified keywords. The algorithm selects the keywords which fall into the same categories as the seed keywords specified in a POST array.
+ * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/google/keyword_ideas/live/?bash'
+ */
+export const googleKeywordIdeasLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleKeywordIdeasLiveData, ThrowOnError>) => (options?.client ?? client).post<GoogleKeywordIdeasLiveResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/dataforseo_labs/google/keyword_ideas/live',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+/**
  * This endpoint will provide you with the list of keywords that any domain or webpage is ranking for. You will also get SERP elements related to the keyword position, as well as impressions, monthly searches and other data relevant to the returned keywords.
  * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/google/ranked_keywords/live/?bash'
  */
-export const googleRankedKeywordsLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleRankedKeywordsLiveData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoogleRankedKeywordsLiveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'basic',
-                type: 'http'
-            }
-        ],
-        url: '/v3/dataforseo_labs/google/ranked_keywords/live',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+export const googleRankedKeywordsLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleRankedKeywordsLiveData, ThrowOnError>) => (options?.client ?? client).post<GoogleRankedKeywordsLiveResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/dataforseo_labs/google/ranked_keywords/live',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
 /**
- * ‌
  * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/google/relevant_pages/live/?bash'
  */
-export const googleRelevantPagesLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleRelevantPagesLiveData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoogleRelevantPagesLiveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'basic',
-                type: 'http'
-            }
-        ],
-        url: '/v3/dataforseo_labs/google/relevant_pages/live',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+export const googleRelevantPagesLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleRelevantPagesLiveData, ThrowOnError>) => (options?.client ?? client).post<GoogleRelevantPagesLiveResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/dataforseo_labs/google/relevant_pages/live',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
 /**
- * ‌‌
+ *
  * This endpoint provides Google keyword data for specified keywords. For each keyword, you will receive current cost-per-click, competition values for paid search, search volume, search intent, monthly searches, as well as SERP and backlink information. Additionally, you can obtain clickstream data, such as clickstream search volume, by specifying the include_clickstream_data parameter.
  * for more info please visit 'https://docs.dataforseo.com/v3/dataforseo_labs/google/keyword_overview/live/?bash'
  */
-export const googleKeywordOverviewLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleKeywordOverviewLiveData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoogleKeywordOverviewLiveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'basic',
-                type: 'http'
-            }
-        ],
-        url: '/v3/dataforseo_labs/google/keyword_overview/live',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+export const googleKeywordOverviewLive = <ThrowOnError extends boolean = false>(options?: Options<GoogleKeywordOverviewLiveData, ThrowOnError>) => (options?.client ?? client).post<GoogleKeywordOverviewLiveResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'basic', type: 'http' }],
+    url: '/v3/dataforseo_labs/google/keyword_overview/live',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});

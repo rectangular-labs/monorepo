@@ -29,7 +29,6 @@ import { wrappedOpenAI } from "../utils/wrapped-language-model";
 export interface StrategyContext {
   name: string;
   motivation: string;
-  description: string | null;
   goal: {
     metric: string;
     target: number;

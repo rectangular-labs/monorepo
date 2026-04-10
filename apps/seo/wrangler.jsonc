@@ -96,9 +96,9 @@
       "class_name": "SeoStrategySuggestionsWorkflow"
     },
     {
-      "name": "seo-strategy-phase-generation",
-      "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
-      "class_name": "SeoStrategyPhaseGenerationWorkflow"
+      "name": "seo-strategy-draft-planning",
+      "binding": "SEO_STRATEGY_DRAFT_PLANNING_WORKFLOW",
+      "class_name": "SeoStrategyDraftPlanningWorkflow"
     },
     {
       "name": "seo-strategy-snapshot",
@@ -179,9 +179,9 @@
           "class_name": "SeoStrategySuggestionsWorkflow"
         },
         {
-          "name": "seo-strategy-phase-generation-production",
-          "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
-          "class_name": "SeoStrategyPhaseGenerationWorkflow"
+          "name": "seo-strategy-draft-planning-production",
+          "binding": "SEO_STRATEGY_DRAFT_PLANNING_WORKFLOW",
+          "class_name": "SeoStrategyDraftPlanningWorkflow"
         },
         {
           "name": "seo-strategy-snapshot-production",
@@ -269,9 +269,9 @@
           "class_name": "SeoStrategySuggestionsWorkflow"
         },
         {
-          "name": "seo-strategy-phase-generation",
-          "binding": "SEO_STRATEGY_PHASE_GENERATION_WORKFLOW",
-          "class_name": "SeoStrategyPhaseGenerationWorkflow"
+          "name": "seo-strategy-draft-planning",
+          "binding": "SEO_STRATEGY_DRAFT_PLANNING_WORKFLOW",
+          "class_name": "SeoStrategyDraftPlanningWorkflow"
         },
         {
           "name": "seo-strategy-snapshot",

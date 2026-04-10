@@ -131,25 +131,27 @@ const update = withOrganizationIdBase
       });
     }
 
-    if (input.status === "active" && context.strategy.status !== "active") {
+    if (
+      updateResult.value.status === "active" &&
+      context.strategy.status !== "active"
+    ) {
       const taskResult = await createTask({
         db: context.db,
-        userId: context.user?.id,
+        userId: context.user.id,
         input: {
-          type: "seo-generate-strategy-phase",
-          projectId: input.projectId,
+          type: "seo-generate-strategy-drafts",
           organizationId: context.organization.id,
+          projectId: input.projectId,
           strategyId: updateResult.value.id,
           userId: context.user.id,
         },
-        workflowInstanceId: `strategy_phase_generation_${updateResult.value.id}_${crypto.randomUUID().slice(0, 6)}`,
+        workflowInstanceId: `strategy_drafts_${updateResult.value.id}_${crypto.randomUUID().slice(0, 6)}`,
       });
-
       if (!taskResult.ok) {
-        console.error(
-          "Failed to trigger strategy phase generation workflow",
-          taskResult.error,
-        );
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to queue strategy draft planning workflow.",
+          cause: taskResult.error,
+        });
       }
     }
 
@@ -189,7 +191,6 @@ const create = withOrganizationIdBase
         organizationId: context.organization.id,
         name: input.name,
         motivation: input.motivation,
-        description: input.description ?? null,
         goal: input.goal,
         keywordUniverse: input.keywordUniverse ?? null,
         llmQueries: input.llmQueries ?? null,
@@ -208,25 +209,28 @@ const create = withOrganizationIdBase
         message: "BAD STATE: Missing created strategy",
       });
     }
-    const taskResult = await createTask({
-      db: context.db,
-      userId: context.user?.id,
-      input: {
-        type: "seo-generate-strategy-phase",
-        projectId: input.projectId,
-        organizationId: context.organization.id,
-        strategyId: createdStrategy.id,
-        userId: context.user.id,
-      },
-      workflowInstanceId: `strategy_phase_generation_${createdStrategy.id}_${crypto.randomUUID().slice(0, 6)}`,
-    });
 
-    if (!taskResult.ok) {
-      console.error(
-        "Failed to trigger strategy phase generation workflow",
-        taskResult.error,
-      );
+    if (createdStrategy.status === "active") {
+      const taskResult = await createTask({
+        db: context.db,
+        userId: context.user.id,
+        input: {
+          type: "seo-generate-strategy-drafts",
+          organizationId: context.organization.id,
+          projectId: input.projectId,
+          strategyId: createdStrategy.id,
+          userId: context.user.id,
+        },
+        workflowInstanceId: `strategy_drafts_${createdStrategy.id}_${crypto.randomUUID().slice(0, 6)}`,
+      });
+      if (!taskResult.ok) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to queue strategy draft planning workflow.",
+          cause: taskResult.error,
+        });
+      }
     }
+
     return createdStrategy;
   });
 

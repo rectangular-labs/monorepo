@@ -1,6 +1,7 @@
 import type { RouterOutputs } from "@rectangular-labs/api-seo/types";
 import { capitalize } from "@rectangular-labs/core/format/capitalize";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
+import { getStrategyKeywordStats } from "@rectangular-labs/core/strategy/get-strategy-keyword-stats";
 import * as Icons from "@rectangular-labs/ui/components/icon";
 import { Badge } from "@rectangular-labs/ui/components/ui/badge";
 import { Button } from "@rectangular-labs/ui/components/ui/button";
@@ -17,13 +18,6 @@ import {
   DialogDrawerHeader,
   DialogDrawerTitle,
 } from "@rectangular-labs/ui/components/ui/dialog-drawer";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@rectangular-labs/ui/components/ui/empty";
 import { Skeleton } from "@rectangular-labs/ui/components/ui/skeleton";
 import { toast } from "@rectangular-labs/ui/components/ui/sonner";
 import {
@@ -35,6 +29,7 @@ import {
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { type } from "arktype";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getApiClientRq } from "~/lib/api";
 import { LoadingError } from "~/routes/_authed/-components/loading-error";
@@ -49,8 +44,8 @@ import {
 } from "../-components/snapshot-trend-chart";
 import { TopKeywords } from "../-components/top-keywords";
 import { ManageStrategyDialog } from "./-components/manage-strategy-dialog";
-import { ManageStrategyPhaseDialog } from "./-components/manage-strategy-phase-dialog";
 import { StrategyContentTab } from "./-components/strategy-content-tab";
+import { StrategyKeywordSections } from "./-components/strategy-keyword-sections";
 
 type Tab = "overview" | "content" | "keywords";
 type ContentSortBy = Exclude<ContentTableSortBy, "strategy">;
@@ -141,8 +136,6 @@ function PageComponent() {
   const isLocalUpdatePendingRef = useRef(false);
   const [editOpen, setEditOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
-  const [phaseViewOpen, setPhaseViewOpen] = useState(false);
-  const [phaseEditOpen, setPhaseEditOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState<LocalSearchState>(() =>
     toLocalSearchState(routeSearch),
   );
@@ -255,7 +248,6 @@ function PageComponent() {
     };
   }, [localSearch, navigate, routeLocalSearch]);
 
-  const currentPhase = getCurrentPhase(strategy?.phases ?? []);
   const latestSnapshot = strategy?.snapshots?.[0] ?? null;
   const goalProgress = getGoalProgress(
     strategy,
@@ -331,83 +323,40 @@ function PageComponent() {
             projectId={activeProject.id}
             strategy={strategy}
           />
-          <ManageStrategyPhaseDialog
-            onOpenChange={setPhaseEditOpen}
-            open={phaseEditOpen}
-            organizationId={activeProject.organizationId}
-            phase={currentPhase ?? null}
-            projectId={activeProject.id}
-          />
-          <ViewPhaseDetailDialog
-            onEdit={() => {
-              setPhaseViewOpen(false);
-              setPhaseEditOpen(true);
-            }}
-            onOpenChange={setPhaseViewOpen}
-            open={phaseViewOpen}
-            phase={currentPhase ?? null}
-          />
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Latest snapshot</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {latestSnapshot ? (
-                  <div className="space-y-2">
-                    <p className="text-sm">
-                      Captured {formatDateTime(latestSnapshot.takenAt)}
-                    </p>
-                    {latestSnapshot.delta && (
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <SnapshotDeltaPill
-                          label="Clicks"
-                          value={latestSnapshot.delta.clicks}
-                        />
-                        <SnapshotDeltaPill
-                          label="Impressions"
-                          value={latestSnapshot.delta.impressions}
-                        />
-                        <SnapshotDeltaPill
-                          label="Position"
-                          lowerIsBetter
-                          value={latestSnapshot.delta.avgPosition}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No data yet.</p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Current phase</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {currentPhase ? (
-                  <PhaseCard
-                    onEdit={() => setPhaseEditOpen(true)}
-                    onView={() => setPhaseViewOpen(true)}
-                    phase={currentPhase}
-                  />
-                ) : (
-                  <Empty className="border-none p-0">
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon" />
-                      <EmptyTitle>No active phase yet</EmptyTitle>
-                      <EmptyDescription>
-                        Strategy phases will appear once they are generated.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Latest snapshot</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {latestSnapshot ? (
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    Captured {formatDateTime(latestSnapshot.takenAt)}
+                  </p>
+                  {latestSnapshot.delta && (
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <SnapshotDeltaPill
+                        label="Clicks"
+                        value={latestSnapshot.delta.clicks}
+                      />
+                      <SnapshotDeltaPill
+                        label="Impressions"
+                        value={latestSnapshot.delta.impressions}
+                      />
+                      <SnapshotDeltaPill
+                        label="Position"
+                        lowerIsBetter
+                        value={latestSnapshot.delta.avgPosition}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No data yet.</p>
+              )}
+            </CardContent>
+          </Card>
 
           <Tabs
             onValueChange={(value) => {
@@ -542,7 +491,6 @@ function PageComponent() {
 }
 
 type Strategy = RouterOutputs["strategy"]["get"];
-type StrategyPhase = Strategy["phases"][number];
 type OverviewPoint =
   RouterOutputs["strategy"]["snapshot"]["series"]["points"][number];
 
@@ -623,21 +571,27 @@ function StrategyHeader({
       {goalProgress ? (
         <div className="space-y-3 rounded-lg border p-4">
           <div className="grid gap-2 text-sm md:grid-cols-3">
-            <div className="text-muted-foreground">
-              Baseline{" "}
-              <span className="text-foreground">
+            <div className="flex min-h-20 flex-col justify-between rounded-md border bg-muted/20 p-3">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
+                Starting Point
+              </span>
+              <span className="text-base text-foreground">
                 {formatMetricValue(strategy.goal.metric, goalProgress.baseline)}
               </span>
             </div>
-            <div className="text-muted-foreground">
-              Current{" "}
-              <span className="text-foreground">
+            <div className="flex min-h-20 flex-col justify-between rounded-md border bg-muted/20 p-3">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
+                Current
+              </span>
+              <span className="text-base text-foreground">
                 {formatMetricValue(strategy.goal.metric, goalProgress.current)}
               </span>
             </div>
-            <div className="text-muted-foreground">
-              Target{" "}
-              <span className="text-foreground">
+            <div className="flex min-h-20 flex-col justify-between rounded-md border bg-muted/20 p-3">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
+                Goal Target
+              </span>
+              <span className="text-base text-foreground">
                 {formatMetricValue(strategy.goal.metric, strategy.goal.target)}
               </span>
             </div>
@@ -685,6 +639,16 @@ function ViewStrategyDetailDialog({
   onOpenChange: (open: boolean) => void;
   onEdit: () => void;
 }) {
+  const keywordStats = getStrategyKeywordStats({
+    keywordUniverse: strategy.keywordUniverse,
+    llmQueries: strategy.llmQueries,
+  });
+  const hasKeywordDetails =
+    keywordStats.activeKeywords.length > 0 ||
+    keywordStats.activeQueries.length > 0;
+  const hasAdditionalDetails =
+    Boolean(strategy.motivation) || hasKeywordDetails;
+
   return (
     <DialogDrawer
       className="sm:max-w-2xl"
@@ -704,48 +668,31 @@ function ViewStrategyDetailDialog({
       </DialogDrawerHeader>
 
       <div className="max-h-[70vh] space-y-4 overflow-y-auto">
-        <div className="text-muted-foreground text-sm">
-          Goal:{" "}
-          <span className="font-medium text-foreground">
-            {formatStrategyGoal(strategy.goal)}
-          </span>
-        </div>
+        <StrategyDetailSection title="Goal">
+          <p className="text-sm">
+            <span className="font-medium text-foreground">
+              {formatStrategyGoal(strategy.goal)}
+            </span>
+          </p>
+        </StrategyDetailSection>
 
         {strategy.motivation && (
-          <div className="space-y-1">
-            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              Motivation
-            </p>
+          <StrategyDetailSection title="Motivation">
             <p className="whitespace-pre-line text-sm">{strategy.motivation}</p>
+          </StrategyDetailSection>
+        )}
+
+        {hasKeywordDetails && (
+          <div className="space-y-3">
+            <StrategyKeywordSections keywordStats={keywordStats} />
           </div>
         )}
 
-        {strategy.description && (
-          <div className="space-y-1">
-            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              Description
+        {!hasAdditionalDetails && (
+          <div className="rounded-md border border-dashed p-4">
+            <p className="text-muted-foreground text-sm">
+              No additional strategy details yet.
             </p>
-            <p className="whitespace-pre-wrap text-sm">
-              {strategy.description}
-            </p>
-          </div>
-        )}
-
-        {strategy.phases.length > 0 && (
-          <div className="space-y-1">
-            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              Phases
-            </p>
-            <ul className="space-y-1">
-              {strategy.phases.map((phase) => (
-                <li className="text-sm" key={phase.id}>
-                  <span className="text-muted-foreground capitalize">
-                    {phase.type}
-                  </span>{" "}
-                  &mdash; {phase.name}
-                </li>
-              ))}
-            </ul>
           </div>
         )}
       </div>
@@ -768,132 +715,20 @@ function ViewStrategyDetailDialog({
   );
 }
 
-function ViewPhaseDetailDialog({
-  phase,
-  open,
-  onOpenChange,
-  onEdit,
+function StrategyDetailSection({
+  title,
+  children,
 }: {
-  phase: StrategyPhase | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onEdit: () => void;
-}) {
-  if (!phase) return null;
-
-  return (
-    <DialogDrawer
-      className="sm:max-w-2xl"
-      onOpenChange={onOpenChange}
-      open={open}
-    >
-      <DialogDrawerHeader>
-        <Badge className="w-fit capitalize" variant="outline">
-          {formatPhaseStatus(phase.status)}
-        </Badge>
-        <DialogDrawerTitle className="leading-snug">
-          {phase.name}
-        </DialogDrawerTitle>
-        <DialogDrawerDescription className="sr-only">
-          Phase details
-        </DialogDrawerDescription>
-      </DialogDrawerHeader>
-
-      <div className="max-h-[70vh] space-y-4 overflow-y-auto">
-        <div className="text-muted-foreground text-sm">
-          Type: <span className="text-foreground capitalize">{phase.type}</span>
-        </div>
-
-        <div className="text-muted-foreground text-sm">
-          Target completion:{" "}
-          <span className="text-foreground">
-            {phase.targetCompletionDate
-              ? formatDateTime(phase.targetCompletionDate)
-              : "Not set"}
-          </span>
-        </div>
-
-        <div className="text-muted-foreground text-sm">
-          Observation weeks:{" "}
-          <span className="text-foreground">{phase.observationWeeks}</span>
-        </div>
-
-        <div className="space-y-1">
-          <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-            Success criteria
-          </p>
-          <p className="whitespace-pre-wrap text-sm">
-            {phase.successCriteria || "No success criteria provided yet."}
-          </p>
-        </div>
-
-        <div className="space-y-1">
-          <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-            Cadence
-          </p>
-          <p className="text-sm">
-            Every {phase.cadence.frequency} {phase.cadence.period} on{" "}
-            {phase.cadence.allowedDays.map(formatWeekdayLabel).join(", ")}
-          </p>
-        </div>
-
-        <div className="text-muted-foreground text-sm">
-          Phase content items:{" "}
-          <span className="text-foreground">{phase.phaseContents.length}</span>
-        </div>
-      </div>
-
-      <DialogDrawerFooter className="gap-2">
-        <Button
-          onClick={() => onOpenChange(false)}
-          type="button"
-          variant="ghost"
-        >
-          Close
-        </Button>
-        <Button onClick={onEdit} size="sm" type="button">
-          Edit phase
-        </Button>
-      </DialogDrawerFooter>
-    </DialogDrawer>
-  );
-}
-
-function PhaseCard({
-  phase,
-  onView,
-  onEdit,
-}: {
-  phase: StrategyPhase;
-  onView: () => void;
-  onEdit: () => void;
+  title: string;
+  children: ReactNode;
 }) {
   return (
-    <button
-      className="w-full rounded-lg border p-4 text-left transition hover:border-primary/40"
-      onClick={onView}
-      type="button"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="space-y-1">
-          <p className="font-medium">{phase.name}</p>
-          <p className="text-muted-foreground text-sm">
-            {formatPhaseStatus(phase.status)}
-          </p>
-        </div>
-        <Button
-          onClick={(event) => {
-            event.stopPropagation();
-            onEdit();
-          }}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          Edit
-        </Button>
-      </div>
-    </button>
+    <div className="space-y-2 rounded-md border p-4">
+      <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+        {title}
+      </p>
+      {children}
+    </div>
   );
 }
 
@@ -967,24 +802,6 @@ function OverviewTab({
       series={points}
     />
   );
-}
-
-function formatPhaseStatus(status: StrategyPhase["status"]) {
-  return status.replace("_", " ");
-}
-
-function formatWeekdayLabel(day: string) {
-  const labels: Record<string, string> = {
-    mon: "Mon",
-    tue: "Tue",
-    wed: "Wed",
-    thu: "Thu",
-    fri: "Fri",
-    sat: "Sat",
-    sun: "Sun",
-  };
-
-  return labels[day] ?? day;
 }
 
 function formatDateTime(value: Date) {
@@ -1090,14 +907,4 @@ function getGoalMetricValue(
   if (metric === "impressions") return aggregate.impressions;
   if (metric === "avgPosition") return aggregate.avgPosition;
   return aggregate.clicks;
-}
-
-function getCurrentPhase(phases: StrategyPhase[]) {
-  if (phases.length === 0) return null;
-  const activePhase = phases.find((phase) =>
-    ["in_progress", "planned", "observing"].includes(phase.status),
-  );
-  if (activePhase) return activePhase;
-  const observingPhase = phases.find((phase) => phase.status === "observing");
-  return observingPhase ?? phases[0];
 }

@@ -5,6 +5,10 @@ import {
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
 import { formatStrategyGoal } from "@rectangular-labs/core/format/strategy-goal";
+import type {
+  strategyKeywordUniverseSchema,
+  strategyLlmQueriesSchema,
+} from "@rectangular-labs/core/schemas/keyword-parsers";
 import type { strategySuggestionSchema } from "@rectangular-labs/core/schemas/strategy-parsers";
 import type {
   seoStrategySuggestionsTaskInputSchema,
@@ -16,6 +20,7 @@ import {
   getSeoProjectById,
   listStrategiesByProjectId,
 } from "@rectangular-labs/db/operations";
+import type { JSONSchema7 } from "ai";
 import { createStrategyAdvisorAgent } from "../lib/ai/agents/strategy-advisor";
 import { summarizeAgentInvocation } from "../lib/ai/utils/agent-telemetry";
 import { createWorkflowAuth } from "../lib/ai/utils/auth-init";
@@ -24,6 +29,130 @@ import type { InitialContext } from "../types";
 
 function logInfo(message: string, data?: Record<string, unknown>) {
   console.info(`[SeoStrategySuggestionsWorkflow] ${message}`, data ?? {});
+}
+
+const keywordUniverseJsonSchema: JSONSchema7 = {
+  type: "object",
+  additionalProperties: false,
+  required: ["items"],
+  description:
+    "Clustered keyword universe for the strategy. Focus on one core keyword plus compact BOFU/supporting variants per cluster.",
+  properties: {
+    items: {
+      type: "array",
+      description:
+        "Keywords the strategy should target. Every item belongs to a page-sized cluster.",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["keyword", "clusterId", "source", "category"],
+        properties: {
+          keyword: {
+            type: "string",
+            description:
+              "Keyword phrase to target. Prefer compact, bottom-of-funnel phrasing over broad informational head terms.",
+          },
+          clusterId: {
+            type: "string",
+            description:
+              "Stable cluster identifier grouping keywords that should map to the same eventual page.",
+          },
+          source: {
+            type: "object",
+            additionalProperties: false,
+            required: ["type"],
+            description:
+              "Provenance for the keyword. During strategy generation this should always be strategyGeneration.",
+            properties: {
+              type: {
+                type: "string",
+                enum: ["strategyGeneration"],
+                description:
+                  "Source type for the keyword. Use strategyGeneration for milestone 2 suggestions.",
+              },
+            },
+          },
+          category: {
+            type: "string",
+            enum: ["core", "supporting", "fanOut"],
+            description:
+              "Keyword role within the cluster. Use core for the primary keyword and supporting for adjacent BOFU variants.",
+          },
+        },
+      },
+    },
+  },
+};
+
+const llmQueriesJsonSchema: JSONSchema7 = {
+  type: "object",
+  additionalProperties: false,
+  required: ["items"],
+  description:
+    "Conversational LLM queries the strategy should be visible for, aligned to the same keyword opportunity.",
+  properties: {
+    items: {
+      type: "array",
+      description:
+        "Natural-language prompts users may ask AI assistants where this strategy's content should appear or be cited.",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["query", "rationale"],
+        properties: {
+          query: {
+            type: "string",
+            description:
+              "Natural-language question or prompt a user might ask an AI assistant.",
+          },
+          rationale: {
+            type: ["string", "null"],
+            description:
+              "Why this query matters for the strategy and how it connects to the keyword universe.",
+          },
+        },
+      },
+    },
+  },
+};
+
+type StrategyKeywordUniverse = typeof strategyKeywordUniverseSchema.infer;
+type StrategyLlmQueries = typeof strategyLlmQueriesSchema.infer;
+type StrategySuggestion = typeof strategySuggestionSchema.infer;
+
+function normalizeKeywordUniverse(
+  keywordUniverse: StrategySuggestion["keywordUniverse"],
+): StrategyKeywordUniverse {
+  return {
+    version: 1,
+    items: keywordUniverse.items.map((item) => ({
+      id: crypto.randomUUID(),
+      keyword: item.keyword,
+      clusterId: item.clusterId,
+      status: "active",
+      source: item.source,
+      category: item.category,
+      intent: null,
+      difficulty: null,
+      searchVolume: null,
+      cpc: null,
+      cpcCompetitionLevel: null,
+    })),
+  };
+}
+
+function normalizeLlmQueries(
+  llmQueries: StrategySuggestion["llmQueries"],
+): StrategyLlmQueries {
+  return {
+    version: 1,
+    items: llmQueries.items.map((item) => ({
+      id: crypto.randomUUID(),
+      query: item.query,
+      rationale: item.rationale,
+      status: "active",
+    })),
+  };
 }
 
 type StrategySuggestionsInput =
@@ -104,7 +233,8 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
                     `- [${strategy.status}] "${strategy.name}"`,
                     `id: ${strategy.id}`,
                     `goal: ${goal}`,
-                    `phases:${strategy.phases?.length ?? 0}`,
+                    `keywords:${strategy.keywordUniverse?.items.length ?? 0}`,
+                    `llmQueries:${strategy.llmQueries?.items.length ?? 0}`,
                     `updated:${updatedAt ?? "unknown"}`,
                     dismissalReason,
                   ]
@@ -130,11 +260,16 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
                 items: {
                   type: "object",
                   additionalProperties: false,
-                  required: ["name", "motivation", "description", "goal"],
+                  required: [
+                    "name",
+                    "motivation",
+                    "goal",
+                    "keywordUniverse",
+                    "llmQueries",
+                  ],
                   properties: {
                     name: { type: "string" },
                     motivation: { type: "string" },
-                    description: { type: ["string", "null"] },
                     goal: {
                       type: "object",
                       additionalProperties: false,
@@ -151,6 +286,8 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
                         },
                       },
                     },
+                    keywordUniverse: keywordUniverseJsonSchema,
+                    llmQueries: llmQueriesJsonSchema,
                   },
                 },
               },
@@ -170,6 +307,11 @@ export class SeoStrategySuggestionsWorkflow extends WorkflowEntrypoint<
 <instructions>
 ${input.instructions}
 </instructions>
+
+<schema-requirements>
+- Every active cluster must include exactly one item with category "core".
+- Return llmQueries aligned to the same keyword opportunity.
+</schema-requirements>
 
 <existing-strategies>
 ${existingStrategies}
@@ -194,6 +336,10 @@ ${existingStrategies}
           db,
           suggestionResult.suggestions.map((suggestion) => ({
             ...suggestion,
+            keywordUniverse: normalizeKeywordUniverse(
+              suggestion.keywordUniverse,
+            ),
+            llmQueries: normalizeLlmQueries(suggestion.llmQueries),
             organizationId: project.organizationId,
             projectId: project.id,
             status: "suggestion",

@@ -169,6 +169,13 @@
       "when": 1773750791206,
       "tag": "0023_mean_joshua_kane",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1773764324861,
+      "tag": "0024_careful_rafael_vega",
+      "breakpoints": true
     }
   ]
 }

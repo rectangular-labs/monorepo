@@ -144,7 +144,7 @@ function PageComponent() {
         <div className="min-w-0">
           <h1 className="font-bold text-3xl tracking-tight">Strategies</h1>
           <p className="text-muted-foreground">
-            Track strategy performance, phases, and content outcomes.
+            Track strategy performance, keyword clusters, and content outcomes.
           </p>
         </div>
         <div className="flex items-center gap-2">

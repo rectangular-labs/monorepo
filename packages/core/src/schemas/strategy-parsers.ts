@@ -1,18 +1,15 @@
 import { type } from "arktype";
 
+import {
+  strategyKeywordUniverseDraftSchema,
+  strategyLlmQueriesDraftSchema,
+} from "./keyword-parsers";
+
 export const strategyGoalSchema = type({
-  metric: type("'clicks'|'impressions'|'avgPosition'").describe(
-    "Primary KPI to optimize for: clicks (traffic), impressions (visibility), avgPosition (rank).",
-  ),
-  target: type("number").describe(
-    "Numeric goal for the chosen KPI (absolute count for clicks/impressions, or ranking position for avgPosition).",
-  ),
-  timeframe: type("'monthly'|'total'").describe(
-    "Whether the target is expected per month or cumulative across the full strategy duration.",
-  ),
-}).describe(
-  "Target metric for a strategy. Example aggressive SEO goal: { metric: 'clicks', target: 120000, timeframe: 'monthly' }.",
-);
+  metric: type("'clicks'|'impressions'|'avgPosition'"),
+  target: type("number"),
+  timeframe: type("'monthly'|'total'"),
+});
 
 export const STRATEGY_STATUSES = [
   "suggestion",
@@ -23,18 +20,37 @@ export const STRATEGY_STATUSES = [
   "dismissed",
 ] as const;
 
+const strategyBaseSchema = type({
+  name: type("string"),
+  motivation: type("string"),
+  goal: strategyGoalSchema,
+});
+
 export const strategySuggestionSchema = type({
-  name: type("string").describe("Short, clear strategy name."),
-  motivation: type("string").describe(
-    "Why this strategy matters right now, grounded in research or data.",
-  ),
-  description: type("string|null").describe(
-    "Concise description of what will be executed and how it works.",
-  ),
-  goal: strategyGoalSchema.describe(
-    "Primary success metric, target value, and timeframe. Should follow the SMART Goal setting",
-  ),
-}).describe("Single strategy suggestion.");
+  "...": strategyBaseSchema,
+  keywordUniverse: strategyKeywordUniverseDraftSchema,
+  llmQueries: strategyLlmQueriesDraftSchema,
+});
+
+export const strategyEditableSchema = strategyBaseSchema;
+
+export const strategyKeywordClusterFormSchema = type({
+  clusterId: "string",
+  coreKeyword: "string",
+  supportingKeywords: type({
+    value: "string",
+  }).array(),
+});
+
+export const strategyLlmQueryFormSchema = type({
+  query: "string",
+});
+
+export const strategyManageFormSchema = type({
+  "...": strategyEditableSchema,
+  keywordClusters: strategyKeywordClusterFormSchema.array(),
+  llmQueries: strategyLlmQueryFormSchema.array(),
+});
 
 export const cadencePeriodSchema = type("'daily' | 'weekly' | 'monthly'");
 export const weekdaySchema = type(
@@ -44,22 +60,14 @@ export const cadenceSchema = type({
   // "daily" => frequency is articles/day
   // "weekly" => frequency is articles/week
   // "monthly" => frequency is articles/month
-  period: cadencePeriodSchema.describe(
-    "Publishing cadence unit. Default to weekly",
-  ),
-  // .default("weekly"),
-  frequency: type("number.integer >= 1").describe(
-    "Number of items published per period. Default to 3",
-  ),
-  // .default(3),
+  period: cadencePeriodSchema.default("weekly"),
+  frequency: type("number.integer >= 1").default(3),
   // Days that are eligible for publishing. Deselecting a day means we won't publish on that day.
   allowedDays: weekdaySchema
     .describe("Eligible days for publishing.")
     .array()
-    .describe(
-      "The set of days that content will be published on. By default prefer mon through fri for publishing.",
-    ),
-  // .default(() => ["mon", "tue", "wed", "thu", "fri"] as const),
+
+    .default(() => ["mon", "tue", "wed", "thu", "fri"] as const),
 });
 
 export type PublishingCadence = typeof cadenceSchema.infer;

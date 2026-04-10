@@ -50,12 +50,10 @@ export async function createTask({
         });
         return { provider: "cloudflare" as const, taskId: instance.id };
       }
-      case "seo-generate-strategy-phase": {
+      case "seo-generate-strategy-drafts": {
         const instance =
-          await workflows.seoStrategyPhaseGenerationWorkflow.create({
-            id:
-              workflowInstanceId ??
-              `strategy_phase_generation_${crypto.randomUUID()}`,
+          await workflows.seoStrategyDraftPlanningWorkflow.create({
+            id: workflowInstanceId ?? `strategy_drafts_${crypto.randomUUID()}`,
             params: input,
           });
         return { provider: "cloudflare" as const, taskId: instance.id };

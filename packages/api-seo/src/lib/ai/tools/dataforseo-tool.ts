@@ -1,6 +1,7 @@
 import type {
   FetchKeywordSuggestionsArgs,
   FetchKeywordsOverviewArgs,
+  FetchKeywordUniverseSuggestionsArgs,
   FetchRankedKeywordsForSiteArgs,
   FetchRankedPagesForSiteArgs,
   FetchSerpArgs,
@@ -12,6 +13,7 @@ import {
   configureDataForSeoClient,
   fetchKeywordSuggestionsWithCache,
   fetchKeywordsOverviewWithCache,
+  fetchKeywordUniverseSuggestionsWithCache,
   fetchRankedKeywordsForSiteWithCache,
   fetchRankedPagesForSiteWithCache,
   fetchSerpWithCache,
@@ -225,7 +227,7 @@ export function createDataforseoTool(
   // Keyword Suggestions tool
   const getKeywordSuggestions = tool({
     description:
-      "Generate keyword suggestions from a seed keyword. Use to expand a topic cluster before prioritization.",
+      "Generate focused keyword suggestions from a single seed keyword. Use when you already have one core term and want close variations or modifiers for that term. Prefer this over exploreKeywordUniverse when refining one keyword cluster rather than combining multiple seeds into a broader market map.",
     inputSchema: jsonSchema<
       Omit<FetchKeywordSuggestionsArgs, "locationName" | "languageCode">
     >({
@@ -235,10 +237,13 @@ export function createDataforseoTool(
       properties: {
         seedKeyword: {
           type: "string",
-          description: "Seed keyword to generate suggestions for.",
+          description:
+            "One core keyword to expand into closely related suggestions and modifiers.",
         },
         includeSeedKeyword: {
           type: "boolean",
+          description:
+            "Whether to include the original seed keyword alongside the returned suggestions.",
         },
         ...commonListOptionsProperties,
       },
@@ -311,6 +316,89 @@ export function createDataforseoTool(
             resultCount: keyword.serpInfo?.resultCount,
           },
           backlinkInfo: keyword.backlinkInfo,
+        })),
+      };
+    },
+  });
+
+  const exploreKeywordUniverse = tool({
+    description:
+      "Explore a broader keyword universe from one or more keywords. Use when you want keyword ideas across multiple related keywords to map the wider opportunity space before choosing clusters. Prefer this over getKeywordSuggestions when discovery breadth matters more than refining a single seed term.",
+    inputSchema: jsonSchema<
+      Omit<FetchKeywordUniverseSuggestionsArgs, "locationName" | "languageCode">
+    >({
+      type: "object",
+      additionalProperties: false,
+      required: ["keywords"],
+      properties: {
+        keywords: {
+          type: "array",
+          minItems: 1,
+          items: {
+            type: "string",
+          },
+          description:
+            "One or more keywords to be used in a broader keyword-ideas search.",
+        },
+        limit: {
+          type: "number",
+          description: "Maximum number of keyword ideas to return.",
+        },
+        includeGenderAndAgeDistribution: {
+          ...commonListOptionsProperties.includeGenderAndAgeDistribution,
+        },
+      },
+    }),
+    inputExamples: [
+      {
+        input: {
+          keywords: ["invoice automation"],
+        },
+      },
+      {
+        input: {
+          keywords: ["local seo", "local seo audit"],
+          limit: 20,
+        },
+      },
+    ],
+    async execute({
+      keywords,
+      limit = 25,
+      includeGenderAndAgeDistribution = false,
+    }) {
+      console.log("fetchKeywordUniverseSuggestions", {
+        keywords,
+        limit,
+        includeGenderAndAgeDistribution,
+      });
+      const result = await fetchKeywordUniverseSuggestionsWithCache({
+        keywords,
+        locationName,
+        languageCode,
+        limit,
+        includeGenderAndAgeDistribution,
+        cacheKV,
+      });
+      if (!result.ok) {
+        throw new Error(keywordDataSourceError("keyword universe"), {
+          cause: result.error,
+        });
+      }
+      return {
+        keywords: result.value.keywords.map((keyword) => ({
+          keyword: keyword.keyword,
+          keywordDifficulty: keyword.keywordDifficulty,
+          mainIntent: keyword.mainIntent,
+          searchVolume: {
+            monthlyAverage: keyword.searchVolume.monthlyAverage,
+            percentageChange: keyword.searchVolume.percentageChange,
+          },
+          competition: keyword.competition,
+          serpInfo: {
+            itemTypes: keyword.serpInfo?.itemTypes,
+            resultCount: keyword.serpInfo?.resultCount,
+          },
         })),
       };
     },
@@ -470,6 +558,7 @@ export function createDataforseoTool(
   const tools = {
     get_ranked_keywords_for_site: getRankedKeywordsForSite,
     get_ranked_pages_for_site: getRankedPagesForSite,
+    explore_keyword_universe: exploreKeywordUniverse,
     get_keyword_suggestions: getKeywordSuggestions,
     get_keywords_overview: getKeywordOverview,
     get_serp_for_keyword: getSerpForKeyword,

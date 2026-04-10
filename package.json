@@ -42,7 +42,7 @@
     "sso": "aws sso login --sso-session=rectangular-labs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.7",
+    "@biomejs/biome": "2.4.10",
     "@changesets/cli": "^2.29.7",
     "@dotenvx/dotenvx": "^1.51.1",
     "@rectangular-labs/typescript": "workspace:*",
@@ -81,5 +81,5 @@
       "@ark/util": "patches/@ark__util.patch"
     }
   },
-  "packageManager": "pnpm@10.23.0"
+  "packageManager": "pnpm@10.32.1"
 }
