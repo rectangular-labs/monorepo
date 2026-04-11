@@ -213,6 +213,11 @@ export const sendMessage = withOrganizationIdBase
 
     const modelMessages = await convertToModelMessages(input.messages, {
       ignoreIncompleteToolCalls: true,
+    }).catch((e) => {
+      console.error("[chat.sendMessage] convertToModelMessages error", {
+        error: e,
+      });
+      throw e;
     });
     const result = await orchestrator.stream({
       messages: modelMessages,
@@ -239,6 +244,12 @@ export const sendMessage = withOrganizationIdBase
       sendSources: true,
       sendReasoning: true,
       generateMessageId: uuidv7,
+      onError: (error) => {
+        console.error("[chat.sendMessage] toUIMessageStream onError", {
+          error,
+        });
+        return "Something has went wrong.";
+      },
       messageMetadata: ({ part }) => {
         if (part.type === "start") {
           console.log("[chat.sendMessage] messageMetadata - start part");

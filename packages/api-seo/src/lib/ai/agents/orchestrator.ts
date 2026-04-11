@@ -137,7 +137,7 @@ export function createOrchestrator(ctx: OrchestratorContext) {
             output.telemetry.estimatedCostUsd != null
               ? `- est. cost (USD): ${output.telemetry.estimatedCostUsd}`
               : "- est. cost (USD): unavailable",
-            `- summary: ${output.summary.slice(0, 1_200)}`,
+            `- summary: ${output.summary}`,
           ].join("\n"),
         },
       ],
@@ -175,7 +175,7 @@ export function createOrchestrator(ctx: OrchestratorContext) {
         slug: {
           type: "string",
           description:
-            "Slug for a new article draft. Required for new article generation when draftId is not provided.",
+            "SEO/GEO optimized Slug for a new article draft. Required for new article generation when draftId is not provided.",
         },
         primaryKeyword: {
           type: "string",
@@ -281,7 +281,7 @@ export function createOrchestrator(ctx: OrchestratorContext) {
         metadata: {
           title,
           notes,
-          strategyId,
+          strategyId: strategyId || undefined,
           role,
           articleType,
         },

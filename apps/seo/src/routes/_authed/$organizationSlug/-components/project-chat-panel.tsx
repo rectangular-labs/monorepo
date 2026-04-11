@@ -49,7 +49,13 @@ import {
   Suggestion,
   Suggestions,
 } from "@rectangular-labs/ui/components/ai-elements/suggestion";
-import { TaskItemFile } from "@rectangular-labs/ui/components/ai-elements/task";
+import {
+  Task,
+  TaskContent,
+  TaskItem,
+  TaskItemFile,
+  TaskTrigger,
+} from "@rectangular-labs/ui/components/ai-elements/task";
 import {
   Copy,
   File,
@@ -102,6 +108,112 @@ type DeleteDataToolPart = Extract<
   ChatToolPart,
   { type: "tool-delete_existing_data" }
 >;
+
+function OrchestratorToolPart({ part }: { part: ChatToolPart }) {
+  if (part.type !== "tool-advise" && part.type !== "tool-write") {
+    return null;
+  }
+
+  const task =
+    part.input && typeof part.input.task === "string" ? part.input.task : null;
+
+  if (part.state === "input-streaming" || part.state === "input-available") {
+    return (
+      <Shimmer className="text-sm" key={part.toolCallId}>
+        {part.type === "tool-advise"
+          ? "Researching and analyzing"
+          : "Preparing the writing workflow"}
+      </Shimmer>
+    );
+  }
+
+  if (part.state === "output-error") {
+    return (
+      <div className="mb-4 w-full rounded-md border bg-background p-4">
+        <div className="font-medium text-sm">
+          {part.type === "tool-advise"
+            ? "Research step failed"
+            : "Write step failed"}
+        </div>
+        <div className="text-destructive text-sm">{part.errorText}</div>
+      </div>
+    );
+  }
+
+  if (part.state !== "output-available" || !part.output) {
+    return null;
+  }
+
+  if (part.type === "tool-advise") {
+    const summary =
+      typeof part.output.summary === "string" ? part.output.summary : null;
+    const telemetry = part.output.telemetry ? part.output.telemetry : null;
+
+    return (
+      <Task className="mb-4 w-full" defaultOpen={false}>
+        <TaskTrigger title="Research complete">
+          <div className="flex w-full cursor-pointer items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground">
+            <Search className="size-4" />
+            <p className="text-sm">Research complete</p>
+          </div>
+        </TaskTrigger>
+        <TaskContent>
+          {task ? <TaskItem>Task: {task}</TaskItem> : null}
+          {telemetry && typeof telemetry.stepCount === "number" ? (
+            <TaskItem>Steps: {telemetry.stepCount}</TaskItem>
+          ) : null}
+          {telemetry && typeof telemetry.toolCallCount === "number" ? (
+            <TaskItem>Tool calls: {telemetry.toolCallCount}</TaskItem>
+          ) : null}
+          {summary ? (
+            <div className="rounded-md border bg-background p-3">
+              <Response>{summary}</Response>
+            </div>
+          ) : (
+            <TaskItem>Analysis finished.</TaskItem>
+          )}
+        </TaskContent>
+      </Task>
+    );
+  }
+
+  const status =
+    typeof part.output.status === "string" ? part.output.status : null;
+  const draftId =
+    typeof part.output.draftId === "string" ? part.output.draftId : null;
+  const draftStatus =
+    typeof part.output.draftStatus === "string"
+      ? part.output.draftStatus
+      : null;
+  const message =
+    typeof part.output.message === "string" ? part.output.message : null;
+
+  const title =
+    status === "queued"
+      ? "Writer queued"
+      : status === "in_progress"
+        ? "Writer already running"
+        : status === "confirmation_required"
+          ? "Confirmation required"
+          : "Writer update";
+
+  return (
+    <Task className="mb-4 w-full" defaultOpen={status !== "queued"}>
+      <TaskTrigger title={title}>
+        <div className="flex w-full cursor-pointer items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground">
+          <Pencil className="size-4" />
+          <p className="text-sm">{title}</p>
+        </div>
+      </TaskTrigger>
+      <TaskContent>
+        {task ? <TaskItem>Task: {task}</TaskItem> : null}
+        {draftId ? <TaskItem>Draft ID: {draftId}</TaskItem> : null}
+        {draftStatus ? <TaskItem>Draft status: {draftStatus}</TaskItem> : null}
+        {message ? <TaskItem>{message}</TaskItem> : null}
+      </TaskContent>
+    </Task>
+  );
+}
 
 function AskQuestionsToolPart({
   part,
@@ -642,7 +754,8 @@ function ChatConversation({
                           className="w-full"
                           defaultOpen={false}
                           isStreaming={part.state !== "done"}
-                          key={`${message.id}-${part.text}`}
+                          // biome-ignore lint/suspicious/noArrayIndexKey: quick fix
+                          key={i}
                         >
                           <ReasoningTrigger />
                           <ReasoningContent>{part.text}</ReasoningContent>
@@ -670,6 +783,15 @@ function ChatConversation({
                         <Shimmer className="text-sm" key={part.toolCallId}>
                           Drilling into the details
                         </Shimmer>
+                      );
+                    }
+                    case "tool-advise":
+                    case "tool-write": {
+                      return (
+                        <OrchestratorToolPart
+                          key={`${message.id}-${part.toolCallId}`}
+                          part={part}
+                        />
                       );
                     }
                     case "tool-delete_existing_data": {

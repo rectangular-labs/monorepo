@@ -1,6 +1,6 @@
 import { ORPCError } from "@orpc/server";
-import type { taskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import type { ArticleType } from "@rectangular-labs/core/schemas/content-parsers";
+import type { taskInputSchema } from "@rectangular-labs/core/schemas/task-parsers";
 import { type DB, schema } from "@rectangular-labs/db";
 import {
   addChatContribution,
@@ -154,11 +154,7 @@ export async function queueSeoWriteArticleTask(args: {
     const { slug, primaryKeyword } = args.target;
     const normalizedSlug = normalizeContentSlug(slug);
     if (!normalizedSlug) {
-      return err(
-        new ORPCError("BAD_REQUEST", {
-          message: "A valid slug is required to create a new draft.",
-        }),
-      );
+      return err(new Error("A valid slug is required to create a new draft."));
     }
 
     return await ensureDraftForSlug({
@@ -172,14 +168,7 @@ export async function queueSeoWriteArticleTask(args: {
     );
   })();
   if (!draftResult.ok) {
-    return err(
-      draftResult.error instanceof ORPCError
-        ? draftResult.error
-        : new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: "Failed to load or create draft.",
-            cause: draftResult.error,
-          }),
-    );
+    return draftResult;
   }
 
   const existingDraft = draftResult.value;
@@ -235,8 +224,7 @@ export async function queueSeoWriteArticleTask(args: {
     });
     if (!updatedDraftResult.ok) {
       return err(
-        new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to update draft before queueing.",
+        new Error("Failed to update draft before queueing.", {
           cause: updatedDraftResult.error,
         }),
       );
