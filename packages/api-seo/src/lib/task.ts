@@ -153,7 +153,7 @@ export async function queueSeoWriteArticleTask(args: {
 
     const { slug, primaryKeyword } = args.target;
     const normalizedSlug = normalizeContentSlug(slug);
-    if (!normalizedSlug) {
+    if (slug.trim().length === 0 || normalizedSlug === "/") {
       return err(new Error("A valid slug is required to create a new draft."));
     }
 
@@ -193,11 +193,7 @@ export async function queueSeoWriteArticleTask(args: {
     );
   }
 
-  if (
-    liveInProgressResult.value ||
-    (!existingDraft.generatedByTaskRunId &&
-      IN_PROGRESS_DRAFT_STATUSES.has(existingDraft.status))
-  ) {
+  if (liveInProgressResult.value) {
     return ok({
       status: "in_progress",
       draft: existingDraft,
@@ -263,25 +259,9 @@ export async function queueSeoWriteArticleTask(args: {
     return err(taskResult.error);
   }
 
-  const queuedDraftResult = await updateContentDraft(args.db, {
-    id: draft.id,
-    projectId: args.projectId,
-    organizationId: args.organizationId,
-    status: "queued",
-    generatedByTaskRunId: taskResult.value.id,
-  });
-  if (!queuedDraftResult.ok) {
-    return err(
-      new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to mark draft as queued.",
-        cause: queuedDraftResult.error,
-      }),
-    );
-  }
-
   return ok({
     status: "queued",
-    draft: queuedDraftResult.value,
+    draft,
   });
 }
 

@@ -248,7 +248,7 @@ export const sendMessage = withOrganizationIdBase
         console.error("[chat.sendMessage] toUIMessageStream onError", {
           error,
         });
-        return "Something has went wrong.";
+        return "Something has gone wrong.";
       },
       messageMetadata: ({ part }) => {
         if (part.type === "start") {
