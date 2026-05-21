@@ -24,7 +24,7 @@
   "dependencies": {
     "@octokit/rest": "^22.0.1",
     "@rectangular-labs/result": "workspace:*",
-    "@shopify/admin-api-client": "^1.1.1",
-    "arktype": "^2.1.29"
+    "@shopify/admin-api-client": "^1.1.2",
+    "arktype": "^2.2.0"
   }
 }
